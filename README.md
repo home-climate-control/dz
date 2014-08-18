@@ -5,7 +5,7 @@ Home Climate Control Core: platform independent code and device drivers for mult
 
 A few useful links:
 
-http://homeclimatecontrol.com/ - project home
-http://diy-zoning.blogspot.com/ - project blog
-https://plus.google.com/+Homeclimatecontrol/
-http://diy-zoning.sourceforge.net/ - legacy project site
+* http://homeclimatecontrol.com/ - project home
+* http://diy-zoning.blogspot.com/ - project blog
+* https://plus.google.com/+Homeclimatecontrol/
+* http://diy-zoning.sourceforge.net/ - legacy project site
