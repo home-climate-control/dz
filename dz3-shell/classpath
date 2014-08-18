@@ -1,0 +1,49 @@
+#! /bin/sh
+
+if test -z "${BASENAME}"; then
+    echo "This script must only be run from dz-runner";
+    exit 1;
+fi
+
+LIBDIR=${BASENAME}/lib
+
+DZ_VERSION=3.6.6
+JUKEBOX_VERSION=6.1.2
+SERVOMASTER_VERSION=0.8.2.4
+
+export CLASSPATH="./conf:\
+${LIBDIR}/dz3-model-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-common-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-connector-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-http-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-sensors-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-spring-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-owapi-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-owfs-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-scheduler-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-scheduler-gcal-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-servomaster-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-swing-${DZ_VERSION}.jar:\
+${LIBDIR}/dz3-xbee-${DZ_VERSION}.jar:\
+${LIBDIR}/jukebox-common-${JUKEBOX_VERSION}.jar:\
+${LIBDIR}/jukebox-datastream-${JUKEBOX_VERSION}.jar:\
+${LIBDIR}/jukebox-jmx-${JUKEBOX_VERSION}.jar:\
+${LIBDIR}/jukebox-sem-${JUKEBOX_VERSION}.jar:\
+${LIBDIR}/jukebox-service-${JUKEBOX_VERSION}.jar:\
+${LIBDIR}/servomaster-common-${SERVOMASTER_VERSION}.jar:\
+${LIBDIR}/servomaster-serial-${SERVOMASTER_VERSION}.jar:\
+${LIBDIR}/servomaster-usb-${SERVOMASTER_VERSION}.jar:\
+${LIBDIR}/commons-codec-1.2.jar:\
+${LIBDIR}/commons-logging-1.1.1.jar:\
+${LIBDIR}/commons-httpclient-3.1.jar:\
+${LIBDIR}/log4j-1.2.16.jar:\
+${LIBDIR}/spring-2.5.6.jar:\
+${LIBDIR}/google-collect-1.0-rc1.jar:\
+${LIBDIR}/gdata-core-1.0.jar:\
+${LIBDIR}/gdata-client-1.0.jar:\
+${LIBDIR}/gdata-calendar-2.0.jar:\
+${LIBDIR}/gson-1.7.1.jar:\
+${LIBDIR}/xbee-api-0.5.5.jar:\
+/usr/share/java/RXTXcomm.jar"
+
+echo $CLASSPATH | tr ":" "\n"

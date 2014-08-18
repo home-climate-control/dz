@@ -1,0 +1,11 @@
+#! /bin/sh
+
+# The following line will get the thread stack dump from the running DZ process.
+# It is safe to run it multiple times, each time a separate file will be created.
+
+OUTPUT_FILE=`date +"%Y.%m.%d-%H:%M:%S"`.stack
+
+echo "Dumping thread stack into ${OUTPUT_FILE}"
+
+${JAVA_HOME}/bin/jstack `ps ax|grep net.sf.dz3.runtime.Container|grep -v grep|tr -s " "|sed -e "s:^ ::;"|cut -f 1 -d " "` > ${OUTPUT_FILE}
+

@@ -1,0 +1,43 @@
+#! /bin/sh
+
+export BASENAME=`dirname $0`
+
+# Following line should be uncommented if you want to run the distribution code
+
+. ${BASENAME}/classpath
+
+# Following line should be uncommented if you want to run the code produced locally on your box
+# by Maven build
+
+#. ${BASENAME}/classpath-dev
+
+# Comment out the next line if DZ blows out of memory for you - and don't forget to file a bug report.
+# See http://diy-zoning.blogspot.com/2010/01/memory-leak-hunt-aftermath.html for details
+
+MEM_LIMITS="-Xms4m -Xmx4m"
+
+# Uncomment the next line if you experience random freezes.
+# Please see http://code.google.com/p/diy-zoning/issues/detail?id=6 for more details and instructions.
+
+#DATA_ASYNC-Dnet.sf.jukebox.datastream.logger.impl.DataBroadcaster.async=true
+
+# Comment out the following line if you want to disable servo dampers crawling
+# (You'd want this if they move too slowly, for example, with 16 servo serial servo controllers)
+# Keep in mind that you will start hearing them if you do so.
+
+DAMPER_CRAWL=-Dnet.sf.dz3.device.actuator.servomaster.ServoDamper.crawl=true
+
+# Comment out the following line if you want to disable JMX
+# (why would you, though??? this makes sense only in EXTREMELY tight memory conditions)
+
+JMX=-Dcom.sun.management.jmxremote
+
+# Remember that arguments on the command line are relative to the root of CLASSPATH
+
+(cd ${BASENAME} && \
+    ${JAVA_HOME}/bin/java ${MEM_LIMITS} \
+                          ${EVENT_ASYNC} \
+                          ${DATA_ASYNC} \
+                          ${DAMPER_CRAWL} \
+                          ${JMX} \
+                          -cp ${CLASSPATH} net.sf.dz3.runtime.Container $*)

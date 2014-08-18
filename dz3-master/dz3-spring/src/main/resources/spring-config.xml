@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+           
+    <!-- 
+    
+    	THIS FILE CONTAINS ENTITIES THAT WILL BE INVISIBLE TO THE REST OF THE SYSTEM.
+    	USE IT AS A SAMPLE ONLY.
+    	
+    	PUT YOUR CONFIGURATION INTO spring-config-local.xml FILE, AND PUT IT ON THE
+    	ROOT OF YOUR CLASSPATH.
+    	
+      -->
+
+	<!--
+		We don't really need different settings for different PID controllers,
+		unless tuning is *really* fine, hence single bean tag and
+		scope=prototype (they're all stateful).
+		
+		The only exception is the setpoint (temperature), but
+		let's make it uniform 22C (71.6F) for now.
+	  -->
+	<bean id="pid_controller" class="net.sf.dz3.controller.pid.SimplePidController" scope="prototype" lazy-init="true">
+		<!-- Setpoint -->
+		<constructor-arg index="0" value="22"/>
+		<!-- P -->
+		<constructor-arg index="1" value="1"/>
+		<!-- I - Careful here.
+			
+			This defines the integral component. Suppose you want to compensate for 1C/15min drift,
+			this makes I = (1/ (1000 * 60 * 15)) = 1.11111111 × 10-6 (time is expressed in milliseconds).
+		-->
+		<constructor-arg index="2" value="0.0000001"/>
+		<!-- D -->
+		<constructor-arg index="3" value="0"/>
+		<!-- Saturation limit -->
+		<constructor-arg index="4" value="0"/>
+	</bean>
+
+	<!-- Sensors -->
+	<bean id="temperature_sensor-sample1" class="net.sf.dz3.device.sensor.impl.NullSensor" lazy-init="true">
+		<constructor-arg index="0" value="address1"/>
+		<constructor-arg index="1" value="1000"/>
+	</bean>
+	<bean id="temperature_sensor-sample2" class="net.sf.dz3.device.sensor.impl.NullSensor" lazy-init="true">
+		<constructor-arg index="0" value="address2"/>
+		<constructor-arg index="1" value="1000"/>
+	</bean>
+	
+	<!-- Thermostats -->
+	<bean id="thermostat-sample1" class="net.sf.dz3.device.model.impl.ThermostatModel" lazy-init="true">
+		<constructor-arg index="0" value="Thermostat 1"/>
+		<constructor-arg index="1" ref="temperature_sensor-sample1"/>
+		<constructor-arg index="2" ref="pid_controller"/>
+	</bean>
+	<bean id="thermostat-sample2" class="net.sf.dz3.device.model.impl.ThermostatModel" lazy-init="true">
+		<constructor-arg index="0" value="Thermostat 2"/>
+		<constructor-arg index="1" ref="temperature_sensor-sample2"/>
+		<constructor-arg index="2" ref="pid_controller"/>
+	</bean>
+	
+	<!-- Dampers -->
+	<bean id="damper-sample1" class="net.sf.dz3.device.actuator.impl.NullDamper" lazy-init="true">
+		<constructor-arg type="java.lang.String" value="damper-sample1"/>
+	</bean>
+	<bean id="damper-sample2" class="net.sf.dz3.device.actuator.impl.NullDamper" lazy-init="true">
+		<constructor-arg type="java.lang.String" value="damper-sample2"/>
+	</bean>
+
+	<!-- Zone Controllers -->
+	<bean id="zone_controller-sample1" class="net.sf.dz3.device.model.impl.SimpleZoneController" lazy-init="true">
+		<constructor-arg index="0" type="java.lang.String" value="zone_controller-sample1"/>
+		<constructor-arg index="1"  type="java.util.Set">
+			<set>
+				<ref bean="thermostat-sample1"/>
+				<ref bean="thermostat-sample2"/>
+			</set>
+		</constructor-arg>
+	</bean>
+
+	<!-- HVAC Units -->	
+	<bean id="unit-sample1" class="net.sf.dz3.device.model.impl.UnitModel" lazy-init="true">
+		<constructor-arg index="0" type="java.lang.String" value="Unit 1"/>
+		<constructor-arg type="net.sf.dz3.device.model.ZoneController" ref="zone_controller-sample1"/>
+	</bean>
+
+	<!-- Damper Controllers -->
+	<bean id="damper_controller-sample1" class="net.sf.dz3.device.model.impl.BalancingDamperController" lazy-init="true">
+		<constructor-arg type="net.sf.dz3.device.model.Unit" ref="unit-sample1"/>
+		<constructor-arg>
+			<map>
+				<entry>
+					<key><ref bean="thermostat-sample1"/></key>
+					<ref bean="damper-sample1"/>
+				</entry>
+				<entry>
+					<key><ref bean="thermostat-sample2"/></key>
+					<ref bean="damper-sample2"/>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+</beans>

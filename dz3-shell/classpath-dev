@@ -1,0 +1,67 @@
+#! /bin/sh
+
+# Use this file instead of ./classpath to use code built by Maven ('mvn install').
+# Don't forget to adjust version numbers if necessary.
+
+# This might need '-SNAPSHOT' added to it if you're using the up-to-date SVN code
+DZ_VERSION=3.6.6
+
+JUKEBOX_VERSION=6.1.2
+SERVOMASTER_VERSION=0.8.2.4
+
+LIBDIR=${HOME}/.m2/repository
+
+COMMONS_CODEC=${LIBDIR}/commons-codec/commons-codec/1.2/commons-codec-1.2.jar
+COMMONS_LOGGING=${LIBDIR}/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar
+COMMONS_HTTPCLIENT=${LIBDIR}/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar
+LOG4J=${LIBDIR}/log4j/log4j/1.2.16/log4j-1.2.16.jar
+SPRING=${LIBDIR}/org/springframework/spring/2.5.6/spring-2.5.6.jar
+GOOGLE_COLLECT=./lib/google-collect-1.0-rc1.jar
+GDATA_CORE=./lib/gdata-core-1.0.jar
+GDATA_CLIENT=./lib/gdata-client-1.0.jar
+GDATA_CALENDAR=./lib/gdata-calendar-2.0.jar
+GSON=${LIBDIR}/com/google/code/gson/gson/1.7.1/gson-1.7.1.jar
+XBEE_API=./lib/xbee-api-0.5.5.jar
+
+DZ=${LIBDIR}/net/sf/dz3
+JUKEBOX=${LIBDIR}/net/sf/jukebox
+SERVOMASTER=${LIBDIR}/net/sf/servomaster
+
+export CLASSPATH="./conf:\
+${DZ}/dz3-model/${DZ_VERSION}/dz3-model-${DZ_VERSION}.jar:\
+${DZ}/dz3-common/${DZ_VERSION}/dz3-common-${DZ_VERSION}.jar:\
+${DZ}/dz3-connector/${DZ_VERSION}/dz3-connector-${DZ_VERSION}.jar:\
+${DZ}/dz3-http/${DZ_VERSION}/dz3-http-${DZ_VERSION}.jar:\
+${DZ}/dz3-sensors/${DZ_VERSION}/dz3-sensors-${DZ_VERSION}.jar:\
+${DZ}/dz3-scheduler/${DZ_VERSION}/dz3-scheduler-${DZ_VERSION}.jar:\
+${DZ}/dz3-scheduler-gcal/${DZ_VERSION}/dz3-scheduler-gcal-${DZ_VERSION}.jar:\
+${DZ}/dz3-spring/${DZ_VERSION}/dz3-spring-${DZ_VERSION}.jar:\
+${DZ}/dz3-owapi/${DZ_VERSION}/dz3-owapi-${DZ_VERSION}.jar:\
+${DZ}/dz3-servomaster/${DZ_VERSION}/dz3-servomaster-${DZ_VERSION}.jar:\
+${DZ}/dz3-swing/${DZ_VERSION}/dz3-swing-${DZ_VERSION}.jar:\
+${DZ}/dz3-xbee/${DZ_VERSION}/dz3-xbee-${DZ_VERSION}.jar:\
+/usr/share/java/RXTXcomm.jar:\
+/usr/share/java/jsr80.jar:\
+/usr/share/java/jsr80_linux.jar:\
+/usr/share/java/jsr80_ri.jar:\
+${JUKEBOX}/jukebox-common/${JUKEBOX_VERSION}/jukebox-common-${JUKEBOX_VERSION}.jar:\
+${JUKEBOX}/jukebox-datastream/${JUKEBOX_VERSION}/jukebox-datastream-${JUKEBOX_VERSION}.jar:\
+${JUKEBOX}/jukebox-jmx/${JUKEBOX_VERSION}/jukebox-jmx-${JUKEBOX_VERSION}.jar:\
+${JUKEBOX}/jukebox-sem/${JUKEBOX_VERSION}/jukebox-sem-${JUKEBOX_VERSION}.jar:\
+${JUKEBOX}/jukebox-service/${JUKEBOX_VERSION}/jukebox-service-${JUKEBOX_VERSION}.jar:\
+${SERVOMASTER}/servomaster-common/${SERVOMASTER_VERSION}/servomaster-common-${SERVOMASTER_VERSION}.jar:\
+${SERVOMASTER}/servomaster-serial/${SERVOMASTER_VERSION}/servomaster-serial-${SERVOMASTER_VERSION}.jar:\
+${SERVOMASTER}/servomaster-usb/${SERVOMASTER_VERSION}/servomaster-usb-${SERVOMASTER_VERSION}.jar:\
+${COMMONS_CODEC}:\
+${COMMONS_LOGGING}:\
+${COMMONS_HTTPCLIENT}:\
+${LOG4J}:\
+${SPRING}:\
+${GOOGLE_COLLECT}:\
+${GDATA_CLIENT}:\
+${GDATA_CORE}:\
+${GDATA_CALENDAR}:\
+${GSON}:\
+${XBEE_API}"
+
+echo $CLASSPATH | tr ":" "\n"

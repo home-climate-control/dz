@@ -1,0 +1,87 @@
+package net.sf.dz3.device.model.impl;
+
+import java.io.Serializable;
+
+import net.sf.dz3.device.model.ZoneStatus;
+
+public class ZoneStatusImpl implements ZoneStatus, Serializable {
+
+    private static final long serialVersionUID = 7691993493568700451L;
+    public final double setpoint;
+    public final int dumpPriority;
+    public final boolean enabled;
+    public final boolean voting;
+
+    public ZoneStatusImpl(double setpoint, int dumpPriority, boolean enabled, boolean voting) {
+
+        if (dumpPriority < 0) {
+            
+            throw new IllegalArgumentException("Dump priority must be non-negative (" + dumpPriority + " given)");
+        }
+        
+        this.setpoint = setpoint;
+        this.dumpPriority = dumpPriority;
+        this.enabled = enabled;
+        this.voting = voting;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public double getSetpoint() {
+        return setpoint;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int getDumpPriority() {
+        return dumpPriority;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isOn() {
+        return enabled;
+    }
+
+    public boolean isVoting() {
+        return voting;
+    }
+
+    @Override
+    public String toString() {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("setpoint=").append(setpoint);
+        sb.append(enabled ? ", enabled" : ", disabled");
+        sb.append(voting ? ", voting" : ", not voting");
+        sb.append(dumpPriority != 0 ? ", dump priority=" + dumpPriority : "");
+
+        return sb.toString();
+    }
+    
+    @Override
+    public boolean equals(Object other) {
+        
+        if (other == null) {
+            return false;
+        }
+        
+        if (!(other instanceof ZoneStatus)) {
+            return false;
+        }
+        
+        ZoneStatus otherStatus = (ZoneStatus) other;
+        
+        return (getSetpoint() == otherStatus.getSetpoint())
+            && (getDumpPriority() == otherStatus.getDumpPriority())
+            && (isOn() == otherStatus.isOn())
+            && (isVoting() == otherStatus.isVoting());
+    }
+}

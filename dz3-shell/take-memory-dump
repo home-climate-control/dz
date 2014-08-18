@@ -1,0 +1,6 @@
+#! /bin/sh
+
+# The following line will get the memory dump from the running DZ process.
+# It is safe to run it multiple times, each time a separate file will be created.
+
+${JAVA_HOME}/bin/jmap -dump:file=`date +"%Y.%m.%d-%H:%M:%S"`.jmap `ps ax|grep net.sf.dz3.runtime.Container|grep -v grep|tr -s " "|sed -e "s:^ ::;"|cut -f 1 -d " "`

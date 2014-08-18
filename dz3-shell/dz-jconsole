@@ -1,0 +1,16 @@
+#! /bin/sh
+
+export BASENAME=`dirname $0`
+
+# Following line should be uncommented if you want to run the distribution code
+
+. ${BASENAME}/classpath
+
+# Following line should be uncommented if you want to run the code produced locally on your box
+# by Maven build
+
+#. ${BASENAME}/classpath-dev
+
+# Remember that arguments on the command line are relative to the root of CLASSPATH
+
+(cd ${BASENAME} && ${JAVA_HOME}/bin/jconsole -J-Djava.class.path=${JAVA_HOME}/lib/jconsole.jar:${JAVA_HOME}/lib/tools.jar:$CLASSPATH $*)
