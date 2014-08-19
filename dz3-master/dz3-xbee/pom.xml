@@ -16,14 +16,8 @@
   	</dependency>
   	<dependency>
   		<groupId>com.rapplogic</groupId>
-  		<artifactId>xbee-api</artifactId>
-  		<version>0.5.5</version>
-  	</dependency>
-  	<dependency>
-  		<groupId>org.rxtx</groupId>
-  		<artifactId>rxtx</artifactId>
-  		<version>2.1.7</version>
-  		<type>jar</type>
+  		<artifactId>xbeeapi</artifactId>
+  		<version>0.9.1-SNAPSHOT</version>
   	</dependency>
   	<dependency>
   		<groupId>${project.groupId}</groupId>
