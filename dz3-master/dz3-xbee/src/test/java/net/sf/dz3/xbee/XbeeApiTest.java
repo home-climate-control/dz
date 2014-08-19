@@ -8,12 +8,12 @@ import org.apache.log4j.NDC;
 
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
+import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBee;
 import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeePacket;
 import com.rapplogic.xbee.api.XBeeResponse;
-import com.rapplogic.xbee.api.zigbee.ZNetRemoteAtRequest;
 import com.rapplogic.xbee.util.ByteUtils;
 
 public class XbeeApiTest extends TestCase {
@@ -28,11 +28,11 @@ public class XbeeApiTest extends TestCase {
     public void testPacketEscape() {
         
         final int[] knownGoodPacket = new int[] {
-                0x7E,
-                0x00,
-                0x0F,
-                0x17,
-                0x01,
+                0x7E, // Start delimiter
+                0x00, // Length MSB
+                0x0F, // Length LSB
+                0x17, // 'Remote AT' command (frame data start)
+                0x01, // Frame ID
                 0x00,
                 0x7D, // 0x7D33 is 0x13 escaped
                 0x33,
@@ -44,7 +44,7 @@ public class XbeeApiTest extends TestCase {
                 0x98,
                 0xFF,
                 0xFE,
-                0x02,
+                0x02, // 0x02 means 'apply changes'
                 0x41,
                 0x30,
                 0xDC
@@ -55,10 +55,15 @@ public class XbeeApiTest extends TestCase {
         try {
 
             XBeeAddress64 xbeeAddress = Parser.parse("0013A200.4062AC98");
-            ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(xbeeAddress, "A0");
+            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, "A0");
+            
+            request.setApplyChanges(true);
+            
             XBeePacket packet = request.getXBeePacket();
 
-            int[] byteBuffer = packet.getPacket();
+            int[] byteBuffer = packet.getByteArray();
+            
+            logger.info("Source: " + ByteUtils.toBase16(knownGoodPacket));
             logger.info("Packet: " + ByteUtils.toBase16(byteBuffer));
             
             assertEquals("Byte buffer length mismatch", knownGoodPacket.length, byteBuffer.length);
@@ -134,7 +139,7 @@ public class XbeeApiTest extends TestCase {
                         logger.info("creating request to " + addr64);
 
                         // Send the request to turn on D${offset}
-                        ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, target, new int[] {5});
+                        RemoteAtRequest request = new RemoteAtRequest(addr64, target, new int[] {5});
 //                        ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(XBeeRequest.DEFAULT_FRAME_ID, addr64, addr16, true, target, new int[] {5});
                         XBeeResponse rsp = xbee.sendSynchronous(request, 5000);
 
@@ -157,7 +162,7 @@ public class XbeeApiTest extends TestCase {
                     try {
 
                         // Query D${offset} status
-                        ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, target);
+                        RemoteAtRequest request = new RemoteAtRequest(addr64, target);
 
                         XBeeResponse rsp = xbee.sendSynchronous(request, 10000);
 
@@ -182,7 +187,7 @@ public class XbeeApiTest extends TestCase {
                         logger.info("creating request to " + addr64);
 
                         // Send the request to turn on D${offset}
-                        ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, target, new int[] {4});
+                        RemoteAtRequest request = new RemoteAtRequest(addr64, target, new int[] {4});
 //                        ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(XBeeRequest.DEFAULT_FRAME_ID, addr64, addr16, true, target, new int[] {5});
                         XBeeResponse rsp = xbee.sendSynchronous(request, 5000);
 

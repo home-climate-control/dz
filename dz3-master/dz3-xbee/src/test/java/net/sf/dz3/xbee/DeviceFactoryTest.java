@@ -18,11 +18,11 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import com.rapplogic.xbee.api.AtCommandResponse;
+import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBee;
 import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeeResponse;
-import com.rapplogic.xbee.api.zigbee.ZNetRemoteAtRequest;
 
 public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
     
@@ -49,32 +49,32 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
             XBeeAddress64 addr64 = new XBeeAddress64("00 13 A2 00 40 62 AC 98");
             
             {
-                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "D0", new int[] {2});
+                RemoteAtRequest request = new RemoteAtRequest(addr64, "D0", new int[] {2});
                 XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
 
                 logger.info("D0 response: " + rsp);
             }
             {
-                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "D1", new int[] {2});
+                RemoteAtRequest request = new RemoteAtRequest(addr64, "D1", new int[] {2});
                 XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
 
                 logger.info("D1 response: " + rsp);
             }
             {
-                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "D2", new int[] {2});
+                RemoteAtRequest request = new RemoteAtRequest(addr64, "D2", new int[] {2});
                 XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
 
                 logger.info("D2 response: " + rsp);
             }
             {
-                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "D3", new int[] {2});
+                RemoteAtRequest request = new RemoteAtRequest(addr64, "D3", new int[] {2});
                 XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
 
                 logger.info("D3 response: " + rsp);
             }
 
             {
-                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "IS");
+                RemoteAtRequest request = new RemoteAtRequest(addr64, "IS");
                 XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
 
                 logger.info("IS response: " + rsp);
@@ -106,13 +106,13 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
             }
 
             {
-                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "RP", new int[] {0x05});
+                RemoteAtRequest request = new RemoteAtRequest(addr64, "RP", new int[] {0x05});
                 XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
 
                 logger.info("IR response: " + rsp);
             }
             {
-                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "%V", new int[] {2});
+                RemoteAtRequest request = new RemoteAtRequest(addr64, "%V", new int[] {2});
                 XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
 
                 logger.info("%V response: " + rsp);
@@ -126,8 +126,8 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
                 logger.info("raw " + Integer.toHexString(sensorReading) + " (" + Converter.raw2mV(sensorReading) + "mV)");
             }
             {
-                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "IR", new int[] {0x14, 0x00});
-//                ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(addr64, "IR", new int[] {0});
+                RemoteAtRequest request = new RemoteAtRequest(addr64, "IR", new int[] {0x14, 0x00});
+//                RemoteAtRequest request = new RemoteAtRequest(addr64, "IR", new int[] {0});
                 XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
 
                 logger.info("IR response: " + rsp);
