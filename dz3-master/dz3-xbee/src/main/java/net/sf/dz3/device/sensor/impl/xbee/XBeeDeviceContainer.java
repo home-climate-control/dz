@@ -13,10 +13,10 @@ import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
+import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeeResponse;
-import com.rapplogic.xbee.api.zigbee.ZNetRemoteAtRequest;
 
 /**
  * XBee device container.
@@ -128,7 +128,7 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
         }
     }
 
-    public XBeeResponse sendSynchronous(ZNetRemoteAtRequest request, int timeout) throws XBeeException {
+    public XBeeResponse sendSynchronous(RemoteAtRequest request, int timeout) throws XBeeException {
         
         return factory.sendSynchronous(request, timeout);
     }

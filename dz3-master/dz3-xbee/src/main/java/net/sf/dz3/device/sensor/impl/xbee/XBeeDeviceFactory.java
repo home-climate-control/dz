@@ -27,13 +27,12 @@ import com.rapplogic.xbee.api.ApiId;
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.PacketListener;
+import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBee;
 import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeeResponse;
 import com.rapplogic.xbee.api.XBeeTimeoutException;
-import com.rapplogic.xbee.api.zigbee.NodeDiscover;
-import com.rapplogic.xbee.api.zigbee.ZNetRemoteAtRequest;
 import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
 import com.rapplogic.xbee.util.ByteUtils;
 
@@ -470,7 +469,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         }
     }
     
-    public XBeeResponse sendSynchronous(ZNetRemoteAtRequest request, int timeout) throws XBeeException {
+    public XBeeResponse sendSynchronous(RemoteAtRequest request, int timeout) throws XBeeException {
         
         return coordinator.sendSynchronous(request, timeout);
     }

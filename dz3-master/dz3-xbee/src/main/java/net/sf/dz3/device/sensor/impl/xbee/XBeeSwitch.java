@@ -9,8 +9,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import com.rapplogic.xbee.api.AtCommandResponse;
+import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBeeAddress64;
-import com.rapplogic.xbee.api.zigbee.ZNetRemoteAtRequest;
 
 /**
  * XBee switch container.
@@ -53,7 +53,7 @@ public class XBeeSwitch implements Switch {
             XBeeAddress64 xbeeAddress = Parser.parse(address.hardwareAddress);
             String channel = address.channel;
             
-            ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(xbeeAddress, channel);
+            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, channel);
             AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, 5000);
 
             logger.info(channel + " response: " + rsp);
@@ -112,7 +112,7 @@ public class XBeeSwitch implements Switch {
             String channel = address.channel;
             
             int deviceState = state ? 5 : 4;
-            ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(xbeeAddress, channel, new int[] {deviceState});
+            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, channel, new int[] {deviceState});
             AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, 5000);
 
             logger.info(channel + " response: " + rsp);

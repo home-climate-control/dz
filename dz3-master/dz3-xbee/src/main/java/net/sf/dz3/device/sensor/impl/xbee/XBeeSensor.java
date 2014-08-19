@@ -16,8 +16,8 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import com.rapplogic.xbee.api.AtCommandResponse;
+import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBeeAddress64;
-import com.rapplogic.xbee.api.zigbee.ZNetRemoteAtRequest;
 
 /**
  * XBee sensor container.
@@ -76,7 +76,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
             XBeeAddress64 xbeeAddress = Parser.parse(address.hardwareAddress);
             String channel = address.channel;
             
-            ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(xbeeAddress, "IS");
+            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, "IS");
             AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, 5000);
 
             logger.debug(channel + " response: " + rsp);
