@@ -33,6 +33,7 @@ import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeeResponse;
 import com.rapplogic.xbee.api.XBeeTimeoutException;
+import com.rapplogic.xbee.api.zigbee.ZBNodeDiscover;
 import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
 import com.rapplogic.xbee.util.ByteUtils;
 
@@ -325,7 +326,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
      * 
      * @param nd Node Discover command response to create the prototype for.
      */
-    private void createPrototype(NodeDiscover nd) {
+    private void createPrototype(ZBNodeDiscover nd) {
         
         NDC.push("createProxy");
         
@@ -445,7 +446,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             
             logger.debug("prototype: " + prototype);
             
-            int buffer[] = packet.getPacketBytes();
+            int buffer[] = packet.getRawPacketBytes();
             int[] sampleBytes = new int[buffer.length - 14];
             
             for (int offset = 0; offset < buffer.length - 15; offset++) {
@@ -623,7 +624,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                     
                     if ("ND".equals(command)) {
                     
-                        createPrototype(NodeDiscover.parse(atCommandResponse));
+                        createPrototype(ZBNodeDiscover.parse(atCommandResponse));
                         
                     } else if ("NT".equals(command)) {
                         
