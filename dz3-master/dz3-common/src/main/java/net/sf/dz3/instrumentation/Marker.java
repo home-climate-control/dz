@@ -1,7 +1,9 @@
 package net.sf.dz3.instrumentation;
 
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
 
 /**
  * An object to keep track of time spent on something in a convenient manner.
@@ -34,6 +36,11 @@ public class Marker {
     private final String marker;
     
     /**
+     * Level to print marker messages with.
+     */
+    private final Level level;
+    
+    /**
      * Timekeeper.
      */
     private StopWatch stopWatch;
@@ -49,19 +56,38 @@ public class Marker {
      * @param marker Message to print when the marker is closed.
      * It would be a good idea not to use parentheses in this string, for they
      * will break automated processing.
+     * 
+     * @param level Level to print marker messages with.
      */
-    public Marker(String marker) {
+    public Marker(String marker, Level level) {
     
         if (marker == null) {
             throw new IllegalArgumentException("Marker can't be null");
         }
         
+        if (level == null) {
+            throw new IllegalArgumentException("Level can't be null");
+        }
+        
         this.marker = marker;
+        this.level = level;
         
         stopWatch = new StopWatch();
         stopWatch.start();
 
         printStartMarker();
+    }
+
+    /**
+     * Create an instance at {@link Level#DEBUG DEBUG} level and start the {@link #stopWatch timer}.
+     * 
+     * @param marker Message to print when the marker is closed.
+     * It would be a good idea not to use parentheses in this string, for they
+     * will break automated processing.
+     */
+    public Marker(String marker) {
+        
+        this(marker, Level.DEBUG);
     }
 
     protected void printStartMarker() {
@@ -73,7 +99,7 @@ public class Marker {
         getSignature(sb);
         sb.append(marker).append(") started");
 
-        logger.info(sb.toString());
+        logger.log(level, sb.toString());
     }
     
     /**
@@ -93,7 +119,7 @@ public class Marker {
 
         printTimeMarker(sb, stopWatch);
         
-        logger.info(sb.toString());
+        logger.log(level, sb.toString());
         
         return stopWatch.getTime();
     }
@@ -127,7 +153,7 @@ public class Marker {
 
         printTimeMarker(sb, stopWatch);
         
-        logger.info(sb.toString());
+        logger.log(level, sb.toString());
         
         return stopWatch.getTime();
     }
