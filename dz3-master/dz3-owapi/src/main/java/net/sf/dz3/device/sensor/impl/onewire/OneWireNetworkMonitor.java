@@ -5,6 +5,7 @@ import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.utils.OWPath;
 
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.sem.EventSemaphore;
@@ -227,10 +228,10 @@ public class OneWireNetworkMonitor extends ActiveService {
     private void browse() throws Throwable {
         
         NDC.push("browse");
+        Marker m = new Marker("browse");
         
-        long start = System.currentTimeMillis();
         lock.writeLock().lock();
-        logger.debug("Got lock in " + (System.currentTimeMillis() - start) + "ms");
+        m.checkpoint("got lock");
         
         try {
 
@@ -244,9 +245,10 @@ public class OneWireNetworkMonitor extends ActiveService {
             Map<String, OWPath> address2pathLocal = new TreeMap<String, OWPath>();
 
             NDC.push("browseProper");
+            Marker m2 = new Marker("browseProper");
+
             try {
 
-                start = System.currentTimeMillis();
 
                 adapter.setSearchAllDevices();
                 adapter.targetAllFamilies();
@@ -255,28 +257,26 @@ public class OneWireNetworkMonitor extends ActiveService {
 
                 browse(rootPath, address2deviceLocal, address2pathLocal);
 
-                logger.debug("Completed in " + (System.currentTimeMillis() - start) + "ms");
-
             } finally {
 
+                m2.close();
                 NDC.pop();
             }
             
             NDC.push("handleChanges");
+            Marker m3 = new Marker("handleChanges");
             
             try {
 
-                start = System.currentTimeMillis();
-                
                 handleDepartures(address2deviceLocal, address2pathLocal);
                 handleArrivals(address2deviceLocal, address2pathLocal);
 
                 address2device = address2deviceLocal;
                 address2path = address2pathLocal;
 
-                logger.debug("Completed in " + (System.currentTimeMillis() - start) + "ms");
-
             } finally {
+                
+                m3.close();
                 NDC.pop();
             }
 
@@ -293,6 +293,7 @@ public class OneWireNetworkMonitor extends ActiveService {
             forcedRescan = false;
             lock.writeLock().unlock();
 
+            m.close();
             NDC.pop();
             NDC.clear();
         }

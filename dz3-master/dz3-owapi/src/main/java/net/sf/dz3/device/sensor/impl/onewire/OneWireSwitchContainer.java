@@ -5,6 +5,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import net.sf.dz3.device.sensor.DzSwitchContainer;
 import net.sf.dz3.device.sensor.SensorType;
+import net.sf.dz3.instrumentation.Marker;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -62,6 +63,7 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
 
             try {
 
+                // VT: FIXME: Consider replacing this with a Marker
                 long start = System.currentTimeMillis();
 
                 lock = factory.getLock();
@@ -114,22 +116,20 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
         String address = container.getAddressAsString();
         
         NDC.push("read(" + address + ":" + channel + ")");
-
-        long start = System.currentTimeMillis();
+        Marker m = new Marker("read(" + address + ":" + channel + ")");
 
         try {
 
             lock = factory.getLock();
 
             lock.writeLock().lock();
-            logger.debug("got lock in " + (System.currentTimeMillis() - start) + "ms");
-            start = System.currentTimeMillis();
+            m.checkpoint("got lock");
 
             factory.getDevicePath(address).open();
 
             byte[] state = sc.readDevice();
 
-            logger.debug("readDevice: " + (System.currentTimeMillis() - start));
+            m.checkpoint("readDevice");
 
             // boolean smart = sc.hasSmartOn();
             
@@ -154,7 +154,7 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
                 lock.writeLock().unlock();
             }
 
-            logger.debug("complete in " + (System.currentTimeMillis() - start) + "ms");
+            m.close();
             NDC.pop();
         }
     }
@@ -178,38 +178,42 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
         String address = container.getAddressAsString();
 
         NDC.push("write(" + address + ":" + channel + ", " + value + ")");
-
-        long start = System.currentTimeMillis();
+        Marker m = new Marker("write(" + address + ":" + channel + ", " + value + ")");
 
         try {
 
             lock = factory.getLock();
 
             lock.writeLock().lock();
-            logger.debug("got lock in " + (System.currentTimeMillis() - start) + "ms");
-            start = System.currentTimeMillis();
+            m.checkpoint("got lock");
 
             factory.getDevicePath(address).open();
 
             byte[] state = sc.readDevice();
 
+            m.checkpoint("readDevice/1");
+            
             if (logger.isDebugEnabled()) {
-                logger.debug("readDevice/1: " + dumpState(state) + " " + (System.currentTimeMillis() - start) + "ms");
+                logger.debug("state: " + dumpState(state));
             }
 
             boolean smart = sc.hasSmartOn();
 
             sc.setLatchState(channel, value, smart, state);
 
+            m.checkpoint("writeDevice");
+            
             if (logger.isDebugEnabled()) {
-                logger.debug("writeDevice:  " + dumpState(state));
+                logger.debug("state: " + dumpState(state));
             }
             
             sc.writeDevice(state);
             state = sc.readDevice();
 
+            m.checkpoint("readDevice/2");
+
             if (logger.isDebugEnabled()) {
-                logger.debug("readDevice/2: " + dumpState(state) + " " + (System.currentTimeMillis() - start) + "ms");
+                logger.debug("state: " + dumpState(state));
             }
 
             if (value == sc.getLatchState(channel, state)) {
@@ -234,7 +238,7 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
                 lock.writeLock().unlock();
             }
 
-            logger.debug("complete in " + (System.currentTimeMillis() - start) + "ms");
+            m.close();
             NDC.pop();
         }
     }

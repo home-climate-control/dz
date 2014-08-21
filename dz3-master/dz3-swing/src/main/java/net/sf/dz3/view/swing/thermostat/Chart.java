@@ -155,6 +155,7 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
     @Override
     public synchronized void paintComponent(Graphics g) {
 
+        // VT: FIXME: Consider replacing this with a Marker - careful, though, this is a time sensitive path
         long startTime = System.currentTimeMillis();
 
         // Draw background

@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import net.sf.dz3.instrumentation.Marker;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -45,8 +46,7 @@ public class XBeeSwitch implements Switch {
     public boolean getState() throws IOException {
 
         NDC.push("read(" + address + ")");
-
-        long start = System.currentTimeMillis();
+        Marker m = new Marker("read(" + address + ")");
 
         try {
             
@@ -94,7 +94,7 @@ public class XBeeSwitch implements Switch {
 
         } finally {
 
-            logger.debug("complete in " + (System.currentTimeMillis() - start) + "ms");
+            m.close();
             NDC.pop();
         }
     }
@@ -103,9 +103,8 @@ public class XBeeSwitch implements Switch {
     public void setState(boolean state) throws IOException {
 
         NDC.push("write(" + address + ")");
-
-        long start = System.currentTimeMillis();
-
+        Marker m = new Marker("write(" + address + ")");
+        
         try {
             
             XBeeAddress64 xbeeAddress = Parser.parse(address.hardwareAddress);
@@ -132,7 +131,7 @@ public class XBeeSwitch implements Switch {
 
         } finally {
 
-            logger.debug("complete in " + (System.currentTimeMillis() - start) + "ms");
+            m.close();
             NDC.pop();
         }
     }

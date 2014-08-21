@@ -1,7 +1,7 @@
 package net.sf.dz3.runtime;
 
 import net.sf.dz3.device.model.DamperController;
-import net.sf.jukebox.util.Interval;
+import net.sf.dz3.instrumentation.Marker;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -121,22 +121,21 @@ public class Container {
     private void loadConfiguration(String file) {
 
         NDC.push("loadConfiguration(" + file + ")");
+        Marker m = new Marker("loadConfiguration(" + file + ")");
 
         try {
             
-            long start = System.currentTimeMillis();
-
             applicationContext = new ClassPathXmlApplicationContext(new String[] { file });
 
             ((AbstractApplicationContext) applicationContext).registerShutdownHook();
             
-            logger.info("Loaded configuration in " + Interval.toTimeInterval(System.currentTimeMillis() - start));
-
         } catch (BeanDefinitionStoreException ex) {
             
             logger.error("Failed to load " + file, ex);
             
         } finally {
+            
+            m.close();
             NDC.pop();
         }
     }

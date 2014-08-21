@@ -19,6 +19,7 @@ import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.ContainerMap;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAware;
@@ -411,7 +412,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     private void poll() throws InterruptedException, OneWireException {
         
         NDC.push("poll");
-        long start = System.currentTimeMillis();
+        Marker m = new Marker("poll");
         
         try {
 
@@ -446,7 +447,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             logger.debug("Data map: " + dataMap);
         
         } finally {
-            logger.debug("done in " + (System.currentTimeMillis() - start + "ms"));
+
+            m.close();
             NDC.pop();
         }
     }
@@ -454,19 +456,19 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     private void processPath(OWPath path, DataMap dataMap) throws OneWireException {
         
         NDC.push("processPath");
+        Marker m = new Marker("processPath");
         
         logger.debug("Processing " + path);
-        long start = System.currentTimeMillis();
+
         lock.writeLock().lock();
         
         try {
 
-            logger.debug("Got lock in " + (System.currentTimeMillis() - start) + "ms");
-            start = System.currentTimeMillis();
+            m.checkpoint("got lock");
 
             path.open();
 
-            logger.debug("open in " + (System.currentTimeMillis() - start) + "ms");
+            m.checkpoint("open");
 
             ContainerMap address2dcForPath = path2device.get(path);
 
@@ -511,8 +513,9 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             
         } finally {
 
-            logger.debug("Completed in " + (System.currentTimeMillis() - start) + "ms");
             lock.writeLock().unlock();
+
+            m.close();
             NDC.pop();
         }
     }
@@ -1063,60 +1066,63 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     @SuppressWarnings("deprecation")
     final double getTemperature(final TemperatureContainer tc) throws OneWireException, OneWireIOException {
+        
+        NDC.push("getTemperature");
+        Marker m = new Marker("getTemperature");
+        
+        try {
 
-        // get the current resolution and other settings of the device
-
-        long start = System.currentTimeMillis();
-        long now = start;
-
-        String address = ((OneWireContainer) tc).getAddressAsString();
-        double lastTemp;
-
-        // VT: FIXME: What if the state is not available yet?
-        // Theoretically, it should be 'cause setHiRes should have been
-        // called, but this has to be verified
-
-        byte[] state = stateMap.get(address);
-
-        if (state == null) {
-
-            logger.warn("device state is not available yet, possibly setHiRes failed");
-
+            // get the current resolution and other settings of the device
+    
+            String address = ((OneWireContainer) tc).getAddressAsString();
+            double lastTemp;
+    
+            // VT: FIXME: What if the state is not available yet?
+            // Theoretically, it should be 'cause setHiRes should have been
+            // called, but this has to be verified
+    
+            byte[] state = stateMap.get(address);
+    
+            if (state == null) {
+    
+                logger.warn("device state is not available yet, possibly setHiRes failed");
+    
+                state = tc.readDevice();
+            }
+    
+            m.checkpoint("readDevice/0");
+    
+            // perform a temperature conversion
+    
+            tc.doTemperatureConvert(state);
+    
+            m.checkpoint("doTemperatureConvert");
+    
+            // read the result of the conversion
+    
             state = tc.readDevice();
+    
+            m.checkpoint("readDevice/1");
+    
+            // extract the result out of state
+            lastTemp = tc.getTemperature(state);
+    
+            if (lastTemp == 85.0) {
+    
+                // Known bug, ignore
+    
+                throw new IllegalStateException("Temp read is 85C, ignored");
+            }
+    
+            stateMap.put(address, state);
+    
+            return lastTemp;
+            
+        } finally {
+            
+            m.close();
+            NDC.pop();
         }
-
-        now = System.currentTimeMillis();
-
-        logger.debug("ReadDevice/0: " + (now - start));
-
-        // perform a temperature conversion
-
-        tc.doTemperatureConvert(state);
-
-        now = System.currentTimeMillis();
-
-        logger.debug("doTemperatureConvert: " + (now - start));
-
-        // read the result of the conversion
-
-        state = tc.readDevice();
-
-        now = System.currentTimeMillis();
-        logger.debug("ReadDevice/1: " + (now - start));
-
-        // extract the result out of state
-        lastTemp = tc.getTemperature(state);
-
-        if (lastTemp == 85.0) {
-
-            // Known bug, ignore
-
-            throw new IllegalStateException("Temp read is 85C, ignored");
-        }
-
-        stateMap.put(address, state);
-
-        return lastTemp;
     }
 
     /**

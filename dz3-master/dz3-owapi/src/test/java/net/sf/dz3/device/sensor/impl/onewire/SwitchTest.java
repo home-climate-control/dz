@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import net.sf.dz3.device.sensor.Switch;
+import net.sf.dz3.instrumentation.Marker;
 import junit.framework.TestCase;
 
 /**
@@ -159,10 +160,11 @@ public class SwitchTest extends TestCase {
                 fail("Can't initialize DeviceFactory");
             }
 
-            long start = System.currentTimeMillis();
-            logger.debug("Got lock in " + (System.currentTimeMillis() - start) + "ms");
+            Marker m = new Marker("lock");
 
             df.getLock().writeLock().lock();
+            
+            m.checkpoint("got lock");
             NDC.push("locked");
             try {
             
@@ -200,7 +202,10 @@ public class SwitchTest extends TestCase {
                 logger.info(s11.getAddress() + ": " + s00.getState());
 
             } finally {
+
                 df.getLock().writeLock().unlock();
+                
+                m.close();
                 NDC.pop();
             }
             

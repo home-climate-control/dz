@@ -6,6 +6,7 @@ import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
@@ -27,7 +28,7 @@ import com.rapplogic.xbee.api.XBeeAddress64;
  * 
  * @see ftp://ftp1.digi.com/support/documentation/90000976_G.pdf, I/O sample rate (IR command).
  *   
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2014
  */
 public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor {
     
@@ -68,8 +69,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
     public DataSample<Double> getSignal() {
         
         NDC.push("getSignal(" + address + ")");
-
-        long start = System.currentTimeMillis();
+        Marker m = new Marker("getSignal(" + address + ")");
 
         try {
             
@@ -102,7 +102,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
 
         } finally {
 
-            logger.debug("complete in " + (System.currentTimeMillis() - start) + "ms");
+            m.close();
             NDC.pop();
         }
     }
