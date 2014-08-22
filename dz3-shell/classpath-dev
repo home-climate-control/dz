@@ -3,7 +3,7 @@
 # Use this file instead of ./classpath to use code built by Maven ('mvn install').
 # Don't forget to adjust version numbers if necessary.
 
-# This might need '-SNAPSHOT' added to it if you're using the up-to-date SVN code
+# This might need '-SNAPSHOT' added to it if you're using the up-to-date code from source control repository
 DZ_VERSION=3.6.6
 
 JUKEBOX_VERSION=6.1.2
