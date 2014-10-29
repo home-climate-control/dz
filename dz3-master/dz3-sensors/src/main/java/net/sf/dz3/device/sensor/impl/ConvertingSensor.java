@@ -80,7 +80,7 @@ public final class ConvertingSensor implements AnalogSensor, DataSink<Double> {
         Double sample;
         
         sample = converter != null ? converter.convert(signal.sample) : signal.sample;
-        sample = sample != null ? sample + calibrationShift : sample;        
+        sample = sample != null ? sample + calibrationShift : null;        
         
         return new DataSample<Double>(signal.timestamp, signal.sourceName, signal.signature, sample, signal.error);
     }
