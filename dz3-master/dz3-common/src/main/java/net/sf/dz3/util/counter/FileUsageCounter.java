@@ -90,6 +90,8 @@ public class FileUsageCounter extends TransientUsageCounter {
                 if (line == null) {
                     
                     // End of file
+                    
+                    br.close();
                     break;
                 }
                 
@@ -114,9 +116,10 @@ public class FileUsageCounter extends TransientUsageCounter {
                     }
                 
                 } catch (Throwable t) {
+                    
+                    br.close();
                     throw new IOException("Failed to parse line '" + line + "' out of " + persistentStorage.getCanonicalPath());
                 }
-                
             }
             
             if (threshold == null) {
