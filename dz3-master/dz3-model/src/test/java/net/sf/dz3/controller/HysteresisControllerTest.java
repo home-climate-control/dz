@@ -17,6 +17,7 @@ public class HysteresisControllerTest extends TestCase {
 	
 	long timestamp = 0;
 
+	@SuppressWarnings("rawtypes")
 	DataSample sequence[] = {
     	    new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
     	    new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
