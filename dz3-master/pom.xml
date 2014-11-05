@@ -39,6 +39,7 @@
         <module>dz3-swing</module>
         <module>dz3-scheduler</module>
         <module>dz3-scheduler-gcal</module>
+        <module>dz3-scheduler-gcal-v3</module>
         <module>dz3-http</module>
         <module>dz3-connector</module>
         <module>dz3-xbee</module>
