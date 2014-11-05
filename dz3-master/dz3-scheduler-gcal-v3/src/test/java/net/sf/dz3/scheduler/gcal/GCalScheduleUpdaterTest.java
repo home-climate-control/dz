@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 import junit.framework.TestCase;
@@ -26,7 +27,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
-import com.google.gdata.data.DateTime;
+import com.google.api.client.util.DateTime;
 
 /**
  * 
@@ -77,13 +78,14 @@ public class GCalScheduleUpdaterTest extends TestCase {
     
     public void testTzShift() {
         
-        DateTime dt = DateTime.parseDateTime("2010-01-30T18:00:00.000-07:00");
+        DateTime dt = DateTime.parseRfc3339("2010-01-30T18:00:00.000-07:00");
         
         logger.info("GMT-7: " + dt);
-        logger.info("TZ Shift: " + dt.getTzShift());
+        logger.info("TZ Shift: " + dt.getTimeZoneShift());
         
         // This operation doesn't change the time, but changes the representation
-        dt.setTzShift(0);
+        
+        dt = new DateTime(new Date(dt.getValue()), TimeZone.getTimeZone("GMT"));
 
         logger.info("GMT: " + dt);
         
@@ -186,9 +188,9 @@ public class GCalScheduleUpdaterTest extends TestCase {
         logger.debug("String to parse: " + startString);
         
         @SuppressWarnings("unused")
-        DateTime dtStart = DateTime.parseDateTime(startString);
+        DateTime dtStart = DateTime.parseRfc3339(startString);
         @SuppressWarnings("unused")
-        DateTime dtEnd = DateTime.parseDateTime(endString);
+        DateTime dtEnd = DateTime.parseRfc3339(endString);
         
         logger.debug("Parsed OK");
         

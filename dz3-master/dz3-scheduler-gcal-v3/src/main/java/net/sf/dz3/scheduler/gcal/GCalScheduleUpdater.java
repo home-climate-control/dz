@@ -1,72 +1,69 @@
 package net.sf.dz3.scheduler.gcal;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.security.GeneralSecurityException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneStatus;
-import net.sf.dz3.scheduler.AbstractScheduleUpdater;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Period;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxAware;
-import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
-import com.google.gdata.client.ClientLoginAccountType;
-import com.google.gdata.client.calendar.CalendarQuery;
-import com.google.gdata.client.calendar.CalendarService;
-import com.google.gdata.data.DateTime;
-import com.google.gdata.data.TextConstruct;
-import com.google.gdata.data.calendar.CalendarEntry;
-import com.google.gdata.data.calendar.CalendarEventEntry;
-import com.google.gdata.data.calendar.CalendarEventFeed;
-import com.google.gdata.data.calendar.CalendarFeed;
-import com.google.gdata.data.extensions.When;
-import com.google.gdata.util.AuthenticationException;
-import com.google.gdata.util.ServiceException;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.calendar.model.CalendarList;
+import com.google.api.services.calendar.model.CalendarListEntry;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.Events;
 
 /**
- * Schedule updater using Google Calendar as a back end.
+ * Schedule updater using Google Calendar V3 as a back end.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * Look for V3 API docs starting at https://developers.google.com/google-apps/calendar/ - but as time goes, it'll slip, there's no
+ * specific URL for V3 docs while it is the last version.
+ * 
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2014
  */
-public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxAware {
+public class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
 
-    private final Logger logger = Logger.getLogger(getClass());
-    
     private final String LITERAL_APP_NAME = "Home Climate Control-DZ-3.5";
-    
+    private final String STORED_CREDENTIALS = ".dz/calendar";
+    private final String CLIENT_SECRETS = "/client_secrets.json"; 
+
     private final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     private final NumberFormat tzFormatter = new DecimalFormat("+#00;-#00");
-    private final StatusParser statusParser = new StatusParser();
-    
-    private String username;
-    private String password;
-    private String domain;
-    
-    private long lastKnownGood = 0;
-    
-    /**
-     * Cached instance of a Google calendar service.
-     */
-    private CalendarService calendarService;
-    
+
     /**
      * Create an instance with a Google username, but without a password.
      * 
@@ -108,121 +105,102 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
      */
     public GCalScheduleUpdater(Map<Thermostat, String> ts2source, String username, String password, String domain) {
 
-        super(ts2source);
-
-        this.username = username;
-        this.password = password;
-        this.domain = domain;
-    }
-    
-    @JmxAttribute(description = "username")
-    public String getUsername() {
-        return username;
-    }
-    
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    @JmxAttribute(description = "password")
-    public String getPassword() {
-        return password;
-    }
-    
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @JmxAttribute(description = "domain")
-    public String getDomain() {
-        return domain;
-    }
-    
-    public void setDomain(String domain) {
-        this.domain = domain;
+        super(ts2source, username, password, domain);
     }
 
     @Override
     public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
 
         NDC.push("update");
-        
-        long start = System.currentTimeMillis();
+        Marker m = new Marker("update");
         
         Map<Thermostat, SortedMap<Period, ZoneStatus>> ts2schedule = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
 
         try {
             
-            CalendarService cal = createService();
-            URL feedUrl = new URL("https://www.google.com/calendar/feeds/default/allcalendars/full");
-            CalendarFeed calendarFeed = cal.getFeed(feedUrl, CalendarFeed.class);
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+            FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(new File(System.getProperty("user.home"), STORED_CREDENTIALS));
+
+            m.checkpoint("instantiated tools");
+
+            Credential credential = authorize(httpTransport, jsonFactory, dataStoreFactory);
             
-            List<CalendarEntry> calendars = calendarFeed.getEntries();
-            logger.debug("Found " + calendars.size() + " calendars");
-            logger.debug("Elapsed time: listCalendars: " + (System.currentTimeMillis() - start) + "ms");
+            m.checkpoint("authorized");
+
+            // VT: NOTE: There's no need for us to do this more often than we really need.
+            // I'd assume that once a year would be just fine. Maybe a bit too often, but come on, let's be realistic,
+            // users need some extra fun.
+            credential.setExpiresInSeconds(60L * 60L * 24L * 365L);
             
-            for (Iterator<CalendarEntry> i = calendars.iterator(); i.hasNext(); ) {
-                
-                CalendarEntry calendar = i.next();
-                TextConstruct titleConstruct = calendar.getTitle();
-                
-                if (titleConstruct == null) {
-                
-                    logger.warn("Failed to retrieve title for " + calendar + ", skipping");
-                    continue;
-                }
-                
-                String title = titleConstruct.getPlainText();
-                
-                logger.debug("Calendar: " + title);
-                
-                
-                if (title != null) {
+            Calendar calendarClient = new Calendar.Builder(httpTransport, jsonFactory, credential).setApplicationName(LITERAL_APP_NAME).build();
+            
+            m.checkpoint("instantiated client");
+
+            CalendarList feed = calendarClient.calendarList().list().execute();
+            
+            List<CalendarListEntry> calendars = feed.getItems(); 
                     
-                    updateCalendar(ts2schedule, cal, calendar);
+            m.checkpoint("retrieved feed");
+
+            logger.info(calendars.size() + " calendars found:");
+            
+            for (Iterator<CalendarListEntry> i = calendars.iterator(); i.hasNext(); ) {
+                
+                CalendarListEntry c = i.next();
+                
+                logger.info("  calendar: " + c.getSummary());
+            }
+            
+            m.checkpoint("retrieved summary");
+
+            for (Iterator<CalendarListEntry> i = calendars.iterator(); i.hasNext(); ) {
+                
+                CalendarListEntry calendar = i.next();
+                
+                updateCalendar(ts2schedule, calendarClient, calendar);
+            }
+
+            NDC.push("schedule");
+            
+            for (Iterator<Entry<Thermostat, SortedMap<Period, ZoneStatus>>> i = ts2schedule.entrySet().iterator(); i.hasNext(); ) {
+                
+                Entry<Thermostat, SortedMap<Period, ZoneStatus>> pair = i.next();
+                
+                logger.info(pair.getKey().getName() + ": " + pair.getValue().size() + " entries");
+                
+                for (Iterator<Entry<Period, ZoneStatus>> i2 = pair.getValue().entrySet().iterator(); i2.hasNext(); ) {
+                    
+                    logger.info("  " + i2.next());
                 }
             }
             
-        } catch (AuthenticationException ex) {
+            NDC.pop();
             
-            // Need to reset the instance so it will be regenerated next time,
-            // it is possible that the authenticated session has expired
+            return ts2schedule;
             
-            calendarService = null;
-            
-            throw new IOException("Authentication failed", ex);
-            
-        } catch (ServiceException ex) {
+        } catch (GeneralSecurityException ex) {
 
-            throw new IOException("Failed to retrieve the feed", ex);
+            throw new IllegalStateException("Oops", ex);
             
         } finally {
-            logger.debug("Elapsed time: update: " + (System.currentTimeMillis() - start) + "ms");
+            
+            m.close();
             NDC.pop();
         }
-        
-        return ts2schedule;
     }
-    
-    /**
-     * Pull period data from an individual calendar.
-     * 
-     * @param ts2schedule Map to put found periods into.
-     * @param cal Calendar service to use.
-     * @param calendar Individual calendar to pull period data from.
-     */
-    private void updateCalendar(Map<Thermostat, SortedMap<Period, ZoneStatus>> ts2schedule, CalendarService cal, CalendarEntry calendar) {
 
+    private void updateCalendar(Map<Thermostat, SortedMap<Period, ZoneStatus>> ts2schedule, Calendar calendarClient, CalendarListEntry calendar) {
+        
         NDC.push("updateCalendar");
-        long startMillis = System.currentTimeMillis();
-        SortedMap<Period, ZoneStatus> period2status = new TreeMap<Period, ZoneStatus>();
+        Marker m = new Marker("updateCalendar");
         
         try {
-            
-            String name = calendar.getTitle().getPlainText();
+
+            String name = calendar.getSummary();
             
             Set<Thermostat> tSet = getByName(name);
-            
+
             if (tSet == null || tSet.isEmpty()) {
                 
                 logger.debug("No zone '" + name + "' configured, skipped");
@@ -231,27 +209,46 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
 
             logger.info("Zone name: " + name);
             
-            String id = getCalendarId(calendar);
-
-            logger.info(calendar.getTitle().getPlainText() + " id=" + id);
-
-            URL feedUrl = new URL("https://www.google.com/calendar/feeds/" + id + "/private/full-noattendees");
-          
-            CalendarQuery q = new CalendarQuery(feedUrl);
+            String id = calendar.getId();
             
-            Calendar tempCalendar = new GregorianCalendar();
+            logger.info("id: " + id);
             
-            tempCalendar.set(Calendar.HOUR_OF_DAY, 0);
-            tempCalendar.set(Calendar.MINUTE, 0);
-            tempCalendar.set(Calendar.SECOND, 0);
-            tempCalendar.set(Calendar.MILLISECOND, 0);
+            parseEvents(ts2schedule, tSet, calendarClient, id);
+            
+        } catch (IOException ex) {
+
+            logger.error("Unable to retrieve schedule for '" + calendar.getSummary() + "'", ex);
+
+        } finally {
+            
+            m.close();
+            NDC.pop();
+        }
+
+    }
+
+    private void parseEvents(Map<Thermostat, SortedMap<Period, ZoneStatus>> ts2schedule, Set<Thermostat> tSet, Calendar calendarClient, String id) throws IOException {
+
+        NDC.push("parseEvents");
+        Marker m = new Marker("parseEvents");
+
+        try {
+
+            com.google.api.services.calendar.Calendar.Events.List events = calendarClient.events().list(id);
+            
+            java.util.Calendar tempCalendar = new GregorianCalendar();
+            
+            tempCalendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            tempCalendar.set(java.util.Calendar.MINUTE, 0);
+            tempCalendar.set(java.util.Calendar.SECOND, 0);
+            tempCalendar.set(java.util.Calendar.MILLISECOND, 0);
             
             Date start = tempCalendar.getTime();
 
-            tempCalendar.set(Calendar.HOUR_OF_DAY, 23);
-            tempCalendar.set(Calendar.MINUTE, 59);
-            tempCalendar.set(Calendar.SECOND, 59);
-            tempCalendar.set(Calendar.MILLISECOND, 0);
+            tempCalendar.set(java.util.Calendar.HOUR_OF_DAY, 23);
+            tempCalendar.set(java.util.Calendar.MINUTE, 59);
+            tempCalendar.set(java.util.Calendar.SECOND, 59);
+            tempCalendar.set(java.util.Calendar.MILLISECOND, 0);
             
             Date end = tempCalendar.getTime();
             
@@ -263,39 +260,44 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
             int tzShift = tempCalendar.getTimeZone().getRawOffset() / (60000 * 60);
             String tzTail = tzFormatter.format(tzShift) + ":00";
             
-            DateTime dtStart = DateTime.parseDateTime(dateFormatter.format(start) + tzTail);
-            DateTime dtEnd = DateTime.parseDateTime(dateFormatter.format(end) + tzTail);
+            DateTime dtStart = DateTime.parseRfc3339(dateFormatter.format(start) + tzTail);
+            DateTime dtEnd = DateTime.parseRfc3339(dateFormatter.format(end) + tzTail);
             
-            logger.debug("Day span: " + dtStart + " ... " + dtEnd);
+            events.setTimeMin(dtStart);
+            events.setTimeMax(dtEnd);
+            events.setSingleEvents(true);
             
-            q.setMinimumStartTime(dtStart);
-            q.setMaximumStartTime(dtEnd);
+            logger.info("query: " + events);
             
-            CalendarEventFeed eventFeed = cal.query(q, CalendarEventFeed.class);
-
+            Events feed = events.execute();
+            
             // cal.query() has been known to get stuck, let's update the timestamp
-            lastKnownGood = System.currentTimeMillis();            
+            touch();            
 
-            for (int i = 0; i < eventFeed.getEntries().size(); i++) {
-                
-                CalendarEventEntry event = eventFeed.getEntries().get(i);
-                
-                updateEvent(period2status, event);
-            }
-            
-            for (Iterator<Thermostat> i = tSet.iterator(); i.hasNext(); ) {
-
-                ts2schedule.put(i.next(), period2status);
-            }
-            
-        } catch (Throwable t) {
-            
-            logger.error("Failed to pull schedule for " + calendar.getTitle().getPlainText(), t);
+            parse(ts2schedule, tSet, feed.getItems());
 
         } finally {
 
-            logger.debug("Elapsed time: updateCalendar: " + (System.currentTimeMillis() - startMillis) + "ms");
+            m.close();
             NDC.pop();
+        }
+
+    }
+
+    private void parse(Map<Thermostat, SortedMap<Period, ZoneStatus>> ts2schedule, Set<Thermostat> tSet, List<Event> events) {
+
+        logger.info(events.size() + " events found");
+
+        SortedMap<Period, ZoneStatus> period2status = new TreeMap<Period, ZoneStatus>();
+
+        for (Iterator<Event> i = events.iterator(); i.hasNext();) {
+            
+            updateEvent(period2status, i.next());
+        }
+
+        for (Iterator<Thermostat> i = tSet.iterator(); i.hasNext(); ) {
+
+            ts2schedule.put(i.next(), period2status);
         }
     }
 
@@ -305,40 +307,28 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
      * @param period2status Map to put period information into.
      * @param event Data source.
      */
-    private void updateEvent(SortedMap<Period,ZoneStatus> period2status, CalendarEventEntry event) {
+    private void updateEvent(SortedMap<Period,ZoneStatus> period2status, Event event) {
 
         NDC.push("updateEvent");
         
         try {
             
-            List<When> times = event.getTimes();
-            String title = event.getTitle().getPlainText();
-            
-            logger.info(title + ": " + times.size() + " times");
-            
-            if (!times.isEmpty()) {
+            EventDateTime start = event.getStart();
+            EventDateTime end = event.getEnd();
 
-                for (Iterator<When> i2 = times.iterator(); i2.hasNext(); ) {
+            logger.info("  " + start + " to " + end);
 
-                    When when = i2.next();
-                    DateTime start = when.getStartTime();
-                    DateTime end = when.getEndTime();
-                    
-                    logger.info("  " + start + " to " + end);
-                    
-                    // VT: FIXME: Need to pass recurrence as well,
-                    // for cases of not connected for over a day
-                    
-                    parseEvent(period2status, title, start, end);
-                }
-            }
+            // VT: FIXME: Need to pass recurrence as well,
+            // for cases of not connected for over a day
+
+            parseEvent(period2status, event.getSummary(), start, end);
 
         } finally {
             NDC.pop();
         }
     }
 
-    private void parseEvent(SortedMap<Period,ZoneStatus> period2status, String title, DateTime start, DateTime end) {
+    private void parseEvent(SortedMap<Period,ZoneStatus> period2status, String title, EventDateTime start, EventDateTime end) {
         
         NDC.push("parsePeriod");
         
@@ -376,7 +366,7 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
         
     }
 
-    private Period parsePeriod(String periodName, DateTime start, DateTime end) {
+    private Period parsePeriod(String periodName, EventDateTime start, EventDateTime end) {
         
         NDC.push("parsePeriod");
         
@@ -384,13 +374,13 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
             
             String startTime;
             String endTime;
-          
-            if (start.isDateOnly()) {
+            
+            if (isDateOnly(start)) {
 
                 logger.debug("All day event: " + start + "/" + end);
                 
-                startTime = start.toString() + "T00:00:00";
-                endTime = start.toString() + "T23:59:59";
+                startTime = start.getDate().toString() + "T00:00:00";
+                endTime = start.getDate().toString() + "T23:59:59";
                 
                 // Check if this is today
                 
@@ -400,12 +390,12 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
                     // not just offset from midnight. Need to keep this in mind if
                     // this piece of code ever gets refactored.
 
-                    Calendar cal = new GregorianCalendar();
+                    GregorianCalendar cal = new GregorianCalendar();
                     Date d = dateFormatter.parse(startTime);
-                    int today = cal.get(Calendar.DAY_OF_YEAR);
+                    int today = cal.get(GregorianCalendar.DAY_OF_YEAR);
                     
                     cal.setTime(d);
-                    int startDay = cal.get(Calendar.DAY_OF_YEAR);
+                    int startDay = cal.get(GregorianCalendar.DAY_OF_YEAR);
                     
                     logger.debug("Today vs. start day: " + today + "/" + startDay);
                     
@@ -417,34 +407,21 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
                 
                 } catch (ParseException ex) {
                     
-                    throw new IllegalStateException("Failed to parse " + startTime);
+                    throw new IllegalStateException("Failed to parse " + startTime, ex);
                 }
                 
 
             } else {
 
-                // Adjust the time zone to the local system time zone
-                // (they may differ, and the only place where this is visible is calendar settings)
-                
-                Calendar calendar = new GregorianCalendar();
-                
-                int tzShift = calendar.getTimeZone().getRawOffset() / 60000;
-                
-                // This will not change the time, just the representation
-                start.setTzShift(tzShift);
-                end.setTzShift(tzShift);
-
-                logger.debug("Local time zone start/end: " + start + "/" + end);
+                // logger.debug("Local time zone start/end: " + start + "/" + end);
                 
                 // Kinda ugly, but efficient
-                startTime = start.toString().substring(11, 16);
-                endTime = end.toString().substring(11, 16);
+                startTime = start.getDateTime().toString().substring(11, 16);
+                endTime = end.getDateTime().toString().substring(11, 16);
+
+                logger.debug("Local time zone start/end: " + startTime + "/" + endTime);
             }
 
-            // VT: NOTE: Recurrence is irrelevant ere since he schedule
-            // is  dynamically regenerated - but it'd be nice to make it right later
-            // (though what';s the point other than a scenario when the system is offline for over a day?)
-            
             return new Period(periodName, startTime, endTime, ".......");
         
         } finally {
@@ -452,95 +429,61 @@ public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxA
         }
     }
 
-    private String getCalendarId(CalendarEntry calendar) {
-
-        String id = calendar.getId();
-        
-        // VT: NOTE: This is ugly, but I can't find a more elegant way of doing it at the moment
-        final String prefix = "https://www.google.com/calendar/feeds/default/calendars/";
-        
-        if (!id.startsWith(prefix)) {
-            
-            throw new IllegalStateException("Don't know how to handle calendar ID: " + id);
-        }
-        
-        return id.substring(prefix.length());
-    }
-
     /**
-     * Create the service and authenticate it.
-     * 
-     * @return Authenticated calendar service.
-     * @throws AuthenticationException if authentication failed.
+     * @return {@code true} if the object contains just the date, false otherwise.
      */
-    private CalendarService createService() throws AuthenticationException {
+    private boolean isDateOnly(EventDateTime source) {
         
-        NDC.push("createService");
-        long start = System.currentTimeMillis();
+        NDC.push("isDateOnly");
         
         try {
-            
-            if (calendarService != null) {
-            
-                logger.debug("Returning cached instance");
-                return calendarService;
+
+            if (source.getDate() != null && source.getDateTime() == null) {
+                return true;
             }
-
-            logger.debug("Creating new instance");
-            
-            calendarService =  new CalendarService(LITERAL_APP_NAME);
-
-            if (username == null || "".equals(username) || password == null || "".equals(password)) {
-
-                logger.warn("No authentication credentials provided, skipping authentication");
-
-            } else {
-                
-                if (domain == null || "".equals(domain)) {
-                    
-                    logger.info("Using Google authentication");
-                    calendarService.setUserCredentials(username, password);
-
-                } else {
-
-                    String email = username + "@" + domain;
-                    logger.info("Using Google App Engine authentication (" + email + ")");
-                    calendarService.setUserCredentials(email, password, ClientLoginAccountType.HOSTED);
-                }
+    
+            if (source.getDate() == null && source.getDateTime() != null) {
+                return false;
             }
             
-            return calendarService;
+            logger.error("source: " + source);
+            logger.error("date:   " + source.getDate());
+            logger.error("time:   " + source.getDateTime());
             
-        } catch (AuthenticationException ex) {
-            
-            // Damn! Credentials must be wrong, but the instance already exists. Need to reset.
-            calendarService = null;
-            
-            // And rethrow. Next time the updater runs, the instance will be recreated
-            // (if things go right, that is).
-            throw ex;
-            
+            throw new IllegalArgumentException("API must have changed, both Date and DateTime are returned, need to revise the code");
+
         } finally {
-            
-            logger.debug("Elapsed time: createService: " + (System.currentTimeMillis() - start) + "ms");
-            
             NDC.pop();
         }
     }
-    
-    @JmxAttribute(description = "Last time when the schedule was actually extracted")
-    public String getLastKnownGood() {
-        
-        return new Date(lastKnownGood).toString();
-    }
 
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
+    private Credential authorize(HttpTransport httpTransport, JsonFactory jsonFactory, FileDataStoreFactory dataStoreFactory) throws IOException {
         
-        return new JmxDescriptor(
-                "dz",
-                "Google Calendar Schedule Updater",
-                username + (domain == null || "".equals(domain) ? "" : "@" + domain),
-                "Pulls schedule from a Google Calendar");
+        NDC.push("authorize");
+        Marker m = new Marker("authorize");
+        
+        try {
+            
+            InputStream in = getClass().getResourceAsStream(CLIENT_SECRETS);
+            
+            if (in == null) {
+                throw new IOException("null stream trying to open " + CLIENT_SECRETS);
+            }
+
+            GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(jsonFactory, new InputStreamReader(in));
+
+            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
+                    httpTransport,
+                    jsonFactory,
+                    clientSecrets,
+                    Collections.singleton(CalendarScopes.CALENDAR)).setDataStoreFactory(dataStoreFactory).build();
+
+            return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
+
+        } finally {
+            
+            m.close();
+            NDC.pop();
+        }
     }
 }

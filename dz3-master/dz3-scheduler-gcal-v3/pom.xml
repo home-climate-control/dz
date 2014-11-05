@@ -20,9 +20,18 @@
         </dependency>
         <!-- Google dependencies are not specified in the master POM to allow for better decoupling -->
         <dependency>
-            <groupId>com.github.dcarter.gdata-java-client</groupId>
-            <artifactId>gdata-calendar-2.0</artifactId>
-            <version>1.41.1-SNAPSHOT</version>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-calendar</artifactId>
+            <version>${project.calendar.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-jetty</artifactId>
+            <version>${project.oauth.version}</version>
         </dependency>
     </dependencies>
+    <properties>
+        <project.calendar.version>v3-rev104-1.19.0</project.calendar.version>
+        <project.oauth.version>1.19.0</project.oauth.version>
+    </properties>
 </project>
