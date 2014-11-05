@@ -17,6 +17,7 @@ import junit.framework.TestCase;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneStatus;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Period;
 import net.sf.dz3.scheduler.PeriodMatcher;
 import net.sf.dz3.scheduler.ScheduleUpdater;
@@ -31,49 +32,15 @@ import com.google.api.client.util.DateTime;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2014
  */
 public class GCalScheduleUpdaterTest extends TestCase {
 
     private final Logger logger = Logger.getLogger(getClass());
 
-    // Temporarily disabled, testYesterday() will test this anyway
-    public void XtestAuth() throws IOException {
-        
-        Map<Thermostat, String> ts2source = new TreeMap<Thermostat, String>();
-        
-        Thermostat ts1 = new NullThermostat("DZ Schedule: Single Zone Sample");
-        Thermostat ts2 = new NullThermostat("Office");
-        Thermostat ts3 = new NullThermostat("This zone does not exist");
-        
-        ts2source.put(ts1, ts1.getName());
-        ts2source.put(ts2, ts2.getName());
-        ts2source.put(ts3, ts3.getName());
-        
-        logger.info("Targets: " + ts2source);
-        
-        String username = System.getProperty("GCAL_SHEDULE_UPDATER_USERNAME");
-        String password = System.getProperty("GCAL_SHEDULE_UPDATER_PASSWORD");
-        String domain = System.getProperty("GCAL_SHEDULE_UPDATER_DOMAIN");
-        
-        if (username == null || "".equals(username)) {
-            
-            logger.error("Username not set, test not run",
-                    new Exception("Use this trace to see what you have to do to run the test"));
-            
-            return;
-        }
-        
-        logger.info("Using " + username + ":" + password + "@" + domain + " for authentication");
+    public void testAuth() throws IOException {
 
-        ScheduleUpdater updater = new GCalScheduleUpdater(ts2source, username, password, domain);
-        
-        long start = System.currentTimeMillis();
-        
-        Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = updater.update();
-        
-        logger.info("Took " + (System.currentTimeMillis() - start) + "ms to complete");
-        logger.info("Schedule retrieved: " + schedule);
+        // Nothing to test here as ov API v3 - testYesterday() will walk down this path anyway.
     }
     
     public void testTzShift() {
@@ -95,34 +62,22 @@ public class GCalScheduleUpdaterTest extends TestCase {
     public void testYesterday() {
         
         NDC.push("testYesterday");
+        Marker m = new Marker("testYesterday");
         
         try {
         
             Map<Thermostat, String> ts2source = new TreeMap<Thermostat, String>();
 
 //            Thermostat ts1 = new NullThermostat("DZ Test Case: MB");
-            Thermostat ts1 = new NullThermostat("DZ Test Case: IO");
+//            Thermostat ts1 = new NullThermostat("DZ Test Case: IO");
 //            Thermostat ts1 = new NullThermostat("DZ Test Case: TO");
+            Thermostat ts1 = new NullThermostat("DZ Schedule: Master Bedroom");
 
             ts2source.put(ts1, ts1.getName());
 
             logger.info("Targets: " + ts2source);
 
-            String username = System.getProperty("GCAL_SHEDULE_UPDATER_USERNAME");
-            String password = System.getProperty("GCAL_SHEDULE_UPDATER_PASSWORD");
-            String domain = System.getProperty("GCAL_SHEDULE_UPDATER_DOMAIN");
-
-            if (username == null || "".equals(username)) {
-
-                logger.error("Username not set, test not run",
-                        new Exception("Use this trace to see what you have to do to run the test"));
-
-                return;
-            }
-
-            logger.info("Using " + username + ":" + password + "@" + domain + " for authentication");
-
-            ScheduleUpdater updater = new GCalScheduleUpdater(ts2source, username, password, domain);
+            ScheduleUpdater updater = new GCalScheduleUpdater(ts2source);
 
             long start = System.currentTimeMillis();
 
@@ -144,6 +99,8 @@ public class GCalScheduleUpdaterTest extends TestCase {
             fail("Unexpected exception, see logs");
             
         } finally {
+            
+            m.close();
             NDC.pop();
         }
     }

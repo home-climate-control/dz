@@ -65,47 +65,12 @@ public class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
     private final NumberFormat tzFormatter = new DecimalFormat("+#00;-#00");
 
     /**
-     * Create an instance with a Google username, but without a password.
+     * Create an instance.
      * 
-     * Password can be later {@link #setUsername(String) provided via JMX},
-     * as well as {@link #setDomain(String) domain}.
-     * 
-     * @param ts2source Keys are thermostats to update the schedule for,
-     * values are calendar names to pull schedules from.
-     * @param username Google (or Google Apps) account name.
+     * @param ts2source Keys are thermostats to update the schedule for, values are calendar names to pull schedules from.
      */
-    public GCalScheduleUpdater(Map<Thermostat, String> ts2source, String username) {
-        
-        this(ts2source, username, null, null);
-    }
-
-    /**
-     * Create an instance with username and domain information, but without a password.
-     * 
-     * Password can be later {@link #setUsername(String) provided via JMX}.
-     * 
-     * @param ts2source Keys are thermostats to update the schedule for,
-     * values are calendar names to pull schedules from.
-     * @param username Google (or Google Apps) account name.
-     * @param domain Google Apps domain. If {@code null} or empty, Google will be used.
-     */
-    public GCalScheduleUpdater(Map<Thermostat, String> ts2source, String username, String domain) {
-        
-        this(ts2source, username, null, domain);
-    }
-
-    /**
-     * Create an instance with authentication and domain information.
-     * 
-     * @param ts2source Keys are thermostats to update the schedule for,
-     * values are calendar names to pull schedules from.
-     * @param username Google (or Google Apps) account name.
-     * @param password  Password for that account.
-     * @param domain Google Apps domain. If {@code null} or empty, Google will be used.
-     */
-    public GCalScheduleUpdater(Map<Thermostat, String> ts2source, String username, String password, String domain) {
-
-        super(ts2source, username, password, domain);
+    public GCalScheduleUpdater(Map<Thermostat, String> ts2source) {
+        super(ts2source);
     }
 
     @Override

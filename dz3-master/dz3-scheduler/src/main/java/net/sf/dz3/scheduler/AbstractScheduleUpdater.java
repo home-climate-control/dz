@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.log4j.Logger;
+
 import net.sf.dz3.device.model.Thermostat;
 
 /**
@@ -15,6 +17,8 @@ import net.sf.dz3.device.model.Thermostat;
  */
 public abstract class AbstractScheduleUpdater implements ScheduleUpdater {
     
+    protected final Logger logger = Logger.getLogger(getClass());
+
     /**
      * Set of thermostats to retrieve updated schedule for.
      */
