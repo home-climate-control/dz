@@ -54,9 +54,6 @@ ${LIBDIR}/jackson-core-2.1.3.jar:\
 ${LIBDIR}/jetty-${JETTY_VERSION}.jar:\
 ${LIBDIR}/jetty-util-${JETTY_VERSION}.jar:\
 ${LIBDIR}/servlet-api-2.5-6.1.5.jar:\
-${LIBDIR}/gdata-core-1.0.jar:\
-${LIBDIR}/gdata-client-1.0.jar:\
-${LIBDIR}/gdata-calendar-2.0.jar:\
 ${LIBDIR}/gson-1.7.1.jar:\
 ${LIBDIR}/xbeeapi-0.9.1-SNAPSHOT.jar:\
 /usr/share/java/RXTXcomm.jar"
