@@ -4,10 +4,15 @@
 # Don't forget to adjust version numbers if necessary.
 
 # This might need '-SNAPSHOT' added to it if you're using the up-to-date code from source control repository
-DZ_VERSION=3.6.6
+# (NOTE: There is no '3.6.7' at this point, just the snapshot)
+DZ_VERSION=3.6.7-SNAPSHOT
 
 JUKEBOX_VERSION=6.1.2
 SERVOMASTER_VERSION=0.8.2.4
+GOOGLE_OAUTH_VERSION=1.19.0
+GOOGLE_CALENDAR_VERSION=v3-rev104-1.19.0
+JETTY_VERSION=6.1.26
+XBEE_VERSION=0.9.1-SNAPSHOT
 
 LIBDIR=${HOME}/.m2/repository
 
@@ -16,12 +21,8 @@ COMMONS_LOGGING=${LIBDIR}/commons-logging/commons-logging/1.1.1/commons-logging-
 COMMONS_HTTPCLIENT=${LIBDIR}/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar
 LOG4J=${LIBDIR}/log4j/log4j/1.2.16/log4j-1.2.16.jar
 SPRING=${LIBDIR}/org/springframework/spring/2.5.6/spring-2.5.6.jar
-GOOGLE_COLLECT=./lib/google-collect-1.0-rc1.jar
-GDATA_CORE=./lib/gdata-core-1.0.jar
-GDATA_CLIENT=./lib/gdata-client-1.0.jar
-GDATA_CALENDAR=./lib/gdata-calendar-2.0.jar
 GSON=${LIBDIR}/com/google/code/gson/gson/1.7.1/gson-1.7.1.jar
-XBEE_API=./lib/xbee-api-0.5.5.jar
+XBEE_API=${LIBDIR}/com/rapplogic/xbeeapi/${XBEE_VERSION}/xbee-api-${VERSION}.jar
 
 DZ=${LIBDIR}/net/sf/dz3
 JUKEBOX=${LIBDIR}/net/sf/jukebox
@@ -57,11 +58,18 @@ ${COMMONS_LOGGING}:\
 ${COMMONS_HTTPCLIENT}:\
 ${LOG4J}:\
 ${SPRING}:\
-${GOOGLE_COLLECT}:\
-${GDATA_CLIENT}:\
-${GDATA_CORE}:\
-${GDATA_CALENDAR}:\
 ${GSON}:\
-${XBEE_API}"
+${XBEE_API}:\
+${LIBDIR}/com/google/api-client/google-api-client/${GOOGLE_OAUTH_VERSION}/google-api-client-${GOOGLE_OAUTH_VERSION}.jar:\
+${LIBDIR}/com/google/http-client/google-http-client/${GOOGLE_OAUTH_VERSION}/google-http-client-${GOOGLE_OAUTH_VERSION}.jar:\
+${LIBDIR}/com/google/http-client/google-http-client-jackson2/${GOOGLE_OAUTH_VERSION}/google-http-client-jackson2-${GOOGLE_OAUTH_VERSION}.jar:\
+${LIBDIR}/com/google/oauth-client/google-oauth-client/${GOOGLE_OAUTH_VERSION}/google-oauth-client-${GOOGLE_OAUTH_VERSION}.jar:\
+${LIBDIR}/com/google/oauth-client/google-oauth-client-java6/${GOOGLE_OAUTH_VERSION}/google-oauth-client-java6-${GOOGLE_OAUTH_VERSION}.jar:\
+${LIBDIR}/com/google/oauth-client/google-oauth-client-jetty/${GOOGLE_OAUTH_VERSION}/google-oauth-client-jetty-${GOOGLE_OAUTH_VERSION}.jar:\
+${LIBDIR}/com/google/apis/google-api-services-calendar/${GOOGLE_CALENDAR_VERSION}/google-api-services-calendar-${GOOGLE_CALENDAR_VERSION}.jar:\
+${LIBDIR}/com/fasterxml/jackson/core/jackson-core/2.1.3/jackson-core-2.1.3.jar:\
+${LIBDIR}/org/mortbay/jetty/jetty/${JETTY_VERSION}/jetty-${JETTY_VERSION}.jar:\
+${LIBDIR}/org/mortbay/jetty/jetty-util/${JETTY_VERSION}/jetty-util-${JETTY_VERSION}.jar:\
+${LIBDIR}/org/mortbay/jetty/servlet-api-2.5/6.1.5/servlet-api-2.5-6.1.5.jar"
 
 echo $CLASSPATH | tr ":" "\n"
