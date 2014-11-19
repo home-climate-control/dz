@@ -287,6 +287,10 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             
             listFound();
             
+        } catch (XBeeTimeoutException ex) {
+            
+            logger.error("Load too high or timeout too short?", ex);
+            
         } catch (InterruptedException ex) {
             
             logger.error("Huh? Interrupted?", ex);
