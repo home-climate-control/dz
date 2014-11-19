@@ -77,7 +77,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
             String channel = address.channel;
             
             RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, "IS");
-            AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, 5000);
+            AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_IS_MILLIS);
 
             logger.debug(channel + " response: " + rsp);
 

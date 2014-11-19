@@ -54,7 +54,7 @@ public class XBeeSwitch implements Switch {
             String channel = address.channel;
             
             RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, channel);
-            AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, 5000);
+            AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
             logger.info(channel + " response: " + rsp);
 
@@ -112,7 +112,7 @@ public class XBeeSwitch implements Switch {
             
             int deviceState = state ? 5 : 4;
             RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, channel, new int[] {deviceState});
-            AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, 5000);
+            AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
             logger.info(channel + " response: " + rsp);
 
