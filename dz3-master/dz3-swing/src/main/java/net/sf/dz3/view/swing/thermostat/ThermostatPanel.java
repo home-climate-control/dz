@@ -459,6 +459,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             if (scheduler == null) {
                 
                 logger.warn("No scheduler was provided, ignored");
+                return;
             }
             
             Period p = scheduler.getCurrentPeriod(source);
