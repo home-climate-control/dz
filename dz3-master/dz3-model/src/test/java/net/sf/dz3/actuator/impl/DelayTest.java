@@ -63,9 +63,13 @@ public class DelayTest extends TestCase {
         
         DelayedCommand c = new DelayedCommand(1000);
         
+        // Any of these might fail on slow computers, or in slow environments
+        
         assertEquals(1000, c.getDelay(TimeUnit.MILLISECONDS));
         assertEquals(1, c.getDelay(TimeUnit.SECONDS));
         assertEquals(1000000, c.getDelay(TimeUnit.MICROSECONDS));
+        
+        // This will fail when building on Raspberry Pi B+ with almost 100% probability, comment it out
         assertEquals(1000000000, c.getDelay(TimeUnit.NANOSECONDS));
     }
     
