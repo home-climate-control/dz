@@ -71,7 +71,7 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
  * @author DalSemi
  * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
  */
-public class OneWireContainer22 extends OneWireContainer28 implements TemperatureContainer {
+public class OneWireContainer22 extends OneWireContainer28 {
 
     //-------------------------------------------------------------------------
     //-------- Static Final Variables
