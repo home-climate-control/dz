@@ -43,7 +43,7 @@ public abstract class AbstractListener extends PassiveService {
      * Set of addresses to listen on. Empty set means that we're listening on
      * all local addresses.
      */
-    private Set<String> addressSet;
+    private Set<String> addressSet = new TreeSet<String>();
 
     /**
      * The port to broadcast on.
