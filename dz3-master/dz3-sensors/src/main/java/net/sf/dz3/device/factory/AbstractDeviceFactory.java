@@ -252,7 +252,7 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
 
     protected abstract Switch createSingleSwitchProxy(ContainerMap address2dcGlobal, StringChannelAddress switchAddress);
     
-    protected abstract class SensorProxy extends AbstractAnalogSensor implements DataSink<Double>, JmxAware {
+    protected abstract class SensorProxy extends AbstractAnalogSensor implements DataSink<Double> {
 
         /**
          * Sensor type.
