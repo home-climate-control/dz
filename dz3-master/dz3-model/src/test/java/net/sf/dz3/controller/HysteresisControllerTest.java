@@ -66,4 +66,12 @@ public class HysteresisControllerTest extends TestCase {
 	    NDC.pop();
 	}
     }
+    
+    public void testNullPV() {
+
+        HysteresisController pc = new HysteresisController(0);
+        
+        // This must not blow up like it did before
+        pc.compute();
+    }
 }

@@ -134,6 +134,7 @@ public class HysteresisController extends AbstractProcessController {
 	if (pv == null || pv.isError()) {
 	    
 	    // Don't have to do a thing, nothing happened yet, nothing good at least
+	    return null;
 	    
 	} else {
 
