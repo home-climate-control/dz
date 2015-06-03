@@ -21,7 +21,7 @@ import org.apache.log4j.NDC;
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
  */
-public class SimpleDamperController extends AbstractDamperController implements DamperController {
+public class SimpleDamperController extends AbstractDamperController {
 
     /**
      * Create an instance with nothing attached.
