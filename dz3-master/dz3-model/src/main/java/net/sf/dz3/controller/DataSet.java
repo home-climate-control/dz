@@ -105,7 +105,7 @@ public class DataSet<T> {
             }
         }
 
-        dataSet.put(new Long(millis), value);
+        dataSet.put(Long.valueOf(millis), value);
 
         expire();
 
@@ -121,7 +121,7 @@ public class DataSet<T> {
         try {
 
             Long lastKey = dataSet.lastKey();
-            Long expireBefore = new Long(lastKey.longValue() - expirationInterval);
+            Long expireBefore = Long.valueOf(lastKey.longValue() - expirationInterval);
 
             SortedMap<Long, T> expireMap = dataSet.headMap(expireBefore);
 
@@ -177,7 +177,7 @@ public class DataSet<T> {
      */
     public final T get(final long time) {
 
-        T result = dataSet.get(new Long(time));
+        T result = dataSet.get(Long.valueOf(time));
 
         if (result == null) {
 
