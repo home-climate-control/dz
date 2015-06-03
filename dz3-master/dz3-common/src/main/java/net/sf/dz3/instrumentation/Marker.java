@@ -174,7 +174,7 @@ public class Marker {
         sb.append(": (");
     }
     
-    public void finalize() {
+    protected void finalize() {
         
         if (!closed) {
 
