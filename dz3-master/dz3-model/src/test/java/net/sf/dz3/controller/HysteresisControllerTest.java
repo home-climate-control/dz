@@ -11,6 +11,7 @@ import junit.framework.TestCase;
 public class HysteresisControllerTest extends TestCase {
     
     private final Logger logger = Logger.getLogger(getClass());
+    private final Random rg = new Random();
 
     @SuppressWarnings("unchecked")
     public void testController() {
@@ -48,8 +49,8 @@ public class HysteresisControllerTest extends TestCase {
 	NDC.push("testTimestamp");
 	
 	try {
-	
-	    long timestamp = System.currentTimeMillis() + new Random().nextInt();
+	    
+	    long timestamp = System.currentTimeMillis() + rg.nextInt();
 
 	    logger.info("Original timestamp: " + timestamp);
 
