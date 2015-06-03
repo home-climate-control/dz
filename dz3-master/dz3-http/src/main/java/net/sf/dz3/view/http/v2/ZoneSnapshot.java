@@ -114,6 +114,22 @@ public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
         return us.compareTo(them);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        
+        if (o == null) {
+            return false;
+        }
+        
+        return toString().equals(o.toString());
+    }
+    
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
     public String toString() {
 
         StringBuilder sb = new StringBuilder();
