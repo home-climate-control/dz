@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+
+    <!-- Any two instances of this are stateless, execute the same conversion algorithm and therefore are equal. -->
+    <Match>
+        <Class name="net.sf.dz3.device.sensor.impl.AnalogConverterLM34"/>
+        <Method name="equals" />
+        <Bug pattern="HE_EQUALS_USE_HASHCODE"/>
+    </Match>
+
+    <!-- Any two instances of this are stateless, execute the same conversion algorithm and therefore are equal. -->
+    <Match>
+        <Class name="net.sf.dz3.device.sensor.impl.AnalogConverterTMP36"/>
+        <Method name="equals" />
+        <Bug pattern="HE_EQUALS_USE_HASHCODE"/>
+    </Match>
+</FindBugsFilter>
