@@ -38,6 +38,8 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Enumeration;
 
+import org.apache.log4j.Logger;
+
 import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.utils.CRC16;
@@ -1356,13 +1358,16 @@ public class NetAdapterHost
       /**
        * Waits for handler to finish, with a timeout.
        */
-      public void stopHandler()
-      {
-         int i = 0;
-         int timeout = 3000;
-         while(handlerRunning && i++<timeout)
-            try{Thread.sleep(10);}catch(Exception e){;}
-      }
+        public void stopHandler() {
+            int i = 0;
+            int timeout = 3000;
+            while (handlerRunning && i++ < timeout)
+                try {
+                    Thread.sleep(10);
+                } catch (Exception ex) {
+                    Logger.getLogger(getClass()).warn("Oops", ex);
+                }
+        }
    }
 
    //--------

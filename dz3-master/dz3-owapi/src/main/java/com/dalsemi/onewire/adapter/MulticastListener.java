@@ -29,6 +29,8 @@ package com.dalsemi.onewire.adapter;
 import java.io.*;
 import java.net.*;
 
+import org.apache.log4j.Logger;
+
 /**
  * Generic Mulitcast broadcast listener.  Listens for a specific message and,
  * in response, gives the specified reply.  Used by NetAdapterHost for
@@ -161,12 +163,16 @@ public class MulticastListener implements Runnable
    /**
     * Waits for datagram listener to finish, with a timeout.
     */
-   public void stopListener()
-   {
-      listenerStopped = true;
-      int i = 0;
-      int timeout = timeoutInSeconds*100;
-      while(listenerRunning && i++<timeout)
-         try{Thread.sleep(10);}catch(Exception e){;}
-   }
+    public void stopListener() {
+        listenerStopped = true;
+        int i = 0;
+        int timeout = timeoutInSeconds * 100;
+        
+        while (listenerRunning && i++ < timeout)
+            try {
+                Thread.sleep(10);
+            } catch (Exception ex) {
+                Logger.getLogger(getClass()).warn("Oops", ex);
+            }
+    }
 }
