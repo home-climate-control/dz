@@ -73,7 +73,7 @@ public class DifferentialSet extends DataSet<Double> {
 
                 double diff = (currentValue - trailerValue) / (currentKey.longValue() - trailerKey.longValue());
 
-                resultSet.put(new Long(start + ((start + stop) / 2)), new Double(diff));
+                resultSet.put(Long.valueOf(start + ((start + stop) / 2)), Double.valueOf(diff));
 
                 trailerKey = currentKey;
             }
@@ -155,7 +155,7 @@ public class DifferentialSet extends DataSet<Double> {
 
               double diff = (currentValue - trailerValue) / (currentKey - trailerKey);
 
-              resultSet.put(new Long(start + ((start + stop) / 2)), new Double(diff));
+              resultSet.put(Long.valueOf(start + ((start + stop) / 2)), Double.valueOf(diff));
 
               trailerEntry = currentEntry;
           }
