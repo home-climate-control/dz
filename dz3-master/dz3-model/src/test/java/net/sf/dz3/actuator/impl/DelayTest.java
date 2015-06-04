@@ -59,20 +59,44 @@ public class DelayTest extends TestCase {
         }
     }
     
-    public void testDelay() {
+    /**
+     * Test the delay for fast[er] systems.
+     * 
+     * Any of these might fail on slow computers, or in slow (high load) environments. @Ignore them if this happens.
+     */
+    public void testDelayExact() {
+        
+        DelayedCommand c = new DelayedCommand(1000);
+        String message = "Delay mismatch, or slow system (@Ignore this test if it is)";
+        
+        assertEquals(message, 1000, c.getDelay(TimeUnit.MILLISECONDS));
+        assertEquals(message, 1, c.getDelay(TimeUnit.SECONDS));
+        assertEquals(message, 1000000, c.getDelay(TimeUnit.MICROSECONDS));
+        assertEquals(message, 1000000000, c.getDelay(TimeUnit.NANOSECONDS));
+    }
+    
+    /**
+     * Test the delay for slow[er] systems.
+     * 
+     * Any of these might fail on slow computers, or in slow (high load) environments. @Ignore them if this happens.
+     */
+    public void testDelaySlow() {
         
         DelayedCommand c = new DelayedCommand(1000);
         
-        // Any of these might fail on slow computers, or in slow environments
-        
-        assertEquals(1000, c.getDelay(TimeUnit.MILLISECONDS));
-        assertEquals(1, c.getDelay(TimeUnit.SECONDS));
-        assertEquals(1000000, c.getDelay(TimeUnit.MICROSECONDS));
-        
-        // This will fail when building on Raspberry Pi B+ with almost 100% probability, comment it out
-        assertEquals(1000000000, c.getDelay(TimeUnit.NANOSECONDS));
+        assertDelay(1000, c.getDelay(TimeUnit.MILLISECONDS));
+        assertDelay(1, c.getDelay(TimeUnit.SECONDS));
+        assertDelay(1000000, c.getDelay(TimeUnit.MICROSECONDS));
+        assertDelay(1000000000, c.getDelay(TimeUnit.NANOSECONDS));
     }
     
+    private void assertDelay(long expected, long actual) {
+        
+        if (expected < actual) {
+            fail("Delay mismatch (expected less than " + expected + ", actual" + actual + ")");
+        }
+    }
+
     public void testDelayQueue() throws InterruptedException {
         
         NDC.push("testDelayQueue");
