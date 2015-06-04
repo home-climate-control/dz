@@ -1,91 +1,86 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
-           
+
     <bean id="device_factory" class="net.sf.dz3.device.sensor.impl.onewire.OwapiDeviceFactory" init-method="start">
-		<constructor-arg index="0" value="/dev/ttyUSB0"/>    	
-		<constructor-arg index="1" value="regular"/>    	
+        <constructor-arg index="0" value="/dev/ttyUSB0" />
+        <constructor-arg index="1" value="regular" />
     </bean>
 
-  <bean id="onewire_monitor"
-        factory-bean="device_factory"
-        factory-method="getMonitor" />
-    
-	<bean id="temperature_sensor-6500000055FF1A26"
-		factory-bean="device_factory"
-		factory-method="getTemperatureSensor">
-		<constructor-arg value="6500000055FF1A26"/>
-	</bean>
-	
-	<bean id="pid_controller-6500000055FF1A26" class="net.sf.dz3.controller.pid.SimplePidController">
-		<!-- Setpoint -->
-		<constructor-arg index="0" value="25"/>
-		<!-- P -->
-		<constructor-arg index="1" value="1"/>
-		<!-- I -->
-		<constructor-arg index="2" value="0"/>
-		<!-- D -->
-		<constructor-arg index="3" value="0"/>
-		<!-- Saturation limit -->
-		<constructor-arg index="4" value="0"/>
-	</bean>
+    <bean id="onewire_monitor" factory-bean="device_factory" factory-method="getMonitor" />
 
-	<!-- Thermostat -->
-	<bean id="thermostat-6500000055FF1A26" class="net.sf.dz3.device.model.impl.ThermostatModel">
-		<constructor-arg index="0" value="6500000055FF1A26"/>
-		<constructor-arg index="1" ref="temperature_sensor-6500000055FF1A26"/>
-		<constructor-arg index="2" ref="pid_controller-6500000055FF1A26"/>
-	</bean>
-	
-	<!-- Zone controller -->
-	<bean id="zone_controller-6500000055FF1A26" class="net.sf.dz3.device.model.impl.SimpleZoneController">
-		<constructor-arg type="java.lang.String" value="zone controller"/>
-		<constructor-arg type="java.util.Set">
-			<set>
-				<ref bean="thermostat-6500000055FF1A26"/>
-			</set>
-		</constructor-arg>
-	</bean>
-	
-	<!-- Splitters -->
+    <bean id="temperature_sensor-6500000055FF1A26" factory-bean="device_factory" factory-method="getTemperatureSensor">
+        <constructor-arg value="6500000055FF1A26" />
+    </bean>
+
+    <bean id="pid_controller-6500000055FF1A26" class="net.sf.dz3.controller.pid.SimplePidController">
+        <!-- Setpoint -->
+        <constructor-arg index="0" value="25" />
+        <!-- P -->
+        <constructor-arg index="1" value="1" />
+        <!-- I -->
+        <constructor-arg index="2" value="0" />
+        <!-- D -->
+        <constructor-arg index="3" value="0" />
+        <!-- Saturation limit -->
+        <constructor-arg index="4" value="0" />
+    </bean>
+
+    <!-- Thermostat -->
+    <bean id="thermostat-6500000055FF1A26" class="net.sf.dz3.device.model.impl.ThermostatModel">
+        <constructor-arg index="0" value="6500000055FF1A26" />
+        <constructor-arg index="1" ref="temperature_sensor-6500000055FF1A26" />
+        <constructor-arg index="2" ref="pid_controller-6500000055FF1A26" />
+    </bean>
+
+    <!-- Zone controller -->
+    <bean id="zone_controller-6500000055FF1A26" class="net.sf.dz3.device.model.impl.SimpleZoneController">
+        <constructor-arg type="java.lang.String" value="zone controller" />
+        <constructor-arg type="java.util.Set">
+            <set>
+                <ref bean="thermostat-6500000055FF1A26" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <!-- Splitters -->
     <bean id="splitter-pid_controller-6500000055FF1A26" class="net.sf.dz3.controller.pid.PidControllerSignalSplitter">
-            <constructor-arg index="0" ref="pid_controller-6500000055FF1A26"/>
+        <constructor-arg index="0" ref="pid_controller-6500000055FF1A26" />
     </bean>
     <bean id="splitter-thermostat-6500000055FF1A26" class="net.sf.dz3.device.model.impl.ThermostatSignalSplitter">
-            <constructor-arg index="0" ref="thermostat-6500000055FF1A26"/>
+        <constructor-arg index="0" ref="thermostat-6500000055FF1A26" />
     </bean>
 
-	<!-- Loggers -->
-	<bean id="rrdtool" class="java.io.File">
-		<constructor-arg type="java.lang.String" value="/usr/bin/rrdtool"/>
-	</bean>
-	<bean id="rrdbase_onewire" class="java.io.File">
-		<constructor-arg type="java.lang.String" value="./rrd"/>
-	</bean>
-	<bean id="rrdlogger_onewire" class="net.sf.jukebox.datastream.logger.impl.rrd.RrdLogger" init-method="start">
-		<constructor-arg index="0" type="java.util.Set">
-			<set>
-				<ref bean="device_factory"/>
-				<ref bean="splitter-pid_controller-6500000055FF1A26"/>
-				<ref bean="splitter-thermostat-6500000055FF1A26"/>
-				<ref bean="zone_controller-6500000055FF1A26"/>
-			</set>
-		</constructor-arg>
-		<constructor-arg index="1" type="java.io.File" ref="rrdbase_onewire"/>
-		<constructor-arg index="2" type="java.io.File" ref="rrdtool"/>
-	</bean>
+    <!-- Loggers -->
+    <bean id="rrdtool" class="java.io.File">
+        <constructor-arg type="java.lang.String" value="/usr/bin/rrdtool" />
+    </bean>
+    <bean id="rrdbase_onewire" class="java.io.File">
+        <constructor-arg type="java.lang.String" value="./rrd" />
+    </bean>
+    <bean id="rrdlogger_onewire" class="net.sf.jukebox.datastream.logger.impl.rrd.RrdLogger" init-method="start">
+        <constructor-arg index="0" type="java.util.Set">
+            <set>
+                <ref bean="device_factory" />
+                <ref bean="splitter-pid_controller-6500000055FF1A26" />
+                <ref bean="splitter-thermostat-6500000055FF1A26" />
+                <ref bean="zone_controller-6500000055FF1A26" />
+            </set>
+        </constructor-arg>
+        <constructor-arg index="1" type="java.io.File" ref="rrdbase_onewire" />
+        <constructor-arg index="2" type="java.io.File" ref="rrdtool" />
+    </bean>
 
-	<!-- JMX configuration -->
-	<bean id="jmx-wrapper" class="net.sf.jukebox.jmx.JmxWrapper">
-		<constructor-arg index="0" type="java.util.Set">
-			<set>
-				<ref bean="device_factory"/>
-                <ref bean="onewire_monitor"/>
-				<ref bean="temperature_sensor-6500000055FF1A26"/>
-				<ref bean="thermostat-6500000055FF1A26"/>
-			</set>
-		</constructor-arg>
-	</bean>
+    <!-- JMX configuration -->
+    <bean id="jmx-wrapper" class="net.sf.jukebox.jmx.JmxWrapper">
+        <constructor-arg index="0" type="java.util.Set">
+            <set>
+                <ref bean="device_factory" />
+                <ref bean="onewire_monitor" />
+                <ref bean="temperature_sensor-6500000055FF1A26" />
+                <ref bean="thermostat-6500000055FF1A26" />
+            </set>
+        </constructor-arg>
+    </bean>
 </beans>
