@@ -47,10 +47,10 @@
     <scm>
         <connection>scm:svn:https://diy-zoning.svn.sourceforge.net/svnroot/diy-zoning</connection>
         <developerConnection>scm:svn:https://diy-zoning.svn.sourceforge.net/svnroot/diy-zoning</developerConnection>
-        <url>http://diy-zoning.svn.sourceforge.net/viewvc/diy-zoning/</url>
+        <url>https://github.com/home-climate-control/dz</url>
     </scm>
     <issueManagement>
-        <url>http://sourceforge.net/tracker/?group_id=52647</url>
+        <url>https://github.com/home-climate-control/dz/issues</url>
     </issueManagement>
     <repositories>
         <repository>
