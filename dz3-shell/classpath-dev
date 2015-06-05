@@ -23,7 +23,7 @@ COMMONS_HTTPCLIENT=${LIBDIR}/commons-httpclient/commons-httpclient/3.1/commons-h
 LOG4J=${LIBDIR}/log4j/log4j/1.2.16/log4j-1.2.16.jar
 SPRING=${LIBDIR}/org/springframework/spring/2.5.6/spring-2.5.6.jar
 GSON=${LIBDIR}/com/google/code/gson/gson/1.7.1/gson-1.7.1.jar
-XBEE_API=${LIBDIR}/com/rapplogic/xbeeapi/${XBEE_VERSION}/xbee-api-${VERSION}.jar
+XBEE_API=${LIBDIR}/com/rapplogic/xbeeapi/${XBEE_VERSION}/xbeeapi-${XBEE_VERSION}.jar
 
 DZ=${LIBDIR}/net/sf/dz3
 JUKEBOX=${LIBDIR}/net/sf/jukebox
