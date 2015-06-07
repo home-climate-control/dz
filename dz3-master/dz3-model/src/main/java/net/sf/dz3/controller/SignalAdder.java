@@ -119,11 +119,12 @@ public class SignalAdder extends LogAware implements DataSink<Double>, DataSourc
 
             double integral = 0;
 
-            for (Iterator<String> i = source2p.keySet().iterator(); i.hasNext(); ) {
+            for (Iterator<Entry<String, Double>> i = source2p.entrySet().iterator(); i.hasNext(); ) {
 
                 // This is safe because of the relation between EventSource and Source
-                String key = i.next();
-                p = source2p.get(key);
+                Entry<String, Double> entry = i.next();
+                String key = entry.getKey();
+                p = entry.getValue();
 
                 // Note, this is not the container we're iterating on
                 DataSample<Double> value = source2signal.get(key);
