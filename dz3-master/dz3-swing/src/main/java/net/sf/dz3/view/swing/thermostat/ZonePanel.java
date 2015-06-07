@@ -8,6 +8,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -80,10 +81,11 @@ public class ZonePanel extends JPanel implements KeyListener {
         
         SortedMap<Thermostat, JComponent> thermostatMap = new TreeMap<Thermostat, JComponent>();
 
-        for (Iterator<Object> i = componentMap.keySet().iterator(); i.hasNext(); ) {
+        for (Iterator<Entry<Object, JComponent>> i = componentMap.entrySet().iterator(); i.hasNext(); ) {
             
-            Object dataSource = i.next();
-            JComponent panel = componentMap.get(dataSource);
+            Entry<Object, JComponent> entry = i.next();
+            Object dataSource = entry.getKey();
+            JComponent panel = entry.getValue();
             
             // VT: FIXME: Extend this to all sensors
             
