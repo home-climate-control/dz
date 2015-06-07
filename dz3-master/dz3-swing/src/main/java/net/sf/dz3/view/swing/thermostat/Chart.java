@@ -258,6 +258,7 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
         g2d.setStroke(gridStroke);
 
         double valueOffset = 0;
+        double halfWidth = ((double) (boundary.width - insets.right - 1)) / 2d;
 
         for (valueOffset = valueSpacing; valueOffset < dataMax + padding; valueOffset += valueSpacing) {
 
@@ -268,11 +269,11 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
 
             drawGradientLine(g2d,
                     insets.left, gridY,
-                    (boundary.width - insets.right - 1) / 2, gridY,
+                    halfWidth, gridY,
                     Color.GRAY.darker().darker(), getBackground());
 
             drawGradientLine(g2d,
-                    (boundary.width - insets.right - 1) / 2, gridY,
+                    halfWidth, gridY,
                     boundary.width - insets.right - 1, gridY,
                     getBackground(), Color.GRAY.darker().darker());
         }
@@ -286,11 +287,11 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
 
             drawGradientLine(g2d,
                     insets.left, gridY,
-                    (boundary.width - insets.right - 1) / 2, gridY,
+                    halfWidth, gridY,
                     getBackground(), Color.GRAY.darker().darker());
 
             drawGradientLine(g2d,
-                    (boundary.width - insets.right - 1) / 2, gridY,
+                    halfWidth, gridY,
                     boundary.width - insets.right - 1, gridY,
                     getBackground(), Color.GRAY.darker().darker());
         }
