@@ -3,6 +3,7 @@ package net.sf.dz3.device.model.impl;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -140,13 +141,10 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
             logger.debug("Source: " + source);
             logger.debug("Signal: " + pv);
 
-            ThermostatSignal lastKnownStatus = lastKnownSignal.get(source);
-
-            if (lastKnownStatus == null) {
+            if (lastKnownSignal.get(source) == null) {
 
                 // Let's pretend the signal didn't change, this should trigger the downflow correctly
                 lastKnownSignal.put(source, pv);
-                lastKnownStatus = pv;
             }
 
             checkError(source, pv);
@@ -317,10 +315,10 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
             // Calculate demand for voting zones only for now
 
-            for (Iterator<Thermostat> i = unhappyVoting.keySet().iterator(); i.hasNext();) {
+            for (Iterator<Entry<Thermostat, ThermostatSignal>> i = unhappyVoting.entrySet().iterator(); i.hasNext();) {
 
-                Thermostat ts = i.next();
-                ThermostatSignal signal = unhappyVoting.get(ts);
+                Entry<Thermostat, ThermostatSignal> entry = i.next();
+                ThermostatSignal signal = entry.getValue();
 
                 demandVoting += signal.demand.sample;
             }
@@ -331,10 +329,10 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
             double demandTotal = 0;
 
-            for (Iterator<Thermostat> i = unhappy.keySet().iterator(); i.hasNext();) {
+            for (Iterator<Entry<Thermostat, ThermostatSignal>> i = unhappy.entrySet().iterator(); i.hasNext();) {
 
-                Thermostat ts = i.next();
-                ThermostatSignal signal = unhappy.get(ts);
+                Entry<Thermostat, ThermostatSignal> entry = i.next();
+                ThermostatSignal signal = entry.getValue();
 
                 demandTotal += signal.demand.sample;
             }
@@ -387,10 +385,13 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
         sb.append("unhappy: ").append(unhappy).append(", ");
         sb.append("unhappyVoting: ").append(unhappyVoting).append(", ");
-        sb.append(signal);
+        
+        synchronized (this) {
+            sb.append(signal);
+        }
     }
 
-    public DataSample<Double> getSignal() {
+    public synchronized DataSample<Double> getSignal() {
 
         return signal;
     }
