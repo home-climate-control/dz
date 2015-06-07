@@ -447,7 +447,7 @@ public class TcpSensorFactory extends PassiveService {
         }
     }
     
-    private class ReaderSignature extends TcpConnectionSignature {
+    private static class ReaderSignature extends TcpConnectionSignature {
         
         public final String remoteHost;
         
@@ -458,12 +458,6 @@ public class TcpSensorFactory extends PassiveService {
             this.remoteHost = remoteHost;
         }
 
-        @Override
-        public boolean equals(Object obj) {
-            
-            return toString().equals(obj);
-        }
-        
         protected void render(final StringBuilder sb) {
             
             sb.append("(").append(remoteHost).append(":").append(port);

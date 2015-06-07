@@ -14,9 +14,18 @@ public class TcpConnectionSignature implements Comparable<TcpConnectionSignature
     }
 
     @Override
-    public boolean equals(Object obj) {
-
-        return toString().equals(obj);
+    public final boolean equals(Object other) {
+        
+        if (other == null) {
+            return false;
+        }
+        
+        return toString().equals(other.toString());
+    }
+    
+    @Override
+    public final int hashCode() {
+        return toString().hashCode();
     }
 
     @Override
