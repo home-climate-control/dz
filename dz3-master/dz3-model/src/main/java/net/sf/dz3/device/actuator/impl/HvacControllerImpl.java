@@ -142,7 +142,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
      * {@inheritDoc}
      */
     @Override
-    public final HvacMode getMode() {
+    public final synchronized HvacMode getMode() {
         
         return state.sample.mode;
     }
