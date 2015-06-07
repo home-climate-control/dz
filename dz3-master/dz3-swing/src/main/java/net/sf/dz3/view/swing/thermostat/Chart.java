@@ -471,10 +471,10 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
         double valueAccumulator = 0;
         double tintAccumulator = 0;
 
-        for (Iterator<Long> i = buffer.keySet().iterator(); i.hasNext(); ) {
+        for (Iterator<Entry<Long, TintedValue>> i = buffer.entrySet().iterator(); i.hasNext(); ) {
 
-            Long timestamp = i.next();
-            TintedValue signal = buffer.get(timestamp);
+            Entry<Long, TintedValue> entry = i.next();
+            TintedValue signal = entry.getValue();
 
             valueAccumulator += signal.value;
             tintAccumulator += signal.tint;
