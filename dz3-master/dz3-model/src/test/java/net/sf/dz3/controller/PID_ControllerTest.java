@@ -160,9 +160,9 @@ public class PID_ControllerTest extends TestCase {
 		logger.debug("signal: " + signal + " @" + offset);
 		
 		if (offset < Ispan) {
-		    assertEquals(I * offset * delta + delta, signal.sample.doubleValue(), 0.00001);
+		    assertEquals(I * offset * delta + delta, signal.sample, 0.00001);
 		} else {
-		    assertEquals(limit, signal.sample.doubleValue());
+		    assertEquals(limit, signal.sample);
 		}
 	    }
 

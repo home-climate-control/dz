@@ -62,7 +62,7 @@ public class IntegralSetTest extends TestCase {
             for (int count = 0; count < COUNT; count++) {
 
                 timestamp += rg.nextInt(100);
-                double value = new Double(rg.nextDouble());
+                double value = rg.nextDouble();
 
                 dataSet.record(timestamp, value);
 
@@ -101,7 +101,7 @@ public class IntegralSetTest extends TestCase {
             for (int count = 0; count < COUNT; count++) {
 
                 now += rg.nextInt(100);
-                double value = new Double(rg.nextDouble());
+                double value = rg.nextDouble();
 
                 dataSet.record(now, value);
 
