@@ -138,14 +138,12 @@ public class SimpleZoneControllerTest extends TestCase {
      * 
      * The zone controller should stay off without exceptions when the first ever signal.
      */
-    public void testColdStartNotCaling() {
+    public void testColdStartNotCalling() {
         
         NDC.push("testColdStart");
         
         try {
         
-            long timestamp = 0;
-
             AbstractPidController c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
             AnalogSensor s1 = new NullSensor("address1", 0);
             Thermostat t1 = new ThermostatModel("ts1", s1, c1);
@@ -166,7 +164,7 @@ public class SimpleZoneControllerTest extends TestCase {
             logger.info("Zone controller: " + zc);
             
             {
-                t2.consume(new DataSample<Double>(timestamp++, "source", "signature", 20.0, null));
+                t2.consume(new DataSample<Double>(0, "source", "signature", 20.0, null));
                 assertFalse(t2.getSignal().calling);
                 
                 DataSample<Double> signal = zc.getSignal();
@@ -186,14 +184,12 @@ public class SimpleZoneControllerTest extends TestCase {
      * The zone controller should switch on when the first ever thermostat signal
      * indicates calling.
      */
-    public void testColdStartCaling() {
+    public void testColdStartCalling() {
         
         NDC.push("testColdStart");
         
         try {
         
-            long timestamp = 0;
-
             AbstractPidController c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
             AnalogSensor s1 = new NullSensor("address1", 0);
             Thermostat t1 = new ThermostatModel("ts1", s1, c1);
@@ -214,7 +210,7 @@ public class SimpleZoneControllerTest extends TestCase {
             logger.info("Zone controller: " + zc);
             
             {
-                t2.consume(new DataSample<Double>(timestamp++, "source", "signature", 30.0, null));
+                t2.consume(new DataSample<Double>(0, "source", "signature", 30.0, null));
                 assertTrue(t2.getSignal().calling);
                 
                 DataSample<Double> signal = zc.getSignal();
