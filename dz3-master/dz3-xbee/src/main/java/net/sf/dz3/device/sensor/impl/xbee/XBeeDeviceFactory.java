@@ -556,7 +556,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         }
     }
 
-    private class XBeeSingleSwitchProxy extends SingleSwitchProxy<XBeeSwitch> {
+    private static class XBeeSingleSwitchProxy extends SingleSwitchProxy<XBeeSwitch> {
         
         public XBeeSingleSwitchProxy(ContainerMap address2dcGlobal, StringChannelAddress address) {
             
