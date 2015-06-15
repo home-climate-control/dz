@@ -94,8 +94,6 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
         this.counter = counter;
         this.storageKeys = storageKeys;
         
-        logger.debug("storageKeys: " + storageKeys);
-        
         if (storageKeys != null) {
 
             logger.debug("storageKeys: " + storageKeys.length + " items");
@@ -103,6 +101,10 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
             for (int offset = 0; offset < storageKeys.length; offset++) {
                 logger.debug("storageKeys[" + offset + "]: " + storageKeys[offset]);
             }
+        
+        } else {
+            
+            logger.info("no storageKeys given");
         }
 
         CounterState state = load();
