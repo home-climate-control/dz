@@ -150,10 +150,8 @@ public class GCalScheduleUpdaterTest extends TestCase {
         
         logger.debug("String to parse: " + startString);
         
-        @SuppressWarnings("unused")
-        DateTime dtStart = DateTime.parseRfc3339(startString);
-        @SuppressWarnings("unused")
-        DateTime dtEnd = DateTime.parseRfc3339(endString);
+        DateTime.parseRfc3339(startString);
+        DateTime.parseRfc3339(endString);
         
         logger.debug("Parsed OK");
         
@@ -168,7 +166,7 @@ public class GCalScheduleUpdaterTest extends TestCase {
         }
     }
 
-    private class NullThermostat implements Thermostat {
+    private static class NullThermostat implements Thermostat {
 
         private final String name;
         
