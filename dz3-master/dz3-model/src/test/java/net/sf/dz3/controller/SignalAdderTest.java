@@ -79,7 +79,7 @@ public class SignalAdderTest extends TestCase {
 		}
     }
     
-    private class Sink implements DataSink<Double> {
+    private static class Sink implements DataSink<Double> {
 
         public DataSample<Double> lastKnownSignal;
         @Override
