@@ -141,7 +141,7 @@ public class DelayTest extends TestCase {
         }
     }
     
-    protected class Command implements Runnable {
+    protected static class Command implements Runnable {
 
         public final long delayMillis;
         private long startedAt;
