@@ -223,7 +223,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
 
             save();
 
-            dataBroadcaster.broadcast(new DataSample<Double>(name, signature, new Double(current), null));
+            dataBroadcaster.broadcast(new DataSample<Double>(name, signature, Double.valueOf(current), null));
 
             alert(threshold, current);
         
