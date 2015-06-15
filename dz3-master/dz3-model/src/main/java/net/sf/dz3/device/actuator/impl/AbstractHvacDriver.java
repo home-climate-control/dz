@@ -114,7 +114,7 @@ public abstract class AbstractHvacDriver extends LogAware implements HvacDriver 
                 "Pretends to be the actual HVAC driver");
     }
     
-    protected class HvacState {
+    protected static class HvacState {
         
         public HvacMode mode;
         public int stage;
