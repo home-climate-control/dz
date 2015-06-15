@@ -257,7 +257,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
     /**
      * Object to represent the counter state.
      */
-    protected class CounterState {
+    protected static class CounterState {
 
         /**
          * Currently set threshold.
