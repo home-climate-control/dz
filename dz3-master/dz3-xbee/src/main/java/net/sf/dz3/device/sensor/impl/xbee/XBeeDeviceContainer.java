@@ -3,6 +3,7 @@ package net.sf.dz3.device.sensor.impl.xbee;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.PrototypeContainer;
@@ -141,9 +142,10 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
         
         try {
             
-            for (Iterator<String> i = sensorMap.keySet().iterator(); i.hasNext(); ) {
+            for (Iterator<Entry<String, XBeeSensor>> i = sensorMap.entrySet().iterator(); i.hasNext(); ) {
 
-                String compositeAddress = i.next();
+                Entry<String, XBeeSensor> entry = i.next();
+                String compositeAddress = entry.getKey();
                 String channel = compositeAddress.substring(18);
                 Double value = sample.getChannel(channel);
                 
@@ -151,7 +153,7 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
                 
                 if (value != null) {
                     
-                    XBeeSensor sensor = sensorMap.get(compositeAddress);
+                    XBeeSensor sensor = entry.getValue();
                     
                     sensor.broadcast(now, value, null);
                 }
@@ -169,12 +171,11 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
         long now = System.currentTimeMillis();
         
         try {
-            
-            for (Iterator<String> i = sensorMap.keySet().iterator(); i.hasNext(); ) {
 
-                String compositeAddress = i.next();
-                
-                XBeeSensor sensor = sensorMap.get(compositeAddress);
+            for (Iterator<Entry<String, XBeeSensor>> i = sensorMap.entrySet().iterator(); i.hasNext(); ) {
+
+                Entry<String, XBeeSensor> entry = i.next();
+                XBeeSensor sensor = entry.getValue();
 
                 sensor.broadcast(now, null, t);
             }
