@@ -108,7 +108,7 @@ public class HttpConnector extends Connector<RestRenderer> {
         exchanger.stop();
     }
     
-    private class UpstreamBlockExchanger extends ImmediateExchanger<UpstreamBlock> {
+    private static class UpstreamBlockExchanger extends ImmediateExchanger<UpstreamBlock> {
 
         public UpstreamBlockExchanger(URL serverContextRoot, String username, String password, BlockingQueue<UpstreamBlock> upstreamQueue) {
 
