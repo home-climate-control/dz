@@ -60,7 +60,7 @@ public class BalancingDamperControllerTest extends TestCase {
         assertEquals("Wrong damper position", 0.0, d1.get(), 0.000000000001);
     }
 
-    private class DummyDamper implements Damper {
+    private static class DummyDamper implements Damper {
         
         private final String name;
         private Double currentPosition = null;
