@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -367,10 +368,11 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             
             long now = System.currentTimeMillis();
             
-            for (Iterator<String> i = lastSeen.keySet().iterator(); i.hasNext(); ) {
+            for (Iterator<Entry<String, Long>> i = lastSeen.entrySet().iterator(); i.hasNext(); ) {
                 
-                String address = i.next();
-                long age = now - lastSeen.get(address);
+                Entry<String, Long> entry = i.next();
+                String address = entry.getKey();
+                long age = now - entry.getValue();
                 
                 if (age > staleAgeMillis) {
                     
