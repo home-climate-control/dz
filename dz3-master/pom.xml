@@ -183,12 +183,15 @@
             <!-- use mvn cobertura:cobertura to generate cobertura reports -->
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>cobertura-maven-plugin</artifactId>
-            <version>2.4</version>
+            <version>2.6</version>
             <configuration>
                 <formats>
                     <format>html</format>
                     <format>xml</format>
                 </formats>
+                <instrumentation>
+                    <ignoreTrivial>true</ignoreTrivial>
+                </instrumentation>
             </configuration>
         </plugin>
     </plugins>
