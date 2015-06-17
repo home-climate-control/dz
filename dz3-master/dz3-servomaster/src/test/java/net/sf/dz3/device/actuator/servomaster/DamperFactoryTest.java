@@ -12,8 +12,7 @@ public class DamperFactoryTest extends TestCase {
         
         try {
 
-            @SuppressWarnings("unused")
-            DamperFactory df = new DamperFactory("badClass", null);
+            new DamperFactory("badClass", null);
             fail("Should've thrown an exception already");
             
         } catch (IllegalArgumentException ex) {
@@ -26,8 +25,7 @@ public class DamperFactoryTest extends TestCase {
         
         try {
 
-            @SuppressWarnings("unused")
-            DamperFactory df = new DamperFactory("java.lang.String", null);
+            new DamperFactory("java.lang.String", null);
             fail("Should've thrown an exception already");
             
         } catch (IllegalArgumentException ex) {
