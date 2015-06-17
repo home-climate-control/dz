@@ -145,7 +145,7 @@ public class ServoDamper extends AbstractDamper {
         
         try {
 
-            if ( servo.getPosition() != throttle ) {
+            if (Double.compare(servo.getPosition(), throttle) != 0) {
 
                 logger.debug(servo.getName() + ": " + throttle);
             }
