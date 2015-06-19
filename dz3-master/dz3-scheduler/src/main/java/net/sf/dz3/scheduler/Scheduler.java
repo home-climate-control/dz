@@ -142,6 +142,8 @@ public class Scheduler implements Runnable, JmxAware {
     
     /**
      * This method is to be executed every {@link #getScheduleGranularity()} milliseconds.
+     * 
+     * VT: FIXME: It is a bad idea to have this method exposed, need to move the whole thing into an inner class after the test coverage is sufficient
      */
     public void run() {
         
