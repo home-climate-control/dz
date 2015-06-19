@@ -18,6 +18,9 @@ import net.sf.dz3.device.model.impl.ZoneStatusImpl;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.jmx.JmxDescriptor;
+import net.sf.jukebox.sem.ACT;
+import net.sf.jukebox.sem.EventSemaphore;
+import net.sf.jukebox.service.StoppableService;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -25,7 +28,7 @@ import org.apache.log4j.NDC;
 /**
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
-public class Scheduler implements Runnable, JmxAware {
+public class Scheduler implements Runnable, StoppableService, JmxAware {
 
     private final Logger logger = Logger.getLogger(getClass());
     private final static DecimalFormat df = new DecimalFormat("#0.0###;-#0.0###");
@@ -107,10 +110,11 @@ public class Scheduler implements Runnable, JmxAware {
      * Start with default delay.
      * 
      * This method needs to be called in order for the scheduler to start functioning.
+     * @return 
      * 
      * @see #start(long)
      */
-    public void start() {
+    public EventSemaphore start() {
 
         // There has to be some initial delay to let sensors settle,
         // otherwise there'll be NullPointerExceptions everywhere
@@ -118,7 +122,7 @@ public class Scheduler implements Runnable, JmxAware {
         // VT: FIXME: I don't like the statement above, it suggest flakiness. Let's see
         // if this restriction can be removed.
 
-        start(10000);
+        return start(10000);
     }
 
     /**
@@ -130,11 +134,58 @@ public class Scheduler implements Runnable, JmxAware {
      * 
      * @see #start()
      */
-    public void start(long initialDelayMillis) {
+    public EventSemaphore start(long initialDelayMillis) {
         
         logger.warn("VT: FIXME: Synchronize to the minute boundary");
         
         scheduler.scheduleAtFixedRate(this, initialDelayMillis, getScheduleGranularity(), TimeUnit.MILLISECONDS);
+
+        // We're cheating, for simplicity
+        
+        ACT started = new ACT();
+        
+        started.post();
+        
+        return started;
+    }
+    
+    /**
+     * Stop the scheduler.
+     * 
+     * @return
+     */
+    public EventSemaphore stop() {
+        
+        NDC.push("stop");
+        
+        try {
+            
+            logger.info("stopping");
+
+            scheduler.shutdown();
+            
+            try {
+            
+                scheduler.awaitTermination(10000, TimeUnit.MILLISECONDS);
+                
+            } catch (InterruptedException ex) {
+                
+                logger.warn("Failed to shut down the scheduler cleanly", ex);
+            }
+            
+            logger.info("stopped");
+
+            // We're cheating, for simplicity
+            
+            ACT stopped = new ACT();
+            
+            stopped.post();
+            
+            return stopped;
+            
+        } finally {
+            NDC.pop();
+        }
     }
     
     /**

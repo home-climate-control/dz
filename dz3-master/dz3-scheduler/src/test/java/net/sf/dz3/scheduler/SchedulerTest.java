@@ -125,4 +125,30 @@ public class SchedulerTest extends TestCase {
             NDC.pop();
         }
     }
+
+    public void testStartStop() {
+        
+        NDC.push("testStartStop");
+        
+        try {
+
+            Scheduler s = new Scheduler();
+            
+            s.setScheduleGranularity(50);
+            
+            // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped 
+            s.start(0);
+            
+            Thread.sleep(100);
+            
+            s.stop();
+
+        } catch (InterruptedException ex) {
+
+            throw new IllegalStateException(ex);
+            
+        } finally {
+            NDC.pop();
+        }
+    }
 }
