@@ -98,19 +98,39 @@ public class Scheduler implements Runnable, JmxAware {
     }
 
     /**
+     * Start with default delay.
+     * 
      * This method needs to be called in order for the scheduler to start functioning.
+     * 
+     * @see #start(long)
      */
     public void start() {
 
-        logger.warn("VT: FIXME: Synchronize to the minute boundary");
-        
         // There has to be some initial delay to let sensors settle,
         // otherwise there'll be NullPointerExceptions everywhere
         
         // VT: FIXME: I don't like the statement above, it suggest flakiness. Let's see
         // if this restriction can be removed.
-        scheduler.scheduleAtFixedRate(this, 10000, getScheduleGranularity(), TimeUnit.MILLISECONDS);
+
+        start(10000);
     }
+
+    /**
+     * Start with a given initial delay.
+     * 
+     * This method needs to be called in order for the scheduler to start functioning.
+     * 
+     * @param initialDelayMillis Initial delay.
+     * 
+     * @see #start()
+     */
+    public void start(long initialDelayMillis) {
+        
+        logger.warn("VT: FIXME: Synchronize to the minute boundary");
+        
+        scheduler.scheduleAtFixedRate(this, initialDelayMillis, getScheduleGranularity(), TimeUnit.MILLISECONDS);
+    }
+    
     /**
      * @return Schedule check and execution granularity, in milliseconds.
      */
