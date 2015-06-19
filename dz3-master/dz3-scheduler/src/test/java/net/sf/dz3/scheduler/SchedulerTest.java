@@ -47,6 +47,33 @@ public class SchedulerTest extends TestCase {
         new Scheduler(updater, null);
     }
     
+    public void testGranularity() {
+        
+        Scheduler s = new Scheduler();
+        
+        // This should be fine
+        s.setScheduleGranularity(1);
+        
+        try {
+
+            // but this is not
+            s.setScheduleGranularity(0);
+
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Wrong exception message", "0: value doesn't make sense", ex.getMessage());
+        }
+
+        long value = -1 * Math.abs(rg.nextLong());
+
+        try {
+            // and neither is this
+            s.setScheduleGranularity(value);
+
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Wrong exception message", value + ": value doesn't make sense", ex.getMessage());
+        }
+    }
+    
     /**
      * Test the no-argument {@link Scheduler#start()} method.
      */
