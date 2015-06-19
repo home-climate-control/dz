@@ -65,9 +65,9 @@ public class SchedulerTest extends TestCase {
         }
     }
 
-    public void testStartStop() {
+    public void testFastStart() {
         
-        NDC.push("testStartStop");
+        NDC.push("testFastStart");
         
         try {
 
@@ -75,6 +75,8 @@ public class SchedulerTest extends TestCase {
                 
                 @Override
                 public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+                    
+                    // Bad implementation, but shouldn't break anything
                     return null;
                 }
             };
@@ -82,6 +84,8 @@ public class SchedulerTest extends TestCase {
             Scheduler s = new Scheduler(u);
             
             s.setScheduleGranularity(50);
+            
+            // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped 
             s.start(0);
             
             Thread.sleep(100);
