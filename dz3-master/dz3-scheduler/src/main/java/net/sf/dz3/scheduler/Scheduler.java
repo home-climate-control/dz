@@ -217,7 +217,9 @@ public class Scheduler implements Runnable, JmxAware {
                 
                 // Third party developers may want to implement different schedule updaters,
                 // and even though the design contract requires not to return null,
-                // they might
+                // they might.
+                
+                // Note that this exception doesn't break the whole scheduler because it runs asynchronously.
                 
                 throw new IllegalStateException("Bad updater implementation returned null");
             }
