@@ -6,6 +6,8 @@ import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.log4j.NDC;
+
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneStatus;
 import net.sf.dz3.scheduler.Scheduler.Deviation;
@@ -50,15 +52,31 @@ public class SchedulerTest extends TestCase {
      */
     public void testStart() {
         
-        Scheduler s = new Scheduler();
+        NDC.push("testStart");
         
-        s.start();
+        try {
+        
+            Scheduler s = new Scheduler();
+            
+            s.start();
+            
+        } finally {
+            NDC.pop();
+        }
     }
 
     public void testStartStop() {
         
-        Scheduler s = new Scheduler();
+        NDC.push("testStartStop");
         
-        s.start(0);
+        try {
+        
+            Scheduler s = new Scheduler();
+            
+            s.start(0);
+
+        } finally {
+            NDC.pop();
+        }
     }
 }
