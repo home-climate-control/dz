@@ -132,7 +132,7 @@ public class Scheduler implements Runnable, JmxAware {
     }
     
     /**
-     * @return Schedule check and execution granularity, in milliseconds.
+     * @return Schedule check and execution granularity, in milliseconds. Currently, hardcoded to one minute.
      */
     @JmxAttribute(description = "Schedule check and execution granularity, in milliseconds")
     public long getScheduleGranularity() {
