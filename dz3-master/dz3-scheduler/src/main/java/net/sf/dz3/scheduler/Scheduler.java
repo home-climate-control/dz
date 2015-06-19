@@ -22,8 +22,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 /**
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class Scheduler implements Runnable, JmxAware {
 
@@ -107,6 +106,9 @@ public class Scheduler implements Runnable, JmxAware {
         
         // There has to be some initial delay to let sensors settle,
         // otherwise there'll be NullPointerExceptions everywhere
+        
+        // VT: FIXME: I don't like the statement above, it suggest flakiness. Let's see
+        // if this restriction can be removed.
         scheduler.scheduleAtFixedRate(this, 10000, getScheduleGranularity(), TimeUnit.MILLISECONDS);
     }
     /**
