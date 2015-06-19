@@ -1,16 +1,5 @@
 package net.sf.dz3.device.sensor.impl.tcp.server;
 
-import net.sf.dz3.device.sensor.impl.tcp.TcpConnectionSignature;
-import net.sf.dz3.util.SSLContextFactory;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.sem.MutexSemaphore;
-import net.sf.jukebox.sem.SemaphoreGroup;
-import net.sf.jukebox.service.ActiveService;
-import net.sf.jukebox.service.PassiveService;
-import net.sf.jukebox.util.network.HostHelper;
-
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLServerSocket;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -23,6 +12,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Semaphore;
+
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLServerSocket;
+
+import net.sf.dz3.device.sensor.impl.tcp.TcpConnectionSignature;
+import net.sf.dz3.util.SSLContextFactory;
+import net.sf.jukebox.jmx.JmxAttribute;
+import net.sf.jukebox.sem.SemaphoreGroup;
+import net.sf.jukebox.service.ActiveService;
+import net.sf.jukebox.service.PassiveService;
+import net.sf.jukebox.util.network.HostHelper;
 
 /**
  * The TCP connection listener.
@@ -66,7 +67,7 @@ public abstract class AbstractListener extends PassiveService {
      * Exclusive lock to avoid race conditions between {@link #cleanup
      * cleanup()} and new connections.
      */
-    private MutexSemaphore cleanupLock = new MutexSemaphore();
+    private Semaphore cleanupLock = new Semaphore(1);
 
     /*
      * The multicast server.
@@ -464,7 +465,7 @@ public abstract class AbstractListener extends PassiveService {
 
                 try {
 
-                    cleanupLock.waitFor();
+                    cleanupLock.acquire();
 
                     BufferedReader br = new BufferedReader(new InputStreamReader(s.getInputStream()));
                     PrintWriter pw = new PrintWriter(s.getOutputStream());
@@ -766,7 +767,7 @@ public abstract class AbstractListener extends PassiveService {
 
                     try {
 
-                        cleanupLock.waitFor();
+                        cleanupLock.acquire();
 
                         cleanup();
 
