@@ -81,10 +81,10 @@ public class SchedulerTest extends TestCase {
             
             Scheduler s = new Scheduler(u);
             
-            s.setScheduleGranularity(100);
+            s.setScheduleGranularity(50);
             s.start(0);
             
-            Thread.sleep(200);
+            Thread.sleep(100);
 
         } catch (InterruptedException ex) {
 
