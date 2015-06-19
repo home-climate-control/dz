@@ -35,6 +35,11 @@ public class Scheduler implements Runnable, JmxAware {
     private final ScheduleUpdater updater;
     
     /**
+     * Schedule check and execution granularity, in milliseconds.
+     */
+    private long scheduleGranularityMillis = 60 * 1000; 
+    
+    /**
      * The schedule.
      */
     private final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
@@ -133,12 +138,28 @@ public class Scheduler implements Runnable, JmxAware {
     }
     
     /**
-     * @return Schedule check and execution granularity, in milliseconds. Currently, hardcoded to one minute.
+     * @return {@link #scheduleGranularityMillis}.
      */
     @JmxAttribute(description = "Schedule check and execution granularity, in milliseconds")
     public long getScheduleGranularity() {
         
-        return 60 * 1000;
+        return scheduleGranularityMillis;
+    }
+    
+    /**
+     * @param scheduleGranularityMillis Schedule granularity, in milliseconds.
+     */
+    public void setScheduleGranularity(long scheduleGranularityMillis) {
+        
+        if (scheduleGranularityMillis <= 0) {
+        
+            throw new IllegalArgumentException(scheduleGranularityMillis + ": value doesn't make sense");
+        }
+        
+        // VT: FIXME: Currently, this will not be honored if invoked after the scheduler is started.
+        // Good enough for testing purposes.
+        
+        this.scheduleGranularityMillis = scheduleGranularityMillis;
     }
     
     /**
