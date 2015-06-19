@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 import java.util.EmptyStackException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
@@ -226,10 +227,11 @@ public class Scheduler implements Runnable, JmxAware {
             
             long now = System.currentTimeMillis(); 
             
-            for (Iterator<Thermostat> i = schedule.keySet().iterator(); i.hasNext(); ) {
+            for (Iterator<Entry<Thermostat, SortedMap<Period, ZoneStatus>>> i = schedule.entrySet().iterator(); i.hasNext(); ) {
                 
-                Thermostat ts = i.next();
-                SortedMap<Period, ZoneStatus> zoneSchedule = schedule.get(ts);
+                Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = i.next();
+                Thermostat ts = entry.getKey();
+                SortedMap<Period, ZoneStatus> zoneSchedule = entry.getValue();
                 
                 try {
 
