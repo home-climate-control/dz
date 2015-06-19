@@ -22,9 +22,26 @@ public class SchedulerTest extends TestCase {
             }
         };
         
-        Scheduler s1 = new Scheduler();
-        Scheduler s2 = new Scheduler(schedule);
-        Scheduler s3 = new Scheduler(updater);
-        Scheduler s4 = new Scheduler(updater, null);
+        new Scheduler();
+        new Scheduler(schedule);
+        new Scheduler(updater);
+        new Scheduler(updater, null);
+    }
+    
+    /**
+     * Test the no-argument {@link Scheduler#start()} method.
+     */
+    public void testStart() {
+        
+        Scheduler s = new Scheduler();
+        
+        s.start();
+    }
+
+    public void testStartStop() {
+        
+        Scheduler s = new Scheduler();
+        
+        s.start(0);
     }
 }
