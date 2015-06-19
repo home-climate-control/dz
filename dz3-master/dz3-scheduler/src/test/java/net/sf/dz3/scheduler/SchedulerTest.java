@@ -70,11 +70,25 @@ public class SchedulerTest extends TestCase {
         NDC.push("testStartStop");
         
         try {
-        
-            Scheduler s = new Scheduler();
+
+            ScheduleUpdater u = new ScheduleUpdater() {
+                
+                @Override
+                public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+                    return null;
+                }
+            };
+            
+            Scheduler s = new Scheduler(u);
             
             s.start(0);
+            
+            Thread.sleep(65 *1000);
 
+        } catch (InterruptedException ex) {
+
+            throw new IllegalStateException(ex);
+            
         } finally {
             NDC.pop();
         }
