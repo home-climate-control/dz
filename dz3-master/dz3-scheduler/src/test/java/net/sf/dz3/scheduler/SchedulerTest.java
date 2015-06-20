@@ -674,9 +674,11 @@ public class SchedulerTest extends TestCase {
             
             s.execute(schedule, cal.getTimeInMillis());
 
-            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 22, false, false, cal.getTimeInMillis());
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
+            assertEquals("Wrong enabled deviation ", false, d.enabled);
+            assertEquals("Wrong voting deviation ", false, d.voting);
         }
         
         {
@@ -688,6 +690,8 @@ public class SchedulerTest extends TestCase {
             Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
 
             assertEquals("Wrong setpoint deviation ", -2.5, d.setpoint);
+            assertEquals("Wrong enabled deviation ", false, d.enabled);
+            assertEquals("Wrong voting deviation ", false, d.voting);
         }
         
         {
@@ -701,6 +705,8 @@ public class SchedulerTest extends TestCase {
             Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
+            assertEquals("Wrong enabled deviation ", false, d.enabled);
+            assertEquals("Wrong voting deviation ", false, d.voting);
         }
         
         {
@@ -709,9 +715,11 @@ public class SchedulerTest extends TestCase {
 
             s.execute(schedule, cal.getTimeInMillis());
 
-            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 22, true, false, cal.getTimeInMillis());
 
             assertEquals("Wrong setpoint deviation ", -2.8, d.setpoint, 0.0001);
+            assertEquals("Wrong enabled deviation ", false, d.enabled);
+            assertEquals("Wrong voting deviation ", true, d.voting);
         }
 
         {
@@ -720,11 +728,25 @@ public class SchedulerTest extends TestCase {
 
             s.execute(schedule, cal.getTimeInMillis());
 
+            Deviation d = s.getDeviation(ts, 24.8, false, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
+            assertEquals("Wrong enabled deviation ", true, d.enabled);
+            assertEquals("Wrong voting deviation ", false, d.voting);
+        }
+
+        {
+            cal.set(Calendar.HOUR_OF_DAY, 22);
+            cal.set(Calendar.MINUTE, 0);
+
+            s.execute(schedule, cal.getTimeInMillis());
+
             Deviation d = s.getDeviation(ts, 24.8, true, true, cal.getTimeInMillis());
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
+            assertEquals("Wrong enabled deviation ", false, d.enabled);
+            assertEquals("Wrong voting deviation ", false, d.voting);
         }
-
         {
             // No period is present at this time
             
