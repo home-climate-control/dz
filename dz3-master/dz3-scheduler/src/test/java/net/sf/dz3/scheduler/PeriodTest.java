@@ -13,7 +13,29 @@ public class PeriodTest extends TestCase {
     private static final long TWO_FIFTEEN = 2 * 1000 * 60 * 60 + 15 * 1000 * 60;
     private static final long FOURTEEN_FIFTEEN = 14 * 1000 * 60 * 60 + 15 * 1000 * 60;
     
-    public void testNull() {
+    public void testNullName() {
+        
+        try {
+            
+        new Period(null, "02:15", "02:20", "       ");
+        
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Wrong exception message", "name can't be null or empty", ex.getMessage());
+        }
+    }
+    
+    public void testEmptyName() {
+        
+        try {
+            
+        new Period("", "02:15", "02:20", "       ");
+        
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Wrong exception message", "name can't be null or empty", ex.getMessage());
+        }
+    }
+    
+    public void testNullDays() {
         
         try {
             
