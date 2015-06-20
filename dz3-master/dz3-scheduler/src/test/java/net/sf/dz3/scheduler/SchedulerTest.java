@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.Semaphore;
 
+import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import net.sf.dz3.device.model.Thermostat;
@@ -15,6 +17,7 @@ import junit.framework.TestCase;
 
 public class SchedulerTest extends TestCase {
     
+    private final Logger logger = Logger.getLogger(getClass());
     private final Random rg = new Random();
     
     public void testDeviation() {
@@ -102,7 +105,7 @@ public class SchedulerTest extends TestCase {
                 
                 @Override
                 public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
-                    
+
                     // Bad implementation, but shouldn't break anything
                     return null;
                 }
@@ -131,16 +134,60 @@ public class SchedulerTest extends TestCase {
         NDC.push("testStartStop");
         
         try {
+            
+            final Semaphore syncLock = new Semaphore(1);
 
-            Scheduler s = new Scheduler();
+            ScheduleUpdater u = new ScheduleUpdater() {
+                
+                @Override
+                public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+                    
+                    NDC.push("update");
+                    
+                    try {
+                        
+                        logger.info("started");
+                        
+                        syncLock.acquire();
+                        
+                        logger.info("got the lock");
+
+                        // This timeout should be longer than the run timeout so we can test the stop() properly
+                        Thread.sleep(200);
+                        
+                        logger.info("done");
+                        
+                        return new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+
+                    } catch (InterruptedException ex) {
+                     
+                        logger.info("Interrupted", ex);
+                        return null;
+                        
+                    } finally {
+                        NDC.pop();
+                    }
+                }
+            };
+            
+            Scheduler s = new Scheduler(u);
             
             s.setScheduleGranularity(50);
+
+            // Acquire the lock so update() will wait until it is released
             
-            // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped 
+            syncLock.acquire();
             s.start(0);
             
+            // Wait for a bit so update() has a chance to run
             Thread.sleep(100);
             
+            logger.info("releasing the lock");
+            syncLock.release();
+            
+            // Wait for a bit so update() has a chance to acquire the lock and start waiting
+            Thread.sleep(50);
+
             s.stop();
 
         } catch (InterruptedException ex) {
