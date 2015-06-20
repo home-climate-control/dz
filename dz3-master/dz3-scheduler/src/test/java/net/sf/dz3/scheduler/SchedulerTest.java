@@ -618,7 +618,7 @@ public class SchedulerTest extends TestCase {
         
         try {
             
-            final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = renderSchedule1();
+            final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = renderSchedule3();
             
             ScheduleUpdater u = new ScheduleUpdater() {
                 
@@ -670,24 +670,15 @@ public class SchedulerTest extends TestCase {
         Thermostat ts = entry.getKey();
                 
         {
+            // No period is present at this time
+            
             s.execute(schedule, cal.getTimeInMillis());
 
             Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
 
-            assertEquals("Wrong setpoint deviation ", -3.0, d.setpoint);
+            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
         }
         
-        {
-            cal.set(Calendar.HOUR_OF_DAY, 8);
-            cal.set(Calendar.MINUTE, 30);
-
-            s.execute(schedule, cal.getTimeInMillis());
-
-            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
-
-            assertEquals("Wrong setpoint deviation ", -2.5, d.setpoint);
-        }
-
         {
             cal.set(Calendar.HOUR_OF_DAY, 9);
             cal.set(Calendar.MINUTE, 0);
@@ -696,18 +687,20 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
 
-            assertEquals("Wrong setpoint deviation ", -8.0, d.setpoint);
+            assertEquals("Wrong setpoint deviation ", -2.5, d.setpoint);
         }
         
         {
-            cal.set(Calendar.HOUR_OF_DAY, 10);
+            // No period is present at this time
+            
+            cal.set(Calendar.HOUR_OF_DAY, 12);
             cal.set(Calendar.MINUTE, 0);
 
             s.execute(schedule, cal.getTimeInMillis());
 
             Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
 
-            assertEquals("Wrong setpoint deviation ", -8.0, d.setpoint);
+            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
         }
         
         {
@@ -731,6 +724,20 @@ public class SchedulerTest extends TestCase {
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
         }
+
+        {
+            // No period is present at this time
+            
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 0);
+
+            s.execute(schedule, cal.getTimeInMillis());
+
+            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
+        }
+        
     }
 
     private static class NullThermostat implements Thermostat {
