@@ -10,8 +10,30 @@ import junit.framework.TestCase;
 
 public class PeriodTest extends TestCase {
     
-    private final long TWO_FIFTEEN = 2 * 1000 * 60 * 60 + 15 * 1000 * 60;
-    private final long FOURTEEN_FIFTEEN = 14 * 1000 * 60 * 60 + 15 * 1000 * 60;
+    private static final long TWO_FIFTEEN = 2 * 1000 * 60 * 60 + 15 * 1000 * 60;
+    private static final long FOURTEEN_FIFTEEN = 14 * 1000 * 60 * 60 + 15 * 1000 * 60;
+    
+    public void testNull() {
+        
+        try {
+            
+        new Period("period", "02:15", "02:20", null);
+        
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Wrong exception message", "days argument malformed, see source code for instructions", ex.getMessage());
+        }
+    }
+    
+    public void testNot7() {
+        
+        try {
+            
+        new Period("period", "02:15", "02:20", "");
+        
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Wrong exception message", "days argument malformed, see source code for instructions", ex.getMessage());
+        }
+    }
     
     public void testTwoFifteen() {
         
