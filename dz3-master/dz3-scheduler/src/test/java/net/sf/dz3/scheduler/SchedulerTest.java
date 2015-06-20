@@ -11,8 +11,13 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneStatus;
+import net.sf.dz3.device.model.impl.ZoneStatusImpl;
 import net.sf.dz3.scheduler.Scheduler.Deviation;
+import net.sf.jukebox.datastream.signal.model.DataSample;
+import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.jukebox.jmx.JmxDescriptor;
 import junit.framework.TestCase;
 
 public class SchedulerTest extends TestCase {
@@ -234,4 +239,173 @@ public class SchedulerTest extends TestCase {
         }
     }
 
+    public void testExecute() {
+        
+        NDC.push("testExecute");
+        
+        try {
+            
+            final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+            Thermostat t = new NullThermostat("thermostat");
+
+            Period pNight = new Period("night", "0:00", "9:00", ".......");
+            ZoneStatus zsNight = new ZoneStatusImpl(25.0, 0, true, true);
+
+            Period pMorning = new Period("night", "8:00", "10:00", ".......");
+            ZoneStatus zsMorning = new ZoneStatusImpl(24.5, 0, true, true);
+
+            Period pDay = new Period("night", "9:00", "21:00", ".......");
+            ZoneStatus zsDay = new ZoneStatusImpl(30, 0, true, true);
+
+            Period pEvening = new Period("night", "18:00", "23:59", ".......");
+            ZoneStatus zsEvening = new ZoneStatusImpl(24.8, 0, true, true);
+            
+            SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
+            
+            periods.put(pNight, zsNight);
+            periods.put(pMorning, zsMorning);
+            periods.put(pDay, zsDay);
+            periods.put(pEvening, zsEvening);
+            
+            schedule.put(t, periods);
+
+            ScheduleUpdater u = new ScheduleUpdater() {
+                
+                @Override
+                public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+
+                    return schedule;
+                }
+            };
+            
+            Scheduler s = new Scheduler(u);
+            
+            s.setScheduleGranularity(50);
+            
+            // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped 
+            s.start(0);
+            
+            Thread.sleep(50);
+            
+            s.stop();
+
+        } catch (InterruptedException ex) {
+
+            throw new IllegalStateException(ex);
+            
+        } finally {
+            NDC.pop();
+        }
+    }
+    
+    private static class NullThermostat implements Thermostat {
+
+        private final String name;
+        
+        public NullThermostat(String name) {
+            
+            this.name = name;
+        }
+
+        @Override
+        public String getName() {
+
+            return name;
+        }
+
+        @Override
+        public double getSetpoint() {
+            // Inconsequential for the test case
+            return 0;
+        }
+
+        @Override
+        public ThermostatSignal getSignal() {
+            // Inconsequential for the test case
+            return null;
+        }
+
+        @Override
+        public void raise() {
+            // Inconsequential for the test case
+
+        }
+
+        @Override
+        public void set(ZoneStatus status) {
+            // Inconsequential for the test case
+
+        }
+
+        @Override
+        public double getControlSignal() {
+            // Inconsequential for the test case
+            return 0;
+        }
+
+        @Override
+        public boolean isError() {
+            // Inconsequential for the test case
+            return false;
+        }
+
+        @Override
+        public boolean isOnHold() {
+            // Inconsequential for the test case
+            return false;
+        }
+
+        @Override
+        public int getDumpPriority() {
+            // Inconsequential for the test case
+            return 0;
+        }
+
+        @Override
+        public boolean isOn() {
+            // Inconsequential for the test case
+            return false;
+        }
+
+        @Override
+        public boolean isVoting() {
+            // Inconsequential for the test case
+            return false;
+        }
+
+        @Override
+        public void consume(DataSample<Double> signal) {
+            // Inconsequential for the test case
+
+        }
+
+        @Override
+        public void addConsumer(DataSink<ThermostatSignal> consumer) {
+            // Inconsequential for the test case
+
+        }
+
+        @Override
+        public void removeConsumer(DataSink<ThermostatSignal> consumer) {
+            // Inconsequential for the test case
+
+        }
+
+        @Override
+        public int compareTo(Thermostat o) {
+            
+            return getName().compareTo(o.getName());
+        }
+
+        @Override
+        public JmxDescriptor getJmxDescriptor() {
+            // Inconsequential for the test case
+            return null;
+        }
+        
+        public String toString() {
+            
+            return getName();
+        }
+    }
 }
