@@ -34,7 +34,6 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
     private final static DecimalFormat df = new DecimalFormat("#0.0###;-#0.0###");
     
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private final PeriodMatcher periodMatcher = new PeriodMatcher();
     private final ScheduleUpdater updater;
     
     /**
@@ -340,6 +339,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             
             try {
             
+                PeriodMatcher periodMatcher = new PeriodMatcher();
                 Period p = periodMatcher.match(zoneSchedule, time);
                 ZoneStatus status = zoneSchedule.get(p);
                 ZoneStatus currentZoneStatus = currentStatus.get(ts);
@@ -429,6 +429,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
                     return new Deviation(0, false, false);
                 }
                 
+                PeriodMatcher periodMatcher = new PeriodMatcher();
                 Period p = periodMatcher.match(zoneSchedule, time);
                 ZoneStatus statusScheduled = zoneSchedule.get(p);
 
