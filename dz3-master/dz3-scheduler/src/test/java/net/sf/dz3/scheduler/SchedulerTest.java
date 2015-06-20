@@ -198,4 +198,40 @@ public class SchedulerTest extends TestCase {
             NDC.pop();
         }
     }
+
+    public void testIOException() {
+        
+        NDC.push("testIOException");
+        
+        try {
+
+            ScheduleUpdater u = new ScheduleUpdater() {
+                
+                @Override
+                public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+
+                    throw new IOException("Ouch!");
+                }
+            };
+            
+            Scheduler s = new Scheduler(u);
+            
+            s.setScheduleGranularity(50);
+            
+            // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped 
+            s.start(0);
+            
+            Thread.sleep(50);
+            
+            s.stop();
+
+        } catch (InterruptedException ex) {
+
+            throw new IllegalStateException(ex);
+            
+        } finally {
+            NDC.pop();
+        }
+    }
+
 }
