@@ -57,41 +57,7 @@ public class Period implements Comparable<Period> {
      * 0x01 is Monday, 0x02 is Tuesday, and son on.
      */
     public final byte days;
-    
-    /**
-     * Create an instance.
-     * 
-     * @param name Period name.
-     * @param start Start time offset against midnight, in milliseconds.
-     * @param end Start time offset against midnight, in milliseconds.
-     * @param days Days when this period is scheduled to be active, as a bitmask.
-     */
-    public Period(String name, long start, long end, byte days) {
-        
-        if (name == null || "".equals(name)) {
-            throw new IllegalArgumentException("name can't be null or empty");
-        }
-        
-        this.name = name;
-        
-        if (start > 1000 * 60 * 60 * 24) {
-            throw new IllegalArgumentException("Start time given (" + start + " is beyond 24 hours");
-        }
-        
-        if (end > 1000 * 60 * 60 * 24) {
-            throw new IllegalArgumentException("End time given (" + end + " is beyond 24 hours");
-        }
-        
-        if (end - start < 60000) {
-            throw new IllegalArgumentException("Duration given (" + (end - start) + ") is less than a minute");
-        }
 
-        this.start = start;
-        this.end = end;
-        
-        this.days = days;
-    }
-    
     /**
      * Create an instance from human readable arguments.
      * 
