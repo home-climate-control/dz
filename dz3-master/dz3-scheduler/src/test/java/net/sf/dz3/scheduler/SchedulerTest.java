@@ -31,7 +31,7 @@ public class SchedulerTest extends TestCase {
     private final Logger logger = Logger.getLogger(getClass());
     private final Random rg = new Random();
     
-    public void testDeviation() {
+    public void testDeviationInstantiation() {
         
         double setpoint = rg.nextDouble();
         boolean enabled = rg.nextBoolean();
@@ -610,6 +610,118 @@ public class SchedulerTest extends TestCase {
         
         assertEquals("Wrong period for " + cal.getTime(), null, s.getCurrentPeriod(ts));
         
+    }
+
+    public void testDeviation() {
+        
+        NDC.push("testDeviation");
+        
+        try {
+            
+            final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = renderSchedule1();
+            
+            ScheduleUpdater u = new ScheduleUpdater() {
+                
+                @Override
+                public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+
+                    return schedule;
+                }
+            };
+            
+            Scheduler s = new Scheduler(u);
+            
+            s.setScheduleGranularity(50);
+            
+            // Need this so the internal schedule is initialized
+            
+            s.start(0);
+            
+            Thread.sleep(50);
+            
+            // Stopping the scheduler doesn't clear the schedule
+            s.stop();
+            
+            checkDeviation(schedule, s);
+
+        } catch (InterruptedException ex) {
+
+            throw new IllegalStateException(ex);
+            
+        } finally {
+            NDC.pop();
+        }
+    }
+    
+    private void checkDeviation(Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule, Scheduler s) {
+        
+        Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = schedule.entrySet().iterator().next();
+        Thermostat ts = entry.getKey();
+                
+        Calendar cal = getMondayStart();
+
+        {
+            s.execute(schedule, cal.getTimeInMillis());
+
+            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", -3.0, d.setpoint);
+        }
+        
+        {
+            cal.set(Calendar.HOUR_OF_DAY, 8);
+            cal.set(Calendar.MINUTE, 30);
+
+            s.execute(schedule, cal.getTimeInMillis());
+
+            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", -2.5, d.setpoint);
+        }
+
+        {
+            cal.set(Calendar.HOUR_OF_DAY, 9);
+            cal.set(Calendar.MINUTE, 0);
+
+            s.execute(schedule, cal.getTimeInMillis());
+
+            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", -8.0, d.setpoint);
+        }
+        
+        {
+            cal.set(Calendar.HOUR_OF_DAY, 10);
+            cal.set(Calendar.MINUTE, 0);
+
+            s.execute(schedule, cal.getTimeInMillis());
+
+            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", -8.0, d.setpoint);
+        }
+        
+        {
+            cal.set(Calendar.HOUR_OF_DAY, 18);
+            cal.set(Calendar.MINUTE, 0);
+
+            s.execute(schedule, cal.getTimeInMillis());
+
+            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", -2.8, d.setpoint, 0.0001);
+        }
+
+        {
+            cal.set(Calendar.HOUR_OF_DAY, 21);
+            cal.set(Calendar.MINUTE, 0);
+
+            s.execute(schedule, cal.getTimeInMillis());
+
+            Deviation d = s.getDeviation(ts, 24.8, true, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", 0, d.setpoint, 0.0001);
+        }
     }
 
     private static class NullThermostat implements Thermostat {
