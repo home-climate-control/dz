@@ -1,6 +1,9 @@
 package net.sf.dz3.scheduler;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
@@ -241,12 +244,25 @@ public class SchedulerTest extends TestCase {
 
     public void testExecute() {
         
-        NDC.push("testExecute");
+        List<Map<Thermostat, SortedMap<Period, ZoneStatus>>> schedules = new LinkedList<Map<Thermostat, SortedMap<Period, ZoneStatus>>>();
+        
+        schedules.add(renderSchedule1());
+        schedules.add(renderSchedule2());
+        schedules.add(renderSchedule3());
+        
+        int id = 0;
+        for (Iterator<Map<Thermostat, SortedMap<Period, ZoneStatus>>> i = schedules.iterator(); i.hasNext(); ) {
+            
+            testExecute(id++, i.next());
+        }
+    }
+    
+    public void testExecute(int id, final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule) {
+        
+        NDC.push("testExecute:" + id);
         
         try {
             
-            final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = renderSchedule1();
-
             ScheduleUpdater u = new ScheduleUpdater() {
                 
                 @Override
@@ -276,6 +292,14 @@ public class SchedulerTest extends TestCase {
         }
     }
     
+    /**
+     * Render the schedule with overlapping periods as follows:
+     * 
+     *  Night: midnight to 9:00
+     *  Morning: 8:00 to 10:00
+     *  Day: 9:00 to 21:00
+     *  Evening: 18:00 to 23:59
+     */
     private Map<Thermostat, SortedMap<Period, ZoneStatus>> renderSchedule1() {
         
         final Map<Thermostat, SortedMap<Period, ZoneStatus>> result = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
@@ -298,6 +322,70 @@ public class SchedulerTest extends TestCase {
         periods.put(pNight, zsNight);
         periods.put(pMorning, zsMorning);
         periods.put(pDay, zsDay);
+        periods.put(pEvening, zsEvening);
+        
+        result.put(t, periods);
+        
+        return result;
+    }
+    
+    /**
+     * Render the schedule with overlapping periods as follows:
+     * 
+     *  Background: midnight to 23:59
+     *  Morning: 8:00 to 10:00
+     *  Day: 9:00 to 21:00
+     *  Evening: 18:00 to 23:59
+     */
+    private Map<Thermostat, SortedMap<Period, ZoneStatus>> renderSchedule2() {
+        
+        final Map<Thermostat, SortedMap<Period, ZoneStatus>> result = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+        Thermostat t = new NullThermostat("thermostat");
+
+        Period pBackground = new Period("night", "0:00", "23:59", ".......");
+        ZoneStatus zsBackground = new ZoneStatusImpl(25.0, 0, true, true);
+
+        Period pMorning = new Period("night", "8:00", "10:00", ".......");
+        ZoneStatus zsMorning = new ZoneStatusImpl(24.5, 0, true, true);
+
+        Period pDay = new Period("night", "9:00", "21:00", ".......");
+        ZoneStatus zsDay = new ZoneStatusImpl(30, 0, true, true);
+
+        Period pEvening = new Period("night", "18:00", "23:59", ".......");
+        ZoneStatus zsEvening = new ZoneStatusImpl(24.8, 0, true, true);
+        
+        SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
+        
+        periods.put(pBackground, zsBackground);
+        periods.put(pMorning, zsMorning);
+        periods.put(pDay, zsDay);
+        periods.put(pEvening, zsEvening);
+        
+        result.put(t, periods);
+        
+        return result;
+    }
+    
+    /**
+     * Render the schedule with gaps as follows:
+     * 
+     *  Morning: 8:00 to 10:00
+     *  Evening: 18:00 to 23:00
+     */
+    private Map<Thermostat, SortedMap<Period, ZoneStatus>> renderSchedule3() {
+        
+        final Map<Thermostat, SortedMap<Period, ZoneStatus>> result = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+        Thermostat t = new NullThermostat("thermostat");
+
+        Period pMorning = new Period("night", "8:00", "10:00", ".......");
+        ZoneStatus zsMorning = new ZoneStatusImpl(24.5, 0, true, true);
+
+        Period pEvening = new Period("night", "18:00", "23:59", ".......");
+        ZoneStatus zsEvening = new ZoneStatusImpl(24.8, 0, true, true);
+        
+        SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
+        
+        periods.put(pMorning, zsMorning);
         periods.put(pEvening, zsEvening);
         
         result.put(t, periods);
