@@ -225,8 +225,8 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
             logger.info("Checking schedule");
             
-            update();
-            execute();
+            update(schedule);
+            execute(schedule, System.currentTimeMillis());
             
         } catch (Throwable t) {
           
@@ -249,7 +249,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
     /**
      * Update the schedule.
      */
-    private void update() {
+    private void update(final Map<Thermostat, SortedMap<Period, ZoneStatus>> target) {
 
         NDC.push("update");
         
@@ -277,8 +277,8 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             // Completely discard the current schedule and replace it with the new one,
             // there's no need to use rocket science here
             
-            schedule.clear();
-            schedule.putAll(newSchedule);
+            target.clear();
+            target.putAll(newSchedule);
             
         } catch (IOException ex) {
             
@@ -291,16 +291,16 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
     /**
      * Match the schedule against current time and execute necessary changes.
+     * 
+     * The only reason this method is public is to make it testable.
      */
-    private void execute() {
+    public void execute(final Map<Thermostat, SortedMap<Period, ZoneStatus>> target, long when) {
 
         NDC.push("execute");
         
         try {
             
-            long now = System.currentTimeMillis(); 
-            
-            for (Iterator<Entry<Thermostat, SortedMap<Period, ZoneStatus>>> i = schedule.entrySet().iterator(); i.hasNext(); ) {
+            for (Iterator<Entry<Thermostat, SortedMap<Period, ZoneStatus>>> i = target.entrySet().iterator(); i.hasNext(); ) {
                 
                 Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = i.next();
                 Thermostat ts = entry.getKey();
@@ -308,7 +308,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
                 
                 try {
 
-                    execute(ts, zoneSchedule, now);
+                    execute(ts, zoneSchedule, when);
 
                 } catch (Throwable t) {
 
