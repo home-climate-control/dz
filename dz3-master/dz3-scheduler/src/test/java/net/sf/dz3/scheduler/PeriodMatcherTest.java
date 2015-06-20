@@ -109,10 +109,12 @@ public class PeriodMatcherTest extends TestCase {
         Period p1 = new Period("period 1", "00:10", "00:50", ".......");
         Period p2 = new Period("period 2", "00:15", "00:40", ".......");
         Period p3 = new Period("period 3", "00:20", "00:30", ".......");
+        Period p4 = new Period("period 4", "01:00", "02:00", "       ");
 
         zoneSchedule.put(p1, null);
         zoneSchedule.put(p2, null);
         zoneSchedule.put(p3, null);
+        zoneSchedule.put(p4, null);
 
         
         Calendar cal = new GregorianCalendar();
