@@ -1,10 +1,13 @@
 package net.sf.dz3.scheduler;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -308,13 +311,13 @@ public class SchedulerTest extends TestCase {
         Period pNight = new Period("night", "0:00", "9:00", ".......");
         ZoneStatus zsNight = new ZoneStatusImpl(25.0, 0, true, true);
 
-        Period pMorning = new Period("night", "8:00", "10:00", ".......");
+        Period pMorning = new Period("morning", "8:00", "10:00", ".......");
         ZoneStatus zsMorning = new ZoneStatusImpl(24.5, 0, true, true);
 
-        Period pDay = new Period("night", "9:00", "21:00", ".......");
+        Period pDay = new Period("day", "9:00", "21:00", ".......");
         ZoneStatus zsDay = new ZoneStatusImpl(30, 0, true, true);
 
-        Period pEvening = new Period("night", "18:00", "23:59", ".......");
+        Period pEvening = new Period("evening", "18:00", "23:59", ".......");
         ZoneStatus zsEvening = new ZoneStatusImpl(24.8, 0, true, true);
         
         SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
@@ -342,16 +345,16 @@ public class SchedulerTest extends TestCase {
         final Map<Thermostat, SortedMap<Period, ZoneStatus>> result = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
         Thermostat t = new NullThermostat("thermostat");
 
-        Period pBackground = new Period("night", "0:00", "23:59", ".......");
+        Period pBackground = new Period("background", "0:00", "23:59", ".......");
         ZoneStatus zsBackground = new ZoneStatusImpl(25.0, 0, true, true);
 
-        Period pMorning = new Period("night", "8:00", "10:00", ".......");
+        Period pMorning = new Period("morning", "8:00", "10:00", ".......");
         ZoneStatus zsMorning = new ZoneStatusImpl(24.5, 0, true, true);
 
-        Period pDay = new Period("night", "9:00", "21:00", ".......");
+        Period pDay = new Period("day", "9:00", "21:00", ".......");
         ZoneStatus zsDay = new ZoneStatusImpl(30, 0, true, true);
 
-        Period pEvening = new Period("night", "18:00", "23:59", ".......");
+        Period pEvening = new Period("evening", "18:00", "23:59", ".......");
         ZoneStatus zsEvening = new ZoneStatusImpl(24.8, 0, true, true);
         
         SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
@@ -377,10 +380,10 @@ public class SchedulerTest extends TestCase {
         final Map<Thermostat, SortedMap<Period, ZoneStatus>> result = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
         Thermostat t = new NullThermostat("thermostat");
 
-        Period pMorning = new Period("night", "8:00", "10:00", ".......");
+        Period pMorning = new Period("morning", "8:00", "10:00", ".......");
         ZoneStatus zsMorning = new ZoneStatusImpl(24.5, 0, true, true);
 
-        Period pEvening = new Period("night", "18:00", "23:59", ".......");
+        Period pEvening = new Period("evening", "18:00", "23:59", ".......");
         ZoneStatus zsEvening = new ZoneStatusImpl(24.8, 0, true, true);
         
         SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
@@ -393,6 +396,98 @@ public class SchedulerTest extends TestCase {
         return result;
     }
     
+    /**
+     * @return Time for 00:00 of current week's Monday.
+     */
+    private Calendar getMondayStart() {
+        
+        NDC.push("getMondayStart");
+        
+        try {
+        
+            Calendar cal = new GregorianCalendar();
+            
+            logger.debug("calendar: " + cal);
+            
+            cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            
+            logger.debug("calendar: " + cal);
+
+            return cal;
+        
+        } finally {
+            NDC.pop();
+        }
+    }
+    
+    public void testSchedule1() {
+        
+        NDC.push("testSchedule1");
+        
+        try {
+        
+            final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = renderSchedule1();
+            
+            Scheduler s = new Scheduler();
+            
+            checkSchedule1(schedule, s);
+            
+        } finally {
+            NDC.pop();
+        }
+    }
+
+    private void checkSchedule1(Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule, Scheduler s) {
+
+        Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = schedule.entrySet().iterator().next();
+        Thermostat ts = entry.getKey();
+                
+        Calendar cal = getMondayStart();
+
+        s.execute(schedule, cal.getTimeInMillis());
+        
+        assertEquals("Wrong period for " + cal.getTime(), "night", s.getCurrentPeriod(ts).name);
+        
+        cal.set(Calendar.HOUR_OF_DAY, 8);
+        cal.set(Calendar.MINUTE, 30);
+        
+        s.execute(schedule, cal.getTimeInMillis());
+        
+        assertEquals("Wrong period for " + cal.getTime(), "morning", s.getCurrentPeriod(ts).name);
+        
+        cal.set(Calendar.HOUR_OF_DAY, 9);
+        cal.set(Calendar.MINUTE, 0);
+        
+        s.execute(schedule, cal.getTimeInMillis());
+        
+        assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
+        
+        cal.set(Calendar.HOUR_OF_DAY, 10);
+        cal.set(Calendar.MINUTE, 0);
+        
+        s.execute(schedule, cal.getTimeInMillis());
+        
+        assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
+        
+        cal.set(Calendar.HOUR_OF_DAY, 18);
+        cal.set(Calendar.MINUTE, 0);
+        
+        s.execute(schedule, cal.getTimeInMillis());
+        
+        assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
+        
+        cal.set(Calendar.HOUR_OF_DAY, 21);
+        cal.set(Calendar.MINUTE, 0);
+        
+        s.execute(schedule, cal.getTimeInMillis());
+        
+        assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
+    }
+
     private static class NullThermostat implements Thermostat {
 
         private final String name;
