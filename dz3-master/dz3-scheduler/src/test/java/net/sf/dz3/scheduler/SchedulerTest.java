@@ -245,29 +245,7 @@ public class SchedulerTest extends TestCase {
         
         try {
             
-            final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
-            Thermostat t = new NullThermostat("thermostat");
-
-            Period pNight = new Period("night", "0:00", "9:00", ".......");
-            ZoneStatus zsNight = new ZoneStatusImpl(25.0, 0, true, true);
-
-            Period pMorning = new Period("night", "8:00", "10:00", ".......");
-            ZoneStatus zsMorning = new ZoneStatusImpl(24.5, 0, true, true);
-
-            Period pDay = new Period("night", "9:00", "21:00", ".......");
-            ZoneStatus zsDay = new ZoneStatusImpl(30, 0, true, true);
-
-            Period pEvening = new Period("night", "18:00", "23:59", ".......");
-            ZoneStatus zsEvening = new ZoneStatusImpl(24.8, 0, true, true);
-            
-            SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
-            
-            periods.put(pNight, zsNight);
-            periods.put(pMorning, zsMorning);
-            periods.put(pDay, zsDay);
-            periods.put(pEvening, zsEvening);
-            
-            schedule.put(t, periods);
+            final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = renderSchedule1();
 
             ScheduleUpdater u = new ScheduleUpdater() {
                 
@@ -296,6 +274,35 @@ public class SchedulerTest extends TestCase {
         } finally {
             NDC.pop();
         }
+    }
+    
+    private Map<Thermostat, SortedMap<Period, ZoneStatus>> renderSchedule1() {
+        
+        final Map<Thermostat, SortedMap<Period, ZoneStatus>> result = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+        Thermostat t = new NullThermostat("thermostat");
+
+        Period pNight = new Period("night", "0:00", "9:00", ".......");
+        ZoneStatus zsNight = new ZoneStatusImpl(25.0, 0, true, true);
+
+        Period pMorning = new Period("night", "8:00", "10:00", ".......");
+        ZoneStatus zsMorning = new ZoneStatusImpl(24.5, 0, true, true);
+
+        Period pDay = new Period("night", "9:00", "21:00", ".......");
+        ZoneStatus zsDay = new ZoneStatusImpl(30, 0, true, true);
+
+        Period pEvening = new Period("night", "18:00", "23:59", ".......");
+        ZoneStatus zsEvening = new ZoneStatusImpl(24.8, 0, true, true);
+        
+        SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
+        
+        periods.put(pNight, zsNight);
+        periods.put(pMorning, zsMorning);
+        periods.put(pDay, zsDay);
+        periods.put(pEvening, zsEvening);
+        
+        result.put(t, periods);
+        
+        return result;
     }
     
     private static class NullThermostat implements Thermostat {
