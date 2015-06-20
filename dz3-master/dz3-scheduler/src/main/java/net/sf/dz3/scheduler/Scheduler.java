@@ -231,7 +231,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
         } catch (Throwable t) {
           
             // If an exception is not caught, the executor will choke and never call us again
-            logger.error("Unexpected", t);
+            logger.error("Unexpected exception", t);
          
         } finally {
             
@@ -293,6 +293,9 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      * Match the schedule against current time and execute necessary changes.
      * 
      * The only reason this method is public is to make it testable.
+     * 
+     * @param target Schedule to apply.
+     * @param when Time to use when applying the schedule, in milliseconds.
      */
     public void execute(final Map<Thermostat, SortedMap<Period, ZoneStatus>> target, long when) {
 
