@@ -643,7 +643,7 @@ public class SchedulerTest extends TestCase {
             s.stop();
             
             checkDeviation(schedule, s);
-
+            
         } catch (InterruptedException ex) {
 
             throw new IllegalStateException(ex);
@@ -655,11 +655,20 @@ public class SchedulerTest extends TestCase {
     
     private void checkDeviation(Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule, Scheduler s) {
         
+        Calendar cal = getMondayStart();
+
+        {
+            // This thermostat is not in the schedule
+            Thermostat ts = new NullThermostat("alien");
+
+            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+
+            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
+        }
+        
         Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = schedule.entrySet().iterator().next();
         Thermostat ts = entry.getKey();
                 
-        Calendar cal = getMondayStart();
-
         {
             s.execute(schedule, cal.getTimeInMillis());
 
@@ -720,7 +729,7 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 24.8, true, true, cal.getTimeInMillis());
 
-            assertEquals("Wrong setpoint deviation ", 0, d.setpoint, 0.0001);
+            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
         }
     }
 
