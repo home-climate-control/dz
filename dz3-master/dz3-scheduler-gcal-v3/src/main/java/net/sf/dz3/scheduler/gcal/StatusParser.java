@@ -71,8 +71,9 @@ public class StatusParser {
                     
                     StringTokenizer st2 = new StringTokenizer(token, " =:");
                     
-                    @SuppressWarnings("unused")
-                    String ignored = st2.nextToken();
+                    // Result is not needed
+                    st2.nextToken();
+                    
                     setpoint = parseSetpoint(st2.nextToken());
                 }
                 
