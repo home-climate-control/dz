@@ -14,4 +14,9 @@
         <Method name="equals" />
         <Bug pattern="HE_EQUALS_USE_HASHCODE"/>
     </Match>
+    <!-- Test class, inconsequential -->
+    <Match>
+        <Class name="net.sf.dz3.scheduler.gcal.GCalScheduleUpdaterTest$NullThermostat"/>
+        <Bug pattern="EQ_COMPARETO_USE_OBJECT_EQUALS" />
+    </Match>
 </FindBugsFilter>
