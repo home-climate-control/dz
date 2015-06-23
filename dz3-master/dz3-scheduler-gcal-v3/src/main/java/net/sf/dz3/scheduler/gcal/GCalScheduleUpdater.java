@@ -55,7 +55,7 @@ import com.google.api.services.calendar.model.Events;
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2014
  */
-public class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
+public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
 
     private static final String LITERAL_APP_NAME = "Home Climate Control-DZ-3.5";
     private static final String STORED_CREDENTIALS = ".dz/calendar";
