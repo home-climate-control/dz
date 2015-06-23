@@ -57,12 +57,12 @@ import com.google.api.services.calendar.model.Events;
  */
 public class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
 
-    private final String LITERAL_APP_NAME = "Home Climate Control-DZ-3.5";
-    private final String STORED_CREDENTIALS = ".dz/calendar";
-    private final String CLIENT_SECRETS = "/client_secrets.json"; 
+    private static final String LITERAL_APP_NAME = "Home Climate Control-DZ-3.5";
+    private static final String STORED_CREDENTIALS = ".dz/calendar";
+    private static final String CLIENT_SECRETS = "/client_secrets.json"; 
 
-    private final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    private final NumberFormat tzFormatter = new DecimalFormat("+#00;-#00");
+    private static final String dateFormat = "yyyy-MM-dd'T'HH:mm:ss";
+    private static final NumberFormat tzFormatter = new DecimalFormat("+#00;-#00");
 
     /**
      * Create an instance.
@@ -225,6 +225,7 @@ public class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
             int tzShift = tempCalendar.getTimeZone().getRawOffset() / (60000 * 60);
             String tzTail = tzFormatter.format(tzShift) + ":00";
             
+            DateFormat dateFormatter = new SimpleDateFormat(dateFormat);
             DateTime dtStart = DateTime.parseRfc3339(dateFormatter.format(start) + tzTail);
             DateTime dtEnd = DateTime.parseRfc3339(dateFormatter.format(end) + tzTail);
             
@@ -356,7 +357,7 @@ public class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
                     // this piece of code ever gets refactored.
 
                     GregorianCalendar cal = new GregorianCalendar();
-                    Date d = dateFormatter.parse(startTime);
+                    Date d = new SimpleDateFormat(dateFormat).parse(startTime);
                     int today = cal.get(GregorianCalendar.DAY_OF_YEAR);
                     
                     cal.setTime(d);
