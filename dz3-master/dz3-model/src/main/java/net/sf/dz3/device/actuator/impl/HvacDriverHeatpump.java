@@ -79,6 +79,10 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
 
     @Override
     protected synchronized void doSetMode(HvacMode mode) throws IOException {
+        
+        if (mode == null) {
+            throw new IllegalArgumentException("mode can't be null");
+        }
 
         checkEnabled();
         
