@@ -13,6 +13,7 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
@@ -59,7 +60,10 @@ public class GCalScheduleUpdaterTest extends TestCase {
         assertEquals("TZ shift problem", "2010-01-31T01:00:00.000Z", dt.toString());
     }
 
-    public void testYesterday() {
+    /**
+     * Test case to reproduce and fix {@link https://github.com/home-climate-control/dz/issues/6}.
+     */
+    public void testDST() {
         
         // VT: NOTE: This test will try to spawn the system browser, or pring a link you need to visit to get the callback.
         // You will need to visit the link on the same box, the callback URL is pointing to 'localhost'.
@@ -67,17 +71,19 @@ public class GCalScheduleUpdaterTest extends TestCase {
         
         // In the worst case, just @Ignore this test. 
         
-        NDC.push("testYesterday");
-        Marker m = new Marker("testYesterday");
+        NDC.push("testDST");
+        Marker m = new Marker("testDST");
         
         try {
         
             Map<Thermostat, String> ts2source = new TreeMap<Thermostat, String>();
+            
+            // This calendar has to be in Mountain Time Zone with the DST offset present, so do all the events (check individually
+            // if your time zone is different).
+            // It has to contain 24 periods, spanning from $hour to ($hour + 1) (except the last for now, which has to end at 23:59).
+            // Events have to be recurring, with recurrence set to "daily, never expires" (careful: it'll expire in 2 years anyway). 
 
-//            Thermostat ts1 = new NullThermostat("DZ Test Case: MB");
-//            Thermostat ts1 = new NullThermostat("DZ Test Case: IO");
-//            Thermostat ts1 = new NullThermostat("DZ Test Case: TO");
-            Thermostat ts1 = new NullThermostat("DZ Schedule: Master Bedroom");
+            Thermostat ts1 = new NullThermostat("DZ Test Case: DST Test (with DST)");
 
             ts2source.put(ts1, ts1.getName());
 
@@ -93,12 +99,13 @@ public class GCalScheduleUpdaterTest extends TestCase {
             logger.info("Schedule retrieved: " + schedule);
 
             SortedMap<Period, ZoneStatus> events = schedule.values().iterator().next();
-            PeriodMatcher pm = new PeriodMatcher();
-
-            Period p = pm.match(events, System.currentTimeMillis());
-
-            logger.info("Period matched: " + p);
-
+            
+            testEvents(events);
+            
+        } catch (AssertionFailedError ex) {
+            
+            throw ex;
+            
         } catch (Throwable t) {
             
             logger.error("Oops", t);
@@ -108,6 +115,87 @@ public class GCalScheduleUpdaterTest extends TestCase {
             
             m.close();
             NDC.pop();
+        }
+    }
+    
+    private void testEvents(SortedMap<Period,ZoneStatus> events) {
+        
+        Map<Integer, String> offset2name = new TreeMap<Integer, String>();
+        
+        // The key is the hour offset, the value is the period name in the calendar
+
+        offset2name.put(0, "0 - 1");
+        offset2name.put(1, "1 - 2");
+        offset2name.put(2, "2 - 3");
+        offset2name.put(3, "3 - 4");
+        offset2name.put(4, "4 - 5");
+        offset2name.put(5, "5 - 6");
+        offset2name.put(6, "6 - 7");
+        offset2name.put(7, "7 - 8");
+        offset2name.put(8, "8 - 9");
+        offset2name.put(9, "9 - 10");
+        offset2name.put(10, "10 - 11");
+        offset2name.put(11, "11 - 12");
+        offset2name.put(12, "12 - 13");
+        offset2name.put(13, "13 - 14");
+        offset2name.put(14, "14 - 15");
+        offset2name.put(15, "15 - 16");
+        offset2name.put(16, "16 - 17");
+        offset2name.put(17, "17 - 18");
+        offset2name.put(18, "18 - 19");
+        offset2name.put(19, "19 - 20");
+        offset2name.put(20, "20 - 21");
+        offset2name.put(21, "21 - 22");
+        offset2name.put(22, "22 - 23");
+        offset2name.put(23, "23 - 24");
+        
+        PeriodMatcher pm = new PeriodMatcher();
+        
+        // DST
+        TimeZone tzMST = TimeZone.getTimeZone("America/Denver");
+        // No DST
+        TimeZone tzPHX = TimeZone.getTimeZone("America/Phoenix");
+        
+        logger.info("TZ/MST: " + tzMST);
+        logger.info("TZ/PHX: " + tzPHX);
+        
+        Calendar calMST = Calendar.getInstance(tzMST);
+        Calendar calPHX = Calendar.getInstance(tzPHX);
+        
+        // DST is guaranteed to be active on this day
+        
+        calMST.set(2015, Calendar.JULY, 1, 0, 0, 0);
+        calPHX.set(2015, Calendar.JULY, 1, 0, 0, 0);
+        
+        calMST.set(Calendar.MILLISECOND, 0);
+        calPHX.set(Calendar.MILLISECOND, 0);
+
+        // java.util.Date doesn't do this right, but DateTime does
+
+        DateTime dtMST = new DateTime(calMST.getTime(), tzMST);
+        DateTime dtPHX = new DateTime(calPHX.getTime(), tzPHX);
+        
+        logger.info("time/DST: " + dtMST);
+        logger.info("time/PHX: " + dtPHX);
+
+        calMST.set(Calendar.MINUTE, 30);
+        calPHX.set(Calendar.MINUTE, 30);
+        
+        for (int hour = 0; hour < 24; hour++) {
+
+            calMST.set(Calendar.HOUR_OF_DAY, hour);
+            calPHX.set(Calendar.HOUR_OF_DAY, hour);
+
+            logger.info("Matching DST time: " + new DateTime(calMST.getTime(), tzMST));
+            logger.info("Matching PHX time: " + new DateTime(calPHX.getTime(), tzPHX));
+            
+            long timeMST = calMST.getTimeInMillis();
+            
+            Period p = pm.match(events, timeMST);
+
+            logger.info("Period matched: " + p);
+            
+            assertEquals("Wrong period matched", offset2name.get(hour), p.name);
         }
     }
     
