@@ -1,12 +1,11 @@
 package net.sf.dz3.scheduler;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import junit.framework.TestCase;
+
+import org.joda.time.DateTime;
 
 public class PeriodTest extends TestCase {
     
@@ -228,32 +227,17 @@ public class PeriodTest extends TestCase {
     
     public void testIncludesDayMo() {
         
-        Calendar cal = new GregorianCalendar();
-        
-        cal.set(2010, 0, 18);
-        testIncludesDay(cal.getTime(), "M      ");
-        
-        cal.set(2010, 0, 19);
-        testIncludesDay(cal.getTime(), " T     ");
-        
-        cal.set(2010, 0, 20);
-        testIncludesDay(cal.getTime(), "  W    ");
-        
-        cal.set(2010, 0, 21);
-        testIncludesDay(cal.getTime(), "   T   ");
-        
-        cal.set(2010, 0, 22);
-        testIncludesDay(cal.getTime(), "    F  ");
-        
-        cal.set(2010, 0, 23);
-        testIncludesDay(cal.getTime(), "     S ");
-        
-        cal.set(2010, 0, 24);
-        testIncludesDay(cal.getTime(), "      S");
+        testIncludesDay(new DateTime().withDate(2010, 1, 18), "M      ");
+        testIncludesDay(new DateTime().withDate(2010, 1, 19), " T     ");
+        testIncludesDay(new DateTime().withDate(2010, 1, 20), "  W    ");
+        testIncludesDay(new DateTime().withDate(2010, 1, 21), "   T   ");
+        testIncludesDay(new DateTime().withDate(2010, 1, 22), "    F  ");
+        testIncludesDay(new DateTime().withDate(2010, 1, 23), "     S ");
+        testIncludesDay(new DateTime().withDate(2010, 1, 24), "      S");
         
     }
     
-    private void testIncludesDay(Date d, String days) {
+    private void testIncludesDay(DateTime d, String days) {
         
         Period p = new Period("period", "1415", "1420", days);
         

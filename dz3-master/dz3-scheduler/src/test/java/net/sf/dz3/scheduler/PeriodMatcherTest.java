@@ -1,21 +1,18 @@
 package net.sf.dz3.scheduler;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.EmptyStackException;
-import java.util.GregorianCalendar;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
-
+import junit.framework.TestCase;
 import net.sf.dz3.device.model.ZoneStatus;
 
-import junit.framework.TestCase;
+import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class PeriodMatcherTest extends TestCase {
     
@@ -24,15 +21,13 @@ public class PeriodMatcherTest extends TestCase {
     public void testNone() {
         
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
+        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0).withMinuteOfHour(40);
         
-        Calendar cal = new GregorianCalendar();
-        
-        cal.set(2010, 0, 19, 0, 40);
         zoneSchedule.put(new Period("period", "0:15", "0:30", "......."), null);
         
         try {
             
-            test(zoneSchedule, cal.getTime());
+            test(zoneSchedule, dt);
             fail("Should have thrown an exception by now");
             
         } catch (EmptyStackException ex) {
@@ -49,12 +44,9 @@ public class PeriodMatcherTest extends TestCase {
         Period p1 = new Period("period", "00:15", "00:30", ".......");
         zoneSchedule.put(p1, null);
 
+        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
         
-        Calendar cal = new GregorianCalendar();
-        
-        cal.set(2010, 0, 19, 0, 20);
-        
-        assertEquals("Improper match", p1, test(zoneSchedule, cal.getTime()));
+        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(20)));
     }
 
     public void testSimple2() {
@@ -65,12 +57,9 @@ public class PeriodMatcherTest extends TestCase {
         Period p1 = new Period("period", "02:15", "02:30", ".......");
         zoneSchedule.put(p1, null);
 
+        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(2);
         
-        Calendar cal = new GregorianCalendar();
-        
-        cal.set(2010, 0, 19, 2, 20);
-        
-        assertEquals("Improper match", p1, test(zoneSchedule, cal.getTime()));
+        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(20)));
     }
 
     public void testLadder() {
@@ -85,21 +74,12 @@ public class PeriodMatcherTest extends TestCase {
         zoneSchedule.put(p2, null);
         zoneSchedule.put(p3, null);
 
+        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
         
-        Calendar cal = new GregorianCalendar();
-        
-        cal.set(2010, 0, 19, 0, 15);
-        assertEquals("Improper match", p1, test(zoneSchedule, cal.getTime()));
-
-        cal.set(2010, 0, 19, 0, 25);
-        assertEquals("Improper match", p2, test(zoneSchedule, cal.getTime()));
-
-        cal.set(2010, 0, 19, 0, 35);
-        assertEquals("Improper match", p3, test(zoneSchedule, cal.getTime()));
-
-        cal.set(2010, 0, 19, 0, 45);
-        assertEquals("Improper match", p3, test(zoneSchedule, cal.getTime()));
-
+        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(15)));
+        assertEquals("Improper match", p2, test(zoneSchedule, dt.withMinuteOfHour(25)));
+        assertEquals("Improper match", p3, test(zoneSchedule, dt.withMinuteOfHour(35)));
+        assertEquals("Improper match", p3, test(zoneSchedule, dt.withMinuteOfHour(45)));
     }
 
     public void testStack() {
@@ -117,26 +97,17 @@ public class PeriodMatcherTest extends TestCase {
         zoneSchedule.put(p4, null);
 
         
-        Calendar cal = new GregorianCalendar();
+        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
         
-        cal.set(2010, 0, 19, 0, 12);
-        assertEquals("Improper match", p1, test(zoneSchedule, cal.getTime()));
-
-        cal.set(2010, 0, 19, 0, 18);
-        assertEquals("Improper match", p2, test(zoneSchedule, cal.getTime()));
-
-        cal.set(2010, 0, 19, 0, 22);
-        assertEquals("Improper match", p3, test(zoneSchedule, cal.getTime()));
-
-        cal.set(2010, 0, 19, 0, 32);
-        assertEquals("Improper match", p2, test(zoneSchedule, cal.getTime()));
-
-        cal.set(2010, 0, 19, 0, 42);
-        assertEquals("Improper match", p1, test(zoneSchedule, cal.getTime()));
+        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(12)));
+        assertEquals("Improper match", p2, test(zoneSchedule, dt.withMinuteOfHour(18)));
+        assertEquals("Improper match", p3, test(zoneSchedule, dt.withMinuteOfHour(22)));
+        assertEquals("Improper match", p2, test(zoneSchedule, dt.withMinuteOfHour(32)));
+        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(42)));
     }
 
-    public Period test(SortedMap<Period, ZoneStatus> zoneSchedule, Date time) {
+    private Period test(SortedMap<Period, ZoneStatus> zoneSchedule, DateTime time) {
         
-        return new PeriodMatcher().match(zoneSchedule, time.getTime());
+        return new PeriodMatcher().match(zoneSchedule, time);
     }
 }

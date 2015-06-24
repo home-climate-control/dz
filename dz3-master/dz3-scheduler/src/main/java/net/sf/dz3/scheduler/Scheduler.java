@@ -24,6 +24,7 @@ import net.sf.jukebox.service.StoppableService;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
+import org.joda.time.DateTime;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
@@ -226,7 +227,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             logger.info("Checking schedule");
             
             update(schedule);
-            execute(schedule, System.currentTimeMillis());
+            execute(schedule, new DateTime());
             
         } catch (Throwable t) {
           
@@ -297,7 +298,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      * @param target Schedule to apply.
      * @param when Time to use when applying the schedule, in milliseconds.
      */
-    public void execute(final Map<Thermostat, SortedMap<Period, ZoneStatus>> target, long when) {
+    public void execute(final Map<Thermostat, SortedMap<Period, ZoneStatus>> target, DateTime when) {
 
         NDC.push("execute");
         
@@ -332,7 +333,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      * @param zoneSchedule Schedule to use.
      * @param time Time to match against.
      */
-    private void execute(Thermostat ts, SortedMap<Period, ZoneStatus> zoneSchedule, long time) {
+    private void execute(Thermostat ts, SortedMap<Period, ZoneStatus> zoneSchedule, DateTime time) {
         
         NDC.push("execute");
         
@@ -416,7 +417,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      * 
      * @return An object containing deviations found, if any. 
      */
-    public Deviation getDeviation(Thermostat ts, double setpointTemperature, boolean currentEnabled, boolean currentVoting, long time) {
+    public Deviation getDeviation(Thermostat ts, double setpointTemperature, boolean currentEnabled, boolean currentVoting, DateTime time) {
         
         NDC.push("getDeviation(" + ts.getName() + ")");
         

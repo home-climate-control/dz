@@ -28,12 +28,13 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
+import org.joda.time.DateTimeZone;
 
 import com.google.api.client.util.DateTime;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2014
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
  */
 public class GCalScheduleUpdaterTest extends TestCase {
 
@@ -151,45 +152,22 @@ public class GCalScheduleUpdaterTest extends TestCase {
         
         PeriodMatcher pm = new PeriodMatcher();
         
-        // DST
-        TimeZone tzMST = TimeZone.getTimeZone("America/Denver");
-        // No DST
-        TimeZone tzPHX = TimeZone.getTimeZone("America/Phoenix");
-        
-        logger.info("TZ/MST: " + tzMST);
-        logger.info("TZ/PHX: " + tzPHX);
-        
-        Calendar calMST = Calendar.getInstance(tzMST);
-        Calendar calPHX = Calendar.getInstance(tzPHX);
-        
-        // DST is guaranteed to be active on this day
-        
-        calMST.set(2015, Calendar.JULY, 1, 0, 0, 0);
-        calPHX.set(2015, Calendar.JULY, 1, 0, 0, 0);
-        
-        calMST.set(Calendar.MILLISECOND, 0);
-        calPHX.set(Calendar.MILLISECOND, 0);
+        // DST is guaranteed to be active on this day (in Northern hemisphere)
 
-        // java.util.Date doesn't do this right, but DateTime does
-
-        DateTime dtMST = new DateTime(calMST.getTime(), tzMST);
-        DateTime dtPHX = new DateTime(calPHX.getTime(), tzPHX);
+        org.joda.time.DateTime base = new org.joda.time.DateTime().withDate(2015, 7, 1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0);
+        org.joda.time.DateTime dtMST = base.withZone(DateTimeZone.forID("America/Denver")); 
+        org.joda.time.DateTime dtPHX = base.withZone(DateTimeZone.forID("America/Phoenix")); 
         
         logger.info("time/DST: " + dtMST);
         logger.info("time/PHX: " + dtPHX);
 
-        calMST.set(Calendar.MINUTE, 30);
-        calPHX.set(Calendar.MINUTE, 30);
-        
         for (int hour = 0; hour < 24; hour++) {
 
-            calMST.set(Calendar.HOUR_OF_DAY, hour);
-            calPHX.set(Calendar.HOUR_OF_DAY, hour);
+            org.joda.time.DateTime timeMST = dtMST.withHourOfDay(hour).withMinuteOfHour(30);
+            org.joda.time.DateTime timePHX = dtPHX.withHourOfDay(hour).withMinuteOfHour(30);
 
-            logger.info("Matching DST time: " + new DateTime(calMST.getTime(), tzMST));
-            logger.info("Matching PHX time: " + new DateTime(calPHX.getTime(), tzPHX));
-            
-            long timeMST = calMST.getTimeInMillis();
+            logger.info("Matching DST time: " + timeMST);
+            logger.info("Matching PHX time: " + timePHX);
             
             Period p = pm.match(events, timeMST);
 

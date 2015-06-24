@@ -1,6 +1,5 @@
 package net.sf.dz3.scheduler;
 
-import java.util.Date;
 import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.Stack;
@@ -8,6 +7,7 @@ import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
+import org.joda.time.DateTime;
 
 import net.sf.dz3.device.model.ZoneStatus;
 
@@ -16,7 +16,7 @@ import net.sf.dz3.device.model.ZoneStatus;
  * 
  * Exists as a separate entity to enable unit testing.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class PeriodMatcher {
 
@@ -30,24 +30,23 @@ public class PeriodMatcher {
      * 
      * @return Current period, or {@code null} if none was found.
      */
-    public Period match(SortedMap<Period, ZoneStatus> zoneSchedule, long time) {
+    public Period match(SortedMap<Period, ZoneStatus> zoneSchedule, DateTime time) {
         
         NDC.push("match");
         
         try {
         
             Stack<Period> stack = new Stack<Period>();
-            Date currentDate = new Date(time);
             
-            logger.debug("Matching " + currentDate);
+            logger.debug("Matching " + time);
 
-            SortedMap<Period, ZoneStatus> today = getToday(zoneSchedule, currentDate);
+            SortedMap<Period, ZoneStatus> today = getToday(zoneSchedule, time);
 
             for (Iterator<Period> i = today.keySet().iterator(); i.hasNext(); ) {
 
                 Period p = i.next();
 
-                if (p.includes(currentDate)) {
+                if (p.includes(time)) {
 
                     logger.debug("Included " + p);
                     stack.push(p);
@@ -69,7 +68,7 @@ public class PeriodMatcher {
      * 
      * @return Map containing only periods for the given day of week.
      */
-    private SortedMap<Period, ZoneStatus> getToday(SortedMap<Period, ZoneStatus> zoneSchedule, Date date) {
+    private SortedMap<Period, ZoneStatus> getToday(SortedMap<Period, ZoneStatus> zoneSchedule, DateTime date) {
         
         NDC.push("getToday");
         

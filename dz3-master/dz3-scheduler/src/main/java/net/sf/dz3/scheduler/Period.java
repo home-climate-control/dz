@@ -10,11 +10,12 @@ import net.sf.dz3.device.model.ZoneStatus;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
+import org.joda.time.DateTime;
 
 /**
  * Defines a time period when a given {@link ZoneStatus} is to be activated.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class Period implements Comparable<Period> {
     
@@ -88,16 +89,16 @@ public class Period implements Comparable<Period> {
      * This is necessary to dodge a time zone calculation that would be missing if a
      * {@code new Date(millis)} constructor was used.
      * 
-     * @param time Time offset against midnight, in milliseconds.
+     * @param offset Time offset against midnight, in milliseconds.
      * 
      * @return TOday's date with proper hours and minutes set.
      */
-    private Date parseDate(long time) {
+    private Date parseOffset(long offset) {
         
         Calendar cal = new GregorianCalendar();
         
-        cal.set(Calendar.HOUR_OF_DAY, (int) (time / 1000 / 60 / 60));
-        cal.set(Calendar.MINUTE, (int)((time % (1000 * 60 * 60)) / 1000 / 60));
+        cal.set(Calendar.HOUR_OF_DAY, (int) (offset / 1000 / 60 / 60));
+        cal.set(Calendar.MINUTE, (int)((offset % (1000 * 60 * 60)) / 1000 / 60));
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         
@@ -191,10 +192,9 @@ public class Period implements Comparable<Period> {
      * 
      * @return {@code true} if this period includes the time.
      */
-    @SuppressWarnings("deprecation")
-    public boolean includes(Date d) {
+    public boolean includes(DateTime d) {
         
-        long offset = d.getHours() * 1000 * 60 * 60 + d.getMinutes() * 1000 * 60;
+        long offset = d.getHourOfDay() * 1000 * 60 * 60 + d.getMinuteOfHour() * 1000 * 60;
         
         return includes(offset);
     }
@@ -218,11 +218,10 @@ public class Period implements Comparable<Period> {
      * 
      * @return {@code true} if this period includes is active for the date's day of week..
      */
-    @SuppressWarnings("deprecation")
-    public boolean includesDay(Date d) {
+    public boolean includesDay(DateTime d) {
         
         // Sunday based
-        int day = d.getDay();
+        int day = d.getDayOfWeek();
         
         // Monday based
         day = (day + 6) % 7;
@@ -253,9 +252,9 @@ public class Period implements Comparable<Period> {
         StringBuilder sb = new StringBuilder();
         
         sb.append(name).append(" (");
-        sb.append(df.format(parseDate(start)));
+        sb.append(df.format(parseOffset(start)));
         sb.append(" to ");
-        sb.append(df.format(parseDate(end)));
+        sb.append(df.format(parseOffset(end)));
         sb.append(" on ");
         
         for (int offset = 0; offset < 7; offset++) {

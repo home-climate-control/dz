@@ -7,15 +7,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
+import junit.framework.TestCase;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneStatus;
@@ -24,7 +21,9 @@ import net.sf.dz3.scheduler.Scheduler.Deviation;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
-import junit.framework.TestCase;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
 
 public class SchedulerTest extends TestCase {
     
@@ -424,6 +423,7 @@ public class SchedulerTest extends TestCase {
         }
     }
     
+    /*
     public void testSchedule1() {
         
         NDC.push("testSchedule1");
@@ -760,7 +760,7 @@ public class SchedulerTest extends TestCase {
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
         }
         
-    }
+    } */
 
     private static class NullThermostat implements Thermostat {
 

@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.log4j.Logger;
+import org.joda.time.DateTime;
 
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.device.model.HvacMode;
@@ -118,7 +119,7 @@ public class ThermostatRenderer extends QueueFeeder<ZoneSnapshot> implements Dat
         
         String periodName = getPeriod();
         
-        Deviation deviation = scheduler == null ? new Deviation(0, false, false) : scheduler.getDeviation(source, setpointTemperature, enabled, voting, signal.timestamp);
+        Deviation deviation = scheduler == null ? new Deviation(0, false, false) : scheduler.getDeviation(source, setpointTemperature, enabled, voting, new DateTime(signal.timestamp));
             
         emit(new ZoneSnapshot(signal.timestamp, name, mode, state, thermostatSignal, currentTemperature,
                 setpointTemperature, enabled, onHold, voting, periodName, 
