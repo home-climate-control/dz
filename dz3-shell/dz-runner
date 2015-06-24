@@ -32,12 +32,28 @@ DAMPER_CRAWL=-Dnet.sf.dz3.device.actuator.servomaster.ServoDamper.crawl=true
 
 JMX=-Dcom.sun.management.jmxremote
 
+# We don't need ${JAVA_HOME} *that* much, but if it is set, it'd be nice to honor it
+
+if test -z "${JAVA_HOME}"; then
+    export JAVA=`which java`
+    if ! test -x "${JAVA}"; then
+        echo "Can't find Java binary";
+        exit 1;
+    fi
+else
+    export JAVA="${JAVA_HOME}/bin/java"
+    if ! test -x "${JAVA}"; then
+        echo "JAVA_HOME seems to point into a wrong place (${JAVA_HOME}), can't find Java binary";
+        exit 1;
+    fi
+fi
+
 # Remember that arguments on the command line are relative to the root of CLASSPATH
 
 (cd ${BASENAME} && \
-    ${JAVA_HOME}/bin/java ${MEM_LIMITS} \
-                          ${EVENT_ASYNC} \
-                          ${DATA_ASYNC} \
-                          ${DAMPER_CRAWL} \
-                          ${JMX} \
-                          -cp ${CLASSPATH} net.sf.dz3.runtime.Container $*)
+    ${JAVA} ${MEM_LIMITS} \
+            ${EVENT_ASYNC} \
+            ${DATA_ASYNC} \
+            ${DAMPER_CRAWL} \
+            ${JMX} \
+            -cp ${CLASSPATH} net.sf.dz3.runtime.Container $*)
