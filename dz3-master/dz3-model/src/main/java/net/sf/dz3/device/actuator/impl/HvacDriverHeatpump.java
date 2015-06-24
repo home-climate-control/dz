@@ -26,6 +26,11 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
     private boolean enabled = true;
     
     /**
+     * HVAC mode mirror, to keep track of what it should actually be.
+     */
+    private HvacMode mode;
+    
+    /**
      * Create an instance with all straight switches.
      * 
      * @param switchMode Switch to pull to change the operating mode.
@@ -77,6 +82,9 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
 
         checkEnabled();
         
+        // Let's remember what this is, in case there's a power loss
+        this.mode = mode;
+        
         boolean state = HvacMode.HEATING == mode;
         switchMode.setState(reverseMode ? !state : state);
     }
@@ -85,6 +93,14 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
     protected synchronized void doSetStage(int stage) throws IOException {
         
         checkEnabled();
+        
+        // Let's make sure that the mode is what it actually is supposed to be - but it only makes sense
+        // if we're switching ON, not off
+        
+        if (stage > 0) {
+
+            doSetMode(mode);
+        }
         
         boolean state = stage > 0 ? true: false;
         switchRunning.setState(reverseRunning ? !state : state);
@@ -95,6 +111,7 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
         
         checkEnabled();
         
+        // We don't have to restore the mode here
         boolean state = speed > 0 ? true: false;
         switchFan.setState(reverseFan ? !state : state);
     }
