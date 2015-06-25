@@ -40,6 +40,7 @@ ${LIBDIR}/commons-codec-1.2.jar:\
 ${LIBDIR}/commons-httpclient-3.1.jar:\
 ${LIBDIR}/commons-lang3-3.3.2.jar:\
 ${LIBDIR}/commons-logging-1.1.1.jar:\
+${LIBDIR}/joda-time-2.8.1.jar:\
 ${LIBDIR}/log4j-1.2.16.jar:\
 ${LIBDIR}/spring-2.5.6.jar:\
 ${LIBDIR}/google-api-client-${GOOGLE_OAUTH_VERSION}.jar:\

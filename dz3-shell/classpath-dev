@@ -21,6 +21,7 @@ COMMONS_LANG=${LIBDIR}/org/apache/commons/commons-lang3/3.3.2/commons-lang3-3.3.
 COMMONS_LOGGING=${LIBDIR}/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar
 COMMONS_HTTPCLIENT=${LIBDIR}/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar
 LOG4J=${LIBDIR}/log4j/log4j/1.2.16/log4j-1.2.16.jar
+JODA_TIME=${LIBDOR}/joda-time/joda-time/2.8.1/joda-time-2.8.1.jar
 SPRING=${LIBDIR}/org/springframework/spring/2.5.6/spring-2.5.6.jar
 GSON=${LIBDIR}/com/google/code/gson/gson/1.7.1/gson-1.7.1.jar
 XBEE_API=${LIBDIR}/com/rapplogic/xbeeapi/${XBEE_VERSION}/xbeeapi-${XBEE_VERSION}.jar
@@ -58,6 +59,7 @@ ${COMMONS_CODEC}:\
 ${COMMONS_LANG}:\
 ${COMMONS_LOGGING}:\
 ${COMMONS_HTTPCLIENT}:\
+${JODA_TIME}:\
 ${LOG4J}:\
 ${SPRING}:\
 ${GSON}:\
