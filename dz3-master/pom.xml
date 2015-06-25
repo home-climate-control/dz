@@ -82,7 +82,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jukebox.groupId>net.sf.jukebox</jukebox.groupId>
-        <jukebox.version>6.1.2</jukebox.version>
+        <jukebox.version>6.1.3-SNAPSHOT</jukebox.version>
     </properties>
     <dependencyManagement>
         <dependencies>
