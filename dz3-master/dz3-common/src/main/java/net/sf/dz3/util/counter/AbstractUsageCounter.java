@@ -112,6 +112,10 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
         this.threshold = state.threshold;
         this.current = state.current;
         
+        if (target == null) {
+            throw new IllegalArgumentException("null target doesn't make sense");
+        }
+        
         target.addConsumer(this);
     }
 

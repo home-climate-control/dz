@@ -155,7 +155,11 @@ public class FileUsageCounter extends TransientUsageCounter {
             logger.debug(getUsageRelative() + "/" + getUsageAbsolute());
 
             File persistentStorage = (File) getStorageKeys()[0];
-            PrintWriter pw = new PrintWriter(new FileWriter(persistentStorage.getCanonicalPath()));
+            File canonical = new File(persistentStorage.getCanonicalPath());
+            
+            canonical.getParentFile().mkdirs();
+            
+            PrintWriter pw = new PrintWriter(new FileWriter(canonical));
             
             pw.println("# Resource Usage Counter: " + getName());
             pw.println(CF_THRESHOLD + "=" + getThreshold());
