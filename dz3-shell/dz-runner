@@ -14,7 +14,11 @@ export BASENAME=`dirname $0`
 # Comment out the next line if DZ blows out of memory for you - and don't forget to file a bug report.
 # See http://diy-zoning.blogspot.com/2010/01/memory-leak-hunt-aftermath.html for details
 
-MEM_LIMITS="-Xms4m -Xmx4m"
+# UPDATE: It remains to be seen how much memory DZ actually consumes when running under Java 7 and 8.
+# With 4MB, it blows out of memory almost immediately (while running within 4MB under Java 6 just fine).
+# Commenting out for now.
+
+# MEM_LIMITS="-Xms4m -Xmx4m"
 
 # Uncomment the next line if you experience random freezes.
 # Please see http://code.google.com/p/diy-zoning/issues/detail?id=6 for more details and instructions.
