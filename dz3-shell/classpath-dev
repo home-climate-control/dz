@@ -37,7 +37,7 @@ ${DZ}/dz3-connector/${DZ_VERSION}/dz3-connector-${DZ_VERSION}.jar:\
 ${DZ}/dz3-http/${DZ_VERSION}/dz3-http-${DZ_VERSION}.jar:\
 ${DZ}/dz3-sensors/${DZ_VERSION}/dz3-sensors-${DZ_VERSION}.jar:\
 ${DZ}/dz3-scheduler/${DZ_VERSION}/dz3-scheduler-${DZ_VERSION}.jar:\
-${DZ}/dz3-scheduler-gcal/${DZ_VERSION}/dz3-scheduler-gcal-${DZ_VERSION}.jar:\
+${DZ}/dz3-scheduler-gcal-v3/${DZ_VERSION}/dz3-scheduler-gcal-v3-${DZ_VERSION}.jar:\
 ${DZ}/dz3-spring/${DZ_VERSION}/dz3-spring-${DZ_VERSION}.jar:\
 ${DZ}/dz3-owapi/${DZ_VERSION}/dz3-owapi-${DZ_VERSION}.jar:\
 ${DZ}/dz3-servomaster/${DZ_VERSION}/dz3-servomaster-${DZ_VERSION}.jar:\
