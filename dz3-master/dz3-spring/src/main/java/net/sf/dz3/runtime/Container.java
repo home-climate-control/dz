@@ -73,6 +73,8 @@ public class Container {
         } catch (Throwable t) {
             logger.fatal("Unexpected exception: ", t);
         } finally {
+            
+            logger.fatal("Shutting down");
             NDC.pop();
         }
     }
