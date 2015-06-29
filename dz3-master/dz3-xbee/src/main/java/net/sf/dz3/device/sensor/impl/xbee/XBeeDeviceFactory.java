@@ -511,7 +511,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                 "XBee device factory at " + baud + " baud on " + port);
     }
 
-    private class XBeeSensorProxy extends SensorProxy implements DataSink<Double>, JmxAware {
+    private class XBeeSensorProxy extends SensorProxy {
 
         public XBeeSensorProxy(String address, int pollIntervalMillis, SensorType type) {
 
