@@ -274,7 +274,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             AtCommandResponse nodeTimeout = (AtCommandResponse) target.sendSynchronous(new AtCommand("NT"), XBeeConstants.TIMEOUT_NT_MILLIS);
 
             // default is 6 seconds
-            long nodeDiscoveryTimeout = ByteUtils.convertMultiByteToInt(nodeTimeout.getValue()) * 100;
+            long nodeDiscoveryTimeout = ((long) ByteUtils.convertMultiByteToInt(nodeTimeout.getValue())) * 100L;
             
             logger.debug("Node discovery timeout is " + nodeDiscoveryTimeout + " milliseconds");
             
