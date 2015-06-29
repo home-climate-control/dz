@@ -20,7 +20,6 @@ import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
 import org.apache.log4j.NDC;
