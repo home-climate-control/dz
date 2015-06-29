@@ -16,6 +16,7 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
+import org.junit.Ignore;
 
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
@@ -24,19 +25,15 @@ import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeeResponse;
 
+@Ignore
 public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
     
-    private final String serialPort = "/dev/ttyUSB0";
+    private static final String serialPort = "/dev/ttyUSB0";
 
     private final Logger logger = Logger.getLogger(getClass());
     private final Random rg = new Random();
     
-    public void testNothing() {
-        
-        // To make JUnit happy while other hardware specific tests are disabled
-    }
-    
-    public void xtestSensor() throws XBeeException {
+    public void testSensor() throws XBeeException {
     
         NDC.push("testSensor");
         
@@ -155,7 +152,7 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
         }
     }
     
-    public void xtestStartStop() throws InterruptedException {
+    public void testStartStop() throws InterruptedException {
         
         NDC.push("testStartStop");
         
