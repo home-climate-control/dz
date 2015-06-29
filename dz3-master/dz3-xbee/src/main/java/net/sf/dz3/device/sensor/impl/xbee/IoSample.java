@@ -142,13 +142,13 @@ public class IoSample {
                 
                 if ((raw & ~0x3FF) == 0) {
                     
-                    sample[bitOffset] = new Double(rawDouble / resolution);
+                    sample[bitOffset] = Double.valueOf(rawDouble / resolution);
 
                 } else {
                     
                     logger.error("ADC sample out of range for " + Parser.render4x4(xbeeAddress) + ":"
                             + bitOffset + " (0x" + Integer.toHexString(raw)
-                            + "), sample would've been " + new Double(rawDouble / resolution));
+                            + "), sample would've been " + Double.valueOf(rawDouble / resolution));
                     
                     sample[bitOffset] = null;
 
