@@ -3,13 +3,13 @@ package net.sf.dz3.device.model.impl;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.model.ZoneController;
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.NDC;
 
@@ -78,7 +78,7 @@ public class UnitModel extends LogAware implements Unit {
         }
         
         this.name = name;
-        signature = new MessageDigestFactory().getMD5(name).substring(0, 19);
+        signature = MessageDigestCache.getMD5(name).substring(0, 19);
         
         setMinRuntime(minRuntimeMillis);
         

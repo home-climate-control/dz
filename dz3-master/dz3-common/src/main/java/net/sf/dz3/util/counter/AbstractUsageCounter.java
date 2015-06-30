@@ -2,11 +2,11 @@ package net.sf.dz3.util.counter;
 
 import java.io.IOException;
 
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -90,7 +90,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
         }
 
         this.name = name;
-        this.signature = new MessageDigestFactory().getMD5(name).substring(0, 19);
+        this.signature = MessageDigestCache.getMD5(name).substring(0, 19);
         this.counter = counter;
         this.storageKeys = storageKeys;
         

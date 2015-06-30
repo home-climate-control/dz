@@ -1,12 +1,12 @@
 package net.sf.dz3.device.model.impl;
 
 import net.sf.dz3.device.model.HvacSignal;
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.logger.model.DataLogger;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.NDC;
 
@@ -48,7 +48,7 @@ public class HvacSignalSplitter implements DataSink<HvacSignal>, DataSource<Doub
             {
                 // Current operating mode
                 String sourceName = signal.sourceName + ".mode";
-                String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
                 DataSample<Double> mode = new DataSample<Double>(signal.timestamp, sourceName, signature, (double)signal.sample.mode.mode, null);
                 dataBroadcaster.broadcast(mode);
             }
@@ -56,7 +56,7 @@ public class HvacSignalSplitter implements DataSink<HvacSignal>, DataSource<Doub
             {
                 // Whether the unit is currently running
                 String sourceName = signal.sourceName + ".running";
-                String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
                 DataSample<Double> running = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.running ? 1.0 : 0.0, null);
                 dataBroadcaster.broadcast(running);
             }
@@ -64,7 +64,7 @@ public class HvacSignalSplitter implements DataSink<HvacSignal>, DataSource<Doub
             {
                 // The demand sent to the HVAC hardware driver
                 String sourceName = signal.sourceName + ".demand";
-                String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
                 DataSample<Double> running = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.demand, null);
                 dataBroadcaster.broadcast(running);
             }

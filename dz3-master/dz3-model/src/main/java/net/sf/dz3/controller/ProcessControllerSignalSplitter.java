@@ -1,10 +1,10 @@
 package net.sf.dz3.controller;
 
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.NDC;
 
@@ -59,7 +59,7 @@ public class ProcessControllerSignalSplitter implements DataSink<ProcessControll
      */
     protected final void consume(long timestamp, String sourceName, double signal) {
         
-        String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+        String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
         DataSample<Double> output = new DataSample<Double>(timestamp, sourceName, signature, signal, null);
 
         dataBroadcaster.broadcast(output);
@@ -73,7 +73,7 @@ public class ProcessControllerSignalSplitter implements DataSink<ProcessControll
     private void consumeSignal(DataSample<Double> signal) {
         
         String name = signal.sourceName + ".signal";
-        String signature = new MessageDigestFactory().getMD5(name).substring(0, 19);
+        String signature = MessageDigestCache.getMD5(name).substring(0, 19);
         DataSample<Double> output = new DataSample<Double>(signal.timestamp, name, signature, signal.sample, null);
 
         dataBroadcaster.broadcast(output);

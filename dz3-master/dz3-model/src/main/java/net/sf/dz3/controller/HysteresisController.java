@@ -1,9 +1,9 @@
 package net.sf.dz3.controller;
 
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.conf.ConfigurableProperty;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 /**
  * A hysteresis controller.
@@ -157,7 +157,7 @@ public class HysteresisController extends AbstractProcessController {
 	}
 
         String sourceName = pv.sourceName + ".pc";
-        String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+        String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
 
         return new DataSample<Double>(pv.timestamp, sourceName, signature,state ? 1.0 : -1.0, null);
     }

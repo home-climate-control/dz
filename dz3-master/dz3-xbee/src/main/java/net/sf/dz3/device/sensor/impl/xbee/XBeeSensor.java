@@ -7,11 +7,11 @@ import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -56,7 +56,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
         this.type = type;
         
         this.sourceName = type + this.address.toString();
-        this.signature = new MessageDigestFactory().getMD5(type + getAddress()).substring(0, 19);
+        this.signature = MessageDigestCache.getMD5(type + getAddress()).substring(0, 19);
     }
 
     @Override

@@ -12,12 +12,12 @@ import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ThermostatStatus;
 import net.sf.dz3.device.model.ZoneController;
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.NDC;
 
@@ -98,7 +98,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
 
         this.name = name;
-        signature = new MessageDigestFactory().getMD5(name).substring(0, 19);
+        signature = MessageDigestCache.getMD5(name).substring(0, 19);
 
         signal = new DataSample<Double>(System.currentTimeMillis(), name, signature, 0d, null);
 

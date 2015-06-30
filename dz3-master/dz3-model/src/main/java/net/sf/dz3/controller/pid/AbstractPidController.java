@@ -2,11 +2,11 @@ package net.sf.dz3.controller.pid;
 
 import net.sf.dz3.controller.AbstractProcessController;
 import net.sf.dz3.controller.ProcessControllerStatus;
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.NDC;
 
@@ -234,7 +234,7 @@ public abstract class AbstractPidController extends AbstractProcessController im
             }
 
             String sourceName = pv.sourceName + ".pc";
-            String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+            String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
 
             return new DataSample<Double>(pv.timestamp, sourceName, signature, signal, null);
 

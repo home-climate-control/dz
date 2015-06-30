@@ -1,9 +1,9 @@
 package net.sf.dz3.controller;
 
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -211,7 +211,7 @@ public abstract class AbstractProcessController implements ProcessController {
         // the purpose is not control but instrumentation
         
         String sourceName = lastKnownSignal.sourceName + "." + getShortName();
-        String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+        String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
 
         DataSample<ProcessControllerStatus> sample = new DataSample<ProcessControllerStatus>(lastKnownSignal.timestamp,
                 sourceName, signature, status, null);

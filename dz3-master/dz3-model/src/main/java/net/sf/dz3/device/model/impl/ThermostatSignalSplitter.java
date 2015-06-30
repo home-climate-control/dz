@@ -2,12 +2,12 @@ package net.sf.dz3.device.model.impl;
 
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
+import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.logger.model.DataLogger;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.util.MessageDigestFactory;
 
 import org.apache.log4j.NDC;
 
@@ -49,7 +49,7 @@ public class ThermostatSignalSplitter implements DataSink<ThermostatSignal>, Dat
             {
                 // Whether this thermostat is enabled
                 String sourceName = signal.sourceName + ".enabled";
-                String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
                 DataSample<Double> calling = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.enabled ? 1.0 : 0.0, null);
                 dataBroadcaster.broadcast(calling);
             }
@@ -57,7 +57,7 @@ public class ThermostatSignalSplitter implements DataSink<ThermostatSignal>, Dat
             {
                 // Whether this thermostat is on hold
                 String sourceName = signal.sourceName + ".hold";
-                String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
                 DataSample<Double> calling = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.onHold ? 1.0 : 0.0, null);
                 dataBroadcaster.broadcast(calling);
             }
@@ -65,7 +65,7 @@ public class ThermostatSignalSplitter implements DataSink<ThermostatSignal>, Dat
             {
                 // Whether this thermostat is calling
                 String sourceName = signal.sourceName + ".calling";
-                String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
                 DataSample<Double> calling = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.calling ? 1.0 : 0.0, null);
                 dataBroadcaster.broadcast(calling);
             }
@@ -73,7 +73,7 @@ public class ThermostatSignalSplitter implements DataSink<ThermostatSignal>, Dat
             {
                 // Whether this thermostat is voting
                 String sourceName = signal.sourceName + ".voting";
-                String signature = new MessageDigestFactory().getMD5(sourceName).substring(0, 19);
+                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
                 DataSample<Double> calling = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.voting ? 1.0 : 0.0, null);
                 dataBroadcaster.broadcast(calling);
             }
