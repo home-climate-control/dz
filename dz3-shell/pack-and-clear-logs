@@ -1,0 +1,27 @@
+#! /bin/sh
+
+# Setting the DZ_HOME here is one of possible options. Uncomment and adjust the following line if that works for you
+
+# export DZ_HOME=$HOME/dz
+
+if test -z "${DZ_HOME}"; then
+    echo "Please set DZ_HOME to where the logs are so they can be processed";
+    exit -1;
+fi
+
+# If the logs aren't read by this time, they can be safely packed to store space
+PACK_AGE=4
+
+# If the logs aren't stashed away by this time, they can be deleted. You've been warned.
+DELETE_AGE=7
+
+for PACK in `find ${DZ_HOME} -maxdepth 1 -name "*.log.*" -mtime +${PACK_AGE}|grep -v ".bz2$"`; do
+    echo "Packing $PACK";
+    bzip2 $PACK;
+done
+
+for DELETE in `find ${DZ_HOME} -maxdepth 1 -name "*.log.*.bz2" -mtime +${DELETE_AGE}`; do
+    echo "Deleting $DELETE";
+    rm $DELETE;
+done
+
