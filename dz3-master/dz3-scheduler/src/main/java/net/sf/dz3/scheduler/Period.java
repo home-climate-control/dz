@@ -127,7 +127,10 @@ public class Period implements Comparable<Period> {
 
                 } catch (Throwable t) {
 
-                    logger.debug("Failed to parse '" + time + "' as '" + format + "'");
+                    // VT: NOTE: Only uncomment this if you're having problems.
+                    // This message may repeat over a hundred thousand times a day.
+                    
+                    // logger.debug("Failed to parse '" + time + "' as '" + format + "'");
                 }
             }
 
