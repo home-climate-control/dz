@@ -3,7 +3,7 @@
 <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
   <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
     <layout class="net.sf.jukebox.logger.ANSIColorLayout">
-      <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %p %C{1} %t [%x] %m%n" />
+      <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %p %c{1} %t [%x] %m%n" />
     </layout>
     <!-- Set your comfortable debug level for the console. -->
     <filter class="org.apache.log4j.varia.LevelRangeFilter">
@@ -14,7 +14,7 @@
   <appender name="DebugAppender" class="org.apache.log4j.DailyRollingFileAppender">
     <param name="File" value="debug.log" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %p %C{1} %t [%x] %m%n" />
+      <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %p %c{1} %t [%x] %m%n" />
     </layout>
     <!-- Set your comfortable debug level for the debug log. Best be left as is.-->
     <filter class="org.apache.log4j.varia.LevelRangeFilter">
@@ -25,7 +25,7 @@
   <appender name="FileAppender" class="org.apache.log4j.DailyRollingFileAppender">
     <param name="File" value="dz.log" />
     <layout class="org.apache.log4j.PatternLayout">
-      <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %p %C{1} %t [%x] %m%n" />
+      <param name="ConversionPattern" value="%d{HH:mm:ss,SSS} %p %c{1} %t [%x] %m%n" />
     </layout>
     <!-- Set your comfortable debug level for the long term log. -->
     <filter class="org.apache.log4j.varia.LevelRangeFilter">
