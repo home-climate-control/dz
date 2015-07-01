@@ -20,6 +20,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
 
 import org.apache.log4j.NDC;
+import org.apache.log4j.Priority;
 
 /**
  * The zone controller abstraction.
@@ -137,9 +138,14 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
         NDC.push("stateChanged");
 
         try {
+            
+            if (logger.isTraceEnabled()) {
+                
+                // DataSample.toString() is expensive,and DataSample is a component of ThermostatSignal
 
-            logger.debug("Source: " + source);
-            logger.debug("Signal: " + pv);
+                logger.trace("Source: " + source);
+                logger.trace("Signal: " + pv);
+            }
 
             if (lastKnownSignal.get(source) == null) {
 
