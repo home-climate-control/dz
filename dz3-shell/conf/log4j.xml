@@ -49,9 +49,6 @@
   <category name="net.sf.dz3.device.sensor">
     <priority value="INFO" />
   </category>
-  <category name="net.sf.dz3.event.EventBroadcast">
-    <priority value="INFO" />
-  </category>
   <category name="net.sf.dz3.device.model.HvacSignal">
     <priority value="ERROR" />
   </category>
