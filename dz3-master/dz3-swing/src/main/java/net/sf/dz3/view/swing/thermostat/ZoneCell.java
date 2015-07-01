@@ -74,7 +74,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
         
             this.signal = signal;
             
-            logger.debug("Signal: " + signal);
+            logger.trace(signal);
 
             repaint();
 
