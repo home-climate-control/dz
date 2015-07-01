@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.sf.dz3.device.actuator.Damper;
-import net.sf.dz3.device.model.DamperController;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;

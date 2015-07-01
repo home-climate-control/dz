@@ -29,14 +29,12 @@
 package com.dalsemi.onewire.adapter;
 
 // imports
-import java.util.Enumeration;
-import com.dalsemi.onewire.container.OneWireContainer;
-import com.dalsemi.onewire.*;
-import com.dalsemi.onewire.adapter.*;
-import com.dalsemi.onewire.OneWireException;
-import java.util.Vector;
-import java.lang.ClassNotFoundException;
 import java.io.File;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import com.dalsemi.onewire.OneWireException;
+import com.dalsemi.onewire.utils.Address;
 
 
 /**

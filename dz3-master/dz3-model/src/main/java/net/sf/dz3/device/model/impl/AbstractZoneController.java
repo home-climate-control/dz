@@ -20,7 +20,6 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
 
 import org.apache.log4j.NDC;
-import org.apache.log4j.Priority;
 
 /**
  * The zone controller abstraction.
