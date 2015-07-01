@@ -48,7 +48,7 @@ public class PeriodMatcher {
 
                 if (p.includes(time)) {
 
-                    logger.debug("Included " + p);
+                    logger.trace(p);
                     stack.push(p);
                 }
             }
@@ -82,7 +82,7 @@ public class PeriodMatcher {
 
                 if (p.includesDay(date)) {
 
-                    logger.debug("Including " + p);
+                    logger.trace(p);
                     result.put(p, zoneSchedule.get(p));
                 }
             }
