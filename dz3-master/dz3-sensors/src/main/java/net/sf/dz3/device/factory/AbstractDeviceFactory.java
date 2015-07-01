@@ -397,8 +397,8 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
                     throw new IllegalStateException("How did we end up here?");
                 }
 
-                logger.debug("Rebroadcast: " + signal);
-                logger.debug("Container: #" + Integer.toHexString(container.hashCode()));
+                logger.trace(signal);
+                logger.trace("Container: #" + Integer.toHexString(container.hashCode()));
 
                 currentSignal = signal;
                 broadcast(signal);
