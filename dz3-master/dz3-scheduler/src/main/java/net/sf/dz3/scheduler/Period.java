@@ -8,7 +8,6 @@ import java.util.GregorianCalendar;
 
 import net.sf.dz3.device.model.ZoneStatus;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 import org.joda.time.DateTime;
 
@@ -18,8 +17,6 @@ import org.joda.time.DateTime;
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class Period implements Comparable<Period> {
-    
-    private final Logger logger = Logger.getLogger(getClass());
     
     private static final String[] dateFormats = {
         
