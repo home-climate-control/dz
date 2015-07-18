@@ -10,7 +10,7 @@ if test -z "${DZ_HOME}"; then
 fi
 
 # If the logs aren't read by this time, they can be safely packed to store space
-PACK_AGE=4
+PACK_AGE=2
 
 # If the logs aren't stashed away by this time, they can be deleted. You've been warned.
 DELETE_AGE=7
