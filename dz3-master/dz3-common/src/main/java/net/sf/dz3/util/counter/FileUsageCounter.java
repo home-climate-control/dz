@@ -58,6 +58,10 @@ public class FileUsageCounter extends TransientUsageCounter {
             
             File persistentStorage = (File) storageKeys[0];
             
+            if (persistentStorage == null) {
+                throw new IllegalArgumentException("persistentStorage can't be null");
+            }
+            
             logger.info("Loading " + persistentStorage);
             
             if (persistentStorage.isDirectory()) {
