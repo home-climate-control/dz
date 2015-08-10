@@ -1,7 +1,9 @@
 package net.sf.dz3.util.counter;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.UUID;
 
 import org.apache.log4j.NDC;
@@ -84,6 +86,23 @@ public class FileUsageCounterTest extends TestCase {
         } finally {
             NDC.pop();
         }
+    }
+    
+    public void testExisting() throws IOException {
+        
+        File f = File.createTempFile("counter", "");
+        
+        f.deleteOnExit();
+
+        PrintWriter pw = new PrintWriter(new FileWriter(f));
+
+        pw.println("# comment");
+        pw.println("threshold=100");
+        pw.println("current=0");
+        
+        pw.close();
+        
+        new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
     }
     
     /**
