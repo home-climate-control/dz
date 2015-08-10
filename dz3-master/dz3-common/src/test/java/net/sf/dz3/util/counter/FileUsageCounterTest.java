@@ -105,6 +105,44 @@ public class FileUsageCounterTest extends TestCase {
         new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
     }
     
+    public void testNoThreshold() throws IOException {
+        
+        File f = File.createTempFile("counter", "");
+        
+        f.deleteOnExit();
+
+        try {
+            
+            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
+            
+        } catch (IllegalArgumentException ex) {
+            
+            assertEquals("Wrong exception message", "No 'threshold=NN' found in " + f.getCanonicalPath(), ex.getMessage());
+        }
+    }
+
+    public void testNoCurrent() throws IOException {
+        
+        File f = File.createTempFile("counter", "");
+        
+        f.deleteOnExit();
+
+        PrintWriter pw = new PrintWriter(new FileWriter(f));
+
+        pw.println("threshold=100");
+        
+        pw.close();
+        
+        try {
+            
+            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
+            
+        } catch (IllegalArgumentException ex) {
+            
+            assertEquals("Wrong exception message", "No 'current=NN' found in " + f.getCanonicalPath(), ex.getMessage());
+        }
+    }
+
     /**
      * Make sure directory can't be specified as persistent storage.
      */

@@ -119,11 +119,11 @@ public class FileUsageCounter extends TransientUsageCounter {
             }
             
             if (threshold == null) {
-                throw new IOException("No '" + CF_THRESHOLD + "=NN' found in " + persistentStorage.getCanonicalPath());
+                throw new IllegalArgumentException("No '" + CF_THRESHOLD + "=NN' found in " + persistentStorage.getCanonicalPath());
             }
 
             if (current == null) {
-                throw new IOException("No '" + CF_CURRENT +"=NN' found in " + persistentStorage.getCanonicalPath());
+                throw new IllegalArgumentException("No '" + CF_CURRENT +"=NN' found in " + persistentStorage.getCanonicalPath());
             }
 
             CounterState state = new CounterState(threshold.longValue(), current.longValue());
