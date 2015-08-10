@@ -23,4 +23,8 @@
     <Match>
         <Class name="net.sf.dz3.util.digest.MessageDigestCacheTest"/>
     </Match>
+    <!-- Test class, inconsequential -->
+    <Match>
+        <Class name="net.sf.dz3.util.counter.FileUsageCounterTest"/>
+    </Match>
 </FindBugsFilter>
