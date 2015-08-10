@@ -63,6 +63,9 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
     
+    /**
+     * Make sure {@link FileUsageCounter#reset()} works.
+     */
     public void testReset() throws IOException {
         
         NDC.push("testReset");
@@ -72,13 +75,20 @@ public class FileUsageCounterTest extends TestCase {
             File f = createNonexistentDirect();
             FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
 
+            // VT: FIXME: Add the pre-reset value check here
+            
             counter.reset();
+
+            // VT: FIXME: Add the post-reset value check here
 
         } finally {
             NDC.pop();
         }
     }
     
+    /**
+     * Make sure directory can't be specified as persistent storage.
+     */
     public void testDirectory() throws IOException {
         
         String tmp = System.getProperty("java.io.tmpdir");
