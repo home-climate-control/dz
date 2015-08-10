@@ -153,7 +153,9 @@ public class FileUsageCounter extends TransientUsageCounter {
             File persistentStorage = (File) getStorageKeys()[0];
             File canonical = new File(persistentStorage.getCanonicalPath());
             
-            canonical.getParentFile().mkdirs();
+            if (canonical.getParentFile().mkdirs()) {
+                logger.info("Created " + canonical);
+            };
             
             PrintWriter pw = new PrintWriter(new FileWriter(canonical));
             
