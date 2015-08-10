@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
@@ -74,20 +75,20 @@ public class FileUsageCounter extends TransientUsageCounter {
                 throw new IOException(persistentStorage + ": not a regular file");
             }
 
-            BufferedReader br = new BufferedReader(new FileReader(persistentStorage));
+            LineNumberReader lnr = new LineNumberReader(new FileReader(persistentStorage));
 
             Long threshold = null;
             Long current = null;
 
             while (true) {
 
-                String line = br.readLine();
+                String line = lnr.readLine();
                 
                 if (line == null) {
                     
                     // End of file
                     
-                    br.close();
+                    lnr.close();
                     break;
                 }
                 
@@ -113,8 +114,8 @@ public class FileUsageCounter extends TransientUsageCounter {
                 
                 } catch (Throwable t) {
                     
-                    br.close();
-                    throw new IOException("Failed to parse line '" + line + "' out of " + persistentStorage.getCanonicalPath());
+                    lnr.close();
+                    throw new IllegalArgumentException("Failed to parse line '" + line + "' out of " + persistentStorage.getCanonicalPath() + " (line " + lnr.getLineNumber() + ")");
                 }
             }
             

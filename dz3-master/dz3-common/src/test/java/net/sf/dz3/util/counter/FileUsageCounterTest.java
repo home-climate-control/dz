@@ -143,6 +143,28 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    public void testBadLine() throws IOException {
+        
+        File f = File.createTempFile("counter", "");
+        
+        f.deleteOnExit();
+
+        PrintWriter pw = new PrintWriter(new FileWriter(f));
+
+        pw.println("threshold-100");
+        
+        pw.close();
+        
+        try {
+            
+            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
+            
+        } catch (IllegalArgumentException ex) {
+            
+            assertEquals("Wrong exception message", "Failed to parse line 'threshold-100' out of " + f.getCanonicalPath() + " (line 1)", ex.getMessage());
+        }
+    }
+
     /**
      * Make sure directory can't be specified as persistent storage.
      */
