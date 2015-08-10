@@ -169,13 +169,4 @@ public class FileUsageCounter extends TransientUsageCounter {
             NDC.pop();
         }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void doReset() throws IOException {
-        
-        save();
-    }
 }

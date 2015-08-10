@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
+import org.apache.log4j.NDC;
+
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
 import junit.framework.TestCase;
@@ -58,6 +60,22 @@ public class FileUsageCounterTest extends TestCase {
 
         } finally {
             f.delete();
+        }
+    }
+    
+    public void testReset() throws IOException {
+        
+        NDC.push("testReset");
+        
+        try {
+        
+            File f = createNonexistentDirect();
+            FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
+
+            counter.reset();
+
+        } finally {
+            NDC.pop();
         }
     }
     
