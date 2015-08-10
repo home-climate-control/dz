@@ -183,6 +183,20 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    public void testNotRegularFile() throws IOException {
+        
+        File devnull = new File("/dev/null");
+        
+        try {
+            
+            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), devnull);
+            fail("Should've failed by now");
+            
+        } catch (IOException ex) {
+            assertEquals("Wrong exception message", devnull + ": not a regular file", ex.getMessage());
+        }
+    }
+
     /**
      * Make sure that the persistent storage file that doesn't exist is created.
      */
