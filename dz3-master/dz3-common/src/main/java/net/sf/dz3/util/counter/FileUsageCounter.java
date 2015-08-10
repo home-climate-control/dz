@@ -48,14 +48,6 @@ public class FileUsageCounter extends TransientUsageCounter {
             
             Object[] storageKeys = getStorageKeys();
             
-            if (storageKeys == null) {
-                throw new IllegalArgumentException("null storageKeys");
-            }
-            
-            if (storageKeys.length == 0) {
-                throw new IllegalArgumentException("empty storageKeys");
-            }
-            
             File persistentStorage = (File) storageKeys[0];
             
             if (persistentStorage == null) {
