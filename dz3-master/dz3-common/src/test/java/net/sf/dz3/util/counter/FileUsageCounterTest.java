@@ -9,6 +9,72 @@ import net.sf.jukebox.datastream.signal.model.DataSource;
 import junit.framework.TestCase;
 
 public class FileUsageCounterTest extends TestCase {
+    
+    /**
+     * Make sure no null arguments are accepted.
+     */
+    public void testNullArgs() throws IOException {
+    
+        try {
+
+            new FileUsageCounter(null, null, null, null);
+            fail("Should've failed by now");
+            
+        } catch (IllegalArgumentException ex) {
+            
+            assertEquals("Wrong exception message", "name can't be null", ex.getMessage());
+        }
+
+        try {
+
+            new FileUsageCounter("name", null, null, null);
+            fail("Should've failed by now");
+            
+        } catch (IllegalArgumentException ex) {
+            
+            assertEquals("Wrong exception message", "counter can't be null", ex.getMessage());
+        }
+
+        try {
+
+            new FileUsageCounter("name", new TimeBasedUsage(), null, null);
+            fail("Should've failed by now");
+            
+        } catch (IllegalArgumentException ex) {
+            
+            assertEquals("Wrong exception message", "persistentStorage can't be null", ex.getMessage());
+        }
+
+        File f = createNonexistentDirect();
+
+        try {
+
+            new FileUsageCounter("name", new TimeBasedUsage(), null, f);
+            fail("Should've failed by now");
+            
+        } catch (IllegalArgumentException ex) {
+            
+            assertEquals("Wrong exception message", "null target doesn't make sense", ex.getMessage());
+
+        } finally {
+            f.delete();
+        }
+    }
+    
+    public void testDirectory() throws IOException {
+        
+        String tmp = System.getProperty("java.io.tmpdir");
+        File dir = new File(tmp);
+        
+        try {
+            
+            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), dir);
+            fail("Should've failed by now");
+            
+        } catch (IOException ex) {
+            assertEquals("Wrong exception message", tmp + ": is a directory", ex.getMessage());
+        }
+    }
 
     /**
      * Make sure that the persistent storage file that doesn't exist is created.
