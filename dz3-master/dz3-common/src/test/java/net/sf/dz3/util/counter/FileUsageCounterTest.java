@@ -185,6 +185,8 @@ public class FileUsageCounterTest extends TestCase {
 
     public void testNotRegularFile() throws IOException {
         
+        // Will not work on Windows, but who cares :)
+        
         File devnull = new File("/dev/null");
         
         try {
@@ -194,6 +196,23 @@ public class FileUsageCounterTest extends TestCase {
             
         } catch (IOException ex) {
             assertEquals("Wrong exception message", devnull + ": not a regular file", ex.getMessage());
+        }
+    }
+
+    public void testNotWritable() throws IOException {
+        
+        // Will not work on Windows, but who cares :)
+        // ...and if *this test fails, you're really doing it wrong
+        
+        File passwd = new File("/etc/passwd");
+        
+        try {
+            
+            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), passwd);
+            fail("Should've failed by now");
+            
+        } catch (IOException ex) {
+            assertEquals("Wrong exception message", passwd + ": can't write", ex.getMessage());
         }
     }
 
