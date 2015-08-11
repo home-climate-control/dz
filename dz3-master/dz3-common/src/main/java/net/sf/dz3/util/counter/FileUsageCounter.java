@@ -76,62 +76,69 @@ public class FileUsageCounter extends TransientUsageCounter {
             }
 
             LineNumberReader lnr = new LineNumberReader(new FileReader(persistentStorage));
-
-            Long threshold = null;
-            Long current = null;
-
-            while (true) {
-
-                String line = lnr.readLine();
-                
-                if (line == null) {
-                    
-                    // End of file
-                    
-                    lnr.close();
-                    break;
-                }
-                
-                if (line.startsWith("#")) {
-                    // That's a comment
-                    continue;
-                }
-                
-                StringTokenizer st = new StringTokenizer(line, "=");
-                
-                try {
-                
-                    String key = st.nextToken();
-                    Long value = Long.parseLong(st.nextToken());
-                    
-                    if ("threshold".equals(key)) {
-                        threshold = value;
-                    }
-                
-                    if ("current".equals(key)) {
-                        current = value;
-                    }
-                
-                } catch (Throwable t) {
-                    
-                    lnr.close();
-                    throw new IllegalArgumentException("Failed to parse line '" + line + "' out of " + persistentStorage.getCanonicalPath() + " (line " + lnr.getLineNumber() + ")");
-                }
-            }
             
-            if (threshold == null) {
-                throw new IllegalArgumentException("No '" + CF_THRESHOLD + "=NN' found in " + persistentStorage.getCanonicalPath());
+            try {
+
+                Long threshold = null;
+                Long current = null;
+
+                while (true) {
+
+                    String line = lnr.readLine();
+
+                    if (line == null) {
+
+                        // End of file
+
+                        lnr.close();
+                        break;
+                    }
+
+                    if (line.startsWith("#")) {
+                        // That's a comment
+                        continue;
+                    }
+
+                    StringTokenizer st = new StringTokenizer(line, "=");
+
+                    try {
+
+                        String key = st.nextToken();
+                        Long value = Long.parseLong(st.nextToken());
+
+                        if ("threshold".equals(key)) {
+                            threshold = value;
+                        }
+
+                        if ("current".equals(key)) {
+                            current = value;
+                        }
+
+                    } catch (Throwable t) {
+
+                        lnr.close();
+                        throw new IllegalArgumentException("Failed to parse line '" + line + "' out of " + persistentStorage.getCanonicalPath() + " (line " + lnr.getLineNumber() + ")");
+                    }
+                }
+
+                if (threshold == null) {
+                    throw new IllegalArgumentException("No '" + CF_THRESHOLD + "=NN' found in " + persistentStorage.getCanonicalPath());
+                }
+
+                if (current == null) {
+                    throw new IllegalArgumentException("No '" + CF_CURRENT +"=NN' found in " + persistentStorage.getCanonicalPath());
+                }
+
+                CounterState state = new CounterState(threshold.longValue(), current.longValue());
+
+                logger.info("Loaded: " + state);
+
+                return state;
+
+            } finally {
+            
+                lnr.close();
             }
-
-            if (current == null) {
-                throw new IllegalArgumentException("No '" + CF_CURRENT +"=NN' found in " + persistentStorage.getCanonicalPath());
-            }
-
-            CounterState state = new CounterState(threshold.longValue(), current.longValue());
-
-            logger.info("Loaded: " + state);
-
-            return state;
 
         } finally {
             NDC.pop();
