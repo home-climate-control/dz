@@ -85,6 +85,7 @@ public class FileUsageCounterTest extends TestCase {
             counter.consume(new DataSample<Double>("source", "signature", 1d, null));
             Thread.sleep(delay);
             counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            counter.consume(new DataSample<Double>("source", "signature", null, new Error()));
             
             logger.debug("Consumed: " + counter.getUsageAbsolute());
             
@@ -101,6 +102,23 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
     
+    public void testConsumeNull() throws IOException {
+        
+        try {
+        
+            File f = createNonexistentDirect();
+            
+            FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
+
+            counter.consume(null);
+
+        } catch (IllegalArgumentException ex) {
+            
+            assertEquals("Wrong exception message", "signal can't be null", ex.getMessage());
+
+        }
+    }
+
     public void testExisting() throws IOException {
         
         File f = File.createTempFile("counter", "");
