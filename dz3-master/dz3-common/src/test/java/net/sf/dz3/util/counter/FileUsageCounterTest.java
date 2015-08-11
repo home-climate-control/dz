@@ -119,21 +119,55 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
-    public void testExisting() throws IOException {
+    public void testExisting() throws IOException, InterruptedException {
         
-        File f = File.createTempFile("counter", "");
+        NDC.push("testExisting");
         
-        f.deleteOnExit();
+        try {
+        
+            File f = File.createTempFile("counter", "");
 
-        PrintWriter pw = new PrintWriter(new FileWriter(f));
+            f.deleteOnExit();
 
-        pw.println("# comment");
-        pw.println("threshold=100");
-        pw.println("current=0");
+            PrintWriter pw = new PrintWriter(new FileWriter(f));
+
+            pw.println("# comment");
+            pw.println("threshold=100");
+            pw.println("current=0");
+
+            pw.close();
+
+            FileUsageCounter counter = new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
+
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            Thread.sleep(25);
+
+            // This will cause a debug message
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            
+            logger.debug("Consumed: " + counter.getUsageRelative());
+
+            Thread.sleep(25);
+            
+            // This will cause an info message
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+
+            Thread.sleep(30);
+            
+            // This will cause a warning message
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+
+            Thread.sleep(30);
+
+            // This *will* cause an alert (error message)
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+
+            logger.debug("Consumed: " + counter.getUsageRelative());
+
         
-        pw.close();
-        
-        new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
+        } finally {
+            NDC.pop();
+        }
     }
     
     public void testNoThreshold() throws IOException {
