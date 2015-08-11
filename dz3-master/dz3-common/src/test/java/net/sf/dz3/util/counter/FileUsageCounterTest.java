@@ -6,13 +6,17 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
+import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
 import junit.framework.TestCase;
 
 public class FileUsageCounterTest extends TestCase {
+
+    private final Logger logger = Logger.getLogger(getClass());
     
     /**
      * Make sure no null arguments are accepted.
@@ -68,7 +72,7 @@ public class FileUsageCounterTest extends TestCase {
     /**
      * Make sure {@link FileUsageCounter#reset()} works.
      */
-    public void testReset() throws IOException {
+    public void testReset() throws IOException, InterruptedException {
         
         NDC.push("testReset");
         
@@ -76,12 +80,21 @@ public class FileUsageCounterTest extends TestCase {
         
             File f = createNonexistentDirect();
             FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
+            long delay = 100;
 
-            // VT: FIXME: Add the pre-reset value check here
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            Thread.sleep(delay);
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
             
-            counter.reset();
+            logger.debug("Consumed: " + counter.getUsageAbsolute());
+            
+            // Can't really assert much, the timer is too inexact
+            
+            assertTrue("Consumed value less than time passed???", counter.getUsageAbsolute() > delay);
 
-            // VT: FIXME: Add the post-reset value check here
+            counter.reset();
+            
+            assertEquals("Wrong value after reset", 0, counter.getUsageAbsolute());
 
         } finally {
             NDC.pop();
