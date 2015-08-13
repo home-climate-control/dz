@@ -17,7 +17,7 @@ public class NativeSensorFactory implements SensorFactory<NativeSensorDescriptor
 		return new NativeSensor(descriptor);
 	}
 
-	public class NativeSensor implements AnalogSensor {
+	public static class NativeSensor implements AnalogSensor {
 		
 		private final NativeSensorDescriptor descriptor;
 		
