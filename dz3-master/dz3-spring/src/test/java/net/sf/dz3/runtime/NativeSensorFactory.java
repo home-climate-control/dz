@@ -9,56 +9,56 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 
 public class NativeSensorFactory implements SensorFactory<NativeSensorDescriptor> {
 
-	@Override
-	public AnalogSensor getSensor(final NativeSensorDescriptor descriptor) {
-		
-		Logger.getLogger(getClass()).info("getSensor(" + descriptor + ") invoked");
-		
-		return new NativeSensor(descriptor);
-	}
+    @Override
+    public AnalogSensor getSensor(final NativeSensorDescriptor descriptor) {
 
-	public static class NativeSensor implements AnalogSensor {
-		
-		private final NativeSensorDescriptor descriptor;
-		
-		public NativeSensor(NativeSensorDescriptor descriptor) {
-			this.descriptor = descriptor;
-		}
+        Logger.getLogger(getClass()).info("getSensor(" + descriptor + ") invoked");
+
+        return new NativeSensor(descriptor);
+    }
+
+    public static class NativeSensor implements AnalogSensor {
+
+        private final NativeSensorDescriptor descriptor;
+
+        public NativeSensor(NativeSensorDescriptor descriptor) {
+            this.descriptor = descriptor;
+        }
 
 
-		@Override
-		public void addConsumer(DataSink<Double> consumer) {
-			// TODO Auto-generated method stub
-			
-		}
+        @Override
+        public void addConsumer(DataSink<Double> consumer) {
+            // TODO Auto-generated method stub
 
-		@Override
-		public void removeConsumer(DataSink<Double> consumer) {
-			// TODO Auto-generated method stub
-			
-		}
+        }
 
-		@Override
-		public JmxDescriptor getJmxDescriptor() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        @Override
+        public void removeConsumer(DataSink<Double> consumer) {
+            // TODO Auto-generated method stub
 
-		@Override
-		public String getAddress() {
-			// TODO Auto-generated method stub
-			return null;
-		}
+        }
 
-		@Override
-		public DataSample<Double> getSignal() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-		
-		public String toString() {
-			
-			return "Sensor[" + descriptor + "]";
-		}
-	};
+        @Override
+        public JmxDescriptor getJmxDescriptor() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public String getAddress() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public DataSample<Double> getSignal() {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        public String toString() {
+
+            return "Sensor[" + descriptor + "]";
+        }
+    };
 }

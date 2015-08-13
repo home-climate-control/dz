@@ -4,6 +4,6 @@ import net.sf.dz3.device.sensor.AnalogSensor;
 
 
 public interface SensorFactory<Descriptor extends SensorDescriptor> {
-	
-	AnalogSensor getSensor(Descriptor descriptor);
+
+    AnalogSensor getSensor(Descriptor descriptor);
 }
