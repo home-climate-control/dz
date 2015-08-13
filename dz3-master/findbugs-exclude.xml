@@ -35,4 +35,19 @@
     <Match>
         <Class name="net.sf.dz3.device.sensor.impl.onewire.SwitchAddressTest"/>
     </Match>
+
+    <!--
+    
+        Complex false positive. FindBugs is confused by
+        a) NDC.push() and
+        b) the fact that the lock access is indirect.
+        
+        Rewriting the code to use the bare Lock variable and no NDC.push() between lock() and try() takes care of it,
+        but there's no practical case where this can concievably happen.  
+        -->
+    <Match>
+        <Class name="net.sf.dz3.device.sensor.impl.onewire.SwitchTest"/>
+        <Bug pattern="UL_UNRELEASED_LOCK_EXCEPTION_PATH" />
+    </Match>
+    
 </FindBugsFilter>
