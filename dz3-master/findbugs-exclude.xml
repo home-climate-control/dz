@@ -50,4 +50,12 @@
         <Bug pattern="UL_UNRELEASED_LOCK_EXCEPTION_PATH" />
     </Match>
     
+    <!-- False positive, the classes that use these fields are in a different module and are not reachable by FindBugs -->
+    <Match>
+        <Class name="net.sf.dz3.device.factory.AbstractDeviceFactory"/>
+        <!-- <Field name="address2proxy" /> -->
+        <!-- <Field name="dataMap" /> -->
+        <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
+    </Match>
+    
 </FindBugsFilter>
