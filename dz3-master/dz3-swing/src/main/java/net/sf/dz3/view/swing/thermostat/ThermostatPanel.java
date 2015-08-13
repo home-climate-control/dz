@@ -645,7 +645,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         Graphics2D g2d = (Graphics2D) g;
         Dimension d = getSize();
         
-        Double signal = thermostatListener.signal == null ? null : thermostatListener.signal.sample.demand.sample;
+        Double signal = thermostatListener.signal.sample.demand.sample;
         HvacMode mode = getMode();
         ZoneState state = thermostatListener.signal == null ? null : (thermostatListener.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY);
         
