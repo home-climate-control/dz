@@ -22,7 +22,7 @@ public class ThermostatPanelTest extends TestCase {
         tp.keyPressed(new KeyEvent(tp, 0, 0, 0, 0, 's', 0));
     }
     
-    private class MockSensor implements AnalogSensor {
+    private static class MockSensor implements AnalogSensor {
         
         
         @Override
