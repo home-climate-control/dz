@@ -31,7 +31,7 @@ public class ZonePanel extends JPanel implements KeyListener {
     
     private static final long serialVersionUID = 6400746493551083129L;
     
-    private Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = Logger.getLogger(getClass());
 
     private int currentZoneOffset = 0;
     private final Zone[] zones;
@@ -118,7 +118,7 @@ public class ZonePanel extends JPanel implements KeyListener {
         setCurrentZone(0);
     }
     
-    private class Zone {
+    private static class Zone {
         
         public final ZoneCell zoneCell;
         public final ThermostatPanel thermostatPanel;
