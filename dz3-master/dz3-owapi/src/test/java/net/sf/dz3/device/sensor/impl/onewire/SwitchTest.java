@@ -66,8 +66,7 @@ public class SwitchTest extends TestCase {
             fail("Can't initialize DeviceFactory");
         }
 
-        @SuppressWarnings("unused")
-        Switch s = df.getSwitch("5F00000020AB3012:0");
+        df.getSwitch("5F00000020AB3012:0");
 
         logger.info("stopping");
 
