@@ -16,16 +16,14 @@ public class SwitchAddressTest extends TestCase {
     
     public void testGood() {
         
-        @SuppressWarnings("unused")
-        StringChannelAddress sa = new StringChannelAddress("1300000000E6B51F:1");
+        new StringChannelAddress("1300000000E6B51F:1");
     }
 
     public void testNoChannel() {
         
         try {
         
-            @SuppressWarnings("unused")
-            StringChannelAddress sa = new StringChannelAddress("1300000000E6B51F");
+            new StringChannelAddress("1300000000E6B51F");
             fail("Should've thrown an exception");
         
         } catch (IllegalArgumentException ex) {
@@ -37,8 +35,7 @@ public class SwitchAddressTest extends TestCase {
         
         try {
             
-            @SuppressWarnings("unused")
-            IntegerChannelAddress sa = new IntegerChannelAddress("1300000000E6B51F:0x0f");
+            new IntegerChannelAddress("1300000000E6B51F:0x0f");
             fail("Should've thrown an exception");
         
         } catch (NumberFormatException ex) {
@@ -50,8 +47,7 @@ public class SwitchAddressTest extends TestCase {
         
         try {
             
-            @SuppressWarnings("unused")
-            StringChannelAddress sa = new StringChannelAddress("1300000000E6B51F:1:2");
+            new StringChannelAddress("1300000000E6B51F:1:2");
             fail("Should've thrown an exception");
         
         } catch (IllegalArgumentException ex) {
@@ -63,8 +59,7 @@ public class SwitchAddressTest extends TestCase {
         
         try {
             
-            @SuppressWarnings("unused")
-            IntegerChannelAddress sa = new IntegerChannelAddress("1300000000E6B51F:-1");
+            new IntegerChannelAddress("1300000000E6B51F:-1");
             fail("Should've thrown an exception");
         
         } catch (IllegalArgumentException ex) {
