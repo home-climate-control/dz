@@ -32,8 +32,6 @@ import com.rapplogic.xbee.api.XBeeAddress64;
  */
 public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor {
     
-    private final Logger logger = Logger.getLogger(getClass());
-
     private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
     
     private final XBeeDeviceContainer container;

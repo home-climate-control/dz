@@ -26,8 +26,6 @@ import com.rapplogic.xbee.api.XBeeResponse;
  */
 public final class XBeeDeviceContainer extends AbstractDeviceContainer implements PrototypeContainer {
     
-    private final Logger logger = Logger.getLogger(getClass()); 
-
     private final XBeeDeviceFactory factory;
     private final XBeeAddress64 xbeeAddress;
     
