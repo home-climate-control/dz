@@ -87,7 +87,7 @@ public class MedianFilterTest extends TestCase {
         }
     }
     
-    private class Consumer implements DataSink<Double> {
+    private static class Consumer implements DataSink<Double> {
 
         public DataSample<Double> sample;
         
