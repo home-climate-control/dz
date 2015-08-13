@@ -12,9 +12,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class ReflectionTest extends TestCase {
 	
 	private final Logger logger = Logger.getLogger(getClass());
-	
-	private final String PROBLEM_METHOD = "getSensor";
 	private final NativeSensorFactory nativeFactory = new NativeSensorFactory();
+
+	private static final String PROBLEM_METHOD = "getSensor";
 	
 	public void testGetMethod() {
 		
