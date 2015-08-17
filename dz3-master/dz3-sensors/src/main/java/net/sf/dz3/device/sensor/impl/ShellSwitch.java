@@ -1,10 +1,11 @@
 package net.sf.dz3.device.sensor.impl;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
-
 
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.jukebox.jmx.JmxAware;
@@ -192,6 +193,8 @@ public class ShellSwitch implements Switch, JmxAware {
             process = runtime.exec(command);
             // wait for process completion
             int returnCode = 0;
+/*
+ * java 8 boolean waitfor implementation
             if (m_maxWaitMilliseconds > 0) {
                 boolean processHasEnded = process.waitfor(m_maxWaitMilliseconds,
                                                           MILLISECONDS);
@@ -208,9 +211,14 @@ public class ShellSwitch implements Switch, JmxAware {
                                  " milliseconds exceeded");
                 }
             } else {
+ * java 8 waitfor
+ */
                 returnCode = process.waitFor();
+/*
+ * java 8 boolean waitfor implementation
             }
-            // capture command output
+ * java 8 waitfor
+ */            // capture command output
             reader = new BufferedReader(
                             new InputStreamReader(process.getInputStream()));
             String output = read(reader);
@@ -322,6 +330,11 @@ public class ShellSwitch implements Switch, JmxAware {
             logger.debug("Unable to set switch " + m_address);
             throw new IOException("Unable to set switch state");
         }
+    }
+
+    @Override
+    public String getAddress() {
+        return m_address;
     }
 
     public String getOpenCommand() {
