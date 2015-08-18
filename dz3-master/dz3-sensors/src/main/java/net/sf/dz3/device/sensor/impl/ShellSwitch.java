@@ -9,6 +9,7 @@ import org.apache.log4j.NDC;
 
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.jukebox.jmx.JmxAware;
+import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
@@ -28,9 +29,8 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  *
  * This software is provided under GPLv3 with NO WARRANTY
  */
- // TODO: select Logger or NDC for logging
- // TODO: #ifdef commands to run on other operating systems
- // TODO: test Java 8 waitfor implementation
+ // TODO: configuration options to run on other operating systems
+ // TODO: implement timeout for command execution
 public class ShellSwitch implements Switch, JmxAware {
 
     private final Logger logger = Logger.getLogger(getClass());
@@ -190,35 +190,10 @@ public class ShellSwitch implements Switch, JmxAware {
             logger.debug("Switch " + m_address + " executing: '/bin/sh -c " +
                          command + "'");
             // execute command
-            process = runtime.exec(command);
+            process = runtime.exec(new String[] {"/bin/sh", "-c", command});
             // wait for process completion
-            int returnCode = 0;
-/*
- * java 8 boolean waitfor implementation
-            if (m_maxWaitMilliseconds > 0) {
-                boolean processHasEnded = process.waitfor(m_maxWaitMilliseconds,
-                                                          MILLISECONDS);
-                // check for process completion
-                if (processHasEnded) {
-                    // read return code
-                    returnCode = process.exitValue();
-                } else {
-                    // process is terminated in finally{} block
-                    // process.destroy();
-                    returnCode = 255;
-                    logger.error("Switch " + m_address + " process timed out "
-                                 + m_maxWaitMilliseconds +
-                                 " milliseconds exceeded");
-                }
-            } else {
- * java 8 waitfor
- */
-                returnCode = process.waitFor();
-/*
- * java 8 boolean waitfor implementation
-            }
- * java 8 waitfor
- */            // capture command output
+            int returnCode = process.waitFor();
+            // capture command output
             reader = new BufferedReader(
                             new InputStreamReader(process.getInputStream()));
             String output = read(reader);
@@ -233,6 +208,9 @@ public class ShellSwitch implements Switch, JmxAware {
                 } catch (Exception err) {
                     // member variables set above
                     retVal = -2;
+                    logger.error("Switch " + m_address +
+                                 " exception parsing command output: "
+                                 + output);
                 }
             } else {
                 // Error, switch position not reliable
@@ -245,6 +223,9 @@ public class ShellSwitch implements Switch, JmxAware {
         } catch (Exception err) {
             // member variables set above
             retVal = -4;
+            logger.error("Switch " + m_address +
+                         " exception in execution: "
+                         + command);
         } finally {
             // terminate process if not null
             if (process != null) {
@@ -282,21 +263,26 @@ public class ShellSwitch implements Switch, JmxAware {
             // execRet == 0
             // m_outputValueRead == true
             // m_commandOutputValue = 0 or 1
-            if ((execRet == 0) &&
-                (m_outputValueRead == true) &&
-                ((m_commandOutputValue ==0) || (m_commandOutputValue == 1))) {
-                    // set return value based on command output
-                    if (m_commandOutputValue == 0) {
-                        retVal = false;
-                    } else {
+            if ((execRet == 0) && (m_outputValueRead == true)) {
+                // set return value based on command output
+                if (m_commandOutputValue == 0) {
+                    retVal = false;
+                } else {
+                    if (m_commandOutputValue == 1) {
                         retVal = true;
+                    } else {
+                        logger.error("Switch " + m_address +
+                                     "Invalid command output: " +
+                                     m_commandOutputValue +
+                                     " cannot set state");
+                        throw new IOException(
+                            "Invalid command output, cannot set switch state");
                     }
+                }
             } else {
-                // WARNING - this implementation assumes the last
-                // command setState() was successful
-                retVal = m_lastCommandedState;
-                // alternative implementation
-                // throw new IOException("Unable to read switch state");
+                // source of error logged in execute()
+                logger.error("Switch " + m_address + "cannot get state");
+                throw new IOException("Unable to read switch state");
             }
         }
         return retVal;
@@ -337,18 +323,22 @@ public class ShellSwitch implements Switch, JmxAware {
         return m_address;
     }
 
+    @JmxAttribute(description="Shell command to open switch")
     public String getOpenCommand() {
         return m_openCommand;
     }
 
+    @JmxAttribute(description="Shell command to close switch")
     public String getCloseCommand() {
         return m_closeCommand;
     }
 
+    @JmxAttribute(description="Shell command to read switch state")
     public String getGetStateCommand() {
         return m_getStateCommand;
     }
 
+    @JmxAttribute(description="Not implemented - maximum exec wait millisec")
     public long getMaxWaitMilliseconds() {
         return m_maxWaitMilliseconds;
     }
@@ -367,12 +357,45 @@ public class ShellSwitch implements Switch, JmxAware {
 
     @Override
     public JmxDescriptor getJmxDescriptor() {
-
         return new JmxDescriptor(
                 "dz",
                 "Shell Switch",
                 Integer.toHexString(hashCode()),
                 "Executes open, close and status commands to operate switch");
+    }
+
+
+    /**
+     * Parse the content of the reader into a string.
+     *
+     * @param br Reader to read from.
+     *
+     * @return Parsed string.
+     *
+     * @exception IOException if things go sour.
+     *
+     * copy of read() from ShellSensor.java line 133
+     */
+    private String read(BufferedReader br) throws IOException {
+        NDC.push("read");
+        try {
+            long size = 0;
+            StringBuilder sb = new StringBuilder();
+            while (true) {
+                String line = br.readLine();
+                if (line == null) {
+                    break;
+                }
+                if (size > 0) {
+                    sb.append(System.getProperty("line.separator"));
+                }
+                size += line.length();
+                sb.append(line);
+            }
+            return sb.toString();
+        } finally {
+            NDC.pop();
+        }
     }
 
 }
