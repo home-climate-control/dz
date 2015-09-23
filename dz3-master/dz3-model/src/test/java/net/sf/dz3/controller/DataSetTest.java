@@ -1,5 +1,8 @@
 package net.sf.dz3.controller;
 
+import java.util.Random;
+
+import net.sf.dz3.instrumentation.Marker;
 import junit.framework.TestCase;
 
 public class DataSetTest extends TestCase {
@@ -50,5 +53,35 @@ public class DataSetTest extends TestCase {
             ds.record(101, 0d);
             assertEquals("Wrong value after expiration", 100, ds.iterator().next().longValue());
         }
+    }
+    
+    public void testPerformance10000000_100() {
+        
+        // This test completes roughly in 1.5s on the development system (with TreeSet based DataSet)
+        testPerformance(10000000, 100);
+    }
+    
+    public void testPerformance10000000_10000() {
+
+        // This test completes roughly in 2.5s on the development system (with TreeSet based DataSet)
+        testPerformance(10000000, 10000);
+    }
+    
+    private void testPerformance(long entryCount, long expirationInterval) {
+        
+        DataSet<Double> ds = new DataSet<Double>(expirationInterval);
+        long timestamp = 0;
+        Random rg = new Random();
+        
+        Marker m = new Marker("testPerformance(" + entryCount + ", " + expirationInterval + ")");
+
+        for (int count = 0; count < entryCount; count++) {
+            
+            timestamp += rg.nextInt(10);
+            
+            ds.record(timestamp, rg.nextDouble());
+        }
+        
+        m.close();
     }
 }
