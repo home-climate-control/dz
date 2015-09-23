@@ -60,7 +60,7 @@ public class DataSet<T> {
      *
      * @param strict If set to true, out-of-order updates will not be accepted.
      */
-    public final void setStrict(final boolean strict) {
+    public synchronized final void setStrict(final boolean strict) {
 
         this.strict = strict;
     }
