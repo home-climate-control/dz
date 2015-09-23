@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
  * used for the {@link PID_Controller}, it must be fed with controller error,
  * and anti-windup action must be programmed outside of this class.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-20012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class IntegralSet extends DataSet<Double> {
 
@@ -25,7 +25,7 @@ public class IntegralSet extends DataSet<Double> {
      */
     public IntegralSet(final long integrationTime) {
 
-        super(integrationTime);
+        super(integrationTime, true);
     }
 
     /**

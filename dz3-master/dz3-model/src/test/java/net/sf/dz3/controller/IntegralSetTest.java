@@ -2,6 +2,7 @@ package net.sf.dz3.controller;
 
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.IntegralSet;
+
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
@@ -60,7 +61,7 @@ public class IntegralSetTest extends TestCase {
 
             for (int count = 0; count < COUNT; count++) {
 
-                timestamp += rg.nextInt(100);
+                timestamp += Math.abs(rg.nextInt(100)) + 1;
                 double value = rg.nextDouble();
 
                 dataSet.record(timestamp, value);
@@ -99,7 +100,7 @@ public class IntegralSetTest extends TestCase {
 
             for (int count = 0; count < COUNT; count++) {
 
-                now += rg.nextInt(100);
+                now += Math.abs(rg.nextInt(100)) + 1;
                 double value = rg.nextDouble();
 
                 dataSet.record(now, value);

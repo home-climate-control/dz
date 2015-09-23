@@ -61,7 +61,7 @@ public class DifferentialSetTest extends TestCase {
 
             for (int count = 0; count < COUNT; count++) {
 
-                timestamp += rg.nextInt(100);
+                timestamp += Math.abs(rg.nextInt(100)) + 1;
                 double value = rg.nextDouble();
 
                 dataSet.record(timestamp, value);
@@ -100,7 +100,7 @@ public class DifferentialSetTest extends TestCase {
 
             for (int count = 0; count < COUNT; count++) {
 
-                now += rg.nextInt(100);
+                now += Math.abs(rg.nextInt(100)) + 1;
                 double value = rg.nextDouble();
 
                 dataSet.record(now, value);

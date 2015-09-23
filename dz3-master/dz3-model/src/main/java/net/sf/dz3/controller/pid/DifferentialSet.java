@@ -10,7 +10,7 @@ import java.util.TreeMap;
 /**
  * Data set supporting the differential calculation.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class DifferentialSet extends DataSet<Double> {
 
@@ -22,7 +22,7 @@ public class DifferentialSet extends DataSet<Double> {
      */
     public DifferentialSet(final long differentialTime) {
 
-        super(differentialTime);
+        super(differentialTime, true);
     }
 
     /**
