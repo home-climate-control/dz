@@ -32,23 +32,37 @@ public class DataSet<T> {
      * <p>
      * This is not necessarily a good thing.
      */
-    private boolean strict = false;
+    private final boolean strict;
     
     /**
      * Last known timestamp. {@code null} if none recorded yet.
      */
     private Long lastTimestamp;
+    
+    /**
+     * Create the instance allowing out-of-order updates.
+     *
+     * @param expirationInterval How many milliseconds to keep the data.
+     * @exception IllegalArgumentException if the expiration interval is
+     * non-positive (<= 0). Be careful with the short intervals, it's going to
+     * be your fault, not mine.
+     */
+    public DataSet(final long expirationInterval) {
+        this(expirationInterval, false);
+    }
 
     /**
      * Create the instance.
      *
      * @param expirationInterval How many milliseconds to keep the data.
      * 
+     * @param strict If set to true, out-of-order updates will not be accepted.
+     * 
      * @exception IllegalArgumentException if the expiration interval is
      * non-positive (<= 0). Be careful with the short intervals, it's going to
      * be your fault, not mine.
      */
-    public DataSet(final long expirationInterval) {
+    public DataSet(final long expirationInterval, boolean strict) {
 
         if (expirationInterval <= 0) {
 
@@ -57,15 +71,6 @@ public class DataSet<T> {
         }
 
         this.expirationInterval = expirationInterval;
-    }
-
-    /**
-     * Set strictness.
-     *
-     * @param strict If set to true, out-of-order updates will not be accepted.
-     */
-    public synchronized final void setStrict(final boolean strict) {
-
         this.strict = strict;
     }
 

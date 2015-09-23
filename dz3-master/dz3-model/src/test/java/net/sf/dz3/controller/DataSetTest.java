@@ -27,9 +27,7 @@ public class DataSetTest extends TestCase {
 
     public void testStrict() {
         
-        DataSet<Double> ds = new DataSet<Double>(100);
-        
-        ds.setStrict(true);
+        DataSet<Double> ds = new DataSet<Double>(100, true);
         
         // Record values in order
         
