@@ -5,7 +5,6 @@ import net.sf.dz3.controller.pid.IntegralSet;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
-import java.security.SecureRandom;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
@@ -16,7 +15,7 @@ public class IntegralSetTest extends TestCase {
 
     private final Logger logger = Logger.getLogger(getClass());
 
-    private final Random rg = new SecureRandom();
+    private final Random rg = new Random();
     private Semaphore startGate = new Semaphore(2);
     private Semaphore stopGate = new Semaphore(2);
 
