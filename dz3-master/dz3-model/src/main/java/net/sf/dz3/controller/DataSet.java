@@ -116,7 +116,7 @@ public class DataSet<T> {
      * Expire all the data elements older than the last by {@link
      * #expirationInterval expiration interval}.
      */
-    protected final void expire() {
+    private final void expire() {
 
         try {
 
