@@ -22,13 +22,24 @@ public class DataSetTest extends TestCase {
 
         try {
             
-            // This should blow up
+            // This should blow up - this timestamp is out of order
             ds.record(99, 0d);
             
             fail("Should've failed by now");
             
         } catch (IllegalArgumentException ex) {
             assertEquals("Wrong exception message", "Data element out of sequence: last key is 101, key being added is 99", ex.getMessage());
+        }
+
+        try {
+            
+            // This also should blow up - this timestamp is already present
+            ds.record(101, 0d);
+            
+            fail("Should've failed by now");
+            
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Wrong exception message", "Data element out of sequence: last key is 101, key being added is 101", ex.getMessage());
         }
     }
 
