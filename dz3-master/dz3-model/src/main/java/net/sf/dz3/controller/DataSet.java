@@ -1,24 +1,23 @@
 package net.sf.dz3.controller;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * Entity supporting the data sampling.
  *
  * VT: FIXME: Implement variable expiration time.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class DataSet<T> {
 
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private SortedMap<Long, T> dataSet = new TreeMap<Long, T>();
+    private TimeLimitedMap<T> dataSet = new TimeLimitedMap<T>();
 
     /**
      * The expiration interval. Values older than the last key by this many
@@ -34,6 +33,11 @@ public class DataSet<T> {
      * This is not necessarily a good thing.
      */
     private boolean strict = false;
+    
+    /**
+     * Last known timestamp. {@code null} if none recorded yet.
+     */
+    private Long lastTimestamp;
 
     /**
      * Create the instance.
@@ -87,59 +91,18 @@ public class DataSet<T> {
         // before, so we return nothing.
 
         if (strict) {
+            
+            if (lastTimestamp != null && lastTimestamp >= millis)
 
-            try {
-
-                Long lastKey = dataSet.lastKey();
-
-                if (lastKey.longValue() >= millis) {
-
-                    throw new IllegalArgumentException("Data element out of sequence: last key is " + lastKey
-                            + ", key being added is " + millis);
-                }
-
-            } catch (NoSuchElementException nseex) {
-
-                // We're fine. This means that there was no previous entry,
-                // therefore, the current one will not be out of order.
-            }
+                throw new IllegalArgumentException("Data element out of sequence: last key is " + lastTimestamp
+                        + ", key being added is " + millis);
         }
+        
+        lastTimestamp = millis;
 
         dataSet.put(Long.valueOf(millis), value);
 
-        expire();
-
         // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
-    }
-
-    /**
-     * Expire all the data elements older than the last by {@link
-     * #expirationInterval expiration interval}.
-     */
-    private final void expire() {
-
-        try {
-
-            Long lastKey = dataSet.lastKey();
-            Long expireBefore = Long.valueOf(lastKey.longValue() - expirationInterval);
-
-            SortedMap<Long, T> expireMap = dataSet.headMap(expireBefore);
-
-            for (Iterator<Long> i = expireMap.keySet().iterator(); i.hasNext();) {
-
-                //Long found =
-
-                i.next();
-                i.remove();
-
-                // System.err.println("Expired: " + found + ", left: " +
-                // dataSet.size());
-            }
-
-        } catch (NoSuchElementException nseex) {
-
-            // We're fine, the map is empty
-        }
     }
 
     /**
@@ -185,5 +148,16 @@ public class DataSet<T> {
         }
 
         return result;
+    }
+    
+    private class TimeLimitedMap<V> extends LinkedHashMap<Long, V> {
+
+        private static final long serialVersionUID = 3727574969200653019L;
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Long, V> eldest) {
+            
+            return eldest.getKey() < lastTimestamp - expirationInterval;
+        }
     }
 }

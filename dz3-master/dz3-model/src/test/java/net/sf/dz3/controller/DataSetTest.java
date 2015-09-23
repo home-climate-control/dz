@@ -88,12 +88,14 @@ public class DataSetTest extends TestCase {
     public void testPerformance10000000_100() {
         
         // This test completes roughly in 1.5s on the development system (with TreeSet based DataSet)
+        // This test completes roughly in 850ms on the development system (with LinkedHashMap based DataSet)
         testPerformance(10000000, 100);
     }
     
     public void testPerformance10000000_10000() {
 
         // This test completes roughly in 2.5s on the development system (with TreeSet based DataSet)
+        // This test completes roughly in 850ms on the development system (with LinkedHashMap based DataSet)
         testPerformance(10000000, 10000);
     }
     
