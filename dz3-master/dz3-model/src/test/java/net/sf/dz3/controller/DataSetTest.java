@@ -1,11 +1,29 @@
 package net.sf.dz3.controller;
 
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import net.sf.dz3.instrumentation.Marker;
 import junit.framework.TestCase;
 
 public class DataSetTest extends TestCase {
+    
+    public void testNonexistentValue() {
+        
+        DataSet<Double> ds = new DataSet<Double>(100);
+        
+        try {
+        
+            // Any value will fail, the set is empty
+            ds.get(500);
+            
+            fail("Should've failed by now");
+        
+        } catch (NoSuchElementException ex) {
+            
+            assertEquals("Wrong exception message", "No value for time 500", ex.getMessage());
+        }
+    }
 
     public void testStrict() {
         
@@ -65,6 +83,7 @@ public class DataSetTest extends TestCase {
             assertEquals("Wrong value after expiration", 100, ds.iterator().next().longValue());
         }
     }
+
     
     public void testPerformance10000000_100() {
         
