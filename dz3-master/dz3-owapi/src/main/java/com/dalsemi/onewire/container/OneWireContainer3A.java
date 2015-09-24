@@ -598,14 +598,14 @@ public class OneWireContainer3A
    {
    }
 
-  /** Need to add the following to overide to an an abstract something not being overidded in ./OneWireSensor.java
+  /** Need to add the following to overide to an an abstract something not being overidden in ./OneWireSensor.java
   *   Note to MW and VT: I've got no idea what the implications of this dirty hack is
   */
 	 @Override
 	public void readDevice(byte[] outputBuffer) throws OneWireIOException, OneWireException {
 	// read the status byte
 
-  // These following 3 lines had to be removed from the snip borrowed from line 325-333 of ./OneWireContainer1F.java as they break the
+  // These following 3 lines had to be removed from the snip borrowed from line 325-333 of ./OneWireContainer1F.java as they break something
   // and are specific to the 1F chip
 
   /*     byte[] outputBuffer = new byte[4];
