@@ -28,67 +28,6 @@ public class IntegralSet extends DataSet<Double> {
         super(integrationTime, true);
     }
 
-    /**
-     * Get the integral starting with the first data element available and
-     * ending with the last data element available.
-     * <p>
-     * Integration time must have been taken care of by {@link DataSet#expire
-     * expiration}.
-     *
-     * @return An integral value.
-     *
-     * @deprecated Use {@link #getIntegral()} instead.
-     */
-    @Deprecated
-    public final synchronized double getIntegralSlow() {
-
-
-        double result = 0;
-
-        //long startTime = System.currentTimeMillis();
-
-        try {
-
-            // The following line will throw the NoSuchElementException if
-            // the dataSet is empty. It is possible to check the size, but
-            // handling the exception is more efficient because happens just
-            // once - at the startup, or when there was an interruption in
-            // the data sequence longer than the expiration interval and all
-            // the data elements were expired.
-
-            Iterator<Long> i = iterator();
-            Long trailerKey = i.next();
-
-            while (i.hasNext()) {
-
-                double trailerValue = get(trailerKey.longValue());
-                Long currentKey = i.next();
-                double currentValue = get(currentKey.longValue());
-
-                double diff = ((currentValue + trailerValue) / 2) * (currentKey.longValue() - trailerKey.longValue());
-
-                result += diff;
-
-                trailerKey = currentKey;
-            }
-
-            return result;
-
-        } catch (NoSuchElementException nseex) {
-
-            System.err.println("Ignored:");
-            nseex.printStackTrace();
-
-            return result;
-
-        } finally {
-
-            // System.err.println("getIntegral@" + hashCode() + "," +
-            // dataSet.size() + ": " + (System.currentTimeMillis() -
-            // startTime));
-        }
-    }
-
   /**
    * Get the integral starting with the first data element available and
    * ending with the last data element available.
