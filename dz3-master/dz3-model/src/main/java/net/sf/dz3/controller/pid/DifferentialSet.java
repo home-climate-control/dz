@@ -3,6 +3,7 @@ package net.sf.dz3.controller.pid;
 import net.sf.dz3.controller.DataSet;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -138,7 +139,7 @@ public class DifferentialSet extends DataSet<Double> {
           Iterator<Map.Entry<Long, Double>> i = entryIterator();
           Map.Entry<Long, Double> trailerEntry = i.next();
 
-          SortedMap<Long, Double> resultSet = new TreeMap<Long, Double>();
+          LinkedHashMap<Long, Double> resultSet = new LinkedHashMap<Long, Double>();
 
           while (i.hasNext()) {
 

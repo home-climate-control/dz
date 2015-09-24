@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 
 /**
- * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
  */
 public class DifferentialSetTest extends TestCase {
 
@@ -21,7 +21,7 @@ public class DifferentialSetTest extends TestCase {
     private Semaphore stopGate = new Semaphore(2);
 
     private final long INTEGRATION_INTERVAL = 10000L;
-    private final int COUNT = 10000;
+    private final int COUNT = 100000;
 
     /**
      * Compare slow and fast implementation speed.
