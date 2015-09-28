@@ -2,6 +2,8 @@ package net.sf.dz3.controller;
 
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.IntegralSet;
+import net.sf.dz3.controller.pid.LegacyIntegralSet;
+import net.sf.dz3.controller.pid.NaiveIntegralSet;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -10,7 +12,7 @@ import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 /**
- * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
  */
 public class IntegralSetTest extends TestCase {
 
@@ -25,13 +27,15 @@ public class IntegralSetTest extends TestCase {
 
     /**
      * Compare slow and fast implementation speed.
+     * 
+     * This test doesn't test the implementation correctness.
      */
     public void testAll() throws InterruptedException {
 
         startGate.acquire(2);
 
-        Thread t1 = new Thread(new Slow());
-        Thread t2 = new Thread(new Fast());
+        Thread t1 = new Thread(new Slow(INTEGRATION_INTERVAL));
+        Thread t2 = new Thread(new Fast(INTEGRATION_INTERVAL));
 
         t1.start();
         t2.start();
@@ -47,26 +51,28 @@ public class IntegralSetTest extends TestCase {
     /**
      * Make sure the slow and fast implementation yield the same results.
      */
-    @SuppressWarnings("deprecation")
     public void testSame() {
 
         NDC.push("testSame/I");
 
+        int count = 0;
         try {
 
-            IntegralSet dataSet = new IntegralSet(INTEGRATION_INTERVAL);
+            IntegralSet dataSet2000 = new LegacyIntegralSet(INTEGRATION_INTERVAL);
+            IntegralSet dataSet2015 = new NaiveIntegralSet(INTEGRATION_INTERVAL);
 
             long start = System.currentTimeMillis();
             long timestamp = start;
 
-            for (int count = 0; count < COUNT; count++) {
+            for ( ; count < COUNT; count++) {
 
                 timestamp += Math.abs(rg.nextInt(100)) + 1;
                 double value = rg.nextDouble();
 
-                dataSet.record(timestamp, value);
+                dataSet2000.record(timestamp, value);
+                dataSet2015.record(timestamp, value);
 
-                assertEquals(dataSet.getIntegralSlow(), dataSet.getIntegral());
+                assertEquals(dataSet2000.getIntegral(), dataSet2015.getIntegral());
             }
 
             long now = System.currentTimeMillis();
@@ -74,20 +80,27 @@ public class IntegralSetTest extends TestCase {
             logger.info((now - start) + "ms");
 
         } finally {
+            
+            logger.info("Survived " + count + " iterations");
             NDC.pop();
         }
 
     }
 
     private abstract class Runner implements Runnable {
-
-        Runner() throws InterruptedException {
+        
+        protected final long expirationInterval;
+        
+        Runner(long expirationInterval) throws InterruptedException {
+            
+            this.expirationInterval = expirationInterval;
+            
             stopGate.acquire();
         }
 
         public void run() {
 
-            IntegralSet dataSet = new IntegralSet(INTEGRATION_INTERVAL);
+            IntegralSet dataSet = createSet(expirationInterval);
 
             try {
                 startGate.acquire();
@@ -114,15 +127,21 @@ public class IntegralSetTest extends TestCase {
             stopGate.release();
         }
 
+        protected abstract IntegralSet createSet(long expirationInterval);
         protected abstract void sample(IntegralSet dataSet);
     }
 
     private class Fast extends Runner {
 
-        Fast() throws InterruptedException {
-            super();
+        Fast(long expirationInterval) throws InterruptedException {
+            super(expirationInterval);
         }
 
+        @Override
+        protected IntegralSet createSet(long expirationInterval) {
+            return new NaiveIntegralSet(expirationInterval);
+        }
+        
         @Override
         protected void sample(IntegralSet dataSet) {
             dataSet.getIntegral();
@@ -131,14 +150,18 @@ public class IntegralSetTest extends TestCase {
 
     private class Slow extends Runner {
 
-        Slow() throws InterruptedException {
-            super();
+        Slow(long expirationInterval) throws InterruptedException {
+            super(expirationInterval);
         }
 
-        @SuppressWarnings("deprecation")
+        @Override
+        protected IntegralSet createSet(long expirationInterval) {
+            return new LegacyIntegralSet(expirationInterval);
+        }
+
         @Override
         protected void sample(IntegralSet dataSet) {
-            dataSet.getIntegralSlow();
+            dataSet.getIntegral();
         }
     }
 }
