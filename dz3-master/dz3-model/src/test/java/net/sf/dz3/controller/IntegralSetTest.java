@@ -27,7 +27,7 @@ public class IntegralSetTest extends TestCase {
     private Semaphore stopGate = new Semaphore(2);
 
     private static final long INTEGRATION_INTERVAL = 10000L;
-    private static final int COUNT = 10000;
+    private static final int COUNT = 1000000;
     private static final int TICK = 100;
 
     /**
