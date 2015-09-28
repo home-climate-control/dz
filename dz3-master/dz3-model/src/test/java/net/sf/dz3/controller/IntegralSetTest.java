@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.IntegralSet;
 import net.sf.dz3.controller.pid.LegacyIntegralSet;
 import net.sf.dz3.controller.pid.NaiveIntegralSet;
+import net.sf.dz3.instrumentation.Marker;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
@@ -24,6 +25,7 @@ public class IntegralSetTest extends TestCase {
 
     private static final long INTEGRATION_INTERVAL = 10000L;
     private static final int COUNT = 10000;
+    private static final int TICK = 100;
 
     /**
      * Compare slow and fast implementation speed.
@@ -47,26 +49,54 @@ public class IntegralSetTest extends TestCase {
 
         logger.info("done");
     }
+    
+    /**
+     * Make sure the slow and fast implementation yield the same results, without triggering expiration.
+     */
+    public void testSameNoExpiration() {
+        
+        int count = 100;
+        
+        // Make sure the expiration interval is beyond the possible timestamp advance
+        long expirationInterval = (count + count/2) * TICK; 
+                
+        testSame(count, expirationInterval);
+    }
+
+    /**
+     * Make sure the slow and fast implementation yield the same results, without triggering expiration.
+     */
+    public void testSameWithExpiration() {
+        
+        int count = 10000;
+        
+        // Make sure the expiration interval is within the possible timestamp advance. Statistically.
+        long expirationInterval = (count/10) * TICK; 
+                
+        testSame(count, expirationInterval);
+    }
 
     /**
      * Make sure the slow and fast implementation yield the same results.
      */
-    public void testSame() {
+    public void testSame(int limit, long expirationInterval) {
 
-        NDC.push("testSame/I");
+        NDC.push("testSame/I(" + limit + ", " + expirationInterval + ")");
 
+        Marker m = new Marker("testSame");
         int count = 0;
+        
         try {
 
-            IntegralSet dataSet2000 = new LegacyIntegralSet(INTEGRATION_INTERVAL);
-            IntegralSet dataSet2015 = new NaiveIntegralSet(INTEGRATION_INTERVAL);
+            IntegralSet dataSet2000 = new LegacyIntegralSet(expirationInterval);
+            IntegralSet dataSet2015 = new NaiveIntegralSet(expirationInterval);
 
             long start = System.currentTimeMillis();
             long timestamp = start;
 
-            for ( ; count < COUNT; count++) {
+            for ( ; count < limit; count++) {
 
-                timestamp += Math.abs(rg.nextInt(100)) + 1;
+                timestamp += Math.abs(rg.nextInt(TICK)) + 1;
                 double value = rg.nextDouble();
 
                 dataSet2000.record(timestamp, value);
@@ -81,7 +111,11 @@ public class IntegralSetTest extends TestCase {
 
         } finally {
             
-            logger.info("Survived " + count + " iterations");
+            if (count < limit) {
+                logger.info("Survived " + count + "/" + limit + " iterations");
+            }
+        
+            m.close();
             NDC.pop();
         }
 
@@ -108,22 +142,20 @@ public class IntegralSetTest extends TestCase {
                 logger.info("Interrupted", e);
             }
 
-            long start = System.currentTimeMillis();
-            long now = start;
+            Marker m = new Marker("run/" + dataSet.getClass().getSimpleName());
+            long timestamp = System.currentTimeMillis();
 
             for (int count = 0; count < COUNT; count++) {
 
-                now += Math.abs(rg.nextInt(100)) + 1;
+                timestamp += Math.abs(rg.nextInt(TICK)) + 1;
                 double value = rg.nextDouble();
 
-                dataSet.record(now, value);
+                dataSet.record(timestamp, value);
 
                 sample(dataSet);
             }
 
-            long stop = System.currentTimeMillis();
-
-            logger.info(getClass().getName() + " Completed in " + (stop - start));
+            m.close();
             stopGate.release();
         }
 
