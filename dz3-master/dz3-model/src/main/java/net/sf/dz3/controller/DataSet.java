@@ -17,7 +17,7 @@ public class DataSet<T> {
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private TimeLimitedMap<T> dataSet = new TimeLimitedMap<T>();
+    private LinkedHashMap<Long, T> dataSet = new LinkedHashMap<Long, T>();
 
     /**
      * The expiration interval. Values older than the last key by this many
@@ -107,7 +107,44 @@ public class DataSet<T> {
 
         dataSet.put(Long.valueOf(millis), value);
 
+        expire();
+        
         // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
+    }
+
+    /**
+     * Expire all the data elements older than the last by {@link
+     * #expirationInterval expiration interval}.
+     */
+    private final void expire() {
+
+        try {
+
+            Long expireBefore = Long.valueOf(lastTimestamp.longValue() - expirationInterval);
+
+            for (Iterator<Long> i = dataSet.keySet().iterator(); i.hasNext();) {
+
+                Long found = i.next();
+
+                if (found < expireBefore) {
+
+                    // System.err.println("Expired: " + found + ", left: " +
+                    // dataSet.size());
+
+                    i.remove();
+
+                } else {
+                    
+                    // We're done, all other keys will be younger
+                    return;
+                }
+
+            }
+
+        } catch (NoSuchElementException nseex) {
+
+            // We're fine, the map is empty
+        }
     }
 
     /**
@@ -153,16 +190,5 @@ public class DataSet<T> {
         }
 
         return result;
-    }
-    
-    private class TimeLimitedMap<V> extends LinkedHashMap<Long, V> {
-
-        private static final long serialVersionUID = 3727574969200653019L;
-
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<Long, V> eldest) {
-            
-            return eldest.getKey() < lastTimestamp - expirationInterval;
-        }
     }
 }
