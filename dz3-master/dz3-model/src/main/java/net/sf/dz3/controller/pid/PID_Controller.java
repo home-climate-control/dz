@@ -38,7 +38,7 @@ public class PID_Controller extends AbstractPidController implements PidControll
 	super(setpoint, P, I, D, saturationLimit);
 
         this.integralSet = new LegacyIntegralSet(Ispan);
-        this.differentialSet = new DifferentialSet(Dspan);
+        this.differentialSet = new LegacyDifferentialSet(Dspan);
     }
 
     @JmxAttribute(description = "Proportional component time span")
@@ -56,7 +56,7 @@ public class PID_Controller extends AbstractPidController implements PidControll
 
       // VT: FIXME: This will reset the existing set and screw things up
       if (getD() != 0) {
-          differentialSet = new DifferentialSet(dSpan);
+          differentialSet = new LegacyDifferentialSet(dSpan);
       }
       statusChanged();
     }
