@@ -1,9 +1,11 @@
 package net.sf.dz3.controller;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.IntegralSet;
 import net.sf.dz3.controller.pid.LegacyIntegralSet;
 import net.sf.dz3.controller.pid.NaiveIntegralSet;
+import net.sf.dz3.controller.pid.SlidingIntegralSet;
 import net.sf.dz3.instrumentation.Marker;
 
 import org.apache.log4j.Logger;
@@ -15,6 +17,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
+import javax.rmi.CORBA.Tie;
+
 /**
  * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
  */
@@ -23,8 +27,8 @@ public class IntegralSetTest extends TestCase {
     private final Logger logger = Logger.getLogger(getClass());
 
     private final Random rg = new Random();
-    private Semaphore startGate = new Semaphore(2);
-    private Semaphore stopGate = new Semaphore(2);
+    private Semaphore startGate = new Semaphore(3);
+    private Semaphore stopGate = new Semaphore(3);
 
     private static final long INTEGRATION_INTERVAL = 10000L;
     private static final int COUNT = 1000000;
@@ -37,18 +41,20 @@ public class IntegralSetTest extends TestCase {
      */
     public void testAll() throws InterruptedException {
 
-        startGate.acquire(2);
+        startGate.acquire(3);
 
-        Thread t1 = new Thread(new Slow(INTEGRATION_INTERVAL));
-        Thread t2 = new Thread(new Fast(INTEGRATION_INTERVAL));
+        Thread t1 = new Thread(new Legacy(INTEGRATION_INTERVAL));
+        Thread t2 = new Thread(new Naive(INTEGRATION_INTERVAL));
+        Thread t3 = new Thread(new Sliding(INTEGRATION_INTERVAL));
 
         t1.start();
         t2.start();
+        t3.start();
 
-        startGate.release(2);
+        startGate.release(3);
         logger.info("unleashed");
 
-        stopGate.acquire(2);
+        stopGate.acquire(3);
 
         logger.info("done");
     }
@@ -88,14 +94,16 @@ public class IntegralSetTest extends TestCase {
 
         Marker m = new Marker("testSame");
         int count = 0;
+
+        Long lastGoodTimestamp = null;
         
         try {
 
             IntegralSet dataSet2000 = new LegacyIntegralSet(expirationInterval);
             IntegralSet dataSet2015 = new NaiveIntegralSet(expirationInterval);
+            IntegralSet dataSetFast = new SlidingIntegralSet(expirationInterval);
 
-            long start = System.currentTimeMillis();
-            long timestamp = start;
+            long timestamp = 0;
 
             for ( ; count < limit; count++) {
 
@@ -104,18 +112,18 @@ public class IntegralSetTest extends TestCase {
 
                 dataSet2000.record(timestamp, value);
                 dataSet2015.record(timestamp, value);
+                dataSetFast.record(timestamp, value);
 
-                assertEquals(dataSet2000.getIntegral(), dataSet2015.getIntegral());
+                assertEquals("2000/2015 differ", dataSet2000.getIntegral(), dataSet2015.getIntegral(), 0.0001);
+                assertEquals("2015/slide differ", dataSet2015.getIntegral(), dataSetFast.getIntegral(), 0.0001);
+                
+                lastGoodTimestamp = timestamp;
             }
-
-            long now = System.currentTimeMillis();
-
-            logger.info((now - start) + "ms");
 
         } finally {
             
             if (count < limit) {
-                logger.info("Survived " + count + "/" + limit + " iterations");
+                logger.info("Survived " + count + "/" + limit + " iterations, last good timestamp is " + lastGoodTimestamp);
             }
         
             m.close();
@@ -129,17 +137,26 @@ public class IntegralSetTest extends TestCase {
      */
     public void testSameSingleExpiration() {
         
-        List<Long> timestamps = new LinkedList<Long>();
-
-        // Make sure no intervals exceed the expiration interval so no more than one entry ever needs to be expired
-        timestamps.add(80L);
-        timestamps.add(80L);
-        timestamps.add(80L);
-        timestamps.add(80L);
-        timestamps.add(80L);
-        timestamps.add(80L);
+        NDC.push("1");
         
-        testSameSteps(100, timestamps);
+        try {
+        
+            List<Long> timestamps = new LinkedList<Long>();
+
+            // Make sure no intervals exceed the expiration interval so no more than one entry ever needs to be expired
+            timestamps.add(80L);
+            timestamps.add(80L);
+            timestamps.add(80L);
+            timestamps.add(80L);
+            timestamps.add(80L);
+            timestamps.add(80L);
+
+            testSameSteps(100, timestamps);
+
+        } finally {
+            
+            NDC.pop();
+        }
     }
 
     /**
@@ -147,19 +164,27 @@ public class IntegralSetTest extends TestCase {
      */
     public void testSameMultipleExpiration() {
         
-        List<Long> timestamps = new LinkedList<Long>();
+        NDC.push("N");
+        
+        try {
+        
+            List<Long> timestamps = new LinkedList<Long>();
 
-        timestamps.add(80L);
-        timestamps.add(80L);
-        timestamps.add(80L);
+            timestamps.add(80L);
+            timestamps.add(80L);
+            timestamps.add(80L);
+
+            // This difference will trigger expiration for more than one record
+            timestamps.add(300L);
+
+            timestamps.add(80L);
+            timestamps.add(80L);
+
+            testSameSteps(100, timestamps);
         
-        // This difference will trigger expiration for more than one record
-        timestamps.add(300L);
-        
-        timestamps.add(80L);
-        timestamps.add(80L);
-        
-        testSameSteps(100, timestamps);
+        } finally {
+            NDC.pop();
+        }
     }
 
     /**
@@ -170,9 +195,10 @@ public class IntegralSetTest extends TestCase {
         NDC.push("testSameSteps/I");
 
         try {
-
+            
             IntegralSet dataSet2000 = new LegacyIntegralSet(expirationInterval);
             IntegralSet dataSet2015 = new NaiveIntegralSet(expirationInterval);
+            IntegralSet dataSetFast = new SlidingIntegralSet(expirationInterval);
 
             long timestamp = 0;
 
@@ -183,12 +209,28 @@ public class IntegralSetTest extends TestCase {
 
                 dataSet2000.record(timestamp, value);
                 dataSet2015.record(timestamp, value);
+                dataSetFast.record(timestamp, value);
                 
                 logger.info("timestamp/expiration: " + timestamp + "/" + expirationInterval);
+                
+                double i2000 = dataSet2000.getIntegral();
+                double i2015 = dataSet2015.getIntegral();
+                double iFast = dataSetFast.getIntegral();
+                
+                logger.debug("old/new/fast: " + i2000 + " " + i2015 + " " + iFast);
 
-                assertEquals(dataSet2000.getIntegral(), dataSet2015.getIntegral());
+                assertEquals("2000/2015 differ", i2000, i2015, 0.0001);
+                assertEquals("2015/slide differ", i2015, iFast, 0.0001);
             }
+            
+            logger.debug("Success");
 
+        } catch (AssertionFailedError e) {
+            
+            logger.error("Failure");
+            
+            throw e;
+            
         } finally {
             
             NDC.pop();
@@ -238,9 +280,9 @@ public class IntegralSetTest extends TestCase {
         protected abstract void sample(IntegralSet dataSet);
     }
 
-    private class Fast extends Runner {
+    private class Naive extends Runner {
 
-        Fast(long expirationInterval) throws InterruptedException {
+        Naive(long expirationInterval) throws InterruptedException {
             super(expirationInterval);
         }
 
@@ -255,15 +297,32 @@ public class IntegralSetTest extends TestCase {
         }
     }
 
-    private class Slow extends Runner {
+    private class Legacy extends Runner {
 
-        Slow(long expirationInterval) throws InterruptedException {
+        Legacy(long expirationInterval) throws InterruptedException {
             super(expirationInterval);
         }
 
         @Override
         protected IntegralSet createSet(long expirationInterval) {
             return new LegacyIntegralSet(expirationInterval);
+        }
+
+        @Override
+        protected void sample(IntegralSet dataSet) {
+            dataSet.getIntegral();
+        }
+    }
+
+    private class Sliding extends Runner {
+
+        Sliding(long expirationInterval) throws InterruptedException {
+            super(expirationInterval);
+        }
+
+        @Override
+        protected IntegralSet createSet(long expirationInterval) {
+            return new SlidingIntegralSet(expirationInterval);
         }
 
         @Override
