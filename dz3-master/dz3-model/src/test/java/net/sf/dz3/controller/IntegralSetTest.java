@@ -135,28 +135,37 @@ public class IntegralSetTest extends TestCase {
     /**
      * Make sure the slow and fast implementation yield the same results, step by step, with NO more than one record ever expired.
      */
-    public void testSameSingleExpiration() {
+    public void testSameSingleExpiration80() {
         
-        NDC.push("1");
+        List<Long> timestamps = new LinkedList<Long>();
+
+        // Make sure no intervals exceed the expiration interval so no more than one entry ever needs to be expired
+        timestamps.add(80L);
+        timestamps.add(80L);
+        timestamps.add(80L);
+        timestamps.add(80L);
+        timestamps.add(80L);
+        timestamps.add(80L);
+
+        testSameSteps("single-80", 100, timestamps);
+    }
+
+    /**
+     * Make sure the slow and fast implementation yield the same results, step by step, with NO more than one record ever expired.
+     */
+    public void testSameSingleExpiration50() {
         
-        try {
-        
-            List<Long> timestamps = new LinkedList<Long>();
+        List<Long> timestamps = new LinkedList<Long>();
 
-            // Make sure no intervals exceed the expiration interval so no more than one entry ever needs to be expired
-            timestamps.add(80L);
-            timestamps.add(80L);
-            timestamps.add(80L);
-            timestamps.add(80L);
-            timestamps.add(80L);
-            timestamps.add(80L);
+        // Make sure no intervals exceed the expiration interval so no more than one entry ever needs to be expired
+        timestamps.add(50L);
+        timestamps.add(50L);
+        timestamps.add(50L);
+        timestamps.add(50L);
+        timestamps.add(50L);
+        timestamps.add(50L);
 
-            testSameSteps(100, timestamps);
-
-        } finally {
-            
-            NDC.pop();
-        }
+        testSameSteps("single-50", 100, timestamps);
     }
 
     /**
@@ -164,35 +173,43 @@ public class IntegralSetTest extends TestCase {
      */
     public void testSameMultipleExpiration() {
         
-        NDC.push("N");
+        List<Long> timestamps = new LinkedList<Long>();
+
+        timestamps.add(80L);
+        timestamps.add(80L);
+        timestamps.add(80L);
+
+        // This difference will trigger expiration for more than one record
+        timestamps.add(300L);
+
+        timestamps.add(80L);
+        timestamps.add(80L);
+
+        testSameSteps("multiple", 100, timestamps);
+    }
+
+    /**
+     * Make sure the slow and fast implementation yield the same results, step by step, with MORE than one record ever expired.
+     */
+    public void testSameFirstExpiration() {
         
-        try {
-        
-            List<Long> timestamps = new LinkedList<Long>();
+        List<Long> timestamps = new LinkedList<Long>();
 
-            timestamps.add(80L);
-            timestamps.add(80L);
-            timestamps.add(80L);
+        // The first item added will trigger the expiration already
+        timestamps.add(200L);
+        timestamps.add(50L);
+        timestamps.add(50L);
+        timestamps.add(50L);
 
-            // This difference will trigger expiration for more than one record
-            timestamps.add(300L);
-
-            timestamps.add(80L);
-            timestamps.add(80L);
-
-            testSameSteps(100, timestamps);
-        
-        } finally {
-            NDC.pop();
-        }
+        testSameSteps("first", 100, timestamps);
     }
 
     /**
      * Make sure the slow and fast implementation yield the same results.
      */
-    public void testSameSteps(long expirationInterval, List<Long> timestamps) {
+    public void testSameSteps(String marker, long expirationInterval, List<Long> timestamps) {
 
-        NDC.push("testSameSteps/I");
+        NDC.push("testSameSteps/I-" + marker);
 
         try {
             
