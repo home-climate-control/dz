@@ -32,9 +32,9 @@ public class SlidingIntegralSet implements IntegralSet {
      * Last known timestamp. {@code null} if none recorded yet.
      */
     private Long lastTimestamp;
-    
+
     private double lastValue;
-    
+
     private double lastIntegral;
 
     /**
@@ -55,7 +55,7 @@ public class SlidingIntegralSet implements IntegralSet {
      */
     @Override
     public synchronized void record(final long millis, final Double value) {
-        
+
         if (value == null) {
             throw new IllegalArgumentException("null value mustn't propagate here");
         }
@@ -65,15 +65,15 @@ public class SlidingIntegralSet implements IntegralSet {
             throw new IllegalArgumentException("Data element out of sequence: last key is " + lastTimestamp
                     + ", key being added is " + millis);
         }
-        
+
         double diff;
-        
+
         if (lastTimestamp == null) {
-            
+
             diff = 0;
-        
+
         } else {
-            
+
             diff = ((value + lastValue) / 2) * (millis - lastTimestamp);
         }
 
@@ -81,11 +81,11 @@ public class SlidingIntegralSet implements IntegralSet {
         lastValue = value;
 
         dataSet.put(Long.valueOf(millis), diff);
-        
+
         lastIntegral += diff;
 
         expire();
-        
+
         // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
     }
 
@@ -94,9 +94,9 @@ public class SlidingIntegralSet implements IntegralSet {
      * #integrationTime integration time}.
      */
     private void expire() {
-        
+
         Long expireBefore = Long.valueOf(lastTimestamp.longValue() - integrationTime);
-        
+
         Entry<Long, Double> trailer = null;
 
         for (Iterator<Entry<Long, Double>> i = dataSet.entrySet().iterator(); i.hasNext(); ) {
@@ -119,17 +119,17 @@ public class SlidingIntegralSet implements IntegralSet {
         }
     }
 
-/**
-   * Get the integral starting with the first data element available and
-   * ending with the last data element available.
-   * <p>
-   * Integration time must have been taken care of by {@link DataSet#expire
-   * expiration}.
-   *
-   * @return An integral value (of the {@link #lastIntegral}).
-   */
+    /**
+     * Get the integral starting with the first data element available and
+     * ending with the last data element available.
+     * <p>
+     * Integration time must have been taken care of by {@link DataSet#expire
+     * expiration}.
+     *
+     * @return An integral value (of the {@link #lastIntegral}).
+     */
     public final synchronized double getIntegral() {
-        
+
         return lastIntegral;
     }
 }
