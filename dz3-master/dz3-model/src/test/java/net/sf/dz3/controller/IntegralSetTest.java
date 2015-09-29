@@ -17,8 +17,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
-import javax.rmi.CORBA.Tie;
-
 /**
  * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
  */
