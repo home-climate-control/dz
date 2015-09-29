@@ -97,27 +97,25 @@ public class SlidingIntegralSet implements IntegralSet {
         
         Long expireBefore = Long.valueOf(lastTimestamp.longValue() - integrationTime);
         
-        while (true) {
+        Entry<Long, Double> trailer = null;
 
-            for (Iterator<Entry<Long, Double>> i = dataSet.entrySet().iterator(); i.hasNext(); ) {
+        for (Iterator<Entry<Long, Double>> i = dataSet.entrySet().iterator(); i.hasNext(); ) {
 
-                Entry<Long, Double> entry = i.next();
+            Entry<Long, Double> entry = trailer != null ? trailer : i.next();
 
-                if (entry.getKey() < expireBefore) {
+            if (entry.getKey() >= expireBefore) {
 
-                    i.remove();
-
-                    Entry<Long, Double> next = i.next();
-
-                    lastIntegral -= next.getValue();
-                    break;
-
-                } else {
-
-                    // We're done, all other keys will be younger
-                    return;
-                }
+                // We're done, all other keys will be younger
+                return;
             }
+
+            i.remove();
+
+            Entry<Long, Double> next = i.next();
+
+            lastIntegral -= next.getValue();
+
+            trailer = next;
         }
     }
 
