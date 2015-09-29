@@ -14,7 +14,7 @@ import net.sf.dz3.controller.DataSet;
  * used for the {@link PID_Controller}, it must be fed with controller error,
  * and anti-windup action must be programmed outside of this class.
  * 
- * Unlike {@link NaiveIntegralSet} (which has the time complexity of {@code O(n)}, this class
+ * Unlike {@link NaiveIntegralSet} (which has the time complexity of {@code O(n)}), this class
  * provides {@code O(1)} time complexity.
  *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
