@@ -103,7 +103,7 @@ public class SlidingIntegralSet implements IntegralSet {
 
                 Entry<Long, Double> entry = i.next();
 
-                if (entry.getKey() <= expireBefore) {
+                if (entry.getKey() < expireBefore) {
 
                     if (!i.hasNext()) {
 
