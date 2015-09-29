@@ -71,7 +71,7 @@ public class IntegralSetTest extends TestCase {
     }
 
     /**
-     * Make sure the slow and fast implementation yield the same results, without triggering expiration.
+     * Make sure the slow and fast implementation yield the same results, triggering expiration.
      */
     public void testSameWithExpiration() {
         

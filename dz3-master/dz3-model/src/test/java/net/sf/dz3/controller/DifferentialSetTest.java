@@ -71,7 +71,7 @@ public class DifferentialSetTest extends TestCase {
     }
 
     /**
-     * Make sure the slow and fast implementation yield the same results, without triggering expiration.
+     * Make sure the slow and fast implementation yield the same results, triggering expiration.
      */
     public void DISABLED_testSameWithExpiration() {
         
@@ -88,7 +88,7 @@ public class DifferentialSetTest extends TestCase {
      */
     public void testSame(int limit, long expirationInterval) {
 
-        NDC.push("testSame/I(" + limit + ", " + expirationInterval + ")");
+        NDC.push("testSame/D(" + limit + ", " + expirationInterval + ")");
 
         Marker m = new Marker("testSame");
         int count = 0;
@@ -207,7 +207,7 @@ public class DifferentialSetTest extends TestCase {
      */
     public void testSameSteps(String marker, long expirationInterval, List<Long> timestamps) {
 
-        NDC.push("testSameSteps/I-" + marker);
+        NDC.push("testSameSteps/D-" + marker);
 
         try {
             
