@@ -76,7 +76,7 @@ public class SchedulerTest extends TestCase {
             assertEquals("Wrong exception message", "0: value doesn't make sense", ex.getMessage());
         }
 
-        long value = -1 * Math.abs(rg.nextLong());
+        long value = -1 * Math.abs(rg.nextInt(Integer.MAX_VALUE));
 
         try {
             // and neither is this
