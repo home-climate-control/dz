@@ -136,7 +136,8 @@ public class SimpleZoneControllerTest extends TestCase {
     /**
      * Test the "Cold Start" bug ({@link http://code.google.com/p/diy-zoning/issues/detail?id=1}.
      * 
-     * The zone controller should stay off without exceptions when the first ever signal.
+     * The zone controller should stay off without exceptions when the first ever signal
+     * doesn't indicate calling.
      */
     public void testColdStartNotCalling() {
         
@@ -178,6 +179,7 @@ public class SimpleZoneControllerTest extends TestCase {
             NDC.pop();
         }
     }
+    
     /**
      * Test the "Cold Start" bug ({@link http://code.google.com/p/diy-zoning/issues/detail?id=1}.
      * 
