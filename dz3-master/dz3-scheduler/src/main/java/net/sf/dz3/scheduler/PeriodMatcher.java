@@ -1,6 +1,7 @@
 package net.sf.dz3.scheduler;
 
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -76,14 +77,15 @@ public class PeriodMatcher {
         
             SortedMap<Period, ZoneStatus> result = new TreeMap<Period, ZoneStatus>();
 
-            for (Iterator<Period> i = zoneSchedule.keySet().iterator(); i.hasNext(); ) {
+            for (Iterator<Entry<Period, ZoneStatus>> i = zoneSchedule.entrySet().iterator(); i.hasNext(); ) {
 
-                Period p = i.next();
+                Entry<Period, ZoneStatus> entry = i.next();
+                Period p = entry.getKey();
 
                 if (p.includesDay(date)) {
 
                     logger.trace(p);
-                    result.put(p, zoneSchedule.get(p));
+                    result.put(p, entry.getValue());
                 }
             }
 
