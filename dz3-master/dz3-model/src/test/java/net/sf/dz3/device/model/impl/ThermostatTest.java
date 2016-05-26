@@ -23,47 +23,47 @@ import org.apache.log4j.NDC;
 public class ThermostatTest extends TestCase {
 
     private final Logger logger = Logger.getLogger(getClass());
-    
+
     /**
      * Make sure that the thermostat refuses null data sample.
      */
     public void testNull() {
-        
+
         AnalogSensor sensor = new NullSensor("address", 0);
         AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
         Thermostat ts = new ThermostatModel("ts",  sensor, controller);
-        
+
         try {
             ts.consume(null);
         } catch (IllegalArgumentException ex) {
             assertEquals("Wrong exception message", "sample can't be null", ex.getMessage());
         }
     }
-    
+
     /**
      * Make sure the surrounding logic doesn't break on the thermostat in initial state.
      */
     public void testInitialSignal() {
-        
+
         AnalogSensor sensor = new NullSensor("address", 0);
         AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
         Thermostat ts = new ThermostatModel("ts",  sensor, controller);
-        
+
         ThermostatSignal signal = ts.getSignal();
-        
+
         assertTrue("Should be error", signal.demand.isError());
         assertEquals("Wrong exception class", IllegalStateException.class, signal.demand.error.getClass());
         assertEquals("Wrong exception message", "No data received yet", signal.demand.error.getMessage());
-        
+
     }
-    
+
     /**
      * Make sure that the thermostat doesn't choke on an error signal and properly propagates it
      * to the zone controller.
      * 
      */
     public void testError() throws InterruptedException {
-	
+
         AnalogSensor sensor = new NullSensor("address", 0);
         AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
         Thermostat ts = new ThermostatModel("ts",  sensor, controller);
@@ -81,30 +81,30 @@ public class ThermostatTest extends TestCase {
 
     private class ThermostateErrorTestZoneController implements ZoneController {
 
-		@Override
-		public void consume(DataSample<ThermostatSignal> signal) {
-			
-			logger.info("Signal: " + signal);
-		}
+        @Override
+        public void consume(DataSample<ThermostatSignal> signal) {
 
-    	public DataSample<Double> getSignal() {
+            logger.info("Signal: " + signal);
+        }
 
-    		throw new UnsupportedOperationException("Not Implemented");
-    	}
+        public DataSample<Double> getSignal() {
 
-    	public void addConsumer(DataSink<Double> consumer) {
-    		throw new UnsupportedOperationException("Not Implemented");
-    	}
+            throw new UnsupportedOperationException("Not Implemented");
+        }
 
-    	public void removeConsumer(DataSink<Double> consumer) {
-    		throw new UnsupportedOperationException("Not Implemented");
-    	}
+        public void addConsumer(DataSink<Double> consumer) {
+            throw new UnsupportedOperationException("Not Implemented");
+        }
 
-    	@Override
-    	public JmxDescriptor getJmxDescriptor() {
+        public void removeConsumer(DataSink<Double> consumer) {
+            throw new UnsupportedOperationException("Not Implemented");
+        }
 
-    		throw new UnsupportedOperationException("Not Implemented");
-    	}
+        @Override
+        public JmxDescriptor getJmxDescriptor() {
+
+            throw new UnsupportedOperationException("Not Implemented");
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -117,14 +117,14 @@ public class ThermostatTest extends TestCase {
             long timestamp = 0;
 
             @SuppressWarnings("rawtypes")
-			DataSample tempSequence[] = {
-                    new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
-                    new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
-                    new DataSample<Double>(timestamp++, "source", "signature", 21.0, null),
-                    new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
-                    new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
-                    new DataSample<Double>(timestamp++, "source", "signature", 19.5, null),
-                    new DataSample<Double>(timestamp++, "source", "signature", 19.0, null)
+            DataSample tempSequence[] = {
+                new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 21.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 19.5, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 19.0, null)
             };
 
             AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
@@ -165,7 +165,7 @@ public class ThermostatTest extends TestCase {
 
             // and off again
             logger.info("TURNING OFF");
-            
+
             assertFalse(ts.getSignal().calling);
 
         } finally {
