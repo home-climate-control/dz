@@ -2,6 +2,7 @@ package net.sf.dz3.scheduler;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -37,10 +38,11 @@ public abstract class AbstractScheduleUpdater implements ScheduleUpdater {
             throw new IllegalStateException("No thermostats to control given, why bother?");
         }
         
-        for (Iterator<Thermostat> i = ts2source.keySet().iterator(); i.hasNext(); ) {
+        for (Iterator<Entry<Thermostat, String>> i = ts2source.entrySet().iterator(); i.hasNext(); ) {
             
-            Thermostat ts = i.next();
-            String source = ts2source.get(ts);
+            Entry<Thermostat, String> entry = i.next();
+            Thermostat ts = entry.getKey();
+            String source = entry.getValue();
             
             if (source == null || "".equals(source)) {
                 
