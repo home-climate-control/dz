@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -24,6 +25,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
+import org.joda.time.DateTime;
 
 public class SchedulerTest extends TestCase {
     
@@ -423,7 +425,6 @@ public class SchedulerTest extends TestCase {
         }
     }
     
-    /*
     public void testSchedule1() {
         
         NDC.push("testSchedule1");
@@ -444,42 +445,42 @@ public class SchedulerTest extends TestCase {
                 
         Calendar cal = getMondayStart();
 
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "night", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 8);
         cal.set(Calendar.MINUTE, 30);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "morning", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 9);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 10);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 18);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 21);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
     }
@@ -504,49 +505,49 @@ public class SchedulerTest extends TestCase {
                 
         Calendar cal = getMondayStart();
 
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "background", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 8);
         cal.set(Calendar.MINUTE, 30);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "morning", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 9);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 10);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 15);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "background", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 18);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 21);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
     }
@@ -571,42 +572,42 @@ public class SchedulerTest extends TestCase {
                 
         Calendar cal = getMondayStart();
 
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), null, s.getCurrentPeriod(ts));
         
         cal.set(Calendar.HOUR_OF_DAY, 9);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "morning", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 15);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), null, s.getCurrentPeriod(ts));
         
         cal.set(Calendar.HOUR_OF_DAY, 18);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
         
         cal.set(Calendar.HOUR_OF_DAY, 21);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
 
         cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 0);
         
-        s.execute(schedule, cal.getTimeInMillis());
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         assertEquals("Wrong period for " + cal.getTime(), null, s.getCurrentPeriod(ts));
         
@@ -661,7 +662,7 @@ public class SchedulerTest extends TestCase {
             // This thermostat is not in the schedule
             Thermostat ts = new NullThermostat("alien");
 
-            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 22, true, true, new DateTime(cal.getTimeInMillis()));
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
         }
@@ -672,9 +673,9 @@ public class SchedulerTest extends TestCase {
         {
             // No period is present at this time
             
-            s.execute(schedule, cal.getTimeInMillis());
+            s.execute(schedule, new DateTime(cal.getTimeInMillis()));
 
-            Deviation d = s.getDeviation(ts, 22, false, false, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 22, false, false, new DateTime(cal.getTimeInMillis()));
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
             assertEquals("Wrong enabled deviation ", false, d.enabled);
@@ -685,9 +686,9 @@ public class SchedulerTest extends TestCase {
             cal.set(Calendar.HOUR_OF_DAY, 9);
             cal.set(Calendar.MINUTE, 0);
 
-            s.execute(schedule, cal.getTimeInMillis());
+            s.execute(schedule, new DateTime(cal.getTimeInMillis()));
 
-            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 22, true, true, new DateTime(cal.getTimeInMillis()));
 
             assertEquals("Wrong setpoint deviation ", -2.5, d.setpoint);
             assertEquals("Wrong enabled deviation ", false, d.enabled);
@@ -700,9 +701,9 @@ public class SchedulerTest extends TestCase {
             cal.set(Calendar.HOUR_OF_DAY, 12);
             cal.set(Calendar.MINUTE, 0);
 
-            s.execute(schedule, cal.getTimeInMillis());
+            s.execute(schedule, new DateTime(cal.getTimeInMillis()));
 
-            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 22, true, true, new DateTime(cal.getTimeInMillis()));
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
             assertEquals("Wrong enabled deviation ", false, d.enabled);
@@ -713,9 +714,9 @@ public class SchedulerTest extends TestCase {
             cal.set(Calendar.HOUR_OF_DAY, 18);
             cal.set(Calendar.MINUTE, 0);
 
-            s.execute(schedule, cal.getTimeInMillis());
+            s.execute(schedule, new DateTime(cal.getTimeInMillis()));
 
-            Deviation d = s.getDeviation(ts, 22, true, false, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 22, true, false, new DateTime(cal.getTimeInMillis()));
 
             assertEquals("Wrong setpoint deviation ", -2.8, d.setpoint, 0.0001);
             assertEquals("Wrong enabled deviation ", false, d.enabled);
@@ -726,9 +727,9 @@ public class SchedulerTest extends TestCase {
             cal.set(Calendar.HOUR_OF_DAY, 21);
             cal.set(Calendar.MINUTE, 0);
 
-            s.execute(schedule, cal.getTimeInMillis());
+            s.execute(schedule, new DateTime(cal.getTimeInMillis()));
 
-            Deviation d = s.getDeviation(ts, 24.8, false, true, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 24.8, false, true, new DateTime(cal.getTimeInMillis()));
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
             assertEquals("Wrong enabled deviation ", true, d.enabled);
@@ -739,9 +740,9 @@ public class SchedulerTest extends TestCase {
             cal.set(Calendar.HOUR_OF_DAY, 22);
             cal.set(Calendar.MINUTE, 0);
 
-            s.execute(schedule, cal.getTimeInMillis());
+            s.execute(schedule, new DateTime(cal.getTimeInMillis()));
 
-            Deviation d = s.getDeviation(ts, 24.8, true, true, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 24.8, true, true, new DateTime(cal.getTimeInMillis()));
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
             assertEquals("Wrong enabled deviation ", false, d.enabled);
@@ -753,14 +754,14 @@ public class SchedulerTest extends TestCase {
             cal.set(Calendar.HOUR_OF_DAY, 23);
             cal.set(Calendar.MINUTE, 0);
 
-            s.execute(schedule, cal.getTimeInMillis());
+            s.execute(schedule, new DateTime(cal.getTimeInMillis()));
 
-            Deviation d = s.getDeviation(ts, 22, true, true, cal.getTimeInMillis());
+            Deviation d = s.getDeviation(ts, 22, true, true, new DateTime(cal.getTimeInMillis()));
 
             assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
         }
         
-    } */
+    }
 
     private static class NullThermostat implements Thermostat {
 
