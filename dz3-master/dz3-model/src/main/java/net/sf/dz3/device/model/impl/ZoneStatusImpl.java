@@ -13,6 +13,10 @@ public class ZoneStatusImpl implements ZoneStatus, Serializable {
     public final boolean voting;
 
     public ZoneStatusImpl(double setpoint, int dumpPriority, boolean enabled, boolean voting) {
+        
+        if (Double.compare(setpoint, Double.NaN) == 0 || setpoint == Double.NEGATIVE_INFINITY || setpoint == Double.POSITIVE_INFINITY) {
+            throw new IllegalArgumentException("Invalid setpoint " + setpoint);
+        }
 
         if (dumpPriority < 0) {
             

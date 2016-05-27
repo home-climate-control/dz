@@ -23,6 +23,42 @@ public class ZoneStatusTest extends TestCase {
         }
     }
     
+    public void testSetpointNaN() {
+
+        try {
+        
+            new ZoneStatusImpl(Double.NaN, 0, true, true);
+            fail("Should've failed by now");
+        
+        } catch (IllegalArgumentException ex) {
+            assertEquals("wrong exception message", "Invalid setpoint NaN", ex.getMessage());
+        }
+    }
+
+    public void testSetpointPositiveInfinity() {
+
+        try {
+        
+            new ZoneStatusImpl(Double.POSITIVE_INFINITY, 0, true, true);
+            fail("Should've failed by now");
+        
+        } catch (IllegalArgumentException ex) {
+            assertEquals("wrong exception message", "Invalid setpoint Infinity", ex.getMessage());
+        }
+    }
+
+    public void testSetpointNegativeInfinity() {
+
+        try {
+        
+            new ZoneStatusImpl(Double.NEGATIVE_INFINITY, 0, true, true);
+            fail("Should've failed by now");
+        
+        } catch (IllegalArgumentException ex) {
+            assertEquals("wrong exception message", "Invalid setpoint -Infinity", ex.getMessage());
+        }
+    }
+
     public void testNegativeDumpPriority() {
 
         try {
