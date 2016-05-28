@@ -398,6 +398,33 @@ public class SchedulerTest extends TestCase {
     }
     
     /**
+     * Render the schedule as follows:
+     * 
+     *  Away: setpoint 29C, all day
+     *  Reset: setpoint 29C, 01:00 to 01:30
+     */
+    private Map<Thermostat, SortedMap<Period, ZoneStatus>> renderSchedule4() {
+        
+        final Map<Thermostat, SortedMap<Period, ZoneStatus>> result = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+        Thermostat t = new NullThermostat("thermostat");
+
+        Period pMorning = new Period("away", "0:00", "23:59", ".......");
+        ZoneStatus zsAway = new ZoneStatusImpl(29.0, 0, true, true);
+
+        Period pEvening = new Period("reset", "01:00", "01:30", ".......");
+        ZoneStatus zsReset = new ZoneStatusImpl(29.0, 0, true, true);
+        
+        SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
+        
+        periods.put(pMorning, zsAway);
+        periods.put(pEvening, zsReset);
+        
+        result.put(t, periods);
+        
+        return result;
+    }
+
+    /**
      * @return Time for 00:00 of current week's Monday.
      */
     private Calendar getMondayStart() {
@@ -552,6 +579,9 @@ public class SchedulerTest extends TestCase {
         assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
     }
 
+    /**
+     * @see https://github.com/home-climate-control/dz/issues/13
+     */
     public void testSchedule3() {
         
         NDC.push("testSchedule3");
@@ -611,6 +641,65 @@ public class SchedulerTest extends TestCase {
         
         assertEquals("Wrong period for " + cal.getTime(), null, s.getCurrentPeriod(ts));
         
+    }
+
+    public void testSchedule4() {
+        
+        NDC.push("testSchedule4");
+        
+        try {
+        
+            checkSchedule4(renderSchedule4(), new Scheduler());
+            
+        } finally {
+            NDC.pop();
+        }
+    }
+
+    private void checkSchedule4(Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule, Scheduler s) {
+
+        Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = schedule.entrySet().iterator().next();
+        Thermostat ts = entry.getKey();
+                
+        Calendar cal = getMondayStart();
+        
+        // Start the day
+
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
+        
+        // Has to be at +29C, enabled, voting - according to schedule
+
+        assertEquals("Wrong setpoint for " + cal.getTime(), 29.0, ts.getSetpoint());
+        
+        // Change the setpoint to 26C manually
+        
+        ts.set(new ZoneStatusImpl(26, 0, true, true));
+        
+        assertEquals("Wrong setpoint for " + cal.getTime(), 26.0, ts.getSetpoint());
+        
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 10);
+        
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
+        
+        assertEquals("Wrong period for " + cal.getTime(), "away", s.getCurrentPeriod(ts).name);
+
+        // Has to be still at 26C
+        
+        assertEquals("Wrong setpoint for " + cal.getTime(), 26.0, ts.getSetpoint());
+
+        cal.set(Calendar.HOUR_OF_DAY, 1);
+        cal.set(Calendar.MINUTE, 10);
+        
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
+        
+        // 'reset' should've taken over by now
+        
+        assertEquals("Wrong period for " + cal.getTime(), "reset", s.getCurrentPeriod(ts).name);
+
+        // Has to be at 29C now
+        
+        assertEquals("Wrong setpoint for " + cal.getTime(), 29.0, ts.getSetpoint());
     }
 
     public void testDeviation() {
@@ -765,7 +854,12 @@ public class SchedulerTest extends TestCase {
 
     private static class NullThermostat implements Thermostat {
 
+        private final Logger logger = Logger.getLogger(getClass());
+
         private final String name;
+        private Double setpoint;
+        private Boolean enabled;
+        private Boolean voting;
         
         public NullThermostat(String name) {
             
@@ -780,8 +874,8 @@ public class SchedulerTest extends TestCase {
 
         @Override
         public double getSetpoint() {
-            // Inconsequential for the test case
-            return 0;
+            
+            return setpoint;
         }
 
         @Override
@@ -798,8 +892,12 @@ public class SchedulerTest extends TestCase {
 
         @Override
         public void set(ZoneStatus status) {
-            // Inconsequential for the test case
+            
+            logger.info(getName() + ": set() to " + status);
 
+            this.setpoint = status.getSetpoint();
+            this.enabled = status.isOn();
+            this.voting = status.isVoting();
         }
 
         @Override
@@ -828,14 +926,14 @@ public class SchedulerTest extends TestCase {
 
         @Override
         public boolean isOn() {
-            // Inconsequential for the test case
-            return false;
+
+            return enabled;
         }
 
         @Override
         public boolean isVoting() {
-            // Inconsequential for the test case
-            return false;
+
+            return voting;
         }
 
         @Override
