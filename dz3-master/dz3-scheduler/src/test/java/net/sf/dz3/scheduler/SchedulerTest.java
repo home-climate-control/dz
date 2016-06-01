@@ -402,6 +402,8 @@ public class SchedulerTest extends TestCase {
      * 
      *  Away: setpoint 29C, all day
      *  Reset: setpoint 29C, 01:00 to 01:30
+     *
+     *  @see #renderSchedule5()
      */
     private Map<Thermostat, SortedMap<Period, ZoneStatus>> renderSchedule4() {
         
@@ -413,6 +415,35 @@ public class SchedulerTest extends TestCase {
 
         Period pEvening = new Period("reset", "01:00", "01:30", ".......");
         ZoneStatus zsReset = new ZoneStatusImpl(29.0, 0, true, true);
+        
+        SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
+        
+        periods.put(pMorning, zsAway);
+        periods.put(pEvening, zsReset);
+        
+        result.put(t, periods);
+        
+        return result;
+    }
+
+    /**
+     * Render the schedule as follows:
+     * 
+     *  Away: setpoint 29C, all day
+     *  Reset: setpoint 29.5C, 01:00 to 01:30
+     *
+     *  @see #renderSchedule4()
+     */
+    private Map<Thermostat, SortedMap<Period, ZoneStatus>> renderSchedule5() {
+        
+        final Map<Thermostat, SortedMap<Period, ZoneStatus>> result = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+        Thermostat t = new NullThermostat("thermostat");
+
+        Period pMorning = new Period("away", "0:00", "23:59", ".......");
+        ZoneStatus zsAway = new ZoneStatusImpl(29.0, 0, true, true);
+
+        Period pEvening = new Period("reset", "01:00", "01:30", ".......");
+        ZoneStatus zsReset = new ZoneStatusImpl(29.5, 0, true, true);
         
         SortedMap<Period, ZoneStatus> periods = new TreeMap<Period, ZoneStatus>();
         
@@ -700,6 +731,65 @@ public class SchedulerTest extends TestCase {
         // Has to be at 29C now
         
         assertEquals("Wrong setpoint for " + cal.getTime(), 29.0, ts.getSetpoint());
+    }
+
+    public void testSchedule5() {
+        
+        NDC.push("testSchedule5");
+        
+        try {
+        
+            checkSchedule5(renderSchedule5(), new Scheduler());
+            
+        } finally {
+            NDC.pop();
+        }
+    }
+
+    private void checkSchedule5(Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule, Scheduler s) {
+
+        Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = schedule.entrySet().iterator().next();
+        Thermostat ts = entry.getKey();
+                
+        Calendar cal = getMondayStart();
+        
+        // Start the day
+
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
+        
+        // Has to be at +29C, enabled, voting - according to schedule
+
+        assertEquals("Wrong setpoint for " + cal.getTime(), 29.0, ts.getSetpoint());
+        
+        // Change the setpoint to 26C manually
+        
+        ts.set(new ZoneStatusImpl(26, 0, true, true));
+        
+        assertEquals("Wrong setpoint for " + cal.getTime(), 26.0, ts.getSetpoint());
+        
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 10);
+        
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
+        
+        assertEquals("Wrong period for " + cal.getTime(), "away", s.getCurrentPeriod(ts).name);
+
+        // Has to be still at 26C
+        
+        assertEquals("Wrong setpoint for " + cal.getTime(), 26.0, ts.getSetpoint());
+
+        cal.set(Calendar.HOUR_OF_DAY, 1);
+        cal.set(Calendar.MINUTE, 10);
+        
+        s.execute(schedule, new DateTime(cal.getTimeInMillis()));
+        
+        // 'reset' should've taken over by now
+        
+        assertEquals("Wrong period for " + cal.getTime(), "reset", s.getCurrentPeriod(ts).name);
+
+        // Has to be at 29.5C now
+        
+        assertEquals("Wrong setpoint for " + cal.getTime(), 29.5, ts.getSetpoint());
     }
 
     public void testDeviation() {
