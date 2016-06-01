@@ -347,6 +347,14 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
                 Period p = periodMatcher.match(zoneSchedule, time);
                 ZoneStatus status = zoneSchedule.get(p);
                 ZoneStatus currentZoneStatus = currentStatus.get(ts);
+                
+                // VT: FIXME: https://github.com/home-climate-control/dz/issues/13
+                
+                // The check below will only enforce the next event if it is different
+                // from the previous. Otherwise, if the setpoint or voting status were
+                // changed manually, the thermostat will stay at current settings.
+                
+                // Workaround: avoid overlapping/adjacent events with identical settings.
 
                 if (!status.equals(currentZoneStatus)) {
 
