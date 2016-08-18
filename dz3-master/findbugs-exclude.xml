@@ -66,4 +66,18 @@
         <Bug pattern="URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD" />
     </Match>
     
+    <!-- This collection holds values that can safely be discarded -->
+    <Match>
+        <Class name="net.sf.dz3.view.swing.thermostat.Chart"/>
+        <Field name="channel2ds" />
+        <Bug pattern="SE_TRANSIENT_FIELD_NOT_RESTORED" />
+    </Match>
+    
+    <!-- False positive -->
+    <Match>
+        <Class name="net.sf.dz3.view.swing.thermostat.Chart"/>
+        <Method name="paintComponent" />
+        <Bug pattern="BC_UNCONFIRMED_CAST" />
+    </Match>
+    
 </FindBugsFilter>

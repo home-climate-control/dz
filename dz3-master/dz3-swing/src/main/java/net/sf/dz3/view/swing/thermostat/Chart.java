@@ -30,9 +30,9 @@ import org.apache.log4j.Logger;
 public class Chart extends JPanel implements DataSink<TintedValue> {
 
     private static final long serialVersionUID = 6232379779841821973L;
-    private final Logger logger = Logger.getLogger(getClass());
+    private transient final Logger logger = Logger.getLogger(getClass());
 
-    private final SortedMap<String, DataSet<TintedValue>> channel2ds = new TreeMap<String, DataSet<TintedValue>>();
+    private transient final SortedMap<String, DataSet<TintedValue>> channel2ds = new TreeMap<String, DataSet<TintedValue>>();
 
     /**
      * Grid color.
