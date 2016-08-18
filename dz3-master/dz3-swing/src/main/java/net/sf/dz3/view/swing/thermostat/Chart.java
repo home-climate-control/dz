@@ -185,7 +185,7 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
 
         paintValueGrid(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset);
 
-        paintChart(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset);
+        paintCharts(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset);
 
         logger.info("Painted in " + (System.currentTimeMillis() - startTime) + "ms");
     }
@@ -300,7 +300,7 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
         g2d.setStroke(originalStroke);
     }
 
-    private void paintChart(Graphics2D g2d, Dimension boundary, Insets insets, long now, double x_scale, long x_offset, double y_scale, double y_offset) {
+    private void paintCharts(Graphics2D g2d, Dimension boundary, Insets insets, long now, double x_scale, long x_offset, double y_scale, double y_offset) {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
