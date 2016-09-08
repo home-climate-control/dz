@@ -155,7 +155,7 @@ public class DataSet<T> {
         return dataSet.keySet().iterator();
     }
 
-    protected final Iterator<Map.Entry<Long, T>> entryIterator() {
+    public final Iterator<Map.Entry<Long, T>> entryIterator() {
 
       return dataSet.entrySet().iterator();
     }

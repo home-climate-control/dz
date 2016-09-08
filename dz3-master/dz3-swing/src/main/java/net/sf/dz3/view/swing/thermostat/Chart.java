@@ -20,12 +20,13 @@ import javax.swing.JPanel;
 import net.sf.dz3.controller.DataSet;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.jukebox.util.Interval;
 
 import org.apache.log4j.Logger;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2016
  */
 public class Chart extends JPanel implements DataSink<TintedValue> {
 
@@ -90,6 +91,23 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
      * Minimum known data value.
      */
     private Double dataMin = null;
+    
+    /**
+     * Timestamp on {@link #dataMin} or {@link #dataMax}, whichever is younger.
+     * 
+     * @see #adjustVerticalLimits(double)
+     */
+    private Long minmaxTime = null;
+    
+    /**
+     * Amount of extra time to wait before {@link #recalculateVerticalLimits()
+     * recalculating} the limits.
+     * 
+     * Chances are, new min/max values will be pretty close to old, so unless
+     * this value is used, recalculation will be happening more often than
+     * necessary.
+     */
+    private double minmaxOverhead = 1.1;
 
     public Chart() {
 
@@ -129,7 +147,7 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
         }
 
         ds.record(signal.timestamp, signal.sample);
-        adjustVerticalLimits(signal.sample.value);
+        adjustVerticalLimits(signal.timestamp, signal.sample.value);
 
         repaint();
     }
@@ -137,20 +155,75 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
     /**
      * Adjust the vertical limits, if necessary.
      * 
+     * @param timestamp Value timestamp.
      * @param value Incoming data element.
      * 
      * @see #dataMax
      * @see #dataMin
      */
-    private void adjustVerticalLimits(double value) {
+    private void adjustVerticalLimits(long timestamp, double value) {
+        
+        if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * minmaxOverhead)) {
+            
+            logger.info("minmax too old (" + Interval.toTimeInterval(timestamp - minmaxTime) + "), recalculating");
 
+            // Total recalculation is required
+            
+            recalculateVerticalLimits();
+        }
+        
+        // Treating minmaxTime like this still allows for lopsided chart if a long up or down trend continues,
+        // but we probably do want to know about that, so let's just make a note and ignore it for the moment 
+        
         if (dataMax == null || value > dataMax) {
+
             dataMax = value;
+            minmaxTime = timestamp;
         }
 
         if (dataMin == null || value < dataMin) {
+
             dataMin = value;
+            minmaxTime = timestamp;
         }
+    }
+
+    /**
+     * Calculate {@link #dataMin} and {@link #dataMax} based on all values available in {@link #channel2ds}.
+     */
+    private synchronized void recalculateVerticalLimits() {
+        
+        long startTime = System.currentTimeMillis();
+        
+        dataMin = null;
+        dataMax = null;
+        
+        for (Iterator<DataSet<TintedValue>> i = channel2ds.values().iterator(); i.hasNext(); ) {
+            
+            DataSet<TintedValue> ds = i.next();
+            
+            for (Iterator<Entry<Long, TintedValue>> i2 = ds.entryIterator(); i2.hasNext(); ) {
+                
+                Entry<Long, TintedValue> entry = i2.next();
+                Long timestamp = entry.getKey();
+                TintedValue tv = entry.getValue();
+                
+                if (dataMax == null || tv.value > dataMax) {
+                    
+                    dataMax = tv.value;
+                    minmaxTime = timestamp;
+                }
+
+                if (dataMin == null || tv.value < dataMin) {
+
+                    dataMin = tv.value;
+                    minmaxTime = timestamp;
+                }
+            }
+        }
+        
+        logger.info("Recalculated in " + (System.currentTimeMillis() - startTime) + "ms");
+        logger.info("New minmaxTime set to + " + Interval.toTimeInterval(System.currentTimeMillis() - minmaxTime));
     }
 
     @Override
