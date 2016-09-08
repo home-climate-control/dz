@@ -389,8 +389,8 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
         }
     }
 
-    final static Color low = Color.GREEN;
-    final static Color high = Color.RED;
+    private final static Color SIGNAL_COLOR_LOW = Color.GREEN;
+    private final static Color SIGNAL_COLOR_HIGH = Color.RED;
 
     private void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
             long now, double x_scale, long x_offset, double y_scale, double y_offset,
@@ -436,7 +436,7 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
                     // and skew the x0 so the next part will be
                     // painted vertical
 
-                    Color startColor = signal2color(trailer.tint - 1, low, high);
+                    Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
                     Color endColor = getBackground();
 
                     drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor);
@@ -448,8 +448,8 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
                     dead = false;
                 }
 
-                Color startColor = signal2color(trailer.tint - 1, low, high);
-                Color endColor = signal2color(cursor.tint - 1, low, high);
+                Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                Color endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
 
                 drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor);
             }
@@ -468,7 +468,7 @@ public class Chart extends JPanel implements DataSink<TintedValue> {
             double x1 = (now - x_offset) * x_scale + insets.left;
             double y = (y_offset - trailer.value) * y_scale + insets.top;
 
-            Color startColor = signal2color(trailer.tint - 1, low, high);
+            Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
             Color endColor = getBackground();
 
             drawGradientLine(g2d, x0, y, x1, y, startColor, endColor);
