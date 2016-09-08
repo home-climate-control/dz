@@ -22,15 +22,6 @@ public class Chart extends AbstractChart {
 
     private static final long serialVersionUID = -8138341010404232436L;
 
-    private transient final SortedMap<String, DataSet<TintedValue>> channel2ds = new TreeMap<String, DataSet<TintedValue>>();
-
-    /**
-     * Timestamp on {@link #dataMin} or {@link #dataMax}, whichever is younger.
-     * 
-     * @see #adjustVerticalLimits(double)
-     */
-    private Long minmaxTime = null;
-    
     public Chart(long chartLengthMillis) {
         
         super(chartLengthMillis);
@@ -47,8 +38,7 @@ public class Chart extends AbstractChart {
 
         if (ds == null) {
 
-            // 3 hours
-            ds = new DataSet<TintedValue>(1000 * 60 * 60 * 3);
+            ds = new DataSet<TintedValue>(chartLengthMillis);
             channel2ds.put(channel, ds);
         }
 
@@ -56,80 +46,6 @@ public class Chart extends AbstractChart {
         adjustVerticalLimits(signal.timestamp, signal.sample.value);
 
         repaint();
-    }
-
-    /**
-     * Adjust the vertical limits, if necessary.
-     * 
-     * @param timestamp Value timestamp.
-     * @param value Incoming data element.
-     * 
-     * @see #dataMax
-     * @see #dataMin
-     */
-    private void adjustVerticalLimits(long timestamp, double value) {
-        
-        if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * minmaxOverhead)) {
-            
-            logger.info("minmax too old (" + Interval.toTimeInterval(timestamp - minmaxTime) + "), recalculating");
-
-            // Total recalculation is required
-            
-            recalculateVerticalLimits();
-        }
-        
-        // Treating minmaxTime like this still allows for lopsided chart if a long up or down trend continues,
-        // but we probably do want to know about that, so let's just make a note and ignore it for the moment 
-        
-        if (dataMax == null || value > dataMax) {
-
-            dataMax = value;
-            minmaxTime = timestamp;
-        }
-
-        if (dataMin == null || value < dataMin) {
-
-            dataMin = value;
-            minmaxTime = timestamp;
-        }
-    }
-
-    /**
-     * Calculate {@link #dataMin} and {@link #dataMax} based on all values available in {@link #channel2ds}.
-     */
-    private synchronized void recalculateVerticalLimits() {
-        
-        long startTime = System.currentTimeMillis();
-        
-        dataMin = null;
-        dataMax = null;
-        
-        for (Iterator<DataSet<TintedValue>> i = channel2ds.values().iterator(); i.hasNext(); ) {
-            
-            DataSet<TintedValue> ds = i.next();
-            
-            for (Iterator<Entry<Long, TintedValue>> i2 = ds.entryIterator(); i2.hasNext(); ) {
-                
-                Entry<Long, TintedValue> entry = i2.next();
-                Long timestamp = entry.getKey();
-                TintedValue tv = entry.getValue();
-                
-                if (dataMax == null || tv.value > dataMax) {
-                    
-                    dataMax = tv.value;
-                    minmaxTime = timestamp;
-                }
-
-                if (dataMin == null || tv.value < dataMin) {
-
-                    dataMin = tv.value;
-                    minmaxTime = timestamp;
-                }
-            }
-        }
-        
-        logger.info("Recalculated in " + (System.currentTimeMillis() - startTime) + "ms");
-        logger.info("New minmaxTime set to + " + Interval.toTimeInterval(System.currentTimeMillis() - minmaxTime));
     }
 
     @Override
@@ -313,18 +229,5 @@ public class Chart extends AbstractChart {
         }
 
         return new TintedValue(valueAccumulator / size, tintAccumulator / size);
-    }
-
-    @Override
-    protected boolean isDataAvailable() {
-
-        if (channel2ds.isEmpty() || dataMax == null || dataMin == null) {
-
-            // No data consumed yet
-            return false;
-        }
-        
-        return true;
-
     }
 }
