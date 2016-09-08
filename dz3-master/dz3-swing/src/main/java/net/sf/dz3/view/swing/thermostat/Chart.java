@@ -31,13 +31,6 @@ public class Chart extends AbstractChart {
      */
     private Long minmaxTime = null;
     
-    public Chart() {
-
-        // 30 minutes
-
-        this(1000 * 60 * 30);
-    }
-
     public Chart(long chartLengthMillis) {
         
         super(chartLengthMillis);
