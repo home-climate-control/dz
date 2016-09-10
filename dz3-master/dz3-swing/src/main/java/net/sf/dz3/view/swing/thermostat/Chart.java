@@ -49,23 +49,7 @@ public class Chart extends AbstractChart {
     }
 
     @Override
-    protected void paintCharts(Graphics2D g2d, Dimension boundary, Insets insets, long now, double x_scale, long x_offset, double y_scale, double y_offset) {
-
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        for (Iterator<Entry<String, DataSet<TintedValue>>> i = channel2ds.entrySet().iterator(); i.hasNext(); ) {
-
-            // VT: FIXME: Implement depth ordering
-
-            Entry<String, DataSet<TintedValue>> entry = i.next();
-            String channel = entry.getKey();
-            DataSet<TintedValue> ds = entry.getValue();
-
-            paintChart(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, ds);
-        }
-    }
-
-    private void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
+    protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
             long now, double x_scale, long x_offset, double y_scale, double y_offset,
             String channel, DataSet<TintedValue> ds) {
 
@@ -229,5 +213,10 @@ public class Chart extends AbstractChart {
         }
 
         return new TintedValue(valueAccumulator / size, tintAccumulator / size);
+    }
+
+    @Override
+    protected void checkWidth(Dimension boundary) {
+        // Does nothing here
     }
 }

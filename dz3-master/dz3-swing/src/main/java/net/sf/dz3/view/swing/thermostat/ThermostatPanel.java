@@ -79,7 +79,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     private final JLabel periodLabel = new JLabel("", JLabel.LEFT);
 
     // 3 hours
-    private final Chart chart = new Chart(1000 * 60 * 60 * 3);
+    private final AbstractChart chart = new FasterChart(1000 * 60 * 60 * 3);
 
     private static final String NO_PERIOD = "(no period is active)";
 

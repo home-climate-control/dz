@@ -7,6 +7,7 @@ import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
@@ -139,6 +140,9 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         paintTimeGrid(g2d, boundary, insets, now, x_scale, x_offset);
         
+        // VT: FIXME: Ugly hack.
+        checkWidth(boundary);
+        
         if (!isDataAvailable()) {
             return;
         }
@@ -153,6 +157,8 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         logger.info("Painted in " + (System.currentTimeMillis() - startTime) + "ms");
     }
 
+    protected abstract void checkWidth(Dimension boundary);
+
     protected final boolean isDataAvailable() {
 
         if (channel2ds.isEmpty() || dataMax == null || dataMin == null) {
@@ -165,7 +171,29 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     }
 
-    protected abstract void paintCharts(Graphics2D g2d, Dimension boundary, Insets insets, long now, double x_scale, long x_offset, double y_scale, double y_offset);
+    protected final void paintCharts(
+                Graphics2D g2d, Dimension boundary, Insets insets, long now,
+                double x_scale, long x_offset, double y_scale, double y_offset) {
+
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        for (Iterator<Entry<String, DataSet<TintedValue>>> i = channel2ds.entrySet().iterator(); i.hasNext(); ) {
+
+            // VT: FIXME: Implement depth ordering
+
+            Entry<String, DataSet<TintedValue>> entry = i.next();
+            String channel = entry.getKey();
+            DataSet<TintedValue> ds = entry.getValue();
+
+            paintChart(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, ds);
+        }
+    }
+
+
+    protected abstract void paintChart(
+            Graphics2D g2d, Dimension boundary, Insets insets, long now,
+            double x_scale, long x_offset, double y_scale, double y_offset,
+            String channel, DataSet<TintedValue> ds);
 
     private void paintBackground(Graphics2D g2d, Dimension boundary, Insets insets) {
 
