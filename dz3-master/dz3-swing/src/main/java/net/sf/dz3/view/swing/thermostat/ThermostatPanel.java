@@ -627,8 +627,11 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
             setpointLabel.setText(label);
             setpointLabel.setForeground(fg);
+            
+            // The signal path is such that this code will always be executed right before ThermostatListener#refresh
+            // which also calls repaint(), hence this call is redundant.
 
-            repaint();
+            // repaint();
         }
     }
 
