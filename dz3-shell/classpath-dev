@@ -16,7 +16,7 @@ XBEE_VERSION=0.9.1-SNAPSHOT
 
 LIBDIR=${HOME}/.m2/repository
 
-COMMONS_CODEC=${LIBDIR}/commons-codec/commons-codec/1.2/commons-codec-1.2.jar
+COMMONS_CODEC=${LIBDIR}/commons-codec/commons-codec/1.3/commons-codec-1.3.jar
 COMMONS_LANG=${LIBDIR}/org/apache/commons/commons-lang3/3.3.2/commons-lang3-3.3.2.jar
 COMMONS_LOGGING=${LIBDIR}/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar
 COMMONS_HTTPCLIENT=${LIBDIR}/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar

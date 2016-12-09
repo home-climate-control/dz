@@ -36,7 +36,7 @@ ${LIBDIR}/jukebox-service-${JUKEBOX_VERSION}.jar:\
 ${LIBDIR}/servomaster-common-${SERVOMASTER_VERSION}.jar:\
 ${LIBDIR}/servomaster-serial-${SERVOMASTER_VERSION}.jar:\
 ${LIBDIR}/servomaster-usb-${SERVOMASTER_VERSION}.jar:\
-${LIBDIR}/commons-codec-1.2.jar:\
+${LIBDIR}/commons-codec-1.3.jar:\
 ${LIBDIR}/commons-httpclient-3.1.jar:\
 ${LIBDIR}/commons-lang3-3.3.2.jar:\
 ${LIBDIR}/commons-logging-1.1.1.jar:\
