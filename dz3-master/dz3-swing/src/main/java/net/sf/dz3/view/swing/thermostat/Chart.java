@@ -96,7 +96,7 @@ public class Chart extends AbstractChart {
                     Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
                     Color endColor = getBackground();
 
-                    drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor);
+                    drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, false);
 
                     x0 = x1;
                 }
@@ -108,7 +108,7 @@ public class Chart extends AbstractChart {
                 Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
                 Color endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
 
-                drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor);
+                drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, false);
             }
 
             time_trailer = time_now;
@@ -128,7 +128,7 @@ public class Chart extends AbstractChart {
             Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
             Color endColor = getBackground();
 
-            drawGradientLine(g2d, x0, y, x1, y, startColor, endColor);
+            drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
         }
 
         // Store the values so the readings can be displayed

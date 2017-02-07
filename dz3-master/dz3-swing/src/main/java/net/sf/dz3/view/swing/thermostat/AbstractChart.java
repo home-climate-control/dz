@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
@@ -30,6 +31,9 @@ import net.sf.jukebox.util.Interval;
 public abstract class AbstractChart extends JPanel implements DataSink<TintedValue> {
 
     private static final long serialVersionUID = -8584582539155161184L;
+    
+    private static final Stroke strokeSingle = new BasicStroke();
+    private static final Stroke strokeDouble = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10.0f, null, 0.0f);
 
     protected transient final Logger logger = Logger.getLogger(getClass());
 
@@ -227,7 +231,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             double gridX = (timeOffset - x_offset) * x_scale + insets.left;
 
             drawGradientLine(g2d, gridX, insets.top, gridX, boundary.height - insets.bottom - 1,
-                    getBackground(), Color.GRAY.darker().darker());
+                    getBackground(), Color.GRAY.darker().darker(), false);
         }
 
         g2d.setStroke(originalStroke);
@@ -275,12 +279,14 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             drawGradientLine(g2d,
                     insets.left, gridY,
                     halfWidth, gridY,
-                    Color.GRAY.darker().darker(), getBackground());
+                    Color.GRAY.darker().darker(), getBackground(),
+                    false);
 
             drawGradientLine(g2d,
                     halfWidth, gridY,
                     boundary.width - insets.right - 1, gridY,
-                    getBackground(), Color.GRAY.darker().darker());
+                    getBackground(), Color.GRAY.darker().darker(),
+                    false);
         }
 
         for (valueOffset = -valueSpacing; valueOffset > dataMin - padding; valueOffset -= valueSpacing) {
@@ -293,12 +299,14 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             drawGradientLine(g2d,
                     insets.left, gridY,
                     halfWidth, gridY,
-                    getBackground(), Color.GRAY.darker().darker());
+                    getBackground(), Color.GRAY.darker().darker(),
+                    false);
 
             drawGradientLine(g2d,
                     halfWidth, gridY,
                     boundary.width - insets.right - 1, gridY,
-                    getBackground(), Color.GRAY.darker().darker());
+                    getBackground(), Color.GRAY.darker().darker(),
+                    false);
         }
 
         g2d.setStroke(originalStroke);
@@ -306,8 +314,15 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Draw the gradient line between given points and given colors.
+     * 
+     * @param emphasize {@code true} if this particular line has to stand out.
+     * Exact way of emphasizing is left to the implementation.
      */
-    protected final void drawGradientLine(Graphics2D g2d, double x0, double y0, double x1, double y1, Color startColor, Color endColor) {
+    protected final void drawGradientLine(
+            Graphics2D g2d,
+            double x0, double y0, double x1, double y1,
+            Color startColor, Color endColor,
+            boolean emphasize) {
 
         GradientPaint gp = new GradientPaint(
                 (int) x0, (int) y0, startColor,
@@ -315,6 +330,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         Line2D line = new Line2D.Double(x0, y0, x1, y1);
 
         g2d.setPaint(gp);
+        g2d.setStroke(emphasize ? strokeDouble : strokeSingle);
         g2d.draw(line);
     }
 
