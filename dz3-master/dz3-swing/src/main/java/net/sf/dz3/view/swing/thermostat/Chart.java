@@ -96,7 +96,7 @@ public class Chart extends AbstractChart {
                     Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
                     Color endColor = getBackground();
 
-                    drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, false);
+                    drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
 
                     x0 = x1;
                 }
@@ -108,12 +108,12 @@ public class Chart extends AbstractChart {
                 Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
                 Color endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
 
-                drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, false);
+                drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, cursor.emphasize);
             }
 
             time_trailer = time_now;
 
-            trailer = new TintedValue(cursor.value, cursor.tint);
+            trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize);
         }
 
         if (time_trailer != null && now - time_trailer > deadTimeout) {
@@ -200,6 +200,7 @@ public class Chart extends AbstractChart {
 
         double valueAccumulator = 0;
         double tintAccumulator = 0;
+        int emphasizeAccumulator = 0;
 
         for (Iterator<Entry<Long, TintedValue>> i = buffer.entrySet().iterator(); i.hasNext(); ) {
 
@@ -208,11 +209,12 @@ public class Chart extends AbstractChart {
 
             valueAccumulator += signal.value;
             tintAccumulator += signal.tint;
+            emphasizeAccumulator += signal.emphasize ? 1 : 0;
 
             i.remove();
         }
 
-        return new TintedValue(valueAccumulator / size, tintAccumulator / size);
+        return new TintedValue(valueAccumulator / size, tintAccumulator / size, emphasizeAccumulator > 0);
     }
 
     @Override

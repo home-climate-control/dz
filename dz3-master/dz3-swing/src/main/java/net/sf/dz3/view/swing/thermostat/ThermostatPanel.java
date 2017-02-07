@@ -532,7 +532,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 currentTemperature = needFahrenheit ? (currentTemperature * 9) / 5 + 32: currentTemperature;
                 displayTemperature = (sample == null) ? UNDEFINED : (sample.demand.isError() ? UNDEFINED : new Formatter().format(Locale.getDefault(), "%.1f", currentTemperature).toString());
 
-                TintedValue v = new TintedValue(currentTemperature, source.getControlSignal() * 2);
+                TintedValue v = new TintedValue(currentTemperature, source.getControlSignal() * 2, sample.calling);
                 chart.consume(new DataSample<TintedValue>(pidListener.signal.timestamp, "temp", "temp", v, null));
 
                 //logger.debug("VALUE: " + v);

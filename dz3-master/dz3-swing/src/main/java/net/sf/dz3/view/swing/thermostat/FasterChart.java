@@ -185,7 +185,7 @@ public class FasterChart extends AbstractChart {
                     Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
                     Color endColor = getBackground();
 
-                    drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, false);
+                    drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
 
                     x0 = x1;
                 }
@@ -197,12 +197,12 @@ public class FasterChart extends AbstractChart {
                 Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
                 Color endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
 
-                drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, false);
+                drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, cursor.emphasize);
             }
 
             time_trailer = time_now;
 
-            trailer = new TintedValue(cursor.value, cursor.tint);
+            trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize);
         }
 
         if (time_trailer != null && now - time_trailer > deadTimeout) {
@@ -247,6 +247,7 @@ public class FasterChart extends AbstractChart {
         private int count;
         private double valueAccumulator = 0;
         private double tintAccumulator = 0;
+        private double emphasizeAccumulator = 0;
         
         public Averager(long expirationInterval) {
             this.expirationInterval = expirationInterval;
@@ -273,17 +274,19 @@ public class FasterChart extends AbstractChart {
                 count++;
                 valueAccumulator += signal.sample.value;
                 tintAccumulator += signal.sample.tint;
+                emphasizeAccumulator += signal.sample.emphasize ? 1 : 0;
                 
                 return null;
             }
                 
             logger.debug("RingBuffer: flushing at " + Interval.toTimeInterval(age));
             
-            TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count);
+            TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
             
             count = 1;
             valueAccumulator = signal.sample.value;
             tintAccumulator = signal.sample.tint;
+            emphasizeAccumulator = 0;
             timestamp = signal.timestamp;
             
             return result;

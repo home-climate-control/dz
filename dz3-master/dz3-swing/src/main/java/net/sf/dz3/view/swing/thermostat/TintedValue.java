@@ -9,11 +9,13 @@ public class TintedValue {
 
     public final double value;
     public final double tint;
+    public final boolean emphasize;
 
-    public TintedValue(double value, double tint) {
+    public TintedValue(double value, double tint, boolean emphasize) {
 
         this.value = value;
         this.tint = tint;
+        this.emphasize = emphasize;
     }
 
     @Override
@@ -21,7 +23,7 @@ public class TintedValue {
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append("TintedValue(").append(value).append(", ").append(tint);
+        sb.append("TintedValue(").append(value).append(", ").append(tint).append(", ").append(emphasize);
         sb.append(")");
 
         return sb.toString();
