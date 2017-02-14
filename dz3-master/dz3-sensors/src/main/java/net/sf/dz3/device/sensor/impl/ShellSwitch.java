@@ -19,8 +19,8 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  *
  * WARNING: If a command to get switch state is not specified, this object
  *          will assume current switch state based on the last command
- *          issued.  This switch should not be used without explicit
- *          construction of the physical system and controlling
+ *          successfully executed.  This switch should not be used without 
+ *          explicit construction of the physical system and controlling
  *          software to ensure reliable and safe operation.
  *
  * @author Copyright &copy; Thomas Rooney 2015
@@ -79,6 +79,7 @@ public class ShellSwitch implements Switch, JmxAware {
      */
     private int m_commandOutputValue = 0;
 
+
     /**
      *  \brief Create an instance.
      *
@@ -96,6 +97,7 @@ public class ShellSwitch implements Switch, JmxAware {
      * must output 0 for switch open or 1 for switch closed.
      *
      * @param maxWaitMilliseconds Parameter to control blocking behavior
+     * NOTE: not currently implemented
      * if maxWaitMilliseconds <= 0 call will block
      * if maxWaitMilliseconds > 0, block for a maximum of maxWaitMilliseconds
      * and then kill the process if not complete.
@@ -148,7 +150,7 @@ public class ShellSwitch implements Switch, JmxAware {
                             String getStateCommand,
                             long maxWaitMilliseconds) {
         if ((openCommand == null || "".equals(openCommand)) ||
-            (openCommand == null || "".equals(openCommand)) ) {
+            (closeCommand == null || "".equals(closeCommand)) ) {
             // Orderly error handling not possible in constructor,
             // must resort to throw
             throw new IllegalArgumentException(address +
@@ -168,12 +170,11 @@ public class ShellSwitch implements Switch, JmxAware {
      *  \brief Utility method to execute command.
      *
      * sets m_outputValueRead
-     * sets m_commandOutputValue = -1;
+     * sets m_commandOutputValue (-1 on error);
      *
      * returns 0 on success
      * returns -1 on exec error
-     * returns -2 on parse error
-     * returns -4 on other error
+     * returns -2 on other error
      */
     private int executeCommand(String command) {
         int retVal = 0;
@@ -205,12 +206,13 @@ public class ShellSwitch implements Switch, JmxAware {
                     int outVal = Integer.parseInt(output);
                     m_outputValueRead = true;
                     m_commandOutputValue = outVal;
+                    logger.debug("Switch " + m_address + " parsed output value as : " +
+                          Integer.toString(outVal));
                 } catch (Exception err) {
                     // member variables set above
-                    retVal = -2;
-                    logger.error("Switch " + m_address +
+                    logger.debug("Switch " + m_address +
                                  " exception parsing command output: "
-                                 + output);
+                                 + output + ", no integer read");
                 }
             } else {
                 // Error, switch position not reliable
@@ -222,7 +224,7 @@ public class ShellSwitch implements Switch, JmxAware {
             }
         } catch (Exception err) {
             // member variables set above
-            retVal = -4;
+            retVal = -2;
             logger.error("Switch " + m_address +
                          " exception in execution: "
                          + command);
@@ -295,8 +297,6 @@ public class ShellSwitch implements Switch, JmxAware {
      */
     @Override
     public void setState(boolean state) throws IOException {
-        // record last commanded state
-        m_lastCommandedState = state;
         // select command string to be executed
         String commandToExecute = "";
         if (state == false)
@@ -311,8 +311,13 @@ public class ShellSwitch implements Switch, JmxAware {
         }
         // execute command
         int execRet = executeCommand(commandToExecute);
-        // void function cannot return error code
-        if (execRet != 0) {
+        // if execution was successful, record last commanded state
+        if (execRet == 0) 
+        {
+            m_lastCommandedState = state;
+        }
+        else
+        {
             logger.debug("Unable to set switch " + m_address);
             throw new IOException("Unable to set switch state");
         }

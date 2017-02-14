@@ -124,9 +124,16 @@ public class ShellSwitchTest extends TestCase {
                                              1000);
             logger.info("ShellSwitch set no output");
             ss.setState(false);
-            fail("ShellSwitch testSetNoOutput did not throw exception");
+            if (ss.getOutputValueRead() == false)
+            {
+                assert(true);
+            }
+            else
+            {
+                fail("ShellSwitch testSetNoOutput did not set m_outputValueRead to false");
+            }
         } catch (Exception err) {
-            assertTrue(true);
+            fail("ShellSwitch exception testing command with no output");
         } finally {
             NDC.pop();
         }
@@ -142,27 +149,50 @@ public class ShellSwitchTest extends TestCase {
                                              1000);
             logger.info("ShellSwitch bad output");
             ss.setState(false);
-            fail("ShellSwitch testSetBadOutput did not throw exception");
+            if (ss.getOutputValueRead() == false)
+            {
+                assert(true);
+            }
+            else
+            {
+                fail("ShellSwitch testSetBadOutput did not set m_outputValueRead to false");
+            }
         } catch (Exception err) {
-            assertTrue(true);
+            fail("ShellSwitch exception testing command with no output");
         } finally {
             NDC.pop();
         }
     }
 
-    public void testSetInvalidReturn() throws IOException {
-        NDC.push("testSetInvalidReturn");
+    public void testParseReturn() throws IOException {
+        NDC.push("testParseReturn");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
-                                             "exit 2",
+                                             "echo 2",
                                              "echo 0",
                                              "",
                                              1000);
-            logger.info("ShellSwitch invalid return");
             ss.setState(false);
-            fail("ShellSwitch testSetInvalidOutput did not throw exception");
+            if (ss.getOutputValueRead() == true)
+            {
+                logger.debug("testParseReturn() output was '" 
+                             + Long.toString(ss.getCommandOutputValue()) + "'");
+
+                if (ss.getCommandOutputValue() == 2)
+                {
+                    assert(true);
+		}
+                else
+                {
+                    fail("ShellSwitch testParseReturn output value not equal to expected value '2'");
+                }
+            }
+            else
+            {
+                fail("ShellSwitch testParseReturn did not set m_outputValueRead to true");
+            }
         } catch (Exception err) {
-            assertTrue(true);
+            fail("ShellSwitch exception testing parse command output");
         } finally {
             NDC.pop();
         }
@@ -310,7 +340,7 @@ public class ShellSwitchTest extends TestCase {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
                                              "echo 0",
-                                             "exit 2",
+                                             "echo 2",
                                              1000);
             logger.info("ShellSwitch invalid return");
             boolean testRet = ss.getState();
