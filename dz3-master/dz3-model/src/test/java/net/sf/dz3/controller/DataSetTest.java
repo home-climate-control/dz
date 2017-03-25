@@ -67,18 +67,21 @@ public class DataSetTest extends TestCase {
         ds.record(100, 0d);
         
         assertEquals("Wrong value", 0, ds.iterator().next().longValue());
+        assertEquals("Wrong data set size", 2, ds.size());
 
         {
             
             // This value won't cause expiration
             ds.record(100, 0d);
             assertEquals("Wrong value before expiration", 0, ds.iterator().next().longValue());
+            assertEquals("Wrong data set size", 2, ds.size());
         }
 
         {
             // This value *will* cause expiration
             ds.record(101, 0d);
             assertEquals("Wrong value after expiration", 100, ds.iterator().next().longValue());
+            assertEquals("Wrong data set size", 2, ds.size());
         }
     }
 
