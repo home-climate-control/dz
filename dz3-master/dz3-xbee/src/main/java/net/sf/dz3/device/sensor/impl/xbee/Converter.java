@@ -3,7 +3,7 @@ package net.sf.dz3.device.sensor.impl.xbee;
 /**
  * Conversion utilities for XBee and related hardware.
  *  
- * @author Copyright &copy; <a href="mailto:vt@seriousinsights.com">Vadim Tkachenko</a> 2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2010
  */
 public class Converter {
 
