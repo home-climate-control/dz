@@ -1,0 +1,7 @@
+dependencies {
+
+    compile 'net.sf.servomaster:servomaster-common:0.8.2.5-SNAPSHOT'
+
+    compile project(':dz3-model')
+
+}

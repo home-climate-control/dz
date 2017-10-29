@@ -1,4 +1,10 @@
 .classpath
 .settings
 .project
-/target
+/.gradle/
+/build/
+/gradle/
+/target/
+gradlew
+gradlew.bat
+*~
