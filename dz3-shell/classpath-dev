@@ -74,6 +74,6 @@ ${LIBDIR}/com/google/apis/google-api-services-calendar/${GOOGLE_CALENDAR_VERSION
 ${LIBDIR}/com/fasterxml/jackson/core/jackson-core/2.1.3/jackson-core-2.1.3.jar:\
 ${LIBDIR}/org/mortbay/jetty/jetty/${JETTY_VERSION}/jetty-${JETTY_VERSION}.jar:\
 ${LIBDIR}/org/mortbay/jetty/jetty-util/${JETTY_VERSION}/jetty-util-${JETTY_VERSION}.jar:\
-${LIBDIR}/org/mortbay/jetty/servlet-api-2.5/6.1.5/servlet-api-2.5-6.1.5.jar"
+${LIBDIR}/org/mortbay/jetty/servlet-api/2.5-20081211/servlet-api-2.5-20081211.jar"
 
 echo $CLASSPATH | tr ":" "\n"
