@@ -1,0 +1,30 @@
+subprojects {
+
+    apply plugin: 'java'
+    group = 'net.sf.dz3'
+    version = '3.6.7-SNAPSHOT'
+
+/*
+    apply plugin: 'findbugs'
+
+    findbugs {
+
+        excludeFilter = file("$rootProject.projectDir/findbugs-exclude.xml")
+        ignoreFailures = true
+    }
+ */
+
+    repositories {
+
+        jcenter()
+        mavenLocal()
+
+    }
+
+    dependencies {
+
+        compile 'log4j:log4j:1.2.17'
+
+        testCompile 'junit:junit:4.12'
+    }
+}

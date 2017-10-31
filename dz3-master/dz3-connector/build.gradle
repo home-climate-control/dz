@@ -1,0 +1,6 @@
+dependencies {
+
+    compile 'net.sf.jukebox:jukebox-common:6.1.3-SNAPSHOT'
+    compile 'net.sf.jukebox:jukebox-jmx:6.1.3-SNAPSHOT'
+
+}
