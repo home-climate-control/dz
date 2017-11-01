@@ -1,5 +1,8 @@
 package net.sf.dz3.scheduler.gcal;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -13,8 +16,6 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneStatus;
@@ -29,22 +30,28 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
 import org.joda.time.DateTimeZone;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import com.google.api.client.util.DateTime;
+
+import junit.framework.AssertionFailedError;
 
 /**
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
  */
-public class GCalScheduleUpdaterTest extends TestCase {
+public class GCalScheduleUpdaterTest {
 
     private final Logger logger = Logger.getLogger(getClass());
 
+    @Test
     public void testAuth() throws IOException {
 
         // Nothing to test here as ov API v3 - testYesterday() will walk down this path anyway.
     }
     
+    @Test
     public void testTzShift() {
         
         DateTime dt = DateTime.parseRfc3339("2010-01-30T18:00:00.000-07:00");
@@ -64,6 +71,7 @@ public class GCalScheduleUpdaterTest extends TestCase {
     /**
      * Test case to reproduce and fix {@link https://github.com/home-climate-control/dz/issues/6}.
      */
+    @Test
     public void testDST() {
         
         // VT: NOTE: This test will try to spawn the system browser, or pring a link you need to visit to get the callback.
@@ -180,6 +188,7 @@ public class GCalScheduleUpdaterTest extends TestCase {
     /**
      * Test case for http://code.google.com/p/diy-zoning/issues/detail?id=14
      */
+    @Test
     public void testBigOffset() {
         
         NDC.push("testBigOffset");
