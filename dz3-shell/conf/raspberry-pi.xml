@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+    <bean id="temperature_sensor-vcgencmd"
+          class="net.sf.dz3.device.sensor.impl.ShellSensor"
+          init-method="start">
+        <constructor-arg index="0" value="SoC" />
+        <constructor-arg index="1" value="1000" />
+        <constructor-arg index="2" value="vcgencmd measure_temp|sed -e &quot;s:temp=::;s:'C::;&quot;" />
+    </bean>
+
+    <bean id="pid_controller-vcgencmd" class="net.sf.dz3.controller.pid.SimplePidController">
+        <!-- Setpoint -->
+        <constructor-arg index="0" value="40" />
+        <!-- P -->
+        <constructor-arg index="1" value="1" />
+        <!-- I -->
+        <constructor-arg index="2" value="0" />
+        <!-- D -->
+        <constructor-arg index="3" value="0" />
+        <!-- Saturation limit -->
+        <constructor-arg index="4" value="0" />
+    </bean>
+
+    <!-- Thermostat -->
+    <bean id="thermostat-vcgencmd" class="net.sf.dz3.device.model.impl.ThermostatModel">
+        <constructor-arg index="0" value="vcgencmd" />
+        <constructor-arg index="1" ref="temperature_sensor-vcgencmd" />
+        <constructor-arg index="2" ref="pid_controller-vcgencmd" />
+    </bean>
+
+    <!-- Zone controller -->
+    <bean id="zone_controller-vcgencmd" class="net.sf.dz3.device.model.impl.SimpleZoneController">
+        <constructor-arg type="java.lang.String" value="zone controller" />
+        <constructor-arg type="java.util.Set">
+            <set>
+                <ref bean="thermostat-vcgencmd" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <!-- Splitters -->
+    <bean id="splitter-pid_controller-vcgencmd" class="net.sf.dz3.controller.pid.PidControllerSignalSplitter">
+        <constructor-arg index="0" ref="pid_controller-vcgencmd" />
+    </bean>
+    <bean id="splitter-thermostat-vcgencmd" class="net.sf.dz3.device.model.impl.ThermostatSignalSplitter">
+        <constructor-arg index="0" ref="thermostat-vcgencmd" />
+    </bean>
+
+    <!-- Loggers -->
+    <bean id="rrdtool" class="java.io.File">
+        <constructor-arg type="java.lang.String" value="/usr/bin/rrdtool" />
+    </bean>
+    <bean id="rrdbase_onewire" class="java.io.File">
+        <constructor-arg type="java.lang.String" value="./rrd" />
+    </bean>
+    <bean id="rrdlogger_onewire" class="net.sf.jukebox.datastream.logger.impl.rrd.RrdLogger" init-method="start">
+        <constructor-arg index="0" type="java.util.Set">
+            <set>
+                <ref bean="splitter-pid_controller-vcgencmd" />
+                <ref bean="splitter-thermostat-vcgencmd" />
+                <ref bean="zone_controller-vcgencmd" />
+            </set>
+        </constructor-arg>
+        <constructor-arg index="1" type="java.io.File" ref="rrdbase_onewire" />
+        <constructor-arg index="2" type="java.io.File" ref="rrdtool" />
+    </bean>
+
+    <!-- JMX configuration -->
+    <bean id="jmx-wrapper" class="net.sf.jukebox.jmx.JmxWrapper">
+        <constructor-arg index="0" type="java.util.Set">
+            <set>
+                <ref bean="temperature_sensor-vcgencmd" />
+                <ref bean="thermostat-vcgencmd" />
+            </set>
+        </constructor-arg>
+    </bean>
+
+    <!-- Console -->
+    <bean id="console" class="net.sf.dz3.view.swing.Console"
+        init-method="show">
+        <constructor-arg index="0" type="java.util.Set">
+            <set>
+                <ref bean="thermostat-vcgencmd" />
+            </set>
+        </constructor-arg>
+    </bean>
+</beans>
