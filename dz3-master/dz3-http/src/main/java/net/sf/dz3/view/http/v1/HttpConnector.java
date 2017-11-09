@@ -15,6 +15,7 @@ import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
 import net.sf.dz3.view.http.common.AbstractExchanger;
 import net.sf.dz3.view.http.common.ImmediateExchanger;
+import net.sf.dz3.view.http.common.QueueFeeder;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -98,7 +99,7 @@ public class HttpConnector extends Connector<RestRenderer> {
 
         Map<String, Object> context = new TreeMap<String, Object>();
         
-        context.put("upstream queue", upstreamQueue);
+        context.put(QueueFeeder.QUEUE_KEY, upstreamQueue);
         return context;
     }
 
