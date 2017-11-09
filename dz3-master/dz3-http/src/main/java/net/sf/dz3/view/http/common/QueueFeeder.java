@@ -8,7 +8,7 @@ import net.sf.dz3.view.http.v1.UpstreamBlock;
 /**
  * Basic contraption to feed the {@link #upstreamQueue}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2017
  */
 public abstract class QueueFeeder<DataBlock> {
     
@@ -33,7 +33,15 @@ public abstract class QueueFeeder<DataBlock> {
     @SuppressWarnings("unchecked")
     public QueueFeeder(Map<String, Object> context) {
 
+        if (context == null) {
+            throw new IllegalArgumentException("null context, doesn't make sense");
+        }
+
         upstreamQueue = (BlockingQueue<DataBlock>) context.get(QUEUE_KEY);
+
+        if (upstreamQueue == null) {
+            throw new IllegalArgumentException("null queue, doesn't make sense");
+        }
     }
 
     /**
