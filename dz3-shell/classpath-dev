@@ -5,7 +5,7 @@
 
 # This might need '-SNAPSHOT' added to it if you're using the up-to-date code from source control repository
 # (NOTE: There is no '3.6.7' at this point, just the snapshot)
-DZ_VERSION=3.6.7-SNAPSHOT
+DZ_VERSION=3.6.8-SNAPSHOT
 
 JUKEBOX_VERSION=6.1.3-SNAPSHOT
 SERVOMASTER_VERSION=0.8.2.4

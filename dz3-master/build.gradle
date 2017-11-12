@@ -2,7 +2,7 @@ subprojects {
 
     apply plugin: 'java'
     group = 'net.sf.dz3'
-    version = '3.6.7-SNAPSHOT'
+    version = '3.6.8-SNAPSHOT'
 
 /*
     apply plugin: 'findbugs'

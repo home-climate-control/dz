@@ -70,7 +70,7 @@
       Uncomment the section below if you need extended diagnostics.
       WARNING: consumes a lot of disk space.
      -->
-    <!-- <appender-ref ref="DebugAppender" />  -->
+    <appender-ref ref="DebugAppender" />
     
   </root>
 </log4j:configuration>

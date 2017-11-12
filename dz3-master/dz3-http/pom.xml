@@ -3,7 +3,7 @@
   <parent>
     <artifactId>dz3-master</artifactId>
     <groupId>net.sf.dz3</groupId>
-    <version>3.6.7-SNAPSHOT</version>
+    <version>3.6.8-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>dz3-http</artifactId>

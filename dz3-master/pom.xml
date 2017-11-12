@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>net.sf.dz3</groupId>
     <artifactId>dz3-master</artifactId>
-    <version>3.6.7-SNAPSHOT</version>
+    <version>3.6.8-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>DIY Zoning Master Project</name>
     <url>http://diy-zoning.sourceforge.net/</url>
