@@ -15,4 +15,4 @@ include 'dz3-spring'
 include 'dz3-swing'
 include 'dz3-xbee'
 
-rootProject.name = 'jukebox-master'
+rootProject.name = 'dz3-master'
