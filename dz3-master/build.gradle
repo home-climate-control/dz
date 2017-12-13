@@ -1,6 +1,7 @@
 subprojects {
 
     apply plugin: 'java'
+    apply plugin: 'maven'
     group = 'net.sf.dz3'
     version = '3.6.8-SNAPSHOT'
 
