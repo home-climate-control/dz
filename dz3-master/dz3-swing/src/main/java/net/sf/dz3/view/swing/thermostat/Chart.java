@@ -15,7 +15,9 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 /**
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2016
+ * @deprecated Use {@link FasterChart} instead.
  */
+@Deprecated
 public class Chart extends AbstractChart {
 
     private static final long serialVersionUID = -8138341010404232436L;
