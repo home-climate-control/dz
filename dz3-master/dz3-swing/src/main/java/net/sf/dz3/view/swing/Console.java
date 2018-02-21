@@ -402,16 +402,15 @@ public class Console extends Connector<JComponent> {
 
         @Override
         public void keyReleased(KeyEvent e) {
-            // TODO Auto-generated method stub
-            
+
+            // Do nothing
         }
 
         @Override
         public void keyTyped(KeyEvent e) {
-            // TODO Auto-generated method stub
-            
+
+            // Do nothing
         }
-        
     }
 
     @Override
