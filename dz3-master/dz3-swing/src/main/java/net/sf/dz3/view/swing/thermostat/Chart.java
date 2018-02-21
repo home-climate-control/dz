@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.awt.RenderingHints;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -12,7 +11,6 @@ import java.util.TreeMap;
 
 import net.sf.dz3.controller.DataSet;
 import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.util.Interval;
 
 /**
  * 
