@@ -66,7 +66,7 @@ public class FasterChart extends AbstractChart {
         
         adjustVerticalLimits(signal.timestamp, signal.sample.value);
 
-        synchronized (getClass()) {
+        synchronized (AbstractChart.class) {
             
             if (width != globalWidth) {
                 
@@ -123,7 +123,7 @@ public class FasterChart extends AbstractChart {
 
         // Chart size *can* change during runtime - see +/- Console#ResizeKeyListener.
         
-        synchronized (getClass()) {
+        synchronized (AbstractChart.class) {
             
             if (globalWidth != boundary.width) {
                 
