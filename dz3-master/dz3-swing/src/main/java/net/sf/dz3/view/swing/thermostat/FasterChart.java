@@ -7,6 +7,7 @@ import java.awt.Insets;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.dz3.controller.DataSet;
 import net.sf.jukebox.datastream.signal.model.DataSample;
@@ -150,10 +151,11 @@ public class FasterChart extends AbstractChart {
         // Flag to reduce the color changes
         boolean dead = false;
 
-        for (Iterator<Long> di = ds.iterator(); di.hasNext();) {
+        for (Iterator<Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext();) {
 
-            long time_now = di.next();
-            TintedValue cursor = ds.get(time_now);
+            Entry<Long, TintedValue> entry = di.next();
+            long time_now = entry.getKey();
+            TintedValue cursor = entry.getValue();
 
             if (time_trailer != null) {
 
