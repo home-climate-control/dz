@@ -15,7 +15,7 @@ import net.sf.jukebox.util.Interval;
 public class FasterChart extends AbstractChart {
 
     private static final long serialVersionUID = 8739949924865459025L;
-    
+
     /**
      * Chart width in pixels for all the charts. Undefined until the first time
      * {@link #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)}
@@ -24,7 +24,7 @@ public class FasterChart extends AbstractChart {
      * Making it static is ugly, but gets the job done - the screen size will not change.
      */
     private static int globalWidth = 0;
-    
+
     /**
      * Chart width of this instance.
      * 
@@ -32,7 +32,7 @@ public class FasterChart extends AbstractChart {
      * @see #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)
      */
     private int width = 0;
-    
+
     private final Map<String, Averager> channel2avg = new HashMap<String, Averager>();
 
     public FasterChart(long chartLengthMillis) {
@@ -47,7 +47,7 @@ public class FasterChart extends AbstractChart {
         assert(signal.sample != null);
 
         String channel = signal.sourceName;
-        
+
         if (record(channel, signal)) {
 
             repaint();
@@ -63,48 +63,48 @@ public class FasterChart extends AbstractChart {
      * @return {@code true} if the component needs to be repainted.
      */
     private boolean record(String channel, DataSample<TintedValue> signal) {
-        
+
         adjustVerticalLimits(signal.timestamp, signal.sample.value);
 
         synchronized (AbstractChart.class) {
-            
+
             if (width != globalWidth) {
-                
+
                 // Chart size changed, need to adjust the buffer
-                
+
                 width = globalWidth;
-                
+
                 long step = chartLengthMillis / width;
-                
+
                 logger.info("new width " + width + ", " + step + " ms per pixel");
-                
+
                 // We lose one sample this way, might want to improve it later, for now, no big deal
 
                 channel2avg.put(channel, new Averager(step));
-                
+
                 return true;
             }
         }
 
         if (width == 0) {
-            
+
             // There's nothing we can do before the width is set.
             // It's not even worth it to record the value.
-            
+
             // Please repaint.
             logger.info("please repaint");
             return true;
         }
-        
+
         Averager avg = channel2avg.get(channel);
         TintedValue tv = avg.record(signal);
-        
+
         if (tv == null) {
-            
+
             // The average is still being calculated, nothing to do
             return false;
         }
-        
+
         DataSet<TintedValue> ds = channel2ds.get(channel);
 
         if (ds == null) {
@@ -112,7 +112,7 @@ public class FasterChart extends AbstractChart {
             ds = new DataSet<TintedValue>(chartLengthMillis);
             channel2ds.put(channel, ds);
         }
-        
+
         ds.record(signal.timestamp, tv);
 
         return true;
@@ -122,21 +122,21 @@ public class FasterChart extends AbstractChart {
     protected void checkWidth(Dimension boundary) {
 
         // Chart size *can* change during runtime - see +/- Console#ResizeKeyListener.
-        
+
         synchronized (AbstractChart.class) {
-            
+
             if (globalWidth != boundary.width) {
-                
+
                 logger.info("width changed from " + globalWidth + " to " + boundary.width);
-                
+
                 globalWidth = boundary.width;
-                
+
                 long step = chartLengthMillis / globalWidth;
 
                 logger.info("ms per pixel: " + step);
             }
         }
-        
+
     }
 
     @Override
@@ -170,7 +170,7 @@ public class FasterChart extends AbstractChart {
                 // Decide whether the line is alive or dead
 
                 if (time_now - time_trailer <= deadTimeout) {
-                    
+
                 } else {
 
                     if (!dead) {
@@ -238,17 +238,17 @@ public class FasterChart extends AbstractChart {
          * milliseconds are expired.
          */
         private final long expirationInterval;
-        
+
         /**
          * The timestamp of the oldest recorded sample.
          */
         private Long timestamp;
-        
+
         private int count;
         private double valueAccumulator = 0;
         private double tintAccumulator = 0;
         private double emphasizeAccumulator = 0;
-        
+
         public Averager(long expirationInterval) {
             this.expirationInterval = expirationInterval;
         }
@@ -262,33 +262,33 @@ public class FasterChart extends AbstractChart {
          * away from the first sample stored, {@code null} otherwise.
          */
         public TintedValue record(DataSample<TintedValue> signal) {
-            
+
             if (timestamp == null) {
                 timestamp = signal.timestamp;
             }
-            
+
             long age = signal.timestamp - timestamp;
-            
+
             if ( age < expirationInterval) {
 
                 count++;
                 valueAccumulator += signal.sample.value;
                 tintAccumulator += signal.sample.tint;
                 emphasizeAccumulator += signal.sample.emphasize ? 1 : 0;
-                
+
                 return null;
             }
-                
+
             logger.debug("RingBuffer: flushing at " + Interval.toTimeInterval(age));
-            
+
             TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
-            
+
             count = 1;
             valueAccumulator = signal.sample.value;
             tintAccumulator = signal.sample.tint;
             emphasizeAccumulator = 0;
             timestamp = signal.timestamp;
-            
+
             return result;
         }
     }

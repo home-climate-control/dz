@@ -31,7 +31,7 @@ import net.sf.jukebox.util.Interval;
 public abstract class AbstractChart extends JPanel implements DataSink<TintedValue> {
 
     private static final long serialVersionUID = -8584582539155161184L;
-    
+
     private static final Stroke strokeSingle = new BasicStroke();
     private static final Stroke strokeDouble = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10.0f, null, 0.0f);
 
@@ -95,14 +95,14 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * Minimum known data value.
      */
     protected Double dataMin = null;
-    
+
     /**
      * Timestamp on {@link #dataMin} or {@link #dataMax}, whichever is younger.
      * 
      * @see #adjustVerticalLimits(double)
      */
     private Long minmaxTime = null;
-    
+
     /**
      * Amount of extra time to wait before {@link #recalculateVerticalLimits()
      * recalculating} the limits.
@@ -143,10 +143,10 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         long x_offset = now - chartLengthMillis;
 
         paintTimeGrid(g2d, boundary, insets, now, x_scale, x_offset);
-        
+
         // VT: FIXME: Ugly hack.
         checkWidth(boundary);
-        
+
         if (!isDataAvailable()) {
             return;
         }
@@ -170,14 +170,14 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             // No data consumed yet
             return false;
         }
-        
+
         return true;
 
     }
 
     protected final void paintCharts(
-                Graphics2D g2d, Dimension boundary, Insets insets, long now,
-                double x_scale, long x_offset, double y_scale, double y_offset) {
+            Graphics2D g2d, Dimension boundary, Insets insets, long now,
+            double x_scale, long x_offset, double y_scale, double y_offset) {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -411,7 +411,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         }
 
         rgb2hsb[offset] = new RGB2HSB(rgb, Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null));
-        
+
         logger.info("RGB2HSB offset=" + offset );
 
         return rgb2hsb[offset].hsb;
@@ -433,7 +433,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         return (float) (start + signal * (end - start));
     }
-    
+
     /**
      * Adjust the vertical limits, if necessary.
      * 
@@ -444,19 +444,19 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * @see #dataMin
      */
     protected final void adjustVerticalLimits(long timestamp, double value) {
-        
+
         if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * minmaxOverhead)) {
-            
+
             logger.info("minmax too old (" + Interval.toTimeInterval(timestamp - minmaxTime) + "), recalculating");
 
             // Total recalculation is required
-            
+
             recalculateVerticalLimits();
         }
-        
+
         // Treating minmaxTime like this still allows for lopsided chart if a long up or down trend continues,
         // but we probably do want to know about that, so let's just make a note and ignore it for the moment 
-        
+
         if (dataMax == null || value > dataMax) {
 
             dataMax = value;
@@ -474,24 +474,24 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * Calculate {@link #dataMin} and {@link #dataMax} based on all values available in {@link #channel2ds}.
      */
     private synchronized void recalculateVerticalLimits() {
-        
+
         long startTime = System.currentTimeMillis();
-        
+
         dataMin = null;
         dataMax = null;
-        
+
         for (Iterator<DataSet<TintedValue>> i = channel2ds.values().iterator(); i.hasNext(); ) {
-            
+
             DataSet<TintedValue> ds = i.next();
-            
+
             for (Iterator<Entry<Long, TintedValue>> i2 = ds.entryIterator(); i2.hasNext(); ) {
-                
+
                 Entry<Long, TintedValue> entry = i2.next();
                 Long timestamp = entry.getKey();
                 TintedValue tv = entry.getValue();
-                
+
                 if (dataMax == null || tv.value > dataMax) {
-                    
+
                     dataMax = tv.value;
                     minmaxTime = timestamp;
                 }
@@ -503,7 +503,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
                 }
             }
         }
-        
+
         logger.info("Recalculated in " + (System.currentTimeMillis() - startTime) + "ms");
         logger.info("New minmaxTime set to + " + Interval.toTimeInterval(System.currentTimeMillis() - minmaxTime));
     }
