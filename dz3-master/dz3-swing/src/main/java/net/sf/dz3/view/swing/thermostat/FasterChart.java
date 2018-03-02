@@ -67,7 +67,7 @@ public class FasterChart extends AbstractChart {
      */
     private boolean record(String channel, DataSample<TintedValue> signal) {
 
-        adjustVerticalLimits(signal.timestamp, signal.sample.value);
+        adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
         synchronized (AbstractChart.class) {
 

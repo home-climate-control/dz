@@ -43,7 +43,7 @@ public class Chart extends AbstractChart {
         }
 
         ds.record(signal.timestamp, signal.sample);
-        adjustVerticalLimits(signal.timestamp, signal.sample.value);
+        adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
         repaint();
     }

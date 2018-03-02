@@ -439,11 +439,12 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * 
      * @param timestamp Value timestamp.
      * @param value Incoming data element.
+     * @param setpoint Incoming setpoint.
      * 
      * @see #dataMax
      * @see #dataMin
      */
-    protected final void adjustVerticalLimits(long timestamp, double value) {
+    protected final void adjustVerticalLimits(long timestamp, double value, double setpoint) {
 
         if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * minmaxOverhead)) {
 
@@ -466,6 +467,20 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         if (dataMin == null || value < dataMin) {
 
             dataMin = value;
+            minmaxTime = timestamp;
+        }
+
+        // By this time, dataMin and dataMax are no longer nulls
+
+        if (setpoint > dataMax) {
+
+            dataMax = setpoint;
+            minmaxTime = timestamp;
+        }
+
+        if (setpoint < dataMin) {
+
+            dataMin = setpoint;
             minmaxTime = timestamp;
         }
     }
@@ -499,6 +514,20 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
                 if (dataMin == null || tv.value < dataMin) {
 
                     dataMin = tv.value;
+                    minmaxTime = timestamp;
+                }
+
+                // By this time, dataMin and dataMax are no longer nulls
+
+                if (tv.setpoint > dataMax) {
+
+                    dataMax = tv.setpoint;
+                    minmaxTime = timestamp;
+                }
+
+                if (tv.setpoint < dataMin) {
+
+                    dataMin = tv.setpoint;
                     minmaxTime = timestamp;
                 }
             }
