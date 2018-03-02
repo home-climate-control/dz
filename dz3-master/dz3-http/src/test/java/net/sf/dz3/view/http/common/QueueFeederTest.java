@@ -20,7 +20,7 @@ public class QueueFeederTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("null context, doesn't make sense");
 
-        QueueFeeder<String> qf = new QueueFeeder<String>(context) {};
+        new QueueFeeder<String>(context) {};
     }
 
     @Test
@@ -31,6 +31,6 @@ public class QueueFeederTest {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage("null queue, doesn't make sense");
 
-        QueueFeeder<String> qf = new QueueFeeder<String>(context) {};
+        new QueueFeeder<String>(context) {};
     }
 }
