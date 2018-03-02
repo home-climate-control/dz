@@ -113,7 +113,7 @@ public class Chart extends AbstractChart {
 
             time_trailer = time_now;
 
-            trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize);
+            trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize, cursor.setpoint);
         }
 
         if (time_trailer != null && now - time_trailer > deadTimeout) {
@@ -201,6 +201,7 @@ public class Chart extends AbstractChart {
         double valueAccumulator = 0;
         double tintAccumulator = 0;
         int emphasizeAccumulator = 0;
+        double setpoint = 0;
 
         for (Iterator<Entry<Long, TintedValue>> i = buffer.entrySet().iterator(); i.hasNext(); ) {
 
@@ -211,10 +212,13 @@ public class Chart extends AbstractChart {
             tintAccumulator += signal.tint;
             emphasizeAccumulator += signal.emphasize ? 1 : 0;
 
+            // VT: NOTE: Annoyingly redundant, but this class is already deprecated, so irrelevant
+            setpoint = signal.setpoint;
+
             i.remove();
         }
 
-        return new TintedValue(valueAccumulator / size, tintAccumulator / size, emphasizeAccumulator > 0);
+        return new TintedValue(valueAccumulator / size, tintAccumulator / size, emphasizeAccumulator > 0, setpoint);
     }
 
     @Override

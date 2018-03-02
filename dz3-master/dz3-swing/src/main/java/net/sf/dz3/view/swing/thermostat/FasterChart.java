@@ -12,6 +12,9 @@ import net.sf.dz3.controller.DataSet;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.util.Interval;
 
+/**
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ */
 public class FasterChart extends AbstractChart {
 
     private static final long serialVersionUID = 8739949924865459025L;
@@ -202,7 +205,7 @@ public class FasterChart extends AbstractChart {
 
             time_trailer = time_now;
 
-            trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize);
+            trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize, cursor.setpoint);
         }
 
         if (time_trailer != null && now - time_trailer > deadTimeout) {
@@ -281,7 +284,7 @@ public class FasterChart extends AbstractChart {
 
             logger.debug("RingBuffer: flushing at " + Interval.toTimeInterval(age));
 
-            TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
+            TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0, signal.sample.setpoint);
 
             count = 1;
             valueAccumulator = signal.sample.value;

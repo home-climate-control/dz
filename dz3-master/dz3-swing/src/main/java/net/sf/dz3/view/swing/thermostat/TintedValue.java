@@ -8,7 +8,7 @@ package net.sf.dz3.view.swing.thermostat;
 public class TintedValue {
 
     /**
-     * The Y coordinate on the chart.
+     * Value Y coordinate on the chart.
      */
     public final double value;
 
@@ -25,11 +25,19 @@ public class TintedValue {
      */
     public final boolean emphasize;
 
-    public TintedValue(double value, double tint, boolean emphasize) {
+    /**
+     * Setpoint Y coordinate on the chart.
+     *
+     * VT: FIXME: Makes little sense in the context of a single value, a prime candidate for optimization.
+     */
+    public final double setpoint;
+
+    public TintedValue(double value, double tint, boolean emphasize, double setpoint) {
 
         this.value = value;
         this.tint = tint;
         this.emphasize = emphasize;
+        this.setpoint = setpoint;
     }
 
     @Override
@@ -37,7 +45,7 @@ public class TintedValue {
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append("TintedValue(").append(value).append(", ").append(tint).append(", ").append(emphasize);
+        sb.append("TintedValue(").append(value).append(", ").append(tint).append(", ").append(emphasize).append(", ").append(setpoint);
         sb.append(")");
 
         return sb.toString();
