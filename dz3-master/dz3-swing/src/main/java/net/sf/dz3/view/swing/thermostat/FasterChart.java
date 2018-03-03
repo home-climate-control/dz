@@ -203,8 +203,7 @@ public class FasterChart extends AbstractChart {
             }
 
             time_trailer = time_now;
-
-            trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize);
+            trailer = cursor;
         }
 
         if (time_trailer != null && now - time_trailer > deadTimeout) {
