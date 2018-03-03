@@ -148,6 +148,16 @@ public class FasterChart extends AbstractChart {
             long now, double x_scale, long x_offset, double y_scale, double y_offset,
             String channel, DataSet<TintedValue> ds) {
 
+        // Setpoint history is rendered over the value history
+
+        paintValues(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, ds);
+        paintSetpoints(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, ds);
+    }
+
+    private void paintValues(Graphics2D g2d, Dimension boundary, Insets insets,
+            long now, double x_scale, long x_offset, double y_scale, double y_offset,
+            String channel, DataSet<TintedValue> ds) {
+
         Long time_trailer = null;
         TintedValue trailer = null;
 
@@ -231,6 +241,22 @@ public class FasterChart extends AbstractChart {
         //              if (value_trailer != null) {
         //                      values.put(name, value_trailer);
         //              }
+    }
+
+    private void paintSetpoints(Graphics2D g2d, Dimension boundary, Insets insets,
+            long now, double x_scale, long x_offset, double y_scale, double y_offset,
+            String channel, DataSet<TintedValue> ds) {
+
+        // VT: FIXME: At this point, we're making a second pass over ds (heavily redundant) and wasting a lot of time
+        // to do very little (it may so happen that there's been just one setpoint value over the whole chart).
+        // However, commit 369f1344a58fbceaa5a174f2def81200954ae9a3 (adding setpoint to TintedValue) was extremely
+        // wasteful already, so let's just get the visuals right for now, and find a way of changing the data flow
+        // in a way that would a) not break the DataSink<TintedValue> interface b) not introduce memory chatter
+        // during fast processing cycles. It will most probably involve having a separate efficient structure
+        // to hold setpoint history, so this method is exactly where rendering belongs.
+
+        // VT: FIXME: Do the job here
+
     }
 
     /**
