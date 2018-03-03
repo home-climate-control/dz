@@ -172,15 +172,11 @@ public class FasterChart extends AbstractChart {
 
             if (time_trailer != null) {
 
-                double x0 = (time_trailer - x_offset) * x_scale
-                        + insets.left;
-                double y0 = (y_offset - trailer.value) * y_scale
-                        + insets.top;
+                double x0 = (time_trailer - x_offset) * x_scale + insets.left;
+                double y0 = (y_offset - trailer.value) * y_scale + insets.top;
 
-                double x1 = (time_now - x_offset) * x_scale
-                        + insets.left;
-                double y1 = (y_offset - cursor.value) * y_scale
-                        + insets.top;
+                double x1 = (time_now - x_offset) * x_scale + insets.left;
+                double y1 = (y_offset - cursor.value) * y_scale + insets.top;
 
                 // Decide whether the line is alive or dead
 
@@ -224,8 +220,7 @@ public class FasterChart extends AbstractChart {
 
             // There's a gap on the right, let's fill it
 
-            double x0 = (time_trailer - x_offset) * x_scale
-                    + insets.left;
+            double x0 = (time_trailer - x_offset) * x_scale + insets.left;
             double x1 = (now - x_offset) * x_scale + insets.left;
             double y = (y_offset - trailer.value) * y_scale + insets.top;
 
