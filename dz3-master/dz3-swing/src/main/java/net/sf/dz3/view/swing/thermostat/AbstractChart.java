@@ -115,6 +115,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     protected final static Color SIGNAL_COLOR_LOW = Color.GREEN;
     protected final static Color SIGNAL_COLOR_HIGH = Color.RED;
+    protected final static Color SETPOINT_COLOR = Color.YELLOW;
 
     public AbstractChart(long chartLengthMillis) {
 

@@ -250,8 +250,40 @@ public class FasterChart extends AbstractChart {
         // during fast processing cycles. It will most probably involve having a separate efficient structure
         // to hold setpoint history, so this method is exactly where rendering belongs.
 
-        // VT: FIXME: Do the job here
+        Long time_trailer = null;
+        Double trailer = null;
 
+        for (Iterator<Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext();) {
+
+            Entry<Long, TintedValue> entry = di.next();
+            long time_now = entry.getKey();
+            Double cursor = entry.getValue().setpoint;
+
+            if (time_trailer == null) {
+
+                time_trailer = time_now;
+                trailer = cursor;
+
+                continue;
+            }
+
+            if (Double.compare(trailer, cursor) != 0 || !di.hasNext()) {
+
+                // Setpoint changed, or we're at the last sample, time to draw the line
+
+                double x0 = (time_trailer - x_offset) * x_scale + insets.left;
+                double x1 = (time_now - x_offset) * x_scale + insets.left;
+                double y = (y_offset - trailer) * y_scale + insets.top;
+
+                Color startColor = getBackground();
+                Color endColor = SETPOINT_COLOR;
+
+                drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
+
+                time_trailer = time_now;
+                trailer = cursor;
+            }
+        }
     }
 
     /**
