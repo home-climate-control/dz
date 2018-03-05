@@ -15,17 +15,17 @@ import java.util.TreeMap;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import net.sf.dz3.device.model.Thermostat;
-import net.sf.dz3.view.swing.ScreenDescriptor;
-
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
+
+import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.view.swing.ScreenDescriptor;
 
 /**
  * Panel that contains all {@link ThermostatPanel} instances (and all {@code SensorPanel} instances
  * in a {@link CardLayout}, and an indicator bar that displays abbreviated status for all zones.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class ZonePanel extends JPanel implements KeyListener {
     
@@ -58,26 +58,36 @@ public class ZonePanel extends JPanel implements KeyListener {
         
         this.setLayout(layout);
         
-        // Zone bar spans all the horizontal space available (as many cells as there are zones),
-        // but the height is limited
-        
-        cs.fill = GridBagConstraints.HORIZONTAL;
-        cs.gridx = 0;
-        cs.gridy = 0;
-        cs.gridwidth = 1;
-        cs.gridheight = 1;
-        cs.weightx = 1;
-        cs.weighty = 0;
-        
-        layout.setConstraints(zoneBar, cs);
-        this.add(zoneBar);
-        
-        // Zone panel is right below the zone bar,
-        // same constraints work for it
-        cs.gridy++;
-        
-        layout.setConstraints(zonePanel, cs);
-        this.add(zonePanel);
+        {
+            // Zone bar spans all the horizontal space available (as many cells as there are zones),
+            // but the height is limited
+
+            cs.fill = GridBagConstraints.HORIZONTAL;
+            cs.gridx = 0;
+            cs.gridy = 0;
+            cs.gridwidth = GridBagConstraints.REMAINDER;
+            cs.gridheight = 1;
+            cs.weightx = 1;
+            cs.weighty = 0;
+
+            layout.setConstraints(zoneBar, cs);
+            this.add(zoneBar);
+        }
+
+        {
+            // Zone panel is right below the zone bar
+
+            cs.gridy++;
+
+            // Constraints are different
+
+            cs.fill = GridBagConstraints.BOTH;
+            cs.gridheight = GridBagConstraints.REMAINDER;
+            cs.weighty = 1;
+
+            layout.setConstraints(zonePanel, cs);
+            this.add(zonePanel);
+        }
         
         SortedMap<Thermostat, JComponent> thermostatMap = new TreeMap<Thermostat, JComponent>();
 
