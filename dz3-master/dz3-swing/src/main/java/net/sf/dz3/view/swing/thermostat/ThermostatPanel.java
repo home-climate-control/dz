@@ -77,7 +77,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private final JLabel currentLabel = new JLabel(UNDEFINED, JLabel.RIGHT);
     private final JLabel setpointLabel = new JLabel(UNDEFINED + "\u00b0", JLabel.RIGHT);
-    private final JLabel nonVotingLabel = new JLabel(VOTING, JLabel.RIGHT);
+    private final JLabel votingLabel = new JLabel(VOTING, JLabel.RIGHT);
     private final JLabel holdLabel = new JLabel(HOLD, JLabel.RIGHT);
     private final JLabel periodLabel = new JLabel("", JLabel.LEFT);
 
@@ -188,8 +188,8 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                 cs.gridy++;
 
-                layout.setConstraints(nonVotingLabel, cs);
-                this.add(nonVotingLabel);
+                layout.setConstraints(votingLabel, cs);
+                this.add(votingLabel);
             }
         }
 
@@ -518,10 +518,10 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             currentLabel.setForeground(fg);
             setpointLabel.setForeground(fg);
 
-            nonVotingLabel.setText(source.isVoting() ? VOTING : NOT_VOTING);
+            votingLabel.setText(source.isVoting() ? VOTING : NOT_VOTING);
             holdLabel.setText(source.isOnHold() ? ON_HOLD : HOLD);
 
-            nonVotingLabel.setForeground(source.isVoting() ? ColorScheme.getScheme(getMode()).NOTICE_DEFAULT : ColorScheme.getScheme(getMode()).NOTICE_ACTIVE);
+            votingLabel.setForeground(source.isVoting() ? ColorScheme.getScheme(getMode()).NOTICE_DEFAULT : ColorScheme.getScheme(getMode()).NOTICE_ACTIVE);
             holdLabel.setForeground(source.isOnHold() ? ColorScheme.getScheme(getMode()).NOTICE_ACTIVE : ColorScheme.getScheme(getMode()).NOTICE_DEFAULT);
 
             renderPeriod();
