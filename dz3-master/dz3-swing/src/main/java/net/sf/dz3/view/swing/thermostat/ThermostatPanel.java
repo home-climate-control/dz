@@ -134,77 +134,20 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         this.setLayout(layout);
 
         {
-            // Current label takes all available space on the left
-            // and expands until it meets the setpoint and voting/hold labels
+            // Controls take the upper quarter of the display
 
             cs.fill = GridBagConstraints.HORIZONTAL;
             cs.gridx = 0;
             cs.gridy = 0;
-            cs.gridwidth = 1;
-            cs.gridheight = 4;
+            cs.gridwidth = GridBagConstraints.REMAINDER;
+            cs.gridheight = 1;
             cs.weightx = 1;
             cs.weighty = 0;
 
-            layout.setConstraints(currentLabel, cs);
-            this.add(currentLabel);
-        }
+            JPanel controls = createControls();
 
-        {
-            // Setpoint, hold and voting buttons form a group to the right of the current
-            // temperature reading, and take the rest of the row
-
-            cs.fill = GridBagConstraints.VERTICAL;
-            cs.gridx++;
-
-            cs.gridheight = 1;
-            cs.gridwidth = GridBagConstraints.REMAINDER;
-
-            cs.weightx = 0;
-
-            {
-                // Setpoint label takes the rest of the space on the right in the top row
-
-                // It takes more space than voting and hold labels
-
-                cs.weighty = 1;
-
-                layout.setConstraints(setpointLabel, cs);
-                this.add(setpointLabel);
-            }
-
-            {
-                // Hold label is underneath the setpoint label
-
-                cs.gridy++;
-
-                cs.weighty = 0;
-
-                layout.setConstraints(holdLabel, cs);
-                this.add(holdLabel);
-            }
-
-            {
-                // Voting label is underneath the hold label
-
-                cs.gridy++;
-
-                layout.setConstraints(votingLabel, cs);
-                this.add(votingLabel);
-            }
-        }
-
-        {
-            // VT: FIXME: Move this to top left corner
-
-            cs.gridx = 0;
-            cs.gridy++;
-            cs.gridwidth = 2;
-            cs.fill = GridBagConstraints.HORIZONTAL;
-
-            layout.setConstraints(periodLabel, cs);
-            this.add(periodLabel);
-
-            periodLabel.setForeground(Color.GRAY);
+            layout.setConstraints(controls, cs);
+            this.add(controls);
         }
 
         {
@@ -247,6 +190,95 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 //             periodLabel.setBorder(BorderFactory.createEtchedBorder());
 //             chart.setBorder(javax.swing.BorderFactory.createTitledBorder("Chart"));
         }
+    }
+
+    private JPanel createControls() {
+
+        JPanel controls = new JPanel();
+
+        controls.setBackground(ColorScheme.offMap.BACKGROUND);
+        controls.setOpaque(false);
+
+        GridBagLayout layout = new GridBagLayout();
+        GridBagConstraints cs = new GridBagConstraints();
+
+        controls.setLayout(layout);
+
+        {
+            // Current label takes all available space on the left
+            // and expands until it meets the setpoint and voting/hold labels
+
+            cs.fill = GridBagConstraints.HORIZONTAL;
+            cs.gridx = 0;
+            cs.gridy = 0;
+            cs.gridwidth = 1;
+            cs.gridheight = 4;
+            cs.weightx = 1;
+            cs.weighty = 0;
+
+            layout.setConstraints(currentLabel, cs);
+            controls.add(currentLabel);
+        }
+
+        {
+            // Setpoint, hold and voting buttons form a group to the right of the current
+            // temperature reading, and take the rest of the row
+
+            cs.fill = GridBagConstraints.VERTICAL;
+            cs.gridx++;
+
+            cs.gridheight = 1;
+            cs.gridwidth = GridBagConstraints.REMAINDER;
+
+            cs.weightx = 0;
+
+            {
+                // Setpoint label takes the rest of the space on the right in the top row
+
+                // It takes more space than voting and hold labels
+
+                cs.weighty = 1;
+
+                layout.setConstraints(setpointLabel, cs);
+                controls.add(setpointLabel);
+            }
+
+            {
+                // Hold label is underneath the setpoint label
+
+                cs.gridy++;
+
+                cs.weighty = 0;
+
+                layout.setConstraints(holdLabel, cs);
+                controls.add(holdLabel);
+            }
+
+            {
+                // Voting label is underneath the hold label
+
+                cs.gridy++;
+
+                layout.setConstraints(votingLabel, cs);
+                controls.add(votingLabel);
+            }
+        }
+
+        {
+            // VT: FIXME: Move this to top left corner
+
+            cs.gridx = 0;
+            cs.gridy++;
+            cs.gridwidth = 2;
+            cs.fill = GridBagConstraints.HORIZONTAL;
+
+            layout.setConstraints(periodLabel, cs);
+            controls.add(periodLabel);
+
+            periodLabel.setForeground(Color.GRAY);
+        }
+
+        return controls;
     }
 
     @Override
