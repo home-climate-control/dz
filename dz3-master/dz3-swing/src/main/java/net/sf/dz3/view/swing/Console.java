@@ -55,7 +55,7 @@ import org.apache.log4j.NDC;
  * {@code init-method="show"} attribute must be used in Spring bean definition, otherwise
  * the panel will not display.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class Console extends Connector<JComponent> {
     
@@ -190,26 +190,16 @@ public class Console extends Connector<JComponent> {
             //JComponent unitPanel = createUnitPanel(componentMap);
             zonePanel = new ZonePanel(getComponentMap());
             
-            cs.fill = GridBagConstraints.HORIZONTAL;
+            cs.fill = GridBagConstraints.BOTH;
             cs.gridx = 0;
             cs.gridy = 0;
-            cs.gridwidth = 1;
-            cs.gridheight = 1;
+            cs.gridwidth = GridBagConstraints.REMAINDER;
+            cs.gridheight = GridBagConstraints.REMAINDER;
             cs.weightx = 1;
-            cs.weighty = 0;
+            cs.weighty = 1;
 
             layout.setConstraints(zonePanel, cs);
             display.add(zonePanel);
-            
-            // Add the filler
-            
-            cs.gridy++;
-            cs.weighty = 1;
-            
-            JLabel filler = new JLabel("This space is intentionally left blank", JLabel.CENTER);
-            
-            layout.setConstraints(filler, cs);
-            display.add(filler);
 
             display.setFocusable(true);
             display.addKeyListener(new ResizeKeyListener());
