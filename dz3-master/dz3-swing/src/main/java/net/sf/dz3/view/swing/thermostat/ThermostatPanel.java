@@ -10,17 +10,17 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.Formatter;
 import java.util.Locale;
 
 import javax.swing.BorderFactory;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.NDC;
 
 import net.sf.dz3.controller.ProcessController;
 import net.sf.dz3.controller.ProcessControllerStatus;
@@ -37,9 +37,6 @@ import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.dz3.view.swing.ScreenDescriptor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 /**
  * Thermostat panel.
