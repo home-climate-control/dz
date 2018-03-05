@@ -184,11 +184,12 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         {
             // Borders are to debug the layout, pain in the butt
 
-//             setpointLabel.setBorder(BorderFactory.createEtchedBorder());
-//             nonVotingLabel.setBorder(BorderFactory.createEtchedBorder());
-//             holdLabel.setBorder(BorderFactory.createEtchedBorder());
-//             periodLabel.setBorder(BorderFactory.createEtchedBorder());
-//             chart.setBorder(javax.swing.BorderFactory.createTitledBorder("Chart"));
+//            currentLabel.setBorder(BorderFactory.createEtchedBorder());
+//            setpointLabel.setBorder(BorderFactory.createEtchedBorder());
+//            votingLabel.setBorder(BorderFactory.createEtchedBorder());
+//            holdLabel.setBorder(BorderFactory.createEtchedBorder());
+//            periodLabel.setBorder(BorderFactory.createEtchedBorder());
+//            chart.setBorder(javax.swing.BorderFactory.createTitledBorder("Chart"));
         }
     }
 
@@ -205,14 +206,28 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         controls.setLayout(layout);
 
         {
+            // Period label is on top left
+
+            cs.gridx = 0;
+            cs.gridy = 0;
+            cs.gridwidth = 2;
+            cs.fill = GridBagConstraints.HORIZONTAL;
+
+            layout.setConstraints(periodLabel, cs);
+            controls.add(periodLabel);
+
+            periodLabel.setForeground(Color.GRAY);
+        }
+
+        {
             // Current label takes all available space on the left
             // and expands until it meets the setpoint and voting/hold labels
 
             cs.fill = GridBagConstraints.HORIZONTAL;
             cs.gridx = 0;
-            cs.gridy = 0;
+            cs.gridy++;
             cs.gridwidth = 1;
-            cs.gridheight = 4;
+            cs.gridheight = 3;
             cs.weightx = 1;
             cs.weighty = 0;
 
@@ -262,20 +277,6 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 layout.setConstraints(votingLabel, cs);
                 controls.add(votingLabel);
             }
-        }
-
-        {
-            // VT: FIXME: Move this to top left corner
-
-            cs.gridx = 0;
-            cs.gridy++;
-            cs.gridwidth = 2;
-            cs.fill = GridBagConstraints.HORIZONTAL;
-
-            layout.setConstraints(periodLabel, cs);
-            controls.add(periodLabel);
-
-            periodLabel.setForeground(Color.GRAY);
         }
 
         return controls;
