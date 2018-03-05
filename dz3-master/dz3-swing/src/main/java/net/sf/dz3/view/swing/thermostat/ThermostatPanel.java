@@ -48,7 +48,7 @@ import org.apache.log4j.NDC;
  * but gets event notifications from {@link ZonePanel} instead.
  * This is done in order not to fiddle with focus changes.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class ThermostatPanel extends JPanel implements KeyListener {
 
@@ -72,10 +72,16 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private static final String UNDEFINED = "--.-";
 
+    private static final String VOTING = "VOTING";
+    private static final String NOT_VOTING = "NOT VOTING";
+
+    private static final String HOLD = "HOLD";
+    private static final String ON_HOLD = "ON HOLD";
+
     private final JLabel currentLabel = new JLabel(UNDEFINED, JLabel.RIGHT);
     private final JLabel setpointLabel = new JLabel(UNDEFINED + "\u00b0", JLabel.RIGHT);
-    private final JLabel nonVotingLabel = new JLabel("", JLabel.RIGHT);
-    private final JLabel holdLabel = new JLabel("", JLabel.RIGHT);
+    private final JLabel nonVotingLabel = new JLabel(VOTING, JLabel.RIGHT);
+    private final JLabel holdLabel = new JLabel(HOLD, JLabel.RIGHT);
     private final JLabel periodLabel = new JLabel("", JLabel.LEFT);
 
     // 3 hours
@@ -100,9 +106,6 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private boolean needFahrenheit = false;
 
-    private Icon holdIcon;
-    private Icon nonVotingIcon;
-
     public ThermostatPanel(ThermostatModel source, ScreenDescriptor screenDescriptor, Scheduler scheduler) {
 
         this.source = source;
@@ -111,7 +114,6 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         setFontSize(screenDescriptor); 
 
         initGraphics();
-        createIcons();
 
         // This can only be done when everything else is done, to avoid bootstrapping problems
 
@@ -134,88 +136,94 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
         this.setLayout(layout);
 
-        // Current label takes all available space on the left
-        // and expands until it meets the setpoint and voting/hold labels
+        {
+            // Current label takes all available space on the left
+            // and expands until it meets the setpoint and voting/hold labels
 
-        cs.fill = GridBagConstraints.HORIZONTAL;
-        cs.gridx = 0;
-        cs.gridy = 0;
-        cs.gridwidth = 1;
-        cs.gridheight = 3;
-        cs.weightx = 6;
-        cs.weighty = 1;
+            cs.fill = GridBagConstraints.HORIZONTAL;
+            cs.gridx = 0;
+            cs.gridy = 0;
+            cs.gridwidth = 1;
+            cs.gridheight = 4;
+            cs.weightx = 1;
+            cs.weighty = 0;
 
-        layout.setConstraints(currentLabel, cs);
-        this.add(currentLabel);
+            layout.setConstraints(currentLabel, cs);
+            this.add(currentLabel);
+        }
 
-        // Setpoint label takes the rest of the space on the right in the top row
+        {
+            // Setpoint, hold and voting buttons form a group to the right of the current
+            // temperature reading, and take the rest of the row
 
-        cs.gridx++;
-        cs.weightx = 0;
-        cs.gridwidth = 3;
-        cs.gridheight = 1;
-        cs.weighty = 0;
-        cs.fill = GridBagConstraints.NONE;
+            cs.fill = GridBagConstraints.VERTICAL;
+            cs.gridx++;
 
-        JLabel filler = new JLabel(" ");
+            cs.gridheight = 1;
+            cs.gridwidth = GridBagConstraints.REMAINDER;
 
-        layout.setConstraints(filler, cs);
-        this.add(filler);
+            cs.weightx = 0;
 
-        cs.gridy++;
+            {
+                // Setpoint label takes the rest of the space on the right in the top row
 
-        layout.setConstraints(setpointLabel, cs);
-        this.add(setpointLabel);
+                // It takes more space than voting and hold labels
 
-        // Voting (left) and hold (right) labels take the bottom right corner
+                cs.weighty = 1;
 
-        cs.gridy++;
-        cs.gridwidth = 1;
-        cs.weightx = 1;
-        cs.fill = GridBagConstraints.HORIZONTAL;
+                layout.setConstraints(setpointLabel, cs);
+                this.add(setpointLabel);
+            }
 
-        JLabel filler2 = new JLabel(" ", JLabel.RIGHT);
+            {
+                // Hold label is underneath the setpoint label
 
-        layout.setConstraints(filler2, cs);
-        this.add(filler2);
+                cs.gridy++;
 
-        cs.gridx++;
-        cs.gridwidth = 1;
-        cs.weightx = 0;
-        cs.fill = GridBagConstraints.NONE;
-        cs.anchor = GridBagConstraints.EAST;
+                cs.weighty = 0;
 
-        layout.setConstraints(nonVotingLabel, cs);
-        this.add(nonVotingLabel);
+                layout.setConstraints(holdLabel, cs);
+                this.add(holdLabel);
+            }
 
-        cs.gridx++;
+            {
+                // Voting label is underneath the hold label
 
-        layout.setConstraints(holdLabel, cs);
-        this.add(holdLabel);
+                cs.gridy++;
 
-        cs.gridx = 0;
-        cs.gridy++;
-        cs.gridwidth = 4;
-        cs.fill = GridBagConstraints.HORIZONTAL;
-        cs.anchor = GridBagConstraints.CENTER;
+                layout.setConstraints(nonVotingLabel, cs);
+                this.add(nonVotingLabel);
+            }
+        }
 
-        layout.setConstraints(periodLabel, cs);
-        this.add(periodLabel);
+        {
+            // VT: FIXME: Move this to top left corner
 
-        periodLabel.setForeground(Color.GRAY);
+            cs.gridx = 0;
+            cs.gridy++;
+            cs.gridwidth = 2;
+            cs.fill = GridBagConstraints.HORIZONTAL;
 
-        cs.gridy++;
-        cs.gridheight = 1;
-        cs.weighty = 1;
-        cs.fill = GridBagConstraints.BOTH;
+            layout.setConstraints(periodLabel, cs);
+            this.add(periodLabel);
 
-        layout.setConstraints(chart, cs);
-        this.add(chart);
+            periodLabel.setForeground(Color.GRAY);
+        }
 
-        chart.setPreferredSize(getPreferredSize());
-        Color bg = ColorScheme.offMap.BACKGROUND;
-        Color chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
-        chart.setBackground(chartBg);
+        {
+            cs.gridy++;
+            cs.gridheight = 1;
+            cs.weighty = 1;
+            cs.fill = GridBagConstraints.BOTH;
+
+            layout.setConstraints(chart, cs);
+            this.add(chart);
+
+            chart.setPreferredSize(getPreferredSize());
+            Color bg = ColorScheme.offMap.BACKGROUND;
+            Color chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
+            chart.setBackground(chartBg);
+        }
 
         // Really dirty, but really quick
 
@@ -230,50 +238,17 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
         this.setBorder(border);
 
+        //        nonVotingLabel.setFont(setpointFont);
+        //        holdLabel.setFont(setpointFont);
 
-        filler.setFont(setpointFont);
-        filler2.setFont(setpointFont);
-        nonVotingLabel.setFont(setpointFont);
-        holdLabel.setFont(setpointFont);
+        {
+            // Borders are to debug the layout, pain in the butt
 
-        // Borders are to debug the layout, pain in the butt
-
-        //        filler.setBorder(BorderFactory.createEtchedBorder());
-        //        filler2.setBorder(BorderFactory.createEtchedBorder());
-        //        setpointLabel.setBorder(BorderFactory.createEtchedBorder());
-        //        nonVotingLabel.setBorder(BorderFactory.createEtchedBorder());
-        //        holdLabel.setBorder(BorderFactory.createEtchedBorder());
-        //        periodLabel.setBorder(BorderFactory.createEtchedBorder());
-        //        chart.setBorder(javax.swing.BorderFactory.createTitledBorder("Chart"));
-    }
-
-    private void createIcons() {
-
-        holdIcon = createIcon("/images/lock.png");
-        nonVotingIcon = createIcon("/images/stop.png");
-    }
-
-    private Icon createIcon(String imageName) {
-
-        NDC.push("createIcon");
-
-        try {
-
-            logger.info("Image: " + imageName);
-
-            URL imageUrl = getClass().getResource(imageName);
-
-            logger.info("URL: " + imageUrl);
-
-            return new ImageIcon(imageUrl); 
-
-        } catch (Throwable t) {
-
-            logger.error("Failed to load " + imageName, t);
-            return null;
-
-        } finally {
-            NDC.pop();
+//             setpointLabel.setBorder(BorderFactory.createEtchedBorder());
+//             nonVotingLabel.setBorder(BorderFactory.createEtchedBorder());
+//             holdLabel.setBorder(BorderFactory.createEtchedBorder());
+//             periodLabel.setBorder(BorderFactory.createEtchedBorder());
+//             chart.setBorder(javax.swing.BorderFactory.createTitledBorder("Chart"));
         }
     }
 
@@ -546,8 +521,11 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             currentLabel.setForeground(fg);
             setpointLabel.setForeground(fg);
 
-            nonVotingLabel.setIcon(source.isVoting() ? null : nonVotingIcon);
-            holdLabel.setIcon(source.isOnHold() ? holdIcon : null);
+            nonVotingLabel.setText(source.isVoting() ? VOTING : NOT_VOTING);
+            holdLabel.setText(source.isOnHold() ? ON_HOLD : HOLD);
+
+            nonVotingLabel.setForeground(source.isVoting() ? ColorScheme.getScheme(getMode()).NOTICE_DEFAULT : ColorScheme.getScheme(getMode()).NOTICE_ACTIVE);
+            holdLabel.setForeground(source.isOnHold() ? ColorScheme.getScheme(getMode()).NOTICE_ACTIVE : ColorScheme.getScheme(getMode()).NOTICE_DEFAULT);
 
             renderPeriod();
 
@@ -627,7 +605,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
             setpointLabel.setText(label);
             setpointLabel.setForeground(fg);
-            
+
             // The signal path is such that this code will always be executed right before ThermostatListener#refresh
             // which also calls repaint(), hence this call is redundant.
 
