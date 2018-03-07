@@ -159,7 +159,7 @@ public class FasterChart extends AbstractChart {
             String channel, DataSet<TintedValueAndSetpoint> ds) {
 
         Long time_trailer = null;
-        TintedValueAndSetpoint trailer = null;
+        TintedValue trailer = null;
 
         // Flag to reduce the color changes
         boolean dead = false;
@@ -168,7 +168,7 @@ public class FasterChart extends AbstractChart {
 
             Entry<Long, TintedValueAndSetpoint> entry = di.next();
             long time_now = entry.getKey();
-            TintedValueAndSetpoint cursor = entry.getValue();
+            TintedValue cursor = entry.getValue();
 
             if (time_trailer != null) {
 
