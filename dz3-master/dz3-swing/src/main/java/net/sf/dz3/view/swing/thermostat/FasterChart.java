@@ -180,12 +180,15 @@ public class FasterChart extends AbstractChart {
                         dead = true;
                     }
 
-                    // Paint the horizontal line in dead color
-                    // and skew the x0 so the next part will be
-                    // painted vertical
+                    // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
 
                     Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
-                    Color endColor = getBackground();
+
+                    // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
+                    // Even though this is a memory allocation, it won't affect performance since [hopefully]
+                    // there'll be just a few dead drops
+
+                    Color endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
 
                     drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
 
