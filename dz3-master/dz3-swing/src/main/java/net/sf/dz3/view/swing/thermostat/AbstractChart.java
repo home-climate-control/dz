@@ -28,7 +28,7 @@ import net.sf.jukebox.util.Interval;
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2016
  */
-public abstract class AbstractChart extends JPanel implements DataSink<TintedValue> {
+public abstract class AbstractChart extends JPanel implements DataSink<TintedValueAndSetpoint> {
 
     private static final long serialVersionUID = -8584582539155161184L;
 
@@ -37,7 +37,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     protected transient final Logger logger = Logger.getLogger(getClass());
 
-    protected transient final SortedMap<String, DataSet<TintedValue>> channel2ds = new TreeMap<String, DataSet<TintedValue>>();
+    protected transient final SortedMap<String, DataSet<TintedValueAndSetpoint>> channel2ds = new TreeMap<String, DataSet<TintedValueAndSetpoint>>();
 
     /**
      * Grid color.
@@ -182,13 +182,13 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        for (Iterator<Entry<String, DataSet<TintedValue>>> i = channel2ds.entrySet().iterator(); i.hasNext(); ) {
+        for (Iterator<Entry<String, DataSet<TintedValueAndSetpoint>>> i = channel2ds.entrySet().iterator(); i.hasNext(); ) {
 
             // VT: FIXME: Implement depth ordering
 
-            Entry<String, DataSet<TintedValue>> entry = i.next();
+            Entry<String, DataSet<TintedValueAndSetpoint>> entry = i.next();
             String channel = entry.getKey();
-            DataSet<TintedValue> ds = entry.getValue();
+            DataSet<TintedValueAndSetpoint> ds = entry.getValue();
 
             paintChart(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, ds);
         }
@@ -198,7 +198,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     protected abstract void paintChart(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
             double x_scale, long x_offset, double y_scale, double y_offset,
-            String channel, DataSet<TintedValue> ds);
+            String channel, DataSet<TintedValueAndSetpoint> ds);
 
     private void paintBackground(Graphics2D g2d, Dimension boundary, Insets insets) {
 
@@ -496,15 +496,15 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         dataMin = null;
         dataMax = null;
 
-        for (Iterator<DataSet<TintedValue>> i = channel2ds.values().iterator(); i.hasNext(); ) {
+        for (Iterator<DataSet<TintedValueAndSetpoint>> i = channel2ds.values().iterator(); i.hasNext(); ) {
 
-            DataSet<TintedValue> ds = i.next();
+            DataSet<TintedValueAndSetpoint> ds = i.next();
 
-            for (Iterator<Entry<Long, TintedValue>> i2 = ds.entryIterator(); i2.hasNext(); ) {
+            for (Iterator<Entry<Long, TintedValueAndSetpoint>> i2 = ds.entryIterator(); i2.hasNext(); ) {
 
-                Entry<Long, TintedValue> entry = i2.next();
+                Entry<Long, TintedValueAndSetpoint> entry = i2.next();
                 Long timestamp = entry.getKey();
-                TintedValue tv = entry.getValue();
+                TintedValueAndSetpoint tv = entry.getValue();
 
                 if (dataMax == null || tv.value > dataMax) {
 

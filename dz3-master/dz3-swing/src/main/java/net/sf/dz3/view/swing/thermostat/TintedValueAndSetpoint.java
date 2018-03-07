@@ -5,7 +5,7 @@ package net.sf.dz3.view.swing.thermostat;
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
-public class TintedValue {
+public class TintedValueAndSetpoint {
 
     /**
      * Value Y coordinate on the chart.
@@ -32,7 +32,7 @@ public class TintedValue {
      */
     public final double setpoint;
 
-    public TintedValue(double value, double tint, boolean emphasize, double setpoint) {
+    public TintedValueAndSetpoint(double value, double tint, boolean emphasize, double setpoint) {
 
         this.value = value;
         this.tint = tint;

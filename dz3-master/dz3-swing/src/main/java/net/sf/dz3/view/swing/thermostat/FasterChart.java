@@ -45,7 +45,7 @@ public class FasterChart extends AbstractChart {
     }
 
     @Override
-    public synchronized void consume(DataSample<TintedValue> signal) {
+    public synchronized void consume(DataSample<TintedValueAndSetpoint> signal) {
 
         assert(signal != null);
         assert(signal.sample != null);
@@ -66,7 +66,7 @@ public class FasterChart extends AbstractChart {
      * 
      * @return {@code true} if the component needs to be repainted.
      */
-    private boolean record(String channel, DataSample<TintedValue> signal) {
+    private boolean record(String channel, DataSample<TintedValueAndSetpoint> signal) {
 
         adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
@@ -101,7 +101,7 @@ public class FasterChart extends AbstractChart {
         }
 
         Averager avg = channel2avg.get(channel);
-        TintedValue tv = avg.record(signal);
+        TintedValueAndSetpoint tv = avg.record(signal);
 
         if (tv == null) {
 
@@ -109,11 +109,11 @@ public class FasterChart extends AbstractChart {
             return false;
         }
 
-        DataSet<TintedValue> ds = channel2ds.get(channel);
+        DataSet<TintedValueAndSetpoint> ds = channel2ds.get(channel);
 
         if (ds == null) {
 
-            ds = new DataSet<TintedValue>(chartLengthMillis);
+            ds = new DataSet<TintedValueAndSetpoint>(chartLengthMillis);
             channel2ds.put(channel, ds);
         }
 
@@ -146,7 +146,7 @@ public class FasterChart extends AbstractChart {
     @Override
     protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
             long now, double x_scale, long x_offset, double y_scale, double y_offset,
-            String channel, DataSet<TintedValue> ds) {
+            String channel, DataSet<TintedValueAndSetpoint> ds) {
 
         // Setpoint history is rendered over the value history
 
@@ -156,19 +156,19 @@ public class FasterChart extends AbstractChart {
 
     private void paintValues(Graphics2D g2d, Dimension boundary, Insets insets,
             long now, double x_scale, long x_offset, double y_scale, double y_offset,
-            String channel, DataSet<TintedValue> ds) {
+            String channel, DataSet<TintedValueAndSetpoint> ds) {
 
         Long time_trailer = null;
-        TintedValue trailer = null;
+        TintedValueAndSetpoint trailer = null;
 
         // Flag to reduce the color changes
         boolean dead = false;
 
-        for (Iterator<Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext();) {
+        for (Iterator<Entry<Long, TintedValueAndSetpoint>> di = ds.entryIterator(); di.hasNext();) {
 
-            Entry<Long, TintedValue> entry = di.next();
+            Entry<Long, TintedValueAndSetpoint> entry = di.next();
             long time_now = entry.getKey();
-            TintedValue cursor = entry.getValue();
+            TintedValueAndSetpoint cursor = entry.getValue();
 
             if (time_trailer != null) {
 
@@ -242,7 +242,7 @@ public class FasterChart extends AbstractChart {
 
     private void paintSetpoints(Graphics2D g2d, Dimension boundary, Insets insets,
             long now, double x_scale, long x_offset, double y_scale, double y_offset,
-            String channel, DataSet<TintedValue> ds) {
+            String channel, DataSet<TintedValueAndSetpoint> ds) {
 
         Color startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
         Color endColor = SETPOINT_COLOR;
@@ -258,9 +258,9 @@ public class FasterChart extends AbstractChart {
         Long time_trailer = null;
         Double trailer = null;
 
-        for (Iterator<Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext();) {
+        for (Iterator<Entry<Long, TintedValueAndSetpoint>> di = ds.entryIterator(); di.hasNext();) {
 
-            Entry<Long, TintedValue> entry = di.next();
+            Entry<Long, TintedValueAndSetpoint> entry = di.next();
             long time_now = entry.getKey();
             Double cursor = entry.getValue().setpoint;
 
@@ -321,7 +321,7 @@ public class FasterChart extends AbstractChart {
          * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
          * away from the first sample stored, {@code null} otherwise.
          */
-        public TintedValue record(DataSample<TintedValue> signal) {
+        public TintedValueAndSetpoint record(DataSample<TintedValueAndSetpoint> signal) {
 
             if (timestamp == null) {
                 timestamp = signal.timestamp;
@@ -341,7 +341,7 @@ public class FasterChart extends AbstractChart {
 
             logger.debug("RingBuffer: flushing at " + Interval.toTimeInterval(age));
 
-            TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0, signal.sample.setpoint);
+            TintedValueAndSetpoint result = new TintedValueAndSetpoint(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0, signal.sample.setpoint);
 
             count = 1;
             valueAccumulator = signal.sample.value;

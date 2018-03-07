@@ -28,17 +28,17 @@ public class Chart extends AbstractChart {
     }
 
     @Override
-    public synchronized void consume(DataSample<TintedValue> signal) {
+    public synchronized void consume(DataSample<TintedValueAndSetpoint> signal) {
 
         assert(signal != null);
         assert(signal.sample != null);
 
         String channel = signal.sourceName;
-        DataSet<TintedValue> ds = channel2ds.get(channel);
+        DataSet<TintedValueAndSetpoint> ds = channel2ds.get(channel);
 
         if (ds == null) {
 
-            ds = new DataSet<TintedValue>(chartLengthMillis);
+            ds = new DataSet<TintedValueAndSetpoint>(chartLengthMillis);
             channel2ds.put(channel, ds);
         }
 
@@ -51,12 +51,12 @@ public class Chart extends AbstractChart {
     @Override
     protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
             long now, double x_scale, long x_offset, double y_scale, double y_offset,
-            String channel, DataSet<TintedValue> ds) {
+            String channel, DataSet<TintedValueAndSetpoint> ds) {
 
-        DataSet<TintedValue> sparceSet = spaceOut(ds, boundary.width);
+        DataSet<TintedValueAndSetpoint> sparceSet = spaceOut(ds, boundary.width);
 
         Long time_trailer = null;
-        TintedValue trailer = null;
+        TintedValueAndSetpoint trailer = null;
 
         // Flag to reduce the color changes
         boolean dead = false;
@@ -64,7 +64,7 @@ public class Chart extends AbstractChart {
         for (Iterator<Long> di = sparceSet.iterator(); di.hasNext();) {
 
             long time_now = di.next();
-            TintedValue cursor = sparceSet.get(time_now);
+            TintedValueAndSetpoint cursor = sparceSet.get(time_now);
 
             if (time_trailer != null) {
 
@@ -113,7 +113,7 @@ public class Chart extends AbstractChart {
 
             time_trailer = time_now;
 
-            trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize, cursor.setpoint);
+            trailer = new TintedValueAndSetpoint(cursor.value, cursor.tint, cursor.emphasize, cursor.setpoint);
         }
 
         if (time_trailer != null && now - time_trailer > deadTimeout) {
@@ -139,9 +139,9 @@ public class Chart extends AbstractChart {
         //		}
     }
 
-    private DataSet<TintedValue> spaceOut(DataSet<TintedValue> source, int width) {
+    private DataSet<TintedValueAndSetpoint> spaceOut(DataSet<TintedValueAndSetpoint> source, int width) {
 
-        DataSet<TintedValue> target = new DataSet<TintedValue>(source.getExpirationInterval()); 
+        DataSet<TintedValueAndSetpoint> target = new DataSet<TintedValueAndSetpoint>(source.getExpirationInterval()); 
         long step = chartLengthMillis / width;
 
         logger.info("Source: " + source.size() + " samples");
@@ -149,14 +149,14 @@ public class Chart extends AbstractChart {
 
         step *= 2;
 
-        SortedMap<Long, TintedValue> overflow = new TreeMap<Long, TintedValue>();
-        SortedMap<Long, TintedValue> buffer = new TreeMap<Long, TintedValue>();
+        SortedMap<Long, TintedValueAndSetpoint> overflow = new TreeMap<Long, TintedValueAndSetpoint>();
+        SortedMap<Long, TintedValueAndSetpoint> buffer = new TreeMap<Long, TintedValueAndSetpoint>();
         Long cutoff = null;
 
         for (Iterator<Long> i = source.iterator(); i.hasNext();) {
 
             long timestamp = i.next();
-            TintedValue value = source.get(timestamp);
+            TintedValueAndSetpoint value = source.get(timestamp);
 
             if (cutoff == null) {
 
@@ -192,7 +192,7 @@ public class Chart extends AbstractChart {
         return target;
     }
 
-    private TintedValue spaceOut(SortedMap<Long, TintedValue> buffer) {
+    private TintedValueAndSetpoint spaceOut(SortedMap<Long, TintedValueAndSetpoint> buffer) {
 
         int size = buffer.size();
 
@@ -203,10 +203,10 @@ public class Chart extends AbstractChart {
         int emphasizeAccumulator = 0;
         double setpoint = 0;
 
-        for (Iterator<Entry<Long, TintedValue>> i = buffer.entrySet().iterator(); i.hasNext(); ) {
+        for (Iterator<Entry<Long, TintedValueAndSetpoint>> i = buffer.entrySet().iterator(); i.hasNext(); ) {
 
-            Entry<Long, TintedValue> entry = i.next();
-            TintedValue signal = entry.getValue();
+            Entry<Long, TintedValueAndSetpoint> entry = i.next();
+            TintedValueAndSetpoint signal = entry.getValue();
 
             valueAccumulator += signal.value;
             tintAccumulator += signal.tint;
@@ -218,7 +218,7 @@ public class Chart extends AbstractChart {
             i.remove();
         }
 
-        return new TintedValue(valueAccumulator / size, tintAccumulator / size, emphasizeAccumulator > 0, setpoint);
+        return new TintedValueAndSetpoint(valueAccumulator / size, tintAccumulator / size, emphasizeAccumulator > 0, setpoint);
     }
 
     @Override
