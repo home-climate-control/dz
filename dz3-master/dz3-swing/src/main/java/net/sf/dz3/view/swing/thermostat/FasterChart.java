@@ -241,6 +241,9 @@ public class FasterChart extends AbstractChart {
             long now, double x_scale, long x_offset, double y_scale, double y_offset,
             String channel, DataSet<TintedValue> ds) {
 
+        Color startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
+        Color endColor = SETPOINT_COLOR;
+
         // VT: FIXME: At this point, we're making a second pass over ds (heavily redundant) and wasting a lot of time
         // to do very little (it may so happen that there's been just one setpoint value over the whole chart).
         // However, commit 369f1344a58fbceaa5a174f2def81200954ae9a3 (adding setpoint to TintedValue) was extremely
@@ -273,9 +276,6 @@ public class FasterChart extends AbstractChart {
                 double x0 = (time_trailer - x_offset) * x_scale + insets.left;
                 double x1 = (time_now - x_offset) * x_scale + insets.left;
                 double y = (y_offset - trailer) * y_scale + insets.top;
-
-                Color startColor = getBackground();
-                Color endColor = SETPOINT_COLOR;
 
                 drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
 
