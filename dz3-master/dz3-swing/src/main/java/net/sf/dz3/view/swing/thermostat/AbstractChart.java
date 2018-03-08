@@ -37,7 +37,8 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     protected transient final Logger logger = Logger.getLogger(getClass());
 
-    protected transient final SortedMap<String, DataSet<TintedValueAndSetpoint>> channel2ds = new TreeMap<String, DataSet<TintedValueAndSetpoint>>();
+    protected transient final SortedMap<String, DataSet<TintedValue>> channel2dsValue = new TreeMap<String, DataSet<TintedValue>>();
+    protected transient final SortedMap<String, DataSet<Double>> channel2dsSetpoint = new TreeMap<String, DataSet<Double>>();
 
     /**
      * Grid color.
@@ -166,7 +167,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     protected final boolean isDataAvailable() {
 
-        if (channel2ds.isEmpty() || dataMax == null || dataMin == null) {
+        if (channel2dsValue.isEmpty() || dataMax == null || dataMin == null) {
 
             // No data consumed yet
             return false;
@@ -182,15 +183,16 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        for (Iterator<Entry<String, DataSet<TintedValueAndSetpoint>>> i = channel2ds.entrySet().iterator(); i.hasNext(); ) {
+        for (Iterator<Entry<String, DataSet<TintedValue>>> iv = channel2dsValue.entrySet().iterator(); iv.hasNext(); ) {
 
             // VT: FIXME: Implement depth ordering
 
-            Entry<String, DataSet<TintedValueAndSetpoint>> entry = i.next();
+            Entry<String, DataSet<TintedValue>> entry = iv.next();
             String channel = entry.getKey();
-            DataSet<TintedValueAndSetpoint> ds = entry.getValue();
+            DataSet<TintedValue> dsValues = entry.getValue();
+            DataSet<Double> dsSetpoints = channel2dsSetpoint.get(channel);
 
-            paintChart(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, ds);
+            paintChart(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, dsValues, dsSetpoints);
         }
     }
 
@@ -198,7 +200,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     protected abstract void paintChart(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
             double x_scale, long x_offset, double y_scale, double y_offset,
-            String channel, DataSet<TintedValueAndSetpoint> ds);
+            String channel, DataSet<TintedValue> dsValues, DataSet<Double> dsSetpoints);
 
     private void paintBackground(Graphics2D g2d, Dimension boundary, Insets insets) {
 
@@ -487,7 +489,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     }
 
     /**
-     * Calculate {@link #dataMin} and {@link #dataMax} based on all values available in {@link #channel2ds}.
+     * Calculate {@link #dataMin} and {@link #dataMax} based on all values available in {@link #channel2dsValue}.
      */
     private synchronized void recalculateVerticalLimits() {
 
@@ -496,15 +498,15 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         dataMin = null;
         dataMax = null;
 
-        for (Iterator<DataSet<TintedValueAndSetpoint>> i = channel2ds.values().iterator(); i.hasNext(); ) {
+        for (Iterator<DataSet<TintedValue>> i = channel2dsValue.values().iterator(); i.hasNext(); ) {
 
-            DataSet<TintedValueAndSetpoint> ds = i.next();
+            DataSet<TintedValue> ds = i.next();
 
-            for (Iterator<Entry<Long, TintedValueAndSetpoint>> i2 = ds.entryIterator(); i2.hasNext(); ) {
+            for (Iterator<Entry<Long, TintedValue>> i2 = ds.entryIterator(); i2.hasNext(); ) {
 
-                Entry<Long, TintedValueAndSetpoint> entry = i2.next();
+                Entry<Long, TintedValue> entry = i2.next();
                 Long timestamp = entry.getKey();
-                TintedValueAndSetpoint tv = entry.getValue();
+                TintedValue tv = entry.getValue();
 
                 if (dataMax == null || tv.value > dataMax) {
 
@@ -515,20 +517,6 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
                 if (dataMin == null || tv.value < dataMin) {
 
                     dataMin = tv.value;
-                    minmaxTime = timestamp;
-                }
-
-                // By this time, dataMin and dataMax are no longer nulls
-
-                if (tv.setpoint > dataMax) {
-
-                    dataMax = tv.setpoint;
-                    minmaxTime = timestamp;
-                }
-
-                if (tv.setpoint < dataMin) {
-
-                    dataMin = tv.setpoint;
                     minmaxTime = timestamp;
                 }
             }
