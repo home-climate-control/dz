@@ -31,6 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.joda.time.DateTimeZone;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.api.client.util.DateTime;
@@ -70,7 +71,10 @@ public class GCalScheduleUpdaterTest {
 
     /**
      * Test case to reproduce and fix {@link https://github.com/home-climate-control/dz/issues/6}.
+     *
+     * Also see {@link https://github.com/home-climate-control/dz/issues/42}.
      */
+    @Ignore
     @Test
     public void testDST() {
         
