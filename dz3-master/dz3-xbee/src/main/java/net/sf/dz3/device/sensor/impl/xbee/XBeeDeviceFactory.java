@@ -41,7 +41,7 @@ import com.rapplogic.xbee.util.ByteUtils;
 /**
  * Factory for sensors and actuators implemented with XBee modules.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
  */
 public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer> {
     

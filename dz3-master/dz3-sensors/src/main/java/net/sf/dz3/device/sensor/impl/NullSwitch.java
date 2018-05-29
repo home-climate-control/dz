@@ -2,7 +2,8 @@ package net.sf.dz3.device.sensor.impl;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.jukebox.jmx.JmxAware;
@@ -13,11 +14,11 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * 
  * Does absolutely nothing other than reflecting itself in the log and via JMX.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
  */
 public class NullSwitch implements Switch, JmxAware {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Switch address.

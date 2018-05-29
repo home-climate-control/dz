@@ -6,6 +6,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.actuator.HvacController;
 import net.sf.dz3.device.actuator.HvacDriver;
 import net.sf.dz3.device.model.HvacMode;
@@ -22,14 +24,12 @@ import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
 
-import org.apache.log4j.NDC;
-
 /**
  * Base class for HVAC hardware drivers.
  * 
  * Provides common functions - input sanity checks, mode switching, signal rebroadcasts, etc.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class HvacControllerImpl extends LogAware implements HvacController, JmxAware {
     
@@ -152,7 +152,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
      */
     public final synchronized void setMode(HvacMode mode) {
         
-        NDC.push("setMode");
+        ThreadContext.push("setMode");
         
         try {
         
@@ -172,7 +172,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
             stateChanged(); 
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -270,7 +270,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
     @Override
     public final void consume(DataSample<UnitSignal> signal) {
 
-        NDC.push("consume");
+        ThreadContext.push("consume");
         
         try {
             
@@ -304,7 +304,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
         } finally {
             
             setDemand(signal.sample.demand, signal.timestamp);
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -315,7 +315,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
      */
     private void check(DataSample<UnitSignal> signal) {
         
-        NDC.push("check");
+        ThreadContext.push("check");
 
         try {
 
@@ -330,7 +330,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     /**
@@ -411,7 +411,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
             int retry = 0;
             while (true) {
                 
-                NDC.push("run" + (retry > 0 ? "#retry-" + retry : ""));
+                ThreadContext.push("run" + (retry > 0 ? "#retry-" + retry : ""));
                 
                 try {
 
@@ -441,8 +441,8 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
                     }
 
                 } finally {
-                    NDC.pop();
-                    NDC.remove();
+                    ThreadContext.pop();
+                    ThreadContext.clearStack();
                 }
             }
         }

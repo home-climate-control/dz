@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 /**
  * 1-Wire&reg; network monitor.
@@ -38,7 +38,7 @@ import org.apache.log4j.NDC;
  * Note that DS2409 devices cannot be used as payload switches with this code,
  * only as branch couplers.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class OneWireNetworkMonitor extends ActiveService {
 
@@ -133,7 +133,7 @@ public class OneWireNetworkMonitor extends ActiveService {
     @Override
     protected void execute() throws Throwable {
         
-        NDC.push("execute");
+        ThreadContext.push("execute");
         
         try {
 
@@ -203,8 +203,8 @@ public class OneWireNetworkMonitor extends ActiveService {
             }
         
         } finally {
-            NDC.pop();
-            NDC.clear();
+            ThreadContext.pop();
+            ThreadContext.clearStack();
         }
     }
 
@@ -227,7 +227,7 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     private void browse() throws Throwable {
         
-        NDC.push("browse");
+        ThreadContext.push("browse");
         Marker m = new Marker("browse");
         
         lock.writeLock().lock();
@@ -244,7 +244,7 @@ public class OneWireNetworkMonitor extends ActiveService {
             Map<String, OneWireContainer> address2deviceLocal = new TreeMap<String, OneWireContainer>();
             Map<String, OWPath> address2pathLocal = new TreeMap<String, OWPath>();
 
-            NDC.push("browseProper");
+            ThreadContext.push("browseProper");
             Marker m2 = new Marker("browseProper");
 
             try {
@@ -260,10 +260,10 @@ public class OneWireNetworkMonitor extends ActiveService {
             } finally {
 
                 m2.close();
-                NDC.pop();
+                ThreadContext.pop();
             }
             
-            NDC.push("handleChanges");
+            ThreadContext.push("handleChanges");
             Marker m3 = new Marker("handleChanges");
             
             try {
@@ -277,7 +277,7 @@ public class OneWireNetworkMonitor extends ActiveService {
             } finally {
                 
                 m3.close();
-                NDC.pop();
+                ThreadContext.pop();
             }
 
             logger.debug("Rescan complete");
@@ -294,8 +294,8 @@ public class OneWireNetworkMonitor extends ActiveService {
             lock.writeLock().unlock();
 
             m.close();
-            NDC.pop();
-            NDC.clear();
+            ThreadContext.pop();
+            ThreadContext.clearStack();
         }
     }
 

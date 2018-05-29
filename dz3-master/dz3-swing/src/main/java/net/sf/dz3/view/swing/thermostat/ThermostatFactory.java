@@ -4,7 +4,7 @@ import java.util.Map;
 
 import javax.swing.JComponent;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.scheduler.Scheduler;
@@ -14,7 +14,7 @@ import net.sf.dz3.view.swing.ScreenDescriptor;
 /**
  * Factory to create a panel to represent a {@link ThermostatModel}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class ThermostatFactory extends ComponentFactory {
 
@@ -33,14 +33,14 @@ public class ThermostatFactory extends ComponentFactory {
     @Override
     public JComponent createComponent(Object source, Map<String, Object> context) {
         
-        NDC.push("createComponent");
+        ThreadContext.push("createComponent");
         
         try {
         
             return new ThermostatPanel((ThermostatModel) source, (ScreenDescriptor) context.get("screen descriptor"), (Scheduler) context.get("scheduler"));
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

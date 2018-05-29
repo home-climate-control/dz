@@ -6,19 +6,20 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import junit.framework.TestCase;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import junit.framework.TestCase;
 
 /**
  * Test cases for different delay handling strategies.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
  */
 public class DelayTest extends TestCase {
 
-    private final static Logger logger = Logger.getLogger(DelayTest.class);
+    private final static Logger logger = LogManager.getLogger(DelayTest.class);
     
     /**
      * Test case to find out whether {@link ScheduledExecutorService} is suitable for
@@ -28,7 +29,7 @@ public class DelayTest extends TestCase {
      */
     public void testScheduledExecutorService() throws InterruptedException {
         
-        NDC.push("testScheduledExecutorService");
+        ThreadContext.push("testScheduledExecutorService");
         
         try {
         
@@ -55,7 +56,7 @@ public class DelayTest extends TestCase {
             // the service implementation, but that's not what I'd like to do now.
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -99,7 +100,7 @@ public class DelayTest extends TestCase {
 
     public void testDelayQueue() throws InterruptedException {
         
-        NDC.push("testDelayQueue");
+        ThreadContext.push("testDelayQueue");
         
         try {
         
@@ -137,7 +138,7 @@ public class DelayTest extends TestCase {
             // shared variable state.
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

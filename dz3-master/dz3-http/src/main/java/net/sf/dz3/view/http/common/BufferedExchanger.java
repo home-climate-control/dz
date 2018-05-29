@@ -5,10 +5,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.view.http.v1.HttpConnector;
 import net.sf.jukebox.jmx.JmxAttribute;
-
-import org.apache.log4j.NDC;
 
 /**
  * Keeps sending data that appears in {@link HttpConnector#upstreamQueue} to the server
@@ -16,7 +16,7 @@ import org.apache.log4j.NDC;
  *
  * @param <DataBlock> Data type to send out to the server.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class BufferedExchanger<DataBlock> extends AbstractExchanger<DataBlock> {
 
@@ -60,7 +60,7 @@ public abstract class BufferedExchanger<DataBlock> extends AbstractExchanger<Dat
     @Override
     protected void execute() throws Throwable {
         
-        NDC.push("execute");
+        ThreadContext.push("execute");
         
         try {
 
@@ -86,7 +86,7 @@ public abstract class BufferedExchanger<DataBlock> extends AbstractExchanger<Dat
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

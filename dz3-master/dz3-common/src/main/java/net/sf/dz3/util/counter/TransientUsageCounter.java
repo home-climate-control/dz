@@ -2,15 +2,15 @@ package net.sf.dz3.util.counter;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.jukebox.datastream.signal.model.DataSource;
 import net.sf.jukebox.jmx.JmxDescriptor;
-
-import org.apache.log4j.NDC;
 
 /**
  * Usage counter proof of concept with no persistent state.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class TransientUsageCounter extends AbstractUsageCounter {
 
@@ -59,7 +59,7 @@ public class TransientUsageCounter extends AbstractUsageCounter {
     @Override
     protected void alert(long threshold, long current) {
         
-        NDC.push("alert@" + Integer.toHexString(hashCode()));
+        ThreadContext.push("alert@" + Integer.toHexString(hashCode()));
         
         try {
 
@@ -83,7 +83,7 @@ public class TransientUsageCounter extends AbstractUsageCounter {
             }
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -103,7 +103,7 @@ public class TransientUsageCounter extends AbstractUsageCounter {
     @Override
     protected void save() throws IOException {
 
-        NDC.push("save@" + Integer.toHexString(hashCode()));
+        ThreadContext.push("save@" + Integer.toHexString(hashCode()));
 
         try {
 
@@ -111,7 +111,7 @@ public class TransientUsageCounter extends AbstractUsageCounter {
             logger.info("Current usage: " + getUsageAbsolute() + "/" + getThreshold() + "(" + getUsageRelative() + ")");
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

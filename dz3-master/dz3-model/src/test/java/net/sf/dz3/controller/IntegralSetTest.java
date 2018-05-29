@@ -8,21 +8,22 @@ import net.sf.dz3.controller.pid.NaiveIntegralSet;
 import net.sf.dz3.controller.pid.SlidingIntegralSet;
 import net.sf.dz3.instrumentation.Marker;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 /**
- * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
+ * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class IntegralSetTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private final Random rg = new Random();
     private Semaphore startGate = new Semaphore(3);
@@ -88,7 +89,7 @@ public class IntegralSetTest extends TestCase {
      */
     public void testSame(int limit, long expirationInterval) {
 
-        NDC.push("testSame/I(" + limit + ", " + expirationInterval + ")");
+        ThreadContext.push("testSame/I(" + limit + ", " + expirationInterval + ")");
 
         Marker m = new Marker("testSame");
         int count = 0;
@@ -125,7 +126,7 @@ public class IntegralSetTest extends TestCase {
             }
         
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
 
     }
@@ -207,7 +208,7 @@ public class IntegralSetTest extends TestCase {
      */
     public void testSameSteps(String marker, long expirationInterval, List<Long> timestamps) {
 
-        NDC.push("testSameSteps/I-" + marker);
+        ThreadContext.push("testSameSteps/I-" + marker);
 
         try {
             
@@ -248,7 +249,7 @@ public class IntegralSetTest extends TestCase {
             
         } finally {
             
-            NDC.pop();
+            ThreadContext.pop();
         }
 
     }

@@ -23,13 +23,14 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.joda.time.DateTime;
 
 public class SchedulerTest extends TestCase {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
     
     public void testDeviationInstantiation() {
@@ -94,7 +95,7 @@ public class SchedulerTest extends TestCase {
      */
     public void testStart() {
         
-        NDC.push("testStart");
+        ThreadContext.push("testStart");
         
         try {
         
@@ -103,13 +104,13 @@ public class SchedulerTest extends TestCase {
             s.start();
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testFastStart() {
         
-        NDC.push("testFastStart");
+        ThreadContext.push("testFastStart");
         
         try {
 
@@ -137,13 +138,13 @@ public class SchedulerTest extends TestCase {
             throw new IllegalStateException(ex);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testStartStop() {
         
-        NDC.push("testStartStop");
+        ThreadContext.push("testStartStop");
         
         try {
             
@@ -154,7 +155,7 @@ public class SchedulerTest extends TestCase {
                 @Override
                 public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
                     
-                    NDC.push("update");
+                    ThreadContext.push("update");
                     
                     try {
                         
@@ -177,7 +178,7 @@ public class SchedulerTest extends TestCase {
                         return null;
                         
                     } finally {
-                        NDC.pop();
+                        ThreadContext.pop();
                     }
                 }
             };
@@ -207,13 +208,13 @@ public class SchedulerTest extends TestCase {
             throw new IllegalStateException(ex);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testIOException() {
         
-        NDC.push("testIOException");
+        ThreadContext.push("testIOException");
         
         try {
 
@@ -242,7 +243,7 @@ public class SchedulerTest extends TestCase {
             throw new IllegalStateException(ex);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -263,7 +264,7 @@ public class SchedulerTest extends TestCase {
     
     public void testExecute(int id, final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule) {
         
-        NDC.push("testExecute:" + id);
+        ThreadContext.push("testExecute:" + id);
         
         try {
             
@@ -292,7 +293,7 @@ public class SchedulerTest extends TestCase {
             throw new IllegalStateException(ex);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -460,7 +461,7 @@ public class SchedulerTest extends TestCase {
      */
     private Calendar getMondayStart() {
         
-        NDC.push("getMondayStart");
+        ThreadContext.push("getMondayStart");
         
         try {
         
@@ -479,20 +480,20 @@ public class SchedulerTest extends TestCase {
             return cal;
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
     public void testSchedule1() {
         
-        NDC.push("testSchedule1");
+        ThreadContext.push("testSchedule1");
         
         try {
         
             checkSchedule1(renderSchedule1(), new Scheduler());
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -545,14 +546,14 @@ public class SchedulerTest extends TestCase {
 
     public void testSchedule2() {
         
-        NDC.push("testSchedule2");
+        ThreadContext.push("testSchedule2");
         
         try {
         
             checkSchedule2(renderSchedule2(), new Scheduler());
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -615,14 +616,14 @@ public class SchedulerTest extends TestCase {
      */
     public void testSchedule3() {
         
-        NDC.push("testSchedule3");
+        ThreadContext.push("testSchedule3");
         
         try {
         
             checkSchedule3(renderSchedule3(), new Scheduler());
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -676,14 +677,14 @@ public class SchedulerTest extends TestCase {
 
     public void testSchedule4() {
         
-        NDC.push("testSchedule4");
+        ThreadContext.push("testSchedule4");
         
         try {
         
             checkSchedule4(renderSchedule4(), new Scheduler());
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -739,14 +740,14 @@ public class SchedulerTest extends TestCase {
 
     public void testSchedule5() {
         
-        NDC.push("testSchedule5");
+        ThreadContext.push("testSchedule5");
         
         try {
         
             checkSchedule5(renderSchedule5(), new Scheduler());
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -798,7 +799,7 @@ public class SchedulerTest extends TestCase {
 
     public void testDeviation() {
         
-        NDC.push("testDeviation");
+        ThreadContext.push("testDeviation");
         
         try {
             
@@ -833,7 +834,7 @@ public class SchedulerTest extends TestCase {
             throw new IllegalStateException(ex);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -948,7 +949,7 @@ public class SchedulerTest extends TestCase {
 
     private static class NullThermostat implements Thermostat {
 
-        private final Logger logger = Logger.getLogger(getClass());
+        private final Logger logger = LogManager.getLogger(getClass());
 
         private final String name;
         private Double setpoint;

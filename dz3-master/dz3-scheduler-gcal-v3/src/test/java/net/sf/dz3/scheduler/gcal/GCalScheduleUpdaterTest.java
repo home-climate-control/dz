@@ -27,10 +27,10 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.joda.time.DateTimeZone;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.google.api.client.util.DateTime;
@@ -39,11 +39,11 @@ import junit.framework.AssertionFailedError;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class GCalScheduleUpdaterTest {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     @Test
     public void testAuth() throws IOException {
@@ -74,13 +74,13 @@ public class GCalScheduleUpdaterTest {
     @Test
     public void testDST() {
         
-        // VT: NOTE: This test will try to spawn the system browser, or pring a link you need to visit to get the callback.
+        // VT: NOTE: This test will try to spawn the system browser, or print a link you need to visit to get the callback.
         // You will need to visit the link on the same box, the callback URL is pointing to 'localhost'.
         // Make sure you have a browser that can deal with the page (Lynx, as of 2.8.8dev.12, can't deal with the buttons on the callback page.
         
         // In the worst case, just @Ignore this test. 
         
-        NDC.push("testDST");
+        ThreadContext.push("testDST");
         Marker m = new Marker("testDST");
         
         try {
@@ -123,7 +123,7 @@ public class GCalScheduleUpdaterTest {
         } finally {
             
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -191,7 +191,7 @@ public class GCalScheduleUpdaterTest {
     @Test
     public void testBigOffset() {
         
-        NDC.push("testBigOffset");
+        ThreadContext.push("testBigOffset");
         
         try {
         
@@ -237,7 +237,7 @@ public class GCalScheduleUpdaterTest {
             fail(t.getMessage());
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

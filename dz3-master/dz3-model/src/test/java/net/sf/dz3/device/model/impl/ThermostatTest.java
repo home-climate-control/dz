@@ -1,5 +1,9 @@
 package net.sf.dz3.device.model.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.SimplePidController;
@@ -12,17 +16,14 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 /**
  * Test cases for {@link ThermostatModel}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2018
  */
 public class ThermostatTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * Make sure that the thermostat refuses null data sample.
@@ -110,7 +111,7 @@ public class ThermostatTest extends TestCase {
     @SuppressWarnings("unchecked")
     public void testDataSequence() {
 
-        NDC.push("testDataSequence");
+        ThreadContext.push("testDataSequence");
 
         try {
 
@@ -169,7 +170,7 @@ public class ThermostatTest extends TestCase {
             assertFalse(ts.getSignal().calling);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

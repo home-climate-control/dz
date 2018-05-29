@@ -2,17 +2,17 @@ package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.jukebox.jmx.JmxDescriptor;
-
-import org.apache.log4j.NDC;
 
 /**
  * Damper controlled by a switch.
  * 
  * Most existing HVAC dampers are like this, controlled by 24VAC.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class SwitchDamper extends AbstractDamper {
 
@@ -86,7 +86,7 @@ public class SwitchDamper extends AbstractDamper {
     @Override
     public void moveDamper(double position) {
 	
-	NDC.push("moveDamper");
+	ThreadContext.push("moveDamper");
 
 	try {
 
@@ -105,7 +105,7 @@ public class SwitchDamper extends AbstractDamper {
 	    logger.fatal("Failed to set the damper state", t);
 
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
 

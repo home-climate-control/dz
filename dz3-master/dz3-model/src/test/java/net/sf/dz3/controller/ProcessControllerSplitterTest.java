@@ -1,6 +1,7 @@
 package net.sf.dz3.controller;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.PidControllerSignalSplitter;
@@ -11,7 +12,7 @@ import junit.framework.TestCase;
 
 public class ProcessControllerSplitterTest extends TestCase {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     public void testSplitterHysteresis() {
         

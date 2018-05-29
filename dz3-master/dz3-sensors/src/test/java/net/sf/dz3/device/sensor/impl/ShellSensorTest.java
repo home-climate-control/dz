@@ -4,11 +4,12 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 import net.sf.jukebox.datastream.signal.model.DataSample;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 /**
  * Shell sensor tests.
@@ -18,11 +19,11 @@ import org.apache.log4j.NDC;
  * to make them work on your system - or feel free to make tests generic enough so they can be
  * reused without modification.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
  */
 public class ShellSensorTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * @return {@code false} if OS is not within a supported list (just Linux for now).
@@ -63,7 +64,7 @@ public class ShellSensorTest extends TestCase {
      */
     public void testGood() throws IOException {
         
-        NDC.push("testGood");
+        ThreadContext.push("testGood");
         
         try {
             
@@ -81,7 +82,7 @@ public class ShellSensorTest extends TestCase {
             assertEquals(5.5, sample.sample);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -90,7 +91,7 @@ public class ShellSensorTest extends TestCase {
      */
     public void testBad() throws IOException {
         
-        NDC.push("testBad");
+        ThreadContext.push("testBad");
         
         try {
 
@@ -106,7 +107,7 @@ public class ShellSensorTest extends TestCase {
             assertTrue(sample.isError());
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -117,7 +118,7 @@ public class ShellSensorTest extends TestCase {
      */
     public void testPipeRaw() throws IOException, InterruptedException {
         
-        NDC.push("testPipeRaw");
+        ThreadContext.push("testPipeRaw");
         
         try {
             
@@ -143,7 +144,7 @@ public class ShellSensorTest extends TestCase {
             assertEquals(0, rc);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -152,7 +153,7 @@ public class ShellSensorTest extends TestCase {
      */
     public void testPipe() throws IOException {
         
-        NDC.push("testPipe");
+        ThreadContext.push("testPipe");
         
         try {
 
@@ -175,7 +176,7 @@ public class ShellSensorTest extends TestCase {
             fail("Unexpected exception");
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

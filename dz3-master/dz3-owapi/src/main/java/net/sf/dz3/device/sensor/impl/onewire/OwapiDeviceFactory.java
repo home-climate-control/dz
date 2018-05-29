@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.factory.AbstractDeviceFactory;
 import net.sf.dz3.device.factory.DataMap;
 import net.sf.dz3.device.factory.SingleSwitchProxy;
@@ -25,8 +27,6 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.NDC;
-
 import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
@@ -40,7 +40,7 @@ import com.dalsemi.onewire.utils.OWPath;
 /**
  * 1-Wire device factory.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceContainer> implements OneWireNetworkEventListener {
 
@@ -103,7 +103,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     public OwapiDeviceFactory(String port, String speed) {
 
-        NDC.push("DeviceFactory");
+        ThreadContext.push("DeviceFactory");
 
         try {
 
@@ -138,7 +138,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             logger.info("Speed: " + speedInt2speedName.get(adapterSpeed));
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
 
     }
@@ -169,7 +169,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     @Override
     public synchronized Switch getSwitch(String compositeAddress) {
         
-        NDC.push("getSwitch");
+        ThreadContext.push("getSwitch");
         
         try {
             
@@ -191,14 +191,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             return proxy.getSwitch(switchAddress);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
     @Override
     protected void startup() throws Throwable {
 
-        NDC.push("startup");
+        ThreadContext.push("startup");
 
         try {
 
@@ -271,8 +271,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             logger.info("started");
 
         } finally {
-            NDC.pop();
-            NDC.clear();
+            ThreadContext.pop();
+            ThreadContext.clearStack();
         }
     }
     
@@ -312,7 +312,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     private Set<String> getPortsAvailable() {
 
-        NDC.push("getPortsAvailable");
+        ThreadContext.push("getPortsAvailable");
 
         try {
 
@@ -345,14 +345,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             return portsAvailable;
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @Override
     protected void shutdown() throws Throwable {
         
-        NDC.push("shutdown");
+        ThreadContext.push("shutdown");
         
         try {
 
@@ -361,8 +361,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             logger.info("Stopped");
         
         } finally {
-            NDC.pop();
-            NDC.clear();
+            ThreadContext.pop();
+            ThreadContext.clearStack();
         }
     }
 
@@ -374,7 +374,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     @Override
     protected final void execute() throws Throwable {
         
-        NDC.push("execute");
+        ThreadContext.push("execute");
         
         try {
 
@@ -404,14 +404,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             }
         
         } finally {
-            NDC.pop();
-            NDC.clear();
+            ThreadContext.pop();
+            ThreadContext.clearStack();
         }
     }
 
     private void poll() throws InterruptedException, OneWireException {
         
-        NDC.push("poll");
+        ThreadContext.push("poll");
         Marker m = new Marker("poll");
         
         try {
@@ -449,13 +449,13 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         } finally {
 
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     private void processPath(OWPath path, DataMap dataMap) throws OneWireException {
         
-        NDC.push("processPath");
+        ThreadContext.push("processPath");
         Marker m = new Marker("processPath");
         
         logger.debug("Processing " + path);
@@ -516,14 +516,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             lock.writeLock().unlock();
 
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @SuppressWarnings("deprecation")
     private void processAddress(String address, Set<DeviceContainer> dcSet) throws OneWireException {
 
-        NDC.push("processAddress");
+        ThreadContext.push("processAddress");
 
         try {
 
@@ -612,7 +612,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -863,7 +863,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     @Override
     public void networkDeparture(OneWireNetworkEvent e) {
 
-        NDC.push("networkDeparture");
+        ThreadContext.push("networkDeparture");
 
         try {
 
@@ -927,7 +927,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -941,7 +941,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     private boolean networkDeparture(final ContainerMap address2dcForPath, final String address) {
         
-        NDC.push("networkDeparture");
+        ThreadContext.push("networkDeparture");
         
         try {
 
@@ -991,7 +991,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             return true;
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -1067,7 +1067,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     @SuppressWarnings("deprecation")
     final double getTemperature(final TemperatureContainer tc) throws OneWireException, OneWireIOException {
         
-        NDC.push("getTemperature");
+        ThreadContext.push("getTemperature");
         Marker m = new Marker("getTemperature");
         
         try {
@@ -1121,7 +1121,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         } finally {
             
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -1156,7 +1156,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     private void stateChanged(final DeviceContainer dc, final double value) {
 
-        NDC.push("stateChanged");
+        ThreadContext.push("stateChanged");
 
         try {
 
@@ -1168,7 +1168,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             ((AbstractSensorContainer) dc).stateChanged(value, null);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -1180,7 +1180,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     private void stateChanged(final DeviceContainer dc, final Throwable t) {
 
-        NDC.push("stateChanged");
+        ThreadContext.push("stateChanged");
 
         try {
 
@@ -1199,7 +1199,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -1306,21 +1306,21 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         @Override
         public void networkArrival(OneWireNetworkEvent e) {
             
-            NDC.push("networkArrival");
+            ThreadContext.push("networkArrival");
             
             try {
                 
                 // Nothing to do here, the arrival will be handled asynchronously by getSensorSignal() shortly
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
 
         @Override
         public void networkDeparture(OneWireNetworkEvent e) {
 
-            NDC.push("networkDeparture");
+            ThreadContext.push("networkDeparture");
             
             try {
                 
@@ -1343,14 +1343,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 }
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
 
         @Override
         public void networkFault(OneWireNetworkEvent e, String message) {
             
-            NDC.push("networkFault");
+            ThreadContext.push("networkFault");
             
             try {
                 
@@ -1361,7 +1361,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                         null, new OneWireIOException(message)));
 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
     }
@@ -1376,7 +1376,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         @Override
         public synchronized boolean getState() throws IOException {
             
-            NDC.push("getState");
+            ThreadContext.push("getState");
             
             try {
                 
@@ -1389,14 +1389,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 return sc.read(Integer.parseInt(address.channel));
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
 
         @Override
         public synchronized void setState(boolean state) throws IOException {
 
-            NDC.push("setState");
+            ThreadContext.push("setState");
             
             try {
                 
@@ -1409,7 +1409,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 sc.write(Integer.parseInt(address.channel), state);
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
     }

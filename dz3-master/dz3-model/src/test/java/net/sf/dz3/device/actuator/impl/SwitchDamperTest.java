@@ -2,7 +2,8 @@ package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
@@ -12,11 +13,11 @@ import junit.framework.TestCase;
 /**
  * Test case for {@link SwitchDamper}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class SwitchDamperTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Test whether the {@link SwitchDamper} is properly parked.

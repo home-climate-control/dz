@@ -11,8 +11,9 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.NoSuchPortException;
@@ -25,11 +26,11 @@ import com.dalsemi.onewire.utils.Convert;
 
 /**
  * @author Original implementation &copy; Dallas Semiconductor
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class SerialService implements SerialPortEventListener {
 
-    protected final static Logger logger = Logger.getLogger(OneWireAccessProvider.class);
+    protected final static Logger logger = LogManager.getLogger(OneWireAccessProvider.class);
 
     /**
      * The serial port name of this object (e.g. COM1, /dev/ttyS0).
@@ -156,7 +157,7 @@ public class SerialService implements SerialPortEventListener {
 
     public static SerialService getSerialService(String portName) {
         
-        NDC.push("getSerialService");
+        ThreadContext.push("getSerialService");
         
         try {
 
@@ -178,7 +179,7 @@ public class SerialService implements SerialPortEventListener {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -237,7 +238,7 @@ public class SerialService implements SerialPortEventListener {
 
     public synchronized void openPort(SerialPortEventListener spel) throws IOException {
         
-        NDC.push("openPort");
+        ThreadContext.push("openPort");
 
         try {
 
@@ -314,7 +315,7 @@ public class SerialService implements SerialPortEventListener {
                 throw new IOException("Could not open port (" + portName + ")", ex);
             }
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -382,7 +383,7 @@ public class SerialService implements SerialPortEventListener {
 
     public synchronized void setBaudRate(int baudRate) throws IOException {
 
-        NDC.push("setBaudRate(" + baudRate + ")");
+        ThreadContext.push("setBaudRate(" + baudRate + ")");
         
         try {
             if(!isPortOpen())
@@ -401,7 +402,7 @@ public class SerialService implements SerialPortEventListener {
                 throw new IOException("Failed to set baud rate: ", ex);
             }
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -465,7 +466,7 @@ public class SerialService implements SerialPortEventListener {
      */
     private synchronized void closePortByThreadID(Thread t) {
         
-        NDC.push("closePortByThreadID");
+        ThreadContext.push("closePortByThreadID");
 
         try {
 
@@ -490,7 +491,7 @@ public class SerialService implements SerialPortEventListener {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -532,7 +533,7 @@ public class SerialService implements SerialPortEventListener {
 
     public synchronized int readWithTimeout(byte[] buffer, int offset, int length) throws IOException {
         
-        NDC.push("readWithTimeout");
+        ThreadContext.push("readWithTimeout");
         
         try {
 
@@ -556,13 +557,13 @@ public class SerialService implements SerialPortEventListener {
             return count;
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     private int readWithTimeoutByteBang(byte[] buffer, int offset, int length, long timeout) throws IOException {
         
-        NDC.push("readWithTimeoutByteBang");
+        ThreadContext.push("readWithTimeoutByteBang");
         
         int count = 0;
         try {
@@ -596,7 +597,7 @@ public class SerialService implements SerialPortEventListener {
 
         } finally {
             logger.debug("returning " + count);
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -657,7 +658,7 @@ public class SerialService implements SerialPortEventListener {
      */
     public synchronized void write(int data) throws IOException {
         
-        NDC.push("write");
+        ThreadContext.push("write");
 
         if(!isPortOpen()) {
             throw new IOException(null, new IllegalStateException("Port Not Open"));
@@ -684,7 +685,7 @@ public class SerialService implements SerialPortEventListener {
 
     public synchronized void write(byte[] data, int offset, int length) throws IOException {
         
-        NDC.push("write");
+        ThreadContext.push("write");
         
         try {
 
@@ -712,7 +713,7 @@ public class SerialService implements SerialPortEventListener {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -735,7 +736,7 @@ public class SerialService implements SerialPortEventListener {
 
     public synchronized void write(char[] data, int offset, int length) throws IOException {
         
-        NDC.push("write");
+        ThreadContext.push("write");
         
         try {
 
@@ -753,7 +754,7 @@ public class SerialService implements SerialPortEventListener {
             write(tempArray, 0, length);
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

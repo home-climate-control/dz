@@ -5,6 +5,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.model.Economizer;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.device.sensor.Switch;
@@ -12,18 +16,15 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 /**
  * Extremely simplified implementation of a consumer for a {@link ZoneController}, {@link Economizer},
  * and other sources that might have a simple actuator.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class SingleSwitchDevice implements DataSink<Double> {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private final BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<Runnable>();
     private final ThreadPoolExecutor executor;
@@ -71,7 +72,7 @@ public class SingleSwitchDevice implements DataSink<Double> {
     @Override
     public synchronized void consume(DataSample<Double> signal) {
         
-        NDC.push("consume");
+        ThreadContext.push("consume");
         
         try {
             
@@ -94,7 +95,7 @@ public class SingleSwitchDevice implements DataSink<Double> {
             executor.execute(new Command(newState));
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
         
     }
@@ -110,7 +111,7 @@ public class SingleSwitchDevice implements DataSink<Double> {
      */
     public synchronized void powerOff() {
 
-        NDC.push("powerOff");
+        ThreadContext.push("powerOff");
         
         try {
 
@@ -120,7 +121,7 @@ public class SingleSwitchDevice implements DataSink<Double> {
             enabled = false;
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -138,7 +139,7 @@ public class SingleSwitchDevice implements DataSink<Double> {
             int retry = 0;
             while (true) {
                 
-                NDC.push("run" + (retry > 0 ? "#retry-" + retry : ""));
+                ThreadContext.push("run" + (retry > 0 ? "#retry-" + retry : ""));
                 
                 try {
 
@@ -169,8 +170,8 @@ public class SingleSwitchDevice implements DataSink<Double> {
                     }
 
                 } finally {
-                    NDC.pop();
-                    NDC.remove();
+                    ThreadContext.pop();
+                    ThreadContext.clearStack();
                 }
             }
         }

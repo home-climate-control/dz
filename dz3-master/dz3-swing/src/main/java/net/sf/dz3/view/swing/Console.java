@@ -18,6 +18,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.WindowConstants;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.model.DamperController;
 import net.sf.dz3.device.model.ThermostatController;
 import net.sf.dz3.device.model.Unit;
@@ -31,8 +33,6 @@ import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
 import net.sf.dz3.view.swing.thermostat.ZonePanel;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
-
-import org.apache.log4j.NDC;
 
 /**
  * Entry point into the user interface implemented with Swing.
@@ -120,7 +120,7 @@ public class Console extends Connector<JComponent> {
     
     protected void activate2() {
         
-        NDC.push("activate2");
+        ThreadContext.push("activate2");
         
         try {
         
@@ -130,7 +130,7 @@ public class Console extends Connector<JComponent> {
             mainFrame.setVisible(true);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -142,7 +142,7 @@ public class Console extends Connector<JComponent> {
      */
     private void findScheduler() {
         
-        NDC.push("findScheduler");
+        ThreadContext.push("findScheduler");
         
         try {
         
@@ -161,7 +161,7 @@ public class Console extends Connector<JComponent> {
             logger.warn("No scheduler was given, is this intentional?");
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -171,7 +171,7 @@ public class Console extends Connector<JComponent> {
      */
     private void createFrame() {
         
-        NDC.push("createFrame");
+        ThreadContext.push("createFrame");
         
         try {
             
@@ -206,7 +206,7 @@ public class Console extends Connector<JComponent> {
             display.addKeyListener(zonePanel);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -249,7 +249,7 @@ public class Console extends Connector<JComponent> {
      */
     public synchronized void setVisible(boolean visible) {
         
-        NDC.push("setVisible");
+        ThreadContext.push("setVisible");
         
         try {
 
@@ -274,7 +274,7 @@ public class Console extends Connector<JComponent> {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -293,7 +293,7 @@ public class Console extends Connector<JComponent> {
     
     private void setScreenSize(ScreenDescriptor screenDescriptor) {
         
-        NDC.push("setScreenSize");
+        ThreadContext.push("setScreenSize");
         
         try {
             
@@ -304,7 +304,7 @@ public class Console extends Connector<JComponent> {
             mainFrame.invalidate();
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -346,7 +346,7 @@ public class Console extends Connector<JComponent> {
         @Override
         public void keyPressed(KeyEvent e) {
             
-            NDC.push("keyPressed");
+            ThreadContext.push("keyPressed");
             
             try {
                 
@@ -386,7 +386,7 @@ public class Console extends Connector<JComponent> {
                 }
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
 

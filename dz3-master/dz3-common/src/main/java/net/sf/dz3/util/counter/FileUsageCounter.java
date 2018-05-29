@@ -1,6 +1,5 @@
 package net.sf.dz3.util.counter;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -9,14 +8,14 @@ import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
 
-import net.sf.jukebox.datastream.signal.model.DataSource;
+import org.apache.logging.log4j.ThreadContext;
 
-import org.apache.log4j.NDC;
+import net.sf.jukebox.datastream.signal.model.DataSource;
 
 /**
  * Usage counter storing the state into a file.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class FileUsageCounter extends TransientUsageCounter {
     
@@ -43,7 +42,7 @@ public class FileUsageCounter extends TransientUsageCounter {
     @Override
     protected CounterState load() throws IOException {
         
-        NDC.push("load");
+        ThreadContext.push("load");
         
         try {
             
@@ -141,7 +140,7 @@ public class FileUsageCounter extends TransientUsageCounter {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -152,7 +151,7 @@ public class FileUsageCounter extends TransientUsageCounter {
     @Override
     protected synchronized void save() throws IOException {
 
-        NDC.push("save@" + Integer.toHexString(hashCode()));
+        ThreadContext.push("save@" + Integer.toHexString(hashCode()));
 
         try {
             
@@ -174,7 +173,7 @@ public class FileUsageCounter extends TransientUsageCounter {
             pw.close();
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

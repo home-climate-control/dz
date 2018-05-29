@@ -4,16 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.NDC;
-
 /**
  * Get a reading returned by a shell command.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class ShellSensor extends AbstractAnalogSensor {
 
@@ -52,7 +52,7 @@ public class ShellSensor extends AbstractAnalogSensor {
     @Override
     public DataSample<Double> getSensorSignal() throws IOException {
         
-        NDC.push("getSensorTemperature#" + Integer.toHexString(hashCode()));
+        ThreadContext.push("getSensorTemperature#" + Integer.toHexString(hashCode()));
 
         BufferedReader br = null;
         
@@ -117,7 +117,7 @@ public class ShellSensor extends AbstractAnalogSensor {
                 }
             }
             
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -132,7 +132,7 @@ public class ShellSensor extends AbstractAnalogSensor {
      */
     private String read(BufferedReader br) throws IOException {
         
-        NDC.push("read");
+        ThreadContext.push("read");
         
         try {
 
@@ -158,35 +158,35 @@ public class ShellSensor extends AbstractAnalogSensor {
             return sb.toString();
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @Override
     protected void startup() throws Throwable {
 
-        NDC.push("startup");
+        ThreadContext.push("startup");
         
         try {
         
             logger.info("starting '" + command + "'");
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @Override
     protected void shutdown() throws Throwable {
         
-        NDC.push("shutdown");
+        ThreadContext.push("shutdown");
         
         try {
         
             logger.info("stopping '" + command + "'");
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

@@ -28,7 +28,7 @@ import com.rapplogic.xbee.api.XBeeAddress64;
  * 
  * @see ftp://ftp1.digi.com/support/documentation/90000976_G.pdf, I/O sample rate (IR command).
  *   
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2014
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
  */
 public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor {
     

@@ -30,8 +30,8 @@ package com.dalsemi.onewire.adapter;
 import java.io.IOException;
 import java.util.Enumeration;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
 
 import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
@@ -165,7 +165,7 @@ import com.dalsemi.onewire.utils.Address;
  * @see OneWireContainer
  * @version 0.10, 24 Aug 2001
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class USerialAdapter extends DSPortAdapter {
 
@@ -256,7 +256,7 @@ public class USerialAdapter extends DSPortAdapter {
     @Deprecated
     public static void cleanUpByThread(Thread thread) {
 
-        Logger.getLogger(USerialAdapter.class).debug("CleanUpByThread called: Thread=" + thread);
+        LogManager.getLogger(USerialAdapter.class).debug("CleanUpByThread called: Thread=" + thread);
         SerialService.cleanUpByThread(thread);
     }
 
@@ -2068,7 +2068,7 @@ public class USerialAdapter extends DSPortAdapter {
     @SuppressWarnings("static-access")
     private void setStreamingSpeed(int operation) throws OneWireIOException {
 
-        NDC.push("setStreamingSpeed(" + operation + ")");
+        ThreadContext.push("setStreamingSpeed(" + operation + ")");
 
         try {
 
@@ -2180,7 +2180,7 @@ public class USerialAdapter extends DSPortAdapter {
             logger.error("Failed to change baud of DS2480");
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -2231,7 +2231,7 @@ public class USerialAdapter extends DSPortAdapter {
     @SuppressWarnings("static-access")
     private synchronized void uMasterReset() {
 
-        NDC.push("uMasterReset");
+        ThreadContext.push("uMasterReset");
 
         try {
 
@@ -2262,7 +2262,7 @@ public class USerialAdapter extends DSPortAdapter {
                 logger.error("Reset failed", ex);
             }
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -2273,7 +2273,7 @@ public class USerialAdapter extends DSPortAdapter {
     @SuppressWarnings("static-access")
     private synchronized void uPowerReset() {
 
-        NDC.push("uPowerReset");
+        ThreadContext.push("uPowerReset");
 
         try {
 
@@ -2308,7 +2308,7 @@ public class USerialAdapter extends DSPortAdapter {
                 logger.error("Reset failed", ex);
             }
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -2478,7 +2478,7 @@ public class USerialAdapter extends DSPortAdapter {
         }
 
         // provided debug on standard out
-        Logger.getLogger(USerialAdapter.class).debug("getMaxBaud from properties: " + maxBaud);
+        LogManager.getLogger(USerialAdapter.class).debug("getMaxBaud from properties: " + maxBaud);
 
         // if not valid then use fastest
         if ((maxBaud != 115200) && (maxBaud != 57600) && (maxBaud != 19200) && (maxBaud != 9600))

@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.instrumentation.Marker;
@@ -14,11 +15,11 @@ import junit.framework.TestCase;
 /**
  * Test for {@link OwapiDeviceFactory#getSwitch(String)} and underlying {@link Switch} implementation.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
  */
 public class SwitchTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * @return {@code false} if OS is not within a supported list (just Linux for now).
@@ -77,7 +78,7 @@ public class SwitchTest extends TestCase {
     
     public void testGetGood() throws IOException, InterruptedException {
         
-        NDC.push("testGetGood");
+        ThreadContext.push("testGetGood");
         
         try {
         
@@ -101,7 +102,7 @@ public class SwitchTest extends TestCase {
             }
 
             df.getLock().writeLock().lock();
-            NDC.push("locked");
+            ThreadContext.push("locked");
             try {
             
                 Switch s00 = df.getSwitch("5F00000020AB3012:0");
@@ -120,7 +121,7 @@ public class SwitchTest extends TestCase {
 
             } finally {
                 df.getLock().writeLock().unlock();
-                NDC.pop();
+                ThreadContext.pop();
             }
         
             logger.info("stopping");
@@ -130,13 +131,13 @@ public class SwitchTest extends TestCase {
             logger.info("done");
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
     public void testSetGood() throws IOException, InterruptedException {
         
-        NDC.push("testSetGood");
+        ThreadContext.push("testSetGood");
         
         try {
         
@@ -164,7 +165,7 @@ public class SwitchTest extends TestCase {
             df.getLock().writeLock().lock();
             
             m.checkpoint("got lock");
-            NDC.push("locked");
+            ThreadContext.push("locked");
             try {
             
                 Switch s00 = df.getSwitch("5F00000020AB3012:0");
@@ -205,7 +206,7 @@ public class SwitchTest extends TestCase {
                 df.getLock().writeLock().unlock();
                 
                 m.close();
-                NDC.pop();
+                ThreadContext.pop();
             }
             
             logger.info("stopping");
@@ -215,7 +216,7 @@ public class SwitchTest extends TestCase {
             logger.info("done");
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

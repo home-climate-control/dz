@@ -12,6 +12,8 @@ import java.util.TreeMap;
 
 import javax.net.ssl.SSLException;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.TemperatureSensor;
 import net.sf.dz3.device.sensor.impl.AbstractAnalogSensor;
 import net.sf.dz3.device.sensor.impl.tcp.TcpConnectionSignature;
@@ -22,8 +24,6 @@ import net.sf.jukebox.sem.SemaphoreGroup;
 import net.sf.jukebox.service.ActiveService;
 import net.sf.jukebox.service.PassiveService;
 
-import org.apache.log4j.NDC;
-
 /**
  * TCP temperature sensor.
  *
@@ -32,8 +32,7 @@ import org.apache.log4j.NDC;
  * Connects to DAC over TCP and reads temperature values, then distributes
  * them to listeners.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2004
- * @version $Id: TcpTemperatureSensor.java,v 1.10 2007-03-01 21:34:26 vtt Exp $
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class TcpSensorFactory extends PassiveService {
 
@@ -104,7 +103,7 @@ public class TcpSensorFactory extends PassiveService {
     @Override
     protected void shutdown() throws Throwable {
         
-        NDC.push("shutdown");
+        ThreadContext.push("shutdown");
         
         try {
             
@@ -124,7 +123,7 @@ public class TcpSensorFactory extends PassiveService {
             logger.info("All readers stopped");
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -294,7 +293,7 @@ public class TcpSensorFactory extends PassiveService {
         @Override
         protected void shutdown() throws Throwable {
             
-            NDC.push("shutdown");
+            ThreadContext.push("shutdown");
             
             try {
                 
@@ -303,14 +302,14 @@ public class TcpSensorFactory extends PassiveService {
                 }
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
 
         }
 
         private boolean readLine() throws IOException {
             
-            NDC.push("readLine");
+            ThreadContext.push("readLine");
             
             try {
                 
@@ -364,7 +363,7 @@ public class TcpSensorFactory extends PassiveService {
                 return true;
 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
 

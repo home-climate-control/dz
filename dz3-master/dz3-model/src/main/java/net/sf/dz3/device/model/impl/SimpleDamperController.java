@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;
 import net.sf.jukebox.jmx.JmxDescriptor;
-
-import org.apache.log4j.NDC;
 
 /**
  * Simple damper controller, supports bang/bang dampers only.
@@ -18,7 +18,7 @@ import org.apache.log4j.NDC;
  * If bang/bang dampers is all you have, there's no sense to go beyond this.
  * If you have modulating dampers, use {@link BalancingDamperController} instead.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class SimpleDamperController extends AbstractDamperController {
 
@@ -42,7 +42,7 @@ public class SimpleDamperController extends AbstractDamperController {
     @Override
     protected Map<Damper, Double> compute() {
         
-        NDC.push("compute");
+        ThreadContext.push("compute");
         
         try {
             
@@ -78,7 +78,7 @@ public class SimpleDamperController extends AbstractDamperController {
             return damperMap;
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

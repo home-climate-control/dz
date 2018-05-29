@@ -8,6 +8,10 @@ import java.awt.Rectangle;
 
 import javax.swing.JPanel;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.Thermostat;
@@ -18,19 +22,16 @@ import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 /**
  * Condensed zone status indicator. {@link ZonePanel} displays these for all zones in a bar on top.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
 
     private static final long serialVersionUID = 4736300051405383448L;
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * How many pixels are there between zone cells.
@@ -68,7 +69,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
     @Override
     public void consume(DataSample<ThermostatSignal> signal) {
         
-        NDC.push("consume@" + Integer.toHexString(hashCode()));
+        ThreadContext.push("consume@" + Integer.toHexString(hashCode()));
         
         try {
         
@@ -79,7 +80,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
             repaint();
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

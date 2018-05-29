@@ -31,7 +31,8 @@ package com.dalsemi.onewire.utils;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
@@ -80,7 +81,7 @@ import com.dalsemi.onewire.container.SwitchContainer;
  */
 public class OWPath implements Comparable<OWPath> {
 
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
     //--------
     //-------- Variables
     //--------

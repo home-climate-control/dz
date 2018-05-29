@@ -6,8 +6,9 @@ import java.util.SortedMap;
 import java.util.Stack;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.joda.time.DateTime;
 
 import net.sf.dz3.device.model.ZoneStatus;
@@ -17,11 +18,11 @@ import net.sf.dz3.device.model.ZoneStatus;
  * 
  * Exists as a separate entity to enable unit testing.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class PeriodMatcher {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Match a period against time given.
@@ -33,7 +34,7 @@ public class PeriodMatcher {
      */
     public Period match(SortedMap<Period, ZoneStatus> zoneSchedule, DateTime time) {
         
-        NDC.push("match");
+        ThreadContext.push("match");
         
         try {
         
@@ -57,7 +58,7 @@ public class PeriodMatcher {
             return stack.pop();
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -71,7 +72,7 @@ public class PeriodMatcher {
      */
     private SortedMap<Period, ZoneStatus> getToday(SortedMap<Period, ZoneStatus> zoneSchedule, DateTime date) {
         
-        NDC.push("getToday");
+        ThreadContext.push("getToday");
         
         try {
         
@@ -94,7 +95,7 @@ public class PeriodMatcher {
             return result;
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

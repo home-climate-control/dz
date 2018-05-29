@@ -8,6 +8,8 @@ import java.util.TreeMap;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.DeviceContainer;
 import net.sf.dz3.device.sensor.DeviceFactory;
@@ -25,8 +27,6 @@ import net.sf.jukebox.datastream.signal.model.DataSource;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.service.ActiveService;
 
-import org.apache.log4j.NDC;
-
 /**
  * An entity capable of resolving a device by address.
  * 
@@ -37,7 +37,7 @@ import org.apache.log4j.NDC;
  * 
  * @param <SwitchContainer> Implementation class of the hardware dependent switch container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
  */
 public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveService implements DeviceFactory {
 
@@ -110,14 +110,14 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
     @Override
     public final synchronized AnalogSensor getTemperatureSensor(String address) {
         
-        NDC.push("getTemperatureSensor");
+        ThreadContext.push("getTemperatureSensor");
         
         try {
             
             return getSensor(address, SensorType.TEMPERATURE);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -133,14 +133,14 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
     @Override
     public final synchronized AnalogSensor getHumiditySensor(String address) {
         
-        NDC.push("getHumiditySensor");
+        ThreadContext.push("getHumiditySensor");
         
         try {
             
             return getSensor(address, SensorType.HUMIDITY);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -148,7 +148,7 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
     
     protected AnalogSensor getSensor(String address, SensorType type) {
         
-        NDC.push("getSensor");
+        ThreadContext.push("getSensor");
         
         try {
             
@@ -183,7 +183,7 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
             return createSensorProxy(address, type);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -282,7 +282,7 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
         @Override
         public final synchronized DataSample<Double> getSensorSignal() throws IOException {
             
-            NDC.push("getSensorSignal@" + Integer.toHexString(hashCode()));
+            ThreadContext.push("getSensorSignal@" + Integer.toHexString(hashCode()));
             
             try {
                 
@@ -337,7 +337,7 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
                         null, new IllegalStateException("Address is present, but no " + type.description + " sensors found - check configuration"));
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
             
         }
@@ -360,7 +360,7 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
                 throw new IllegalStateException("Negative poll interval (" + getPollInterval() + ")???");
             }
             
-            NDC.push("execute@" + Integer.toHexString(hashCode()) + "@" + getAddress());
+            ThreadContext.push("execute@" + Integer.toHexString(hashCode()) + "@" + getAddress());
 
             try {
 
@@ -388,7 +388,7 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
         @Override
         public final synchronized void consume(DataSample<Double> signal) {
             
-            NDC.push("consume@" + Integer.toHexString(hashCode()));
+            ThreadContext.push("consume@" + Integer.toHexString(hashCode()));
             
             try {
             
@@ -403,7 +403,7 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
                 broadcast(signal);
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
     }

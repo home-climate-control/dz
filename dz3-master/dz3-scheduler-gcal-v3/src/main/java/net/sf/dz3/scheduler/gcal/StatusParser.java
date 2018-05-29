@@ -4,8 +4,9 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.model.ZoneStatus;
 import net.sf.dz3.device.model.impl.ZoneStatusImpl;
@@ -17,16 +18,16 @@ import net.sf.dz3.device.model.impl.ZoneStatusImpl;
  * this will also cause it to bloat quite a bit and become too heavy. It is possible to offload
  * parsing on an online component, but whether this is necessary is yet to be seen. 
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class StatusParser {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final NumberFormat numberFormat = NumberFormat.getInstance();
 
     public ZoneStatus parse(String arguments) {
         
-        NDC.push("parse");
+        ThreadContext.push("parse");
         
         arguments = arguments.toLowerCase();
         
@@ -110,7 +111,7 @@ public class StatusParser {
             return new ZoneStatusImpl(setpoint, dumpPriority, enabled, voting);
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

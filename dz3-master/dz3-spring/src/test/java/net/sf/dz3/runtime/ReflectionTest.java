@@ -4,14 +4,15 @@ import java.lang.reflect.Method;
 import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.AnalogSensor;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
 public class ReflectionTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final NativeSensorFactory nativeFactory = new NativeSensorFactory();
 
     private static final String PROBLEM_METHOD = "getSensor";

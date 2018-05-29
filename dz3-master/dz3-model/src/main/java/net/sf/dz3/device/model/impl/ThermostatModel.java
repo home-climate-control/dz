@@ -1,5 +1,9 @@
 package net.sf.dz3.device.model.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.controller.HysteresisController;
 import net.sf.dz3.controller.ProcessController;
 import net.sf.dz3.controller.pid.AbstractPidController;
@@ -18,9 +22,6 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 /**
  * The virtual thermostat implementation.
  *
@@ -28,7 +29,7 @@ import org.apache.log4j.NDC;
  */
 public final class ThermostatModel implements Thermostat, ThermostatController {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Lowest acceptable setpoint.
@@ -261,7 +262,7 @@ public final class ThermostatModel implements Thermostat, ThermostatController {
     @Override
     public synchronized void consume(DataSample<Double> sample) {
 
-        NDC.push("consume");
+        ThreadContext.push("consume");
 
         try {
             
@@ -304,7 +305,7 @@ public final class ThermostatModel implements Thermostat, ThermostatController {
             stateChanged();
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -345,7 +346,7 @@ public final class ThermostatModel implements Thermostat, ThermostatController {
     @Override
     public void setSetpoint(double setpoint) {
         
-        NDC.push("setSetpoint");
+        ThreadContext.push("setSetpoint");
 	
         try {
             
@@ -360,7 +361,7 @@ public final class ThermostatModel implements Thermostat, ThermostatController {
             controller.setSetpoint(setpoint);
 	    
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
 	
     }
@@ -500,7 +501,7 @@ public final class ThermostatModel implements Thermostat, ThermostatController {
     @Override
     public void set(ZoneStatus status) {
         
-        NDC.push("set");
+        ThreadContext.push("set");
         
         try {
             
@@ -516,7 +517,7 @@ public final class ThermostatModel implements Thermostat, ThermostatController {
             setDumpPriority(status.getDumpPriority());
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

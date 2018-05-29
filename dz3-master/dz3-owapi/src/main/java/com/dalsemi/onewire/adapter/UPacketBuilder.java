@@ -32,7 +32,8 @@ package com.dalsemi.onewire.adapter;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.utils.Address;
@@ -43,11 +44,11 @@ import com.dalsemi.onewire.utils.Address;
  *
  *  @version    0.00, 28 Aug 2000
  *  @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 class UPacketBuilder {
 
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     //--------
     //-------- Finals

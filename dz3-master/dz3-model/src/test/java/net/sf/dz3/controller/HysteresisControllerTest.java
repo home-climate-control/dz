@@ -2,15 +2,16 @@ package net.sf.dz3.controller;
 
 import java.util.Random;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import junit.framework.TestCase;
 
 public class HysteresisControllerTest extends TestCase {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
 
     @SuppressWarnings("unchecked")
@@ -46,7 +47,7 @@ public class HysteresisControllerTest extends TestCase {
      */
     public void testTimestamp() {
 	
-	NDC.push("testTimestamp");
+	ThreadContext.push("testTimestamp");
 	
 	try {
 	    
@@ -64,7 +65,7 @@ public class HysteresisControllerTest extends TestCase {
 	    assertEquals(timestamp, signal.timestamp);
 	
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
     

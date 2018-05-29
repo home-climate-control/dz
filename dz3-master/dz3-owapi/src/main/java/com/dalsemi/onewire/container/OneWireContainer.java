@@ -33,7 +33,8 @@ import com.dalsemi.onewire.utils.Address;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.dalsemi.onewire.adapter.*;
 import com.dalsemi.onewire.OneWireException;
@@ -92,11 +93,11 @@ import com.dalsemi.onewire.OneWireException;
  *
  *  @version    0.00, 28 Aug 2000
  *  @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class OneWireContainer {
 
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     //--------
     //-------- Variables

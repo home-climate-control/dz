@@ -5,6 +5,10 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.SimplePidController;
@@ -14,16 +18,13 @@ import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.impl.NullSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 /**
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
  */
 public class SimpleZoneControllerTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * Test the simplest possible combination: {@link SimpleZoneController} with
@@ -32,7 +33,7 @@ public class SimpleZoneControllerTest extends TestCase {
      */
     public void test1H() throws InterruptedException {
 
-        NDC.push("test1H");
+        ThreadContext.push("test1H");
 
         try {
 
@@ -129,7 +130,7 @@ public class SimpleZoneControllerTest extends TestCase {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -141,7 +142,7 @@ public class SimpleZoneControllerTest extends TestCase {
      */
     public void testColdStartNotCalling() {
         
-        NDC.push("testColdStart");
+        ThreadContext.push("testColdStart");
         
         try {
         
@@ -176,7 +177,7 @@ public class SimpleZoneControllerTest extends TestCase {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -188,7 +189,7 @@ public class SimpleZoneControllerTest extends TestCase {
      */
     public void testColdStartCalling() {
         
-        NDC.push("testColdStart");
+        ThreadContext.push("testColdStart");
         
         try {
         
@@ -223,7 +224,7 @@ public class SimpleZoneControllerTest extends TestCase {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

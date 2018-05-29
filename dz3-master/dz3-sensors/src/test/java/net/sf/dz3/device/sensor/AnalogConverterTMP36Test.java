@@ -1,20 +1,21 @@
 package net.sf.dz3.device.sensor;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.impl.AnalogConverterTMP36;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 public class AnalogConverterTMP36Test extends TestCase {
     
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     private final AnalogConverter c = new AnalogConverterTMP36();
 
     public void testTMP36AnalogReference() {
 
-        NDC.push("TMP36");
+        ThreadContext.push("TMP36");
         
         try {
             
@@ -23,7 +24,7 @@ public class AnalogConverterTMP36Test extends TestCase {
             printC(5000d);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

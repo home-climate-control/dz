@@ -1,5 +1,7 @@
 package net.sf.dz3.device.model.impl;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.util.digest.MessageDigestCache;
@@ -9,8 +11,6 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
 
-import org.apache.log4j.NDC;
-
 /**
  * Receives a complex {@link ThermostatSignal} signal and converts it into several simpler
  * {@link DataSample} signals suitable for consumption by {@link DataLogger}.
@@ -18,7 +18,7 @@ import org.apache.log4j.NDC;
  * Add this object as a listener to the thermostat, and add the data logger as a listener to this object,
  * to record the data stream.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
  */
 public class ThermostatSignalSplitter implements DataSink<ThermostatSignal>, DataSource<Double> {
 
@@ -42,7 +42,7 @@ public class ThermostatSignalSplitter implements DataSink<ThermostatSignal>, Dat
     
     public synchronized void consume(DataSample<ThermostatSignal> signal) {
         
-        NDC.push("consume");
+        ThreadContext.push("consume");
         
         try {
          
@@ -82,7 +82,7 @@ public class ThermostatSignalSplitter implements DataSink<ThermostatSignal>, Dat
             dataBroadcaster.broadcast(signal.sample.demand);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

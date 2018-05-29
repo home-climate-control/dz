@@ -5,14 +5,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
 import net.sf.jukebox.logger.LogAware;
-
-import org.apache.log4j.NDC;
 
 /**
  * Analog signal adder.
@@ -21,7 +21,7 @@ import org.apache.log4j.NDC;
  * 
  * @param <Source> Defines the type of the signal source.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2018
  */
 public class SignalAdder extends LogAware implements DataSink<Double>, DataSource<Double> {
 
@@ -105,7 +105,7 @@ public class SignalAdder extends LogAware implements DataSink<Double>, DataSourc
     @Override
     public void consume(DataSample<Double> signal) {
 
-        NDC.push("consume");
+        ThreadContext.push("consume");
 
         try {
 
@@ -151,7 +151,7 @@ public class SignalAdder extends LogAware implements DataSink<Double>, DataSourc
             dataBroadcaster.broadcast(new DataSample<Double>(signal.timestamp, sourceName, signature, integral, null));
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

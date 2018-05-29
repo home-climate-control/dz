@@ -2,6 +2,8 @@ package net.sf.dz3.device.sensor.impl;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.conf.ConfigurableProperty;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
@@ -10,8 +12,6 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.service.ActiveService;
 
-import org.apache.log4j.NDC;
-
 /**
  * An abstract analog sensor.
  * 
@@ -19,7 +19,7 @@ import org.apache.log4j.NDC;
  * 
  * Supports the common configuration and listener notification features.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractAnalogSensor extends ActiveService implements AnalogSensor {
 
@@ -114,7 +114,7 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
             throw new IllegalStateException("Negative poll interval (" + getPollInterval() + ")???");
         }
 
-        NDC.push("execute@" + getAddress());
+        ThreadContext.push("execute@" + getAddress());
 
         try {
 
@@ -137,8 +137,8 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
         } catch (Throwable t) {
             logger.fatal("Unexpected problem, shutting down:", t);
         } finally {
-            NDC.pop();
-            NDC.remove();
+            ThreadContext.pop();
+            ThreadContext.clearStack();
         }
     }
 

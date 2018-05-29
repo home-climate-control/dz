@@ -19,8 +19,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.controller.ProcessController;
 import net.sf.dz3.controller.ProcessControllerStatus;
@@ -59,7 +60,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     private static final long serialVersionUID = 3420150515187693627L;
     private static final DecimalFormat numberFormat = new DecimalFormat("#0.0;-#0.0");
 
-    private Logger logger = Logger.getLogger(getClass());
+    private Logger logger = LogManager.getLogger(getClass());
 
     private final ThermostatModel source;
     private final Scheduler scheduler;
@@ -285,7 +286,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     @Override
     public void keyPressed(KeyEvent e) {
 
-        NDC.push("keyPressed");
+        ThreadContext.push("keyPressed");
 
         try {
 
@@ -439,7 +440,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -457,7 +458,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private void activateSchedule() {
 
-        NDC.push("activateSchedule");
+        ThreadContext.push("activateSchedule");
 
         try {
 
@@ -492,7 +493,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             source.set(status);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

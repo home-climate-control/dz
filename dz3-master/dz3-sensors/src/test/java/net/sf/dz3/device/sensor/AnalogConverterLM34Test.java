@@ -1,14 +1,16 @@
 package net.sf.dz3.device.sensor;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 import net.sf.dz3.device.sensor.impl.AnalogConverterLM34;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 
 public class AnalogConverterLM34Test extends TestCase {
     
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     private final AnalogConverter c = new AnalogConverterLM34();
 
@@ -31,7 +33,7 @@ public class AnalogConverterLM34Test extends TestCase {
 
     public void testLM34AnalogReference() {
         
-        NDC.push("LM34");
+        ThreadContext.push("LM34");
         
         try {
         
@@ -40,7 +42,7 @@ public class AnalogConverterLM34Test extends TestCase {
             printC(5000d);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

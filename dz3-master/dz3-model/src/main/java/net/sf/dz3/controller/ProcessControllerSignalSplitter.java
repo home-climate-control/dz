@@ -1,12 +1,12 @@
 package net.sf.dz3.controller;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
-
-import org.apache.log4j.NDC;
 
 public class ProcessControllerSignalSplitter implements DataSink<ProcessControllerStatus>, DataSource<Double> {
 
@@ -34,7 +34,7 @@ public class ProcessControllerSignalSplitter implements DataSink<ProcessControll
      */
     public void consume(DataSample<ProcessControllerStatus> signal) {
         
-        NDC.push("consume");
+        ThreadContext.push("consume");
         
         try {
             
@@ -46,7 +46,7 @@ public class ProcessControllerSignalSplitter implements DataSink<ProcessControll
             consumeSignal(signal.sample.signal);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

@@ -27,7 +27,8 @@
 
 package com.dalsemi.onewire.container;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.OneWireIOException;
@@ -38,11 +39,11 @@ import com.dalsemi.onewire.utils.CRC8;
  *
  *  @version    0.00, 30 Oct 2001
  *  @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 class MemoryBankSBM implements MemoryBank {
 
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
     
    //--------
    //--------Static Final Variables

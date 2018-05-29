@@ -8,13 +8,13 @@ import java.util.GregorianCalendar;
 
 import net.sf.dz3.device.model.ZoneStatus;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 import org.joda.time.DateTime;
 
 /**
  * Defines a time period when a given {@link ZoneStatus} is to be activated.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class Period implements Comparable<Period> {
     
@@ -105,7 +105,7 @@ public class Period implements Comparable<Period> {
     @SuppressWarnings("deprecation")
     private long parseTime(String time) {
         
-        NDC.push("parse(" + time + ")");
+        ThreadContext.push("parse(" + time + ")");
         
         try {
 
@@ -151,7 +151,7 @@ public class Period implements Comparable<Period> {
             throw new IllegalArgumentException(sb.toString());
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

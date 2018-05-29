@@ -3,12 +3,13 @@ package net.sf.dz3.device.sensor.impl.onewire;
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.DzSwitchContainer;
 import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.instrumentation.Marker;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.SwitchContainer;
@@ -18,7 +19,7 @@ import com.dalsemi.onewire.container.SwitchContainer;
  */
 public class OneWireSwitchContainer extends OneWireDeviceContainer implements DzSwitchContainer {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final OwapiDeviceFactory factory;
 
     /**
@@ -115,7 +116,7 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
         SwitchContainer sc = (SwitchContainer) container;
         String address = container.getAddressAsString();
         
-        NDC.push("read(" + address + ":" + channel + ")");
+        ThreadContext.push("read(" + address + ":" + channel + ")");
         Marker m = new Marker("read(" + address + ":" + channel + ")");
 
         try {
@@ -155,7 +156,7 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
             }
 
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -177,7 +178,7 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
         SwitchContainer sc = (SwitchContainer) container;
         String address = container.getAddressAsString();
 
-        NDC.push("write(" + address + ":" + channel + ", " + value + ")");
+        ThreadContext.push("write(" + address + ":" + channel + ", " + value + ")");
         Marker m = new Marker("write(" + address + ":" + channel + ", " + value + ")");
 
         try {
@@ -239,7 +240,7 @@ public class OneWireSwitchContainer extends OneWireDeviceContainer implements Dz
             }
 
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

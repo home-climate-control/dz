@@ -1,12 +1,13 @@
 package net.sf.dz3.controller;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 /**
  * An abstract process controller.
@@ -17,7 +18,7 @@ import org.apache.log4j.NDC;
  */
 public abstract class AbstractProcessController implements ProcessController {
     
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Process controller signal broadcaster.
@@ -156,7 +157,7 @@ public abstract class AbstractProcessController implements ProcessController {
      */
     private DataSample<Double> wrapCompute() {
 
-	NDC.push("wrapCompute");
+	ThreadContext.push("wrapCompute");
 
         try {
 
@@ -168,7 +169,7 @@ public abstract class AbstractProcessController implements ProcessController {
             return lastKnownSignal;
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

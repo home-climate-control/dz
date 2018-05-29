@@ -3,7 +3,7 @@ package net.sf.dz3.view.http.v2;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 import org.joda.time.DateTime;
 
 import net.sf.dz3.controller.pid.AbstractPidController;
@@ -23,7 +23,7 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
  * Keeps {@link #consume(DataSample) receiving} data notifications and
  * {@link #emit(ZoneSnapshot) stuffing} them into the queue. 
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2013
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 
 public class ThermostatRenderer extends QueueFeeder<ZoneSnapshot> implements DataSink<ThermostatSignal>, JsonRenderer<DataSample<ThermostatSignal>> {
@@ -98,12 +98,12 @@ public class ThermostatRenderer extends QueueFeeder<ZoneSnapshot> implements Dat
         
         if (sample == null) {
             
-            Logger.getLogger(getClass()).debug("current=null");
+            LogManager.getLogger(getClass()).debug("current=null");
             currentTemperature = 0;
             
         } else if ( sample.isError() ) {
             
-            Logger.getLogger(getClass()).debug("current=error");
+            LogManager.getLogger(getClass()).debug("current=error");
             currentTemperature = 0;
         
         } else {

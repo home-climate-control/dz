@@ -1,6 +1,6 @@
 package net.sf.dz3.runtime;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
@@ -12,7 +12,7 @@ public class NativeSensorFactory implements SensorFactory<NativeSensorDescriptor
     @Override
     public AnalogSensor getSensor(final NativeSensorDescriptor descriptor) {
 
-        Logger.getLogger(getClass()).info("getSensor(" + descriptor + ") invoked");
+        LogManager.getLogger(getClass()).info("getSensor(" + descriptor + ") invoked");
 
         return new NativeSensor(descriptor);
     }

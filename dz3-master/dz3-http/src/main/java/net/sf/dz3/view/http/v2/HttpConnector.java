@@ -12,7 +12,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -41,7 +41,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * too much request data transfer and processing overhead, this connector caches data from all sources
  * and then submits them in bigger packets more rarely. 
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class HttpConnector extends Connector<JsonRenderer>{
 
@@ -172,7 +172,7 @@ public class HttpConnector extends Connector<JsonRenderer>{
         @Override
         protected final void exchange(List<ZoneSnapshot> buffer) {
             
-            NDC.push("exchange");
+            ThreadContext.push("exchange");
             
             try {
 
@@ -214,13 +214,13 @@ public class HttpConnector extends Connector<JsonRenderer>{
                 logger.error("Buffer exchange failed", t);
             
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
 
         private void processResponse(String rsp) {
 
-            NDC.push("processResponse");
+            ThreadContext.push("processResponse");
             
             try {
                 
@@ -241,13 +241,13 @@ public class HttpConnector extends Connector<JsonRenderer>{
                 }
             
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
 
         private void executeCommand(ZoneCommand command) {
             
-            NDC.push("executeCommand");
+            ThreadContext.push("executeCommand");
             
             try {
                 
@@ -276,7 +276,7 @@ public class HttpConnector extends Connector<JsonRenderer>{
                 }
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
     }

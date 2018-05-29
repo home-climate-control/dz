@@ -2,7 +2,7 @@ package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.sensor.Switch;
@@ -11,7 +11,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 /**
  * Single stage heatpump driver, energize to heat.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class HvacDriverHeatpump extends AbstractHvacDriver {
     
@@ -144,7 +144,7 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
     @Override
     public synchronized void powerOff() {
 
-        NDC.push("powerOff");
+        ThreadContext.push("powerOff");
         
         try {
 
@@ -168,7 +168,7 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
             
             logger.fatal("Shutdown failure", ex);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

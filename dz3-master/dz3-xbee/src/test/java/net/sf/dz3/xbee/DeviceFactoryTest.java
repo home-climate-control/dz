@@ -14,8 +14,9 @@ import net.sf.dz3.device.sensor.impl.xbee.XBeeDeviceFactory;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.junit.Ignore;
 
 import com.rapplogic.xbee.api.AtCommandResponse;
@@ -30,12 +31,12 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
     
     private static final String serialPort = "/dev/ttyUSB0";
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
     
     public void testSensor() throws XBeeException {
     
-        NDC.push("testSensor");
+        ThreadContext.push("testSensor");
         
         XBee coordinator = new XBee();
         
@@ -148,13 +149,13 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
             fail("Unexpected exception");
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
     public void testStartStop() throws InterruptedException {
         
-        NDC.push("testStartStop");
+        ThreadContext.push("testStartStop");
         
         try {
         
@@ -199,7 +200,7 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
             fail("Unexpected exception");
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

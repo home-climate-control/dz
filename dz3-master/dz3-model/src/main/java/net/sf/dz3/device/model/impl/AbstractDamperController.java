@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.DamperController;
@@ -26,7 +26,7 @@ import net.sf.jukebox.sem.SemaphoreGroup;
 /**
  * Base logic for the damper controller.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractDamperController extends LogAware implements DamperController, JmxAware {
 
@@ -130,7 +130,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      */
     public synchronized void stateChanged(Thermostat source, ThermostatSignal signal) {
 
-        NDC.push("signalChanged");
+        ThreadContext.push("signalChanged");
 
         try {
             
@@ -147,14 +147,14 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
             sync();
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
 
     }
 
     public synchronized void consume(DataSample<UnitSignal> signal) {
         
-        NDC.push("consume");
+        ThreadContext.push("consume");
         
         try {
             
@@ -200,13 +200,13 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
         } finally {
             this.hvacSignal = signal;
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
     private void park() {
 
-        NDC.push("park");
+        ThreadContext.push("park");
         
         try {
             
@@ -225,7 +225,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
             shuffle(damperMap);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -236,7 +236,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      */
     private void shuffle(Map<Damper, Double> damperMap) {
         
-        NDC.push("shuffle");
+        ThreadContext.push("shuffle");
         
         try {
             
@@ -269,7 +269,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
             lastMap.clear();
             lastMap.putAll(damperMap);
             
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -336,7 +336,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
     @Override
     public final synchronized void powerOff() {
         
-        NDC.push("powerOff");
+        ThreadContext.push("powerOff");
         
         try {
 
@@ -377,7 +377,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

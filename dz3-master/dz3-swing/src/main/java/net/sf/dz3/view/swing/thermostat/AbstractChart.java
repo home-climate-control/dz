@@ -18,7 +18,8 @@ import java.util.Map.Entry;
 
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.sf.dz3.controller.DataSet;
 import net.sf.jukebox.datastream.signal.model.DataSink;
@@ -26,7 +27,7 @@ import net.sf.jukebox.util.Interval;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2016
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractChart extends JPanel implements DataSink<TintedValue> {
 
@@ -35,7 +36,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     private static final Stroke strokeSingle = new BasicStroke();
     private static final Stroke strokeDouble = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10.0f, null, 0.0f);
 
-    protected transient final Logger logger = Logger.getLogger(getClass());
+    protected transient final Logger logger = LogManager.getLogger(getClass());
 
     protected transient final SortedMap<String, DataSet<TintedValue>> channel2ds = new TreeMap<String, DataSet<TintedValue>>();
 

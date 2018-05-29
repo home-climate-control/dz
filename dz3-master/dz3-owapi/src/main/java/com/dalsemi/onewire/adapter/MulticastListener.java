@@ -29,7 +29,7 @@ package com.dalsemi.onewire.adapter;
 import java.io.*;
 import java.net.*;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Generic Mulitcast broadcast listener.  Listens for a specific message and,
@@ -172,7 +172,7 @@ public class MulticastListener implements Runnable
             try {
                 Thread.sleep(10);
             } catch (Exception ex) {
-                Logger.getLogger(getClass()).warn("Oops", ex);
+                LogManager.getLogger(getClass()).warn("Oops", ex);
             }
     }
 }

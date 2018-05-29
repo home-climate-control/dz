@@ -8,21 +8,22 @@ import net.sf.dz3.controller.pid.NaiveDifferentialSet;
 import net.sf.dz3.controller.pid.SlidingDifferentialSet;
 import net.sf.dz3.instrumentation.Marker;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 /**
- * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
+ * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class DifferentialSetTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private final Random rg = new Random();
     private Semaphore startGate = new Semaphore(3);
@@ -88,7 +89,7 @@ public class DifferentialSetTest extends TestCase {
      */
     public void testSame(int limit, long expirationInterval) {
 
-        NDC.push("testSame/D(" + limit + ", " + expirationInterval + ")");
+        ThreadContext.push("testSame/D(" + limit + ", " + expirationInterval + ")");
 
         Marker m = new Marker("testSame");
         int count = 0;
@@ -125,7 +126,7 @@ public class DifferentialSetTest extends TestCase {
             }
         
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
 
     }
@@ -207,7 +208,7 @@ public class DifferentialSetTest extends TestCase {
      */
     public void testSameSteps(String marker, long expirationInterval, List<Long> timestamps) {
 
-        NDC.push("testSameSteps/D-" + marker);
+        ThreadContext.push("testSameSteps/D-" + marker);
 
         try {
             
@@ -220,7 +221,7 @@ public class DifferentialSetTest extends TestCase {
 
             for (Iterator<Long> i = timestamps.iterator(); i.hasNext(); ) {
                 
-                NDC.push("" + count++);
+                ThreadContext.push("" + count++);
                 
                 try {
 
@@ -242,7 +243,7 @@ public class DifferentialSetTest extends TestCase {
                     assertEquals("2015/slide differ", i2015, iFast, 0.0001);
 
                 } finally {
-                    NDC.pop();
+                    ThreadContext.pop();
                 }
             }
             
@@ -256,7 +257,7 @@ public class DifferentialSetTest extends TestCase {
             
         } finally {
             
-            NDC.pop();
+            ThreadContext.pop();
         }
 
     }

@@ -1,6 +1,6 @@
 package net.sf.dz3.device.sensor.impl;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.AnalogFilter;
@@ -11,7 +11,7 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 /**
  * Test cases for {@link MedianFilter}.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012-2018
  */
 public class MedianFilterTest extends TestCase {
     
@@ -65,7 +65,7 @@ public class MedianFilterTest extends TestCase {
 
     private void test(int depth, double[] sequence, double[] match) {
         
-        NDC.push("test(" + depth + ")");
+        ThreadContext.push("test(" + depth + ")");
         
         try {
 
@@ -83,7 +83,7 @@ public class MedianFilterTest extends TestCase {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

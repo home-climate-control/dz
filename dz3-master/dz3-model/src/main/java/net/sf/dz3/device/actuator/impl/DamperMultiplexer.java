@@ -5,13 +5,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.sem.ACT;
 import net.sf.jukebox.sem.SemaphoreGroup;
 import net.sf.jukebox.service.Messenger;
-
-import org.apache.log4j.NDC;
 
 /**
  * Damper multiplexer.
@@ -19,7 +19,7 @@ import org.apache.log4j.NDC;
  * Allows to control several physical dampers via one logical one. Each of controlled dampers
  * can be calibrated individually.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class DamperMultiplexer extends AbstractDamper {
 
@@ -111,7 +111,7 @@ public class DamperMultiplexer extends AbstractDamper {
         @Override
         protected final Object execute() throws Throwable {
 
-            NDC.push("execute");
+            ThreadContext.push("execute");
             
             try {
                 
@@ -133,7 +133,7 @@ public class DamperMultiplexer extends AbstractDamper {
                 logger.error(getName() + ": failed to park at " + getParkPosition(), t);
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
 
             return null;

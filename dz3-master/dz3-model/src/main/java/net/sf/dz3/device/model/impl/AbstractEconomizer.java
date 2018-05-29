@@ -1,5 +1,8 @@
 package net.sf.dz3.device.model.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.device.model.Economizer;
 import net.sf.dz3.device.sensor.AnalogSensor;
@@ -10,18 +13,16 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
 
-import org.apache.log4j.Logger;
-
 /**
  * Base class for {@link Economizer} implementations.
  *
  * Handles common inputs and outputs.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractEconomizer implements Economizer, JmxAware {
 
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
     private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
     
     protected final String name;
