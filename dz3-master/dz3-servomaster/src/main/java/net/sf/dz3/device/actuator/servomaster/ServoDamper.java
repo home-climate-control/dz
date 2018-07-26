@@ -2,7 +2,7 @@ package net.sf.dz3.device.actuator.servomaster;
 
 import java.io.IOException;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.impl.AbstractDamper;
 import net.sf.jukebox.jmx.JmxDescriptor;
@@ -17,7 +17,7 @@ import net.sf.servomaster.device.model.transition.CrawlTransitionController;
 /**
  * Damper controlled by a RC Servo.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class ServoDamper extends AbstractDamper {
 
@@ -83,7 +83,7 @@ public class ServoDamper extends AbstractDamper {
         
         super(name);
 
-        NDC.push("ServoDamper()");
+        ThreadContext.push("ServoDamper()");
         
         try {
             
@@ -134,14 +134,14 @@ public class ServoDamper extends AbstractDamper {
             this.servo = servo;
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @Override
     public void moveDamper(double throttle) throws IOException {
 
-        NDC.push("moveDamper");
+        ThreadContext.push("moveDamper");
         
         try {
 
@@ -154,7 +154,7 @@ public class ServoDamper extends AbstractDamper {
 
         } finally {
 
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -205,7 +205,7 @@ public class ServoDamper extends AbstractDamper {
         @Override
         protected final Object execute() throws Throwable {
 
-            NDC.push("execute");
+            ThreadContext.push("execute");
 
             try {
 
@@ -218,7 +218,7 @@ public class ServoDamper extends AbstractDamper {
                 logger.error(servo.getName() + ": failed to park at " + getParkPosition(), t);
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
 
             return null;
