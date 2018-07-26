@@ -111,7 +111,7 @@ public class ServoDamper extends AbstractDamper {
             if (System.getProperty(getClass().getName() + ".crawl") != null) {
 
                 logger.info("Will be crawling");
-                servo.attach(new CrawlTransitionController());
+                servo.attach(new CrawlTransitionController(), false);
             }
 
             if (limitCalibration != null) {
@@ -209,7 +209,7 @@ public class ServoDamper extends AbstractDamper {
 
             try {
 
-                servo.setPosition(getParkPosition()).waitFor();
+                servo.setPosition(getParkPosition()).get();
 
                 logger.info(servo.getName() + ": parked at " + getParkPosition());
 
