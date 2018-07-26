@@ -2,20 +2,25 @@ package net.sf.dz3.device.actuator.servomaster;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.servomaster.device.model.ServoController;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
+/**
+ *
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ */
 public class DamperFactory {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final ServoController theController;
 
     public DamperFactory(String className, String portName) {
         
-        NDC.push("DamperFactory()");
+        ThreadContext.push("DamperFactory()");
         
         try {
             
@@ -55,7 +60,7 @@ public class DamperFactory {
             throw new IllegalArgumentException("Don't know how to handle", ex);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
