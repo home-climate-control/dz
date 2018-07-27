@@ -1,6 +1,7 @@
 package net.sf.dz3.xbee;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
@@ -8,7 +9,7 @@ import net.sf.dz3.device.sensor.impl.xbee.Parser;
 
 public class AddressParserTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     public void testParser() {
         

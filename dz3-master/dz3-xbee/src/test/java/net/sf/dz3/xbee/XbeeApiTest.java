@@ -3,8 +3,9 @@ package net.sf.dz3.xbee;
 import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.impl.xbee.Parser;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
@@ -18,7 +19,7 @@ import com.rapplogic.xbee.util.ByteUtils;
 
 public class XbeeApiTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     public void testNothing() {
         
@@ -50,7 +51,7 @@ public class XbeeApiTest extends TestCase {
                 0xDC
         };
 
-        NDC.push("testPacketEscape");
+        ThreadContext.push("testPacketEscape");
 
         try {
 
@@ -80,13 +81,13 @@ public class XbeeApiTest extends TestCase {
 
         } finally {
 
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void xtestXbee() throws XBeeException {
 
-        NDC.push("testXBee");
+        ThreadContext.push("testXBee");
 
         try {
 
@@ -131,7 +132,7 @@ public class XbeeApiTest extends TestCase {
 //                  XBeeAddress16 addr16 = new XBeeAddress16(0x48, 0xFE);
 //                  XBeeAddress64 addr64 = new XBeeAddress64(0x00, 0x13, 0xa2, 0x00, 0x40, 0x62, 0xac, 0x98);
 
-                    NDC.push("405D8027:" + offset + " write 5");
+                    ThreadContext.push("405D8027:" + offset + " write 5");
 
                     
                     try {
@@ -154,10 +155,10 @@ public class XbeeApiTest extends TestCase {
                         }
                         
                     } finally {
-                        NDC.pop();
+                        ThreadContext.pop();
                     }
 
-                    NDC.push("405D8027:" + offset + " read");
+                    ThreadContext.push("405D8027:" + offset + " read");
 
                     try {
 
@@ -177,10 +178,10 @@ public class XbeeApiTest extends TestCase {
                         }
                         
                     } finally {
-                        NDC.pop();
+                        ThreadContext.pop();
                     }
 
-                    NDC.push("405D8027:" + offset + " write 4");
+                    ThreadContext.push("405D8027:" + offset + " write 4");
 
                     try {
                         
@@ -202,7 +203,7 @@ public class XbeeApiTest extends TestCase {
                         }
                         
                     } finally {
-                        NDC.pop();
+                        ThreadContext.pop();
                     }
 
                 }
@@ -216,13 +217,13 @@ public class XbeeApiTest extends TestCase {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
     private void AT(XBee xbee, String command) {
         
-        NDC.push("AT");
+        ThreadContext.push("AT");
         
         try {
             
@@ -232,13 +233,13 @@ public class XbeeApiTest extends TestCase {
         } catch (Throwable t) {
             logger.fatal(command + " failed", t);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     private void AT(XBee xbee, String command, int value) {
         
-        NDC.push("AT");
+        ThreadContext.push("AT");
         
         try {
             
@@ -248,7 +249,7 @@ public class XbeeApiTest extends TestCase {
         } catch (Throwable t) {
             logger.fatal(command + " failed", t);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

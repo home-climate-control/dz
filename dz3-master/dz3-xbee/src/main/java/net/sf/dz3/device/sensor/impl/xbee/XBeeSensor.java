@@ -2,6 +2,8 @@ package net.sf.dz3.device.sensor.impl.xbee;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
@@ -12,9 +14,6 @@ import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
@@ -66,7 +65,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
     @Override
     public DataSample<Double> getSignal() {
         
-        NDC.push("getSignal(" + address + ")");
+        ThreadContext.push("getSignal(" + address + ")");
         Marker m = new Marker("getSignal(" + address + ")");
 
         try {
@@ -101,7 +100,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
         } finally {
 
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

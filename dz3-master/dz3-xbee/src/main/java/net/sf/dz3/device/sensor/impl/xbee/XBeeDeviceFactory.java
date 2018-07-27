@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.factory.AbstractDeviceFactory;
 import net.sf.dz3.device.factory.SingleSwitchProxy;
 import net.sf.dz3.device.sensor.AnalogSensor;
@@ -21,8 +23,6 @@ import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
-
-import org.apache.log4j.NDC;
 
 import com.rapplogic.xbee.api.ApiId;
 import com.rapplogic.xbee.api.AtCommand;
@@ -106,7 +106,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
     @Override
     public Switch getSwitch(String compositeAddress) {
         
-        NDC.push("getSwitch");
+        ThreadContext.push("getSwitch");
         
         try {
             
@@ -129,7 +129,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             return proxy.getSwitch(switchAddress);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -148,7 +148,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
     @Override
     protected void startup() throws Throwable {
         
-        NDC.push("startup");
+        ThreadContext.push("startup");
         
         try {       
         
@@ -174,15 +174,21 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             throw new IllegalStateException("Failed to initialize XBee", t);
             
         } finally {
-            NDC.pop();
-            NDC.remove();
+
+            ThreadContext.pop();
+
+            // VT: NOTE: Whereas NDC#remove() needed to be called here to prevent resource leaks with Log4j,
+            // Log4j2 doesn't have it. Let's for now assume that ThreadContext#clearStack() takes care of it,
+            // but let's also keep an eye on leaks and investigate if this is sufficient.
+
+            ThreadContext.clearStack();
         }
     }
 
     @Override
     protected void execute() throws Throwable {
         
-        NDC.push("execute");
+        ThreadContext.push("execute");
         
         try {
             
@@ -196,7 +202,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -264,7 +270,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
      */
     private void browse(XBee target) throws XBeeException {
         
-        NDC.push("browse");
+        ThreadContext.push("browse");
         Marker m = new Marker("browse");
         
         try {
@@ -298,7 +304,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         } finally {
             
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -336,7 +342,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
      */
     private void createPrototype(ZBNodeDiscover nd) {
         
-        NDC.push("createProxy");
+        ThreadContext.push("createProxy");
         
         try {
             
@@ -349,7 +355,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -361,7 +367,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
      */
     private void checkStale() {
         
-        NDC.push("checkStale");
+        ThreadContext.push("checkStale");
         
         try {
             
@@ -392,7 +398,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
         
     }
@@ -405,7 +411,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
      */
     private XBeeDeviceContainer resolve(String deviceAddress) {
         
-        NDC.push("resolve");
+        ThreadContext.push("resolve");
         
         try {
         
@@ -435,13 +441,13 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             return (XBeeDeviceContainer) deviceSet.toArray()[0];
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void broadcastIoSample(ZNetRxIoSampleResponse packet) {
         
-        NDC.push("broadcastIoSample");
+        ThreadContext.push("broadcastIoSample");
         
         try {
         
@@ -475,7 +481,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             lastSeen.put(deviceAddress, System.currentTimeMillis());
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -567,7 +573,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         @Override
         public synchronized boolean getState() throws IOException {
             
-            NDC.push("getState");
+            ThreadContext.push("getState");
             
             try {
                 
@@ -580,14 +586,14 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                 return xbeeSwitch.getState();
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
 
         @Override
         public synchronized void setState(boolean state) throws IOException {
 
-            NDC.push("setState");
+            ThreadContext.push("setState");
             
             try {
                 
@@ -600,7 +606,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                 xbeeSwitch.setState(state);
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
     }
@@ -616,7 +622,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         @Override
         public void processResponse(XBeeResponse packet) {
             
-            NDC.push("processResponse");
+            ThreadContext.push("processResponse");
             
             try {
                 
@@ -661,7 +667,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                 
                 logger.error("Oops", t);
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
             
         }

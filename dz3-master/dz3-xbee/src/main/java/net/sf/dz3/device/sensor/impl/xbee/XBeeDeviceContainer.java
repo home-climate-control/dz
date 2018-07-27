@@ -5,14 +5,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.PrototypeContainer;
 import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBeeAddress64;
@@ -22,7 +21,7 @@ import com.rapplogic.xbee.api.XBeeResponse;
 /**
  * XBee device container.
  *   
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
  */
 public final class XBeeDeviceContainer extends AbstractDeviceContainer implements PrototypeContainer {
     
@@ -74,7 +73,7 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
     @Override
     public AnalogSensor getSensor(String address, SensorType type) {
         
-        NDC.push("getSensor(" + address + ")");
+        ThreadContext.push("getSensor(" + address + ")");
         
         try {
         
@@ -95,14 +94,14 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
             return s;
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @Override
     public synchronized Switch getSwitch(String address) {
         
-        NDC.push("getSwitch(" + address + ")");
+        ThreadContext.push("getSwitch(" + address + ")");
         
         try {
         
@@ -123,7 +122,7 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
             return s;
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -134,7 +133,7 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
 
     public void broadcastIoSample(IoSample sample) {
         
-        NDC.push("broadcastIoSample");
+        ThreadContext.push("broadcastIoSample");
         
         long now = System.currentTimeMillis();
         
@@ -158,13 +157,13 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void broadcastFailure(Throwable t) {
         
-        NDC.push("broadcastFailure");
+        ThreadContext.push("broadcastFailure");
         
         long now = System.currentTimeMillis();
         
@@ -179,7 +178,7 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }
