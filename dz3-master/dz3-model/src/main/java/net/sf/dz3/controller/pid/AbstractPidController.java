@@ -1,5 +1,7 @@
 package net.sf.dz3.controller.pid;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.controller.AbstractProcessController;
 import net.sf.dz3.controller.ProcessControllerStatus;
 import net.sf.dz3.util.digest.MessageDigestCache;
@@ -8,12 +10,10 @@ import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.NDC;
-
 /**
  * Abstract base for a PID controller implementation.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractPidController extends AbstractProcessController implements AbstractPidControllerConfiguration, JmxAware {
 
@@ -177,7 +177,7 @@ public abstract class AbstractPidController extends AbstractProcessController im
     @Override
     protected final DataSample<Double> compute() {
 
-        NDC.push("compute");
+        ThreadContext.push("compute");
 
         try {
 
@@ -239,7 +239,7 @@ public abstract class AbstractPidController extends AbstractProcessController im
             return new DataSample<Double>(pv.timestamp, sourceName, signature, signal, null);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

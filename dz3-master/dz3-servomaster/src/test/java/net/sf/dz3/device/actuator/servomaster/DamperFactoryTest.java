@@ -1,12 +1,13 @@
 package net.sf.dz3.device.actuator.servomaster;
 
-import junit.framework.TestCase;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import org.apache.log4j.Logger;
+import junit.framework.TestCase;
 
 public class DamperFactoryTest extends TestCase {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     public void testBadClassName() {
         

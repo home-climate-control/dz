@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ThermostatStatus;
@@ -19,15 +21,13 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
 
-import org.apache.log4j.NDC;
-
 /**
  * The zone controller abstraction.
  *
  * Implements the behavior common for all the zone controller, and provides
  * the template methods for the rest.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractZoneController extends LogAware implements ZoneController {
 
@@ -134,7 +134,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
      */
     private synchronized void stateChanged(Thermostat source, ThermostatSignal pv) {
 
-        NDC.push("stateChanged");
+        ThreadContext.push("stateChanged");
 
         try {
             
@@ -165,7 +165,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
         } finally {
             lastKnownSignal.put(source, pv);
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -226,7 +226,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
      */
     private boolean checkUnhappy(Thermostat source, ThermostatSignal signal) {
 
-        NDC.push("checkUnhappy");
+        ThreadContext.push("checkUnhappy");
 
         try {
 
@@ -272,7 +272,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
             return false;
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -306,7 +306,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
      */
     private DataSample<Double> computeDemand(long timestamp, boolean needBump) {
 
-        NDC.push("computeDemand");
+        ThreadContext.push("computeDemand");
 
         try {
 
@@ -359,7 +359,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

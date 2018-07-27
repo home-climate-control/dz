@@ -22,16 +22,17 @@ import net.sf.jukebox.sem.ACT;
 import net.sf.jukebox.sem.EventSemaphore;
 import net.sf.jukebox.service.StoppableService;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.joda.time.DateTime;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class Scheduler implements Runnable, StoppableService, JmxAware {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final static DecimalFormat df = new DecimalFormat("#0.0###;-#0.0###");
     
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -156,7 +157,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      */
     public EventSemaphore stop() {
         
-        NDC.push("stop");
+        ThreadContext.push("stop");
         
         try {
             
@@ -184,7 +185,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             return stopped;
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -220,7 +221,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      */
     public void run() {
         
-        NDC.push("run");
+        ThreadContext.push("run");
         
         try {
 
@@ -238,12 +239,12 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             
             logger.info("done");
             
-            NDC.pop();
+            ThreadContext.pop();
             
             // Even though the pool size is one, this would be a safe thing to do
             // and won't incur a performance penalty - it's executed less than
             // once in a minute
-            NDC.remove();
+            ThreadContext.clearStack();
         }
     }
     
@@ -252,7 +253,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      */
     private void update(final Map<Thermostat, SortedMap<Period, ZoneStatus>> target) {
 
-        NDC.push("update");
+        ThreadContext.push("update");
         
         try {
             
@@ -286,7 +287,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             logger.error("Schedule update failed", ex);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -300,7 +301,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      */
     public void execute(final Map<Thermostat, SortedMap<Period, ZoneStatus>> target, DateTime when) {
 
-        NDC.push("execute");
+        ThreadContext.push("execute");
         
         try {
             
@@ -322,7 +323,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -335,11 +336,11 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      */
     private void execute(Thermostat ts, SortedMap<Period, ZoneStatus> zoneSchedule, DateTime time) {
         
-        NDC.push("execute");
+        ThreadContext.push("execute");
         
         try {
             
-            NDC.push("(" + ts.getName() + ")");
+            ThreadContext.push("(" + ts.getName() + ")");
             
             try {
             
@@ -366,7 +367,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
                 }
 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
             
         } catch (EmptyStackException ex) {
@@ -378,7 +379,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             
         } finally {
             logger.info("done");
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -427,7 +428,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      */
     public Deviation getDeviation(Thermostat ts, double setpointTemperature, boolean currentEnabled, boolean currentVoting, DateTime time) {
         
-        NDC.push("getDeviation(" + ts.getName() + ")");
+        ThreadContext.push("getDeviation(" + ts.getName() + ")");
         
         try {
 
@@ -472,7 +473,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

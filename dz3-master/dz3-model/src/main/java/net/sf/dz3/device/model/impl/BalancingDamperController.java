@@ -8,6 +8,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
@@ -16,14 +18,12 @@ import net.sf.jukebox.conf.ConfigurableProperty;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.NDC;
-
 /**
  * Balancing damper controller, supports modulating dampers.
  * 
  * If bang/bang dampers is all you have, use {@link SimpleDamperController} instead.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class BalancingDamperController extends AbstractDamperController {
 
@@ -106,7 +106,7 @@ public class BalancingDamperController extends AbstractDamperController {
     @Override
     protected Map<Damper, Double> compute() {
 
-        NDC.push("compute");
+        ThreadContext.push("compute");
         
         try {
 
@@ -196,7 +196,7 @@ public class BalancingDamperController extends AbstractDamperController {
             return damperMap;
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

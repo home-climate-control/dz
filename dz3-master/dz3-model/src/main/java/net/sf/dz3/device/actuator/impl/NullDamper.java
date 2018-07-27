@@ -2,9 +2,9 @@ package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
 
-import net.sf.jukebox.jmx.JmxDescriptor;
+import org.apache.logging.log4j.ThreadContext;
 
-import org.apache.log4j.NDC;
+import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
  * 'Null' damper - this damper does not interact with hardware, just logs
@@ -29,7 +29,7 @@ public class NullDamper extends AbstractDamper {
     @Override
     public void moveDamper(double throttle) {
 	
-	NDC.push("moveDamper");
+	ThreadContext.push("moveDamper");
 
 	try {
 	
@@ -37,13 +37,13 @@ public class NullDamper extends AbstractDamper {
 	    this.throttle = throttle;
 
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
 
     public double getPosition() throws IOException {
 	
-	NDC.push("getThrottle");
+	ThreadContext.push("getThrottle");
 	
 	try {
 
@@ -51,7 +51,7 @@ public class NullDamper extends AbstractDamper {
 	    return throttle;
         
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
 

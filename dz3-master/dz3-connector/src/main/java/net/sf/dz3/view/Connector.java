@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.logger.LogAware;
@@ -16,7 +16,7 @@ import net.sf.jukebox.logger.LogAware;
 /**
  * Base class for implementing the V in MVC.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class Connector<ComponentConnector> extends LogAware implements JmxAware {
 
@@ -45,7 +45,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
 
     public Connector(Set<Object> initSet, Set<ConnectorFactory<ComponentConnector>> factorySet) {
 
-        NDC.push("Connector()");
+        ThreadContext.push("Connector()");
         
         try {
         
@@ -62,7 +62,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -77,7 +77,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
      */
     private void createComponentMap(Map<String, Object> context) {
         
-        NDC.push("createComponentMap");
+        ThreadContext.push("createComponentMap");
         
         try {
             
@@ -130,7 +130,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -163,7 +163,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
      */
     public synchronized final void activate() {
 
-        NDC.push("activate");
+        ThreadContext.push("activate");
         
         try {
             
@@ -178,7 +178,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
             activate2();
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -187,7 +187,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
      */
     public synchronized final void deactivate() {
         
-        NDC.push("deactivate");
+        ThreadContext.push("deactivate");
         
         try {
             
@@ -196,7 +196,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
             componentMap.clear();
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

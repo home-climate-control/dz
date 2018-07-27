@@ -1,9 +1,9 @@
 package net.sf.dz3.instrumentation;
 
 import org.apache.commons.lang3.time.StopWatch;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An object to keep track of time spent on something in a convenient manner.
@@ -28,7 +28,7 @@ import org.apache.log4j.NDC;
  */
 public class Marker {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Message to be printed in the log when the marker is closed.

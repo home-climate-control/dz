@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.DeviceContainer;
 import net.sf.dz3.device.sensor.PrototypeContainer;
 import net.sf.dz3.device.sensor.SensorType;
@@ -11,19 +15,16 @@ import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.ContainerMap;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 /**
  * A proxy for a single channel switch device.
  *  
  * @param <SwitchContainerType> Implementation class of the hardware dependent switch container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
  */
 public abstract class SingleSwitchProxy<SwitchContainerType> implements Switch {
 
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
     
     protected final ContainerMap address2dcGlobal;
     protected final StringChannelAddress address;
@@ -52,7 +53,7 @@ public abstract class SingleSwitchProxy<SwitchContainerType> implements Switch {
     @SuppressWarnings("unchecked")
     protected final SwitchContainerType getContainer(String address) throws IOException {
         
-        NDC.push("getContainer");
+        ThreadContext.push("getContainer");
         
         try {
             
@@ -83,7 +84,7 @@ public abstract class SingleSwitchProxy<SwitchContainerType> implements Switch {
             throw new IOException("Device present at " + address + ", not a switch nor a prototype");
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

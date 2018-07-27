@@ -1,19 +1,21 @@
 package net.sf.dz3.scheduler.gcal;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 import net.sf.dz3.device.model.ZoneStatus;
 import net.sf.dz3.device.model.impl.ZoneStatusImpl;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class StatusParserTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private final String[] inputs = {
             "setpoint 18C, enabled, voting",
@@ -41,7 +43,7 @@ public class StatusParserTest extends TestCase {
         
         for (int offset = 0; offset < inputs.length; offset++) {
             
-            NDC.push("[" + offset + "]");
+            ThreadContext.push("[" + offset + "]");
             
             try {
 
@@ -52,7 +54,7 @@ public class StatusParserTest extends TestCase {
                 assertEquals("Failed to parse '" + inputs[offset], outputs[offset], status);
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
     }

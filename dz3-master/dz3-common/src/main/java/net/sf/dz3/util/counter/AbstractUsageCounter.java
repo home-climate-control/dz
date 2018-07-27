@@ -2,19 +2,20 @@ package net.sf.dz3.util.counter;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 /**
  * Base class for persistent implementations.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractUsageCounter implements ResourceUsageCounter {
     
@@ -79,7 +80,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
     public AbstractUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, Object []storageKeys) throws IOException {
         
         // Kludge to allow to use logger in subclass methods called from the constructor
-        logger = Logger.getLogger(getClass());
+        logger = LogManager.getLogger(getClass());
         
         if (name == null) {
             throw new IllegalArgumentException("name can't be null");
@@ -182,7 +183,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
     @Override
     public synchronized final void reset() {
 
-        NDC.push("reset");
+        ThreadContext.push("reset");
         
         try {
 
@@ -196,7 +197,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
             logger.error("Failed to save state for '" + getName() + "'", ex);
             
         }finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -206,7 +207,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
     @Override
     public void consume(DataSample<Double> signal) {
         
-        NDC.push("consume@" + Integer.toHexString(hashCode()));
+        ThreadContext.push("consume@" + Integer.toHexString(hashCode()));
         
         try {
             
@@ -236,7 +237,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
             logger.error("Failed to save state for '" + getName() + "'", ex);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

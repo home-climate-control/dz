@@ -6,18 +6,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.service.ActiveService;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 public class DeviceFactoryTest extends TestCase {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * @return {@code false} if OS is not within a supported list (just Linux for now).
@@ -50,7 +51,7 @@ public class DeviceFactoryTest extends TestCase {
      */
     public void testFactory() throws InterruptedException {
         
-        NDC.push("testFactory");
+        ThreadContext.push("testFactory");
         
         try {
         
@@ -76,7 +77,7 @@ public class DeviceFactoryTest extends TestCase {
             logger.info("done");
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
    
@@ -102,7 +103,7 @@ public class DeviceFactoryTest extends TestCase {
      */
     private void testGetSensor(long initialDelay, long delay) throws InterruptedException {
         
-        NDC.push("testGetSensor(" + initialDelay + ", " + delay + ")");
+        ThreadContext.push("testGetSensor(" + initialDelay + ", " + delay + ")");
         
         try {
         
@@ -158,7 +159,7 @@ public class DeviceFactoryTest extends TestCase {
 
             assertTrue("No non-error samples were collected", gotData);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

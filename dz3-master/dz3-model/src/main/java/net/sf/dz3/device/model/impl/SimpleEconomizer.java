@@ -1,12 +1,12 @@
 package net.sf.dz3.device.model.impl;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.model.Economizer;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
-
-import org.apache.log4j.NDC;
 
 /**
  * Simple {@link Economizer} implementation.
@@ -14,7 +14,7 @@ import org.apache.log4j.NDC;
  *  This is a proof of concept implementation, not protected from the jitter possible when
  *  temperature readings fluctuate around triggering point.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class SimpleEconomizer extends AbstractEconomizer {
     
@@ -32,7 +32,7 @@ public class SimpleEconomizer extends AbstractEconomizer {
     @Override
     protected double compute() {
         
-        NDC.push("compute");
+        ThreadContext.push("compute");
         
         try {
             
@@ -87,7 +87,7 @@ public class SimpleEconomizer extends AbstractEconomizer {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

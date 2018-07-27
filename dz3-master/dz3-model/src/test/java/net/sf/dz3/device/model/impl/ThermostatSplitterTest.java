@@ -1,5 +1,8 @@
 package net.sf.dz3.device.model.impl;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.model.Thermostat;
@@ -7,11 +10,9 @@ import net.sf.dz3.device.sensor.impl.NullSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 
-import org.apache.log4j.Logger;
-
 public class ThermostatSplitterTest extends TestCase {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     public void testSplitterHysteresis() {
 

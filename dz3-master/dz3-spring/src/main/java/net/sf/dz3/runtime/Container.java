@@ -3,8 +3,9 @@ package net.sf.dz3.runtime;
 import net.sf.dz3.device.model.DamperController;
 import net.sf.dz3.instrumentation.Marker;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
@@ -14,14 +15,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 /**
  * Entry point into DZ Core.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2018
  */
 public class Container {
 
     /**
      * Logger to use.
      */
-    private static Logger logger = Logger.getLogger(Container.class);
+    private static Logger logger = LogManager.getLogger(Container.class);
 
     /**
      * Name of the configuration file embedded into the jar file.
@@ -50,7 +51,7 @@ public class Container {
      */
     public void run(String[] args) {
 
-        NDC.push("run");
+        ThreadContext.push("run");
 
         try {
 
@@ -75,7 +76,7 @@ public class Container {
         } finally {
             
             logger.fatal("Shutting down");
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -91,7 +92,7 @@ public class Container {
      */
     private void loadSampleConfiguration() {
 
-        NDC.push("loadSampleConfiguration");
+        ThreadContext.push("loadSampleConfiguration");
         
         try {
             
@@ -109,7 +110,7 @@ public class Container {
             logger.debug("Oh, they found and deleted the sample configuration! Good.");
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -122,7 +123,7 @@ public class Container {
      */
     private void loadConfiguration(String file) {
 
-        NDC.push("loadConfiguration(" + file + ")");
+        ThreadContext.push("loadConfiguration(" + file + ")");
         Marker m = new Marker("loadConfiguration(" + file + ")");
 
         try {
@@ -138,7 +139,7 @@ public class Container {
         } finally {
             
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

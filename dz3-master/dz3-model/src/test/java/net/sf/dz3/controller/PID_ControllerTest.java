@@ -5,6 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.PID_Controller;
@@ -12,13 +16,9 @@ import net.sf.dz3.controller.pid.PidControllerStatus;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
-
 public class PID_ControllerTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
 
     public void testPSimple() {
@@ -34,7 +34,7 @@ public class PID_ControllerTest extends TestCase {
      */
     public void testP(ProcessController pc) {
 	
-	NDC.push("testP/" + pc.getClass().getName());
+	ThreadContext.push("testP/" + pc.getClass().getName());
 	
 	try {
 
@@ -60,7 +60,7 @@ public class PID_ControllerTest extends TestCase {
 	    logger.info(rqPerSec +" requests per second");
 	    
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
     
@@ -70,7 +70,7 @@ public class PID_ControllerTest extends TestCase {
      */
     public void testReconcile() {
 
-	NDC.push("testReconcile");
+	ThreadContext.push("testReconcile");
 
 	try {
 
@@ -115,7 +115,7 @@ public class PID_ControllerTest extends TestCase {
 	    }
 
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
 
@@ -124,7 +124,7 @@ public class PID_ControllerTest extends TestCase {
      */
     public void testI() {
 	
-	NDC.push("testI");
+	ThreadContext.push("testI");
 	
 	try {
 	    
@@ -167,7 +167,7 @@ public class PID_ControllerTest extends TestCase {
 	    }
 
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
     
@@ -207,7 +207,7 @@ public class PID_ControllerTest extends TestCase {
      */
     public void testIrate(ProcessController pc, long start, int deltaT, long COUNT) {
 	
-	NDC.push("testIrate/" + pc.getClass().getName());
+	ThreadContext.push("testIrate/" + pc.getClass().getName());
 	
 	try {
 	    
@@ -235,7 +235,7 @@ public class PID_ControllerTest extends TestCase {
 	    logger.info(rqPerSec +" requests per second");
 	
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
 
@@ -244,7 +244,7 @@ public class PID_ControllerTest extends TestCase {
      */
     public void testD() {
 	
-	NDC.push("testD");
+	ThreadContext.push("testD");
 	
 	try {
 	    
@@ -284,7 +284,7 @@ public class PID_ControllerTest extends TestCase {
 	    }
 
 	} finally {
-	    NDC.pop();
+	    ThreadContext.pop();
 	}
     }
     
@@ -300,7 +300,7 @@ public class PID_ControllerTest extends TestCase {
 
     public void testPidControllerID(AbstractPidController controller, String ndc) {
         
-        NDC.push("testSimplePidControllerID");
+        ThreadContext.push("testSimplePidControllerID");
         
         try {
         
@@ -317,7 +317,7 @@ public class PID_ControllerTest extends TestCase {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -333,7 +333,7 @@ public class PID_ControllerTest extends TestCase {
     
     public void testSaturationNull(AbstractPidController controller, String ndc) {
         
-        NDC.push("testSimplePidControllerID");
+        ThreadContext.push("testSimplePidControllerID");
         
         try {
         
@@ -349,7 +349,7 @@ public class PID_ControllerTest extends TestCase {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
    

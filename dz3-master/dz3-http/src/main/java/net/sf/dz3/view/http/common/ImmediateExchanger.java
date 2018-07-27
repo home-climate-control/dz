@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.concurrent.BlockingQueue;
 
-import net.sf.dz3.view.http.v1.HttpConnector;
+import org.apache.logging.log4j.ThreadContext;
 
-import org.apache.log4j.NDC;
+import net.sf.dz3.view.http.v1.HttpConnector;
 
 /**
  * Keeps sending data that appears in {@link HttpConnector#upstreamQueue} to the server
@@ -14,7 +14,7 @@ import org.apache.log4j.NDC;
  *
  * @param <DataBlock> Data type to send out to the server.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class ImmediateExchanger<DataBlock> extends AbstractExchanger<DataBlock> {
 
@@ -30,7 +30,7 @@ public abstract class ImmediateExchanger<DataBlock> extends AbstractExchanger<Da
     @Override
     protected void execute() throws Throwable {
         
-        NDC.push("execute");
+        ThreadContext.push("execute");
         
         try {
 
@@ -48,7 +48,7 @@ public abstract class ImmediateExchanger<DataBlock> extends AbstractExchanger<Da
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -63,7 +63,7 @@ public abstract class ImmediateExchanger<DataBlock> extends AbstractExchanger<Da
      */
     protected final void exchange(DataBlock dataBlock) throws IOException {
         
-        NDC.push("exchange");
+        ThreadContext.push("exchange");
         
         try {
             
@@ -72,7 +72,7 @@ public abstract class ImmediateExchanger<DataBlock> extends AbstractExchanger<Da
             // VT: FIXME: Process the response
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

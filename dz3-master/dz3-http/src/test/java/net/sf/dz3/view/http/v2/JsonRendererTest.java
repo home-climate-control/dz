@@ -7,8 +7,9 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.junit.Test;
 
 import net.sf.dz3.device.model.ThermostatSignal;
@@ -19,12 +20,12 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 
 public class JsonRendererTest {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     @Test
     public void testRender0() {
 
-        NDC.push("testRender");
+        ThreadContext.push("testRender");
 
         try {
 
@@ -48,7 +49,7 @@ public class JsonRendererTest {
             assertEquals("wrong toString()", "json-thermostat: Cooling, CALLING, signal=0.0, current=0.0, setpoint=20.0, on hold", queue.peek().toString());
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

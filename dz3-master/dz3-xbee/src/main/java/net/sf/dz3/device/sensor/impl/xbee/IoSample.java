@@ -3,14 +3,14 @@ package net.sf.dz3.device.sensor.impl.xbee;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Logger;
 
 import com.rapplogic.xbee.api.XBeeAddress64;
 
 /**
  * XBee IO Sample.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2010-2018
  */
 public class IoSample {
 

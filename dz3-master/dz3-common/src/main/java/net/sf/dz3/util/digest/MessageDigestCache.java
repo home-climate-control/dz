@@ -3,18 +3,19 @@ package net.sf.dz3.util.digest;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.sf.jukebox.util.MessageDigestFactory;
 
 /**
  * Caching wrapper for {@link MessageDigestFactory}
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class MessageDigestCache {
 
-    private static final Logger logger = Logger.getLogger(MessageDigestCache.class);
+    private static final Logger logger = LogManager.getLogger(MessageDigestCache.class);
     private static final MessageDigestFactory provider = new MessageDigestFactory();
     
     /**

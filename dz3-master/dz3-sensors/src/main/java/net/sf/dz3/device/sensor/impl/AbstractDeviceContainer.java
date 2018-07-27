@@ -1,6 +1,7 @@
 package net.sf.dz3.device.sensor.impl;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.sf.dz3.device.sensor.DeviceContainer;
 import net.sf.dz3.device.sensor.SensorType;
@@ -12,7 +13,7 @@ import net.sf.dz3.device.sensor.SensorType;
  */
 abstract public class AbstractDeviceContainer implements DeviceContainer {
 
-    protected final Logger logger = Logger.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * @return Device name.

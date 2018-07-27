@@ -2,19 +2,19 @@ package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.actuator.HvacDriver;
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
-
-import org.apache.log4j.NDC;
 
 /**
  * Abstract HVAC driver.
  * 
  * Provides common logic for state housekeeping and JMX reporting.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractHvacDriver extends LogAware implements HvacDriver {
 
@@ -45,7 +45,7 @@ public abstract class AbstractHvacDriver extends LogAware implements HvacDriver 
     @Override
     public final void setMode(HvacMode mode) throws IOException {
         
-        NDC.push("setMode");
+        ThreadContext.push("setMode");
         
         try {
             
@@ -57,14 +57,14 @@ public abstract class AbstractHvacDriver extends LogAware implements HvacDriver 
             actual.mode = mode;
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @Override
     public final void setStage(int stage) throws IOException {
         
-        NDC.push("setStage");
+        ThreadContext.push("setStage");
         
         try {
             
@@ -76,14 +76,14 @@ public abstract class AbstractHvacDriver extends LogAware implements HvacDriver 
             actual.stage = stage;
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @Override
     public final void setFanSpeed(double speed) throws IOException {
         
-        NDC.push("setFanSpeed");
+        ThreadContext.push("setFanSpeed");
         
         try {
             
@@ -95,7 +95,7 @@ public abstract class AbstractHvacDriver extends LogAware implements HvacDriver 
             actual.speed = speed;
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

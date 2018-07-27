@@ -17,7 +17,7 @@
   	<dependency>
   		<groupId>com.rapplogic</groupId>
   		<artifactId>xbeeapi</artifactId>
-  		<version>0.9.1-SNAPSHOT</version>
+        <version>0.9.1-dz</version>
   	</dependency>
   	<dependency>
   		<groupId>${project.groupId}</groupId>

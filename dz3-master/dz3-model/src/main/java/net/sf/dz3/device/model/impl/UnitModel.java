@@ -1,5 +1,7 @@
 package net.sf.dz3.device.model.impl;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.model.ZoneController;
@@ -11,11 +13,9 @@ import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
 
-import org.apache.log4j.NDC;
-
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class UnitModel extends LogAware implements Unit {
 
@@ -137,7 +137,7 @@ public class UnitModel extends LogAware implements Unit {
      */
     public synchronized void consume(DataSample<Double> signal) {
         
-        NDC.push("consume");
+        ThreadContext.push("consume");
         
         try {
             
@@ -165,7 +165,7 @@ public class UnitModel extends LogAware implements Unit {
         } finally {
             
             setDemand(signal.sample, signal.timestamp);
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -176,7 +176,7 @@ public class UnitModel extends LogAware implements Unit {
      */
     private void check(DataSample<Double> signal) {
         
-        NDC.push("check");
+        ThreadContext.push("check");
 
         try {
 
@@ -196,7 +196,7 @@ public class UnitModel extends LogAware implements Unit {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -209,7 +209,7 @@ public class UnitModel extends LogAware implements Unit {
      */
     private void stateChanged() {
         
-        NDC.push("stateChanged");
+        ThreadContext.push("stateChanged");
         
         try {
 
@@ -222,7 +222,7 @@ public class UnitModel extends LogAware implements Unit {
             dataBroadcaster.broadcast(state);
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     /**

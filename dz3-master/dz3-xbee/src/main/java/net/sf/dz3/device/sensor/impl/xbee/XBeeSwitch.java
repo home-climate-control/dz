@@ -2,12 +2,13 @@ package net.sf.dz3.device.sensor.impl.xbee;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.instrumentation.Marker;
-
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
 
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
@@ -21,11 +22,11 @@ import com.rapplogic.xbee.api.XBeeAddress64;
  * but support will be soon extended to all XBee pins that can be configured as
  * digital outputs.
  *   
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
  */
 public class XBeeSwitch implements Switch {
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     private final XBeeDeviceContainer container;
     private StringChannelAddress address;
@@ -45,7 +46,7 @@ public class XBeeSwitch implements Switch {
     @Override
     public boolean getState() throws IOException {
 
-        NDC.push("read(" + address + ")");
+        ThreadContext.push("read(" + address + ")");
         Marker m = new Marker("read(" + address + ")");
 
         try {
@@ -95,14 +96,14 @@ public class XBeeSwitch implements Switch {
         } finally {
 
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     @Override
     public void setState(boolean state) throws IOException {
 
-        NDC.push("write(" + address + ")");
+        ThreadContext.push("write(" + address + ")");
         Marker m = new Marker("write(" + address + ")");
         
         try {
@@ -132,7 +133,7 @@ public class XBeeSwitch implements Switch {
         } finally {
 
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

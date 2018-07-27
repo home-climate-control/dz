@@ -19,7 +19,7 @@ import net.sf.dz3.view.http.common.QueueFeeder;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
 import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 /**
  * HTTP client side interface.
@@ -32,7 +32,7 @@ import org.apache.log4j.NDC;
  * {@code init-method="start"} attribute must be used in Spring bean definition, otherwise
  * the connector will not work.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class HttpConnector extends Connector<RestRenderer> {
     
@@ -119,7 +119,7 @@ public class HttpConnector extends Connector<RestRenderer> {
         @Override
         protected void send(UpstreamBlock dataBlock) throws IOException {
             
-            NDC.push("send");
+            ThreadContext.push("send");
             
             try {
 
@@ -157,7 +157,7 @@ public class HttpConnector extends Connector<RestRenderer> {
                 }
                 
             } finally {
-                NDC.pop();
+                ThreadContext.pop();
             }
         }
     }

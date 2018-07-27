@@ -6,8 +6,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.DeviceContainer;
 
@@ -23,11 +24,11 @@ import net.sf.dz3.device.sensor.DeviceContainer;
  * logical devices of different types (such as DS2438 posing as both temperature
  * and humidity container).
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class ContainerMap {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Device address to device container instance map.
@@ -41,7 +42,7 @@ public class ContainerMap {
      */
     public String getHardwareAddress(String address) {
         
-        NDC.push("getHardwareAddress");
+        ThreadContext.push("getHardwareAddress");
         
         try {
             
@@ -66,7 +67,7 @@ public class ContainerMap {
             return channelAddress.hardwareAddress;
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -78,7 +79,7 @@ public class ContainerMap {
      */
     public void add(DeviceContainer dc) {
         
-        NDC.push("add");
+        ThreadContext.push("add");
         
         try {
 
@@ -99,7 +100,7 @@ public class ContainerMap {
             //dump();
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -111,7 +112,7 @@ public class ContainerMap {
      */
     public Set<DeviceContainer> get(String address) {
         
-        NDC.push("get(" + address + ")");
+        ThreadContext.push("get(" + address + ")");
         
         try {
 
@@ -133,7 +134,7 @@ public class ContainerMap {
             return found;
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -190,7 +191,7 @@ public class ContainerMap {
      */
     public void dump() {
         
-        NDC.push("dump#" + Integer.toHexString(hashCode()));
+        ThreadContext.push("dump#" + Integer.toHexString(hashCode()));
         
         try {
             
@@ -227,7 +228,7 @@ public class ContainerMap {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

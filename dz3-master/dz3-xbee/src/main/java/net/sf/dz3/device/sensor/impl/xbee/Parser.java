@@ -2,14 +2,15 @@ package net.sf.dz3.device.sensor.impl.xbee;
 
 import java.util.StringTokenizer;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import com.rapplogic.xbee.api.XBeeAddress64;
 
 public class Parser {
 
-    private final static Logger logger = Logger.getLogger(Parser.class);
+    private final static Logger logger = LogManager.getLogger(Parser.class);
     
 
     /**
@@ -22,7 +23,7 @@ public class Parser {
      */
     public static XBeeAddress64 parse(String rawAddress) {
         
-        NDC.push("parse");
+        ThreadContext.push("parse");
         
         try {
             
@@ -59,7 +60,7 @@ public class Parser {
             return new XBeeAddress64(result);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

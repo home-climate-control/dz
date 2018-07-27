@@ -2,6 +2,8 @@ package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
@@ -10,10 +12,8 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.logger.LogAware;
 import net.sf.jukebox.sem.ACT;
 
-import org.apache.log4j.NDC;
-
 /**
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractDamper extends LogAware implements Damper {
     
@@ -87,7 +87,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
     @Override
     public final void set(double throttle) {
         
-        NDC.push("set");
+        ThreadContext.push("set");
         
         try {
             
@@ -113,7 +113,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
             }
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -132,7 +132,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
     @Override
     public ACT park() {
 
-        NDC.push("park");
+        ThreadContext.push("park");
         
         try {
             
@@ -156,7 +156,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
             return done;
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

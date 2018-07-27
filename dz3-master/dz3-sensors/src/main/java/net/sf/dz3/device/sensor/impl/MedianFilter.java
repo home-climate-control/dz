@@ -4,6 +4,10 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.sensor.AnalogFilter;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
@@ -12,19 +16,16 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
-
 /**
  * A median filter.
  * 
  * Careful, first ({@link #depth} - 1) samples will get out unfiltered. 
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012-2018
  */
 public class MedianFilter implements AnalogFilter {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
     private final List<Double> buffer = new LinkedList<Double>();
 
@@ -94,7 +95,7 @@ public class MedianFilter implements AnalogFilter {
     @Override
     public synchronized void consume(DataSample<Double> sample) {
         
-        NDC.push("consume(" + sample + ")");
+        ThreadContext.push("consume(" + sample + ")");
         
         try {
 
@@ -130,7 +131,7 @@ public class MedianFilter implements AnalogFilter {
         } finally {
             
             logger.debug("buffer: " + buffer);
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -140,7 +141,7 @@ public class MedianFilter implements AnalogFilter {
     
     private DataSample<Double> filter(DataSample<Double> source) {
         
-        NDC.push("filter");
+        ThreadContext.push("filter");
         
         try {
 
@@ -154,7 +155,7 @@ public class MedianFilter implements AnalogFilter {
             return new DataSample<Double>(source.timestamp, address, address, median, source.error);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

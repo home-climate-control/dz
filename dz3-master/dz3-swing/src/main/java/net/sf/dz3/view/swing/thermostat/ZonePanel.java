@@ -15,8 +15,9 @@ import java.util.TreeMap;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.view.swing.ScreenDescriptor;
@@ -31,7 +32,7 @@ public class ZonePanel extends JPanel implements KeyListener {
     
     private static final long serialVersionUID = 6400746493551083129L;
     
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     private int currentZoneOffset = 0;
     private final Zone[] zones;
@@ -146,7 +147,7 @@ public class ZonePanel extends JPanel implements KeyListener {
     @Override
     public synchronized void keyPressed(KeyEvent e) {
         
-        NDC.push("keyPressed");
+        ThreadContext.push("keyPressed");
         
         try {
             
@@ -260,7 +261,7 @@ public class ZonePanel extends JPanel implements KeyListener {
             }
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

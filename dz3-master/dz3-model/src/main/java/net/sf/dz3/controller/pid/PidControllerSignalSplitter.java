@@ -1,6 +1,6 @@
 package net.sf.dz3.controller.pid;
 
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.controller.ProcessControllerSignalSplitter;
 import net.sf.dz3.controller.ProcessControllerStatus;
@@ -8,7 +8,7 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class PidControllerSignalSplitter extends ProcessControllerSignalSplitter {
     
@@ -38,7 +38,7 @@ public class PidControllerSignalSplitter extends ProcessControllerSignalSplitter
         
         // And now let's take care of PID specific components
         
-        NDC.push("consume.pid");
+        ThreadContext.push("consume.pid");
         
         try {
             
@@ -53,7 +53,7 @@ public class PidControllerSignalSplitter extends ProcessControllerSignalSplitter
             consume(timestamp, sourceName + ".d", pidStatus.d);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

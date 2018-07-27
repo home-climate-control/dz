@@ -6,8 +6,9 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.UUID;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
@@ -16,7 +17,7 @@ import junit.framework.TestCase;
 
 public class FileUsageCounterTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Make sure no null arguments are accepted.
@@ -74,7 +75,7 @@ public class FileUsageCounterTest extends TestCase {
      */
     public void testReset() throws IOException, InterruptedException {
         
-        NDC.push("testReset");
+        ThreadContext.push("testReset");
         
         try {
         
@@ -98,7 +99,7 @@ public class FileUsageCounterTest extends TestCase {
             assertEquals("Wrong value after reset", 0, counter.getUsageAbsolute());
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     
@@ -121,7 +122,7 @@ public class FileUsageCounterTest extends TestCase {
 
     public void testExisting() throws IOException, InterruptedException {
         
-        NDC.push("testExisting");
+        ThreadContext.push("testExisting");
         
         try {
         
@@ -166,7 +167,7 @@ public class FileUsageCounterTest extends TestCase {
 
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
     

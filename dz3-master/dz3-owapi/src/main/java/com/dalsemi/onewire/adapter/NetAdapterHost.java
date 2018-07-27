@@ -32,13 +32,14 @@ import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import java.util.Hashtable;
 import java.util.Random;
+
+import org.apache.logging.log4j.LogManager;
+
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.Enumeration;
-
-import org.apache.log4j.Logger;
 
 import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
@@ -1365,7 +1366,7 @@ public class NetAdapterHost
                 try {
                     Thread.sleep(10);
                 } catch (Exception ex) {
-                    Logger.getLogger(getClass()).warn("Oops", ex);
+                    LogManager.getLogger(getClass()).warn("Oops", ex);
                 }
         }
    }

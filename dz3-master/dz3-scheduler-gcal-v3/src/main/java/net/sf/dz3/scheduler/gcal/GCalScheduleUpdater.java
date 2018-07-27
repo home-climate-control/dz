@@ -21,12 +21,12 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneStatus;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Period;
-
-import org.apache.log4j.NDC;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
@@ -53,7 +53,7 @@ import com.google.api.services.calendar.model.Events;
  * Look for V3 API docs starting at https://developers.google.com/google-apps/calendar/ - but as time goes, it'll slip, there's no
  * specific URL for V3 docs while it is the last version.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2014
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
 
@@ -76,7 +76,7 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
     @Override
     public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
 
-        NDC.push("update");
+        ThreadContext.push("update");
         Marker m = new Marker("update");
         
         Map<Thermostat, SortedMap<Period, ZoneStatus>> ts2schedule = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
@@ -126,7 +126,7 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
                 updateCalendar(ts2schedule, calendarClient, calendar);
             }
 
-            NDC.push("schedule");
+            ThreadContext.push("schedule");
             
             for (Iterator<Entry<Thermostat, SortedMap<Period, ZoneStatus>>> i = ts2schedule.entrySet().iterator(); i.hasNext(); ) {
                 
@@ -140,7 +140,7 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
                 }
             }
             
-            NDC.pop();
+            ThreadContext.pop();
             
             return ts2schedule;
             
@@ -151,13 +151,13 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
         } finally {
             
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     private void updateCalendar(Map<Thermostat, SortedMap<Period, ZoneStatus>> ts2schedule, Calendar calendarClient, CalendarListEntry calendar) {
         
-        NDC.push("updateCalendar");
+        ThreadContext.push("updateCalendar");
         Marker m = new Marker("updateCalendar");
         
         try {
@@ -187,14 +187,14 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
         } finally {
             
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
 
     }
 
     private void parseEvents(Map<Thermostat, SortedMap<Period, ZoneStatus>> ts2schedule, Set<Thermostat> tSet, Calendar calendarClient, String id) throws IOException {
 
-        NDC.push("parseEvents");
+        ThreadContext.push("parseEvents");
         Marker m = new Marker("parseEvents");
 
         try {
@@ -245,7 +245,7 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
         } finally {
 
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
 
     }
@@ -275,7 +275,7 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
      */
     private void updateEvent(SortedMap<Period,ZoneStatus> period2status, Event event) {
 
-        NDC.push("updateEvent");
+        ThreadContext.push("updateEvent");
         
         try {
             
@@ -290,13 +290,13 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
             parseEvent(period2status, event.getSummary(), start, end);
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     private void parseEvent(SortedMap<Period,ZoneStatus> period2status, String title, EventDateTime start, EventDateTime end) {
         
-        NDC.push("parsePeriod");
+        ThreadContext.push("parsePeriod");
         
         try {
 
@@ -327,14 +327,14 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
             period2status.put(p, status);
             
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
         
     }
 
     private Period parsePeriod(String periodName, EventDateTime start, EventDateTime end) {
         
-        NDC.push("parsePeriod");
+        ThreadContext.push("parsePeriod");
         
         try {
             
@@ -391,7 +391,7 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
             return new Period(periodName, startTime, endTime, ".......");
         
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
@@ -400,7 +400,7 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
      */
     private boolean isDateOnly(EventDateTime source) {
         
-        NDC.push("isDateOnly");
+        ThreadContext.push("isDateOnly");
         
         try {
 
@@ -419,13 +419,13 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
             throw new IllegalArgumentException("API must have changed, both Date and DateTime are returned, need to revise the code");
 
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     private Credential authorize(HttpTransport httpTransport, JsonFactory jsonFactory, FileDataStoreFactory dataStoreFactory) throws IOException {
         
-        NDC.push("authorize");
+        ThreadContext.push("authorize");
         Marker m = new Marker("authorize");
         
         try {
@@ -449,7 +449,7 @@ public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
         } finally {
             
             m.close();
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 }

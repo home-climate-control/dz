@@ -34,7 +34,8 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
@@ -95,11 +96,11 @@ import com.dalsemi.onewire.adapter.TMEXAdapter;
  * @see DSPortAdapter
  * @version 0.00, 30 August 2000
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class OneWireAccessProvider {
 
-    protected final static Logger logger = Logger.getLogger(OneWireAccessProvider.class);
+    protected final static Logger logger = LogManager.getLogger(OneWireAccessProvider.class);
 
     /**
      * Override adapter variables.

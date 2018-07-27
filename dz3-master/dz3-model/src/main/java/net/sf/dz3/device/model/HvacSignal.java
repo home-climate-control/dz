@@ -1,6 +1,6 @@
 package net.sf.dz3.device.model;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 public class HvacSignal extends UnitSignal {
 
@@ -16,7 +16,7 @@ public class HvacSignal extends UnitSignal {
         if (mode.equals(HvacMode.OFF) && (demand > 0 || running)) {
             // That's a bit harsh at this point
             //throw new IllegalArgumentException("Invalid combination of (mode, demand, running): " + toString());
-            Logger.getLogger(getClass()).warn("HvacSignal(): Invalid combination of (mode, demand, running): " + toString());
+            LogManager.getLogger(getClass()).warn("HvacSignal(): Invalid combination of (mode, demand, running): " + toString());
         }
     }
 
