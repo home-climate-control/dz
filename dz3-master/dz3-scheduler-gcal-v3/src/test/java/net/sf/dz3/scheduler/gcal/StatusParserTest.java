@@ -69,4 +69,51 @@ public class StatusParserTest extends TestCase {
         
         assertEquals("Wrong substring", "14:59", substring);
     }
+
+    private final String[] malformedSetpoints1 = {
+            "setpoint18",
+            "setpoint",
+    };
+
+    public void testBadSetpoints() {
+
+        ThreadContext.push("testBadSetpoints");
+
+        try {
+
+            StatusParser p = new StatusParser();
+
+            for (int offset = 0; offset < malformedSetpoints1.length; offset++) {
+
+                ThreadContext.push("[" + offset + "]");
+                String setpoint = malformedSetpoints1[offset];
+
+                try {
+
+                    ZoneStatus status = p.parse(setpoint);
+
+                    fail("should've blown up by now");
+
+                } catch (IllegalArgumentException ex) {
+
+                    // This is expected
+                    logger.debug("Expected exception", ex);
+
+                    assertEquals("wrong exception message",
+                            "can't parse '" + setpoint + "' (malformed setpoint '" + setpoint + "')",
+                            ex.getMessage());
+
+                } catch (Throwable t) {
+
+                    logger.error("Oops", t);
+                    fail("wrong exception thrown, see the log");
+
+                } finally {
+                    ThreadContext.pop();
+                }
+            }
+        } finally {
+            ThreadContext.pop();
+        }
+    }
 }

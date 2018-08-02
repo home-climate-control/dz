@@ -2,6 +2,7 @@ package net.sf.dz3.scheduler.gcal;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 import org.apache.logging.log4j.LogManager;
@@ -74,8 +75,16 @@ public class StatusParser {
                     
                     // Result is not needed
                     st2.nextToken();
-                    
-                    setpoint = parseSetpoint(st2.nextToken());
+
+                    try {
+
+                        setpoint = parseSetpoint(st2.nextToken());
+
+                    } catch (NoSuchElementException ex) {
+
+                        // This indicates a problem with setpoint syntax
+                        throw new IllegalArgumentException("can't parse '" + arguments + "' (malformed setpoint '" + token + "')", ex);
+                    }
                 }
                 
                 if (token.startsWith("dump")) {
