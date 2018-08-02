@@ -18,6 +18,7 @@ public class StatusParserTest extends TestCase {
     private final Logger logger = LogManager.getLogger(getClass());
 
     private final String[] inputs = {
+            "setpoint 18",
             "setpoint 18C, enabled, voting",
             "setpoint 18C, on, voting, dump priority = 2",
             "setpoint 18C, enabled, voting, dump priority: 2",
@@ -28,6 +29,7 @@ public class StatusParserTest extends TestCase {
     };
     
     private final ZoneStatus[] outputs = {
+            new ZoneStatusImpl(18, 0, true, true),
             new ZoneStatusImpl(18, 0, true, true),
             new ZoneStatusImpl(18, 2, true, true),
             new ZoneStatusImpl(18, 2, true, true),
