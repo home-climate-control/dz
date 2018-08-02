@@ -116,4 +116,28 @@ public class StatusParserTest extends TestCase {
             ThreadContext.pop();
         }
     }
+
+    public void testOff() {
+
+        ThreadContext.push("testBadSetpoints");
+
+        try {
+
+            StatusParser p = new StatusParser();
+
+            try {
+
+                ZoneStatus status = p.parse("off");
+
+                fail("should've blown up by now");
+
+            } catch (IllegalArgumentException ex) {
+
+                assertEquals("wrong exception message", "Could not parse setpoint out of 'off'", ex.getMessage());
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
 }
