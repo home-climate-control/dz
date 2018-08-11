@@ -177,7 +177,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
             this.authToken = rg.nextLong();
 
             if (this.async) {
-                logger.fatal("FIXME: async not implemented", new IllegalArgumentException());
+                logger.fatal("FIXME: async not implemented");
             }
         }
 
