@@ -163,14 +163,12 @@ public class ServoDamper extends AbstractDamper {
         return servo.getPosition();
     }
 
+    @Override
     public Future<TransitionStatus> park() {
 
         return servo.setPosition(getParkPosition());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
         

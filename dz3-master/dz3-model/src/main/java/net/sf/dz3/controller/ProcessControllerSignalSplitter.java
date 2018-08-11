@@ -29,9 +29,7 @@ public class ProcessControllerSignalSplitter implements DataSink<ProcessControll
         source.addConsumer(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void consume(DataSample<ProcessControllerStatus> signal) {
         
         ThreadContext.push("consume");
@@ -79,17 +77,13 @@ public class ProcessControllerSignalSplitter implements DataSink<ProcessControll
         dataBroadcaster.broadcast(output);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final void addConsumer(DataSink<Double> consumer) {
         
         dataBroadcaster.addConsumer(consumer);
     }
     
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final void removeConsumer(DataSink<Double> consumer) {
         
         dataBroadcaster.removeConsumer(consumer);

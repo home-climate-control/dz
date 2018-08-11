@@ -36,9 +36,6 @@ public class FileUsageCounter extends TransientUsageCounter {
         super(name, counter, target, new Object [] { persistentStorage });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected CounterState load() throws IOException {
         
@@ -144,10 +141,6 @@ public class FileUsageCounter extends TransientUsageCounter {
         }
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected synchronized void save() throws IOException {
 

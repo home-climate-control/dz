@@ -196,9 +196,7 @@ public class ShellSensor extends AbstractAnalogSensor {
         return command;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public JmxDescriptor getJmxDescriptor() {
         
       return new JmxDescriptor(

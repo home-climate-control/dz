@@ -105,9 +105,6 @@ public abstract class AbstractListener extends PassiveService {
         return clientSet.iterator();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected final void startup() throws Throwable {
 
@@ -262,9 +259,6 @@ public abstract class AbstractListener extends PassiveService {
         return "/" + signature.port + "/" + (signature.secure ? "secure" : "insecure");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void shutdown() throws Throwable {
 
@@ -387,9 +381,6 @@ public abstract class AbstractListener extends PassiveService {
             return ss instanceof SSLServerSocket;
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected void startup() throws Throwable {
 
@@ -589,17 +580,12 @@ public abstract class AbstractListener extends PassiveService {
             logger.info("Dropped existing connections");
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected void shutdown() throws Throwable {
 
         }
 
-        /**
-         * {@inheritDoc}
-         */
+        @Override
         public int compareTo(Listener other) {
             
             if (other == null) {
@@ -670,9 +656,6 @@ public abstract class AbstractListener extends PassiveService {
             pw.flush();
         }
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected void startup() throws Throwable {
 
@@ -708,9 +691,6 @@ public abstract class AbstractListener extends PassiveService {
          */
         protected abstract CommandParser createParser();
 
-        /**
-         * {@inheritDoc}
-         */
         @Override
         protected void shutdown() throws Throwable {
 

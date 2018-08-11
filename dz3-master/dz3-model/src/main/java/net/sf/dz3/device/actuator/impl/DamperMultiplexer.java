@@ -90,9 +90,6 @@ public class DamperMultiplexer extends AbstractDamper {
         return dampers.iterator().next().getPosition();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
         
@@ -103,9 +100,7 @@ public class DamperMultiplexer extends AbstractDamper {
                 "Controls " + dampers.size() + " dampers");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Future<TransitionStatus> park() {
 
         ThreadContext.push("park");

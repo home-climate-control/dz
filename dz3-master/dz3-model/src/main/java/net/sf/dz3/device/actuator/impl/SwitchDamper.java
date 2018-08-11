@@ -128,18 +128,12 @@ public class SwitchDamper extends AbstractDamper {
         return CompletableFuture.completedFuture(status);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double getPosition() throws IOException {
         
         return position; 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
         

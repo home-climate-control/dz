@@ -26,33 +26,21 @@ public class ThermostatStatusImpl extends ZoneStatusImpl implements ThermostatSt
         this.error = error;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double getControlSignal() {
         return controlSignal;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isOnHold() {
         return hold;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isError() {
         return error;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
 

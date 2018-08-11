@@ -31,9 +31,7 @@ public class NullHvacDriver extends AbstractHvacDriver {
         // Do absolutely nothing
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public JmxDescriptor getJmxDescriptor() {
         
         return new JmxDescriptor(

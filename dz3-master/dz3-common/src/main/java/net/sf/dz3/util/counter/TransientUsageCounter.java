@@ -87,9 +87,6 @@ public class TransientUsageCounter extends AbstractUsageCounter {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected CounterState load() throws IOException {
 
@@ -97,9 +94,6 @@ public class TransientUsageCounter extends AbstractUsageCounter {
         return new CounterState(1000 * 60 * 60, 0);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void save() throws IOException {
 
@@ -115,9 +109,6 @@ public class TransientUsageCounter extends AbstractUsageCounter {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
         
@@ -128,9 +119,6 @@ public class TransientUsageCounter extends AbstractUsageCounter {
                 "Keeps track of resource usage and logs it");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void doReset() throws IOException {
         

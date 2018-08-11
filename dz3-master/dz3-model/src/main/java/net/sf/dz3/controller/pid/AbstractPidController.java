@@ -117,27 +117,21 @@ public abstract class AbstractPidController extends AbstractProcessController im
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void setP(double P) {
 
 	this.P = P;
 	statusChanged();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void setI(double I) {
 
 	this.I = I;
 	statusChanged();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void setD(double D) {
 
 	this.D = D;
@@ -248,9 +242,6 @@ public abstract class AbstractPidController extends AbstractProcessController im
         return "pid";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final ProcessControllerStatus getStatus() {
 
