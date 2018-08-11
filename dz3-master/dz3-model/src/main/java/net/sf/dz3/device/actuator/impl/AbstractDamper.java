@@ -1,6 +1,7 @@
 package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
@@ -10,7 +11,7 @@ import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.logger.LogAware;
-import net.sf.jukebox.sem.ACT;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
@@ -85,7 +86,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
      * {@inheritDoc}
      */
     @Override
-    public final void set(double throttle) {
+    public final Future<TransitionStatus> set(double throttle) {
         
         ThreadContext.push("set");
         
@@ -112,6 +113,11 @@ public abstract class AbstractDamper extends LogAware implements Damper {
                 stateChanged();
             }
 
+            // VT: FIXME: Not possible to all things in one commit.
+            // https://github.com/home-climate-control/dz/issues/48
+
+            return null;
+
         } finally {
             ThreadContext.pop();
         }
@@ -130,34 +136,9 @@ public abstract class AbstractDamper extends LogAware implements Damper {
      * {@inheritDoc}
      */
     @Override
-    public ACT park() {
+    public Future<TransitionStatus> park() {
 
-        ThreadContext.push("park");
-        
-        try {
-            
-            // VT: NOTE: Careful here. This implementation will work correctly only if
-            // moveDamper() works synchronously. For others (ServoDamper being a good example)
-            // you will have to provide your own implementation (again, ServoDamper is an
-            // example of how this is done).
-            
-            ACT done = new ACT();
-
-            try {
-                
-                moveDamper(parkPosition);
-                done.complete(true);
-                
-            } catch (Throwable t) {
-                
-                done.complete(false);
-            }
-
-            return done;
-        
-        } finally {
-            ThreadContext.pop();
-        }
+        return set(getParkPosition());
     }
 
     /**

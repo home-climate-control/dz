@@ -1,27 +1,25 @@
 package net.sf.dz3.device.model.impl;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.DamperController;
-import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;
+import net.sf.dz3.device.model.UnitSignal;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.logger.LogAware;
-import net.sf.jukebox.sem.SemaphoreGroup;
 
 /**
  * Base logic for the damper controller.
@@ -178,7 +176,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
                 } else {
 
                     // Might've been killed last time, need to set the dampers straight
-                    park();
+                    park(true);
                 }
                 
             } else if (!this.hvacSignal.sample.running && signal.sample.running) {
@@ -189,7 +187,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
             } else if (this.hvacSignal.sample.running && !signal.sample.running) {
                 
-                park();
+                park(true);
 
             } else {
 
@@ -204,7 +202,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         }
     }
     
-    private void park() {
+    private void park(boolean async) {
 
         ThreadContext.push("park");
         
@@ -222,7 +220,9 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
                 damperMap.put(d, d.getParkPosition());
             }
 
-            shuffle(damperMap);
+            shuffle(damperMap, async);
+
+            logger.info("parked");
 
         } finally {
             ThreadContext.pop();
@@ -231,10 +231,14 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
     /**
      * Set positions of dampers in the map.
-     * 
+     *
+     * Normally, the positions will be set asynchronously. The only exception to this is
+     * when {@code shuffle()} is called via {@link #park()} from {@link #powerOff()}.
+     *
      * @param damperMap Key is the damper, value is the position to set.
+     * @param async {@code true} if the positions are to be set asynchronously.
      */
-    private void shuffle(Map<Damper, Double> damperMap) {
+    private void shuffle(Map<Damper, Double> damperMap, boolean async) {
         
         ThreadContext.push("shuffle");
         
@@ -242,25 +246,41 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
             
             logger.info("damperMap.size()=" + damperMap.size());
         
-            for (Iterator<Damper> i = damperMap.keySet().iterator(); i.hasNext(); ) {
+            for (Iterator<Entry<Damper, Double>> i = damperMap.entrySet().iterator(); i.hasNext(); ) {
 
-                Damper d = i.next();
+                Entry<Damper, Double> entry = i.next();
+                Damper d = entry.getKey();
+                double position = entry.getValue();
 
-                try {
-                    
-                    double position = damperMap.get(d);
-                    
-                    logger.info("damper position: " + d.getName() + "=" + position);
+                logger.info("damper position: " + d.getName() + "=" + position);
+
+                // VT: FIXME: https://github.com/home-climate-control/dz/issues/49
+
+                if (async) {
 
                     d.set(position);
 
-                } catch (IOException ex) {
+                } else {
 
-                    // This can be really bad, for it's possible that all the dampers
-                    // are controlled by the same controller and it's the controller that is faulty.
-                    // Don't want the HVAC to suffocate with all the dampers closed.
+                    // VT: FIXME: This is ugly.
+                    //
+                    // Using the pattern in DamperMultiplexer#park() in our park()
+                    // would speed it up significantly, especially if the dampers are of the crawling type.
+                    // Let's complain loudly so we don't forget
 
-                    logger.fatal("Can't set the damper position for " + d, ex);
+                    logger.fatal("FIXME: implement true synchronous park via CompletionService");
+
+                    try {
+
+                        d.set(position).get();
+
+                    } catch (InterruptedException | ExecutionException ex) {
+
+                        // This is potentially expensive - may slug the HVAC if the dampers are
+                        // left closed while it is running, hence fatal level
+
+                        logger.fatal("can't set position for " + d.getName(),  ex);
+                    }
                 }
             }
             
@@ -316,11 +336,11 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         
         if (this.hvacSignal != null && this.hvacSignal.sample.running) {
         
-            shuffle(compute());
+            shuffle(compute(), true);
             
         } else {
             
-            park();
+            park(true);
         }
     }
 
@@ -343,38 +363,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
             enabled = false;
             logger.warn("Powering off");
             
-            // Can't use normal park() here, for it is asynchronous and this method
-            // must finish everything before returning
-            
-            Set<Damper> damperSet = new HashSet<Damper>(); 
-
-            for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
-
-                Thermostat ts = i.next();
-                Damper d = ts2damper.get(ts);
-
-                damperSet.add(d);
-            }
-
-            SemaphoreGroup parked = new SemaphoreGroup();
-            
-            for (Iterator<Damper> i = damperSet.iterator(); i.hasNext(); ) {
-
-                Damper d = i.next();
-                
-                parked.add(d.park());
-                logger.info("Issued park() to " + d.getName());
-            }
-            
-            try {
-                
-                parked.waitForAll();
-                logger.info("Parked dampers");
-                
-            } catch (InterruptedException ex) {
-
-                logger.warn("Failed to park all dampers, some may be in a wrong position", ex);
-            }
+            park(false);
             
         } finally {
             ThreadContext.pop();

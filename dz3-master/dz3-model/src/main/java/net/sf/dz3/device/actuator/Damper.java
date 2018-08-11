@@ -1,12 +1,14 @@
 package net.sf.dz3.device.actuator;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
-import net.sf.jukebox.sem.ACT;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * The damper abstraction.
@@ -33,12 +35,12 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * @param position 0 is fully closed, 1 is fully open, 0...1 corresponds
      * to partially open position.
      *
-     * @exception IOException if there was a problem communicating with the
-     * hardware.
+     * @return A token that allows to track the completion of the damper
+     * movement.
      * 
      * @exception IllegalArgumentException if {@code position} is outside of 0...1 range.
      */
-    public void set(double position) throws IOException;
+    public Future<TransitionStatus> set(double position);
     
     /**
      * Get current damper position.
@@ -104,5 +106,26 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * may take a while if the damper is configured with a transition
      * controller).
      */
-    public ACT park();
+    public Future<TransitionStatus> park();
+
+    /**
+     * Synchronous wrapper for {@link Damper#set(double)}.
+     */
+    public static class Move implements Callable<TransitionStatus> {
+
+        private final Damper target;
+        private final double position;
+
+        public Move(Damper target, double position) {
+
+            this.target = target;
+            this.position = position;
+        }
+
+        @Override
+        public TransitionStatus call() throws Exception {
+
+            return target.set(position).get();
+        }
+    }
 }

@@ -1,5 +1,6 @@
 dependencies {
 
-    compile project(':dz3-sensors')
+    compile 'net.sf.servomaster:servomaster-common:2.0.0-SNAPSHOT'
 
+    compile project(':dz3-sensors')
 }

@@ -1,17 +1,22 @@
 package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.sem.ACT;
-import net.sf.jukebox.sem.SemaphoreGroup;
-import net.sf.jukebox.service.Messenger;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Damper multiplexer.
@@ -22,6 +27,15 @@ import net.sf.jukebox.service.Messenger;
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public class DamperMultiplexer extends AbstractDamper {
+
+    private static final Random rg = new SecureRandom();
+
+    /**
+     * Thread pool for parking assistants.
+     *
+     * This pool requires exactly one thread.
+     */
+    private final ExecutorService parkingExecutor = Executors.newFixedThreadPool(1);
 
     /**
      * Dampers to control.
@@ -47,20 +61,10 @@ public class DamperMultiplexer extends AbstractDamper {
             
             Damper d = i.next();
             
-            try {
-                
-                d.set(position);
-                
-            } catch (IOException ex) {
+            // VT: FIXME: Not possible to all things in one commit.
+            // https://github.com/home-climate-control/dz/issues/49
 
-                // VT: NOTE: Multiplexer is less prone to errors than a regular damper,
-                // because different dampers may be controlled by different controllers and
-                // not fail all at once. However, low probability of this happening
-                // makes it impractical to handle such errors separately. If you feel otherwise,
-                // feel free to interfere (i.e. not throw an exception if not all dampers failed).
-                
-                throw new IOException("One of controlled dampers failed", ex);
-            }
+            d.set(position);
         }
     }
 
@@ -89,54 +93,95 @@ public class DamperMultiplexer extends AbstractDamper {
     /**
      * {@inheritDoc}
      */
-    public ACT park() {
+    public Future<TransitionStatus> park() {
 
-        // VT: This implementation is similar to the one used in ServoDamper,
-        // but abstractions are different.
+        ThreadContext.push("park");
 
-        logger.info(getName() + ": parking at " + getParkPosition());
+        try {
 
-        return new ParkingAssistant().start();
-    }
+            final long authToken = rg.nextLong();
+            final TransitionStatus status = new TransitionStatus(authToken);
 
-    /**
-     * Commands the {@link ServoDamper#servo} to move to {@link ServoDamper#getParkPosition
-     * parked position} and waits until the servo has done so.
-     */
-    private class ParkingAssistant extends Messenger {
+            Runnable parkingAssistant = new Runnable() {
 
-        /**
-         * Move the {@link ServoDamper#servo} and wait until it gets there.
-         */
-        @Override
-        protected final Object execute() throws Throwable {
+                @Override
+                public void run() {
 
-            ThreadContext.push("execute");
-            
-            try {
-                
-                SemaphoreGroup parked = new SemaphoreGroup();
-                
-                for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
-                    
-                    Damper d = i.next();
-                    
-                    parked.add(d.park());
+                    ThreadContext.push("run");
+
+                    try {
+
+                        logger.info(getName() + ": parking at " + getParkPosition());
+
+                        // VT: NOTE: Ignoring state consistency of the damper collection
+
+                        int count = dampers.size();
+                        CompletionService<TransitionStatus> cs = new ExecutorCompletionService<>(Executors.newFixedThreadPool(count));
+
+                        for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
+
+                            Damper d = i.next();
+
+                            // VT: FIXME: https://github.com/home-climate-control/dz/issues/41
+                            //
+                            // Need to park dampers at their individual positions if they were specified,
+                            // or to the multiplexer parking position if they weren't.
+                            //
+                            // At this point, it is not known whether the parking positions were specified or not
+                            // (the parking position is double, not Double); need to fix this.
+
+                            cs.submit(new Damper.Move(d, getParkPosition()));
+                        }
+
+                        boolean ok = true;
+
+                        while (count-- > 0) {
+
+                            Future<TransitionStatus> result = cs.take();
+                            TransitionStatus s = result.get();
+
+                            // This will cause the whole park() call to report failure
+
+                            ok = s.isOK();
+
+                            if (!ok) {
+
+                                // This is potentially expensive - may slug the HVAC if the dampers are
+                                // left closed while it is running, hence fatal level
+
+                                logger.fatal("can't park one of the dampers", s.getCause());
+                            }
+                        }
+
+                        if (ok) {
+
+                            status.complete(authToken, null);
+                            return;
+                        }
+
+                        status.complete(authToken, new IllegalStateException("one or more dampers failed to park"));
+
+                    } catch (Throwable t) {
+
+                        // This is potentially expensive - may slug the HVAC if the dampers are
+                        // left closed while it is running, hence fatal level
+
+                        logger.fatal("can't park", t);
+
+                        status.complete(authToken, t);
+
+                    } finally {
+
+                        ThreadContext.pop();
+                        ThreadContext.clearStack();
+                    }
                 }
+            };
 
-                parked.waitForAll();
+            return parkingExecutor.submit(parkingAssistant, status);
 
-                logger.info(getName() + ": parked at " + getParkPosition());
-
-            } catch (Throwable t) {
-
-                logger.error(getName() + ": failed to park at " + getParkPosition(), t);
-                
-            } finally {
-                ThreadContext.pop();
-            }
-
-            return null;
+        } finally {
+            ThreadContext.pop();
         }
     }
 }
