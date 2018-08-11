@@ -204,8 +204,12 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
                             Damper d = entry.getKey();
                             double position = entry.getValue();
 
+                            logger.debug(d.getName() + ": " + position);
+
                             cs.submit(new Damper.Move(d, position));
                         }
+
+                        logger.debug("fired transitions");
 
                         boolean ok = true;
 
@@ -226,6 +230,8 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
                                 logger.fatal("can't set damper position", s.getCause());
                             }
                         }
+
+                        logger.debug("transitions complete, ok=" + ok);
 
                         if (ok) {
 

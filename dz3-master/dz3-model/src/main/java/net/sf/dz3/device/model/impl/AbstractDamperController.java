@@ -3,9 +3,12 @@ package net.sf.dz3.device.model.impl;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
@@ -20,6 +23,7 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.logger.LogAware;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Base logic for the damper controller.
@@ -27,6 +31,13 @@ import net.sf.jukebox.logger.LogAware;
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractDamperController extends LogAware implements DamperController, JmxAware {
+
+    /**
+     * Completion service for asynchronous transitions.
+     *
+     * This pool requires exactly one thread.
+     */
+    CompletionService<Future<TransitionStatus>> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
 
     /**
      * Association from a thermostat to a damper.
@@ -238,50 +249,28 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      * @param damperMap Key is the damper, value is the position to set.
      * @param async {@code true} if the positions are to be set asynchronously.
      */
-    private void shuffle(Map<Damper, Double> damperMap, boolean async) {
+    private Future<TransitionStatus> shuffle(Map<Damper, Double> damperMap, boolean async) {
         
         ThreadContext.push("shuffle");
         
         try {
-            
-            logger.info("damperMap.size()=" + damperMap.size());
-        
-            for (Iterator<Entry<Damper, Double>> i = damperMap.entrySet().iterator(); i.hasNext(); ) {
 
-                Entry<Damper, Double> entry = i.next();
-                Damper d = entry.getKey();
-                double position = entry.getValue();
+            transitionCompletionService.submit(new Damper.MoveGroup(damperMap, async));
 
-                logger.info("damper position: " + d.getName() + "=" + position);
+            try {
 
-                // VT: FIXME: https://github.com/home-climate-control/dz/issues/49
+                // VT: NOTE: The following line unwraps one level of Future. The first Future
+                // is completed when the transitions have been fired, and the second is
+                // when they all complete.
 
-                if (async) {
+                return transitionCompletionService.take().get();
 
-                    d.set(position);
+            } catch (InterruptedException | ExecutionException ex) {
 
-                } else {
+                // VT: FIXME: Oops... Really don't know what to do with this, will have to collect stats
+                // before this can be reasonably handled
 
-                    // VT: FIXME: This is ugly.
-                    //
-                    // Using the pattern in DamperMultiplexer#park() in our park()
-                    // would speed it up significantly, especially if the dampers are of the crawling type.
-                    // Let's complain loudly so we don't forget
-
-                    logger.fatal("FIXME: implement true synchronous park via CompletionService");
-
-                    try {
-
-                        d.set(position).get();
-
-                    } catch (InterruptedException | ExecutionException ex) {
-
-                        // This is potentially expensive - may slug the HVAC if the dampers are
-                        // left closed while it is running, hence fatal level
-
-                        logger.fatal("can't set position for " + d.getName(),  ex);
-                    }
-                }
+                throw new IllegalStateException("Unhandled exception", ex);
             }
             
         } finally {

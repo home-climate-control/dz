@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import junit.framework.TestCase;
@@ -20,6 +22,8 @@ import net.sf.servomaster.device.model.TransitionStatus;
 
 public class BalancingDamperControllerTest extends TestCase {
     
+    private final Logger logger = LogManager.getLogger(getClass());
+
     /**
      * Make sure that thermostats with negative demand don't cause damper control signals
      * out of acceptable range.
@@ -73,6 +77,8 @@ public class BalancingDamperControllerTest extends TestCase {
             damperController.consume(new DataSample<UnitSignal>("unit1", "unit1", new UnitSignal(1.0, true, 0), null));
 
             damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>("ts1", "ts1", -50.0, null)));
+
+            logger.debug("about to assert");
 
             assertEquals("Wrong damper position", 0.0, d1.get(), 0.000000000001);
 
