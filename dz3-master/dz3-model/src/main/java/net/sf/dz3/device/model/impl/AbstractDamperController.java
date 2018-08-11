@@ -109,25 +109,18 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public synchronized void put(Thermostat ts, Damper damper) {
 
         ts2damper.put(ts, damper);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public synchronized void remove(Thermostat ts) {
 
         ts2damper.remove(ts);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public synchronized void stateChanged(Thermostat source, ThermostatSignal signal) {
 
         ThreadContext.push("signalChanged");
@@ -330,9 +323,6 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final synchronized void powerOff() {
         

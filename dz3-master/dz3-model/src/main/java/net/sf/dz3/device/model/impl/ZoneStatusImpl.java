@@ -29,25 +29,16 @@ public class ZoneStatusImpl implements ZoneStatus, Serializable {
         this.voting = voting;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double getSetpoint() {
         return setpoint;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getDumpPriority() {
         return dumpPriority;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isOn() {
         return enabled;

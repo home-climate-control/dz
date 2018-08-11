@@ -200,9 +200,6 @@ public class BalancingDamperController extends AbstractDamperController {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
 

@@ -123,9 +123,7 @@ public class HysteresisController extends AbstractProcessController {
     public double getThresholdHigh() {
 	return thresholdHigh;
     }
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public final synchronized DataSample<Double> compute() {
 
@@ -176,9 +174,6 @@ public class HysteresisController extends AbstractProcessController {
         return "hys";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ProcessControllerStatus getStatus() {
 	

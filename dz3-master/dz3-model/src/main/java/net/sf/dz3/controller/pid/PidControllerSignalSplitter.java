@@ -28,9 +28,7 @@ public class PidControllerSignalSplitter extends ProcessControllerSignalSplitter
         super(controller);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void consume(DataSample<ProcessControllerStatus> signal) {
         
         // Let them consume the common process controller signal components

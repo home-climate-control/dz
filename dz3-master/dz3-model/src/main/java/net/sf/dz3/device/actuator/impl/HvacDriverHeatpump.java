@@ -120,9 +120,7 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
         switchFan.setState(reverseFan ? !state : state);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public JmxDescriptor getJmxDescriptor() {
         
         return new JmxDescriptor(
@@ -138,9 +136,6 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void powerOff() {
 

@@ -109,18 +109,12 @@ public class SwitchDamper extends AbstractDamper {
 	}
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double getPosition() throws IOException {
         
         return position; 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
         

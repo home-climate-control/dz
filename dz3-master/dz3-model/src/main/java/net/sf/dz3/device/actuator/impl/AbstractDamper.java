@@ -58,9 +58,6 @@ public abstract class AbstractDamper extends LogAware implements Damper {
         return name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void setParkPosition(double parkPosition) {
 
@@ -72,23 +69,17 @@ public abstract class AbstractDamper extends LogAware implements Damper {
         this.parkPosition = parkPosition;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final double getParkPosition() {
 
         return parkPosition;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final void set(double throttle) {
-        
+
         ThreadContext.push("set");
-        
+
         try {
             
             logger.info("position=" + throttle);
@@ -126,9 +117,6 @@ public abstract class AbstractDamper extends LogAware implements Damper {
      */
     protected abstract void moveDamper(double position) throws IOException;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ACT park() {
 
@@ -160,9 +148,6 @@ public abstract class AbstractDamper extends LogAware implements Damper {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     private synchronized void stateChanged() {
 
         dataBroadcaster.broadcast(new DataSample<Double>(System.currentTimeMillis(), name, signature, position, null));

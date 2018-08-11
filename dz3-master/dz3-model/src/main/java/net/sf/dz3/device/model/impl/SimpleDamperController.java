@@ -82,9 +82,6 @@ public class SimpleDamperController extends AbstractDamperController {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
 

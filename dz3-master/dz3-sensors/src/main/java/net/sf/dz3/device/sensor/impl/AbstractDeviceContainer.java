@@ -38,9 +38,7 @@ abstract public class AbstractDeviceContainer implements DeviceContainer {
         return getType() + getAddress();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public int compareTo(DeviceContainer other) {
 
         if (other == null) {

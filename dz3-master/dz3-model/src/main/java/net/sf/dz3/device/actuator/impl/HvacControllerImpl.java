@@ -138,18 +138,13 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final synchronized HvacMode getMode() {
         
         return state.sample.mode;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final synchronized void setMode(HvacMode mode) {
         
         ThreadContext.push("setMode");
@@ -248,9 +243,6 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
         executor.execute(new CommandSetDemand(hvacDriver, demand));
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final String getName() {
         
@@ -333,6 +325,7 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
             ThreadContext.pop();
         }
     }
+
     /**
      * Broadcast the state change.
      */
@@ -340,25 +333,19 @@ public class HvacControllerImpl extends LogAware implements HvacController, JmxA
         
         dataBroadcaster.broadcast(state);
     }
-    /**
-     * {@inheritDoc}
-     */
+
+    @Override
     public final void addConsumer(DataSink<HvacSignal> consumer) {
         
         dataBroadcaster.addConsumer(consumer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final void removeConsumer(DataSink<HvacSignal> consumer) {
         
         dataBroadcaster.removeConsumer(consumer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final int compareTo(HvacController o) {
 

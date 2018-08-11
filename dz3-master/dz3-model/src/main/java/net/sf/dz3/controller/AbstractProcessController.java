@@ -61,9 +61,7 @@ public abstract class AbstractProcessController implements ProcessController {
         return lastKnownSignal;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final void setSetpoint(final double setpoint) {
 
         this.setpoint = setpoint;
@@ -80,9 +78,7 @@ public abstract class AbstractProcessController implements ProcessController {
      */
     abstract protected void setpointChanged();
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final double getSetpoint() {
 
         return setpoint;
@@ -98,9 +94,7 @@ public abstract class AbstractProcessController implements ProcessController {
         return pv;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final synchronized double getError() {
 	
 	if (pv == null) {
@@ -112,9 +106,7 @@ public abstract class AbstractProcessController implements ProcessController {
         return pv.sample - setpoint;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final synchronized DataSample<Double> compute(DataSample<Double> pv) {
 	
 	if (pv == null) {
@@ -141,9 +133,7 @@ public abstract class AbstractProcessController implements ProcessController {
         return wrapCompute();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void consume(DataSample<Double> sample) {
         
         compute(sample);
@@ -180,16 +170,12 @@ public abstract class AbstractProcessController implements ProcessController {
      */
     protected abstract DataSample<Double> compute();
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void addConsumer(DataSink<ProcessControllerStatus> consumer) {
         dataBroadcaster.addConsumer(consumer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void removeConsumer(DataSink<ProcessControllerStatus> consumer) {
         dataBroadcaster.removeConsumer(consumer);
     }
@@ -235,6 +221,7 @@ public abstract class AbstractProcessController implements ProcessController {
      *
      * @return Status object.
      */
+    @Override
     public ProcessControllerStatus getStatus() {
 
         return new ProcessControllerStatus(

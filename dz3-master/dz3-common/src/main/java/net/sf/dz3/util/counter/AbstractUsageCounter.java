@@ -129,44 +129,30 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
         return storageKeys;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final String getName() {
         
         return name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getThreshold() {
         
         return threshold;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getUsageAbsolute() {
         
         return current;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double getUsageRelative() {
         
         return threshold == 0 ? 0 : (double)current / (double)threshold;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setThreshold(long units) {
         
@@ -177,9 +163,6 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
         threshold = units;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized final void reset() {
 
@@ -201,9 +184,6 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void consume(DataSample<Double> signal) {
         
@@ -241,18 +221,12 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void addConsumer(DataSink<Double> consumer) {
 
         dataBroadcaster.addConsumer(consumer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeConsumer(DataSink<Double> consumer) {
 
@@ -280,9 +254,6 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
             this.current = current;
         }
         
-        /**
-         * {@inheritDoc}
-         */
         @Override
         public String toString() {
             

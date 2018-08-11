@@ -87,9 +87,7 @@ public class UnitModel extends LogAware implements Unit {
         }
     }
     
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public String getName() {
 
         if ( name == null ) {
@@ -100,9 +98,7 @@ public class UnitModel extends LogAware implements Unit {
         return name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public int compareTo(Unit other) {
 	
 	if (other == null) {
@@ -225,17 +221,14 @@ public class UnitModel extends LogAware implements Unit {
             ThreadContext.pop();
         }
     }
-    /**
-     * {@inheritDoc}
-     */
+
+    @Override
     public void addConsumer(DataSink<UnitSignal> consumer) {
         
         dataBroadcaster.addConsumer(consumer);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void removeConsumer(DataSink<UnitSignal> consumer) {
         
         dataBroadcaster.removeConsumer(consumer);
@@ -279,9 +272,6 @@ public class UnitModel extends LogAware implements Unit {
                 "Analyzes zone controller output and decides what signals to send to actual HVAC hardware driver");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public long getMinRuntime() {
         return minRuntimeMillis;

@@ -55,9 +55,6 @@ public class NullDamper extends AbstractDamper {
 	}
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
         

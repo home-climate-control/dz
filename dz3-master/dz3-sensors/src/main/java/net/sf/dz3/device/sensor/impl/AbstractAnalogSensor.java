@@ -90,17 +90,13 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
         this.pollIntervalMillis = pollIntervalMillis;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final String getAddress() {
 
         return address;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public final DataSample<Double> getSignal() {
 
         return currentSignal;

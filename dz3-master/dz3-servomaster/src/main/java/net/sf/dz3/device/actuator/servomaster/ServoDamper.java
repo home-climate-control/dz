@@ -163,9 +163,7 @@ public class ServoDamper extends AbstractDamper {
         return servo.getPosition();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ACT park() {
 
         // VT: This implementation is awkward, but there seems to be no way
@@ -180,9 +178,6 @@ public class ServoDamper extends AbstractDamper {
         return new ParkingAssistant().start();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
         

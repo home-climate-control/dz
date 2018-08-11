@@ -73,9 +73,6 @@ public class DamperMultiplexer extends AbstractDamper {
         return dampers.iterator().next().getPosition();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JmxDescriptor getJmxDescriptor() {
         
@@ -86,9 +83,7 @@ public class DamperMultiplexer extends AbstractDamper {
                 "Controls " + dampers.size() + " dampers");
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public ACT park() {
 
         // VT: This implementation is similar to the one used in ServoDamper,

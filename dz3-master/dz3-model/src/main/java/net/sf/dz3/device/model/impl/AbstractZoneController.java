@@ -129,9 +129,6 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
         stateChanged(source, signal.sample);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     private synchronized void stateChanged(Thermostat source, ThermostatSignal pv) {
 
         ThreadContext.push("stateChanged");

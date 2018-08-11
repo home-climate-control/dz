@@ -32,9 +32,6 @@ public class Calibration<E extends Number> {
         this.max = max;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         

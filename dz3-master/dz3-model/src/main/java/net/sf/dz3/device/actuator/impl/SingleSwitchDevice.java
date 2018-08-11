@@ -66,9 +66,6 @@ public class SingleSwitchDevice implements DataSink<Double> {
         source.addConsumer(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public synchronized void consume(DataSample<Double> signal) {
         
