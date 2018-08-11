@@ -1,6 +1,8 @@
 package net.sf.dz3.device.model.impl;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.SimplePidController;
@@ -13,6 +15,7 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.sem.ACT;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 public class BalancingDamperControllerTest extends TestCase {
     
@@ -81,18 +84,24 @@ public class BalancingDamperControllerTest extends TestCase {
             throw new UnsupportedOperationException("Not Implemented");
         }
 
-        public ACT park() {
+        public Future<TransitionStatus> park() {
             throw new UnsupportedOperationException("Not Implemented");
         }
 
         @Override
-        public void set(double position) throws IOException {
+        public Future<TransitionStatus> set(double position) {
             
             assertTrue("got NaN", Double.compare(position, Double.NaN) != 0);
             assertTrue("position is above 1.0: " + position, position <= 1.0);
             assertTrue("position is below 0.0: " + position, position >= 0.0);
-            
+
             currentPosition = position;
+
+            TransitionStatus status = new TransitionStatus(0);
+
+            status.complete(0, null);
+
+            return CompletableFuture.completedFuture(status);
         }
         
         public double get() {

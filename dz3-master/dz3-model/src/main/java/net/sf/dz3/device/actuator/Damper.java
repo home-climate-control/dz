@@ -1,8 +1,22 @@
 package net.sf.dz3.device.actuator;
 
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
@@ -126,6 +140,119 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
         public TransitionStatus call() throws Exception {
 
             return target.set(position).get();
+        }
+    }
+
+    /**
+     * Utility class to move a set of dampers to given positions, synchronously or asynchronously.
+     */
+    public static class MoveGroup implements Callable<Future<TransitionStatus>> {
+
+        private static final Random rg = new SecureRandom();
+
+        /**
+         * Thread pool for group transitions.
+         *
+         * This pool requires exactly one thread.
+         */
+        private final ExecutorService transitionExecutor = Executors.newFixedThreadPool(1);
+
+        protected final Logger logger = LogManager.getLogger(getClass());
+
+        private final Map<Damper, Double> targetPosition;
+        private final boolean async;
+        private final long authToken;
+
+        /**
+         * @param targetPosition Map between damper and positions they're supposed to be set to.
+         * @param async {@code true} if the {@code Future<TransitionStatus>} will be returned immediately
+         * and positions will be set in background, {@code false} if all the transitions need to end
+         * before this {@link #call()} returns.
+         */
+        public MoveGroup(Map<Damper, Double> targetPosition, boolean async) {
+
+            this.targetPosition = Collections.unmodifiableMap(targetPosition);
+            this.async = async;
+
+            this.authToken = rg.nextLong();
+
+            if (this.async) {
+                logger.fatal("FIXME: async not implemented", new IllegalArgumentException());
+            }
+        }
+
+        @Override
+        public Future<TransitionStatus> call() throws Exception {
+
+            TransitionStatus status = new TransitionStatus(authToken);
+
+            Runnable mover = new Runnable() {
+
+                @Override
+                public void run() {
+
+                    ThreadContext.push("run");
+
+                    try {
+
+                        int count = targetPosition.size();
+                        CompletionService<TransitionStatus> cs = new ExecutorCompletionService<>(Executors.newFixedThreadPool(count));
+
+                        for (Iterator<Entry<Damper, Double>> i = targetPosition.entrySet().iterator(); i.hasNext(); ) {
+
+                            Entry<Damper, Double> entry = i.next();
+                            Damper d = entry.getKey();
+                            double position = entry.getValue();
+
+                            cs.submit(new Damper.Move(d, position));
+                        }
+
+                        boolean ok = true;
+
+                        while (count-- > 0) {
+
+                            Future<TransitionStatus> result = cs.take();
+                            TransitionStatus s = result.get();
+
+                            // This will cause the whole park() call to report failure
+
+                            ok = s.isOK();
+
+                            if (!ok) {
+
+                                // This is potentially expensive - may slug the HVAC if the dampers are
+                                // left closed while it is running, hence fatal level
+
+                                logger.fatal("can't set damper position", s.getCause());
+                            }
+                        }
+
+                        if (ok) {
+
+                            status.complete(authToken, null);
+                            return;
+                        }
+
+                        status.complete(authToken, new IllegalStateException("one or more dampers failed to park"));
+
+                    } catch (Throwable t) {
+
+                        // This is potentially expensive - may slug the HVAC if the dampers are
+                        // left closed while it is running, hence fatal level
+
+                        logger.fatal("can't set damper position", t);
+
+                        status.complete(authToken, t);
+
+                    } finally {
+
+                        ThreadContext.pop();
+                        ThreadContext.clearStack();
+                    }
+                }
+            };
+
+            return transitionExecutor.submit(mover, status);
         }
     }
 }

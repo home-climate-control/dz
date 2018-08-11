@@ -1,11 +1,15 @@
 package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.Switch;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxDescriptor;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Damper controlled by a switch.
@@ -84,29 +88,44 @@ public class SwitchDamper extends AbstractDamper {
     }
 
     @Override
-    public void moveDamper(double position) {
-	
-	ThreadContext.push("moveDamper");
+    public Future<TransitionStatus> moveDamper(double position) {
 
-	try {
+        ThreadContext.push("moveDamper");
 
-	    boolean state = position > threshold ? true : false;
+        // VT: NOTE: For now, let's assume that transition is instantaneous.
+        // However, let's keep an eye on it - there may be slow acting switches
+        // such as ShellSwitch.
 
-	    logger.debug("translated " + position + " => " + state);
+        Marker m = new Marker("moveDamper");
+        TransitionStatus status = new TransitionStatus(m.hashCode());
 
-	    target.setState(state);
-	    
-	    this.position = position;
+        try {
 
-	} catch (Throwable t) {
+            boolean state = position > threshold ? true : false;
 
-	    // This is pretty serious, closed damper may cause the compressor to slug
-	    // or the boiler to blow up
-	    logger.fatal("Failed to set the damper state", t);
+            logger.debug("translated " + position + " => " + state);
 
-	} finally {
-	    ThreadContext.pop();
-	}
+            target.setState(state);
+
+            this.position = position;
+
+            status.complete(m.hashCode(), null);
+
+        } catch (Throwable t) {
+
+            // This is pretty serious, closed damper may cause the compressor to slug
+            // or the boiler to blow up
+            logger.fatal("Failed to set the damper state", t);
+
+            status.complete(m.hashCode(), t);
+
+        } finally {
+
+            m.close();
+            ThreadContext.pop();
+        }
+
+        return CompletableFuture.completedFuture(status);
     }
 
     /**

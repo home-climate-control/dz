@@ -139,7 +139,7 @@ public class ServoDamper extends AbstractDamper {
     }
 
     @Override
-    public void moveDamper(double throttle) throws IOException {
+    public Future<TransitionStatus> moveDamper(double throttle) {
 
         ThreadContext.push("moveDamper");
         
@@ -150,7 +150,7 @@ public class ServoDamper extends AbstractDamper {
                 logger.debug(servo.getName() + ": " + throttle);
             }
 
-            servo.setPosition(throttle);
+            return servo.setPosition(throttle);
 
         } finally {
 

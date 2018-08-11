@@ -1,6 +1,6 @@
 package net.sf.dz3.device.actuator.impl;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
@@ -103,20 +103,23 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
             try {
 
-                moveDamper(throttle);
+                Future<TransitionStatus> done = moveDamper(throttle);
                 stateChanged();
                 
+                return done;
+
             } catch (Throwable t) {
 
-                logger.error("Failed to move damper to position " + throttle, t);
+                logger.fatal("Failed to move damper to position " + throttle, t);
+
                 // VT: FIXME: Need to change Damper to be a producer of DataSample<Double>, not Double
                 stateChanged();
+
+                TransitionStatus done = new TransitionStatus(t.hashCode());
+                done.complete(t.hashCode(), t);
+
+                return CompletableFuture.completedFuture(done);
             }
-
-            // VT: FIXME: Not possible to all things in one commit.
-            // https://github.com/home-climate-control/dz/issues/48
-
-            return null;
 
         } finally {
             ThreadContext.pop();
@@ -127,10 +130,8 @@ public abstract class AbstractDamper extends LogAware implements Damper {
      * Move the actual damper.
      *
      * @param position Position to set.
-     * 
-     * @exception IOException if there was a problem moving the damper.
      */
-    protected abstract void moveDamper(double position) throws IOException;
+    protected abstract Future<TransitionStatus> moveDamper(double position);
 
     /**
      * {@inheritDoc}

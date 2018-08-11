@@ -1,14 +1,16 @@
 package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import junit.framework.TestCase;
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
-import net.sf.jukebox.sem.ACT;
-import junit.framework.TestCase;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Test case for {@link SwitchDamper}.
@@ -51,7 +53,7 @@ public class SwitchDamperTest extends TestCase {
      * @param target Damper to test.
      * @param parkedPosition Position to park in.
      */
-    private void testPark(Damper target, Double parkedPosition) throws IOException, InterruptedException {
+    private void testPark(Damper target, Double parkedPosition) throws IOException, InterruptedException, ExecutionException {
         
         if (parkedPosition != null) {
             
@@ -65,9 +67,13 @@ public class SwitchDamperTest extends TestCase {
         target.set(1);
         target.set(0);
         
-        ACT parked = target.park();
-        
-        if (!parked.waitFor()) {
+        Future<TransitionStatus> parked = target.park();
+
+        assertNotNull("Future is null", parked);
+
+        TransitionStatus s = parked.get();
+
+        if (!s.isOK()) {
             fail("Failed to park, see the log");
         }
         

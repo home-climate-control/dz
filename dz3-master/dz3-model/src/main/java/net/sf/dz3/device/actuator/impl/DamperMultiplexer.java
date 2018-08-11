@@ -1,14 +1,14 @@
 package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
-import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Random;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
@@ -28,14 +28,12 @@ import net.sf.servomaster.device.model.TransitionStatus;
  */
 public class DamperMultiplexer extends AbstractDamper {
 
-    private static final Random rg = new SecureRandom();
-
     /**
-     * Thread pool for parking assistants.
+     * Completion service for asynchronous transitions.
      *
      * This pool requires exactly one thread.
      */
-    private final ExecutorService parkingExecutor = Executors.newFixedThreadPool(1);
+    CompletionService<Future<TransitionStatus>> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
 
     /**
      * Dampers to control.
@@ -55,16 +53,31 @@ public class DamperMultiplexer extends AbstractDamper {
     }
 
     @Override
-    protected synchronized void moveDamper(double position) throws IOException {
-        
-        for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
-            
-            Damper d = i.next();
-            
-            // VT: FIXME: Not possible to all things in one commit.
-            // https://github.com/home-climate-control/dz/issues/49
+    protected synchronized Future<TransitionStatus> moveDamper(double position) {
 
-            d.set(position);
+        Map<Damper, Double> targetPosition = new HashMap<>();
+
+        for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
+
+            targetPosition.put(i.next(), position);
+        }
+
+        transitionCompletionService.submit(new Damper.MoveGroup(targetPosition, false));
+
+        try {
+
+            // VT: NOTE: The following line unwraps one level of Future. The first Future
+            // is completed when the transitions have been fired, and the second is
+            // when they all complete.
+
+            return transitionCompletionService.take().get();
+
+        } catch (InterruptedException | ExecutionException ex) {
+
+            // VT: FIXME: Oops... Really don't know what to do with this, will have to collect stats
+            // before this can be reasonably handled
+
+            throw new IllegalStateException("Unhandled exception", ex);
         }
     }
 
@@ -99,86 +112,15 @@ public class DamperMultiplexer extends AbstractDamper {
 
         try {
 
-            final long authToken = rg.nextLong();
-            final TransitionStatus status = new TransitionStatus(authToken);
+            // VT: FIXME: https://github.com/home-climate-control/dz/issues/41
+            //
+            // Need to park dampers at their individual positions if they were specified,
+            // or to the multiplexer parking position if they weren't.
+            //
+            // At this point, it is not known whether the parking positions were specified or not
+            // (the parking position is double, not Double); need to fix this.
 
-            Runnable parkingAssistant = new Runnable() {
-
-                @Override
-                public void run() {
-
-                    ThreadContext.push("run");
-
-                    try {
-
-                        logger.info(getName() + ": parking at " + getParkPosition());
-
-                        // VT: NOTE: Ignoring state consistency of the damper collection
-
-                        int count = dampers.size();
-                        CompletionService<TransitionStatus> cs = new ExecutorCompletionService<>(Executors.newFixedThreadPool(count));
-
-                        for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
-
-                            Damper d = i.next();
-
-                            // VT: FIXME: https://github.com/home-climate-control/dz/issues/41
-                            //
-                            // Need to park dampers at their individual positions if they were specified,
-                            // or to the multiplexer parking position if they weren't.
-                            //
-                            // At this point, it is not known whether the parking positions were specified or not
-                            // (the parking position is double, not Double); need to fix this.
-
-                            cs.submit(new Damper.Move(d, getParkPosition()));
-                        }
-
-                        boolean ok = true;
-
-                        while (count-- > 0) {
-
-                            Future<TransitionStatus> result = cs.take();
-                            TransitionStatus s = result.get();
-
-                            // This will cause the whole park() call to report failure
-
-                            ok = s.isOK();
-
-                            if (!ok) {
-
-                                // This is potentially expensive - may slug the HVAC if the dampers are
-                                // left closed while it is running, hence fatal level
-
-                                logger.fatal("can't park one of the dampers", s.getCause());
-                            }
-                        }
-
-                        if (ok) {
-
-                            status.complete(authToken, null);
-                            return;
-                        }
-
-                        status.complete(authToken, new IllegalStateException("one or more dampers failed to park"));
-
-                    } catch (Throwable t) {
-
-                        // This is potentially expensive - may slug the HVAC if the dampers are
-                        // left closed while it is running, hence fatal level
-
-                        logger.fatal("can't park", t);
-
-                        status.complete(authToken, t);
-
-                    } finally {
-
-                        ThreadContext.pop();
-                        ThreadContext.clearStack();
-                    }
-                }
-            };
-
-            return parkingExecutor.submit(parkingAssistant, status);
+            return moveDamper(getParkPosition());
 
         } finally {
             ThreadContext.pop();
