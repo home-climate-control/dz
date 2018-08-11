@@ -2,6 +2,7 @@ package net.sf.dz3.device.model.impl;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.LogManager;
@@ -59,7 +60,7 @@ public class BalancingDamperControllerTest extends TestCase {
     /**
      * Make sure that zero demand from all thermostats doesn't cause NaN sent to dampers.
      */
-    public void testNaN() {
+    public void testNaN() throws InterruptedException, ExecutionException {
         
         ThreadContext.push("testNaN");
         
@@ -76,7 +77,11 @@ public class BalancingDamperControllerTest extends TestCase {
             // No calculations are performed unless the HVAC unit signal is present
             damperController.consume(new DataSample<UnitSignal>("unit1", "unit1", new UnitSignal(1.0, true, 0), null));
 
-            damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>("ts1", "ts1", -50.0, null)));
+            Future<TransitionStatus> done = damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>("ts1", "ts1", -50.0, null)));
+
+            TransitionStatus status = done.get();
+
+            assertTrue(status.isOK());
 
             logger.debug("about to assert");
 
