@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import org.apache.logging.log4j.ThreadContext;
+
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.actuator.Damper;
@@ -14,7 +16,6 @@ import net.sf.dz3.device.sensor.impl.NullSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.sem.ACT;
 import net.sf.servomaster.device.model.TransitionStatus;
 
 public class BalancingDamperControllerTest extends TestCase {
@@ -25,21 +26,30 @@ public class BalancingDamperControllerTest extends TestCase {
      */
     public void testBoundaries() {
         
-        Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
-        Thermostat ts2 = new ThermostatModel("ts2", new NullSensor("address2", 0), new SimplePidController(20, 1, 0, 0, 0));
+        ThreadContext.push("testBoundaries");
         
-        Damper d1 = new DummyDamper("d1");
-        Damper d2 = new DummyDamper("d2");
-        
-        BalancingDamperController damperController = new BalancingDamperController();
-        
-        damperController.put(ts1, d1);
-        damperController.put(ts2, d2);
-        
-        long timestamp = 0;
-        
-        damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts1", "ts1", 50.0, null)));
-        damperController.stateChanged(ts2, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts2", "ts2", -50.0, null)));
+        try {
+
+            Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+            Thermostat ts2 = new ThermostatModel("ts2", new NullSensor("address2", 0), new SimplePidController(20, 1, 0, 0, 0));
+
+            Damper d1 = new DummyDamper("d1");
+            Damper d2 = new DummyDamper("d2");
+
+            BalancingDamperController damperController = new BalancingDamperController();
+
+            damperController.put(ts1, d1);
+            damperController.put(ts2, d2);
+
+            long timestamp = 0;
+
+            damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts1", "ts1", 50.0, null)));
+            damperController.stateChanged(ts2, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts2", "ts2", -50.0, null)));
+
+        } finally {
+
+            ThreadContext.pop();
+        }
     }
     
     /**
@@ -47,20 +57,29 @@ public class BalancingDamperControllerTest extends TestCase {
      */
     public void testNaN() {
         
-        Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+        ThreadContext.push("testNaN");
         
-        DummyDamper d1 = new DummyDamper("d1");
-        
-        BalancingDamperController damperController = new BalancingDamperController();
-        
-        damperController.put(ts1, d1);
-        
-        // No calculations are performed unless the HVAC unit signal is present
-        damperController.consume(new DataSample<UnitSignal>("unit1", "unit1", new UnitSignal(1.0, true, 0), null));
-        
-        damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>("ts1", "ts1", -50.0, null)));
-        
-        assertEquals("Wrong damper position", 0.0, d1.get(), 0.000000000001);
+        try {
+
+            Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+
+            DummyDamper d1 = new DummyDamper("d1");
+
+            BalancingDamperController damperController = new BalancingDamperController();
+
+            damperController.put(ts1, d1);
+
+            // No calculations are performed unless the HVAC unit signal is present
+            damperController.consume(new DataSample<UnitSignal>("unit1", "unit1", new UnitSignal(1.0, true, 0), null));
+
+            damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>("ts1", "ts1", -50.0, null)));
+
+            assertEquals("Wrong damper position", 0.0, d1.get(), 0.000000000001);
+
+        } finally {
+
+            ThreadContext.pop();
+        }
     }
 
     private static class DummyDamper implements Damper {
