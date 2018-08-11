@@ -354,21 +354,21 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      * Compute damper positions based on known data.
      */
     protected abstract Map<Damper, Double> compute();
-    
+
     private class ThermostatListener implements DataSink<ThermostatSignal> {
 
-		@Override
-		public void consume(DataSample<ThermostatSignal> signal) {
-			
-			assert(signal != null);
+        @Override
+        public void consume(DataSample<ThermostatSignal> signal) {
 
-			Thermostat source = name2ts.get(signal.sourceName);
-			
-			if (source == null) {
-				throw new IllegalArgumentException("Don't know anything about '" + signal.sourceName + "'");
-			}
-			
-			stateChanged(source, signal.sample);
-		}
+            assert(signal != null);
+
+            Thermostat source = name2ts.get(signal.sourceName);
+
+            if (source == null) {
+                throw new IllegalArgumentException("Don't know anything about '" + signal.sourceName + "'");
+            }
+
+            stateChanged(source, signal.sample);
+        }
     }
 }
