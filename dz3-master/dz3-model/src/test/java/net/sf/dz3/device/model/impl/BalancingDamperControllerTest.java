@@ -93,6 +93,33 @@ public class BalancingDamperControllerTest extends TestCase {
         }
     }
 
+    /**
+     * Make sure that dampers are correctly parked on power off.
+     */
+    public void testPowerOff() throws InterruptedException, ExecutionException {
+
+        ThreadContext.push("testPowerOff");
+
+        try {
+
+            Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+
+            DummyDamper d1 = new DummyDamper("d1");
+
+            BalancingDamperController damperController = new BalancingDamperController();
+
+            damperController.put(ts1, d1);
+
+            damperController.powerOff();
+
+            // VT: FIXME: can't assert anything unless status is propagated here
+
+        } finally {
+
+            ThreadContext.pop();
+        }
+    }
+
     private static class DummyDamper implements Damper {
         
         private final String name;

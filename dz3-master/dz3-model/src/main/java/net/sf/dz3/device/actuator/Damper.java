@@ -153,15 +153,14 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
         /**
          * Thread pool for group transitions.
          *
-         * This pool requires exactly one thread.
+         * This pool requires exactly two threads: one to scatter, one to gather.
          */
-        private final ExecutorService transitionExecutor = Executors.newFixedThreadPool(1);
+        private final ExecutorService transitionExecutor = Executors.newFixedThreadPool(2);
 
         protected final Logger logger = LogManager.getLogger(getClass());
 
         private final Map<Damper, Double> targetPosition;
         private final boolean async;
-        private final long authToken;
 
         /**
          * @param targetPosition Map between damper and positions they're supposed to be set to.
@@ -173,30 +172,28 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
 
             this.targetPosition = Collections.unmodifiableMap(targetPosition);
             this.async = async;
-
-            this.authToken = rg.nextLong();
-
-            if (this.async) {
-                logger.fatal("FIXME: async not implemented");
-            }
         }
 
         @Override
         public Future<TransitionStatus> call() throws Exception {
 
-            TransitionStatus status = new TransitionStatus(authToken);
+            final long authTokenScatter = rg.nextLong();
+            final long authTokenGather  = rg.nextLong();
 
-            Runnable mover = new Runnable() {
+            TransitionStatus scatterStatus = new TransitionStatus(authTokenScatter);
+            TransitionStatus gatherStatus = new TransitionStatus(authTokenGather);
+            int count = targetPosition.size();
+            CompletionService<TransitionStatus> cs = new ExecutorCompletionService<>(Executors.newFixedThreadPool(count));
+
+            Runnable scatter = new Runnable() {
 
                 @Override
                 public void run() {
 
-                    ThreadContext.push("run");
+                    ThreadContext.push("run/scatter");
 
                     try {
 
-                        int count = targetPosition.size();
-                        CompletionService<TransitionStatus> cs = new ExecutorCompletionService<>(Executors.newFixedThreadPool(count));
 
                         for (Iterator<Entry<Damper, Double>> i = targetPosition.entrySet().iterator(); i.hasNext(); ) {
 
@@ -210,10 +207,46 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
                         }
 
                         logger.debug("fired transitions");
+                        scatterStatus.complete(authTokenScatter, null);
+
+                    } catch (Throwable t) {
+
+                        // This is potentially expensive - may slug the HVAC if the dampers are
+                        // left closed while it is running, hence fatal level
+
+                        logger.fatal("can't set damper position", t);
+
+                        scatterStatus.complete(authTokenScatter, t);
+
+                    } finally {
+
+                        ThreadContext.pop();
+                        ThreadContext.clearStack();
+                    }
+                }
+            };
+
+            Future<TransitionStatus> scatterDone = transitionExecutor.submit(scatter, scatterStatus);
+
+            Runnable gather = new Runnable() {
+
+                @Override
+                public void run() {
+
+                    ThreadContext.push("run/gather");
+
+                    try {
+
+                        logger.debug("waiting for transitions to be fired...");
+
+                        scatterDone.get();
+
+                        logger.debug("gathering transition results");
 
                         boolean ok = true;
+                        int left = count;
 
-                        while (count-- > 0) {
+                        while (left-- > 0) {
 
                             Future<TransitionStatus> result = cs.take();
                             TransitionStatus s = result.get();
@@ -222,7 +255,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
 
                             ok = s.isOK();
 
-                            if (!ok) {
+                            if (!s.isOK()) {
 
                                 // This is potentially expensive - may slug the HVAC if the dampers are
                                 // left closed while it is running, hence fatal level
@@ -235,11 +268,11 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
 
                         if (ok) {
 
-                            status.complete(authToken, null);
+                            gatherStatus.complete(authTokenGather, null);
                             return;
                         }
 
-                        status.complete(authToken, new IllegalStateException("one or more dampers failed to park"));
+                        gatherStatus.complete(authTokenGather, new IllegalStateException("one or more dampers failed to set position"));
 
                     } catch (Throwable t) {
 
@@ -248,7 +281,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
 
                         logger.fatal("can't set damper position", t);
 
-                        status.complete(authToken, t);
+                        scatterStatus.complete(authTokenGather, t);
 
                     } finally {
 
@@ -258,7 +291,23 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
                 }
             };
 
-            return transitionExecutor.submit(mover, status);
+            Future<TransitionStatus> done = transitionExecutor.submit(gather, gatherStatus);
+
+            if (async) {
+
+                logger.debug("async call, bailing out");
+                return done;
+            }
+
+            logger.debug("sync: waiting for completion...");
+
+            // We need to wait until all the transitions are complete
+
+            done.get();
+
+            logger.debug("sync: done");
+
+            return done;
         }
     }
 }
