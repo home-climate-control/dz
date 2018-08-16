@@ -83,6 +83,7 @@ public class BalancingDamperControllerTest extends TestCase {
 
             assertTrue(status.isOK());
 
+            // VT: NOTE: Need this because of asynchronous nature of damper transitions
             logger.debug("about to assert");
 
             assertEquals("Wrong damper position", 0.0, d1.get(), 0.000000000001);
@@ -110,9 +111,16 @@ public class BalancingDamperControllerTest extends TestCase {
 
             damperController.put(ts1, d1);
 
-            damperController.powerOff();
+            Future<TransitionStatus> done = damperController.powerOff();
 
-            // VT: FIXME: can't assert anything unless status is propagated here
+            TransitionStatus status = done.get();
+
+            assertTrue(status.isOK());
+
+            // VT: NOTE: Need this because of asynchronous nature of damper transitions
+            logger.debug("about to assert");
+
+            assertEquals("Wrong damper position", 1.0, d1.get(), 0.000000000001);
 
         } finally {
 
