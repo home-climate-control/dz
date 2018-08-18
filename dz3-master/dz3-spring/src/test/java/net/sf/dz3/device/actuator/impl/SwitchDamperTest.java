@@ -57,7 +57,26 @@ public class SwitchDamperTest {
     }
     
     /**
-     * Make sure the damper and the switch are in expected state after the damper is parked.
+     * Make sure a damper multiplexer puts itself into default position when it is parked.
+     *
+     * See https://github.com/home-climate-control/dz/issues/41
+     */
+    @Test
+    public void test41c() throws IOException {
+
+        ThreadContext.push("test41c");
+
+        try {
+
+            testMultiplexer("damper_multiplexer_0", 1.0);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    /**
+     * Make sure the switch damper and the switch are in expected state after the damper is parked.
      *
      * Damper and switch state are asserted at the same time, to uncover more problems.
      *
@@ -82,5 +101,22 @@ public class SwitchDamperTest {
         logger.info("parked state: " + state);
         
         assertEquals("wrong parked state", expectedState, state);
+    }
+
+    /**
+     * Make sure the damper multiplexer itself is in at the right position after it's parked.
+     *
+     * @param damperId Damper to park.
+     * @param expectedPosition Expected damper position.
+     */
+    private void testMultiplexer(String damperId, double expectedPosition) throws IOException {
+
+        AbstractApplicationContext springContext = new ClassPathXmlApplicationContext("dampers.conf.xml");
+
+        Damper damper = (Damper) springContext.getBean(damperId, Damper.class);
+
+        damper.park();
+
+        assertEquals("wrong parked position", expectedPosition, damper.getPosition(), 0.0001);
     }
 }

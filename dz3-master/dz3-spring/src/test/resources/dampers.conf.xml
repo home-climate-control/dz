@@ -41,4 +41,14 @@
         <!--  <constructor-arg index="3" value="0" /> -->
     </bean>
 
+    <bean id="damper_multiplexer_0" class="net.sf.dz3.device.actuator.impl.DamperMultiplexer">
+        <constructor-arg index="0" value="damper_multiplexer_0" />
+        <constructor-arg index="1" type="java.util.Set">
+            <set>
+                <ref bean="switch_damper_0" />
+                <ref bean="switch_damper_1" />
+            </set>
+        </constructor-arg>
+    </bean>
+
 </beans>
