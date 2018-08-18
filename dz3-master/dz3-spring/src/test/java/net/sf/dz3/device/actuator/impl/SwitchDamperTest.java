@@ -95,14 +95,14 @@ public class SwitchDamperTest {
     }
 
     /**
-     * Make sure a damper multiplexer puts its subs into default position when it is parked.
+     * Make sure a damper multiplexer puts its subs into non-default position when it is parked.
      *
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_sub_default() throws IOException {
+    public void test41_sub_nondefault() throws IOException {
 
-        ThreadContext.push("test41_sub_default");
+        ThreadContext.push("test41_sub_nondefault");
 
         try {
 
@@ -115,6 +115,33 @@ public class SwitchDamperTest {
             ThreadContext.pop();
         }
     }
+
+    /**
+     * Make sure a damper multiplexer puts its subs into default position when it is parked.
+     *
+     * See https://github.com/home-climate-control/dz/issues/41
+     */
+    @Test
+    public void test41_sub_default() throws IOException {
+
+        ThreadContext.push("test41_sub_default");
+
+        try {
+
+            // VT: NOTE: This test case represents the essence of https://github.com/home-climate-control/dz/issues/41 -
+            // even though switch_damper_0 is explicitly requested to be parked at 0.0,
+            // it is still parked at 1.0 because this is how the damper multiplexer is coded.
+
+            testMultiplexer("damper_multiplexer_1",
+                    "null_switch_0", "switch_damper_0",
+                    "null_switch_1", "switch_damper_1",
+                    "true:1.0 true:1.0");
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
     /**
      * Make sure the switch damper and the switch are in expected state after the damper is parked.
      *
