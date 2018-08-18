@@ -127,7 +127,17 @@ public abstract class AbstractDamper extends LogAware implements Damper {
     @Override
     public Future<TransitionStatus> park() {
 
-        return set(getParkPosition());
+        ThreadContext.push("park");
+
+        try {
+
+            logger.debug("parking at " + getParkPosition());
+
+            return set(getParkPosition());
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     private synchronized void stateChanged() {
