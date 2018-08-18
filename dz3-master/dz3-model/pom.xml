@@ -21,6 +21,10 @@
       <artifactId>dz3-sensors</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>net.sf.servomaster</groupId>
+      <artifactId>servomaster-common</artifactId>
+    </dependency>
   </dependencies>
 </project>
 
