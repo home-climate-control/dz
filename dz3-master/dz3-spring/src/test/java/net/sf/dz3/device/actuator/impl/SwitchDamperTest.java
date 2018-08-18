@@ -24,9 +24,9 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41a() throws IOException {
+    public void test41_single_nondefault() throws IOException {
 
-        ThreadContext.push("test41a");
+        ThreadContext.push("test41_single_nondefault");
 
         try {
 
@@ -43,9 +43,9 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41b() throws IOException {
+    public void test41_single_default() throws IOException {
 
-        ThreadContext.push("test41b");
+        ThreadContext.push("test41_single_default");
 
         try {
 
@@ -62,9 +62,9 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41c() throws IOException {
+    public void test41_multi_nondefault() throws IOException {
 
-        ThreadContext.push("test41c");
+        ThreadContext.push("test41_multi_nondefault");
 
         try {
 
@@ -81,9 +81,9 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41d() throws IOException {
+    public void test41_multi_default() throws IOException {
 
-        ThreadContext.push("test41d");
+        ThreadContext.push("test41_multi_default");
 
         try {
 
@@ -100,9 +100,9 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41e() throws IOException {
+    public void test41_sub_default() throws IOException {
 
-        ThreadContext.push("test41e");
+        ThreadContext.push("test41_sub_default");
 
         try {
 
