@@ -68,13 +68,53 @@ public class SwitchDamperTest {
 
         try {
 
-            testMultiplexer("damper_multiplexer_0", 1.0);
+            testMultiplexer("damper_multiplexer_0", 0.0);
 
         } finally {
             ThreadContext.pop();
         }
     }
 
+    /**
+     * Make sure a damper multiplexer puts itself into default position when it is parked.
+     *
+     * See https://github.com/home-climate-control/dz/issues/41
+     */
+    @Test
+    public void test41d() throws IOException {
+
+        ThreadContext.push("test41d");
+
+        try {
+
+            testMultiplexer("damper_multiplexer_1", 1.0);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    /**
+     * Make sure a damper multiplexer puts its subs into default position when it is parked.
+     *
+     * See https://github.com/home-climate-control/dz/issues/41
+     */
+    @Test
+    public void test41e() throws IOException {
+
+        ThreadContext.push("test41e");
+
+        try {
+
+            testMultiplexer("damper_multiplexer_0",
+                    "null_switch_0", "switch_damper_0",
+                    "null_switch_1", "switch_damper_1",
+                    "false:0.0 false:0.0");
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
     /**
      * Make sure the switch damper and the switch are in expected state after the damper is parked.
      *
@@ -118,5 +158,40 @@ public class SwitchDamperTest {
         damper.park();
 
         assertEquals("wrong parked position", expectedPosition, damper.getPosition(), 0.0001);
+    }
+
+    /**
+     * Make sure the damper multiplexer uts subs at the right positions after it's parked.
+     *
+     * @param damperId Damper to park.
+     * @param subSwitchId0 Sub switch ID 0.
+     * @param subDamperId0 Sub damper ID 0.
+     * @param subDamperId1 Sub damper ID 1.
+     * @param subSwitchId1 Sub switch ID 1.
+     * @param expectedState Expected sub switch/damper position.
+     */
+    private void testMultiplexer(String damperId,
+            String subSwitchId0, String subDamperId0,
+            String subSwitchId1, String subDamperId1,
+            String expectedState) throws IOException {
+
+        AbstractApplicationContext springContext = new ClassPathXmlApplicationContext("dampers.conf.xml");
+
+        Damper damper = (Damper) springContext.getBean(damperId, Damper.class);
+
+        damper.park();
+
+        Damper sub0 = (Damper) springContext.getBean(subDamperId0, Damper.class);
+        Damper sub1 = (Damper) springContext.getBean(subDamperId1, Damper.class);
+
+        Switch switch0 = (Switch) springContext.getBean(subSwitchId0, Switch.class);
+        Switch switch1 = (Switch) springContext.getBean(subSwitchId1, Switch.class);
+
+        String state0 = switch0.getState() + ":" + sub0.getPosition();
+        String state1 = switch1.getState() + ":" + sub1.getPosition();
+
+        String state = state0 + " " + state1;
+
+        assertEquals("wrong parked position", expectedState, state);
     }
 }
