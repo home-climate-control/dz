@@ -45,11 +45,25 @@ public class DamperMultiplexer extends AbstractDamper {
      * 
      * @param name Name to use.
      * @param dampers Set of dampers to control.
+     * @param parkPosition Park position.
+     */
+    public DamperMultiplexer(String name, Set<Damper> dampers, double parkPosition) {
+        super(name);
+
+        this.dampers.addAll(dampers);
+
+        setParkPosition(parkPosition);
+    }
+
+    /**
+     * Create an instance with default parking position.
+     *
+     * @param name Name to use.
+     * @param dampers Set of dampers to control.
      */
     public DamperMultiplexer(String name, Set<Damper> dampers) {
-        super(name);
-        
-        this.dampers.addAll(dampers);
+
+        this(name, dampers, 1.0);
     }
 
     @Override
