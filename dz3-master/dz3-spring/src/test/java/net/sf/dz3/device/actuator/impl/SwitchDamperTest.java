@@ -106,10 +106,18 @@ public class SwitchDamperTest {
 
         try {
 
+            // VT: NOTE: This test is no longer as useful as it was before
+            // https://github.com/home-climate-control/dz/issues/51 was fixed
+            // (it is now duplicated by DamperMultiplexerTest#testParkAllCustomMulti()),
+            // but let it stay. Worst case, create the XML equivalent of the above
+            // mentioned test case and make sure it doesn't break.
+
+            String expected = "false:0.0 true:1.0";
+
             testMultiplexer("damper_multiplexer_0",
                     "null_switch_0", "switch_damper_0",
                     "null_switch_1", "switch_damper_1",
-                    "false:0.0 false:0.0");
+                    expected);
 
         } finally {
             ThreadContext.pop();
@@ -128,14 +136,20 @@ public class SwitchDamperTest {
 
         try {
 
-            // VT: NOTE: This test case represents the essence of https://github.com/home-climate-control/dz/issues/41 -
-            // even though switch_damper_0 is explicitly requested to be parked at 0.0,
-            // it is still parked at 1.0 because this is how the damper multiplexer is coded.
+            // VT: NOTE: This test case used to represent the essence of https://github.com/home-climate-control/dz/issues/41 -
+            // even though switch_damper_0 was explicitly requested to be parked at 0.0,
+            // it was still parked at 1.0 because this was how the damper multiplexer was coded.
+
+            // String expected = "true:1.0 true:1.0";
+
+            // And now it's been fixed (https://github.com/home-climate-control/dz/issues/51).
+
+            String expected = "false:0.0 true:1.0";
 
             testMultiplexer("damper_multiplexer_1",
                     "null_switch_0", "switch_damper_0",
                     "null_switch_1", "switch_damper_1",
-                    "true:1.0 true:1.0");
+                    expected);
 
         } finally {
             ThreadContext.pop();
