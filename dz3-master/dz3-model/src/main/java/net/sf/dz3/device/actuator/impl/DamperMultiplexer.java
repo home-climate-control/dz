@@ -39,7 +39,14 @@ public class DamperMultiplexer extends AbstractDamper {
      * Dampers to control.
      */
     private final Set<Damper> dampers = new HashSet<Damper>();
-    
+
+    /**
+     * Our own position. Different from {@link AbstractDamper#position}.
+     *
+     * This variable doesn't participate in transitions, but is rather for reporting purposes.
+     */
+    private double multiPosition;
+
     /**
      * Create an instance.
      * 
@@ -47,12 +54,16 @@ public class DamperMultiplexer extends AbstractDamper {
      * @param dampers Set of dampers to control.
      * @param parkPosition Park position.
      */
-    public DamperMultiplexer(String name, Set<Damper> dampers, double parkPosition) {
+    public DamperMultiplexer(String name, Set<Damper> dampers, Double parkPosition) {
         super(name);
 
         this.dampers.addAll(dampers);
 
-        setParkPosition(parkPosition);
+        if (parkPosition != null) {
+            setParkPosition(parkPosition);
+        }
+
+        multiPosition = getParkPosition();
     }
 
     /**
@@ -63,11 +74,13 @@ public class DamperMultiplexer extends AbstractDamper {
      */
     public DamperMultiplexer(String name, Set<Damper> dampers) {
 
-        this(name, dampers, 1.0);
+        this(name, dampers, null);
     }
 
     @Override
     protected synchronized Future<TransitionStatus> moveDamper(double position) {
+
+        multiPosition = position;
 
         Map<Damper, Double> targetPosition = new HashMap<>();
 
@@ -75,6 +88,11 @@ public class DamperMultiplexer extends AbstractDamper {
 
             targetPosition.put(i.next(), position);
         }
+
+        return moveDampers(targetPosition);
+    }
+
+    private Future<TransitionStatus> moveDampers(Map<Damper, Double> targetPosition) {
 
         transitionCompletionService.submit(new Damper.MoveGroup(targetPosition, false));
 
@@ -96,12 +114,9 @@ public class DamperMultiplexer extends AbstractDamper {
     }
 
     @Override
-    public double getPosition() throws IOException {
+    public synchronized double getPosition() throws IOException {
         
-        // A random one (HashSet, remember?) is as good as any other,
-        // they're supposed to be identical anyway
-        
-        return dampers.iterator().next().getPosition();
+        return multiPosition;
     }
 
     @Override
@@ -121,15 +136,32 @@ public class DamperMultiplexer extends AbstractDamper {
 
         try {
 
-            // VT: FIXME: https://github.com/home-climate-control/dz/issues/41
-            //
+            multiPosition = getParkPosition();
+
             // Need to park dampers at their individual positions if they were specified,
             // or to the multiplexer parking position if they weren't.
-            //
-            // At this point, it is not known whether the parking positions were specified or not
-            // (the parking position is double, not Double); need to fix this.
 
-            return moveDamper(getParkPosition());
+            Map<Damper, Double> targetPosition = new HashMap<>();
+
+            for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
+
+                Damper d = i.next();
+                boolean custom = d.isCustomParkPosition();
+                double position = custom ? d.getParkPosition() : getParkPosition();
+
+                targetPosition.put(d, position);
+
+                logger.debug(d.getName() + ": " + position + " (" + (custom ? "custom" : "multiplexer") + ")");
+
+                if (custom) {
+
+                    // Dude, you better know what you're doing
+
+                    logger.warn(d.getName() + " will be parked at custom position, consider changing hardware layout so override is not necessary");
+                }
+            }
+
+            return moveDampers(targetPosition);
 
         } finally {
             ThreadContext.pop();

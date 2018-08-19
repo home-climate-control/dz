@@ -137,18 +137,27 @@ public class BalancingDamperControllerTest extends TestCase {
             this.name = name;
         }
 
+        @Override
         public String getName() {
             return name;
         }
 
+        @Override
         public double getParkPosition() {
             return 1.0;
         }
 
+        @Override
+        public boolean isCustomParkPosition() {
+            return true;
+        }
+
+        @Override
         public double getPosition() throws IOException {
             throw new UnsupportedOperationException("Not Implemented");
         }
 
+        @Override
         public Future<TransitionStatus> park() {
             throw new UnsupportedOperationException("Not Implemented");
         }

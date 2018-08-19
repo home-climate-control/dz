@@ -97,6 +97,16 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
     double getParkPosition();
     
     /**
+     * Determine whether the park position has been explicitly specified.
+     *
+     * See https://github.com/home-climate-control/dz/issues/51 diffs for details.
+     *
+     * @return {@code true} if park position was specified either via constructor, or by calling
+     * {@link #setParkPosition(double)}.
+     */
+    boolean isCustomParkPosition();
+
+    /**
      * 'Park' the damper.
      *
      * This call will cause the damper to move to {@link #getParkPosition

@@ -73,6 +73,9 @@ public class DamperMultiplexerTest {
             
             m.park().get();
             
+            // Note: None of the dampers have their park position specified, hence,
+            // they will be parked where multiplexer wants
+
             assertEquals("wrong parked position - a", parkPosition, a.getPosition(), 0.001);
             assertEquals("wrong parked position - b", parkPosition, b.getPosition(), 0.001);
             assertEquals("wrong parked position - m", parkPosition, m.getPosition(), 0.001);
@@ -98,10 +101,12 @@ public class DamperMultiplexerTest {
 
             Damper a = new NullDamper("a");
             Damper b = new NullDamper("b");
+            Damper c = new NullDamper("c");
             Set<Damper> dampers = new HashSet<>();
 
             dampers.add(a);
             dampers.add(b);
+            dampers.add(c);
 
             DamperMultiplexer m = new DamperMultiplexer("m", dampers);
 
@@ -113,10 +118,13 @@ public class DamperMultiplexerTest {
             b.setParkPosition(parkPositionB);
             m.setParkPosition(parkPositionM);
 
+            // Note: Damper 'c' will have the default park position (none), hence it will be overridden
+
             m.park().get();
 
             assertEquals("wrong parked position - a", parkPositionA, a.getPosition(), 0.001);
             assertEquals("wrong parked position - b", parkPositionB, b.getPosition(), 0.001);
+            assertEquals("wrong parked position - c", parkPositionM, c.getPosition(), 0.001);
             assertEquals("wrong parked position - m", parkPositionM, m.getPosition(), 0.001);
 
         } finally {

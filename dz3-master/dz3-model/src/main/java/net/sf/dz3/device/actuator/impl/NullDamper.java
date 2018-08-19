@@ -21,14 +21,16 @@ import net.sf.servomaster.device.model.TransitionStatus;
  */
 public class NullDamper extends AbstractDamper {
 
-    public NullDamper(String name) {
-        super(name);
-    }
-
     /**
      * Current throttle value.
      */
-    private double throttle = 0.3;
+    private double throttle;
+
+    public NullDamper(String name) {
+        super(name);
+
+        throttle = getParkPosition();
+    }
 
     @Override
     public Future<TransitionStatus> moveDamper(double throttle) {
