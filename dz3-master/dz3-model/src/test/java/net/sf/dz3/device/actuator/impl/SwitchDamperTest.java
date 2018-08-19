@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import junit.framework.TestCase;
 import net.sf.dz3.device.actuator.Damper;
@@ -78,5 +79,30 @@ public class SwitchDamperTest extends TestCase {
         }
         
         assertEquals("Wrong parked position", target.getParkPosition(), target.getPosition());
+    }
+
+    /**
+     * Make sure non-inverted switch works as expected.
+     */
+    public void testPositionStraight() throws InterruptedException, ExecutionException, IOException {
+
+        ThreadContext.push("testPositionStraight");
+
+        try {
+
+            NullSwitch s = new NullSwitch("switch");
+            Damper d = new SwitchDamper("damper", s, 0.5);
+
+            d.set(0).get();
+
+            assertEquals("wrong switch state", false, s.getState());
+
+            d.set(1).get();
+
+            assertEquals("wrong switch state", true, s.getState());
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }
