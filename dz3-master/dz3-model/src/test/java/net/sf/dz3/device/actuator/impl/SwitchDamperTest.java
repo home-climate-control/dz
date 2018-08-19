@@ -91,7 +91,12 @@ public class SwitchDamperTest extends TestCase {
         try {
 
             NullSwitch s = new NullSwitch("switch");
+
+            assertEquals("wrong switch state", false, s.getState());
+
             Damper d = new SwitchDamper("damper", s, 0.5);
+
+            assertEquals("wrong switch state", true, s.getState());
 
             d.set(0).get();
 
@@ -116,7 +121,17 @@ public class SwitchDamperTest extends TestCase {
         try {
 
             NullSwitch s = new NullSwitch("switch");
+
+            assertEquals("wrong switch state", false, s.getState());
+
+            s.setState(true);
+
+            assertEquals("wrong switch state", true, s.getState());
+
             Damper d = new SwitchDamper("damper", s, 0.5, 1.0, true);
+
+            assertEquals("wrong switch state", false, s.getState());
+
 
             d.set(0).get();
 
