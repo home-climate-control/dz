@@ -81,4 +81,46 @@ public class DamperMultiplexerTest {
             ThreadContext.pop();
         }
     }
+
+    /**
+     * Make sure all dampers are parked at the position specified by their own defaults (and not
+     * the default specified for the {@code DamperMultiplexer}
+     *
+     * This is the "new" behavior (see https://github.com/home-climate-control/dz/issues/51).
+     * Before, there were no facilities to implement it.
+     */
+    @Test
+    public void testParkAllCustom() throws InterruptedException, ExecutionException, IOException {
+
+        ThreadContext.push("testParkAllCustom");
+
+        try {
+
+            Damper a = new NullDamper("a");
+            Damper b = new NullDamper("b");
+            Set<Damper> dampers = new HashSet<>();
+
+            dampers.add(a);
+            dampers.add(b);
+
+            DamperMultiplexer m = new DamperMultiplexer("m", dampers);
+
+            double parkPositionA = 0.75;
+            double parkPositionB = 0.25;
+            double parkPositionM = 0.50;
+
+            a.setParkPosition(parkPositionA);
+            b.setParkPosition(parkPositionB);
+            m.setParkPosition(parkPositionM);
+
+            m.park().get();
+
+            assertEquals("wrong parked position - a", parkPositionA, a.getPosition(), 0.001);
+            assertEquals("wrong parked position - b", parkPositionB, b.getPosition(), 0.001);
+            assertEquals("wrong parked position - m", parkPositionM, m.getPosition(), 0.001);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
 }
