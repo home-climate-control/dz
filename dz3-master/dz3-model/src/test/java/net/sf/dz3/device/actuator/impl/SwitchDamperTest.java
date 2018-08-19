@@ -105,4 +105,29 @@ public class SwitchDamperTest extends TestCase {
             ThreadContext.pop();
         }
     }
+
+    /**
+     * Make sure inverted switch works as expected.
+     */
+    public void testPositionInverted() throws InterruptedException, ExecutionException, IOException {
+
+        ThreadContext.push("testPositionInverted");
+
+        try {
+
+            NullSwitch s = new NullSwitch("switch");
+            Damper d = new SwitchDamper("damper", s, 0.5, 1.0, true);
+
+            d.set(0).get();
+
+            assertEquals("wrong switch state", true, s.getState());
+
+            d.set(1).get();
+
+            assertEquals("wrong switch state", false, s.getState());
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
 }
