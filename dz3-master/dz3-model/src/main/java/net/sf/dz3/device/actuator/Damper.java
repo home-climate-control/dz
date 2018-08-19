@@ -38,7 +38,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * 
      * @exception IllegalArgumentException if {@code position} is outside of 0...1 range.
      */
-    public void set(double position) throws IOException;
+    void set(double position) throws IOException;
     
     /**
      * Get current damper position.
@@ -49,7 +49,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * hardware.
      */
     @JmxAttribute(description = "Current position")
-    public double getPosition() throws IOException;
+    double getPosition() throws IOException;
     
     /**
      * Set 'park' position.
@@ -69,7 +69,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * 
      * @exception IllegalArgumentException if {@code position} is outside of 0...1 range.
      */
-    public void setParkPosition(double position);
+    void setParkPosition(double position);
     
     /**
      * Get 'safe' position.
@@ -78,7 +78,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * default value is 1 (fully open).
      */
     @JmxAttribute(description = "Parked position")
-    public double getParkPosition();
+    double getParkPosition();
     
     /**
      * 'Park' the damper.
@@ -104,5 +104,5 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * may take a while if the damper is configured with a transition
      * controller).
      */
-    public ACT park();
+    ACT park();
 }
