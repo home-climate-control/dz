@@ -270,7 +270,8 @@ public class ShellSwitchTest extends TestCase {
                                              "there.is.no.such.command",
                                              1000);
             logger.info("ShellSwitch get exec failure");
-            boolean testRet = ss.getState();
+            ss.getState();
+
             fail("ShellSwitch testGetExecFailure did not throw exception");
         } catch (Exception err) {
             assertTrue(true);
@@ -288,7 +289,8 @@ public class ShellSwitchTest extends TestCase {
                                              "echo",
                                              1000);
             logger.info("ShellSwitch get no output");
-            boolean testRet = ss.getState();
+            ss.getState();
+
             fail("ShellSwitch testSetNoOutput did not throw exception");
         } catch (Exception err) {
             assertTrue(true);
@@ -306,7 +308,8 @@ public class ShellSwitchTest extends TestCase {
                                              "echo QQQ",
                                              1000);
             logger.info("ShellSwitch bad output");
-            boolean testRet = ss.getState();
+            ss.getState();
+
             fail("ShellSwitch testGetBadOutput did not throw exception");
         } catch (Exception err) {
             assertTrue(true);
@@ -324,7 +327,8 @@ public class ShellSwitchTest extends TestCase {
                                              "echo 7",
                                              1000);
             logger.info("ShellSwitch invalid output");
-            boolean testRet = ss.getState();
+            ss.getState();
+
             fail("ShellSwitch testGetInvalidOutput did not throw exception");
         } catch (Exception err) {
             assertTrue(true);
@@ -342,7 +346,8 @@ public class ShellSwitchTest extends TestCase {
                                              "echo 2",
                                              1000);
             logger.info("ShellSwitch invalid return");
-            boolean testRet = ss.getState();
+            ss.getState();
+
             fail("ShellSwitch testSetInvalidOutput did not throw exception");
         } catch (Exception err) {
             assertTrue(true);
