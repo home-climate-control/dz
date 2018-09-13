@@ -1,4 +1,4 @@
-package net.sf.dz3.device.sensor.impl;
+package net.sf.dz3.device.sensor.impl.tr;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

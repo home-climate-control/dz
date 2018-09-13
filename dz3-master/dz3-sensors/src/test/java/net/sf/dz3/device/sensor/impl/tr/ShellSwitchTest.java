@@ -1,4 +1,4 @@
-package net.sf.dz3.device.sensor.impl;
+package net.sf.dz3.device.sensor.impl.tr;
 
 import java.io.IOException;
 import java.util.Set;
@@ -8,8 +8,6 @@ import junit.framework.TestCase;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;
-
-import net.sf.dz3.device.sensor.impl.ShellSwitch;
 
 /**
  * Shell switch tests.
