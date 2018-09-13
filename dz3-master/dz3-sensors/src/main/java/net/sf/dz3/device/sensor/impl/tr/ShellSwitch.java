@@ -2,10 +2,12 @@ package net.sf.dz3.device.sensor.impl.tr;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.IOException;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.IOException;
 
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.jukebox.jmx.JmxAware;
@@ -33,7 +35,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  // TODO: implement timeout for command execution
 public class ShellSwitch implements Switch, JmxAware {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * String to identify switch.
@@ -179,7 +181,7 @@ public class ShellSwitch implements Switch, JmxAware {
     private int executeCommand(String command) {
         int retVal = 0;
         // set logging parameters
-        NDC.push("executeCommand#" + Integer.toHexString(hashCode()));
+        ThreadContext.push("executeCommand#" + Integer.toHexString(hashCode()));
         // initial values of modified member variables - assume failure
         m_outputValueRead = false;
         m_commandOutputValue = -1;
@@ -243,7 +245,7 @@ public class ShellSwitch implements Switch, JmxAware {
                                 err);
                 }
             }
-            NDC.pop();
+            ThreadContext.pop();
         }
         return retVal;
     }
@@ -382,7 +384,7 @@ public class ShellSwitch implements Switch, JmxAware {
      * copy of read() from ShellSensor.java line 133
      */
     private String read(BufferedReader br) throws IOException {
-        NDC.push("read");
+        ThreadContext.push("read");
         try {
             long size = 0;
             StringBuilder sb = new StringBuilder();
@@ -399,7 +401,7 @@ public class ShellSwitch implements Switch, JmxAware {
             }
             return sb.toString();
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 

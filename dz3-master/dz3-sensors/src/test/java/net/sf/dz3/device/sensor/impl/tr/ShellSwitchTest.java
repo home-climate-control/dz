@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
-import org.apache.log4j.Logger;
-import org.apache.log4j.NDC;
+import junit.framework.TestCase;
 
 /**
  * Shell switch tests.
@@ -23,7 +24,7 @@ import org.apache.log4j.NDC;
 // TODO: add capability to test timeout
 public class ShellSwitchTest extends TestCase {
 
-    private final Logger logger = Logger.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     protected void setUp(){
       // no action
@@ -53,13 +54,13 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testOsSupported() throws IOException {
-        NDC.push("testOsIsSupported");
+        ThreadContext.push("testOsIsSupported");
         assertTrue(isOsSupported());
-        NDC.pop();
+        ThreadContext.pop();
     }
 
     public void testGoodSetOpen() throws IOException {
-        NDC.push("testGoodSetOpen");
+        ThreadContext.push("testGoodSetOpen");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 7",
@@ -72,12 +73,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             fail("ShellSwitch testGoodSetOpen failed by exception");
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGoodSetClosed() throws IOException {
-        NDC.push("testGoodSetClosed");
+        ThreadContext.push("testGoodSetClosed");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
@@ -90,12 +91,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             fail("ShellSwitch testGoodSetClosed failed by exception");
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testSetExecFailure() throws IOException {
-        NDC.push("testSetExecFailure");
+        ThreadContext.push("testSetExecFailure");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "there.is.no.such.command",
@@ -108,12 +109,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             assertTrue(true);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testSetNoOutput() throws IOException {
-        NDC.push("testSetNoOutput");
+        ThreadContext.push("testSetNoOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo",
@@ -133,12 +134,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             fail("ShellSwitch exception testing command with no output");
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testSetBadOutput() throws IOException {
-        NDC.push("testSetBadOutput");
+        ThreadContext.push("testSetBadOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo QQQ",
@@ -158,12 +159,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             fail("ShellSwitch exception testing command with no output");
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testParseReturn() throws IOException {
-        NDC.push("testParseReturn");
+        ThreadContext.push("testParseReturn");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 2",
@@ -192,12 +193,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             fail("ShellSwitch exception testing parse command output");
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGoodGetOpen() throws IOException {
-        NDC.push("testGoodGetOpen");
+        ThreadContext.push("testGoodGetOpen");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
@@ -210,12 +211,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             fail("ShellSwitch testGoodGetOpen failed by exception");
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGoodGetClosed() throws IOException {
-        NDC.push("testGoodGetClosed");
+        ThreadContext.push("testGoodGetClosed");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
@@ -228,12 +229,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             fail("ShellSwitch testGoodGetClosed failed by exception");
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGetLastCommanded() throws IOException {
-        NDC.push("testGetLastCommanded");
+        ThreadContext.push("testGetLastCommanded");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
@@ -256,12 +257,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             fail("ShellSwitch testGetLastCommanded failed by exception");
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGetExecFailure() throws IOException {
-        NDC.push("testGetExecFailure");
+        ThreadContext.push("testGetExecFailure");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
@@ -274,12 +275,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             assertTrue(true);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGetNoOutput() throws IOException {
-        NDC.push("testGetNoOutput");
+        ThreadContext.push("testGetNoOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo",
@@ -292,12 +293,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             assertTrue(true);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGetBadOutput() throws IOException {
-        NDC.push("testGetBadOutput");
+        ThreadContext.push("testGetBadOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
@@ -310,12 +311,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             assertTrue(true);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGetInvalidOutput() throws IOException {
-        NDC.push("testGetInvalidOutput");
+        ThreadContext.push("testGetInvalidOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
@@ -328,12 +329,12 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             assertTrue(true);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
     public void testGetInvalidReturn() throws IOException {
-        NDC.push("testGetInvalidReturn");
+        ThreadContext.push("testGetInvalidReturn");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
                                              "echo 0",
@@ -346,7 +347,7 @@ public class ShellSwitchTest extends TestCase {
         } catch (Exception err) {
             assertTrue(true);
         } finally {
-            NDC.pop();
+            ThreadContext.pop();
         }
     }
 
