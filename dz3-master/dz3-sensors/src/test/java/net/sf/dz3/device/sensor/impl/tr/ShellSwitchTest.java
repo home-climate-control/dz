@@ -26,14 +26,6 @@ public class ShellSwitchTest extends TestCase {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
-    protected void setUp(){
-      // no action
-    }
-
-    protected void tearDown(){
-      // no action
-    }
-
     /**
      * @return {@code false} if OS is not within a supported list
      */
