@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
 
 /**
@@ -58,8 +59,16 @@ public class ShellSwitchTest extends TestCase {
             logger.info("Set switch open");
             ss.setState(false);
             assertTrue(ss.getCommandOutputValue() == 7);
-        } catch (Exception err) {
-            fail("ShellSwitch testGoodSetOpen failed by exception");
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -78,8 +87,16 @@ public class ShellSwitchTest extends TestCase {
             logger.info("Set switch closed");
             ss.setState(true);
             assertTrue(ss.getCommandOutputValue() == 7);
-        } catch (Exception err) {
-            fail("ShellSwitch testGoodSetClosed failed by exception");
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -98,7 +115,12 @@ public class ShellSwitchTest extends TestCase {
             logger.info("ShellSwitch set exec failure");
             ss.setState(false);
             fail("ShellSwitch testSetExecFailure did not throw exception");
-        } catch (Exception err) {
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
             assertTrue(true);
         } finally {
             ThreadContext.pop();
@@ -125,8 +147,16 @@ public class ShellSwitchTest extends TestCase {
             {
                 fail("ShellSwitch testSetNoOutput did not set m_outputValueRead to false");
             }
-        } catch (Exception err) {
-            fail("ShellSwitch exception testing command with no output");
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -152,8 +182,16 @@ public class ShellSwitchTest extends TestCase {
             {
                 fail("ShellSwitch testSetBadOutput did not set m_outputValueRead to false");
             }
-        } catch (Exception err) {
-            fail("ShellSwitch exception testing command with no output");
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -188,8 +226,16 @@ public class ShellSwitchTest extends TestCase {
             {
                 fail("ShellSwitch testParseReturn did not set m_outputValueRead to true");
             }
-        } catch (Exception err) {
-            fail("ShellSwitch exception testing parse command output");
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -208,8 +254,16 @@ public class ShellSwitchTest extends TestCase {
             logger.info("Get state - expect open");
             boolean testRet = ss.getState();
             assertTrue(testRet == false);
-        } catch (Exception err) {
-            fail("ShellSwitch testGoodGetOpen failed by exception");
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -228,8 +282,16 @@ public class ShellSwitchTest extends TestCase {
             logger.info("Get state - expect closed");
             boolean testRet = ss.getState();
             assertTrue(testRet == true);
-        } catch (Exception err) {
-            fail("ShellSwitch testGoodGetClosed failed by exception");
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -258,8 +320,16 @@ public class ShellSwitchTest extends TestCase {
             ss.setState(false);
             shouldBeFalse = ss.getState();
             assertTrue(shouldBeFalse == false);
-        } catch (Exception err) {
-            fail("ShellSwitch testGetLastCommanded failed by exception");
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -279,7 +349,12 @@ public class ShellSwitchTest extends TestCase {
             ss.getState();
 
             fail("ShellSwitch testGetExecFailure did not throw exception");
-        } catch (Exception err) {
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
             assertTrue(true);
         } finally {
             ThreadContext.pop();
@@ -300,7 +375,12 @@ public class ShellSwitchTest extends TestCase {
             ss.getState();
 
             fail("ShellSwitch testSetNoOutput did not throw exception");
-        } catch (Exception err) {
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
             assertTrue(true);
         } finally {
             ThreadContext.pop();
@@ -321,7 +401,12 @@ public class ShellSwitchTest extends TestCase {
             ss.getState();
 
             fail("ShellSwitch testGetBadOutput did not throw exception");
-        } catch (Exception err) {
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
             assertTrue(true);
         } finally {
             ThreadContext.pop();
@@ -342,7 +427,12 @@ public class ShellSwitchTest extends TestCase {
             ss.getState();
 
             fail("ShellSwitch testGetInvalidOutput did not throw exception");
-        } catch (Exception err) {
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
             assertTrue(true);
         } finally {
             ThreadContext.pop();
@@ -363,7 +453,12 @@ public class ShellSwitchTest extends TestCase {
             ss.getState();
 
             fail("ShellSwitch testSetInvalidOutput did not throw exception");
-        } catch (Exception err) {
+
+        } catch (AssertionFailedError ex) {
+
+            throw ex;
+
+        } catch (Throwable t) {
             assertTrue(true);
         } finally {
             ThreadContext.pop();
