@@ -45,13 +45,9 @@ public class ShellSwitchTest extends TestCase {
         return false;
     }
 
-    public void testOsSupported() throws IOException {
-        ThreadContext.push("testOsIsSupported");
-        assertTrue(isOsSupported());
-        ThreadContext.pop();
-    }
-
     public void testGoodSetOpen() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGoodSetOpen");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -70,6 +66,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGoodSetClosed() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGoodSetClosed");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -88,6 +86,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testSetExecFailure() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testSetExecFailure");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -106,6 +106,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testSetNoOutput() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testSetNoOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -131,6 +133,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testSetBadOutput() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testSetBadOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -156,6 +160,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testParseReturn() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testParseReturn");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -190,6 +196,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGoodGetOpen() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGoodGetOpen");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -208,6 +216,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGoodGetClosed() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGoodGetClosed");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -226,6 +236,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGetLastCommanded() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGetLastCommanded");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -254,6 +266,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGetExecFailure() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGetExecFailure");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -273,6 +287,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGetNoOutput() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGetNoOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -292,6 +308,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGetBadOutput() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGetBadOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -311,6 +329,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGetInvalidOutput() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGetInvalidOutput");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -330,6 +350,8 @@ public class ShellSwitchTest extends TestCase {
     }
 
     public void testGetInvalidReturn() throws IOException {
+        assertTrue(isOsSupported());
+
         ThreadContext.push("testGetInvalidReturn");
         try {
             ShellSwitch ss = new ShellSwitch("AddrOfTestSwitch",
@@ -347,6 +369,4 @@ public class ShellSwitchTest extends TestCase {
             ThreadContext.pop();
         }
     }
-
-
 }
