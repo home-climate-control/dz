@@ -344,8 +344,6 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
 
         @Override
         protected void shutdown() throws Throwable {
-            // TODO Auto-generated method stub
-            
         }
 
         @Override
