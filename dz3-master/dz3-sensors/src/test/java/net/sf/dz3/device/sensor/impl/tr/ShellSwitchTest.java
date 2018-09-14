@@ -122,7 +122,7 @@ public class ShellSwitchTest extends TestCase {
 
         } catch (IOException ex) {
 
-            assertEquals("wrong exception message", "Unable to set switch state", ex.getMessage());
+            assertEquals("wrong exception message", "AddrOfTestSwitch: cannot set state", ex.getMessage());
 
         } catch (Throwable t) {
 
@@ -363,7 +363,7 @@ public class ShellSwitchTest extends TestCase {
 
         } catch (IOException ex) {
 
-            assertEquals("wrong exception message", "Unable to read switch state", ex.getMessage());
+            assertEquals("wrong exception message", "AddrOfTestSwitch: cannot get state", ex.getMessage());
 
         } catch (Throwable t) {
 
@@ -396,7 +396,7 @@ public class ShellSwitchTest extends TestCase {
 
         } catch (IOException ex) {
 
-            assertEquals("wrong exception message", "Unable to read switch state", ex.getMessage());
+            assertEquals("wrong exception message", "AddrOfTestSwitch: cannot get state", ex.getMessage());
 
         } catch (Throwable t) {
 
@@ -429,7 +429,7 @@ public class ShellSwitchTest extends TestCase {
 
         } catch (IOException ex) {
 
-            assertEquals("wrong exception message", "Unable to read switch state", ex.getMessage());
+            assertEquals("wrong exception message", "AddrOfTestSwitch: cannot get state", ex.getMessage());
 
         } catch (Throwable t) {
 
@@ -462,7 +462,7 @@ public class ShellSwitchTest extends TestCase {
 
         } catch (IOException ex) {
 
-            assertEquals("wrong exception message", "Invalid command output, cannot get switch state", ex.getMessage());
+            assertEquals("wrong exception message", "AddrOfTestSwitch: invalid command output '7', cannot get state", ex.getMessage());
 
         } catch (Throwable t) {
 
@@ -495,7 +495,7 @@ public class ShellSwitchTest extends TestCase {
 
         } catch (IOException ex) {
 
-            assertEquals("wrong exception message", "Invalid command output, cannot get switch state", ex.getMessage());
+            assertEquals("wrong exception message", "AddrOfTestSwitch: invalid command output '2', cannot get state", ex.getMessage());
 
         } catch (Throwable t) {
 

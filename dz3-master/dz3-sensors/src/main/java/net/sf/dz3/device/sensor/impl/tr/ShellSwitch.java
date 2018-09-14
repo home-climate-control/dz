@@ -271,18 +271,13 @@ public class ShellSwitch implements Switch, JmxAware {
                     if (m_commandOutputValue == 1) {
                         retVal = true;
                     } else {
-                        logger.error("Switch " + m_address +
-                                     "Invalid command output: " +
-                                     m_commandOutputValue +
-                                     " cannot get state");
-                        throw new IOException(
-                            "Invalid command output, cannot get switch state");
+
+                        throw new IOException(getAddress() + ": invalid command output '" + m_commandOutputValue + "', cannot get state");
                     }
                 }
             } else {
                 // source of error logged in execute()
-                logger.error("Switch " + m_address + " cannot get state");
-                throw new IOException("Unable to read switch state");
+                throw new IOException(getAddress() + ": cannot get state");
             }
         }
         return retVal;
@@ -312,8 +307,8 @@ public class ShellSwitch implements Switch, JmxAware {
         if (execRet == 0) {
             m_lastCommandedState = state;
         } else {
-            logger.debug("Unable to set switch " + m_address);
-            throw new IOException("Unable to set switch state");
+
+            throw new IOException(getAddress() + ": cannot set state");
         }
     }
 
