@@ -165,7 +165,7 @@ public class ShellSwitch implements Switch, JmxAware {
      * returns -2 on other error
      */
     private int executeCommand(String command) {
-        int retVal = 0;
+
         // set logging parameters
         ThreadContext.push("executeCommand#" + Integer.toHexString(hashCode()));
         // initial values of modified member variables - assume failure
@@ -203,19 +203,28 @@ public class ShellSwitch implements Switch, JmxAware {
                                  + output + ", no integer read");
                 }
             } else {
+
                 // Error, switch position not reliable
                 // member variables set above
-                retVal = -1;
+
                 logger.error("Switch " + m_address +
                              " command returned error code " + returnCode +
                              ": " + command);
+
+                return -1;
+
             }
+
         } catch (Exception err) {
+
             // member variables set above
-            retVal = -2;
+
             logger.error("Switch " + m_address +
                          " exception in execution: "
                          + command);
+
+            return -2;
+
         } finally {
             // terminate process if not null
             if (process != null) {
@@ -233,7 +242,8 @@ public class ShellSwitch implements Switch, JmxAware {
             }
             ThreadContext.pop();
         }
-        return retVal;
+
+        return 0;
     }
 
 
