@@ -67,7 +67,7 @@ public class MedianFilter implements AnalogFilter {
     @Override
     @JmxAttribute(description = "Current signal")
     public DataSample<Double> getSignal() {
-        // TODO Auto-generated method stub
+
         throw new Error("Not Implemented");
     }
 

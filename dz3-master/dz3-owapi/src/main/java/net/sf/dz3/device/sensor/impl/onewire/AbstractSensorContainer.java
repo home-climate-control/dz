@@ -19,7 +19,6 @@ abstract public class AbstractSensorContainer extends OneWireDeviceContainer imp
 
     public AbstractSensorContainer(OneWireContainer container) {
         super(container);
-        // TODO Auto-generated constructor stub
     }
 
     protected final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
