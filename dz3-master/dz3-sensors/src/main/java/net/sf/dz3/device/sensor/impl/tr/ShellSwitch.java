@@ -109,11 +109,23 @@ public class ShellSwitch implements Switch, JmxAware {
                        String closeCommand,
                        String getStateCommand,
                        long maxWaitMilliseconds) {
-        initialize(address,
-                   openCommand,
-                   closeCommand,
-                   getStateCommand,
-                   maxWaitMilliseconds);
+
+        if ((openCommand == null || "".equals(openCommand)) ||
+                (closeCommand == null || "".equals(closeCommand)) ) {
+            // Orderly error handling not possible in constructor,
+            // must resort to throw
+            throw new IllegalArgumentException(address +
+                    "open/close command cannot be null or empty");
+        }
+
+        m_address = address;
+        m_openCommand = openCommand;
+        m_closeCommand = closeCommand;
+        m_getStateCommand = getStateCommand;
+        m_maxWaitMilliseconds = maxWaitMilliseconds;
+        m_lastCommandedState = false;
+        m_outputValueRead = false;
+        m_commandOutputValue = 0;
     }
 
     /**
@@ -123,7 +135,7 @@ public class ShellSwitch implements Switch, JmxAware {
                        String openCommand,
                        String closeCommand,
                        String getStateCommand) {
-        initialize(address,
+        this(address,
                    openCommand,
                    closeCommand,
                    getStateCommand,
@@ -136,36 +148,11 @@ public class ShellSwitch implements Switch, JmxAware {
     public ShellSwitch(String address,
                        String openCommand,
                        String closeCommand) {
-        initialize(address,
+        this(address,
                    openCommand,
                    closeCommand,
                    (String) "",
                    0);
-    }
-
-    /**
-     * Common code for all constructors.
-     */
-    private void initialize(String address,
-                            String openCommand,
-                            String closeCommand,
-                            String getStateCommand,
-                            long maxWaitMilliseconds) {
-        if ((openCommand == null || "".equals(openCommand)) ||
-            (closeCommand == null || "".equals(closeCommand)) ) {
-            // Orderly error handling not possible in constructor,
-            // must resort to throw
-            throw new IllegalArgumentException(address +
-                            "open/close command cannot be null or empty");
-        }
-        m_address = address;
-        m_openCommand = openCommand;
-        m_closeCommand = closeCommand;
-        m_getStateCommand = getStateCommand;
-        m_maxWaitMilliseconds = maxWaitMilliseconds;
-        m_lastCommandedState = false;
-        m_outputValueRead = false;
-        m_commandOutputValue = 0;
     }
 
     /**
