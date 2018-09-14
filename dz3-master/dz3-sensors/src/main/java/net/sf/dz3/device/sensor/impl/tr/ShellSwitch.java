@@ -15,7 +15,7 @@ import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
- *  \brief Shell switch.
+ *  Shell switch.
  *
  * Executes a shell command to set the position of a switch.
  *
@@ -63,7 +63,7 @@ public class ShellSwitch implements Switch, JmxAware {
      private long m_maxWaitMilliseconds = 0;
 
     /**
-     *  \brief Last commanded state.
+     *  Last commanded state.
      *
      * false represents switch open
      * true represents switch closed
@@ -83,7 +83,7 @@ public class ShellSwitch implements Switch, JmxAware {
 
 
     /**
-     *  \brief Create an instance.
+     *  Create an instance.
      *
      * @param address A string to identify the switch.
      *
@@ -169,7 +169,7 @@ public class ShellSwitch implements Switch, JmxAware {
     }
 
     /**
-     *  \brief Utility method to execute command.
+     *  Utility method to execute command.
      *
      * sets m_outputValueRead
      * sets m_commandOutputValue (-1 on error);
@@ -252,7 +252,7 @@ public class ShellSwitch implements Switch, JmxAware {
 
 
     /**
-     *  \brief Set state executes the shell command m_getStateCommand or returns
+     *  Set state executes the shell command m_getStateCommand or returns
      *  m_lastCommandedState if m_getStateCommand="".
      *
      */
@@ -293,7 +293,7 @@ public class ShellSwitch implements Switch, JmxAware {
     }
 
     /**
-     *  \brief Set state executes a shell command, m_openCommand for state=false,
+     *  Set state executes a shell command, m_openCommand for state=false,
      *  m_closeCommand for state=true.
      *
      */
