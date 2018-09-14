@@ -255,7 +255,7 @@ public class ShellSwitch implements Switch, JmxAware {
     @Override
     public boolean getState() throws IOException {
         boolean retVal = false;
-        if (m_getStateCommand == "") {
+        if ("".equals(m_getStateCommand)) {
             retVal = m_lastCommandedState;
         } else {
             int execRet = executeCommand(m_getStateCommand);
