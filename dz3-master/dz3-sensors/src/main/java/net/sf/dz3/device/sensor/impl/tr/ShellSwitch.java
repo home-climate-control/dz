@@ -40,27 +40,27 @@ public class ShellSwitch implements Switch, JmxAware {
     /**
      * String to identify switch.
      */
-    private String m_address = "";
+    private final String m_address;
 
     /**
      * Command to open switch.
      */
-    private String m_openCommand = "";
+    private final String m_openCommand;
 
     /**
      * Command to close switch.
      */
-    private String m_closeCommand = "";
+    private final String m_closeCommand;
 
     /**
      * Command to get switch state.
      */
-    private String m_getStateCommand = "";
+    private final String m_getStateCommand;
 
     /**
      * Maximum number of milliseconds to wait for process completion
      */
-     private long m_maxWaitMilliseconds = 0;
+     private final long m_maxWaitMilliseconds;
 
     /**
      *  Last commanded state.
