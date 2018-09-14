@@ -142,8 +142,8 @@ public class TcpSensorFactory extends PassiveService {
         }
 
         public TemperatureSensor getInstance(String address) {
-            // TODO Auto-generated method stub
-            return null;
+
+            throw new IllegalStateException("Not Implemented");
         }
 
         @Override
