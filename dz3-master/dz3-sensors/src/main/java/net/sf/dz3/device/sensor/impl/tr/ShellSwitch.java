@@ -111,9 +111,8 @@ public class ShellSwitch implements Switch, JmxAware {
                        long maxWaitMilliseconds) {
 
         if ((openCommand == null || "".equals(openCommand)) ||
-                (closeCommand == null || "".equals(closeCommand)) ) {
-            // Orderly error handling not possible in constructor,
-            // must resort to throw
+            (closeCommand == null || "".equals(closeCommand)) ) {
+
             throw new IllegalArgumentException(address +
                     "open/close command cannot be null or empty");
         }
