@@ -28,32 +28,33 @@ public class NativeSensorFactory implements SensorFactory<NativeSensorDescriptor
 
         @Override
         public void addConsumer(DataSink<Double> consumer) {
-            // TODO Auto-generated method stub
 
+            throw new IllegalStateException("Not Implemented");
         }
 
         @Override
         public void removeConsumer(DataSink<Double> consumer) {
-            // TODO Auto-generated method stub
+
+            throw new IllegalStateException("Not Implemented");
 
         }
 
         @Override
         public JmxDescriptor getJmxDescriptor() {
-            // TODO Auto-generated method stub
-            return null;
+
+            throw new IllegalStateException("Not Implemented");
         }
 
         @Override
         public String getAddress() {
-            // TODO Auto-generated method stub
-            return null;
+
+            throw new IllegalStateException("Not Implemented");
         }
 
         @Override
         public DataSample<Double> getSignal() {
-            // TODO Auto-generated method stub
-            return null;
+
+            throw new IllegalStateException("Not Implemented");
         }
 
         public String toString() {
