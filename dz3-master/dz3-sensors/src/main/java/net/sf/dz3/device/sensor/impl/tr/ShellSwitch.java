@@ -297,8 +297,7 @@ public class ShellSwitch implements Switch, JmxAware {
     public void setState(boolean state) throws IOException {
         // select command string to be executed
         String commandToExecute = "";
-        if (state == false)
-        {
+        if (state == false) {
             // open switch
             commandToExecute = m_openCommand;
             logger.debug("Setting switch " + m_address + " to open");
@@ -310,12 +309,9 @@ public class ShellSwitch implements Switch, JmxAware {
         // execute command
         int execRet = executeCommand(commandToExecute);
         // if execution was successful, record last commanded state
-        if (execRet == 0) 
-        {
+        if (execRet == 0) {
             m_lastCommandedState = state;
-        }
-        else
-        {
+        } else {
             logger.debug("Unable to set switch " + m_address);
             throw new IOException("Unable to set switch state");
         }
@@ -400,5 +396,4 @@ public class ShellSwitch implements Switch, JmxAware {
             ThreadContext.pop();
         }
     }
-
 }
