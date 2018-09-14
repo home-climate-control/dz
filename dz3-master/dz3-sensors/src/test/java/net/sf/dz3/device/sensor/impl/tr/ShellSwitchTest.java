@@ -120,8 +120,15 @@ public class ShellSwitchTest extends TestCase {
 
             throw ex;
 
+        } catch (IOException ex) {
+
+            assertEquals("wrong exception message", "Unable to set switch state", ex.getMessage());
+
         } catch (Throwable t) {
-            assertTrue(true);
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -354,8 +361,15 @@ public class ShellSwitchTest extends TestCase {
 
             throw ex;
 
+        } catch (IOException ex) {
+
+            assertEquals("wrong exception message", "Unable to read switch state", ex.getMessage());
+
         } catch (Throwable t) {
-            assertTrue(true);
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -380,8 +394,15 @@ public class ShellSwitchTest extends TestCase {
 
             throw ex;
 
+        } catch (IOException ex) {
+
+            assertEquals("wrong exception message", "Unable to read switch state", ex.getMessage());
+
         } catch (Throwable t) {
-            assertTrue(true);
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -406,8 +427,15 @@ public class ShellSwitchTest extends TestCase {
 
             throw ex;
 
+        } catch (IOException ex) {
+
+            assertEquals("wrong exception message", "Unable to read switch state", ex.getMessage());
+
         } catch (Throwable t) {
-            assertTrue(true);
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -432,8 +460,15 @@ public class ShellSwitchTest extends TestCase {
 
             throw ex;
 
+        } catch (IOException ex) {
+
+            assertEquals("wrong exception message", "Invalid command output, cannot get switch state", ex.getMessage());
+
         } catch (Throwable t) {
-            assertTrue(true);
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
@@ -458,8 +493,15 @@ public class ShellSwitchTest extends TestCase {
 
             throw ex;
 
+        } catch (IOException ex) {
+
+            assertEquals("wrong exception message", "Invalid command output, cannot get switch state", ex.getMessage());
+
         } catch (Throwable t) {
-            assertTrue(true);
+
+            logger.error("Unexpected exception",  t);
+            fail("test failed, see the log for the exception trace");
+
         } finally {
             ThreadContext.pop();
         }
