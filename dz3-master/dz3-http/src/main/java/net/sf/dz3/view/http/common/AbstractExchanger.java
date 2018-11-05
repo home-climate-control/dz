@@ -3,13 +3,12 @@ package net.sf.dz3.view.http.common;
 import java.net.URL;
 import java.util.concurrent.BlockingQueue;
 
-import net.sf.dz3.view.http.v1.HttpConnector;
-import net.sf.jukebox.service.ActiveService;
-
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
+
+import net.sf.jukebox.service.ActiveService;
 
 /**
  * The facilitator between the client {@link #send(Object) sending} data and the server
