@@ -37,19 +37,10 @@ public class OAuth2DeviceLimitedInputAuthTest {
 
         try {
             
-            // Make sure the environment is set correctly, otherwise this code will not have enough information to proceed
+            Map<String, String> env = ContextChecker.check(new String[] {HCC_CLIENT_ID, HCC_CLIENT_SECRET}, true);
             
-            String clientId = System.getenv(HCC_CLIENT_ID);
-            
-            if (clientId == null) {
-                fail("Please set " + HCC_CLIENT_ID);
-            }
-            
-            String clientSecret = System.getenv(HCC_CLIENT_SECRET);
-            
-            if (clientSecret == null) {
-                fail("Please set " + HCC_CLIENT_SECRET);
-            }
+            String clientId = env.get(HCC_CLIENT_ID);
+            String clientSecret = env.get(HCC_CLIENT_SECRET);
 
             HttpClient httpClient = new HttpClient();
             PostMethod post = new PostMethod("https://accounts.google.com/o/oauth2/device/code");

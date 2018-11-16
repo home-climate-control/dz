@@ -2,6 +2,8 @@ package net.sf.dz3.view.http.v3;
 
 import static org.junit.Assert.fail;
 
+import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -30,14 +32,9 @@ public class ServiceAccountAuthTest {
 
         try {
             
-            // Make sure the environment is set correctly, otherwise this code may want to do things
-            // its own implicit way
-            
-            String env = System.getenv(GOOGLE_APPLICATION_CREDENTIALS);
-            
-            if (env == null) {
-                fail("Please set " + GOOGLE_APPLICATION_CREDENTIALS);
-            }
+            // We don't need the return value, just need to have it set
+
+            ContextChecker.check(new String[] {GOOGLE_APPLICATION_CREDENTIALS}, true);
 
             Storage storage = StorageOptions.getDefaultInstance().getService();
 
