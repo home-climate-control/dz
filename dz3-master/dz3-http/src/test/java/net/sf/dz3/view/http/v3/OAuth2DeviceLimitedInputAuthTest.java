@@ -23,7 +23,7 @@ import com.google.gson.reflect.TypeToken;
  *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
-public class OAuth2DeviceAuthTest {
+public class OAuth2DeviceLimitedInputAuthTest {
     
     private final Logger logger = LogManager.getLogger(getClass());
 
