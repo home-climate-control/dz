@@ -7,10 +7,30 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.Logger;
+
 /**
  * Simple class to check whether the test cases run in an environment they need
  */
 public class ContextChecker {
+
+    /**
+     * @return {@code true} if test needs to be run now, otherwise print a warning and return {@code false}.
+     */
+    public static boolean runNow(Logger logger) {
+
+        String RUN_NOW = "HCC_RUN_TESTS_NOW";
+
+        String runTest = System.getenv(RUN_NOW);
+
+        if (runTest == null) {
+
+            logger.warn("not configured to run - set " + RUN_NOW + " environment variable to a non-empty value to run");
+            return false;
+        }
+
+        return true;
+    }
 
     /**
      * Make sure all the variables specified are set and retrieve them.

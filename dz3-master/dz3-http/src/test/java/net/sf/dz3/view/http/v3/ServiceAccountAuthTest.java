@@ -31,7 +31,11 @@ public class ServiceAccountAuthTest {
         ThreadContext.push("testAuth");
 
         try {
-            
+
+            if (!ContextChecker.runNow(logger)) {
+                return;
+            }
+
             // We don't need the return value, just need to have it set
 
             ContextChecker.check(new String[] {GOOGLE_APPLICATION_CREDENTIALS}, true);

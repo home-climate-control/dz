@@ -36,6 +36,10 @@ public class OAuth2DeviceLimitedInputAuthTest {
         ThreadContext.push("testAuth");
 
         try {
+
+            if (!ContextChecker.runNow(logger)) {
+                return;
+            }
             
             Map<String, String> env = ContextChecker.check(new String[] {HCC_CLIENT_ID, HCC_CLIENT_SECRET}, true);
             
