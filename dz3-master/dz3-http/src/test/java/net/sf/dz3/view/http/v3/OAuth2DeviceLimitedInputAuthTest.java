@@ -2,7 +2,12 @@ package net.sf.dz3.view.http.v3;
 
 import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.util.Map;
 
@@ -47,8 +52,58 @@ public class OAuth2DeviceLimitedInputAuthTest {
             String clientSecret = env.get(HCC_CLIENT_SECRET);
 
             HttpClient httpClient = new HttpClient();
+            String refreshToken = getRefreshToken();
+            String accessToken;
+
+            if (refreshToken == null) {
+
+                accessToken = acquire(httpClient, clientId, clientSecret);
+
+            } else {
+
+                accessToken = refresh(httpClient, clientId, clientSecret, refreshToken);
+            }
+
+            // All we need now is to make sure we get HTTP 200 on subsequent calls to Google APIs (including HCC Proxy)
+
+            {
+                PostMethod post = new PostMethod("https://www.googleapis.com/oauth2/v3/userinfo");
+                post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+                post.setRequestHeader("Authorization", "Bearer " + accessToken);
+
+                int rc = httpClient.executeMethod(post);
+
+                logger.info("RC=" + rc);
+
+                if (rc != 200) {
+
+                    logger.error("HTTP rc=" + rc + ", text follows:");
+                    logger.error(post.getResponseBodyAsString());
+
+                    fail("OAuth 2.0 for TV and Limited-Input Device Applications: couldn't finish the sequence");
+                }
+
+                String responseJson = post.getResponseBodyAsString();
+
+                logger.info("response: " + responseJson);
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    /**
+     * @return {@code access_token}.
+     */
+    private String acquire(HttpClient httpClient, String clientId, String clientSecret) throws IOException, InterruptedException {
+
+        ThreadContext.push("acquire");
+
+        try {
+
             PostMethod post = new PostMethod("https://accounts.google.com/o/oauth2/device/code");
-            
+
             // Step 1
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-1-request-device-and-user-codes
 
@@ -156,36 +211,115 @@ public class OAuth2DeviceLimitedInputAuthTest {
                 // Good candidate: https://github.com/auth0/java-jwt
 
                 dumpJWT(idToken);
+                storeRefreshToken(refreshToken);
 
-                // All we need now is to make sure we get HTTP 200 on subsequent calls to Google APIs (including HCC Proxy)
-
-                {
-                    post = new PostMethod("https://www.googleapis.com/oauth2/v3/userinfo");
-                    post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    post.setRequestHeader("Authorization", "Bearer " + accessToken);
-
-                    rc = httpClient.executeMethod(post);
-
-                    logger.info("RC=" + rc);
-
-                    if (rc != 200) {
-
-                        logger.error("HTTP rc=" + rc + ", text follows:");
-                        logger.error(post.getResponseBodyAsString());
-
-                        fail("OAuth 2.0 for TV and Limited-Input Device Applications: couldn't finish the sequence");
-                    }
-
-                    responseJson = post.getResponseBodyAsString();
-
-                    logger.info("response: " + responseJson);
-                }
+                return accessToken;
             }
-            
+
         } finally {
             ThreadContext.pop();
         }
+    }
 
+    /**
+     * @return {@code access_token}.
+     */
+    private String refresh(HttpClient httpClient, String clientId, String clientSecret, String refreshToken) throws IOException {
+
+        ThreadContext.push("refresh");
+
+        try {
+
+            PostMethod post = new PostMethod("https://www.googleapis.com/oauth2/v4/token");
+            post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            post.addParameter(new NameValuePair("client_id", clientId));
+            post.addParameter(new NameValuePair("client_secret", clientSecret));
+            post.addParameter(new NameValuePair("refresh_token", refreshToken));
+            post.addParameter(new NameValuePair("grant_type", "refresh_token"));
+
+            int rc = httpClient.executeMethod(post);
+
+            logger.info("RC=" + rc);
+
+            if (rc != 200) {
+
+                logger.error("HTTP rc=" + rc + ", text follows:");
+                logger.error(post.getResponseBodyAsString());
+
+                fail("request failed with HTTP code " + rc + ", see log for details");
+            }
+
+            String responseJson = post.getResponseBodyAsString();
+            Gson gson = new Gson();
+            Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
+            Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
+
+            logger.info("response: " + responseMap);
+
+            return responseMap.get("access_token");
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private File getRefreshTokenLocation() {
+
+        return new File(System.getProperty("user.home"), ".dz/test/" + getClass().getSimpleName());
+    }
+
+    private void storeRefreshToken(String token) throws IOException {
+
+        ThreadContext.push("storeRefreshToken");
+
+        try {
+
+            File target = getRefreshTokenLocation();
+
+            logger.info("target: " + target);
+
+            // Create the directory if it doesn't exist
+            File dir = target.getParentFile();
+
+            if (!dir.exists()) {
+                if (!dir.mkdirs()) {
+                    throw new IOException("couldn't create " + dir);
+                }
+            }
+
+            PrintWriter pw = new PrintWriter(new FileWriter(target));
+
+            pw.println(token);
+            pw.close();
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private String getRefreshToken() throws IOException {
+
+        ThreadContext.push("getRefreshToken");
+
+        try {
+
+            File target = getRefreshTokenLocation();
+
+            logger.info("source: " + target);
+
+            if (!target.exists()) {
+                return null;
+            }
+
+            logger.warn("Stored refresh token detected in " + target + ", remove that file to reacquire access_token from scratch");
+
+            BufferedReader br = new BufferedReader(new FileReader(target));
+
+            return br.readLine();
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     private void dumpJWT(String source) {
