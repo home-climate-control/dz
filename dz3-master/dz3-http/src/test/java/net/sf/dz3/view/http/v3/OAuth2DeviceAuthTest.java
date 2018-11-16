@@ -56,7 +56,7 @@ public class OAuth2DeviceAuthTest {
             
             post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
             post.addParameter(new NameValuePair("client_id", clientId));
-            post.addParameter(new NameValuePair("scope", "email profile"));
+            post.addParameter(new NameValuePair("scope", "email"));
             
             int rc = httpClient.executeMethod(post);
             
