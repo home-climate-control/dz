@@ -162,7 +162,7 @@ public class OAuth2DeviceLimitedInputAuthTest {
                 {
                     post = new PostMethod("https://www.googleapis.com/oauth2/v3/userinfo");
                     post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    post.addParameter(new NameValuePair("access_token", accessToken));
+                    post.setRequestHeader("Authorization", "Bearer " + accessToken);
 
                     rc = httpClient.executeMethod(post);
 
