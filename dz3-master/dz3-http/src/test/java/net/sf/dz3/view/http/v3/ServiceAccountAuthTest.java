@@ -1,9 +1,5 @@
 package net.sf.dz3.view.http.v3;
 
-import static org.junit.Assert.fail;
-
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
