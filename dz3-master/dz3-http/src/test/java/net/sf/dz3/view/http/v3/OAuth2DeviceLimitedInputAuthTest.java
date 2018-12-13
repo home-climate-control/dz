@@ -9,12 +9,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -51,7 +55,7 @@ public class OAuth2DeviceLimitedInputAuthTest {
             String clientId = env.get(HCC_CLIENT_ID);
             String clientSecret = env.get(HCC_CLIENT_SECRET);
 
-            HttpClient httpClient = new HttpClient();
+            HttpClient httpClient = HttpClientBuilder.create().build();
             String refreshToken = getRefreshToken();
             String accessToken;
 
@@ -67,23 +71,25 @@ public class OAuth2DeviceLimitedInputAuthTest {
             // All we need now is to make sure we get HTTP 200 on subsequent calls to Google APIs (including HCC Proxy)
 
             {
-                PostMethod post = new PostMethod("https://www.googleapis.com/oauth2/v3/userinfo");
-                post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                post.setRequestHeader("Authorization", "Bearer " + accessToken);
+                HttpPost post = new HttpPost("https://www.googleapis.com/oauth2/v3/userinfo");
 
-                int rc = httpClient.executeMethod(post);
+                post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+                post.setHeader("Authorization", "Bearer " + accessToken);
+
+                HttpResponse rsp = httpClient.execute(post);
+                int rc = rsp.getStatusLine().getStatusCode();
 
                 logger.info("RC=" + rc);
 
                 if (rc != 200) {
 
                     logger.error("HTTP rc=" + rc + ", text follows:");
-                    logger.error(post.getResponseBodyAsString());
+                    logger.error(EntityUtils.toString(rsp.getEntity()));
 
                     fail("OAuth 2.0 for TV and Limited-Input Device Applications: couldn't finish the sequence");
                 }
 
-                String responseJson = post.getResponseBodyAsString();
+                String responseJson = EntityUtils.toString(rsp.getEntity());
 
                 logger.info("response: " + responseJson);
             }
@@ -102,16 +108,20 @@ public class OAuth2DeviceLimitedInputAuthTest {
 
         try {
 
-            PostMethod post = new PostMethod("https://accounts.google.com/o/oauth2/device/code");
-
             // Step 1
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-1-request-device-and-user-codes
 
-            post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            post.addParameter(new NameValuePair("client_id", clientId));
-            post.addParameter(new NameValuePair("scope", "email"));
+            URIBuilder builder = new URIBuilder("https://accounts.google.com/o/oauth2/device/code");
             
-            int rc = httpClient.executeMethod(post);
+            builder.addParameter("client_id", clientId);
+            builder.addParameter("scope", "email");
+
+            HttpPost post = new HttpPost(builder.toString());
+
+            post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            HttpResponse rsp = httpClient.execute(post);
+            int rc = rsp.getStatusLine().getStatusCode();
             
             // Step 2
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-2-handle-the-authorization-server-response
@@ -121,12 +131,12 @@ public class OAuth2DeviceLimitedInputAuthTest {
             if (rc != 200) {
 
                 logger.error("HTTP rc=" + rc + ", text follows:");
-                logger.error(post.getResponseBodyAsString());
+                logger.error(EntityUtils.toString(rsp.getEntity()));
                 
                 fail("request failed with HTTP code " + rc + ", see log for details");
             }
             
-            String responseJson = post.getResponseBodyAsString();
+            String responseJson = EntityUtils.toString(rsp.getEntity());
             Gson gson = new Gson();
             Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
             Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
@@ -157,26 +167,31 @@ public class OAuth2DeviceLimitedInputAuthTest {
                     // Step 5 - on a different device
                     // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-5-user-responds-to-access-request
 
-                    post = new PostMethod("https://www.googleapis.com/oauth2/v4/token");
-                    post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                    post.addParameter(new NameValuePair("client_id", clientId));
-                    post.addParameter(new NameValuePair("client_secret", clientSecret));
-                    post.addParameter(new NameValuePair("code", responseMap.get("device_code")));
-                    post.addParameter(new NameValuePair("grant_type", "http://oauth.net/grant_type/device/1.0"));
+                    builder = new URIBuilder("https://www.googleapis.com/oauth2/v4/token");
+
+                    builder.addParameter("client_id", clientId);
+                    builder.addParameter("client_secret", clientSecret);
+                    builder.addParameter("code", responseMap.get("device_code"));
+                    builder.addParameter("grant_type", "http://oauth.net/grant_type/device/1.0");
+
+                    post = new HttpPost(builder.toString());
+                    post.setHeader("Content-Type", "application/x-www-form-urlencoded");
                     
-                    rc = httpClient.executeMethod(post);
+                    rsp = httpClient.execute(post);
+                    rc = rsp.getStatusLine().getStatusCode();
+                    String responseBody = EntityUtils.toString(rsp.getEntity());
                     
                     logger.info("RC=" + rc);
 
                     if (rc != 200) {
 
                         logger.error("HTTP rc=" + rc + ", text follows:");
-                        logger.error(post.getResponseBodyAsString());
+                        logger.error(responseBody);
                         
                         logger.warn("request failed with HTTP code " + rc + ", will retry in " + interval + " seconds");
                     }
                     
-                    responseJson = post.getResponseBodyAsString();
+                    responseJson = responseBody;
                     
                     logger.info("response: " + responseJson);
                     
@@ -216,6 +231,10 @@ public class OAuth2DeviceLimitedInputAuthTest {
                 return accessToken;
             }
 
+        } catch (URISyntaxException ex) {
+
+            throw new IOException("malformed URI", ex);
+
         } finally {
             ThreadContext.pop();
         }
@@ -230,26 +249,30 @@ public class OAuth2DeviceLimitedInputAuthTest {
 
         try {
 
-            PostMethod post = new PostMethod("https://www.googleapis.com/oauth2/v4/token");
-            post.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            post.addParameter(new NameValuePair("client_id", clientId));
-            post.addParameter(new NameValuePair("client_secret", clientSecret));
-            post.addParameter(new NameValuePair("refresh_token", refreshToken));
-            post.addParameter(new NameValuePair("grant_type", "refresh_token"));
+            URIBuilder builder = new URIBuilder("https://www.googleapis.com/oauth2/v4/token");
 
-            int rc = httpClient.executeMethod(post);
+            builder.addParameter("client_id", clientId);
+            builder.addParameter("client_secret", clientSecret);
+            builder.addParameter("refresh_token", refreshToken);
+            builder.addParameter("grant_type", "refresh_token");
+
+            HttpPost post = new HttpPost(builder.toString());
+            post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+            HttpResponse rsp = httpClient.execute(post);
+            int rc = rsp.getStatusLine().getStatusCode();
 
             logger.info("RC=" + rc);
 
             if (rc != 200) {
 
                 logger.error("HTTP rc=" + rc + ", text follows:");
-                logger.error(post.getResponseBodyAsString());
+                logger.error(EntityUtils.toString(rsp.getEntity()));
 
                 fail("request failed with HTTP code " + rc + ", see log for details");
             }
 
-            String responseJson = post.getResponseBodyAsString();
+            String responseJson = EntityUtils.toString(rsp.getEntity());
             Gson gson = new Gson();
             Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
             Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
@@ -257,6 +280,10 @@ public class OAuth2DeviceLimitedInputAuthTest {
             logger.info("response: " + responseMap);
 
             return responseMap.get("access_token");
+
+        } catch (URISyntaxException ex) {
+
+            throw new IOException("malformed URI", ex);
 
         } finally {
             ThreadContext.pop();

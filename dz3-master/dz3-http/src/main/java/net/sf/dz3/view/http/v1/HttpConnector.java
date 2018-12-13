@@ -1,6 +1,7 @@
 package net.sf.dz3.view.http.v1;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Map;
@@ -8,6 +9,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.AnalogSensor;
@@ -17,9 +24,6 @@ import net.sf.dz3.view.http.common.AbstractExchanger;
 import net.sf.dz3.view.http.common.ImmediateExchanger;
 import net.sf.dz3.view.http.common.QueueFeeder;
 import net.sf.jukebox.jmx.JmxDescriptor;
-
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.logging.log4j.ThreadContext;
 
 /**
  * HTTP client side interface.
@@ -129,25 +133,27 @@ public class HttpConnector extends Connector<RestRenderer> {
                 
                 logger.debug("URL: " + targetUrl);
                 
-                PostMethod post = new PostMethod(targetUrl.toString());
-                post.setDoAuthentication(true);
+                URIBuilder builder = new URIBuilder(targetUrl.toURI());
                 
                 for (Iterator<String> i = dataBlock.stateMap.keySet().iterator(); i.hasNext(); ) {
                     
                     String name = i.next();
                     String value = dataBlock.stateMap.get(name);
 
-                    post.addParameter(name, value);
+                    builder.addParameter(name, value);
                 }
-                
+
+                HttpPost post = new HttpPost(builder.toString());
+
                 try {
 
-                    int rc = httpClient.executeMethod(post);
+                    HttpResponse rsp = httpClient.execute(post);
+                    int rc = rsp.getStatusLine().getStatusCode();
 
                     if (rc != 200) {
 
                         logger.error("HTTP rc=" + rc + ", text follows:");
-                        logger.error(post.getResponseBodyAsString());
+                        logger.error(EntityUtils.toString(rsp.getEntity()));
                         
                         throw new IOException("Request failed with HTTP code " + rc);
                     }
@@ -156,6 +162,10 @@ public class HttpConnector extends Connector<RestRenderer> {
                     post.releaseConnection();
                 }
                 
+            } catch (URISyntaxException ex) {
+
+                throw new IOException("Failed to build target URL: " + new URL(serverContextRoot, dataBlock.path), ex);
+
             } finally {
                 ThreadContext.pop();
             }

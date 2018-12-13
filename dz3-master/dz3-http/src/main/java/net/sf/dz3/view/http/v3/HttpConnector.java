@@ -11,7 +11,10 @@ import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.ThreadContext;
 
 import com.google.gson.Gson;
@@ -186,24 +189,25 @@ public class HttpConnector extends Connector<JsonRenderer>{
                 logger.debug("JSON: " + encoded);
 
                 URL targetUrl = serverContextRoot;
-                PostMethod post = new PostMethod(targetUrl.toString());
+                URIBuilder builder = new URIBuilder(targetUrl.toString());
                 
-                post.setDoAuthentication(true);
-                post.addParameter("snapshot", encoded);
+                builder.addParameter("snapshot", encoded);
+                HttpPost post = new HttpPost(builder.toString());
                 
                 try {
 
-                    int rc = httpClient.executeMethod(post);
+                    HttpResponse rsp = httpClient.execute(post);
+                    int rc = rsp.getStatusLine().getStatusCode();
 
                     if (rc != 200) {
 
                         logger.error("HTTP rc=" + rc + ", text follows:");
-                        logger.error(post.getResponseBodyAsString());
+                        logger.error(EntityUtils.toString(rsp.getEntity()));
                         
                         throw new IOException("Request failed with HTTP code " + rc);
                     }
                     
-                    processResponse(post.getResponseBodyAsString());
+                    processResponse(EntityUtils.toString(rsp.getEntity()));
                     
                 } finally {
                     post.releaseConnection();
