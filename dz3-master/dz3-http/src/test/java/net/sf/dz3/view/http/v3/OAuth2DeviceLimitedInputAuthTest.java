@@ -27,6 +27,8 @@ import org.junit.Test;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import net.sf.dz3.view.http.common.ContextChecker;
+
 /**
  * Test case for {@link https://developers.google.com/identity/protocols/OAuth2ForDevices OAuth 2.0 for TV and Limited-Input Device Applications}.
  *

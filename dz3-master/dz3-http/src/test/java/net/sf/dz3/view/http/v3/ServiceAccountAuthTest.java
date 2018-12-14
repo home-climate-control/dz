@@ -10,6 +10,8 @@ import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
+import net.sf.dz3.view.http.common.ContextChecker;
+
 /**
  * Test case for {@link https://cloud.google.com/docs/authentication/production Google Service Account Authentication}.
  *
