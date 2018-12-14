@@ -193,7 +193,7 @@ public class HttpConnector extends Connector<JsonRenderer>{
                 
                 try {
 
-                    HttpResponse rsp = httpClient.execute(post);
+                    HttpResponse rsp = httpClient.execute(post, context);
                     int rc = rsp.getStatusLine().getStatusCode();
 
                     if (rc != 200) {

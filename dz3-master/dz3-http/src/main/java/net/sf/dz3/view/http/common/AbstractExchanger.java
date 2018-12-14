@@ -5,20 +5,17 @@ import java.net.URL;
 import java.util.concurrent.BlockingQueue;
 
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 
 import net.sf.dz3.view.http.v1.HttpConnector;
 import net.sf.jukebox.service.ActiveService;
@@ -34,6 +31,7 @@ import net.sf.jukebox.service.ActiveService;
 public abstract class AbstractExchanger<DataBlock> extends ActiveService {
     
     protected final HttpClient httpClient = HttpClientBuilder.create().build();
+    protected final HttpClientContext context = HttpClientContext.create();
 
     protected final URL serverContextRoot;
     private String username;
@@ -89,20 +87,7 @@ public abstract class AbstractExchanger<DataBlock> extends ActiveService {
         AuthCache authCache = new BasicAuthCache();
         authCache.put(targetHost, new BasicScheme());
 
-        final HttpClientContext context = HttpClientContext.create();
         context.setCredentialsProvider(credsProvider);
         context.setAuthCache(authCache);
-
-        HttpResponse rsp = httpClient.execute(new HttpGet(serverContextRoot.toString()), context);
-
-        int rc = rsp.getStatusLine().getStatusCode();
-
-        if (rc != 200) {
-
-            logger.error("HTTP rc=" + rc + ", text follows:");
-            logger.error(EntityUtils.toString(rsp.getEntity()));
-
-            throw new IOException("Request failed with HTTP code " + rc);
-        }
     }
 }
