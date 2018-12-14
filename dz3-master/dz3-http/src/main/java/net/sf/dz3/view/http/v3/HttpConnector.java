@@ -44,8 +44,13 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * {@code init-method="start"} attribute must be used in Spring bean definition, otherwise
  * the connector will not work.
  * 
- * The only difference between this and {@link net.sf.dz3.view.http.v2.HttpConnector previous implementation}
- * is the authentication method 
+ * The difference between this and {@link net.sf.dz3.view.http.v2.HttpConnector previous implementation}
+ * is the authentication and core/remote matching method. Previous versions used HTTP Basic authentication
+ * which is no longer supported by GAE ({@link https://developers.google.com/api-client-library/java/google-api-java-client/client-login}).
+ *
+ * OAuth 2.0 support seems to only enable "access to Google APIs" which DZ doesn't care about, efficiency
+ * being the reason. Hence, DZ will be matching the message digest of the email used to authenticate
+ * both on HCC Core and HCC Remote side on the proxy in this protocol version.
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
