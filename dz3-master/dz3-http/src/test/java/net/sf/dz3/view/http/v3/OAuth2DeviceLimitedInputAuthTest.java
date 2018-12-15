@@ -342,9 +342,10 @@ public class OAuth2DeviceLimitedInputAuthTest {
 
             logger.warn("Stored refresh token detected in " + target + ", remove that file to reacquire access_token from scratch");
 
-            BufferedReader br = new BufferedReader(new FileReader(target));
+            try (BufferedReader br = new BufferedReader(new FileReader(target))) {
 
-            return br.readLine();
+                return br.readLine();
+            }
 
         } finally {
             ThreadContext.pop();
