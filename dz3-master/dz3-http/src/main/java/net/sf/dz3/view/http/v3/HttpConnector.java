@@ -15,6 +15,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.ThreadContext;
 
@@ -197,11 +198,10 @@ public class HttpConnector extends Connector<JsonRenderer>{
                 URL targetUrl = serverContextRoot;
                 URIBuilder builder = new URIBuilder(targetUrl.toString());
 
-                builder.addParameter("data", encoded);
-
                 HttpPost post = new HttpPost(builder.toString());
 
                 post.setHeader("identity", getIdentity());
+                post.setEntity(new StringEntity(encoded));
                 
                 try {
 
