@@ -210,7 +210,7 @@ public class OAuth2DeviceIdentityProvider {
                 // VT: NOTE: Let's set the level to "warn" so it stands out
 
                 logger.warn("OAuth 2.0 login to " + requesterIdentity + ": action required" );
-                logger.warn("Please go to " + verificationUrl + " and enter this code: " + userCode);
+                logger.warn("Please go to " + verificationUrl);
                 logger.warn("and enter this code: " + userCode);
 
                 Thread.sleep(interval * 1000);
@@ -240,10 +240,20 @@ public class OAuth2DeviceIdentityProvider {
 
                     if (rc != 200) {
 
-                        logger.warn("HTTP rc=" + rc + ", text follows:");
-                        logger.warn(responseBody);
+                        if (rc == 428) {
 
-                        logger.warn("request failed with HTTP code " + rc + ", will retry in " + interval + " seconds");
+                            logger.info("waiting for user response, will retry in " + interval + " seconds");
+
+                        } else {
+
+                            // VT: NOTE: These are not really expected, but let's hope that the user
+                            // figures out what to with them
+
+                            logger.error("Unexpected: HTTP rc=" + rc + ", text follows:");
+                            logger.error(responseBody);
+
+                            logger.warn("will retry in " + interval + " seconds");
+                        }
                     }
 
                     responseJson = responseBody;
