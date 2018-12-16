@@ -40,11 +40,12 @@ public class OAuth2DeviceIdentityProvider {
      * @param clientId OAuth 2.0 client ID.
      * @param clientSecret OAuth 2.0 client secret.
      * @param refreshTokenFile File for the refresh token to be stored to and retrieved from.
-     * @param 
+     * @param requesterIdentity Name of the module requesting authentication. Informational only,
+     * but it would be a good idea to make it match the OAuth client name not to confuse the user.
      *
      * @return Client identity.
      */
-    public String getIdentity(String clientId, String clientSecret, File refreshTokenFile) throws IOException, InterruptedException {
+    public String getIdentity(String clientId, String clientSecret, File refreshTokenFile, String requesterIdentity) throws IOException, InterruptedException {
 
         ThreadContext.push("getIdentity");
 
@@ -60,7 +61,7 @@ public class OAuth2DeviceIdentityProvider {
 
             if (refreshToken == null) {
 
-                accessToken = acquire(httpClient, clientId, clientSecret, refreshTokenFile);
+                accessToken = acquire(httpClient, clientId, clientSecret, refreshTokenFile, requesterIdentity);
 
             } else {
 
@@ -81,7 +82,7 @@ public class OAuth2DeviceIdentityProvider {
 
         try {
 
-            logger.info("target: " + target);
+            logger.debug("target: " + target);
 
             // Create the directory if it doesn't exist
             File dir = target.getParentFile();
@@ -115,7 +116,7 @@ public class OAuth2DeviceIdentityProvider {
 
         try {
 
-            logger.info("source: " + source);
+            logger.debug("source: " + source);
 
             if (!source.exists()) {
 
@@ -139,7 +140,12 @@ public class OAuth2DeviceIdentityProvider {
     /**
      * @return {@code access_token}.
      */
-    private String acquire(HttpClient httpClient, String clientId, String clientSecret, File refreshTokenFile) throws IOException, InterruptedException {
+    private String acquire(
+            HttpClient httpClient,
+            String clientId,
+            String clientSecret,
+            File refreshTokenFile,
+            String requesterIdentity) throws IOException, InterruptedException {
 
         ThreadContext.push("acquire");
 
@@ -163,7 +169,7 @@ public class OAuth2DeviceIdentityProvider {
             // Step 2
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-2-handle-the-authorization-server-response
 
-            logger.info("RC=" + rc);
+            logger.debug("RC=" + rc);
 
             if (rc != 200) {
 
@@ -178,13 +184,13 @@ public class OAuth2DeviceIdentityProvider {
             Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
             Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
 
-            logger.info("response: " + responseMap);
+            logger.debug("response: " + responseMap);
 
             String verificationUrl = responseMap.get("verification_url");
             String userCode =  responseMap.get("user_code");
             int interval = Integer.parseInt(responseMap.get("interval").toString());
 
-            // VT: FIXME: The loop will break after "expires_in" - but this is beyond the test case
+            // VT: FIXME: The loop will break after "expires_in"
 
             while (true) {
 
@@ -193,7 +199,11 @@ public class OAuth2DeviceIdentityProvider {
 
                 // It will most probably display this URL: https://www.google.com/device
 
-                logger.info("Please go to " + verificationUrl + " and enter this code: " + userCode);
+                // VT: NOTE: Let's set the level to "warn" so it stands out
+
+                logger.warn("OAuth 2.0 login to " + requesterIdentity + ": action required" );
+                logger.warn("Please go to " + verificationUrl + " and enter this code: " + userCode);
+                logger.warn("and enter this code: " + userCode);
 
                 Thread.sleep(interval * 1000);
 
@@ -218,7 +228,7 @@ public class OAuth2DeviceIdentityProvider {
                     rc = rsp.getStatusLine().getStatusCode();
                     String responseBody = EntityUtils.toString(rsp.getEntity());
 
-                    logger.info("RC=" + rc);
+                    logger.debug("RC=" + rc);
 
                     if (rc != 200) {
 
@@ -230,7 +240,7 @@ public class OAuth2DeviceIdentityProvider {
 
                     responseJson = responseBody;
 
-                    logger.info("response: " + responseJson);
+                    logger.debug("response: " + responseJson);
 
                     if (rc == 200) {
                         break;
@@ -299,7 +309,7 @@ public class OAuth2DeviceIdentityProvider {
             HttpResponse rsp = httpClient.execute(post);
             int rc = rsp.getStatusLine().getStatusCode();
 
-            logger.info("RC=" + rc);
+            logger.debug("RC=" + rc);
 
             if (rc != 200) {
 
@@ -314,7 +324,7 @@ public class OAuth2DeviceIdentityProvider {
             Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
             Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
 
-            logger.info("response: " + responseMap);
+            logger.debug("response: " + responseMap);
 
             return responseMap.get("access_token");
 
@@ -349,7 +359,7 @@ public class OAuth2DeviceIdentityProvider {
             HttpResponse rsp = httpClient.execute(post);
             int rc = rsp.getStatusLine().getStatusCode();
 
-            logger.info("RC=" + rc);
+            logger.debug("RC=" + rc);
 
             if (rc != 200) {
 
@@ -361,7 +371,7 @@ public class OAuth2DeviceIdentityProvider {
 
             String responseJson = EntityUtils.toString(rsp.getEntity());
 
-            logger.info("response: " + responseJson);
+            logger.debug("response: " + responseJson);
 
             Gson gson = new Gson();
             Type mapType  = new TypeToken<Map<String,String>>(){}.getType();

@@ -36,7 +36,7 @@ public class OAuth2DeviceIdentityProviderTest {
             String clientSecret = env.get(HCC_CLIENT_SECRET);
             File refreshTokenFile = new File(System.getProperty("user.home"), ".dz/test/" + getClass().getSimpleName());
             
-            String identity = provider.getIdentity(clientId, clientSecret, refreshTokenFile);
+            String identity = provider.getIdentity(clientId, clientSecret, refreshTokenFile, getClass().getSimpleName());
             
             logger.info("identity: " + identity);
             
