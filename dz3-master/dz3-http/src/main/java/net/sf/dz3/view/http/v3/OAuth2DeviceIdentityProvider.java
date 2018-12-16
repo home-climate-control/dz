@@ -1,7 +1,5 @@
 package net.sf.dz3.view.http.v3;
 
-import static org.junit.Assert.fail;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -24,6 +22,8 @@ import org.apache.logging.log4j.ThreadContext;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import net.sf.dz3.instrumentation.Marker;
 
 /**
  * Stateless {@link https://oauth.net/2/device-flow/ OAuth 2.0 Device Flow} identity provider.
@@ -48,6 +48,7 @@ public class OAuth2DeviceIdentityProvider {
     public String getIdentity(String clientId, String clientSecret, File refreshTokenFile, String requesterIdentity) throws IOException, InterruptedException {
 
         ThreadContext.push("getIdentity");
+        Marker m = new Marker("getIdentity");
 
         try {
 
@@ -56,7 +57,7 @@ public class OAuth2DeviceIdentityProvider {
             // VT: FIXME: Add sanity checks for refreshTokenFileName
 
             HttpClient httpClient = HttpClientBuilder.create().build();
-            String refreshToken = getRefreshToken(refreshTokenFile);
+            String refreshToken = getString(refreshTokenFile, "refresh token", true);
             String accessToken;
 
             if (refreshToken == null) {
@@ -71,9 +72,20 @@ public class OAuth2DeviceIdentityProvider {
             return getIdentityByToken(httpClient, accessToken);
 
         } finally {
+
+            m.close();
             ThreadContext.pop();
         }
 
+    }
+
+    public String getIdentity(File clientIdFile, File clientSecretFile, File refreshTokenFile, String requesterIdentity) throws IOException, InterruptedException {
+
+        return getIdentity(
+                getString(clientIdFile, null, false),
+                getString(clientSecretFile, null, false),
+                refreshTokenFile,
+                requesterIdentity);
     }
 
     private void storeRefreshToken(File target, String token) throws IOException {
@@ -104,36 +116,32 @@ public class OAuth2DeviceIdentityProvider {
     }
 
     /**
-     * Get the OAuth 2.0 refresh token.
+     * Read a single string from the given file.
      *
-     * @param source File to read the refresh token from.
+     * Used to read {@code client_id}, {@code client_secret}, and {@code refresh_token}.
      *
-     * @return Refresh token, or {@code null} if it doesn't exist.
+     * @param source File to read the string from.
+     * @param title Title to report in the log if needed.
+     * @param allowMissing {@code true} to return {@code null} in case the file is missing, {@code false} to throw an exception.
+     *
+     * @return The string, or {@code null} if the file doesn't exist and {@code allowMissing} is {@code true}.
+     * @throws IOException if things went sour.
+     * @throws IllegalStateException if the file is missing and {@code allowMissing} is {@code false}.
      */
-    private String getRefreshToken(File source) throws IOException {
+    private String getString(File source, String title, boolean allowMissing) throws IOException {
 
-        ThreadContext.push("getRefreshToken");
+        if (!source.exists()) {
 
-        try {
+            if (allowMissing) {
 
-            logger.debug("source: " + source);
-
-            if (!source.exists()) {
-
-                logger.warn(source + " doesn't exist, assuming no refresh token");
-
+                logger.warn(source + " doesn't exist, assuming no " + title);
                 return null;
             }
+        }
 
-            logger.debug("Stored refresh token detected in " + source + ", remove that file to reacquire access_token from scratch");
+        try (BufferedReader br = new BufferedReader(new FileReader(source))) {
 
-            try (BufferedReader br = new BufferedReader(new FileReader(source))) {
-
-                return br.readLine();
-            }
-
-        } finally {
-            ThreadContext.pop();
+            return br.readLine();
         }
     }
 
@@ -176,7 +184,7 @@ public class OAuth2DeviceIdentityProvider {
                 logger.error("HTTP rc=" + rc + ", text follows:");
                 logger.error(EntityUtils.toString(rsp.getEntity()));
 
-                fail("request failed with HTTP code " + rc + ", see log for details");
+                throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
             }
 
             String responseJson = EntityUtils.toString(rsp.getEntity());
@@ -232,8 +240,8 @@ public class OAuth2DeviceIdentityProvider {
 
                     if (rc != 200) {
 
-                        logger.error("HTTP rc=" + rc + ", text follows:");
-                        logger.error(responseBody);
+                        logger.warn("HTTP rc=" + rc + ", text follows:");
+                        logger.warn(responseBody);
 
                         logger.warn("request failed with HTTP code " + rc + ", will retry in " + interval + " seconds");
                     }
@@ -316,7 +324,7 @@ public class OAuth2DeviceIdentityProvider {
                 logger.error("HTTP rc=" + rc + ", text follows:");
                 logger.error(EntityUtils.toString(rsp.getEntity()));
 
-                fail("request failed with HTTP code " + rc + ", see log for details");
+                throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
             }
 
             String responseJson = EntityUtils.toString(rsp.getEntity());
@@ -366,7 +374,7 @@ public class OAuth2DeviceIdentityProvider {
                 logger.error("HTTP rc=" + rc + ", text follows:");
                 logger.error(EntityUtils.toString(rsp.getEntity()));
 
-                fail("OAuth 2.0 for TV and Limited-Input Device Applications: couldn't finish the sequence");
+                throw new IllegalStateException("OAuth 2.0 for TV and Limited-Input Device Applications: couldn't finish the sequence");
             }
 
             String responseJson = EntityUtils.toString(rsp.getEntity());

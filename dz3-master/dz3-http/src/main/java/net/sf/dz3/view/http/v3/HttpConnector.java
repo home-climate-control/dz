@@ -1,5 +1,6 @@
 package net.sf.dz3.view.http.v3;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URL;
@@ -21,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import net.sf.dz3.device.model.impl.ThermostatModel;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
@@ -66,13 +68,13 @@ public class HttpConnector extends Connector<JsonRenderer>{
      * 
      * @param initSet Objects to display.
      */
-    public HttpConnector(URL serverContextRoot, String username, String password, Set<Object> initSet) {
+    public HttpConnector(URL serverContextRoot, Set<Object> initSet) {
 
         super(initSet);
         
         this.serverContextRoot = serverContextRoot;
         
-        exchanger = new ZoneSnapshotExchanger(serverContextRoot, username, password, upstreamQueue);
+        exchanger = new ZoneSnapshotExchanger(serverContextRoot, upstreamQueue);
         
         Scheduler scheduler = null;
         
@@ -104,13 +106,13 @@ public class HttpConnector extends Connector<JsonRenderer>{
      * @param initSet Objects to display.
      * @param factorySet Set of {@link ConnectorFactory} objects to use for component creation.
      */
-    public HttpConnector(URL serverBase, String username, String password, Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
+    public HttpConnector(URL serverBase, Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
         
         super(initSet, factorySet);
         
         this.serverContextRoot = serverBase;
 
-        exchanger = new ZoneSnapshotExchanger(serverContextRoot, username, password, upstreamQueue);
+        exchanger = new ZoneSnapshotExchanger(serverContextRoot, upstreamQueue);
     }
 
     @Override
@@ -173,17 +175,16 @@ public class HttpConnector extends Connector<JsonRenderer>{
 
     private class ZoneSnapshotExchanger extends BufferedExchanger<ZoneSnapshot> {
 
-        public ZoneSnapshotExchanger(URL serverContextRoot,
-                String username, String password, 
-                BlockingQueue<ZoneSnapshot> upstreamQueue) {
+        public ZoneSnapshotExchanger(URL serverContextRoot, BlockingQueue<ZoneSnapshot> upstreamQueue) {
 
-            super(serverContextRoot, username, password, upstreamQueue);
+            super(serverContextRoot, null, null, upstreamQueue);
         }
 
         @Override
         protected final void exchange(List<ZoneSnapshot> buffer) {
             
             ThreadContext.push("exchange");
+            Marker m = new Marker("exchange");
             
             try {
 
@@ -195,9 +196,12 @@ public class HttpConnector extends Connector<JsonRenderer>{
 
                 URL targetUrl = serverContextRoot;
                 URIBuilder builder = new URIBuilder(targetUrl.toString());
-                
-                builder.addParameter("snapshot", encoded);
+
+                builder.addParameter("data", encoded);
+
                 HttpPost post = new HttpPost(builder.toString());
+
+                post.setHeader("identity", getIdentity());
                 
                 try {
 
@@ -209,7 +213,7 @@ public class HttpConnector extends Connector<JsonRenderer>{
                         logger.error("HTTP rc=" + rc + ", text follows:");
                         logger.error(EntityUtils.toString(rsp.getEntity()));
                         
-                        throw new IOException("Request failed with HTTP code " + rc);
+                        throw new IOException("Request to " + targetUrl + " failed with HTTP code " + rc);
                     }
                     
                     processResponse(EntityUtils.toString(rsp.getEntity()));
@@ -226,8 +230,48 @@ public class HttpConnector extends Connector<JsonRenderer>{
                 logger.error("Buffer exchange failed", t);
             
             } finally {
+
+                m.close();
                 ThreadContext.pop();
             }
+        }
+
+        /**
+         * @return Client identity to be sent to the proxy.
+         */
+        private String getIdentity() throws IOException, InterruptedException {
+
+            ThreadContext.push("getIdentity");
+
+            try {
+
+                // VT: NOTE: This needs to be done every time because since last call,
+                // either the access token expired (need to refresh),
+                // or it could've been revoked (need to reacquire permissions
+
+                OAuth2DeviceIdentityProvider provider = new OAuth2DeviceIdentityProvider();
+
+                File base = getSecretsDir();
+                String identity = provider.getIdentity(
+                        new File(base, "client-id"),
+                        new File(base, "client-secret"),
+                        new File(base, "token"),
+                        "HttpConnector");
+
+                logger.info("identity: " + identity);
+
+                return identity;
+
+            } finally {
+                ThreadContext.pop();
+            }
+        }
+
+        private File getSecretsDir() {
+
+            // VT: FIXME: Add sanity check for existence and readability
+
+            return new File(System.getProperty("user.home"), ".dz/oauth/HttpConnector");
         }
 
         private void processResponse(String rsp) {
