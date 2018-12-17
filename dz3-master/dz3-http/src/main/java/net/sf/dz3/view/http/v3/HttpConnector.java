@@ -200,7 +200,7 @@ public class HttpConnector extends Connector<JsonRenderer>{
 
                 HttpPost post = new HttpPost(builder.toString());
 
-                post.setHeader("identity", getIdentity());
+                post.setHeader("HCC-Identity", getIdentity());
                 post.setEntity(new StringEntity(encoded));
                 
                 try {
