@@ -258,7 +258,7 @@ public class HttpConnector extends Connector<JsonRenderer>{
                         new File(base, "token"),
                         "HttpConnector");
 
-                logger.info("identity: " + identity);
+                logger.debug("identity: " + identity);
 
                 return identity;
 
