@@ -16,6 +16,7 @@ import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.view.http.v1.HttpConnector;
 import net.sf.jukebox.service.ActiveService;
@@ -72,22 +73,36 @@ public abstract class AbstractExchanger<DataBlock> extends ActiveService {
         // Do absolutely nothing
         // VT: FIXME: Tell the server that we're gone and invalidate the session?
     }
-    
+
     private void authenticate() throws IOException {
 
-        HttpHost targetHost = new HttpHost(
-                serverContextRoot.getHost(),
-                serverContextRoot.getPort(),
-                serverContextRoot.getProtocol());
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        Credentials credentials = new UsernamePasswordCredentials(username, password);
+        ThreadContext.push("authenticate");
 
-        credsProvider.setCredentials(AuthScope.ANY, credentials);
+        try {
 
-        AuthCache authCache = new BasicAuthCache();
-        authCache.put(targetHost, new BasicScheme());
+            if (username == null || password == null) {
 
-        context.setCredentialsProvider(credsProvider);
-        context.setAuthCache(authCache);
+                logger.warn("username or password are null, skipping auth setup");
+                return;
+            }
+
+            HttpHost targetHost = new HttpHost(
+                    serverContextRoot.getHost(),
+                    serverContextRoot.getPort(),
+                    serverContextRoot.getProtocol());
+            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            Credentials credentials = new UsernamePasswordCredentials(username, password);
+
+            credsProvider.setCredentials(AuthScope.ANY, credentials);
+
+            AuthCache authCache = new BasicAuthCache();
+            authCache.put(targetHost, new BasicScheme());
+
+            context.setCredentialsProvider(credsProvider);
+            context.setAuthCache(authCache);
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }
