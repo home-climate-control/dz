@@ -40,7 +40,7 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
     
     public Connector(Set<Object> initSet) {
 
-        this.initSet.addAll(initSet);
+        this(initSet, null);
     }
 
     public Connector(Set<Object> initSet, Set<ConnectorFactory<ComponentConnector>> factorySet) {
@@ -49,7 +49,15 @@ public abstract class Connector<ComponentConnector> extends LogAware implements 
         
         try {
         
-            this.initSet.addAll(initSet);
+            if (initSet != null) {
+
+                this.initSet.addAll(initSet);
+            }
+            
+            if (factorySet == null) {
+
+                return;
+            }
 
             for (Iterator<ConnectorFactory<ComponentConnector>> i = factorySet.iterator(); i.hasNext(); ) {
 
