@@ -1,6 +1,10 @@
 subprojects {
 
     apply plugin: 'java'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
     apply plugin: 'maven'
     group = 'net.sf.dz3'
     version = '3.6.8-SNAPSHOT'
