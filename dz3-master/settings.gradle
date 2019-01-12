@@ -1,6 +1,7 @@
 include 'dz3-common'
 include 'dz3-connector'
 include 'dz3-http'
+include 'dz3-mqtt'
 include 'dz3-model'
 include 'dz3-modelhome'
 include 'dz3-owapi'
