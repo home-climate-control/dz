@@ -127,6 +127,7 @@ public class ThermostatRenderer extends QueueFeeder<UpstreamBlock> implements Da
 
         b.add("timestamp", signal.timestamp);
         b.add("name", name);
+        b.add("signature", signal.signature);
         b.add("mode", mode.description);
         b.add("state", state.toString());
         b.add("thermostatSignal", thermostatSignal);
