@@ -189,11 +189,11 @@ public class HttpConnector extends Connector<JsonRenderer>{
             
             try {
 
-                logger.debug("Sending: " + buffer);
+                logger.debug("sending " + buffer.size() + " items: " + buffer);
                 
                 String encoded = gson.toJson(buffer);
 
-                logger.debug("JSON: " + encoded);
+                logger.debug("JSON (" + encoded.length() + " bytes): " + encoded);
 
                 URL targetUrl = serverContextRoot;
                 URIBuilder builder = new URIBuilder(targetUrl.toString());
