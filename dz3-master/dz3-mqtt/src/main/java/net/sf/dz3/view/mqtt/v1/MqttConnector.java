@@ -40,6 +40,8 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  */
 public class MqttConnector extends Connector<JsonRenderer> {
 
+    private static final int MQTT_DEFAULT_PORT = 1883;
+
     /**
      * VT: FIXME: Provide an ability to generate and keep a persistent UUID
      */
@@ -64,7 +66,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerHost, String mqttRootTopic,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, 1883, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttRootTopic, initSet, null);
     }
 
     public MqttConnector(
@@ -78,7 +80,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerHost, String mqttRootTopic,
             Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
 
-        this(mqttBrokerHost, 1883, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttRootTopic, initSet, null);
     }
 
     public MqttConnector(
@@ -120,8 +122,9 @@ public class MqttConnector extends Connector<JsonRenderer> {
         return new JmxDescriptor(
                 "dz",
                 getClass().getSimpleName(),
-                mqttBrokerHost + ":" + mqttBrokerPort
-                + " " + mqttRootTopic,
+                mqttBrokerHost
+                + (mqttBrokerPort == MQTT_DEFAULT_PORT ? "" : " port " + mqttBrokerPort)
+                + " topic " + mqttRootTopic,
                 "MQTT Connector v1");
     }
 
