@@ -40,7 +40,7 @@ import com.dalsemi.onewire.utils.OWPath;
 /**
  * 1-Wire device factory.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
  */
 public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceContainer> implements OneWireNetworkEventListener {
 
@@ -1411,6 +1411,16 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             } finally {
                 ThreadContext.pop();
             }
+        }
+
+        @Override
+        public JmxDescriptor getJmxDescriptor() {
+
+            return new JmxDescriptor(
+                    "dz",
+                    getClass().getSimpleName(),
+                    Integer.toHexString(hashCode()) + "#" + getAddress(),
+                    "1-Wire single switch proxy");
         }
     }
 

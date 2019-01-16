@@ -9,6 +9,10 @@ import org.apache.logging.log4j.ThreadContext;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.instrumentation.Marker;
+import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
+import net.sf.jukebox.datastream.signal.model.DataSample;
+import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.jukebox.jmx.JmxDescriptor;
 
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
@@ -22,11 +26,12 @@ import com.rapplogic.xbee.api.XBeeAddress64;
  * but support will be soon extended to all XBee pins that can be configured as
  * digital outputs.
  *   
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2019
  */
 public class XBeeSwitch implements Switch {
     
     private final Logger logger = LogManager.getLogger(getClass());
+    protected final DataBroadcaster<Boolean> dataBroadcaster = new DataBroadcaster<Boolean>();
     
     private final XBeeDeviceContainer container;
     private StringChannelAddress address;
@@ -116,6 +121,7 @@ public class XBeeSwitch implements Switch {
             AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
             logger.info(channel + " response: " + rsp);
+            dataBroadcaster.broadcast(new DataSample<Boolean>(System.currentTimeMillis(), getAddress(), getAddress(), state, null));
 
             if (rsp.isError()) {
                 
@@ -141,5 +147,26 @@ public class XBeeSwitch implements Switch {
     public String getAddress() {
 
         return address.toString();
+    }
+
+    @Override
+    public final void addConsumer(DataSink<Boolean> consumer) {
+        dataBroadcaster.addConsumer(consumer);
+    }
+
+    @Override
+    public final void removeConsumer(DataSink<Boolean> consumer) {
+        dataBroadcaster.removeConsumer(consumer);
+    }
+
+
+    @Override
+    public JmxDescriptor getJmxDescriptor() {
+
+        return new JmxDescriptor(
+                "dz",
+                getClass().getSimpleName(),
+                Integer.toHexString(hashCode()) + "#" + getAddress().replace(":", "@"),
+                "XBee switch");
     }
 }

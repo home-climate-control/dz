@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.sf.dz3.device.sensor.Switch;
+import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
@@ -14,51 +15,19 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * 
  * Does absolutely nothing other than reflecting itself in the log and via JMX.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2019
  */
-public class NullSwitch implements Switch, JmxAware {
+public class NullSwitch extends AbstractSwitch {
     
-    private final Logger logger = LogManager.getLogger(getClass());
-    
-    /**
-     * Switch address.
-     */
-    private final String address;
-    
-    /**
-     * Switch state.
-     */
-    private boolean state = false;
-
     /**
      * Create an instance.
      * 
      * @param address Address to use.
      */
     public NullSwitch(String address) {
-        
-        this.address = address;
+        super(address, false);
     }
     
-    @Override
-    public boolean getState() throws IOException {
-        
-        return state;
-    }
-
-    @Override
-    public void setState(boolean state) throws IOException {
-
-        logger.debug("Switch " + address + "=" + state);
-        this.state = state;
-    }
-
-    @Override
-    public String getAddress() {
-        
-        return address;
-    }
-
     @Override
     public JmxDescriptor getJmxDescriptor() {
 
