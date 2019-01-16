@@ -19,6 +19,7 @@ import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.AnalogSensor;
+import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
@@ -94,6 +95,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
         this.mqttRootTopic = mqttRootTopic;
 
         register(AnalogSensor.class, new SensorFactory());
+        register(Switch.class, new SwitchFactory());
         register(ThermostatModel.class, new ThermostatFactory(resolveScheduler(initSet)));
     }
 
