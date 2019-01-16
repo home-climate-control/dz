@@ -11,19 +11,6 @@ import java.util.TreeMap;
 
 import org.apache.logging.log4j.ThreadContext;
 
-import net.sf.dz3.device.factory.AbstractDeviceFactory;
-import net.sf.dz3.device.factory.SingleSwitchProxy;
-import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.dz3.device.sensor.DeviceContainer;
-import net.sf.dz3.device.sensor.SensorType;
-import net.sf.dz3.device.sensor.Switch;
-import net.sf.dz3.device.sensor.impl.ContainerMap;
-import net.sf.dz3.device.sensor.impl.StringChannelAddress;
-import net.sf.dz3.instrumentation.Marker;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxDescriptor;
-
 import com.rapplogic.xbee.api.ApiId;
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
@@ -38,10 +25,23 @@ import com.rapplogic.xbee.api.zigbee.ZBNodeDiscover;
 import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
 import com.rapplogic.xbee.util.ByteUtils;
 
+import net.sf.dz3.device.factory.AbstractDeviceFactory;
+import net.sf.dz3.device.factory.SingleSwitchProxy;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import net.sf.dz3.device.sensor.DeviceContainer;
+import net.sf.dz3.device.sensor.SensorType;
+import net.sf.dz3.device.sensor.Switch;
+import net.sf.dz3.device.sensor.impl.ContainerMap;
+import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import net.sf.dz3.instrumentation.Marker;
+import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.jukebox.jmx.JmxAttribute;
+import net.sf.jukebox.jmx.JmxDescriptor;
+
 /**
  * Factory for sensors and actuators implemented with XBee modules.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2019
  */
 public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer> {
     
@@ -608,6 +608,16 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             } finally {
                 ThreadContext.pop();
             }
+        }
+
+        @Override
+        public JmxDescriptor getJmxDescriptor() {
+
+            return new JmxDescriptor(
+                    "dz",
+                    getClass().getSimpleName(),
+                    Integer.toHexString(hashCode()) + "#" + getAddress(),
+                    "XBee single switch proxy");
         }
     }
 

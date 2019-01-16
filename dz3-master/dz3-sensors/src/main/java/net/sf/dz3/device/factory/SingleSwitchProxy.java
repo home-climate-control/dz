@@ -14,13 +14,16 @@ import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.ContainerMap;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
+import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.jukebox.jmx.JmxAttribute;
 
 /**
  * A proxy for a single channel switch device.
  *  
  * @param <SwitchContainerType> Implementation class of the hardware dependent switch container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2019
  */
 public abstract class SingleSwitchProxy<SwitchContainerType> implements Switch {
 
@@ -35,6 +38,7 @@ public abstract class SingleSwitchProxy<SwitchContainerType> implements Switch {
         this.address = address;
     }
 
+    @JmxAttribute(description="Switch state")
     @Override
     public abstract boolean getState() throws IOException;
 
@@ -94,4 +98,13 @@ public abstract class SingleSwitchProxy<SwitchContainerType> implements Switch {
         return address.toString();
     }
     
+    @Override
+    public final void addConsumer(DataSink<Boolean> consumer) {
+        throw new IllegalStateException("this object should never be watched");
+    }
+
+    @Override
+    public final void removeConsumer(DataSink<Boolean> consumer) {
+        throw new IllegalStateException("this object should never be watched");
+    }
 }

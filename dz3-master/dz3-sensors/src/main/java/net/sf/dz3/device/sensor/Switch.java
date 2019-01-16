@@ -2,14 +2,16 @@ package net.sf.dz3.device.sensor;
 
 import java.io.IOException;
 
+import net.sf.jukebox.datastream.signal.model.DataSource;
 import net.sf.jukebox.jmx.JmxAttribute;
+import net.sf.jukebox.jmx.JmxAware;
 
 /**
  * Dumb single channel switch.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2019
  */
-public interface Switch extends Addressable {
+public interface Switch extends DataSource<Boolean>, JmxAware, Addressable {
 
     /**
      * Get the switch state.

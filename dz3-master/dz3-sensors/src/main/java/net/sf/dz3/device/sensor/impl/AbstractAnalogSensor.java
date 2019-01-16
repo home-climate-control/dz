@@ -15,9 +15,7 @@ import net.sf.jukebox.service.ActiveService;
 /**
  * An abstract analog sensor.
  * 
- * <p>
- * 
- * Supports the common configuration and listener notification features.
+ * Supports common configuration and listener notification features.
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
