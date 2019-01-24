@@ -14,7 +14,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +23,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3.view.http.common.HttpClientFactory;
 
 /**
  * Stateless {@link https://oauth.net/2/device-flow/ OAuth 2.0 Device Flow} identity provider.
@@ -33,6 +33,8 @@ import net.sf.dz3.instrumentation.Marker;
 public class OAuth2DeviceIdentityProvider {
 
     private final Logger logger = LogManager.getLogger(getClass());
+
+    private final HttpClient httpClient = HttpClientFactory.createClient();
 
     /**
      * Obtain a client identity with given credentials.
@@ -56,7 +58,6 @@ public class OAuth2DeviceIdentityProvider {
             // VT: FIXME: Add sanity checks for clientSecret
             // VT: FIXME: Add sanity checks for refreshTokenFileName
 
-            HttpClient httpClient = HttpClientBuilder.create().build();
             String refreshToken = getString(refreshTokenFile, "refresh token", true);
             String accessToken;
 

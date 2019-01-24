@@ -15,7 +15,6 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.view.http.v1.HttpConnector;
@@ -27,11 +26,11 @@ import net.sf.jukebox.service.ActiveService;
  * 
  * @param <DataBlock> Data type to send out to the server.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
  */
 public abstract class AbstractExchanger<DataBlock> extends ActiveService {
     
-    protected final HttpClient httpClient = HttpClientBuilder.create().build();
+    protected final HttpClient httpClient = HttpClientFactory.createClient();
     protected final HttpClientContext context = HttpClientContext.create();
 
     protected final URL serverContextRoot;
