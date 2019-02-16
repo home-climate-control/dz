@@ -89,7 +89,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerHost, String mqttBrokerLogin, String mqttBrokerPassword, String mqttRootTopic,
             Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT ,mqttBrokerLogin, mqttBrokerPassword, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerLogin, mqttBrokerPassword, mqttRootTopic, initSet, null);
     }
 
     public MqttConnector(
@@ -177,10 +177,11 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         try {
 
-            if (mqttBrokerLogin == null || mqttBrokerPassword == null) {
-                publisher = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
-            } else {
+            /* only authenticate if both credentials are present */
+            if (mqttBrokerLogin != null && mqttBrokerPassword != null) {
                 publisher = new MqttClient("tcp://" + mqttBrokerLogin + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
+            } else {
+                publisher = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
             }
 
             MqttConnectOptions options = new MqttConnectOptions();
