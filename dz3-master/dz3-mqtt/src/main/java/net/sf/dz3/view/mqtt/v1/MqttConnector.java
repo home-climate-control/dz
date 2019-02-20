@@ -51,6 +51,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private final String mqttBrokerHost;
     private final int mqttBrokerPort;
+    private final String mqttBrokerLogin;
+    private final String mqttBrokerPassword;
     private final String mqttRootTopic;
 
     /**
@@ -67,31 +69,39 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerHost, String mqttRootTopic,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopic, initSet, null);
     }
 
     public MqttConnector(
             String mqttBrokerHost, int mqttBrokerPort, String mqttRootTopic,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, mqttBrokerPort, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, mqttBrokerPort, null, null, mqttRootTopic, initSet, null);
     }
 
     public MqttConnector(
-            String mqttBrokerHost, String mqttRootTopic,
+            String mqttBrokerHost, int mqttBrokerPort, String mqttBrokerLogin, String mqttBrokerPassword, String mqttRootTopic,
+            Set<Object> initSet) {
+
+        this(mqttBrokerHost, mqttBrokerPort, mqttBrokerLogin, mqttBrokerPassword, mqttRootTopic, initSet, null);
+    }
+    public MqttConnector(
+            String mqttBrokerHost, String mqttBrokerLogin, String mqttBrokerPassword, String mqttRootTopic,
             Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerLogin, mqttBrokerPassword, mqttRootTopic, initSet, null);
     }
 
     public MqttConnector(
-            String mqttBrokerHost, int mqttBrokerPort, String mqttRootTopic,
-            Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
+            String mqttBrokerHost, int mqttBrokerPort, String mqttBrokerLogin, String mqttBrokerPassword,
+            String mqttRootTopic, Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
 
         super(initSet, factorySet);
 
         this.mqttBrokerHost = mqttBrokerHost;
         this.mqttBrokerPort = mqttBrokerPort;
+        this.mqttBrokerLogin = mqttBrokerLogin;
+        this.mqttBrokerPassword = mqttBrokerPassword;
         this.mqttRootTopic = mqttRootTopic;
 
         register(AnalogSensor.class, new SensorFactory());
@@ -167,7 +177,12 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         try {
 
-            publisher = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
+            /* only authenticate if both credentials are present */
+            if (mqttBrokerLogin != null && mqttBrokerPassword != null) {
+                publisher = new MqttClient("tcp://" + mqttBrokerLogin + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
+            } else {
+                publisher = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
+            }
 
             MqttConnectOptions options = new MqttConnectOptions();
             options.setAutomaticReconnect(true);
