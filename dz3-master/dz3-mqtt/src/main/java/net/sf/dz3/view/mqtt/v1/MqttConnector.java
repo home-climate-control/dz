@@ -15,7 +15,6 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.AnalogSensor;
@@ -51,7 +50,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private final String mqttBrokerHost;
     private final int mqttBrokerPort;
-    private final String mqttBrokerLogin;
+    private final String mqttBrokerUsername;
     private final String mqttBrokerPassword;
     private final String mqttRootTopic;
 
@@ -85,6 +84,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         this(mqttBrokerHost, mqttBrokerPort, mqttBrokerLogin, mqttBrokerPassword, mqttRootTopic, initSet, null);
     }
+
     public MqttConnector(
             String mqttBrokerHost, String mqttBrokerLogin, String mqttBrokerPassword, String mqttRootTopic,
             Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
@@ -100,7 +100,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         this.mqttBrokerHost = mqttBrokerHost;
         this.mqttBrokerPort = mqttBrokerPort;
-        this.mqttBrokerLogin = mqttBrokerLogin;
+        this.mqttBrokerUsername = mqttBrokerLogin;
         this.mqttBrokerPassword = mqttBrokerPassword;
         this.mqttRootTopic = mqttRootTopic;
 
@@ -178,8 +178,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
         try {
 
             /* only authenticate if both credentials are present */
-            if (mqttBrokerLogin != null && mqttBrokerPassword != null) {
-                publisher = new MqttClient("tcp://" + mqttBrokerLogin + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
+            if (mqttBrokerUsername != null && mqttBrokerPassword != null) {
+                publisher = new MqttClient("tcp://" + mqttBrokerUsername + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
             } else {
                 publisher = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
             }
