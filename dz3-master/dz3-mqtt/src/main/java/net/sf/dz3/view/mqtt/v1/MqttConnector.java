@@ -11,6 +11,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -319,7 +321,11 @@ public class MqttConnector extends Connector<JsonRenderer> {
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
+
+            client.setCallback(new Callback());
             client.connect(options);
+
+            client.subscribe(mqttRootTopicSub, QOS);
 
         } finally {
 
@@ -382,6 +388,45 @@ public class MqttConnector extends Connector<JsonRenderer> {
             } finally {
                 ThreadContext.pop();
             }
+        }
+    }
+
+    private class Callback implements MqttCallback {
+
+        @Override
+        public void connectionLost(Throwable cause) {
+
+            // VT: FIXME: Currently, this code does NOT support reconnects.
+            logger.fatal(
+                    "connection to tcp://" + mqttBrokerHost + ":" + mqttBrokerPort +
+                    " lost, will not reconnect, MQTT interface is now dead");
+
+        }
+
+        @Override
+        public void messageArrived(String topic, MqttMessage message) throws Exception {
+
+            ThreadContext.push("MQTT/messageArrived");
+
+            try {
+
+                logger.debug(topic + " " + message);
+
+            } catch (Throwable t) {
+
+                // VT: NOTE: According to the docs, throwing an exception here will shut down the client - can't afford that,
+                // so we'll just complain loudly
+
+                logger.error("MQTT message caused an exception: " + message, t);
+            } finally {
+                ThreadContext.pop();
+            }
+        }
+
+        @Override
+        public void deliveryComplete(IMqttDeliveryToken token) {
+
+            // VT: NOTE: Nothing to do here
         }
     }
 }
