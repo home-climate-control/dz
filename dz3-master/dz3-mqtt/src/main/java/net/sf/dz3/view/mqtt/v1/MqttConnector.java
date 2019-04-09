@@ -64,8 +64,18 @@ public class MqttConnector extends Connector<JsonRenderer> {
     private final String mqttRootTopicSub;
 
     /**
+     * Quality of Service.
+     *
      * VT: FIXME: It may be a good idea to make this a constructor argument, to provide the right QOS
      * for the right application (wall dashboard is one thing, control system is totally another).
+     *
+     * VT: FIXME: QOS for publishing and subscriptions may need to be different.
+     *
+     * Just a reminder to self,
+     *
+     * QOS 0 is "at most once"
+     * QOS 1 is "at least once"
+     * QOS 2 is "exactly once"
      */
     private final int QOS = 0;
 
