@@ -59,6 +59,11 @@ public class MqttConnector extends Connector<JsonRenderer> {
     private final String mqttRootTopicPub;
 
     /**
+     * Root topic for subscriptions. Can't be the same as the topic for publishing.
+     */
+    private final String mqttRootTopicSub;
+
+    /**
      * VT: FIXME: It may be a good idea to make this a constructor argument, to provide the right QOS
      * for the right application (wall dashboard is one thing, control system is totally another).
      */
@@ -73,14 +78,15 @@ public class MqttConnector extends Connector<JsonRenderer> {
      *
      * @param mqttBrokerHost Host to connect to.
      * @param mqttRootTopicPub Root topic to publish to.
+     * @param mqttRootTopicSub Root topic to subscribe to.
      * @param initSet Entities to publish the status of.
      */
     public MqttConnector(
             String mqttBrokerHost,
-            String mqttRootTopicPub,
+            String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopicPub, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -89,14 +95,15 @@ public class MqttConnector extends Connector<JsonRenderer> {
      * @param mqttBrokerHost Host to connect to.
      * @param mqttBrokerPort Port to connect to.
      * @param mqttRootTopicPub Root topic to publish to.
+     * @param mqttRootTopicSub Root topic to subscribe to.
      * @param initSet Entities to publish the status of.
      */
     public MqttConnector(
             String mqttBrokerHost, int mqttBrokerPort,
-            String mqttRootTopicPub,
+            String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, mqttBrokerPort, null, null, mqttRootTopicPub, initSet, null);
+        this(mqttBrokerHost, mqttBrokerPort, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -107,15 +114,16 @@ public class MqttConnector extends Connector<JsonRenderer> {
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
+     * @param mqttRootTopicSub Root topic to subscribe to.
      * @param initSet Entities to publish the status of.
      */
     public MqttConnector(
             String mqttBrokerHost,
             String mqttBrokerUsername, String mqttBrokerPassword,
-            String mqttRootTopicPub,
+            String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -126,15 +134,16 @@ public class MqttConnector extends Connector<JsonRenderer> {
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
+     * @param mqttRootTopicSub Root topic to subscribe to.
      * @param initSet Entities to publish the status of.
      */
     public MqttConnector(
             String mqttBrokerHost, int mqttBrokerPort,
             String mqttBrokerUsername, String mqttBrokerPassword,
-            String mqttRootTopicPub,
+            String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, mqttBrokerPort, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, initSet, null);
+        this(mqttBrokerHost, mqttBrokerPort, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -144,17 +153,18 @@ public class MqttConnector extends Connector<JsonRenderer> {
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
+     * @param mqttRootTopicSub Root topic to subscribe to.
      * @param initSet Entities to publish the status of.
      * @param factorySet Set of component connector factories.
      */
     public MqttConnector(
             String mqttBrokerHost,
             String mqttBrokerUsername, String mqttBrokerPassword,
-            String mqttRootTopicPub,
+            String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet,
             Set<ConnectorFactory<JsonRenderer>> factorySet) {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -165,13 +175,14 @@ public class MqttConnector extends Connector<JsonRenderer> {
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
+     * @param mqttRootTopicSub Root topic to subscribe to.
      * @param initSet Entities to publish the status of.
      * @param factorySet Set of component connector factories.
      */
     public MqttConnector(
             String mqttBrokerHost, int mqttBrokerPort,
             String mqttBrokerUsername, String mqttBrokerPassword,
-            String mqttRootTopicPub,
+            String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet,
             Set<ConnectorFactory<JsonRenderer>> factorySet) {
 
@@ -182,12 +193,39 @@ public class MqttConnector extends Connector<JsonRenderer> {
         this.mqttBrokerUsername = mqttBrokerUsername;
         this.mqttBrokerPassword = mqttBrokerPassword;
         this.mqttRootTopicPub = mqttRootTopicPub;
+        this.mqttRootTopicSub = mqttRootTopicSub;
+
+        checkTopics(mqttRootTopicPub, mqttRootTopicSub);
 
         register(AnalogSensor.class, new SensorFactory());
         register(Switch.class, new SwitchFactory());
         register(ThermostatModel.class, new ThermostatFactory(resolveScheduler(initSet)));
     }
 
+
+    /**
+     * Make sure topic name combination is sane.
+     *
+     * @param topicPub Name of the topic to publish to.
+     * @param topicSub Name of the topic to subscribe to.
+     */
+    private void checkTopics(String topicPub, String topicSub) {
+
+        // Only one of the topics needs to be present; but both being null doesn't make sense -
+        // might just as well remove the object from the configuration altogether
+
+        if (topicPub == null && topicSub == null) {
+            throw new IllegalArgumentException("both publishing and subscription topics are nulls");
+        }
+
+        // Same topic name for publishing and subscriptions is likely to cause a runaway loop
+
+        if (topicPub != null && topicPub.equals(topicSub)) {
+            throw new IllegalArgumentException(
+                    "same topic (" + topicPub + ") for both publishing and subscription, " +
+                    "runaway loop is likely");
+        }
+    }
 
     private Scheduler resolveScheduler(Set<Object> source) {
 
