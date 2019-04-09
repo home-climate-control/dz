@@ -52,7 +52,11 @@ public class MqttConnector extends Connector<JsonRenderer> {
     private final int mqttBrokerPort;
     private final String mqttBrokerUsername;
     private final String mqttBrokerPassword;
-    private final String mqttRootTopic;
+
+    /**
+     * Root topic for publishing. Can't be the same as the topic for subscriptions.
+     */
+    private final String mqttRootTopicPub;
 
     /**
      * VT: FIXME: It may be a good idea to make this a constructor argument, to provide the right QOS
@@ -64,45 +68,120 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private Thread exchanger;
 
+    /**
+     * Unauthenticated constructor with a default port.
+     *
+     * @param mqttBrokerHost Host to connect to.
+     * @param mqttRootTopicPub Root topic to publish to.
+     * @param initSet Entities to publish the status of.
+     */
     public MqttConnector(
-            String mqttBrokerHost, String mqttRootTopic,
+            String mqttBrokerHost,
+            String mqttRootTopicPub,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopicPub, initSet, null);
     }
 
+    /**
+     * Unauthenticated constructor with a custom port.
+     *
+     * @param mqttBrokerHost Host to connect to.
+     * @param mqttBrokerPort Port to connect to.
+     * @param mqttRootTopicPub Root topic to publish to.
+     * @param initSet Entities to publish the status of.
+     */
     public MqttConnector(
-            String mqttBrokerHost, int mqttBrokerPort, String mqttRootTopic,
+            String mqttBrokerHost, int mqttBrokerPort,
+            String mqttRootTopicPub,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, mqttBrokerPort, null, null, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, mqttBrokerPort, null, null, mqttRootTopicPub, initSet, null);
     }
 
+    /**
+     * Authenticated constructor with a default port.
+     *
+     * @param mqttBrokerHost Host to connect to.
+     * @param mqttBrokerPort Port to connect to.
+     * @param mqttBrokerUsername MQTT broker username.
+     * @param mqttBrokerPassword MQTT broker password.
+     * @param mqttRootTopicPub Root topic to publish to.
+     * @param initSet Entities to publish the status of.
+     */
     public MqttConnector(
-            String mqttBrokerHost, int mqttBrokerPort, String mqttBrokerLogin, String mqttBrokerPassword, String mqttRootTopic,
+            String mqttBrokerHost,
+            String mqttBrokerUsername, String mqttBrokerPassword,
+            String mqttRootTopicPub,
             Set<Object> initSet) {
 
-        this(mqttBrokerHost, mqttBrokerPort, mqttBrokerLogin, mqttBrokerPassword, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, initSet, null);
     }
 
+    /**
+     * Authenticated constructor with a custom port.
+     *
+     * @param mqttBrokerHost Host to connect to.
+     * @param mqttBrokerPort Port to connect to.
+     * @param mqttBrokerUsername MQTT broker username.
+     * @param mqttBrokerPassword MQTT broker password.
+     * @param mqttRootTopicPub Root topic to publish to.
+     * @param initSet Entities to publish the status of.
+     */
     public MqttConnector(
-            String mqttBrokerHost, String mqttBrokerLogin, String mqttBrokerPassword, String mqttRootTopic,
-            Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
+            String mqttBrokerHost, int mqttBrokerPort,
+            String mqttBrokerUsername, String mqttBrokerPassword,
+            String mqttRootTopicPub,
+            Set<Object> initSet) {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerLogin, mqttBrokerPassword, mqttRootTopic, initSet, null);
+        this(mqttBrokerHost, mqttBrokerPort, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, initSet, null);
     }
 
+    /**
+     * Authenticated constructor with a default port and custom factory set.
+     *
+     * @param mqttBrokerHost Host to connect to.
+     * @param mqttBrokerUsername MQTT broker username.
+     * @param mqttBrokerPassword MQTT broker password.
+     * @param mqttRootTopicPub Root topic to publish to.
+     * @param initSet Entities to publish the status of.
+     * @param factorySet Set of component connector factories.
+     */
     public MqttConnector(
-            String mqttBrokerHost, int mqttBrokerPort, String mqttBrokerLogin, String mqttBrokerPassword,
-            String mqttRootTopic, Set<Object> initSet, Set<ConnectorFactory<JsonRenderer>> factorySet) {
+            String mqttBrokerHost,
+            String mqttBrokerUsername, String mqttBrokerPassword,
+            String mqttRootTopicPub,
+            Set<Object> initSet,
+            Set<ConnectorFactory<JsonRenderer>> factorySet) {
+
+        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, initSet, null);
+    }
+
+    /**
+     * Authenticated constructor with a default port and custom factory set.
+     *
+     * @param mqttBrokerHost Host to connect to.
+     * @param mqttBrokerPort Port to connect to.
+     * @param mqttBrokerUsername MQTT broker username.
+     * @param mqttBrokerPassword MQTT broker password.
+     * @param mqttRootTopicPub Root topic to publish to.
+     * @param initSet Entities to publish the status of.
+     * @param factorySet Set of component connector factories.
+     */
+    public MqttConnector(
+            String mqttBrokerHost, int mqttBrokerPort,
+            String mqttBrokerUsername, String mqttBrokerPassword,
+            String mqttRootTopicPub,
+            Set<Object> initSet,
+            Set<ConnectorFactory<JsonRenderer>> factorySet) {
 
         super(initSet, factorySet);
 
         this.mqttBrokerHost = mqttBrokerHost;
         this.mqttBrokerPort = mqttBrokerPort;
-        this.mqttBrokerUsername = mqttBrokerLogin;
+        this.mqttBrokerUsername = mqttBrokerUsername;
         this.mqttBrokerPassword = mqttBrokerPassword;
-        this.mqttRootTopic = mqttRootTopic;
+        this.mqttRootTopicPub = mqttRootTopicPub;
 
         register(AnalogSensor.class, new SensorFactory());
         register(Switch.class, new SwitchFactory());
@@ -136,7 +215,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 getClass().getSimpleName(),
                 mqttBrokerHost
                 + (mqttBrokerPort == MQTT_DEFAULT_PORT ? "" : " port " + mqttBrokerPort)
-                + " topic " + mqttRootTopic,
+                + " topic " + mqttRootTopicPub,
                 "MQTT Connector v1");
     }
 
@@ -165,7 +244,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private void startExchanger() {
 
-        exchanger = new Thread(new UpstreamBlockExchanger(mqttBrokerHost, mqttBrokerPort, mqttRootTopic, upstreamQueue));
+        exchanger = new Thread(new UpstreamBlockExchanger(mqttBrokerHost, mqttBrokerPort, mqttRootTopicPub, upstreamQueue));
 
         exchanger.start();
     }
@@ -221,15 +300,15 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private class UpstreamBlockExchanger extends ImmediateExchanger<UpstreamBlock> {
 
-        private final String mqttRootTopic;
+        private final String mqttRootTopicPub;
 
         public UpstreamBlockExchanger(
                 String mqttBrokerHost, int mqttBrokerPort,
-                String mqttRootTopic,
+                String mqttRootTopicPub,
                 BlockingQueue<UpstreamBlock> upstreamQueue) {
             super(upstreamQueue);
 
-            this.mqttRootTopic = mqttRootTopic;
+            this.mqttRootTopicPub = mqttRootTopicPub;
         }
 
         @Override
@@ -244,9 +323,9 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 message.setQos(QOS);
                 message.setRetained(true);
 
-                publisher.publish(mqttRootTopic + "/" + dataBlock.topic, message);
+                publisher.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
 
-                logger.debug(mqttRootTopic + "/" + dataBlock.topic + ": " + dataBlock.payload);
+                logger.debug(mqttRootTopicPub + "/" + dataBlock.topic + ": " + dataBlock.payload);
 
             } catch (MqttException ex) {
 
