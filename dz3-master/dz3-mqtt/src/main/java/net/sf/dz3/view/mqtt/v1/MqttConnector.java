@@ -306,12 +306,12 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             /* only authenticate if both credentials are present */
             if (mqttBrokerUsername != null && mqttBrokerPassword != null) {
-                if (mqttBrokerPassword == null) {
-                    // Bad idea
-                    logger.warn("Empty MQTT password. This behavior will not be allowed in future releases.");
-                }
                 publisher = new MqttClient("tcp://" + mqttBrokerUsername + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
             } else {
+                if (mqttBrokerUsername != null) {
+                    // Bad idea to have no password
+                    logger.warn("Missing MQTT password, connecting unauthenticated. This behavior will not be allowed in future releases.");
+                }
                 publisher = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
             }
 
