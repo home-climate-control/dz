@@ -45,8 +45,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
     /**
      * VT: FIXME: Provide an ability to generate and keep a persistent UUID
      */
-    private final String publisherId = UUID.randomUUID().toString();
-    private IMqttClient publisher;
+    private final String clientId = UUID.randomUUID().toString();
+    private IMqttClient client;
 
     private final String mqttBrokerHost;
     private final int mqttBrokerPort;
@@ -306,20 +306,20 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             /* only authenticate if both credentials are present */
             if (mqttBrokerUsername != null && mqttBrokerPassword != null) {
-                publisher = new MqttClient("tcp://" + mqttBrokerUsername + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
+                client = new MqttClient("tcp://" + mqttBrokerUsername + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, clientId);
             } else {
                 if (mqttBrokerUsername != null) {
                     // Bad idea to have no password
                     logger.warn("Missing MQTT password, connecting unauthenticated. This behavior will not be allowed in future releases.");
                 }
-                publisher = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, publisherId);
+                client = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, clientId);
             }
 
             MqttConnectOptions options = new MqttConnectOptions();
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
-            publisher.connect(options);
+            client.connect(options);
 
         } finally {
 
@@ -336,7 +336,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
         try {
 
             exchanger.interrupt();
-            publisher.disconnect();
+            client.disconnect();
 
         } catch (MqttException ex) {
 
@@ -371,7 +371,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 message.setQos(QOS);
                 message.setRetained(true);
 
-                publisher.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
+                client.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
 
                 logger.debug(mqttRootTopicPub + "/" + dataBlock.topic + ": " + dataBlock.payload);
 
