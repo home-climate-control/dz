@@ -1,5 +1,6 @@
 package net.sf.dz3.view.mqtt.v1;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
@@ -8,6 +9,11 @@ import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
 
 import org.apache.logging.log4j.ThreadContext;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
@@ -393,6 +399,12 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private class Callback implements MqttCallback {
 
+        /**
+         * Mapping from HA's {@code entity_id} to {@code friendly_name}
+         * (which must match our name so we can match their entity to ours).
+         */
+        private final Map<String, String> entityId2name = new TreeMap<>();
+
         @Override
         public void connectionLost(Throwable cause) {
 
@@ -403,6 +415,11 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         }
 
+        /**
+         * Attempt to parse incoming messages as Home Assistant MQTT event stream.
+         *
+         * @see https://www.home-assistant.io/components/mqtt_eventstream/
+         */
         @Override
         public void messageArrived(String topic, MqttMessage message) throws Exception {
 
@@ -412,12 +429,116 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                 logger.debug(topic + " " + message);
 
+                ByteArrayInputStream in = new ByteArrayInputStream(message.getPayload());
+                JsonReader reader = Json.createReader(in);
+
+                JsonObject payload = reader.readObject();
+                JsonString eventType = payload.getJsonString("event_type");
+
+                // We know and care about two event types at this point:
+                //
+                // call_service: somebody moved a slider
+                // state_changed: something changed
+
+                switch (eventType.getString()) {
+
+                case "call_service":
+
+                    callService(payload.getJsonObject("event_data"));
+                    return;
+
+                case "state_changed":
+
+                    stateChanged(payload.getJsonObject("event_data"));
+                    return;
+
+                default:
+
+                    logger.warn("don't know how to handle '" + eventType + "' event_type");
+                    logger.warn("event_data is:" + payload.getJsonObject("event_data"));
+
+                    return;
+                }
+
             } catch (Throwable t) {
 
                 // VT: NOTE: According to the docs, throwing an exception here will shut down the client - can't afford that,
                 // so we'll just complain loudly
 
                 logger.error("MQTT message caused an exception: " + message, t);
+
+            } finally {
+                ThreadContext.pop();
+            }
+        }
+
+        /**
+         * Handle HA's {@code call_service} message.
+         *
+         * @param eventData HA's {@code event_data} JSON fragment.
+         */
+        private void callService(JsonObject eventData) {
+
+            ThreadContext.push("callService");
+
+            try {
+
+                logger.warn("data: " + eventData);
+                logger.error("Not Implemented", new IllegalStateException());
+
+            } finally {
+                ThreadContext.pop();
+            }
+        }
+
+        /**
+         * Handle HA's {@code call_service} message.
+         *
+         * We are only interested in this message as it is an echo of the message we sent to it earlier;
+         * we will use it to figure out the {@code entity_id} we'll need to recognize later.
+         *
+         * @param eventData HA's {@code event_data} JSON fragment.
+         */
+        private void stateChanged(JsonObject eventData) {
+
+            ThreadContext.push("stateChanged");
+
+            try {
+
+                logger.warn("data: " + eventData);
+
+                // We need two elements now:
+                //
+                // .event_data.entity_id
+                // .event_data.new_state.attributes.friendly_name
+
+                String entityId = eventData.getJsonString("entity_id").getString();
+                String friendlyName = eventData.
+                        getJsonObject("new_state").
+                        getJsonObject("attributes").
+                        getJsonString("friendly_name").getString();
+                String knownName = entityId2name.get(entityId);
+
+                if (entityId2name.get(entityId) == null) {
+
+                    logger.info("new entity discovered: " + entityId + ": " + friendlyName);
+
+                    // Since call_service event will only contain entity_id, we'll need to map it
+                    // back to our entity later
+
+                    entityId2name.put(entityId, friendlyName);
+
+                    // VT: FIXME: find our entity
+                    logger.error("Not Implemented", new IllegalStateException());
+
+                    return;
+                }
+
+                if (!knownName.equals(friendlyName)) {
+
+                    logger.warn(entityId + ": old and new name mismatch ('" + knownName + "' vs. '"+ friendlyName + "', ignored");
+                }
+
             } finally {
                 ThreadContext.pop();
             }
