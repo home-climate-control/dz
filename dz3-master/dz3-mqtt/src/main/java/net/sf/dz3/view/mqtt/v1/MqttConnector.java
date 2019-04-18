@@ -484,6 +484,32 @@ public class MqttConnector extends Connector<JsonRenderer> {
             try {
 
                 logger.warn("data: " + eventData);
+
+                // Since this is a control input, let's be paranoid and verify that it contains what we expect
+
+                String domain = eventData.getJsonString("domain").getString();
+                String service = eventData.getJsonString("service").getString();
+
+                if (!"climate".equals(domain) || !"set_temperature".equals(service)) {
+
+                    throw new IllegalArgumentException(
+                            "invalid command: expected (climate, set_temperature)" +
+                            ", received ("+ domain + ", " + service + ")");
+                }
+
+                String entityId = eventData.
+                        getJsonObject("service_data").
+                        getJsonString("entity_id").getString();
+
+                String entityName = entityId2name.get(entityId);
+
+                if (entityName == null) {
+
+                    throw new IllegalArgumentException("unknown entity_id: '" + entityId + "'");
+                }
+
+                logger.error("resolved " + entityId + "=" + entityName);
+
                 logger.error("Not Implemented", new IllegalStateException());
 
             } finally {
