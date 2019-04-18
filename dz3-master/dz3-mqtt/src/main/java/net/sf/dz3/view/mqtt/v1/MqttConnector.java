@@ -24,7 +24,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.impl.ThermostatModel;
+import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.instrumentation.Marker;
@@ -405,6 +407,12 @@ public class MqttConnector extends Connector<JsonRenderer> {
          */
         private final Map<String, String> entityId2name = new TreeMap<>();
 
+        /**
+         * Mapping from known "friendly name" to our entity.
+         * {@code null} value indicates that we know this name, but it is not our entity.
+         */
+        private final Map<String, Object> name2entity = new TreeMap<>();
+
         @Override
         public void connectionLost(Throwable cause) {
 
@@ -483,7 +491,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             try {
 
-                logger.warn("data: " + eventData);
+                logger.info("data: " + eventData);
 
                 // Since this is a control input, let's be paranoid and verify that it contains what we expect
 
@@ -500,15 +508,16 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 String entityId = eventData.
                         getJsonObject("service_data").
                         getJsonString("entity_id").getString();
+                Object entity = resolveEntity(entityId);
 
-                String entityName = entityId2name.get(entityId);
+                if (entity == null) {
 
-                if (entityName == null) {
+                    // VT: NOTE: This is expected behavior in case the entity is not ours
+                    // we've already logged this at debug level, let's just remind ourselves about that
 
-                    throw new IllegalArgumentException("unknown entity_id: '" + entityId + "'");
+                    logger.info(entityId + ": not ours; our known map is: " + entityId2name);
+                    return;
                 }
-
-                logger.error("resolved " + entityId + "=" + entityName);
 
                 logger.error("Not Implemented", new IllegalStateException());
 
@@ -531,7 +540,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             try {
 
-                logger.warn("data: " + eventData);
+                logger.debug("data: " + eventData);
 
                 // We need two elements now:
                 //
@@ -554,16 +563,118 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                     entityId2name.put(entityId, friendlyName);
 
-                    // VT: FIXME: find our entity
-                    logger.error("Not Implemented", new IllegalStateException());
+                } else if (!knownName.equals(friendlyName)) {
+
+                    logger.warn(entityId + ": old and new name mismatch ('" + knownName + "' vs. '"+ friendlyName + "', ignored");
+                }
+
+                Object entity = resolveEntity(entityId);
+
+                if (entity == null) {
+
+                    // VT: NOTE: This is expected behavior in case the entity is not ours;
+                    // we've already logged this at debug level. No need to do anything
 
                     return;
                 }
 
-                if (!knownName.equals(friendlyName)) {
+                if (entity instanceof Thermostat) {
 
-                    logger.warn(entityId + ": old and new name mismatch ('" + knownName + "' vs. '"+ friendlyName + "', ignored");
+                    // VT: NOTE: This must be an echo from our own state change broadcast.
+                    // We will only honor callService() for our own thermostats.
+
+                    return;
                 }
+
+                // VT: FIXME: handle the message
+                logger.error("Not Implemented: " + entity, new IllegalStateException());
+
+            } finally {
+                ThreadContext.pop();
+            }
+        }
+
+        /**
+         * Resolve our entity from the ID given.
+         *
+         * @param entityId Entity ID to resolve.
+         *
+         * @return Our object corresponding to {@code entity_id} received in {@link #callService(JsonObject)}
+         */
+        private Object resolveEntity(String entityId) {
+
+            ThreadContext.push("resolveEntity");
+
+            try {
+
+                String entityName = entityId2name.get(entityId);
+
+                if (entityName == null) {
+
+                    throw new IllegalArgumentException("unknown entity_id: '" + entityId + "', did everything settle?");
+                }
+
+                Object cached = name2entity.get(entityName);
+
+                if (cached != null) {
+
+                    logger.debug("cached instance: " + entityName);
+                    return cached;
+                }
+
+                if (name2entity.containsKey(entityName)) {
+
+                    logger.debug("we know about '" + entityName + "', but it isn't ours");
+                    return null;
+                }
+
+                for (Object entity : getInitSet()) {
+
+                    // VT: NOTE: This is where things get complicated. Our entities were never supposed to be
+                    // resolved from outside. See https://github.com/home-climate-control/dz/issues/87 for details.
+
+                    // For now, let's do it piecemeal, and then unify when the issue above is addressed.
+
+                    if (entity instanceof Addressable) {
+
+                        String name = ((Addressable) entity).getAddress();
+
+                        if (name.equals(entityName)) {
+
+                            logger.info("resolved '" + entityId + "' into " + entity);
+                            name2entity.put(entityName, entity);
+
+                            return entity;
+                        }
+
+                    } else if (entity instanceof Thermostat) {
+
+                        String name = ((Thermostat) entity).getName();
+
+                        if (name.equals(entityName)) {
+
+                            logger.info("resolved '" + entityId + "' into " + entity);
+                            name2entity.put(entityName, entity);
+
+                            return entity;
+                        }
+
+                    } else {
+
+                        // VT: FIXME: We won't control anything other than thermostats at this point.
+                        logger.warn("don't know how to handle: " + entity.getClass().getName());
+                    }
+                }
+
+                // VT: NOTE: No need to be throwing exceptions here, it may be the entity that is not present
+                // in our instance, but is present in our deployment
+
+                logger.warn("unresolved entity: '" + entityId + "', our known map is: " + name2entity);
+
+                // And let's make a note of it
+                name2entity.put(entityName, null);
+
+                return null;
 
             } finally {
                 ThreadContext.pop();
