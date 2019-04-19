@@ -521,7 +521,18 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                 logger.info("resolved entity: " + entity);
 
-                logger.error("Not Implemented", new IllegalStateException());
+                if (!(entity instanceof ThermostatModel)) {
+
+                    throw new IllegalStateException("not a thermostat, but " + entity.getClass().getName() + ": " + entity);
+                }
+
+                double setpoint = eventData.
+                        getJsonObject("service_data").
+                        getJsonNumber("temperature").doubleValue();
+
+                logger.info("setpoint: " + setpoint);
+
+                ((ThermostatModel) entity).setSetpoint(setpoint);
 
             } finally {
                 ThreadContext.pop();
