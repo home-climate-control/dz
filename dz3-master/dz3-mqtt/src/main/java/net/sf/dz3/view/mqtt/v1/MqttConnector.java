@@ -519,6 +519,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
                     return;
                 }
 
+                logger.info("resolved entity: " + entity);
+
                 logger.error("Not Implemented", new IllegalStateException());
 
             } finally {
@@ -610,6 +612,10 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 String entityName = entityId2name.get(entityId);
 
                 if (entityName == null) {
+
+                    logger.warn("unknown entity_id: '" + entityId + "', our known maps are:");
+                    logger.warn("id to name: " + entityId2name);
+                    logger.warn("name to entity: " + name2entity);
 
                     throw new IllegalArgumentException("unknown entity_id: '" + entityId + "', did everything settle?");
                 }
