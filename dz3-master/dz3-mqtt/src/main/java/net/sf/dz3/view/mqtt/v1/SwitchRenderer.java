@@ -52,6 +52,7 @@ public class SwitchRenderer extends QueueFeeder<UpstreamBlock> implements DataSi
         JsonObjectBuilder b = Json.createObjectBuilder();
         StringBuilder sb = new StringBuilder();
 
+        b.add("entityType", MqttConnector.EntityType.SWITCH.toString());
         b.add("timestamp", source.timestamp);
         b.add("name", source.sourceName);
         b.add("signature", source.signature);

@@ -125,6 +125,7 @@ public class ThermostatRenderer extends QueueFeeder<UpstreamBlock> implements Da
             
         JsonObjectBuilder b = Json.createObjectBuilder();
 
+        b.add("entityType", MqttConnector.EntityType.THERMOSTAT.toString());
         b.add("timestamp", signal.timestamp);
         b.add("name", name);
         b.add("signature", signal.signature);

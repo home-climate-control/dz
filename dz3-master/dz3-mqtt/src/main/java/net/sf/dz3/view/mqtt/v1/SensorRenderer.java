@@ -51,6 +51,7 @@ public class SensorRenderer extends QueueFeeder<UpstreamBlock> implements DataSi
 
         JsonObjectBuilder b = Json.createObjectBuilder();
 
+        b.add("entityType", MqttConnector.EntityType.SENSOR.toString());
         b.add("timestamp", source.timestamp);
         b.add("name", source.sourceName);
         b.add("signature", source.signature);

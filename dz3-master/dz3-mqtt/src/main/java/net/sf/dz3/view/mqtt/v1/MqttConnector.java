@@ -50,6 +50,22 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  */
 public class MqttConnector extends Connector<JsonRenderer> {
 
+    /**
+     * @see SensorRenderer#render(net.sf.jukebox.datastream.signal.model.DataSample)
+     * @see SwitchRenderer#render(net.sf.jukebox.datastream.signal.model.DataSample)
+     * @see ThermostatRenderer#render(net.sf.jukebox.datastream.signal.model.DataSample)
+     */
+    static enum EntityType {
+
+        SENSOR,
+        SWITCH,
+        THERMOSTAT;
+
+        public String toString() {
+            return super.toString().toLowerCase();
+        }
+    }
+
     private static final int MQTT_DEFAULT_PORT = 1883;
 
     /**
