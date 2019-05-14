@@ -7,12 +7,13 @@
 # (NOTE: There is no '3.6.7' at this point, just the snapshot)
 DZ_VERSION=3.6.8-SNAPSHOT
 
-JUKEBOX_VERSION=7.0.0-SNAPSHOT
+JUKEBOX_VERSION=7.0.1-SNAPSHOT
 SERVOMASTER_VERSION=2.0.0-SNAPSHOT
 GOOGLE_OAUTH_VERSION=1.19.0
 GOOGLE_CALENDAR_VERSION=v3-rev104-1.19.0
 JETTY_VERSION=6.1.26
 LOG4J_VERSION=2.11.0
+RRD4J_VERSION=3.5
 XBEE_API_VERSION=0.9.1-dz
 
 LIBDIR=${HOME}/.m2/repository
@@ -31,6 +32,7 @@ JSON=${LIBDIR}/org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar
 SPRING=${LIBDIR}/org/springframework/spring/2.5.6/spring-2.5.6.jar
 GSON=${LIBDIR}/com/google/code/gson/gson/1.7.1/gson-1.7.1.jar
 XBEE_API=${LIBDIR}/com/rapplogic/xbeeapi/${XBEE_API_VERSION}/xbeeapi-${XBEE_API_VERSION}.jar
+RRD4J=${LIBDIR}/org/rrd4j/rrd4j/${RRD4J_VERSION}/rrd4j-${RRD4J_VERSION}.jar
 
 DZ=${LIBDIR}/net/sf/dz3
 JUKEBOX=${LIBDIR}/net/sf/jukebox
@@ -74,6 +76,7 @@ ${JSON}:\
 ${LOG4J_API}:\
 ${LOG4J_CORE}:\
 ${MQTT_PAHO}:\
+${RRD4J}:\
 ${SPRING}:\
 ${GSON}:\
 ${XBEE_API}:\
