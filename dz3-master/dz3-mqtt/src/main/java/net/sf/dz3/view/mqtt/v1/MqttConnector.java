@@ -349,7 +349,18 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private void flush(Switch source) {
 
-        logger.fatal("flush: " + source);
+        ThreadContext.push("flush");
+
+        try {
+
+            logger.info(source);
+            source.setState(source.getState());
+
+        } catch (IOException ex) {
+            logger.error("failed to flush, ignored (nothing we can do now): " + source, ex);
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     private void startExchanger() {
