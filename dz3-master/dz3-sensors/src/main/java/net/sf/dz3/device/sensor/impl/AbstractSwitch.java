@@ -76,4 +76,19 @@ abstract public class AbstractSwitch implements Switch {
     public final void removeConsumer(DataSink<Boolean> consumer) {
         dataBroadcaster.removeConsumer(consumer);
     }
+
+    @Override
+    public String toString() {
+
+        String state;
+
+        try {
+            state = Boolean.toString(getState());
+        } catch (IOException ex) {
+            logger.error("exception ignored in toString()", ex);
+            state = "error";
+        }
+
+        return "{" + getClass().getName() + ", address=" + getAddress() + ", state=" + state + "}";
+    }
 }
