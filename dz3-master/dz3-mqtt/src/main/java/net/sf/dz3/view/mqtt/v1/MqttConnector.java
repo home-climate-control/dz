@@ -309,6 +309,11 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             startMqtt();
             startExchanger();
+
+            // Connectors are initialized very late in the game, it is likely that the control logic
+            // has been long activated - but it is also likely that there will be no new events for
+            // quite a while. Need to send all the data that we have to listeners so they can act on it.
+
             flush();
 
         } catch (Throwable t) {
@@ -338,6 +343,14 @@ public class MqttConnector extends Connector<JsonRenderer> {
                     flush((Switch) source);
                     continue;
                 }
+
+                // VT: NOTE: Flushing sensor data is not that important, it will be handled normally
+                // next time sensors are polled or come up with samples. Thermostats will follow
+                // immediately thereafter.
+
+                // VT: FIXME: Other entities (namely, HvacController, HvacDriver, ZoneController, Unit)
+                // will need to be flushed eventually, when/if they will be capable to be independently
+                // controlled without violating DZ abstractions.
 
                 logger.warn("don't know how to flush: " + source.getClass().getName() + ": " + source);
             }
