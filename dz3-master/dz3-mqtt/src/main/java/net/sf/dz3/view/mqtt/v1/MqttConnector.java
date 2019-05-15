@@ -309,11 +309,47 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             startMqtt();
             startExchanger();
+            flush();
 
         } catch (Throwable t) {
 
             throw new IllegalStateException("failed to start", t);
         }
+    }
+
+    /**
+     * Send the status of all {@link #getInitSet() initSet} objects into the transport.
+     */
+    private void flush() {
+
+        ThreadContext.push("flush");
+
+        try {
+
+            // VT: NOTE: This is an ugly hack. The connector architecture was never intended
+            // to poll object status, only to handle events broadcast from upstream.
+
+            for (Iterator<Object> i = getInitSet().iterator(); i.hasNext(); ) {
+
+                Object source = i.next();
+
+                if (source instanceof Switch) {
+
+                    flush((Switch) source);
+                    continue;
+                }
+
+                logger.warn("don't know how to flush: " + source.getClass().getName() + ": " + source);
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void flush(Switch source) {
+
+        logger.fatal("flush: " + source);
     }
 
     private void startExchanger() {
