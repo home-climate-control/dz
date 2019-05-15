@@ -1,0 +1,6 @@
+dependencies {
+
+    compile 'org.influxdb:influxdb-java:2.15'
+
+    compile project(':dz3-connector')
+}
