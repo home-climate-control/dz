@@ -307,8 +307,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         try {
 
-            startExchanger();
             startMqtt();
+            startExchanger();
 
         } catch (Throwable t) {
 
