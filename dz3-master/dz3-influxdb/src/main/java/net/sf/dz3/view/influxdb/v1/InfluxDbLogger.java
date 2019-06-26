@@ -32,6 +32,32 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
     private InfluxDB db;
 
+    /**
+     * Create an unauthenticated instance.
+     * Using this constructor is discouraged, but convenient.
+     *
+     * @param producers Data producers.
+     * @param instance Unique identifier for an instance this logger represents. This value would usually correspond
+     * to a host a DZ instance runs on.
+     * @param dbURL InfluxDB URL to connect to.
+     */
+    public InfluxDbLogger(
+            Set<DataSource<E>> producers,
+            String instance,
+            String dbURL) {
+        this(producers, instance, dbURL, null, null);
+    }
+
+    /**
+     * Create an instance.
+     *
+     * @param producers Data producers.
+     * @param instance Unique identifier for an instance this logger represents. This value would usually correspond
+     * to a host a DZ instance runs on.
+     * @param dbURL InfluxDB URL to connect to.
+     * @param username InfluxDB username. Use {@code null} for unauthenticated access}.
+     * @param password InfluxDB password. Use {@code null} for unauthenticated access}.
+     */
     public InfluxDbLogger(
             Set<DataSource<E>> producers,
             String instance,
