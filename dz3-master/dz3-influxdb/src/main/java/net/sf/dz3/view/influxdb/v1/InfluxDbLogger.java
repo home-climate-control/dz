@@ -80,8 +80,8 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
             db.write(Point.measurement(value.sourceName)
                     .time(value.timestamp, TimeUnit.MILLISECONDS)
-                    .addField("signature", value.signature)
                     .addField("instance", instance)
+                    .addField("signature", value.signature)
                     .addField("sample", value.sample)
                     .build());
 
