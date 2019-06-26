@@ -66,17 +66,7 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
     @Override
     protected void createChannel(String name, String signature, long timestamp) throws IOException {
-
-        ThreadContext.push("createChannel");
-
-        try {
-
-            db.query(new Query("CREATE DATABASE " + dbName));
-            db.setDatabase(dbName);
-
-        } finally {
-            ThreadContext.pop();
-        }
+        // Nothing to do here, channels are tags here
     }
 
     private String doubleQuote(String source) {
@@ -100,6 +90,9 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
             } else {
                 db = InfluxDBFactory.connect(dbURL, username, password);
             }
+
+            db.query(new Query("CREATE DATABASE " + dbName));
+            db.setDatabase(dbName);
 
         } finally {
             ThreadContext.pop();
