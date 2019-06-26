@@ -95,10 +95,6 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
         // Nothing to do here, channels are tags here
     }
 
-    private String doubleQuote(String source) {
-        return "\"" + source + "\"";
-    }
-
     @Override
     protected void startup() throws Throwable {
 
