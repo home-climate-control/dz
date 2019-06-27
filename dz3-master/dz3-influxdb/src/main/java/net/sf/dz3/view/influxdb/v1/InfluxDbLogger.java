@@ -146,7 +146,8 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
     @Override
     protected void createChannel(String name, String signature, long timestamp) throws IOException {
-        // Nothing to do here, channels are tags here
+        // This means nothing for this implementation, other than no more incessant complaining
+        signature2name.put(signature, name);
     }
 
     @Override
