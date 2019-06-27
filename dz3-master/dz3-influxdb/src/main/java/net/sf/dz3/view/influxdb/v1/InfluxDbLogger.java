@@ -103,31 +103,37 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
                 }
             }
 
-            while (!queue.isEmpty()) {
+            // It is possible for more than one thread to call consume() a the same time
+            // VT: FIXME: It would probably be better to use an ExecutorService for this
 
-                try {
+            synchronized (this) {
 
-                    DataSample<E> sample = queue.peek();
+                while (!queue.isEmpty()) {
 
-                    db.write(Point.measurement(sample.sourceName)
-                            .time(sample.timestamp, TimeUnit.MILLISECONDS)
-                            .addField("instance", instance)
-                            .addField("signature", sample.signature)
-                            .addField("sample", sample.sample)
-                            .build());
+                    try {
 
-                    queue.remove();
+                        DataSample<E> sample = queue.peek();
 
-                } catch (Throwable t) {
+                        db.write(Point.measurement(sample.sourceName)
+                                .time(sample.timestamp, TimeUnit.MILLISECONDS)
+                                .addField("instance", instance)
+                                .addField("signature", sample.signature)
+                                .addField("sample", sample.sample)
+                                .build());
 
-                    // The item we couldn't write is still in the queue
+                        queue.remove();
 
-                    logger.warn("can't write sample, deferring remaining " + queue.size() + " samples for now", t);
-                    break;
+                    } catch (Throwable t) {
+
+                        // The item we couldn't write is still in the queue
+
+                        logger.warn("can't write sample, deferring remaining " + queue.size() + " samples for now", t);
+                        break;
+                    }
                 }
-            }
 
-            db.flush();
+                db.flush();
+            }
 
         } finally {
             ThreadContext.pop();
