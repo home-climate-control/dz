@@ -114,11 +114,15 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
                         DataSample<E> sample = queue.peek();
 
-                        db.write(Point.measurement(sample.sourceName)
+                        db.write(Point.measurement("sensor")
                                 .time(sample.timestamp, TimeUnit.MILLISECONDS)
-                                .addField("instance", instance)
-                                .addField("signature", sample.signature)
+
+                                .tag("instance", instance)
+                                .tag("source", sample.sourceName)
+                                .tag("signature", sample.signature)
+
                                 .addField("sample", sample.sample)
+                                .addField("error", sample.error == null ? "" : sample.error.toString())
                                 .build());
 
                         queue.remove();
