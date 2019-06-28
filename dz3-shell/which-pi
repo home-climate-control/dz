@@ -1,0 +1,15 @@
+#! /bin/sh
+
+# This script determines which Raspberry model it runs on - there's too many of them around now.
+# I'm lazy and only added models I have available, so if the script produces empty output -
+# update it with the code from https://www.raspberrypi.org/documentation/hardware/raspberrypi/revision-codes/README.md
+
+REVISION=`cat /proc/cpuinfo |grep ^Revision|cut -c 12-`
+
+(grep ${REVISION}|cut -f 2- -d :) << EOF
+0010:B+ 1.2 512MB Sony UK
+a01041:2B 1.1 1GB Sony UK
+a02082:3B 1.2 1GB Sony UK
+a22082:3B 1.2 1GB Embest
+a020d3:3B+ 1.3 1GB Sony UK
+EOF
