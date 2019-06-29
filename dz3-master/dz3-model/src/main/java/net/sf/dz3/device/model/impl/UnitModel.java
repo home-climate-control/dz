@@ -12,10 +12,11 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.logger.LogAware;
+import net.sf.jukebox.util.Interval;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
  */
 public class UnitModel extends LogAware implements Unit {
 
@@ -35,7 +36,13 @@ public class UnitModel extends LogAware implements Unit {
      * Last known state. 
      */
     private DataSample<UnitSignal> state;
-    
+
+    /**
+     * Time when the unit was started, in milliseconds.
+     * {@code null} value indicates it is not currently running.
+     */
+    private Long lastStarted = null;
+
     /**
      * Minimum runtime allowed, in milliseconds.
      * 
@@ -120,10 +127,32 @@ public class UnitModel extends LogAware implements Unit {
         return sb.toString();
     }
 
-    @JmxAttribute(description="Last Known Signal")
     public UnitSignal getSignal() {
-        
         return state.sample;
+    }
+
+    @JmxAttribute(description="Demand")
+    public double getDemand() {
+        return state != null ? state.sample.demand : 0;
+    }
+
+
+    @JmxAttribute(description="Running")
+    public boolean getRunning() {
+        return state != null ? state.sample.running : false;
+    }
+
+    @JmxAttribute(description="Uptime as string")
+    public String getUptimeAsString() {
+
+        if (lastStarted == null) {
+            return "off";
+        }
+
+        // VT: NOTE: The only reason currentTimeMillis() is allowed here is because
+        // this method is for human consumption via JMX Console
+
+        return Interval.toTimeInterval(System.currentTimeMillis() - lastStarted);
     }
 
     /**
@@ -245,22 +274,45 @@ public class UnitModel extends LogAware implements Unit {
      */
     private synchronized void setRunning(boolean running, long timestamp) {
         
+        long uptime = updateUptime(running, timestamp);
+
         state = new DataSample<UnitSignal>(timestamp,
                 name,
                 signature,
-                new UnitSignal(state == null ? 0.0 : state.sample.demand, running, 0), null);
+                new UnitSignal(state == null ? 0.0 : state.sample.demand, running, uptime), null);
         
         stateChanged(); 
     }
 
     private synchronized void setDemand(double demand, long timestamp) {
         
+        long uptime = updateUptime(demand > 0, timestamp);
+
         state = new DataSample<UnitSignal>(timestamp,
                 name,
                 signature,
-                new UnitSignal(demand, state == null ? false : state.sample.running, 0), null);
+                new UnitSignal(demand, state == null ? false : state.sample.running, uptime), null);
         
         stateChanged(); 
+    }
+
+    private synchronized long updateUptime(boolean running, long timestamp) {
+
+        if (!running) {
+            lastStarted = null;
+            return 0;
+        }
+
+        if (lastStarted == null) {
+            lastStarted = timestamp;
+            return 0;
+        }
+
+        if (timestamp < lastStarted) {
+            throw new IllegalStateException("timestamp < lastStarted (" + timestamp + " < " + lastStarted + ")");
+        }
+
+        return timestamp - lastStarted;
     }
 
     public JmxDescriptor getJmxDescriptor() {

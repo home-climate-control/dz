@@ -307,12 +307,72 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         try {
 
-            startExchanger();
             startMqtt();
+            startExchanger();
+
+            // Connectors are initialized very late in the game, it is likely that the control logic
+            // has been long activated - but it is also likely that there will be no new events for
+            // quite a while. Need to send all the data that we have to listeners so they can act on it.
+
+            flush();
 
         } catch (Throwable t) {
 
             throw new IllegalStateException("failed to start", t);
+        }
+    }
+
+    /**
+     * Send the status of all {@link #getInitSet() initSet} objects into the transport.
+     */
+    private void flush() {
+
+        ThreadContext.push("flush");
+
+        try {
+
+            // VT: NOTE: This is an ugly hack. The connector architecture was never intended
+            // to poll object status, only to handle events broadcast from upstream.
+
+            for (Iterator<Object> i = getInitSet().iterator(); i.hasNext(); ) {
+
+                Object source = i.next();
+
+                if (source instanceof Switch) {
+
+                    flush((Switch) source);
+                    continue;
+                }
+
+                // VT: NOTE: Flushing sensor data is not that important, it will be handled normally
+                // next time sensors are polled or come up with samples. Thermostats will follow
+                // immediately thereafter.
+
+                // VT: FIXME: Other entities (namely, HvacController, HvacDriver, ZoneController, Unit)
+                // will need to be flushed eventually, when/if they will be capable to be independently
+                // controlled without violating DZ abstractions.
+
+                logger.warn("don't know how to flush: " + source.getClass().getName() + ": " + source);
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void flush(Switch source) {
+
+        ThreadContext.push("flush");
+
+        try {
+
+            logger.info(source);
+            source.setState(source.getState());
+
+        } catch (IOException ex) {
+            logger.error("failed to flush, ignored (nothing we can do now): " + source, ex);
+        } finally {
+            ThreadContext.pop();
         }
     }
 

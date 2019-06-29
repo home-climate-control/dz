@@ -11,6 +11,11 @@ JUKEBOX_VERSION=7.0.0-SNAPSHOT
 SERVOMASTER_VERSION=2.0.0-SNAPSHOT
 GOOGLE_OAUTH_VERSION=1.19.0
 GOOGLE_CALENDAR_VERSION=v3-rev104-1.19.0
+INFLUXDB_VERSION=2.15
+INFLUXDB_OKHTTP_VERSION=3.13.1
+INFLUXDB_RETROFIT_VERSION=2.5.0
+INFLUXDB_OKIO_VERSION=1.17.2
+INFLUXDB_MOSHI_VERSION=1.5.0
 JETTY_VERSION=6.1.26
 LOG4J_VERSION=2.11.0
 XBEE_API_VERSION=0.9.1-dz
@@ -25,6 +30,13 @@ LOG4J_CORE=${LIBDIR}/org/apache/logging/log4j/log4j-core/${LOG4J_VERSION}/log4j-
 MQTT_PAHO=${LIBDIR}/org/eclipse/paho/org.eclipse.paho.client.mqttv3/1.2.0/org.eclipse.paho.client.mqttv3-1.2.0.jar
 HTTPCORE=${LIBDIR}/org/apache/httpcomponents/httpcore/4.4.10/httpcore-4.4.10.jar
 HTTPCLIENT=${LIBDIR}/org/apache/httpcomponents/httpclient/4.5.6/httpclient-4.5.6.jar
+INFLUXDB=${LIBDIR}/org/influxdb/influxdb-java/${INFLUXDB_VERSION}/influxdb-java-${INFLUXDB_VERSION}.jar
+INFLUXDB_OKHTTP=${LIBDIR}/com/squareup/okhttp3/okhttp/${INFLUXDB_OKHTTP_VERSION}/okhttp-${INFLUXDB_OKHTTP_VERSION}.jar
+INFLUXDB_OKHTTP_LOGGING=${LIBDIR}/com/squareup/okhttp3/logging-interceptor/${INFLUXDB_OKHTTP_VERSION}/logging-interceptor-${INFLUXDB_OKHTTP_VERSION}.jar
+INFLUXDB_RETROFIT=${LIBDIR}/com/squareup/retrofit2/retrofit/${INFLUXDB_RETROFIT_VERSION}/retrofit-${INFLUXDB_RETROFIT_VERSION}.jar
+INFLUXDB_RETROFIT_MOSHI=${LIBDIR}/com/squareup/retrofit2/converter-moshi/${INFLUXDB_RETROFIT_VERSION}/converter-moshi-${INFLUXDB_RETROFIT_VERSION}.jar
+INFLUXDB_OKIO=${LIBDIR}/com/squareup/okio/okio/${INFLUXDB_OKIO_VERSION}/okio-${INFLUXDB_OKIO_VERSION}.jar
+INFLUXDB_MOSHI=${LIBDIR}/com/squareup/moshi/moshi/${INFLUXDB_MOSHI_VERSION}/moshi-${INFLUXDB_MOSHI_VERSION}.jar
 JODA_TIME=${LIBDIR}/joda-time/joda-time/2.8.1/joda-time-2.8.1.jar
 JSON_API=${LIBDIR}/javax/json/javax.json-api/1.1.4/javax.json-api-1.1.4.jar
 JSON=${LIBDIR}/org/glassfish/javax.json/1.1.4/javax.json-1.1.4.jar
@@ -41,6 +53,7 @@ ${DZ}/dz3-model/${DZ_VERSION}/dz3-model-${DZ_VERSION}.jar:\
 ${DZ}/dz3-common/${DZ_VERSION}/dz3-common-${DZ_VERSION}.jar:\
 ${DZ}/dz3-connector/${DZ_VERSION}/dz3-connector-${DZ_VERSION}.jar:\
 ${DZ}/dz3-http/${DZ_VERSION}/dz3-http-${DZ_VERSION}.jar:\
+${DZ}/dz3-influxdb/${DZ_VERSION}/dz3-influxdb-${DZ_VERSION}.jar:\
 ${DZ}/dz3-mqtt/${DZ_VERSION}/dz3-mqtt-${DZ_VERSION}.jar:\
 ${DZ}/dz3-sensors/${DZ_VERSION}/dz3-sensors-${DZ_VERSION}.jar:\
 ${DZ}/dz3-scheduler/${DZ_VERSION}/dz3-scheduler-${DZ_VERSION}.jar:\
@@ -68,6 +81,13 @@ ${COMMONS_LANG}:\
 ${COMMONS_LOGGING}:\
 ${HTTPCORE}:\
 ${HTTPCLIENT}:\
+${INFLUXDB}:\
+${INFLUXDB_OKHTTP}:\
+${INFLUXDB_OKHTTP_LOGGING}:\
+${INFLUXDB_RETROFIT}:\
+${INFLUXDB_RETROFIT_MOSHI}:\
+${INFLUXDB_OKIO}:\
+${INFLUXDB_MOSHI}:\
 ${JODA_TIME}:\
 ${JSON_API}:\
 ${JSON}:\
