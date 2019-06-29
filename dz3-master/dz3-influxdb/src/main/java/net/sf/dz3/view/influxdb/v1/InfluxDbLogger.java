@@ -10,6 +10,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
+import org.influxdb.dto.Point.Builder;
 import org.influxdb.dto.Query;
 
 import net.sf.jukebox.datastream.logger.impl.AbstractLogger;
@@ -114,16 +115,21 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
                         DataSample<E> sample = queue.peek();
 
-                        db.write(Point.measurement("sensor")
+                        Builder b = Point.measurement("sensor")
                                 .time(sample.timestamp, TimeUnit.MILLISECONDS)
-
                                 .tag("instance", instance)
                                 .tag("source", sample.sourceName)
-                                .tag("signature", sample.signature)
+                                .tag("signature", sample.signature);
 
-                                .addField("sample", sample.sample)
-                                .addField("error", sample.error == null ? "" : sample.error.toString())
-                                .build());
+                        // These two are mutually exclusive
+
+                        if (sample.isError()) {
+                            b.addField("error", sample.error.toString());
+                        } else {
+                            b.addField("sample", sample.sample);
+                        }
+
+                        db.write(b.build());
 
                         queue.remove();
 
