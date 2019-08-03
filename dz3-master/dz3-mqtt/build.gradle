@@ -9,7 +9,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.glassfish/javax.json
     compile 'org.glassfish:javax.json:1.1.4'
 
-    compile 'net.sf.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
+    compile 'net.sf.jukebox:jukebox-datastream:7.1.0-SNAPSHOT'
 
     compile project(':dz3-connector')
     compile project(':dz3-scheduler')
