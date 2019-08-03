@@ -22,8 +22,8 @@ import org.apache.logging.log4j.ThreadContext;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.view.http.common.HttpClientFactory;
+import net.sf.jukebox.instrumentation.Marker;
 
 /**
  * Stateless {@link https://oauth.net/2/device-flow/ OAuth 2.0 Device Flow} identity provider.

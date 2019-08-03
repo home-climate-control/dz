@@ -3,8 +3,8 @@ package net.sf.dz3.controller;
 import java.util.NoSuchElementException;
 import java.util.Random;
 
-import net.sf.dz3.instrumentation.Marker;
 import junit.framework.TestCase;
+import net.sf.jukebox.instrumentation.Marker;
 
 public class DataSetTest extends TestCase {
     

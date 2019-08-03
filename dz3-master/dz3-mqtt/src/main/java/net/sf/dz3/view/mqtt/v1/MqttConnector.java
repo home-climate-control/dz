@@ -29,10 +29,10 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.Switch;
-import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
+import net.sf.jukebox.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**

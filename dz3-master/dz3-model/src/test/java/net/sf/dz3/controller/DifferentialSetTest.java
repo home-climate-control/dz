@@ -6,7 +6,7 @@ import net.sf.dz3.controller.pid.DifferentialSet;
 import net.sf.dz3.controller.pid.LegacyDifferentialSet;
 import net.sf.dz3.controller.pid.NaiveDifferentialSet;
 import net.sf.dz3.controller.pid.SlidingDifferentialSet;
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.jukebox.instrumentation.Marker;
 
 import java.util.Iterator;
 import java.util.LinkedList;

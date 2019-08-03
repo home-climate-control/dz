@@ -25,8 +25,8 @@ import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneStatus;
-import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Period;
+import net.sf.jukebox.instrumentation.Marker;
 
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;

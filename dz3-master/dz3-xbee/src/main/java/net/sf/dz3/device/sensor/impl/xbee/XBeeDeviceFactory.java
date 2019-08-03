@@ -33,8 +33,8 @@ import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.ContainerMap;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
-import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.jukebox.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 

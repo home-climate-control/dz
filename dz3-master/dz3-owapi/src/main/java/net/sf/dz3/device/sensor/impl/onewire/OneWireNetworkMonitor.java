@@ -5,7 +5,7 @@ import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.utils.OWPath;
 
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.jukebox.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.jukebox.sem.EventSemaphore;

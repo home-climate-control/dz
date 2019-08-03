@@ -1,7 +1,7 @@
 package net.sf.dz3.runtime;
 
 import net.sf.dz3.device.model.DamperController;
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.jukebox.instrumentation.Marker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -9,7 +9,7 @@ import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.DzSwitchContainer;
 import net.sf.dz3.device.sensor.SensorType;
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.jukebox.instrumentation.Marker;
 
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.SwitchContainer;

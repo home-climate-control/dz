@@ -23,7 +23,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import net.sf.dz3.device.model.impl.ThermostatModel;
-import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
@@ -33,6 +32,7 @@ import net.sf.dz3.view.http.v2.JsonRenderer;
 import net.sf.dz3.view.http.v2.ThermostatFactory;
 import net.sf.dz3.view.http.v2.ZoneCommand;
 import net.sf.dz3.view.http.v2.ZoneSnapshot;
+import net.sf.jukebox.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 

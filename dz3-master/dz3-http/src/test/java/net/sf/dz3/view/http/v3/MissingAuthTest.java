@@ -19,10 +19,10 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.Test;
 
-import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.view.http.common.AbstractExchanger;
 import net.sf.dz3.view.http.common.BufferedExchanger;
 import net.sf.dz3.view.http.common.ContextChecker;
+import net.sf.jukebox.instrumentation.Marker;
 
 /**
  * Test for {@link AbstractExchanger} being instantiated without username and password

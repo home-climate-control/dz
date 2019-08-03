@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.Switch;
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.jukebox.instrumentation.Marker;
 import junit.framework.TestCase;
 
 /**
