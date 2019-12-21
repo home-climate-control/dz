@@ -1,16 +1,16 @@
 dependencies {
 
-	// https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3
-	compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.2'
+    // https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.2'
 
-	// https://mvnrepository.com/artifact/javax.json/javax.json-api
-	compile 'javax.json:javax.json-api:1.1.4'
+    // https://mvnrepository.com/artifact/javax.json/javax.json-api
+    implementation 'javax.json:javax.json-api:1.1.4'
 
     // https://mvnrepository.com/artifact/org.glassfish/javax.json
-    compile 'org.glassfish:javax.json:1.1.4'
+    implementation 'org.glassfish:javax.json:1.1.4'
 
-    compile 'net.sf.jukebox:jukebox-datastream:7.1.0-SNAPSHOT'
+    implementation 'net.sf.jukebox:jukebox-datastream:7.1.0-SNAPSHOT'
 
-    compile project(':dz3-connector')
-    compile project(':dz3-scheduler')
+    implementation project(':dz3-connector')
+    implementation project(':dz3-scheduler')
 }

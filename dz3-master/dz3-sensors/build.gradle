@@ -1,7 +1,6 @@
 dependencies {
 
-    compile 'net.sf.jukebox:jukebox-datastream:7.1.0-SNAPSHOT'
+    api 'net.sf.jukebox:jukebox-datastream:7.1.0-SNAPSHOT'
 
-    compile project(':dz3-common')
-
+    api project(':dz3-common')
 }
