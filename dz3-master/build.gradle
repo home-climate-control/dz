@@ -5,7 +5,7 @@ subprojects {
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     group = 'net.sf.dz3'
     version = '3.6.8-SNAPSHOT'
 
