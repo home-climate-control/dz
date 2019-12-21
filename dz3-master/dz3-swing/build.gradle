@@ -1,7 +1,6 @@
 dependencies {
 
-    compile project(':dz3-connector')
-    compile project(':dz3-model')
-    compile project(':dz3-scheduler')
-
+    implementation project(':dz3-connector')
+    implementation project(':dz3-model')
+    implementation project(':dz3-scheduler')
 }

@@ -1,6 +1,5 @@
 dependencies {
 
-    compile 'org.apache.commons:commons-lang3:3.3.2'
-    compile 'net.sf.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
-
+    implementation 'org.apache.commons:commons-lang3:3.3.2'
+    api 'net.sf.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
 }

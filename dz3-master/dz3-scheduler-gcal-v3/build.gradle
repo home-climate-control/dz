@@ -1,8 +1,7 @@
 dependencies {
 
-    compile 'com.google.apis:google-api-services-calendar:v3-rev104-1.19.0'
-    compile 'com.google.oauth-client:google-oauth-client-jetty:1.19.0'
+    implementation 'com.google.apis:google-api-services-calendar:v3-rev104-1.19.0'
+    implementation 'com.google.oauth-client:google-oauth-client-jetty:1.19.0'
 
-    compile project(':dz3-scheduler')
-
+    implementation project(':dz3-scheduler')
 }

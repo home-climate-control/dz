@@ -1,7 +1,6 @@
 dependencies {
 
-    compile 'org.rxtx:rxtx:2.1.7'
+    implementation 'org.rxtx:rxtx:2.1.7'
 
-    compile project(':dz3-sensors')
-
+    implementation project(':dz3-sensors')
 }
