@@ -1,6 +1,5 @@
 dependencies {
 
-    compile 'net.sf.jukebox:jukebox-common:7.1.0-SNAPSHOT'
-    compile 'net.sf.jukebox:jukebox-jmx:7.1.0-SNAPSHOT'
-
+    implementation 'net.sf.jukebox:jukebox-common:7.1.0-SNAPSHOT'
+    implementation 'net.sf.jukebox:jukebox-jmx:7.1.0-SNAPSHOT'
 }

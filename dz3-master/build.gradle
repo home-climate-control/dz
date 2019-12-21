@@ -1,11 +1,12 @@
 subprojects {
 
     apply plugin: 'java'
+    apply plugin: 'java-library'
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
 
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     group = 'net.sf.dz3'
     version = '3.6.8-SNAPSHOT'
 
@@ -28,9 +29,9 @@ subprojects {
 
     dependencies {
 
-		compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
-		compile group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 
-        testCompile 'junit:junit:4.12'
+        testImplementation 'junit:junit:4.12'
     }
 }
