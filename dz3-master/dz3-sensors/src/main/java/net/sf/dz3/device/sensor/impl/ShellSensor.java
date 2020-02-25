@@ -54,8 +54,6 @@ public class ShellSensor extends AbstractAnalogSensor {
         
         ThreadContext.push("getSensorTemperature#" + Integer.toHexString(hashCode()));
 
-        BufferedReader br = null;
-        
         long timestamp = System.currentTimeMillis();
 
         try {
@@ -76,20 +74,21 @@ public class ShellSensor extends AbstractAnalogSensor {
                             + command);
                 }
 
-                br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                String output = read(br);
-                
-                logger.debug("Output: " + output);
-                
-                if (rc == 0) {
-                    
-                    double sample = Double.parseDouble(output);
-                    return new DataSample<Double>(timestamp, getAddress(), getAddress(), sample, null);
-                    
-                } else {
-                    
-                    Throwable t = new IOException("rc=" + rc + ", output: " + output);
-                    return new DataSample<Double>(timestamp, getAddress(), getAddress(), null, t);
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+                    String output = read(br);
+
+                    logger.debug("Output: " + output);
+
+                    if (rc == 0) {
+
+                        double sample = Double.parseDouble(output);
+                        return new DataSample<Double>(timestamp, getAddress(), getAddress(), sample, null);
+
+                    } else {
+
+                        Throwable t = new IOException("rc=" + rc + ", output: " + output);
+                        return new DataSample<Double>(timestamp, getAddress(), getAddress(), null, t);
+                    }
                 }
                 
             } finally {
@@ -108,14 +107,6 @@ public class ShellSensor extends AbstractAnalogSensor {
             return new DataSample<Double>(timestamp, getAddress(), getAddress(), null, t);
             
         } finally {
-            
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    logger.info("Can't close() the process stream, ignored:", e);
-                }
-            }
             
             ThreadContext.pop();
         }
