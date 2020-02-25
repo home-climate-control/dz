@@ -25,6 +25,7 @@ import com.rapplogic.xbee.api.zigbee.ZBNodeDiscover;
 import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
 import com.rapplogic.xbee.util.ByteUtils;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import net.sf.dz3.device.factory.AbstractDeviceFactory;
 import net.sf.dz3.device.factory.SingleSwitchProxy;
 import net.sf.dz3.device.sensor.AnalogSensor;
@@ -41,7 +42,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 /**
  * Factory for sensors and actuators implemented with XBee modules.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2019
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2020
  */
 public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer> {
     
@@ -81,9 +82,9 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
      * 
      * @param port Serial port XBee adapter is connected to.
      */
-    public XBeeDeviceFactory(String port) {
+    public XBeeDeviceFactory(MeterRegistry meterRegistry, String port) {
         
-        this(port, 9600);
+        this(meterRegistry, port, 9600);
     }
 
     /**
@@ -95,7 +96,8 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
      * @param port Serial port XBee adapter is connected to.
      * @param baud Port speed.
      */
-    public XBeeDeviceFactory(String port, int baud) {
+    public XBeeDeviceFactory(MeterRegistry meterRegistry, String port, int baud) {
+        super(meterRegistry);
         
         // No sanity checking, it'll blow up in startup()
         
@@ -271,7 +273,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
     private void browse(XBee target) throws XBeeException {
         
         ThreadContext.push("browse");
-        Marker m = new Marker("browse");
+        Marker m = new Marker(meterRegistry, "browse");
         
         try {
 
@@ -495,7 +497,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         
         // Short poll interval is OK - if the device isn't present, no big deal,
         // when it becomes available, the TemperatureProxy will take care of that anyway
-        SensorProxy proxy = new XBeeSensorProxy(address, 1000, type);
+        SensorProxy proxy = new XBeeSensorProxy(meterRegistry, address, 1000, type);
         
         // If it doesn't start, help us God
         proxy.start();
@@ -518,9 +520,9 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
     private class XBeeSensorProxy extends SensorProxy {
 
-        public XBeeSensorProxy(String address, int pollIntervalMillis, SensorType type) {
+        public XBeeSensorProxy(MeterRegistry meterRegistry, String address, int pollIntervalMillis, SensorType type) {
 
-            super(address, pollIntervalMillis, type);
+            super(meterRegistry, address, pollIntervalMillis, type);
         }
 
         /**

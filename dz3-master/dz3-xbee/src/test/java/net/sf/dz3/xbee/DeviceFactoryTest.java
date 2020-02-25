@@ -159,7 +159,7 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
         
         try {
         
-            XBeeDeviceFactory deviceFactory = new XBeeDeviceFactory(serialPort);
+            XBeeDeviceFactory deviceFactory = new XBeeDeviceFactory(null, serialPort);
             String relayAddress = "0013A200.405D8027"; 
             String sensorAddress = "0013A200.4062AC98";
 

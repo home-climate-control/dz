@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 
 import org.apache.logging.log4j.ThreadContext;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxAttribute;
@@ -37,9 +38,9 @@ public class ShellSensor extends AbstractAnalogSensor {
      * @param command Shell command to execute. May be arbitrarily complex, must return a value that is
      * parseable into {@code double}.
      */
-    public ShellSensor(String address, int pollInterval, String command) {
+    public ShellSensor(MeterRegistry meterRegistry, String address, int pollInterval, String command) {
 
-        super(address, pollInterval);
+        super(meterRegistry, address, pollInterval);
         
         if (command == null || "".equals(command)) {
             
@@ -54,7 +55,7 @@ public class ShellSensor extends AbstractAnalogSensor {
     public DataSample<Double> getSensorSignal() throws IOException {
         
         ThreadContext.push("getSensorSignal#" + Integer.toHexString(hashCode()));
-        Marker m = new Marker("getSensorSignal");
+        Marker m = new Marker(meterRegistry, "getSensorSignal");
 
         long timestamp = System.currentTimeMillis();
 

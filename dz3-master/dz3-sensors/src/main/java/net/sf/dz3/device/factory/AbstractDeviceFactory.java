@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.logging.log4j.ThreadContext;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.DeviceContainer;
 import net.sf.dz3.device.sensor.DeviceFactory;
@@ -37,11 +38,13 @@ import net.sf.jukebox.service.ActiveService;
  * 
  * @param <SwitchContainer> Implementation class of the hardware dependent switch container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2020
  */
 public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveService implements DeviceFactory {
 
     protected final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
+
+    protected final MeterRegistry meterRegistry;
     
     /**
      * Constant to use as a key for humidity data.
@@ -77,16 +80,17 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
      */
     protected DataMap dataMap = new DataMap();
     
-    public AbstractDeviceFactory() {
-        super();
+    public AbstractDeviceFactory(MeterRegistry meterRegistry) {
+        this(meterRegistry, Thread.currentThread().getThreadGroup(), null);
     }
 
-    public AbstractDeviceFactory(ThreadGroup tg, ThreadFactory tf) {
+    public AbstractDeviceFactory(MeterRegistry meterRegistry, ThreadFactory tf) {
+        this(meterRegistry, Thread.currentThread().getThreadGroup(), tf);
+    }
+
+    public AbstractDeviceFactory(MeterRegistry meterRegistry, ThreadGroup tg, ThreadFactory tf) {
         super(tg, tf);
-    }
-
-    public AbstractDeviceFactory(ThreadFactory tf) {
-        super(tf);
+        this.meterRegistry = meterRegistry;
     }
 
     /**
@@ -266,9 +270,9 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
          */
         protected AbstractDeviceContainer container = null;
 
-        public SensorProxy(String address, int pollIntervalMillis, SensorType type) {
+        public SensorProxy(MeterRegistry meterRegistry, String address, int pollIntervalMillis, SensorType type) {
 
-            super(address, pollIntervalMillis);
+            super(meterRegistry, address, pollIntervalMillis);
             
             if (!SensorType.TEMPERATURE.equals(type) && !SensorType.HUMIDITY.equals(type)) {
                 

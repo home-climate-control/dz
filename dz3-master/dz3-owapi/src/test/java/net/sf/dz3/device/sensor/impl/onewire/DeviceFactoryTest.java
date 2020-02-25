@@ -62,7 +62,7 @@ public class DeviceFactoryTest extends TestCase {
             // VT: NOTE: This is for my box, = will most probably fail on yours - change it,
             // or remove the test altogether
 
-            OwapiDeviceFactory df = new OwapiDeviceFactory("/dev/ttyUSB0", "regular");
+            OwapiDeviceFactory df = new OwapiDeviceFactory(null, "/dev/ttyUSB0", "regular");
 
             boolean result = df.start().waitFor();
 
@@ -114,7 +114,7 @@ public class DeviceFactoryTest extends TestCase {
             // VT: NOTE: This is for my box, = will most probably fail on yours - change it,
             // or remove the test altogether
 
-            OwapiDeviceFactory df = new OwapiDeviceFactory("/dev/ttyUSB0", "regular");
+            OwapiDeviceFactory df = new OwapiDeviceFactory(null, "/dev/ttyUSB0", "regular");
 
             assertTrue("Failed to start, check the logs", df.start().waitFor());
 

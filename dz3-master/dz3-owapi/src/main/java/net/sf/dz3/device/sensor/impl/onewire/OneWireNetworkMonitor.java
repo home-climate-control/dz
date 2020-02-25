@@ -5,6 +5,7 @@ import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.utils.OWPath;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import net.sf.jukebox.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
@@ -38,9 +39,11 @@ import org.apache.logging.log4j.ThreadContext;
  * Note that DS2409 devices cannot be used as payload switches with this code,
  * only as branch couplers.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class OneWireNetworkMonitor extends ActiveService {
+
+    private final MeterRegistry meterRegistry;
 
     /**
      * Adapter to monitor.
@@ -108,7 +111,9 @@ public class OneWireNetworkMonitor extends ActiveService {
      * @param adapter Adapter to work with. Can't be {@code null}.
      * @param lock Lock to use. Can't be {@code null}.
      */
-    public OneWireNetworkMonitor(DSPortAdapter adapter, ReentrantReadWriteLock lock) {
+    public OneWireNetworkMonitor(MeterRegistry meterRegistry, DSPortAdapter adapter, ReentrantReadWriteLock lock) {
+
+        this.meterRegistry = meterRegistry;
 
         if (adapter == null || lock == null) {
 
@@ -228,7 +233,7 @@ public class OneWireNetworkMonitor extends ActiveService {
     private void browse() throws Throwable {
         
         ThreadContext.push("browse");
-        Marker m = new Marker("browse");
+        Marker m = new Marker(meterRegistry, "browse");
         
         lock.writeLock().lock();
         m.checkpoint("got lock");
@@ -245,7 +250,7 @@ public class OneWireNetworkMonitor extends ActiveService {
             Map<String, OWPath> address2pathLocal = new TreeMap<String, OWPath>();
 
             ThreadContext.push("browseProper");
-            Marker m2 = new Marker("browseProper");
+            Marker m2 = new Marker(meterRegistry, "browseProper");
 
             try {
 
@@ -264,7 +269,7 @@ public class OneWireNetworkMonitor extends ActiveService {
             }
             
             ThreadContext.push("handleChanges");
-            Marker m3 = new Marker("handleChanges");
+            Marker m3 = new Marker(meterRegistry, "handleChanges");
             
             try {
 

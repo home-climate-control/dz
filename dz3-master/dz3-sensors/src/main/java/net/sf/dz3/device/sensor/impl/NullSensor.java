@@ -8,13 +8,13 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 /**
  * No-op {@link TemperatureSensor} implementation for the purpose of testing.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2020
  */
 public class NullSensor extends AbstractAnalogSensor {
 
     public NullSensor(String address, int pollInterval) {
 
-        super(address, pollInterval);
+        super(null, address, pollInterval);
     }
 
     @Override

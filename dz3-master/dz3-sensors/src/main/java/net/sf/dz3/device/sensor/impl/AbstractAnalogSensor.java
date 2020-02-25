@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.ThreadContext;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.conf.ConfigurableProperty;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
@@ -17,7 +18,7 @@ import net.sf.jukebox.service.ActiveService;
  * 
  * Supports common configuration and listener notification features.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public abstract class AbstractAnalogSensor extends ActiveService implements AnalogSensor {
 
@@ -56,12 +57,24 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
      */
     private long pollIntervalMillis = 5000;
 
+    protected final MeterRegistry meterRegistry;
+
     /**
      * Hardware address of the sensor on the remote end to watch for.
      */
     private final String address;
 
-    public AbstractAnalogSensor(String address, int pollIntervalMillis) {
+    /**
+     * Create an instance.
+     *
+     * @param meterRegistry Meter registry to use. The implementation is expected
+     * to be able to handle a {@code null} value without breaking.
+     * @param address Sensor address.
+     * @param pollIntervalMillis Poll interval, in milliseconds.
+     */
+    public AbstractAnalogSensor(MeterRegistry meterRegistry, String address, int pollIntervalMillis) {
+
+        this.meterRegistry = meterRegistry;
 
         // Sensor address will never change, we will only accept it in the constructor.
         this.address = address;

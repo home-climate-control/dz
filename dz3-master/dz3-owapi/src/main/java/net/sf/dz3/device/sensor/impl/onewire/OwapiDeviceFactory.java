@@ -37,10 +37,12 @@ import com.dalsemi.onewire.container.SwitchContainer;
 import com.dalsemi.onewire.container.TemperatureContainer;
 import com.dalsemi.onewire.utils.OWPath;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 /**
  * 1-Wire device factory.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceContainer> implements OneWireNetworkEventListener {
 
@@ -101,7 +103,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * @param port Port to use.
      * @param speed Speed to use (choices are "regular", "flex", "overdrive", "hyperdrive".
      */
-    public OwapiDeviceFactory(String port, String speed) {
+    public OwapiDeviceFactory(MeterRegistry meterRegistry, String port, String speed) {
+        super(meterRegistry);
 
         ThreadContext.push("DeviceFactory");
 
@@ -148,7 +151,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         // Short poll interval is OK - if the device isn't present, no big deal,
         // when it becomes available, the TemperatureProxy will take care of that anyway
-        SensorProxy proxy = new OwapiSensorProxy(address, 1000, type, getMonitor());
+        SensorProxy proxy = new OwapiSensorProxy(meterRegistry, address, 1000, type, getMonitor());
         
         // If it doesn't start, help us God
         proxy.start();
@@ -256,7 +259,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             }
 
-            monitor = new OneWireNetworkMonitor(adapter, lock);
+            monitor = new OneWireNetworkMonitor(meterRegistry, adapter, lock);
             
             synchronized (this) {
                 
@@ -412,7 +415,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     private void poll() throws InterruptedException, OneWireException {
         
         ThreadContext.push("poll");
-        Marker m = new Marker("poll");
+        Marker m = new Marker(meterRegistry, "poll");
         
         try {
 
@@ -456,7 +459,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     private void processPath(OWPath path, DataMap dataMap) throws OneWireException {
         
         ThreadContext.push("processPath");
-        Marker m = new Marker("processPath");
+        Marker m = new Marker(meterRegistry, "processPath");
         
         logger.debug("Processing " + path);
 
@@ -1068,7 +1071,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     final double getTemperature(final TemperatureContainer tc) throws OneWireException, OneWireIOException {
         
         ThreadContext.push("getTemperature");
-        Marker m = new Marker("getTemperature");
+        Marker m = new Marker(meterRegistry, "getTemperature");
         
         try {
 
@@ -1283,9 +1286,9 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     
     private class OwapiSensorProxy extends SensorProxy implements DataSink<Double>, JmxAware, OneWireNetworkEventListener {
 
-        public OwapiSensorProxy(String address, int pollIntervalMillis, SensorType type, OneWireNetworkMonitor monitor) {
+        public OwapiSensorProxy(MeterRegistry meterRegistry, String address, int pollIntervalMillis, SensorType type, OneWireNetworkMonitor monitor) {
 
-            super(address, pollIntervalMillis, type);
+            super(meterRegistry, address, pollIntervalMillis, type);
             
             monitor.addListener(this);
         }

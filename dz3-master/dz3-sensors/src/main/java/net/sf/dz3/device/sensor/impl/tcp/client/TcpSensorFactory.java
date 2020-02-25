@@ -14,6 +14,7 @@ import javax.net.ssl.SSLException;
 
 import org.apache.logging.log4j.ThreadContext;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import net.sf.dz3.device.sensor.TemperatureSensor;
 import net.sf.dz3.device.sensor.impl.AbstractAnalogSensor;
 import net.sf.dz3.device.sensor.impl.tcp.TcpConnectionSignature;
@@ -32,7 +33,7 @@ import net.sf.jukebox.service.PassiveService;
  * Connects to DAC over TCP and reads temperature values, then distributes
  * them to listeners.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class TcpSensorFactory extends PassiveService {
 
@@ -469,8 +470,8 @@ public class TcpSensorFactory extends PassiveService {
         
         private DataSample<Double> lastKnownSignal;
 
-        public TcpTemperatureSensor(String address, int pollIntervalMillis) {
-            super(address, pollIntervalMillis);
+        public TcpTemperatureSensor(MeterRegistry meterRegistry, String address, int pollIntervalMillis) {
+            super(meterRegistry, address, pollIntervalMillis);
             
             lastKnownSignal = new DataSample<Double>(System.currentTimeMillis(), address, "FIXME", null, new IllegalStateException("Not Available"));
         }

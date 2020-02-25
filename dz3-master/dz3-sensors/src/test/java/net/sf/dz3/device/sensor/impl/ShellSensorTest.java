@@ -19,7 +19,7 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
  * to make them work on your system - or feel free to make tests generic enough so they can be
  * reused without modification.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2020
  */
 public class ShellSensorTest extends TestCase {
 
@@ -73,7 +73,7 @@ public class ShellSensorTest extends TestCase {
             }
 
             // VT: NOTE: The test string is Unix specific (shell builtin)
-            ShellSensor ss = new ShellSensor("address", 1000, "echo 5.5");
+            ShellSensor ss = new ShellSensor(null, "address", 1000, "echo 5.5");
 
             DataSample<Double> sample = ss.getSensorSignal();        
             logger.info("Sample: " + sample);
@@ -99,7 +99,7 @@ public class ShellSensorTest extends TestCase {
                 return;
             }
 
-            ShellSensor ss = new ShellSensor("address", 1000, "does.not.exist");
+            ShellSensor ss = new ShellSensor(null, "address", 1000, "does.not.exist");
 
             DataSample<Double> sample = ss.getSensorSignal();        
             logger.info("Sample: " + sample);
@@ -162,7 +162,7 @@ public class ShellSensorTest extends TestCase {
             }
 
             // VT: NOTE: The test string is Unix specific
-            ShellSensor ss = new ShellSensor("address", 1000, "echo \"abcd\"|tr \"dcba\" \"0123\"");
+            ShellSensor ss = new ShellSensor(null, "address", 1000, "echo \"abcd\"|tr \"dcba\" \"0123\"");
 
             DataSample<Double> sample = ss.getSensorSignal();        
             logger.info("Sample: " + sample);
