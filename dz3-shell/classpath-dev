@@ -110,7 +110,8 @@ ${LIBDIR}/org/mortbay/jetty/jetty/${JETTY_VERSION}/jetty-${JETTY_VERSION}.jar:\
 ${LIBDIR}/org/mortbay/jetty/jetty-util/${JETTY_VERSION}/jetty-util-${JETTY_VERSION}.jar:\
 ${LIBDIR}/org/mortbay/jetty/servlet-api/2.5-20081211/servlet-api-2.5-20081211.jar:\
 ${LIBDIR}/io/micrometer/micrometer-registry-influx/${MICROMETER_VERSION}/micrometer-registry-influx-${MICROMETER_VERSION}.jar:\
-${LIBDIR}/io/micrometer/micrometer-core/${MICROMETER_VERSION}/micrometer-core-${MICROMETER_VERSION}.jar"
-
+${LIBDIR}/io/micrometer/micrometer-core/${MICROMETER_VERSION}/micrometer-core-${MICROMETER_VERSION}.jar:\
+${LIBDIR}/org/slf4j/slf4j-api/1.7.28/slf4j-api-1.7.28.jar:\
+${LIBDIR}/org/latencyutils/LatencyUtils/2.0.3/LatencyUtils-2.0.3.jar"
 
 echo $CLASSPATH | tr ":" "\n"

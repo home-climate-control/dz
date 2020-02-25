@@ -50,6 +50,8 @@ ${LIBDIR}/log4j-api-${LOG4J_VERSION}.jar:\
 ${LIBDIR}/log4j-core-${LOG4J_VERSION}.jar:\
 ${LIBDIR}/micrometer-core-${MICROMETER_VERSION}.jar:\
 ${LIBDIR}/micrometer-registry-influx-${MICROMETER_VERSION}.jar:\
+${LIBDIR}slf4j-api-1.7.28.jar:\
+${LIBDIR}LatencyUtils-2.0.3.jar:\
 ${LIBDIR}/spring-2.5.6.jar:\
 ${LIBDIR}/google-api-client-${GOOGLE_OAUTH_VERSION}.jar:\
 ${LIBDIR}/google-http-client-${GOOGLE_OAUTH_VERSION}.jar:\
