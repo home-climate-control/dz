@@ -7,13 +7,14 @@ import java.io.InputStreamReader;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.jukebox.datastream.signal.model.DataSample;
+import net.sf.jukebox.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
  * Get a reading returned by a shell command.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class ShellSensor extends AbstractAnalogSensor {
 
@@ -53,6 +54,7 @@ public class ShellSensor extends AbstractAnalogSensor {
     public DataSample<Double> getSensorSignal() throws IOException {
         
         ThreadContext.push("getSensorSignal#" + Integer.toHexString(hashCode()));
+        Marker m = new Marker("getSensorSignal");
 
         long timestamp = System.currentTimeMillis();
 
@@ -107,7 +109,8 @@ public class ShellSensor extends AbstractAnalogSensor {
             return new DataSample<Double>(timestamp, getAddress(), getAddress(), null, t);
             
         } finally {
-            
+
+            m.close();
             ThreadContext.pop();
         }
     }
