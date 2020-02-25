@@ -52,7 +52,7 @@ public class ShellSensor extends AbstractAnalogSensor {
     @Override
     public DataSample<Double> getSensorSignal() throws IOException {
         
-        ThreadContext.push("getSensorTemperature#" + Integer.toHexString(hashCode()));
+        ThreadContext.push("getSensorSignal#" + Integer.toHexString(hashCode()));
 
         long timestamp = System.currentTimeMillis();
 
