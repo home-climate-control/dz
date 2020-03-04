@@ -168,9 +168,6 @@ public class FasterChart extends AbstractChart {
         Long time_trailer = null;
         TintedValue trailer = null;
 
-        // Flag to reduce the color changes
-        boolean dead = false;
-
         for (Iterator<Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext();) {
 
             Entry<Long, TintedValue> entry = di.next();
@@ -191,11 +188,6 @@ public class FasterChart extends AbstractChart {
 
                 } else {
 
-                    if (!dead) {
-
-                        dead = true;
-                    }
-
                     // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
 
                     Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
@@ -209,10 +201,6 @@ public class FasterChart extends AbstractChart {
                     drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
 
                     x0 = x1;
-                }
-
-                if (dead) {
-                    dead = false;
                 }
 
                 Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
