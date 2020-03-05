@@ -184,10 +184,9 @@ public class FasterChart extends AbstractChart {
 
                 // Decide whether the line is alive or dead
 
-                if (time_now - time_trailer <= deadTimeout) {
+                if (time_now - time_trailer > deadTimeout) {
 
-                } else {
-
+                    // It's dead, all right
                     // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
 
                     Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
