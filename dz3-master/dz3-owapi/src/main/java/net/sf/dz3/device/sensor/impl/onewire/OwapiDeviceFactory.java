@@ -40,7 +40,7 @@ import com.dalsemi.onewire.utils.OWPath;
 /**
  * 1-Wire device factory.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceContainer> implements OneWireNetworkEventListener {
 
@@ -728,28 +728,6 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             address2dcForPath.add(dc);
             address2dcGlobal.add(dc);
-
-            // VT: FIXME: This is a funky mechanism, but it appears sufficient
-            // for the time being
-            
-            // Only temperature and humidity containers get broadcast,
-            // switches aren't
-            
-            SensorType type = dc.getType();
-            
-            logger.debug("type: " + type);
-            
-            if (SensorType.TEMPERATURE.equals(type) || SensorType.HUMIDITY.equals(type)) {
-
-                DataSample<Double> signal = new DataSample<Double>(
-                        System.currentTimeMillis(), dc.getSignature(), dc.getSignature(),
-                        null, new IllegalStateException("Just Arrived"));
-                dataBroadcaster.broadcast(signal);
-
-            } else {
-                
-                logger.debug("Neither T nor H, not broadcasting arrival: " + dc.getSignature());
-            }
         }
     }
 
@@ -980,14 +958,6 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             stateMap.remove(address);
 
-            for (Iterator<DeviceContainer> di = dcSet.iterator(); di.hasNext();) {
-
-                DeviceContainer dc = di.next();
-
-                DataSample<Double> signal = new DataSample<Double>(System.currentTimeMillis(), dc.getSignature(), dc.getSignature(), null, new IOException("Departed"));
-                dataBroadcaster.broadcast(signal);
-            }
-
             return true;
         
         } finally {
@@ -1162,9 +1132,6 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             logger.debug(dc + ": " + value);
 
-            DataSample<Double> signal = new DataSample<Double>(System.currentTimeMillis(), dc.getSignature(), dc.getSignature(), value, null);
-            dataBroadcaster.broadcast(signal);
-            
             ((AbstractSensorContainer) dc).stateChanged(value, null);
 
         } finally {
@@ -1186,9 +1153,6 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             logger.debug(dc, t);
 
-            DataSample<Double> signal = new DataSample<Double>(System.currentTimeMillis(), dc.getSignature(), dc.getSignature(), null, t);
-            dataBroadcaster.broadcast(signal);
-            
             try {
 
                 ((AbstractSensorContainer) dc).stateChanged(null, t);
