@@ -16,7 +16,7 @@ A few useful links:
 * http://homeclimatecontrol.com/ - project home
 * http://diy-zoning.blogspot.com/ - project blog
 * http://groups.google.com/group/home-climate-control - user forum
-* http://diy-zoning.sourceforge.net/ - legacy project site
+* http://diy-zoning.sourceforge.net/ - legacy project site (yep. This is how it started 20 years ago).
 
 ## New Developments
 
