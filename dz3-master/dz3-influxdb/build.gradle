@@ -1,0 +1,10 @@
+dependencies {
+
+    compile 'org.influxdb:influxdb-java:2.15'
+
+	// This dependency is actually transitive from dz3-connector,
+	// but Eclipse Gradle plugin doesn't see it so have to make it explicit
+    compile 'net.sf.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
+
+    compile project(':dz3-connector')
+}
