@@ -17,3 +17,8 @@ A few useful links:
 * http://diy-zoning.blogspot.com/ - project blog
 * http://groups.google.com/group/home-climate-control - user forum
 * http://diy-zoning.sourceforge.net/ - legacy project site
+
+## New Developments
+MQTT is now a protocol of choice for remote integrations.
+* [DZ as an MQTT Publisher](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-as-an-MQTT-Publisher)
+* [DZ to Home Assistant Integration](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-to-Home-Assistant-integration)
