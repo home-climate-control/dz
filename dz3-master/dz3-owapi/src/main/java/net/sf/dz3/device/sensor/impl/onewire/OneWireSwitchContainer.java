@@ -19,7 +19,6 @@ import com.dalsemi.onewire.container.SwitchContainer;
  */
 public class OneWireSwitchContainer extends OneWireDeviceContainer implements DzSwitchContainer {
     
-    private final Logger logger = LogManager.getLogger(getClass());
     private final OwapiDeviceFactory factory;
 
     /**
