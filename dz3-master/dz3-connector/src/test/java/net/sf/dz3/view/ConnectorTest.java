@@ -1,5 +1,7 @@
 package net.sf.dz3.view;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -13,12 +15,14 @@ public class ConnectorTest {
     public void testNullInitSet() {
 
         new TestConnector(null);
+        assertTrue(true);
     }
 
     @Test
     public void testNullFactorySet() {
 
         new TestConnector(null, null);
+        assertTrue(true);
     }
 
     private class TestConnector extends Connector<String> {
