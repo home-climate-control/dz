@@ -15,12 +15,12 @@ import net.sf.jukebox.datastream.signal.model.DataSource;
 /**
  * Usage counter storing the state into a file.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class FileUsageCounter extends TransientUsageCounter {
     
-    private final static String CF_THRESHOLD = "threshold";
-    private final static String CF_CURRENT = "current";
+    private static final String CF_THRESHOLD = "threshold";
+    private static final String CF_CURRENT = "current";
     
     /**
      * Create an instance.
