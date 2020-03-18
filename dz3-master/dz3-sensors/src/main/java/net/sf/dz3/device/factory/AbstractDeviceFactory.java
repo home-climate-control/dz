@@ -34,11 +34,11 @@ import net.sf.jukebox.service.ActiveService;
  * This class behaves like a singleton, but is not built like one - the intent is to instantiate
  * it with Spring Framework, which will take care of creating as few instances as needed.
  * 
- * @param <SwitchContainer> Implementation class of the hardware dependent switch container.
+ * @param <T> Implementation class of the hardware dependent switch container.
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2020
  */
-public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveService implements DeviceFactory {
+public abstract class AbstractDeviceFactory<T> extends ActiveService implements DeviceFactory {
 
     /**
      * Constant to use as a key for humidity data.
