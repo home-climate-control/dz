@@ -152,13 +152,12 @@ public class FileUsageCounter extends TransientUsageCounter {
                 logger.info("Created " + canonical);
             };
             
-            PrintWriter pw = new PrintWriter(new FileWriter(canonical));
+            try (PrintWriter pw = new PrintWriter(new FileWriter(canonical))) {
             
-            pw.println("# Resource Usage Counter: " + getName());
-            pw.println(CF_THRESHOLD + "=" + getThreshold());
-            pw.println(CF_CURRENT + "=" + getUsageAbsolute());
-            
-            pw.close();
+                pw.println("# Resource Usage Counter: " + getName());
+                pw.println(CF_THRESHOLD + "=" + getThreshold());
+                pw.println(CF_CURRENT + "=" + getUsageAbsolute());
+            }
         
         } finally {
             ThreadContext.pop();
