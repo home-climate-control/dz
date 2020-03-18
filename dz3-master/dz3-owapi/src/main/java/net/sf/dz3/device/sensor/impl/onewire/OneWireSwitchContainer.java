@@ -3,16 +3,14 @@ package net.sf.dz3.device.sensor.impl.onewire;
 import java.io.IOException;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+
+import com.dalsemi.onewire.container.OneWireContainer;
+import com.dalsemi.onewire.container.SwitchContainer;
 
 import net.sf.dz3.device.sensor.DzSwitchContainer;
 import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.instrumentation.Marker;
-
-import com.dalsemi.onewire.container.OneWireContainer;
-import com.dalsemi.onewire.container.SwitchContainer;
 
 /**
  * A platform independent switch container.
