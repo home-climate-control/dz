@@ -4,10 +4,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.sf.dz3.device.sensor.DeviceFactory.Type;
+
 /**
  * Data map.
- *
- * <p>
  *
  * This class is introduced to improve reliability of transition between
  * the version of code where one physical device corresponds to one
@@ -16,7 +16,7 @@ import java.util.TreeMap;
  * DS2438 posing as both temperature and humidity container, or XBee based
  * devices which can act as practically anything).
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2004-2010
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2004-2020
  */
 public class DataMap {
 
@@ -28,28 +28,26 @@ public class DataMap {
      * maybe some more later) and the value being last known device
      * reading.
      */
-    private Map<String, Map<String, Object>> dataMap = new TreeMap<String, Map<String, Object>>();
+    private Map<String, Map<Type, Object>> dataMap = new TreeMap<String, Map<Type, Object>>();
 
     /**
      * Store the value.
      *
      * @param address Device address.
      *
-     * @param type Device type ("temperature", "humidity", "switch").
+     * @param type Device type.
      *
      * @param value Value associated to the device (last reading).
      */
-    public void put(String address, String type, Object value) {
-
-        checkType(type);
+    public void put(String address, Type type, Object value) {
 
         // Resolve the container map
 
-        Map<String, Object> containerMap = dataMap.get(address);
+        Map<Type, Object> containerMap = dataMap.get(address);
 
         if (containerMap == null) {
 
-            containerMap = new TreeMap<String, Object>();
+            containerMap = new TreeMap<Type, Object>();
 
             dataMap.put(address, containerMap);
         }
@@ -68,13 +66,11 @@ public class DataMap {
      *
      * @return Value associated with the device address and type.
      */
-    public Object get(String address, String type) {
-
-        checkType(type);
+    public Object get(String address, Type type) {
 
         // Resolve the container map
 
-        Map<String, Object> containerMap = dataMap.get(address);
+        Map<Type, Object> containerMap = dataMap.get(address);
 
         if ( containerMap == null ) {
 
@@ -82,24 +78,6 @@ public class DataMap {
         }
 
         return containerMap.get(type);
-    }
-
-    /**
-     * @param type Type to check.
-     *
-     * @exception IllegalArgumentException if the type is not one of
-     * "temperature", "humidity", "switch".
-     */
-    private void checkType(String type) {
-
-        if (    "switch".equals(type)
-                || "temperature".equals(type)
-                || "humidity".equals(type) ) {
-
-            return;
-        }
-
-        throw new IllegalArgumentException("Invalid type '" + type + "', only 'temperature', 'switch' and 'humidity' are allowed");
     }
 
     /**
@@ -112,11 +90,11 @@ public class DataMap {
         for ( Iterator<String> i = dataMap.keySet().iterator(); i.hasNext(); ) {
 
             String address = i.next();
-            Map<String, Object> containerMap = dataMap.get(address);
+            Map<Type, Object> containerMap = dataMap.get(address);
 
-            for ( Iterator<String> ti = containerMap.keySet().iterator(); ti.hasNext(); ) {
+            for ( Iterator<Type> ti = containerMap.keySet().iterator(); ti.hasNext(); ) {
 
-                String type = ti.next();
+                Type type = ti.next();
                 Object value = containerMap.get(type);
 
                 target.put(address, type, value);

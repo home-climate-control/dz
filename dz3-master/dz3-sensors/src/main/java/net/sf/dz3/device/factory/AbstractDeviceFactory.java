@@ -41,21 +41,6 @@ import net.sf.jukebox.service.ActiveService;
 public abstract class AbstractDeviceFactory<T> extends ActiveService implements DeviceFactory {
 
     /**
-     * Constant to use as a key for humidity data.
-     */
-    public static final String DATA_HUM = "humidity";
-    
-    /**
-     * Constant to use as a key for temperature data.
-     */
-    public static final String DATA_TEMP = "temperature";
-    
-    /**
-     * Constant to use as a key for switch data.
-     */
-    public static final String DATA_SWITCH = "switch";
-    
-    /**
      * Read/write lock controlling the exclusive access to hardware devices.
      * 
      * Note that the lock is constructed with an argument, otherwise fairness is not supported.

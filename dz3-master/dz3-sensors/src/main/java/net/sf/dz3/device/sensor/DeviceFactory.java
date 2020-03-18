@@ -11,6 +11,12 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
  */
 public interface DeviceFactory {
 
+    public enum Type {
+        TEMPERATURE,
+        HUMIDITY,
+        SWITCH
+    }
+
     /**
      * Get an instance of a temperature sensor.
      * 
