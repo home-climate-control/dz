@@ -46,7 +46,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * {@code init-method="start"} attribute must be used in Spring bean definition, otherwise
  * the connector will not work.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class MqttConnector extends Connector<JsonRenderer> {
 
@@ -67,6 +67,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
     }
 
     private static final int MQTT_DEFAULT_PORT = 1883;
+    private static final String EVENT_DATA = "event_data";
+    private static final String EVENT_TYPE = "event_type";
 
     /**
      * VT: FIXME: Provide an ability to generate and keep a persistent UUID
@@ -516,7 +518,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 try (JsonReader reader = Json.createReader(new ByteArrayInputStream(message.getPayload()))) {
 
                     JsonObject payload = reader.readObject();
-                    JsonString eventType = payload.getJsonString("event_type");
+                    JsonString eventType = payload.getJsonString(EVENT_TYPE);
 
                     // We know and care about two event types at this point:
                     //
@@ -527,18 +529,18 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                     case "call_service":
 
-                        callService(payload.getJsonObject("event_data"));
+                        callService(payload.getJsonObject(EVENT_DATA));
                         return;
 
                     case "state_changed":
 
-                        stateChanged(payload.getJsonObject("event_data"));
+                        stateChanged(payload.getJsonObject(EVENT_DATA));
                         return;
 
                     default:
 
                         logger.warn("don't know how to handle '" + eventType + "' event_type");
-                        logger.warn("event_data is:" + payload.getJsonObject("event_data"));
+                        logger.warn("event_data is:" + payload.getJsonObject(EVENT_DATA));
 
                         return;
                     }
