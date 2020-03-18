@@ -13,6 +13,7 @@ public abstract class ImmediateExchanger<DataBlock> extends AbstractExchanger<Da
     
 
     @Override
+    @java.lang.SuppressWarnings("squid:S2189")
     public void run() {
 
         ThreadContext.push("run");
@@ -26,7 +27,8 @@ public abstract class ImmediateExchanger<DataBlock> extends AbstractExchanger<Da
                     exchange(upstreamQueue.take());
                     
                 } catch (InterruptedException ex) {
-                    
+
+                    // VT: NOTE: squid:S2189 SonarQube rule is not smart enough to recognize this as an exit condition
                     logger.info("interrupted, terminating");
                     return;
 
