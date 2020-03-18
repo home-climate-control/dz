@@ -513,35 +513,35 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                 logger.debug(topic + " " + message);
 
-                ByteArrayInputStream in = new ByteArrayInputStream(message.getPayload());
-                JsonReader reader = Json.createReader(in);
+                try (JsonReader reader = Json.createReader(new ByteArrayInputStream(message.getPayload()))) {
 
-                JsonObject payload = reader.readObject();
-                JsonString eventType = payload.getJsonString("event_type");
+                    JsonObject payload = reader.readObject();
+                    JsonString eventType = payload.getJsonString("event_type");
 
-                // We know and care about two event types at this point:
-                //
-                // call_service: somebody moved a slider
-                // state_changed: something changed
+                    // We know and care about two event types at this point:
+                    //
+                    // call_service: somebody moved a slider
+                    // state_changed: something changed
 
-                switch (eventType.getString()) {
+                    switch (eventType.getString()) {
 
-                case "call_service":
+                    case "call_service":
 
-                    callService(payload.getJsonObject("event_data"));
-                    return;
+                        callService(payload.getJsonObject("event_data"));
+                        return;
 
-                case "state_changed":
+                    case "state_changed":
 
-                    stateChanged(payload.getJsonObject("event_data"));
-                    return;
+                        stateChanged(payload.getJsonObject("event_data"));
+                        return;
 
-                default:
+                    default:
 
-                    logger.warn("don't know how to handle '" + eventType + "' event_type");
-                    logger.warn("event_data is:" + payload.getJsonObject("event_data"));
+                        logger.warn("don't know how to handle '" + eventType + "' event_type");
+                        logger.warn("event_data is:" + payload.getJsonObject("event_data"));
 
-                    return;
+                        return;
+                    }
                 }
 
             } catch (Throwable t) {
