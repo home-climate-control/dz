@@ -88,11 +88,11 @@ public class FileUsageCounter extends TransientUsageCounter {
                         String key = st.nextToken();
                         Long value = Long.parseLong(st.nextToken());
 
-                        if ("threshold".equals(key)) {
+                        if (CF_THRESHOLD.equals(key)) {
                             threshold = value;
                         }
 
-                        if ("current".equals(key)) {
+                        if (CF_CURRENT.equals(key)) {
                             current = value;
                         }
 
