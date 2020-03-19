@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -16,11 +15,8 @@ import javax.json.JsonReader;
 import javax.json.JsonString;
 
 import org.apache.logging.log4j.ThreadContext;
-import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
@@ -29,7 +25,6 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.Switch;
-import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
@@ -37,17 +32,17 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
  * MQTT broker interface.
- * 
+ *
  * This object is supposed to be instantiated via Spring configuration file, with objects
  * that are supposed to be rendered and/or controlled being present in a set passed to the constructor.
- * 
+ *
  * See {@code net.sf.dz3.view.swing.Console} for more information.
- * 
+ *
  * {@code init-method="start"} attribute must be used in Spring bean definition, otherwise
  * the connector will not work.
  *
  * @see MqttDeviceFactory
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class MqttConnector extends Connector<JsonRenderer> implements MqttConstants {
@@ -63,6 +58,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
         SWITCH,
         THERMOSTAT;
 
+        @Override
         public String toString() {
             return super.toString().toLowerCase();
         }
@@ -191,7 +187,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
         this.mqtt = new MqttContext(
                 mqttBrokerHost, mqttBrokerPort,
                 mqttBrokerUsername, mqttBrokerPassword,
-                mqttRootTopicPub, mqttRootTopicSub);
+                mqttRootTopicPub, mqttRootTopicSub, new Callback());
 
         checkTopics(mqttRootTopicPub, mqttRootTopicSub);
 
@@ -269,7 +265,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
 
         try {
 
-            startMqtt();
+            mqtt.start();
             startExchanger();
 
             // Connectors are initialized very late in the game, it is likely that the control logic
@@ -345,30 +341,6 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
         exchanger.start();
     }
 
-    private void startMqtt() throws MqttException {
-
-        ThreadContext.push("startMqtt");
-        Marker m = new Marker("startMqtt");
-
-        try {
-
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setAutomaticReconnect(true);
-            options.setCleanSession(true);
-            options.setConnectionTimeout(10);
-
-            mqtt.client.setCallback(new Callback());
-            mqtt.client.connect(options);
-
-            mqtt.client.subscribe(mqtt.rootTopicSub, mqtt.QOS);
-
-        } finally {
-
-            m.close();
-            ThreadContext.pop();
-        }
-    }
-
     @Override
     protected synchronized void deactivate2() {
 
@@ -377,7 +349,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
         try {
 
             exchanger.interrupt();
-            mqtt.client.disconnect();
+            mqtt.disconnect();
 
         } catch (MqttException ex) {
 
@@ -412,7 +384,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
                 message.setQos(mqtt.QOS);
                 message.setRetained(true);
 
-                mqtt.client.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
+                mqtt.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
 
                 logger.debug(mqttRootTopicPub + "/" + dataBlock.topic + ": " + dataBlock.payload);
 

@@ -1,6 +1,9 @@
 package net.sf.dz3.view.mqtt.v1;
 
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.DeviceFactory2020;
@@ -97,7 +100,10 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         this.mqtt = new MqttContext(
                 mqttBrokerHost, mqttBrokerPort,
                 mqttBrokerUsername, mqttBrokerPassword,
-                mqttRootTopicPub, mqttRootTopicSub);
+                mqttRootTopicPub, mqttRootTopicSub,
+                new Callback());
+
+        mqtt.start();
     }
 
     @Override
@@ -112,6 +118,24 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
 
     @Override
     public void close() throws Exception {
-        mqtt.client.close();
+        mqtt.close();
+    }
+
+    private class Callback implements MqttCallback {
+
+        @Override
+        public void connectionLost(Throwable cause) {
+            throw new IllegalStateException("Not Implemented");
+        }
+
+        @Override
+        public void messageArrived(String topic, MqttMessage message) throws Exception {
+            throw new IllegalStateException("Not Implemented");
+        }
+
+        @Override
+        public void deliveryComplete(IMqttDeliveryToken token) {
+            throw new IllegalStateException("Not Implemented");
+        }
     }
 }
