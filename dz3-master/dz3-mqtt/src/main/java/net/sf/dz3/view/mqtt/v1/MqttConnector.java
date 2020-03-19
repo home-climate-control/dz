@@ -45,10 +45,12 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * 
  * {@code init-method="start"} attribute must be used in Spring bean definition, otherwise
  * the connector will not work.
+ *
+ * @see MqttDeviceFactory
  * 
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
-public class MqttConnector extends Connector<JsonRenderer> {
+public class MqttConnector extends Connector<JsonRenderer> implements MqttConstants {
 
     /**
      * @see SensorRenderer#render(net.sf.jukebox.datastream.signal.model.DataSample)
@@ -66,47 +68,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
         }
     }
 
-    private static final int MQTT_DEFAULT_PORT = 1883;
-    private static final String EVENT_DATA = "event_data";
-    private static final String EVENT_TYPE = "event_type";
-
-    /**
-     * VT: FIXME: Provide an ability to generate and keep a persistent UUID
-     */
-    private final String clientId = UUID.randomUUID().toString();
-    private IMqttClient client;
-
-    private final String mqttBrokerHost;
-    private final int mqttBrokerPort;
-    private final String mqttBrokerUsername;
-    private final String mqttBrokerPassword;
-
-    /**
-     * Root topic for publishing. Can't be the same as the topic for subscriptions.
-     */
-    private final String mqttRootTopicPub;
-
-    /**
-     * Root topic for subscriptions. Can't be the same as the topic for publishing.
-     */
-    private final String mqttRootTopicSub;
-
-    /**
-     * Quality of Service.
-     *
-     * VT: FIXME: It may be a good idea to make this a constructor argument, to provide the right QOS
-     * for the right application (wall dashboard is one thing, control system is totally another).
-     *
-     * VT: FIXME: QOS for publishing and subscriptions may need to be different.
-     *
-     * Just a reminder to self,
-     *
-     * QOS 0 is "at most once"
-     * QOS 1 is "at least once"
-     * QOS 2 is "exactly once"
-     */
-    private final int QOS = 0;
-
+    private final MqttContext mqtt;
     private final BlockingQueue<UpstreamBlock> upstreamQueue = new LinkedBlockingQueue<UpstreamBlock>();
 
     private Thread exchanger;
@@ -122,7 +84,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
     public MqttConnector(
             String mqttBrokerHost,
             String mqttRootTopicPub, String mqttRootTopicSub,
-            Set<Object> initSet) {
+            Set<Object> initSet) throws MqttException {
 
         this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
@@ -139,7 +101,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
     public MqttConnector(
             String mqttBrokerHost, int mqttBrokerPort,
             String mqttRootTopicPub, String mqttRootTopicSub,
-            Set<Object> initSet) {
+            Set<Object> initSet) throws MqttException {
 
         this(mqttBrokerHost, mqttBrokerPort, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
@@ -148,7 +110,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
      * Authenticated constructor with a default port.
      *
      * @param mqttBrokerHost Host to connect to.
-     * @param mqttBrokerPort Port to connect to.
+     * @param port Port to connect to.
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
@@ -159,7 +121,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerHost,
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub,
-            Set<Object> initSet) {
+            Set<Object> initSet) throws MqttException {
 
         this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
@@ -179,7 +141,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerHost, int mqttBrokerPort,
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub,
-            Set<Object> initSet) {
+            Set<Object> initSet) throws MqttException {
 
         this(mqttBrokerHost, mqttBrokerPort, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
@@ -200,7 +162,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet,
-            Set<ConnectorFactory<JsonRenderer>> factorySet) {
+            Set<ConnectorFactory<JsonRenderer>> factorySet) throws MqttException {
 
         this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
@@ -222,16 +184,14 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet,
-            Set<ConnectorFactory<JsonRenderer>> factorySet) {
+            Set<ConnectorFactory<JsonRenderer>> factorySet) throws MqttException {
 
         super(initSet, factorySet);
 
-        this.mqttBrokerHost = mqttBrokerHost;
-        this.mqttBrokerPort = mqttBrokerPort;
-        this.mqttBrokerUsername = mqttBrokerUsername;
-        this.mqttBrokerPassword = mqttBrokerPassword;
-        this.mqttRootTopicPub = mqttRootTopicPub;
-        this.mqttRootTopicSub = mqttRootTopicSub;
+        this.mqtt = new MqttContext(
+                mqttBrokerHost, mqttBrokerPort,
+                mqttBrokerUsername, mqttBrokerPassword,
+                mqttRootTopicPub, mqttRootTopicSub);
 
         checkTopics(mqttRootTopicPub, mqttRootTopicSub);
 
@@ -289,9 +249,9 @@ public class MqttConnector extends Connector<JsonRenderer> {
         return new JmxDescriptor(
                 "dz",
                 getClass().getSimpleName(),
-                mqttBrokerHost
-                + (mqttBrokerPort == MQTT_DEFAULT_PORT ? "" : " port " + mqttBrokerPort)
-                + " topic " + mqttRootTopicPub,
+                mqtt.host
+                + (mqtt.port == MQTT_DEFAULT_PORT ? "" : " port " + mqtt.port)
+                + " topic " + mqtt.rootTopicPub,
                 "MQTT Connector v1");
     }
 
@@ -380,7 +340,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private void startExchanger() {
 
-        exchanger = new Thread(new UpstreamBlockExchanger(mqttBrokerHost, mqttBrokerPort, mqttRootTopicPub, upstreamQueue));
+        exchanger = new Thread(new UpstreamBlockExchanger(mqtt.host, mqtt.port, mqtt.rootTopicPub, upstreamQueue));
 
         exchanger.start();
     }
@@ -392,26 +352,15 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         try {
 
-            /* only authenticate if both credentials are present */
-            if (mqttBrokerUsername != null && mqttBrokerPassword != null) {
-                client = new MqttClient("tcp://" + mqttBrokerUsername + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, clientId);
-            } else {
-                if (mqttBrokerUsername != null) {
-                    // Bad idea to have no password
-                    logger.warn("Missing MQTT password, connecting unauthenticated. This behavior will not be allowed in future releases.");
-                }
-                client = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, clientId);
-            }
-
             MqttConnectOptions options = new MqttConnectOptions();
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
 
-            client.setCallback(new Callback());
-            client.connect(options);
+            mqtt.client.setCallback(new Callback());
+            mqtt.client.connect(options);
 
-            client.subscribe(mqttRootTopicSub, QOS);
+            mqtt.client.subscribe(mqtt.rootTopicSub, mqtt.QOS);
 
         } finally {
 
@@ -428,7 +377,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
         try {
 
             exchanger.interrupt();
-            client.disconnect();
+            mqtt.client.disconnect();
 
         } catch (MqttException ex) {
 
@@ -460,10 +409,10 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                 MqttMessage message = new MqttMessage(dataBlock.payload.getBytes());
 
-                message.setQos(QOS);
+                message.setQos(mqtt.QOS);
                 message.setRetained(true);
 
-                client.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
+                mqtt.client.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
 
                 logger.debug(mqttRootTopicPub + "/" + dataBlock.topic + ": " + dataBlock.payload);
 
@@ -496,9 +445,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             // VT: FIXME: Currently, this code does NOT support reconnects.
             logger.fatal(
-                    "connection to tcp://" + mqttBrokerHost + ":" + mqttBrokerPort +
+                    "connection to tcp://" + mqtt.host + ":" + mqtt.port +
                     " lost, will not reconnect, MQTT interface is now dead");
-
         }
 
         /**
