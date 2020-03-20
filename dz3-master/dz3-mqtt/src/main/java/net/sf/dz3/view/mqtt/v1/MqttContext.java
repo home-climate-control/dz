@@ -118,6 +118,7 @@ public class MqttContext {
     }
 
     public void close() throws MqttException {
+        client.disconnect();
         client.close();
     }
 }
