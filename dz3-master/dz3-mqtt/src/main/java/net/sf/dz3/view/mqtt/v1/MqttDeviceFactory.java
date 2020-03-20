@@ -276,7 +276,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
 
     private class Device<E> implements DataSource<E>, Addressable {
 
-        protected DataBroadcaster<E> broadcaster = new DataBroadcaster<E>();
+        protected DataBroadcaster<E> broadcaster = new DataBroadcaster<>();
         private final String address;
         private DataSample<E> status;
 
@@ -288,7 +288,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             // setting to address now and replacing it with the signature received from the
             // MQTT remote later will not break things.
 
-            this.status = new DataSample<E>(address, address, null, new IllegalStateException("booting up, unavailable"));
+            this.status = new DataSample<>(address, address, null, new IllegalStateException("booting up, unavailable"));
 
             deviceMap.put(address, this);
         }
