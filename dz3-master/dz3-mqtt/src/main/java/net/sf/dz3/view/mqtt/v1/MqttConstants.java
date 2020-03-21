@@ -10,5 +10,5 @@ public interface MqttConstants {
     String SIGNATURE = "signature";
     String TIMESTAMP = "timestamp";
     String SIGNAL = "signal";
-    String DEVICE_ID = "deviceId";
+    String DEVICE_ID = "device_id";
 }

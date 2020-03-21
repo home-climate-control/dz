@@ -1,6 +1,7 @@
 package net.sf.dz3.view.mqtt.v1;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -264,6 +265,17 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
                 // The check has already complained
                 return;
             }
+
+            switch (entityType.getString()) {
+
+            case "sensor":
+
+                processSensorInput(name.getString(), signal.bigDecimalValue(), timestamp, signature, deviceId);
+                return;
+
+            default:
+                logger.warn("can't process {} yet", entityType.getString());
+            }
         }
     }
 
@@ -308,6 +320,31 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         }
 
         throw new IllegalArgumentException("don't know how to handle" + source.getClass().getName() + ": " + source);
+    }
+
+    private void processSensorInput(
+            String name,
+            BigDecimal signal,
+            JsonNumber timestamp,
+            JsonString signature,
+            JsonString deviceId) {
+        ThreadContext.push("processSensorInput");
+        try {
+
+            Device<?> d = deviceMap.get(name);
+
+            if (d == null) {
+                logger.debug("not ours: {}", name);
+                return;
+            }
+
+            Sensor s = (Sensor) d;
+            double v = signal.doubleValue();
+            s.inject(v);
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     private class Callback implements MqttCallback {
@@ -407,8 +444,9 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             broadcaster.removeConsumer(consumer);
         }
 
-        public final void inject(E signal) {
-
+        public final void inject(E sample) {
+            status = new DataSample<>(getAddress(), getAddress(), sample, null);
+            broadcaster.broadcast(status);
         }
 
         protected final DataSample<E> getStatus() {
