@@ -60,8 +60,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
     private final Thread watchdog;
     private final CountDownLatch stopGate = new CountDownLatch(1);
 
-    private final static long POLL_INTERVAL = 10000L;
-    private final static long STALE_AGE = POLL_INTERVAL * 5;
+    private static final long POLL_INTERVAL = 10000L;
+    private static final long STALE_AGE = POLL_INTERVAL * 5;
 
     /**
      * Data map.
@@ -226,7 +226,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         }
     }
 
-    private static final List<String> MANDATORY_JSON_FIELDS = Arrays.asList(new String[] { ENTITY_TYPE, NAME, SIGNAL });
+    private static final List<String> MANDATORY_JSON_FIELDS = Arrays.asList(ENTITY_TYPE, NAME, SIGNAL);
 
     void process(byte[] source) {
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(source))) {
@@ -289,7 +289,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             try {
 
                 // VT: NOTE: We ignore topic absolutely at this point other than for logging it
-                logger.debug(topic + " " + message);
+                logger.debug("{} {}", topic, message);
 
                 process(message.getPayload());
 
