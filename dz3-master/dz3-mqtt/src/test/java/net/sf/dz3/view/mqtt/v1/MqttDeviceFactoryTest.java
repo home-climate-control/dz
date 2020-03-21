@@ -1,7 +1,11 @@
 package net.sf.dz3.view.mqtt.v1;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Random;
 
+import javax.json.JsonString;
 import javax.json.stream.JsonParsingException;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -27,6 +31,7 @@ public class MqttDeviceFactoryTest {
         String root = "/dz-test-" + Math.abs(rg.nextInt()) + "/";
         pubTopic = root + "pub";
         subTopic = root + "sub";
+
         // VT: NOTE: Of course this will fail in Jenkins...
         mdf = new MqttDeviceFactory("localhost", pubTopic, subTopic);
     }
@@ -37,11 +42,74 @@ public class MqttDeviceFactoryTest {
     }
 
     @Test
+    public void allMandatoryPresent() {
+        JsonString[] source = {
+                new JsonStringImpl(MqttConstants.ENTITY_TYPE),
+                new JsonStringImpl(MqttConstants.NAME),
+                new JsonStringImpl(MqttConstants.SIGNAL),
+        };
+
+        assertTrue(mdf.checkMandatory(source));
+    }
+
+    @Test
+    public void missingEntityType() {
+        JsonString[] source = {
+                new JsonStringImpl(MqttConstants.NAME),
+                new JsonStringImpl(MqttConstants.SIGNAL)
+        };
+
+        assertFalse(mdf.checkMandatory(source));
+    }
+
+    @Test
+    public void missingName() {
+        JsonString[] source = {
+                new JsonStringImpl(MqttConstants.ENTITY_TYPE),
+                new JsonStringImpl(MqttConstants.SIGNAL)
+        };
+
+        assertFalse(mdf.checkMandatory(source));
+    }
+
+    @Test
+    public void missingSignal() {
+        JsonString[] source = {
+                new JsonStringImpl(MqttConstants.ENTITY_TYPE),
+                new JsonStringImpl(MqttConstants.NAME)
+        };
+
+        assertFalse(mdf.checkMandatory(source));
+    }
+
+    @Test
     public void notJson() {
 
         thrown.expect(JsonParsingException.class);
-        //thrown.expectMessage("null queue, doesn't make sense");
 
         mdf.process("28C06879A20003CE: 23.5C".getBytes());
+    }
+
+    private class JsonStringImpl implements JsonString {
+        private final String value;
+
+        public JsonStringImpl(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public ValueType getValueType() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String getString() {
+            return value;
+        }
+
+        @Override
+        public CharSequence getChars() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

@@ -1,9 +1,14 @@
 package net.sf.dz3.view.mqtt.v1;
 
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -221,17 +226,53 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         }
     }
 
+    private static final List<String> MANDATORY_JSON_FIELDS = Arrays.asList(new String[] { ENTITY_TYPE, NAME, SIGNAL });
+
     void process(byte[] source) {
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(source))) {
 
             JsonObject payload = reader.readObject();
             JsonString entityType = payload.getJsonString(ENTITY_TYPE);
+            JsonString name = payload.getJsonString(NAME);
+            JsonString signature = payload.getJsonString(SIGNATURE);
+            JsonString signal = payload.getJsonString(SIGNAL);
+            JsonString deviceId = payload.getJsonString(DEVICE_ID);
 
-            if (!"sensor".equals(entityType.getString())) {
-                logger.warn("don't know how to handle '" + source + "'");
+            if (!checkMandatory(new JsonString[] {entityType, name, signal} )) {
+                // The check has already complained
                 return;
             }
         }
+    }
+
+    /**
+     * Check if all the mandatory values are present, and complain if they're not.
+     *
+     * @param source JSON entities parsed out of the payload.
+     * @return {@code false} if some of the mandatory entities are missing.
+     */
+    boolean checkMandatory(JsonString[] source) {
+
+        List<String> present = Stream.of(source)
+                .filter(Objects::nonNull)
+                .map(JsonString::getString)
+                .collect(Collectors.toList());
+
+        if (present.size() == 3) {
+            return true;
+        }
+
+        ThreadContext.push("mandatory fields");
+        MANDATORY_JSON_FIELDS
+            .stream()
+            .forEach(field -> {
+            if (!present.contains(field)) {
+                logger.error("missing: {}", field);
+            }
+        });
+        ThreadContext.pop();
+
+        return false;
     }
 
     private class Callback implements MqttCallback {
