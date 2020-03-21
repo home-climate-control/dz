@@ -1,8 +1,14 @@
 package net.sf.dz3.view.mqtt.v1;
 
+import java.io.ByteArrayInputStream;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,8 +55,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
     private final Thread watchdog;
     private final CountDownLatch stopGate = new CountDownLatch(1);
 
-    private final long POLL_INTERVAL = 10000L;
-    private final long STALE_AGE = POLL_INTERVAL * 5;
+    private final static long POLL_INTERVAL = 10000L;
+    private final static long STALE_AGE = POLL_INTERVAL * 5;
 
     /**
      * Data map.
@@ -215,6 +221,19 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         }
     }
 
+    void process(byte[] source) {
+        try (JsonReader reader = Json.createReader(new ByteArrayInputStream(source))) {
+
+            JsonObject payload = reader.readObject();
+            JsonString entityType = payload.getJsonString(ENTITY_TYPE);
+
+            if (!"sensor".equals(entityType.getString())) {
+                logger.warn("don't know how to handle '" + source + "'");
+                return;
+            }
+        }
+    }
+
     private class Callback implements MqttCallback {
 
         @Override
@@ -228,7 +247,10 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
 
             try {
 
-                logger.warn(topic + " " + message);
+                // VT: NOTE: We ignore topic absolutely at this point other than for logging it
+                logger.debug(topic + " " + message);
+
+                process(message.getPayload());
 
             } catch (Throwable t) {
 
