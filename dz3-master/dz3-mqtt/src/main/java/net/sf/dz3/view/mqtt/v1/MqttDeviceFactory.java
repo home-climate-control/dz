@@ -256,19 +256,16 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             ThreadContext.push("run");
             try {
                 while (true) {
-                    try {
 
-                        sleep();
-                        refresh();
-
-                    } catch (InterruptedException e) {
-
-                        // VT: NOTE: squid:S2142 SonarQube is not smart enough to recognize that the exception *is* handled
-                        // VT: NOTE: squid:S2189 SonarQube is not smart enough to recognize this as an exit condition
-                        logger.warn("interrupted, terminating");
-                        break;
-                    }
+                    sleep();
+                    refresh();
                 }
+
+            } catch (InterruptedException e) {
+
+                // VT: NOTE: squid:S2142 SonarQube is not smart enough to recognize that the exception *is* handled
+                // VT: NOTE: squid:S2189 SonarQube is not smart enough to recognize this as an exit condition
+                logger.warn("interrupted, terminating");
 
             } finally {
                 logger.debug("releasing stop gate");
