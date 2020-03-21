@@ -40,7 +40,7 @@ public class MqttDeviceFactoryTest {
 
     @AfterClass
     public static void shutdown() throws Exception {
-        mdf.close();
+        mdf.powerOff();
     }
 
     @Test
