@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Random;
 
 import javax.json.JsonString;
+import javax.json.JsonValue;
 import javax.json.stream.JsonParsingException;
 
 import org.apache.logging.log4j.Level;
@@ -44,7 +45,7 @@ public class MqttDeviceFactoryTest {
 
     @Test
     public void allMandatoryPresent() {
-        JsonString[] source = {
+        JsonValue[] source = {
                 new JsonStringImpl(MqttConstants.ENTITY_TYPE),
                 new JsonStringImpl(MqttConstants.NAME),
                 new JsonStringImpl(MqttConstants.SIGNAL),
@@ -55,7 +56,7 @@ public class MqttDeviceFactoryTest {
 
     @Test
     public void missingEntityType() {
-        JsonString[] source = {
+        JsonValue[] source = {
                 new JsonStringImpl(MqttConstants.NAME),
                 new JsonStringImpl(MqttConstants.SIGNAL)
         };
@@ -65,7 +66,7 @@ public class MqttDeviceFactoryTest {
 
     @Test
     public void missingName() {
-        JsonString[] source = {
+        JsonValue[] source = {
                 new JsonStringImpl(MqttConstants.ENTITY_TYPE),
                 new JsonStringImpl(MqttConstants.SIGNAL)
         };
@@ -75,7 +76,7 @@ public class MqttDeviceFactoryTest {
 
     @Test
     public void missingSignal() {
-        JsonString[] source = {
+        JsonValue[] source = {
                 new JsonStringImpl(MqttConstants.ENTITY_TYPE),
                 new JsonStringImpl(MqttConstants.NAME)
         };
@@ -89,6 +90,11 @@ public class MqttDeviceFactoryTest {
         thrown.expect(JsonParsingException.class);
 
         mdf.process("28C06879A20003CE: 23.5C".getBytes());
+    }
+
+    @Test
+    public void processPass() {
+        mdf.process("{\"entityType\":\"sensor\",\"name\":\"28C06879A20003CE\",\"signature\":\"T28C06879A20003CE\",\"signal\":23.50,\"deviceId\":\"ESP8266-00621CC5\"}".getBytes());
     }
 
     private class JsonStringImpl implements JsonString {

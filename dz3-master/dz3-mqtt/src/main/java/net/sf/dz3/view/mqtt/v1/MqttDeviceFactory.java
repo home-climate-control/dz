@@ -11,9 +11,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.json.Json;
+import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
+import javax.json.JsonValue;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -228,7 +230,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
     }
 
     static final List<String> MANDATORY_JSON_FIELDS = Arrays.asList(ENTITY_TYPE, NAME, SIGNAL);
-    static final List<String> OPTIONAL_JSON_FIELDS = Arrays.asList(SIGNATURE, DEVICE_ID);
+    static final List<String> OPTIONAL_JSON_FIELDS = Arrays.asList(TIMESTAMP, SIGNATURE, DEVICE_ID);
 
     void process(byte[] source) {
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(source))) {
@@ -236,16 +238,29 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             JsonObject payload = reader.readObject();
             JsonString entityType = payload.getJsonString(ENTITY_TYPE);
             JsonString name = payload.getJsonString(NAME);
-            JsonString signal = payload.getJsonString(SIGNAL);
+            JsonNumber signal = payload.getJsonNumber(SIGNAL);
 
+            JsonNumber timestamp = payload.getJsonNumber(TIMESTAMP);
             JsonString signature = payload.getJsonString(SIGNATURE);
             JsonString deviceId = payload.getJsonString(DEVICE_ID);
 
             // We're not using these yet, but let's make sure they're present
             // That'll help figuring out whether we need them in the future.
-            checkFields("optional", Level.WARN, OPTIONAL_JSON_FIELDS, new JsonString[] {signature, deviceId});
+            checkFields(
+                    "optional", Level.WARN, OPTIONAL_JSON_FIELDS,
+                    new JsonValue[] {
+                            timestamp,
+                            signature,
+                            deviceId
+                            });
 
-            if (!checkFields("mandatory", Level.ERROR, MANDATORY_JSON_FIELDS, new JsonString[] {entityType, name, signal})) {
+            if (!checkFields(
+                    "mandatory", Level.ERROR, MANDATORY_JSON_FIELDS,
+                    new JsonValue[] {
+                            entityType,
+                            name,
+                            signal
+                            })) {
                 // The check has already complained
                 return;
             }
@@ -258,11 +273,11 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
      * @param source JSON entities parsed out of the payload.
      * @return {@code false} if some of the mandatory entities are missing.
      */
-    boolean checkFields(String context, Level level, List<String> reference, JsonString[] source) {
+    boolean checkFields(String context, Level level, List<String> reference, JsonValue[] source) {
 
         List<String> present = Stream.of(source)
                 .filter(Objects::nonNull)
-                .map(JsonString::getString)
+                .map(this::mapJsonValue)
                 .collect(Collectors.toList());
 
         if (present.size() == 3) {
@@ -280,6 +295,19 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         ThreadContext.pop();
 
         return false;
+    }
+
+    private String mapJsonValue(JsonValue source) {
+
+        if (source instanceof JsonString) {
+            return ((JsonString) source).getString();
+        }
+
+        if (source instanceof JsonNumber) {
+            return ((JsonNumber) source).bigDecimalValue().toString();
+        }
+
+        throw new IllegalArgumentException("don't know how to handle" + source.getClass().getName() + ": " + source);
     }
 
     private class Callback implements MqttCallback {

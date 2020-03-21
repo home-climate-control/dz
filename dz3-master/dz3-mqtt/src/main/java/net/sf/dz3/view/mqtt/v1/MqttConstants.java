@@ -8,6 +8,7 @@ public interface MqttConstants {
     String ENTITY_TYPE = "entity_type";
     String NAME = "name";
     String SIGNATURE = "signature";
+    String TIMESTAMP = "timestamp";
     String SIGNAL = "signal";
     String DEVICE_ID = "deviceId";
 }
