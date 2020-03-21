@@ -8,6 +8,7 @@ import java.util.Random;
 import javax.json.JsonString;
 import javax.json.stream.JsonParsingException;
 
+import org.apache.logging.log4j.Level;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -49,7 +50,7 @@ public class MqttDeviceFactoryTest {
                 new JsonStringImpl(MqttConstants.SIGNAL),
         };
 
-        assertTrue(mdf.checkMandatory(source));
+        assertTrue(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, source));
     }
 
     @Test
@@ -59,7 +60,7 @@ public class MqttDeviceFactoryTest {
                 new JsonStringImpl(MqttConstants.SIGNAL)
         };
 
-        assertFalse(mdf.checkMandatory(source));
+        assertFalse(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, source));
     }
 
     @Test
@@ -69,7 +70,7 @@ public class MqttDeviceFactoryTest {
                 new JsonStringImpl(MqttConstants.SIGNAL)
         };
 
-        assertFalse(mdf.checkMandatory(source));
+        assertFalse(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, source));
     }
 
     @Test
@@ -79,7 +80,7 @@ public class MqttDeviceFactoryTest {
                 new JsonStringImpl(MqttConstants.NAME)
         };
 
-        assertFalse(mdf.checkMandatory(source));
+        assertFalse(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, source));
     }
 
     @Test

@@ -15,6 +15,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -226,7 +227,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         }
     }
 
-    private static final List<String> MANDATORY_JSON_FIELDS = Arrays.asList(ENTITY_TYPE, NAME, SIGNAL);
+    static final List<String> MANDATORY_JSON_FIELDS = Arrays.asList(ENTITY_TYPE, NAME, SIGNAL);
+    static final List<String> OPTIONAL_JSON_FIELDS = Arrays.asList(SIGNATURE, DEVICE_ID);
 
     void process(byte[] source) {
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(source))) {
@@ -234,11 +236,16 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             JsonObject payload = reader.readObject();
             JsonString entityType = payload.getJsonString(ENTITY_TYPE);
             JsonString name = payload.getJsonString(NAME);
-            JsonString signature = payload.getJsonString(SIGNATURE);
             JsonString signal = payload.getJsonString(SIGNAL);
+
+            JsonString signature = payload.getJsonString(SIGNATURE);
             JsonString deviceId = payload.getJsonString(DEVICE_ID);
 
-            if (!checkMandatory(new JsonString[] {entityType, name, signal} )) {
+            // We're not using these yet, but let's make sure they're present
+            // That'll help figuring out whether we need them in the future.
+            checkFields("optional", Level.WARN, OPTIONAL_JSON_FIELDS, new JsonString[] {signature, deviceId});
+
+            if (!checkFields("mandatory", Level.ERROR, MANDATORY_JSON_FIELDS, new JsonString[] {entityType, name, signal})) {
                 // The check has already complained
                 return;
             }
@@ -251,7 +258,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
      * @param source JSON entities parsed out of the payload.
      * @return {@code false} if some of the mandatory entities are missing.
      */
-    boolean checkMandatory(JsonString[] source) {
+    boolean checkFields(String context, Level level, List<String> reference, JsonString[] source) {
 
         List<String> present = Stream.of(source)
                 .filter(Objects::nonNull)
@@ -262,12 +269,12 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             return true;
         }
 
-        ThreadContext.push("mandatory fields");
-        MANDATORY_JSON_FIELDS
+        ThreadContext.push(context);
+        reference
             .stream()
             .forEach(field -> {
             if (!present.contains(field)) {
-                logger.error("missing: {}", field);
+                logger.log(level, "missing: {}", field);
             }
         });
         ThreadContext.pop();
