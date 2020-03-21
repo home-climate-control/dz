@@ -3,20 +3,17 @@ package net.sf.dz3.view.mqtt.v1;
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.json.Json;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
-import javax.json.JsonValue;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -237,6 +234,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(source))) {
 
             JsonObject payload = reader.readObject();
+
             JsonString entityType = payload.getJsonString(ENTITY_TYPE);
             JsonString name = payload.getJsonString(NAME);
             JsonNumber signal = payload.getJsonNumber(SIGNAL);
@@ -248,8 +246,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             // We're not using these yet, but let's make sure they're present
             // That'll help figuring out whether we need them in the future.
             checkFields(
-                    "optional", Level.WARN, OPTIONAL_JSON_FIELDS,
-                    new JsonValue[] {
+                    "optional", Level.DEBUG, OPTIONAL_JSON_FIELDS,
+                    new Object[] {
                             timestamp,
                             signature,
                             deviceId
@@ -257,7 +255,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
 
             if (!checkFields(
                     "mandatory", Level.ERROR, MANDATORY_JSON_FIELDS,
-                    new JsonValue[] {
+                    new Object[] {
                             entityType,
                             name,
                             signal
@@ -280,46 +278,28 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
     }
 
     /**
-     * Check if all the mandatory values are present, and complain if they're not.
+     * Check if all the values are present, and complain if they're not.
      *
+     * @param reference Fields that are expected to be present.
      * @param source JSON entities parsed out of the payload.
-     * @return {@code false} if some of the mandatory entities are missing.
+     * @return {@code false} if some of the values are missing.
      */
-    boolean checkFields(String context, Level level, List<String> reference, JsonValue[] source) {
+    boolean checkFields(String context, Level level, List<String> reference, Object[] source) {
 
-        List<String> present = Stream.of(source)
-                .filter(Objects::nonNull)
-                .map(this::mapJsonValue)
-                .collect(Collectors.toList());
-
-        if (present.size() == 3) {
-            return true;
+        List<String> missing = new LinkedList<>();
+        for (int offset = 0; offset < reference.size(); offset++) {
+            if (source[offset] == null) {
+                missing.add(reference.get(offset));
+            }
         }
 
         ThreadContext.push(context);
-        reference
+        missing
             .stream()
-            .forEach(field -> {
-            if (!present.contains(field)) {
-                logger.log(level, "missing: {}", field);
-            }
-        });
+            .forEach(field -> { logger.log(level, "missing: {}", field); });
         ThreadContext.pop();
 
-        return false;
-    }
-
-    private String mapJsonValue(JsonValue source) {
-
-        if (source instanceof JsonString) {
-            return ((JsonString) source).getString();
-        }
-
-        if (source instanceof JsonNumber) {
-            return ((JsonNumber) source).bigDecimalValue().toString();
-        }
-
-        throw new IllegalArgumentException("don't know how to handle" + source.getClass().getName() + ": " + source);
+        return missing.isEmpty();
     }
 
     private void processSensorInput(
