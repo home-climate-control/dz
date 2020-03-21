@@ -1,10 +1,14 @@
 package net.sf.dz3.view.mqtt.v1;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.Json;
 import javax.json.JsonNumber;
@@ -20,6 +24,10 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import net.sf.dz3.device.sensor.AnalogSensor;
+import net.sf.jukebox.datastream.signal.model.DataSample;
+import net.sf.jukebox.datastream.signal.model.DataSink;
 
 public class MqttDeviceFactoryTest implements MqttConstants {
 
@@ -57,10 +65,27 @@ public class MqttDeviceFactoryTest implements MqttConstants {
     private static final String MQTT_MESSAGE_NO_NAME = "{\"entity_type\":\"sensor\",\"signature\":\"T28C06879A20003CE\",\"signal\":23.50,\"device_id\":\"ESP8266-00621CC5\"}";
     private static final String MQTT_MESSAGE_NO_SIGNAL = "{\"entity_type\":\"sensor\",\"name\":\"28C06879A20003CE\",\"signature\":\"T28C06879A20003CE\",\"device_id\":\"ESP8266-00621CC5\"}";
     private static final String MQTT_MESSAGE_OPTIONAL = "{\"timestamp\":1584829660855,\"signature\":\"T28C06879A20003CE\",\"device_id\":\"ESP8266-00621CC5\"}";
+    private static final String MQTT_MESSAGE_SWITCH = "{\"entity_type\":\"switch\",\"name\":\"switch\",\"signature\":\"Sswitch\",\"signal\":23.50,\"device_id\":\"ESP8266-00621CC5\"}";
 
     @Test
     public void processPass() {
         mdf.process(MQTT_MESSAGE_ACTUAL.getBytes());
+        // This is a simple pass test
+        assertTrue(true);
+    }
+
+    @Test
+    public void processNoEntity() {
+        mdf.process(MQTT_MESSAGE_NO_ENTITY.getBytes());
+        // This is a simple pass test
+        assertTrue(true);
+    }
+
+    @Test
+    public void processUnknown() {
+        mdf.process(MQTT_MESSAGE_SWITCH.getBytes());
+        // This is a simple pass test
+        assertTrue(true);
     }
 
     @Test
@@ -130,5 +155,56 @@ public class MqttDeviceFactoryTest implements MqttConstants {
         thrown.expect(JsonParsingException.class);
 
         mdf.process("28C06879A20003CE: 23.5C".getBytes());
+    }
+
+    @Test
+    public void getSwitch() {
+
+        thrown.expect(UnsupportedOperationException.class);
+
+        mdf.getSwitch("address");
+    }
+
+    @Test
+    public void getSensor() {
+
+        AnalogSensor s = mdf.getSensor("mqtt-sensor");
+        assertNotNull(s);
+    }
+
+    @Test
+    public void getProcessSensorInput() throws InterruptedException {
+
+        AnalogSensor s = mdf.getSensor("mqtt-sensor");
+        assertNotNull(s);
+
+        AtomicInteger receiver = new AtomicInteger(0);
+        SensorListener sl = new SensorListener(receiver);
+        s.addConsumer(sl);
+
+        mdf.processSensorInput("mqtt-sensor", new BigDecimal("42"), null, null, null);
+
+        // Should be enough for the propagation to kick in
+        Thread.sleep(100);
+
+        s.removeConsumer(sl);
+
+        assertEquals("wrong receiver status", 42, receiver.get());
+        assertEquals("wrong sensor status", 42, s.getSignal().sample.intValue());
+    }
+
+    private class SensorListener implements DataSink<Double> {
+
+        private final AtomicInteger receiver;
+
+        public SensorListener(AtomicInteger receiver) {
+            this.receiver = receiver;
+        }
+
+        @Override
+        public void consume(DataSample<Double> sample) {
+            // The value will be limited for the purpose of the test
+            receiver.set(sample.sample.intValue());
+        }
     }
 }

@@ -155,7 +155,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
 
     @Override
     public Switch getSwitch(String address) {
-        throw new IllegalStateException("Not Implemented");
+        throw new UnsupportedOperationException("Not Implemented");
     }
 
     @Override
@@ -302,7 +302,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         return missing.isEmpty();
     }
 
-    private void processSensorInput(
+    void processSensorInput(
             String name,
             BigDecimal signal,
             JsonNumber timestamp,
