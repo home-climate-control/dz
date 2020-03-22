@@ -173,6 +173,7 @@ public class MqttDeviceFactoryTest implements MqttConstants {
     }
 
     @Test
+    @java.lang.SuppressWarnings("squid:S2925")
     public void getProcessSensorInput() throws InterruptedException {
 
         AnalogSensor s = mdf.getSensor("mqtt-sensor");
@@ -185,6 +186,7 @@ public class MqttDeviceFactoryTest implements MqttConstants {
         mdf.processSensorInput("mqtt-sensor", new BigDecimal("42"), null, null, null);
 
         // Should be enough for the propagation to kick in
+        // VT: NOTE: squid:S2925 it is impractical to exert extra effort for this case
         Thread.sleep(100);
 
         s.removeConsumer(sl);
