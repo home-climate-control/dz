@@ -220,7 +220,20 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
     public void refresh() {
         ThreadContext.push("refresh");
         try {
+
             logger.debug("heartbeat");
+
+            long now = System.currentTimeMillis();
+
+            for (Device<?> device : deviceMap.values()) {
+
+                DataSample<?> sample = device.getStatus();
+
+                if (now - sample.timestamp > STALE_AGE) {
+                    // VT: NOTE: Ideally, this should be synchronized, but practically, the chances are too slim
+                    device.inject(new DataSample(sample.sourceName, sample.signature, null, new Error("stale")));
+                }
+            }
 
         } finally {
             ThreadContext.pop();
@@ -320,7 +333,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
 
             Sensor s = (Sensor) d;
             double v = signal.doubleValue();
-            s.inject(v);
+            s.inject(new DataSample<Double>(s.getAddress(), s.getAddress(), v, null));
 
         } finally {
             ThreadContext.pop();
@@ -431,8 +444,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             broadcaster.removeConsumer(consumer);
         }
 
-        public final void inject(E sample) {
-            status = new DataSample<>(getAddress(), getAddress(), sample, null);
+        public final void inject(DataSample<E> sample) {
+            status = sample;
             broadcaster.broadcast(status);
         }
 
