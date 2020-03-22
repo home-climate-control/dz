@@ -58,7 +58,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
     protected final Logger logger = LogManager.getLogger(getClass());
 
     private final MqttContext mqtt;
-    private final Thread watchdog;
+    private final Watchdog watchdog;
+    private final Thread watchdogThread;
     private final CountDownLatch stopGate = new CountDownLatch(1);
 
     private static final long POLL_INTERVAL = 10000L;
@@ -144,8 +145,11 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
                 new Callback());
 
         mqtt.start();
-        watchdog = new Thread(new Watchdog());
-        watchdog.start();
+
+        // VT: NOTE: Clumsy, but we need access to both the thread (to stop it) and the runnable (to notify())
+        watchdog = new Watchdog();
+        watchdogThread = new Thread(watchdog);
+        watchdogThread.start();
     }
 
     @Override
@@ -163,7 +167,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
 
         // Watchdog needs to be interrupted first, for when we have remote
         logger.debug("stopping the watchdog...");
-        watchdog.interrupt();
+        watchdogThread.interrupt();
 
         stopGate.await();
         logger.debug("watchdog shut down");
@@ -212,10 +216,6 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
                 "MqttDeviceFactory v1");
     }
 
-
-    private synchronized void sleep() throws InterruptedException {
-        wait(POLL_INTERVAL);
-    }
 
     public void refresh() {
         ThreadContext.push("refresh");
@@ -353,6 +353,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
                 logger.error("MQTT message caused an exception: " + message, t);
 
             } finally {
+                watchdog.release();
                 ThreadContext.pop();
             }
         }
@@ -367,12 +368,12 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
     private class Watchdog implements Runnable {
 
         @Override
-        public void run() {
+        public synchronized void run() {
             ThreadContext.push("run");
             try {
                 while (true) {
 
-                    sleep();
+                    wait(POLL_INTERVAL);
                     refresh();
                 }
 
@@ -387,6 +388,10 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
                 ThreadContext.clearAll();
                 stopGate.countDown();
             }
+        }
+
+        public synchronized void release() {
+            notify();
         }
     }
 
