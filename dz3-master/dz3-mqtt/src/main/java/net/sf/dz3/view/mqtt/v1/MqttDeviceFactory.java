@@ -390,7 +390,9 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             }
         }
 
+        @java.lang.SuppressWarnings("squid:S2446")
         public synchronized void release() {
+            // VTL NOTE: squid:S2446 There *is* one thread. The watchdog.
             notify();
         }
     }
