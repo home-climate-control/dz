@@ -158,6 +158,7 @@ public class MqttContext {
                 return;
             }
 
+            logger.warn("hmm, lost connection... Did we sleep? Is the broker still up?");
             client.connect();
             client.subscribe(rootTopicSub);
 
