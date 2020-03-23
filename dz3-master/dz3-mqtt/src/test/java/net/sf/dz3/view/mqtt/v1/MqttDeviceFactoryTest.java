@@ -17,6 +17,7 @@ import javax.json.JsonString;
 import javax.json.stream.JsonParsingException;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.ThreadContext;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -27,6 +28,7 @@ import org.junit.rules.ExpectedException;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
  * @see MqttDeviceFactoryTestSlow
@@ -225,5 +227,28 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
             // The value will be limited for the purpose of the test
             receiver.set(sample.sample.intValue());
         }
+    }
+
+    @Test
+    public void jmxDescriptorFactory() {
+        logDescriptor("jmxDescriptorFactory", mdf.getJmxDescriptor());
+    }
+
+    @Test
+    public void jmxDescriptorSensor() {
+        logDescriptor("jmxDescriptorSensor", mdf.getSensor("sensor").getJmxDescriptor());
+    }
+
+    private void logDescriptor(String marker, JmxDescriptor descriptor) {
+
+        ThreadContext.push(marker);
+
+
+        logger.info("description: {}", descriptor.description);
+        logger.info("domainName: {}", descriptor.domainName);
+        logger.info("instance: {}", descriptor.instance);
+        logger.info("name: {}", descriptor.name);
+
+        ThreadContext.pop();
     }
 }

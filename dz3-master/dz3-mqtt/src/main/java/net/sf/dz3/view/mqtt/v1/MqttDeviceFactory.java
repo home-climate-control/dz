@@ -212,7 +212,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
                 mqtt.host
                 + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
                 + " topic/pub " + mqtt.rootTopicPub
-                + ", topic/sub" + mqtt.rootTopicPub,
+                + " topic/sub " + mqtt.rootTopicSub,
                 "MqttDeviceFactory v1");
     }
 
@@ -418,7 +418,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
         }
     }
 
-    private class Device<E> implements DataSource<E>, Addressable {
+    private abstract class Device<E> implements DataSource<E>, Addressable, JmxAware {
 
         protected DataBroadcaster<E> broadcaster = new DataBroadcaster<>();
         private final String address;
@@ -476,7 +476,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
                     mqtt.host
                     + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
                     + " topic/pub " + mqtt.rootTopicPub
-                    + ", topic/sub" + mqtt.rootTopicPub,
+                    + " topic/sub " + mqtt.rootTopicSub,
                     "sensor " + getAddress());
         }
 

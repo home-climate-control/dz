@@ -247,7 +247,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 getClass().getSimpleName(),
                 mqtt.host
                 + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
-                + " topic " + mqtt.rootTopicPub,
+                + " topic/pub " + mqtt.rootTopicPub
+                + " topic/sub " + mqtt.rootTopicSub,
                 "MQTT Connector v1");
     }
 
