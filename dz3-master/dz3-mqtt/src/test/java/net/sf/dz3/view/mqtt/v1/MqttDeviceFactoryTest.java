@@ -55,7 +55,6 @@ public class MqttDeviceFactoryTest {
         mdf.powerOff();
     }
 
-
     /**
      * The MQTT message hcc-ESP8266 is sending as of right now.
      */
@@ -66,6 +65,27 @@ public class MqttDeviceFactoryTest {
     private static final String MQTT_MESSAGE_NO_SIGNAL = "{\"entity_type\":\"sensor\",\"name\":\"28C06879A20003CE\",\"signature\":\"T28C06879A20003CE\",\"device_id\":\"ESP8266-00621CC5\"}";
     private static final String MQTT_MESSAGE_OPTIONAL = "{\"timestamp\":1584829660855,\"signature\":\"T28C06879A20003CE\",\"device_id\":\"ESP8266-00621CC5\"}";
     private static final String MQTT_MESSAGE_SWITCH = "{\"entity_type\":\"switch\",\"name\":\"switch\",\"signature\":\"Sswitch\",\"signal\":23.50,\"device_id\":\"ESP8266-00621CC5\"}";
+
+    @Test
+    public void instantiate5args() throws MqttException, Exception {
+        try (MqttDeviceFactory unused = new MqttDeviceFactory(
+                "localhost",
+                null, null,
+                "/dev/null", "/dev/null")) {
+            // VT: NOTE: All this just to improve test coverage?
+        }
+    }
+
+    @Test
+    public void instantiate6args() throws MqttException, Exception {
+        try (MqttDeviceFactory unused = new MqttDeviceFactory(
+                "localhost",
+                MqttContext.DEFAULT_PORT,
+                null, null,
+                "/dev/null", "/dev/null")) {
+            // VT: NOTE: All this just to improve test coverage?
+        }
+    }
 
     @Test
     public void processPass() {
