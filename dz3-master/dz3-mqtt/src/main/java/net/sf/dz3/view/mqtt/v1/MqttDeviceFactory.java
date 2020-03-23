@@ -53,7 +53,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
-public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, MqttConstants, JmxAware {
+public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxAware {
 
     protected final Logger logger = LogManager.getLogger(getClass());
 
@@ -84,7 +84,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             String mqttBrokerHost,
             String mqttRootTopicPub, String mqttRootTopicSub) throws MqttException {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub);
     }
 
     /**
@@ -119,7 +119,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub) throws MqttException {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub);
     }
 
     /**
@@ -210,7 +210,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
                 "dz",
                 getClass().getSimpleName(),
                 mqtt.host
-                + (mqtt.port == MQTT_DEFAULT_PORT ? "" : " port " + mqtt.port)
+                + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
                 + " topic/pub " + mqtt.rootTopicPub
                 + ", topic/sub" + mqtt.rootTopicPub,
                 "MqttDeviceFactory v1");
@@ -242,21 +242,27 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
         }
     }
 
-    static final List<String> MANDATORY_JSON_FIELDS = Arrays.asList(ENTITY_TYPE, NAME, SIGNAL);
-    static final List<String> OPTIONAL_JSON_FIELDS = Arrays.asList(TIMESTAMP, SIGNATURE, DEVICE_ID);
+    static final List<String> MANDATORY_JSON_FIELDS = Arrays.asList(
+            MqttContext.JsonTag.ENTITY_TYPE.name,
+            MqttContext.JsonTag.NAME.name,
+            MqttContext.JsonTag.SIGNAL.name);
+    static final List<String> OPTIONAL_JSON_FIELDS = Arrays.asList(
+            MqttContext.JsonTag.TIMESTAMP.name,
+            MqttContext.JsonTag.SIGNATURE.name,
+            MqttContext.JsonTag.DEVICE_ID.name);
 
     void process(byte[] source) {
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(source))) {
 
             JsonObject payload = reader.readObject();
 
-            JsonString entityType = payload.getJsonString(ENTITY_TYPE);
-            JsonString name = payload.getJsonString(NAME);
-            JsonNumber signal = payload.getJsonNumber(SIGNAL);
+            JsonString entityType = payload.getJsonString(MqttContext.JsonTag.ENTITY_TYPE.name);
+            JsonString name = payload.getJsonString(MqttContext.JsonTag.NAME.name);
+            JsonNumber signal = payload.getJsonNumber(MqttContext.JsonTag.SIGNAL.name);
 
-            JsonNumber timestamp = payload.getJsonNumber(TIMESTAMP);
-            JsonString signature = payload.getJsonString(SIGNATURE);
-            JsonString deviceId = payload.getJsonString(DEVICE_ID);
+            JsonNumber timestamp = payload.getJsonNumber(MqttContext.JsonTag.TIMESTAMP.name);
+            JsonString signature = payload.getJsonString(MqttContext.JsonTag.SIGNATURE.name);
+            JsonString deviceId = payload.getJsonString(MqttContext.JsonTag.DEVICE_ID.name);
 
             // We're not using these yet, but let's make sure they're present
             // That'll help figuring out whether we need them in the future.
@@ -468,7 +474,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
                     "dz",
                     getClass().getSimpleName(),
                     mqtt.host
-                    + (mqtt.port == MQTT_DEFAULT_PORT ? "" : " port " + mqtt.port)
+                    + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
                     + " topic/pub " + mqtt.rootTopicPub
                     + ", topic/sub" + mqtt.rootTopicPub,
                     "sensor " + getAddress());

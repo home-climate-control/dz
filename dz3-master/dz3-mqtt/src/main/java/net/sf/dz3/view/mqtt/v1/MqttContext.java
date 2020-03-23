@@ -17,6 +17,29 @@ import net.sf.dz3.instrumentation.Marker;
 
 public class MqttContext {
 
+    public static final int DEFAULT_PORT = 1883;
+
+    /**
+     * Tags that may be encountered in JSON payloads.
+     */
+    @SuppressWarnings("squid:S1845")
+    public enum JsonTag {
+        DEVICE_ID("device_id"),
+        ENTITY_TYPE("entity_type"),
+        EVENT_DATA("event_data"),
+        EVENT_TYPE("event_type"),
+        NAME("name"),
+        SIGNAL("signal"),
+        SIGNATURE("signature"),
+        TIMESTAMP("timestamp");
+
+        public final String name;
+
+        private JsonTag(String name) {
+            this.name = name;
+        }
+    }
+
     protected final Logger logger = LogManager.getLogger(getClass());
 
     /**

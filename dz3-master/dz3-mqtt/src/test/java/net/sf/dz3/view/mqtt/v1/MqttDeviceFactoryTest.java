@@ -29,7 +29,7 @@ import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 
-public class MqttDeviceFactoryTest implements MqttConstants {
+public class MqttDeviceFactoryTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -118,9 +118,9 @@ public class MqttDeviceFactoryTest implements MqttConstants {
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(message.getBytes()))) {
             JsonObject payload = reader.readObject();
 
-            JsonString entityType = payload.getJsonString(ENTITY_TYPE);
-            JsonString name = payload.getJsonString(NAME);
-            JsonNumber signal = payload.getJsonNumber(SIGNAL);
+            JsonString entityType = payload.getJsonString(MqttContext.JsonTag.ENTITY_TYPE.name);
+            JsonString name = payload.getJsonString(MqttContext.JsonTag.NAME.name);
+            JsonNumber signal = payload.getJsonNumber(MqttContext.JsonTag.SIGNAL.name);
 
             return new Object[] {
                 entityType,
@@ -136,9 +136,9 @@ public class MqttDeviceFactoryTest implements MqttConstants {
         try (JsonReader reader = Json.createReader(new ByteArrayInputStream(message.getBytes()))) {
             JsonObject payload = reader.readObject();
 
-            JsonNumber timestamp = payload.getJsonNumber(TIMESTAMP);
-            JsonString signature = payload.getJsonString(SIGNATURE);
-            JsonString deviceId = payload.getJsonString(DEVICE_ID);
+            JsonNumber timestamp = payload.getJsonNumber(MqttContext.JsonTag.TIMESTAMP.name);
+            JsonString signature = payload.getJsonString(MqttContext.JsonTag.SIGNATURE.name);
+            JsonString deviceId = payload.getJsonString(MqttContext.JsonTag.DEVICE_ID.name);
 
             return new Object[] {
                     timestamp,

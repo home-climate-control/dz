@@ -45,7 +45,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
-public class MqttConnector extends Connector<JsonRenderer> implements MqttConstants {
+public class MqttConnector extends Connector<JsonRenderer> {
 
     /**
      * @see SensorRenderer#render(net.sf.jukebox.datastream.signal.model.DataSample)
@@ -82,7 +82,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
             String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet) throws MqttException {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -119,7 +119,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
             String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet) throws MqttException {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -160,7 +160,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
             Set<Object> initSet,
             Set<ConnectorFactory<JsonRenderer>> factorySet) throws MqttException {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -246,7 +246,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
                 "dz",
                 getClass().getSimpleName(),
                 mqtt.host
-                + (mqtt.port == MQTT_DEFAULT_PORT ? "" : " port " + mqtt.port)
+                + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
                 + " topic " + mqtt.rootTopicPub,
                 "MQTT Connector v1");
     }
@@ -438,7 +438,7 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
                 try (JsonReader reader = Json.createReader(new ByteArrayInputStream(message.getPayload()))) {
 
                     JsonObject payload = reader.readObject();
-                    JsonString eventType = payload.getJsonString(EVENT_TYPE);
+                    JsonString eventType = payload.getJsonString(MqttContext.JsonTag.EVENT_TYPE.name);
 
                     // We know and care about two event types at this point:
                     //
@@ -449,18 +449,18 @@ public class MqttConnector extends Connector<JsonRenderer> implements MqttConsta
 
                     case "call_service":
 
-                        callService(payload.getJsonObject(EVENT_DATA));
+                        callService(payload.getJsonObject(MqttContext.JsonTag.EVENT_DATA.name));
                         return;
 
                     case "state_changed":
 
-                        stateChanged(payload.getJsonObject(EVENT_DATA));
+                        stateChanged(payload.getJsonObject(MqttContext.JsonTag.EVENT_DATA.name));
                         return;
 
                     default:
 
                         logger.warn("don't know how to handle '" + eventType + "' event_type");
-                        logger.warn("event_data is:" + payload.getJsonObject(EVENT_DATA));
+                        logger.warn("event_data is:" + payload.getJsonObject(MqttContext.JsonTag.EVENT_DATA.name));
 
                         return;
                     }
