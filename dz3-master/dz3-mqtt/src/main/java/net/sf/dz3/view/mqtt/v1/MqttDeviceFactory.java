@@ -217,6 +217,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
     }
 
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public void refresh() {
         ThreadContext.push("refresh");
         try {
@@ -231,6 +232,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, Mqtt
 
                 if (now - sample.timestamp > STALE_AGE) {
                     // VT: NOTE: Ideally, this should be synchronized, but practically, the chances are too slim
+                    // VT: NOTE: this sample will never contain data of a variable type, hence @SuppressWarnings
                     device.inject(new DataSample(sample.sourceName, sample.signature, null, new Error("stale")));
                 }
             }
