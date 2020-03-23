@@ -144,4 +144,34 @@ public class MqttContext {
         client.disconnect();
         client.close();
     }
+
+    /**
+     * Check if connected. If not, reconnect.
+     */
+    public void reconnect() {
+
+        ThreadContext.push("reconnect");
+        try {
+
+            if (client.isConnected()) {
+                // nothing to do
+                return;
+            }
+
+            client.connect();
+            client.subscribe(rootTopicSub);
+
+        } catch (MqttException ex) {
+
+            // We don't have any option other than keep trying in a bit; this method will be
+            // called again shortly. Devices will be marked as stale anyway, no big loss
+            // unless they're mission critical - but those better be connected in a more
+            // direct way.
+
+            logger.error("failed to reconnect(), nothing we can do now", ex);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
 }

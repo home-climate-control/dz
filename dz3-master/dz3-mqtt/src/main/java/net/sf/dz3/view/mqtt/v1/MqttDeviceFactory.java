@@ -224,6 +224,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
 
             logger.debug("heartbeat");
 
+            mqtt.reconnect();
+
             long now = System.currentTimeMillis();
 
             for (Device<?> device : deviceMap.values()) {
