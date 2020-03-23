@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.json.Json;
@@ -29,15 +28,13 @@ import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 
-public class MqttDeviceFactoryTest {
+/**
+ * @see MqttDeviceFactoryTestSlow
+ */
+public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-
-    private final static Random rg = new Random();
-    private static MqttDeviceFactory mdf;
-    private static String pubTopic;
-    private static String subTopic;
 
     @BeforeClass
     public static void init() throws MqttException {

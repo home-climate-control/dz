@@ -62,8 +62,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
     private final Thread watchdogThread;
     private final CountDownLatch stopGate = new CountDownLatch(1);
 
-    private static final long POLL_INTERVAL = 10000L;
-    private static final long STALE_AGE = POLL_INTERVAL * 5;
+    static final long POLL_INTERVAL = 10000L;
+    static final long STALE_AGE = POLL_INTERVAL * 5;
 
     /**
      * Data map.
