@@ -22,6 +22,7 @@ A few useful links:
 
 MQTT is now a protocol of choice for remote integrations.
 
+* [HOWTO: MQTT Sensors](https://github.com/home-climate-control/dz/wiki/HOWT:-MQTT-Sensors)
 * [DZ as an MQTT Publisher](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-as-an-MQTT-Publisher)
 * [MQTT Pimoroni Automation Hat Driver](https://github.com/climategadgets/mqtt-automation-hat-go)
 * [DZ to Home Assistant Integration](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-to-Home-Assistant-integration)
