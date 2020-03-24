@@ -15,13 +15,13 @@ import net.sf.jukebox.datastream.signal.model.DataSource;
 /**
  * Base class for persistent implementations.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public abstract class AbstractUsageCounter implements ResourceUsageCounter {
     
     protected final Logger logger;
     
-    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
     
     /**
      * Human readable name for the user interface.
@@ -164,7 +164,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
     }
 
     @Override
-    public synchronized final void reset() {
+    public final synchronized void reset() {
 
         ThreadContext.push("reset");
         
@@ -271,14 +271,14 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
      * 
      * @throws IOException if things go sour.
      */
-    abstract protected CounterState load() throws IOException;
+    protected abstract CounterState load() throws IOException;
     
     /**
      * Store the current state.
      * 
      * @throws IOException if things go sour.
      */
-    abstract protected void save() throws IOException;
+    protected abstract void save() throws IOException;
     
     /**
      * Alert the user about usage.
@@ -286,7 +286,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
      * @param threshold Usage threshold.
      * @param current Current usage.
      */
-    abstract protected void alert(long threshold, long current);
+    protected abstract void alert(long threshold, long current);
     
     /**
      * Perform the reset in concrete implementations.
@@ -295,5 +295,5 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
      * 
      * @throws IOException if things go sour.
      */
-    abstract protected void doReset() throws IOException;
+    protected abstract void doReset() throws IOException;
 }

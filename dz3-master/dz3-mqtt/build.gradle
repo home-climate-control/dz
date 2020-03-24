@@ -1,7 +1,7 @@
 dependencies {
 
 	// https://mvnrepository.com/artifact/org.eclipse.paho/org.eclipse.paho.client.mqttv3
-	compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0'
+	compile 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.2'
 
 	// https://mvnrepository.com/artifact/javax.json/javax.json-api
 	compile 'javax.json:javax.json-api:1.1.4'

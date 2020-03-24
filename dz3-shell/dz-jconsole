@@ -11,6 +11,24 @@ export BASENAME=`dirname $0`
 
 #. ${BASENAME}/classpath-dev
 
+# We don't need ${JAVA_HOME} *that* much, but if it is set, it'd be nice to honor it
+
+if test -z "${JAVA_HOME}"; then
+    export JCONSOLE=`which jconsole`
+    if ! test -x "${JCONSOLE}"; then
+        echo "Can't find JConsole binary";
+        exit 1;
+    fi
+else
+    export JCONSOLE="${JAVA_HOME}/bin/jconsole"
+    if ! test -x "${JCONSOLE}"; then
+        echo "JAVA_HOME seems to point into a wrong place (${JAVA_HOME}), can't find JConsole binary";
+        exit 1;
+    fi
+fi
+
 # Remember that arguments on the command line are relative to the root of CLASSPATH
 
-(cd ${BASENAME} && ${JAVA_HOME}/bin/jconsole -J-Djava.class.path=${JAVA_HOME}/lib/jconsole.jar:${JAVA_HOME}/lib/tools.jar:$CLASSPATH $*)
+# VT: FIXME: -D will be wrong if jconsole is taken from PATH, but alas, it seems to work so far
+
+(cd ${BASENAME} && ${JCONSOLE} -J-Djava.class.path=${JAVA_HOME}/lib/jconsole.jar:${JAVA_HOME}/lib/tools.jar:$CLASSPATH $*)

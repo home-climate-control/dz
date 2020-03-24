@@ -91,7 +91,7 @@ public class TransientUsageCounter extends AbstractUsageCounter {
     protected CounterState load() throws IOException {
 
         // One hour limit
-        return new CounterState(1000 * 60 * 60, 0);
+        return new CounterState(1000L * 60L * 60L, 0);
     }
 
     @Override

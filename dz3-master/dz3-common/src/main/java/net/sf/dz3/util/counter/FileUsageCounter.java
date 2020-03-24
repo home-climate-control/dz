@@ -15,12 +15,12 @@ import net.sf.jukebox.datastream.signal.model.DataSource;
 /**
  * Usage counter storing the state into a file.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class FileUsageCounter extends TransientUsageCounter {
     
-    private final static String CF_THRESHOLD = "threshold";
-    private final static String CF_CURRENT = "current";
+    private static final String CF_THRESHOLD = "threshold";
+    private static final String CF_CURRENT = "current";
     
     /**
      * Create an instance.
@@ -46,16 +46,12 @@ public class FileUsageCounter extends TransientUsageCounter {
             Object[] storageKeys = getStorageKeys();
             
             File persistentStorage = (File) storageKeys[0];
-            
+
             if (persistentStorage == null) {
                 throw new IllegalArgumentException("persistentStorage can't be null");
             }
             
             logger.info("Loading " + persistentStorage);
-            
-            if (persistentStorage.isDirectory()) {
-                throw new IOException(persistentStorage + ": is a directory");
-            }
             
             if (!persistentStorage.exists()) {
                 
@@ -63,17 +59,9 @@ public class FileUsageCounter extends TransientUsageCounter {
                 return new CounterState(0, 0);
             }
 
-            if (!persistentStorage.canWrite()) {
-                throw new IOException(persistentStorage + ": can't write");
-            }
-            
-            if (!persistentStorage.isFile()) {
-                throw new IOException(persistentStorage + ": not a regular file");
-            }
+            checkSanity(persistentStorage);
 
-            LineNumberReader lnr = new LineNumberReader(new FileReader(persistentStorage));
-            
-            try {
+            try (LineNumberReader lnr = new LineNumberReader(new FileReader(persistentStorage))) {
 
                 Long threshold = null;
                 Long current = null;
@@ -85,8 +73,6 @@ public class FileUsageCounter extends TransientUsageCounter {
                     if (line == null) {
 
                         // End of file
-
-                        lnr.close();
                         break;
                     }
 
@@ -102,17 +88,15 @@ public class FileUsageCounter extends TransientUsageCounter {
                         String key = st.nextToken();
                         Long value = Long.parseLong(st.nextToken());
 
-                        if ("threshold".equals(key)) {
+                        if (CF_THRESHOLD.equals(key)) {
                             threshold = value;
                         }
 
-                        if ("current".equals(key)) {
+                        if (CF_CURRENT.equals(key)) {
                             current = value;
                         }
 
                     } catch (Throwable t) {
-
-                        lnr.close();
                         throw new IllegalArgumentException("Failed to parse line '" + line + "' out of " + persistentStorage.getCanonicalPath() + " (line " + lnr.getLineNumber() + ")");
                     }
                 }
@@ -130,14 +114,25 @@ public class FileUsageCounter extends TransientUsageCounter {
                 logger.info("Loaded: " + state);
 
                 return state;
-
-            } finally {
-            
-                lnr.close();
             }
 
         } finally {
             ThreadContext.pop();
+        }
+    }
+
+    private void checkSanity(File persistentStorage) throws IOException {
+
+        if (persistentStorage.isDirectory()) {
+            throw new IOException(persistentStorage + ": is a directory");
+        }
+
+        if (!persistentStorage.canWrite()) {
+            throw new IOException(persistentStorage + ": can't write");
+        }
+
+        if (!persistentStorage.isFile()) {
+            throw new IOException(persistentStorage + ": not a regular file");
         }
     }
 
@@ -157,13 +152,12 @@ public class FileUsageCounter extends TransientUsageCounter {
                 logger.info("Created " + canonical);
             };
             
-            PrintWriter pw = new PrintWriter(new FileWriter(canonical));
+            try (PrintWriter pw = new PrintWriter(new FileWriter(canonical))) {
             
-            pw.println("# Resource Usage Counter: " + getName());
-            pw.println(CF_THRESHOLD + "=" + getThreshold());
-            pw.println(CF_CURRENT + "=" + getUsageAbsolute());
-            
-            pw.close();
+                pw.println("# Resource Usage Counter: " + getName());
+                pw.println(CF_THRESHOLD + "=" + getThreshold());
+                pw.println(CF_CURRENT + "=" + getUsageAbsolute());
+            }
         
         } finally {
             ThreadContext.pop();

@@ -6,8 +6,16 @@ subprojects {
     targetCompatibility = 1.8
 
     apply plugin: 'maven'
+    apply plugin: 'jacoco'
     group = 'net.sf.dz3'
     version = '3.6.8-SNAPSHOT'
+
+
+
+    jacoco {
+        toolVersion = "0.8.5"
+    }
+
 
 /*
     apply plugin: 'findbugs'
