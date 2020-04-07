@@ -28,5 +28,5 @@ MQTT is now a protocol of choice for remote integrations.
 * [DZ to Home Assistant Integration](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-to-Home-Assistant-integration)
 
 ESP8266/ESP32 is now a future direction for edge device development and integration.
-* [hcc-esp8266](https://github.com/home-climate-control/hcc-esp8266) - available now;
-* [hcc-esp32](https://github.com/home-climate-control/hcc-esp32) - empty now, but is coming up next.
+* [hcc-esp8266](https://github.com/home-climate-control/hcc-esp8266) - 1-Wire over MQTT over WiFi on [ESP8266](https://en.wikipedia.org/wiki/ESP8266) ([Arduino IDE](https://github.com/esp8266/Arduino));
+* [hcc-esp32](https://github.com/home-climate-control/hcc-esp32) - 1-Wire over MQTT over WiFi on [ESP32](https://en.wikipedia.org/wiki/ESP32) ([ESP-IDF](https://github.com/espressif/esp-idf)).
