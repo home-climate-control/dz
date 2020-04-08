@@ -1,0 +1,2 @@
+import:
+- source: dz3-master/.travis.yml
