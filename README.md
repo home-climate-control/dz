@@ -26,7 +26,9 @@ MQTT is now a protocol of choice for remote integrations.
 * [DZ as an MQTT Publisher](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-as-an-MQTT-Publisher)
 * [MQTT Pimoroni Automation Hat Driver](https://github.com/climategadgets/mqtt-automation-hat-go)
 * [DZ to Home Assistant Integration](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-to-Home-Assistant-integration)
+* [DZ to ESPHome Integration](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-to-ESPHome-integration)
 
 ESP8266/ESP32 is now a future direction for edge device development and integration.
-* [hcc-esp8266](https://github.com/home-climate-control/hcc-esp8266) - 1-Wire over MQTT over WiFi on [ESP8266](https://en.wikipedia.org/wiki/ESP8266) ([Arduino IDE](https://github.com/esp8266/Arduino))
+
+* ~~[hcc-esp8266](https://github.com/home-climate-control/hcc-esp8266) - 1-Wire over MQTT over WiFi on [ESP8266](https://en.wikipedia.org/wiki/ESP8266) ([Arduino IDE](https://github.com/esp8266/Arduino))~~ Use [ESPHome Integration](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-to-ESPHome-integration) instead
 * [hcc-esp32](https://github.com/home-climate-control/hcc-esp32) - 1-Wire over MQTT over WiFi on [ESP32](https://en.wikipedia.org/wiki/ESP32) ([ESP-IDF](https://github.com/espressif/esp-idf))
