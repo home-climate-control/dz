@@ -1,6 +1,7 @@
 package net.sf.dz3.util.counter;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -377,5 +378,43 @@ public class FileUsageCounterTest {
                 // Do absolutely nothing
             }
         };
+    }
+
+    /**
+     * Make sure backup file gets created.
+     *
+     * @see https://github.com/home-climate-control/dz/issues/102
+     */
+    @Test
+    public void testBackup() throws IOException, InterruptedException {
+
+        ThreadContext.push("testReset");
+
+        try {
+
+            File tmp = new File(System.getProperty("java.io.tmpdir"));
+
+            if (!tmp.exists() || !tmp.canWrite()) {
+                fail(tmp + ": doesn't exist or can't write");
+            }
+
+            File counterFile = new File(tmp, UUID.randomUUID().toString());
+            File backupFile = new File(tmp, counterFile.getName() + "-");
+
+            FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), counterFile);
+
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+
+            assertTrue("counter file must exist", counterFile.exists());
+            assertFalse("backup file must NOT exist", backupFile.exists());
+
+            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+
+            assertTrue("counter file must exist", counterFile.exists());
+            assertTrue("backup file must exist", backupFile.exists());
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }
