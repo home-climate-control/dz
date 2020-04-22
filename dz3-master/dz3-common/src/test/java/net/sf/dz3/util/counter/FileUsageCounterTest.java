@@ -1,5 +1,9 @@
 package net.sf.dz3.util.counter;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -9,19 +13,20 @@ import java.util.UUID;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.Test;
 
-import junit.framework.TestCase;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
 
-public class FileUsageCounterTest extends TestCase {
+public class FileUsageCounterTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * Make sure no null arguments are accepted.
      */
+    @Test
     public void testNullArgs() throws IOException {
 
         try {
@@ -73,6 +78,7 @@ public class FileUsageCounterTest extends TestCase {
     /**
      * Make sure {@link FileUsageCounter#reset()} works.
      */
+    @Test
     public void testReset() throws IOException, InterruptedException {
 
         ThreadContext.push("testReset");
@@ -103,6 +109,7 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    @Test
     public void testConsumeNull() throws IOException {
 
         try {
@@ -120,6 +127,7 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    @Test
     public void testExisting() throws IOException, InterruptedException {
 
         ThreadContext.push("testExisting");
@@ -171,6 +179,7 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    @Test
     public void testNoThreshold() throws IOException {
 
         File f = File.createTempFile("counter", "");
@@ -187,6 +196,7 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    @Test
     public void testNoCurrent() throws IOException {
 
         File f = File.createTempFile("counter", "");
@@ -209,6 +219,7 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    @Test
     public void testBadLine() throws IOException {
 
         File f = File.createTempFile("counter", "");
@@ -234,6 +245,7 @@ public class FileUsageCounterTest extends TestCase {
     /**
      * Make sure directory can't be specified as persistent storage.
      */
+    @Test
     public void testDirectory() throws IOException {
 
         String tmp = System.getProperty("java.io.tmpdir");
@@ -249,6 +261,7 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    @Test
     public void testNotRegularFile() throws IOException {
 
         // Will not work on Windows, but who cares :)
@@ -265,6 +278,7 @@ public class FileUsageCounterTest extends TestCase {
         }
     }
 
+    @Test
     public void testNotWritable() throws IOException {
 
         // Will not work on Windows, but who cares :)
@@ -285,6 +299,7 @@ public class FileUsageCounterTest extends TestCase {
     /**
      * Make sure that the persistent storage file that doesn't exist is created.
      */
+    @Test
     public void testNonExistentDirect() throws IOException {
 
         File f = createNonexistentDirect();
@@ -313,6 +328,7 @@ public class FileUsageCounterTest extends TestCase {
         return new File(tmp, UUID.randomUUID().toString());
     }
 
+    @Test
     public void testNonExistentFileIndirect() throws IOException {
 
         File f = createNonexistentIndirect();
