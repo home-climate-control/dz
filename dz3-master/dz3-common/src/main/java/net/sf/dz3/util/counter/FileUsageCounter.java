@@ -152,11 +152,32 @@ public class FileUsageCounter extends TransientUsageCounter {
                 logger.info("Created " + canonical);
             };
 
-            try (PrintWriter pw = new PrintWriter(new FileWriter(canonical))) {
+            // Now, careful... https://github.com/home-climate-control/dz/issues/102
+
+            // If we just try to open the file and write into it, and get hit by an
+            // interrupt at this very moment before the file system gets flushed (yes, it
+            // does happen), we end up with zero length file which breaks everything on next load()
+
+            // To counter that, let's write into a temporary file first, then flip the old counter file into a backup,
+            // and the temp file into the counter file
+
+            File temp = new File(canonical.getParent(), canonical.getName() + "+");
+            File backup = new File(canonical.getParent(), canonical.getName() + "-");
+
+            try (PrintWriter pw = new PrintWriter(new FileWriter(temp))) {
 
                 pw.println("# Resource Usage Counter: " + getName());
                 pw.println(CF_THRESHOLD + "=" + getThreshold());
                 pw.println(CF_CURRENT + "=" + getUsageAbsolute());
+                pw.close();
+            }
+
+            if (canonical.exists() && !canonical.renameTo(backup)) {
+                throw new IOException("failed to rename " + canonical + " to " + backup);
+            }
+
+            if (!temp.renameTo(canonical)) {
+                throw new IOException("failed to rename " + temp + " to " + canonical);
             }
 
         } finally {
