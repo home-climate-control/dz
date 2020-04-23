@@ -169,7 +169,6 @@ public class FileUsageCounter extends TransientUsageCounter {
                 pw.println("# Resource Usage Counter: " + getName());
                 pw.println(CF_THRESHOLD + "=" + getThreshold());
                 pw.println(CF_CURRENT + "=" + getUsageAbsolute());
-                pw.close();
             }
 
             if (canonical.exists() && !canonical.renameTo(backup)) {
