@@ -1,4 +1,14 @@
+group = 'net.sf.dz3'
+version = '3.6.8-SNAPSHOT'
+
 subprojects {
+
+    repositories {
+
+        jcenter()
+        mavenLocal()
+        mavenCentral()
+    }
 
     apply plugin: 'java'
     apply plugin: 'java-library'
@@ -8,19 +18,8 @@ subprojects {
 
     apply plugin: 'maven-publish'
     apply plugin: 'jacoco'
-    group = 'net.sf.dz3'
-    version = '3.6.8-SNAPSHOT'
-
     jacoco {
         toolVersion = "0.8.5"
-    }
-
-
-    repositories {
-
-        jcenter()
-        mavenLocal()
-
     }
 
     dependencies {
