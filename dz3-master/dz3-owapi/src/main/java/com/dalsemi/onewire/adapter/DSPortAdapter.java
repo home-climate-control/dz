@@ -167,14 +167,14 @@ import com.dalsemi.onewire.utils.Address;
  * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
  */
 public abstract class DSPortAdapter {
-    
+
     protected final Logger logger = LogManager.getLogger(getClass());
-    
+
     // --------
     // -------- Finals
     // --------
-    
-    public static final String CLASS_NAME_ONEWIRECONTAINER = "com.dalsemi.onewire.container.OneWireContainer"; 
+
+    public static final String CLASS_NAME_ONEWIRECONTAINER = "com.dalsemi.onewire.container.OneWireContainer";
 
     /** Speed modes for 1-Wire Network, regular */
     public static final int SPEED_REGULAR = 0;
@@ -307,10 +307,10 @@ public abstract class DSPortAdapter {
      * names
      */
     public abstract Enumeration<String> getPortNames();
-    
+
     /**
      * Address to device container map.
-     * 
+     *
      * VT: NOTE: This was introduced during a memory leak hunt to avoid wanton creation
      * of device containers on EVERY network browse. Obviously, there may be zillion side
      * effects, and departing devices have to be handled somehow, but no matter what this
@@ -346,8 +346,8 @@ public abstract class DSPortAdapter {
             // If a null is passed, remove the old container class.
             registeredOneWireContainerClasses.remove(familyInt);
             return;
-        } 
-        
+        }
+
         try {
 
             Class<?> defaultibc = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
@@ -357,7 +357,7 @@ public abstract class DSPortAdapter {
                 // Put the new container class in the hashtable, replacing any
                 // old one.
                 registeredOneWireContainerClasses.put(familyInt, OneWireContainerClass);
-                
+
             } else {
                 throw new ClassCastException(OneWireContainerClass.getName() + "does not extend " + CLASS_NAME_ONEWIRECONTAINER);
             }
@@ -750,7 +750,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
         return isPresent(buffer);
     }
@@ -773,7 +773,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
         return isPresent(buffer);
     }
@@ -817,7 +817,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
         return isAlarming(buffer);
     }
@@ -841,7 +841,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
         return isAlarming(buffer);
     }
@@ -902,7 +902,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
         return select(buffer);
     }
@@ -929,7 +929,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
         return select(buffer);
     }
@@ -982,7 +982,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
 
         if (!select(buffer)) {
@@ -1014,7 +1014,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
 
         if (!select(buffer)) {
@@ -1478,17 +1478,17 @@ public abstract class DSPortAdapter {
      * @see Address
      */
     public synchronized OneWireContainer getDeviceContainer(byte[] address) {
-        
+
         ThreadContext.push("getDeviceContainer(" + Address.toString(address) + ")");
-        
+
         try {
-            
+
             // First see if there's a container for this address already
-            
+
             String stringAddress = Address.toString(address);
             {
                 OneWireContainer existingContainer = address2container.get(stringAddress);
-                
+
                 if (existingContainer != null) {
                     logger.debug("Returning existing container");
                     return existingContainer;
@@ -1500,21 +1500,21 @@ public abstract class DSPortAdapter {
                     .toHexString(family_code)).toUpperCase();
             Class<?> ibutton_class = null;
             OneWireContainer new_ibutton;
-    
+
             // If any user registered button exist, check the hashtable.
             if (!registeredOneWireContainerClasses.isEmpty()) {
                 Integer familyInt = new Integer(family_code);
-    
+
                 // Try and get a user provided container class first.
                 ibutton_class = registeredOneWireContainerClasses.get(familyInt);
             }
-    
+
             // If we don't get one, do the normal lookup method.
             if (ibutton_class == null) {
-    
+
                 // try to load the ibutton container class
                 try {
-                    
+
                     String className = CLASS_NAME_ONEWIRECONTAINER + family_string;
                     logger.debug("Trying to instantiate " + className);
                     ibutton_class = Class.forName(className);
@@ -1522,44 +1522,44 @@ public abstract class DSPortAdapter {
                     logger.warn("Failed, moving on", e);
                     ibutton_class = null;
                 }
-    
+
                 // if did not get specific container try the general one
                 if (ibutton_class == null) {
-    
+
                     // try to load the ibutton container class
                     try {
                         logger.debug("Falling back to " + CLASS_NAME_ONEWIRECONTAINER);
                         ibutton_class = Class.forName(CLASS_NAME_ONEWIRECONTAINER);
                     } catch (Exception ex) {
                         logger.error("Unable to load OneWireContainer", ex);
-                        
+
                         // VT: FIXME: Maybe throw an exception, eh?
                         return null;
                     }
                 }
             }
-    
+
             // try to load the ibutton container class
             try {
-    
+
                 // create the iButton container with a reference to this adapter
                 logger.debug("Instantiating " + ibutton_class.getName());
                 new_ibutton = (OneWireContainer) ibutton_class.newInstance();
-    
+
                 new_ibutton.setupContainer(this, address);
             } catch (Exception ex) {
                 logger.error("Unable to instantiate OneWireContainer " + ibutton_class + ": ", ex);
-    
+
                 // VT: FIXME: Maybe throw an exception, eh?
                 return null;
             }
-            
+
             // Remember this container
             address2container.put(stringAddress, new_ibutton);
-    
+
             // return this new container
             return new_ibutton;
-        
+
         } finally {
             ThreadContext.pop();
         }
@@ -1580,7 +1580,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
         return getDeviceContainer(buffer);
     }
@@ -1600,7 +1600,7 @@ public abstract class DSPortAdapter {
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                 };
-        
+
         Address.toByteArray(address, buffer);
         return getDeviceContainer(buffer);
     }
@@ -1771,7 +1771,7 @@ public abstract class DSPortAdapter {
                 return true;
             }
         }
-        
+
         return false;
     }
 
