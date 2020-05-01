@@ -23,13 +23,13 @@ import net.sf.jukebox.service.ActiveService;
 /**
  * The facilitator between the client {@link #send(Object) sending} data and the server
  * possibly returning some.
- * 
+ *
  * @param <DataBlock> Data type to send out to the server.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
  */
 public abstract class AbstractExchanger<DataBlock> extends ActiveService {
-    
+
     protected final HttpClient httpClient = HttpClientFactory.createClient();
     protected final HttpClientContext context = HttpClientContext.create();
 
@@ -38,9 +38,9 @@ public abstract class AbstractExchanger<DataBlock> extends ActiveService {
     private String password;
 
     protected final BlockingQueue<DataBlock> upstreamQueue;
-    
+
     public AbstractExchanger(URL serverContextRoot, String username, String password, BlockingQueue<DataBlock> upstreamQueue) {
-        
+
         this.serverContextRoot = serverContextRoot;
         this.upstreamQueue = upstreamQueue;
         this.username = username;
@@ -53,7 +53,7 @@ public abstract class AbstractExchanger<DataBlock> extends ActiveService {
         logger.info("Using " + serverContextRoot);
 
         // Do absolutely nothing
-        
+
         // Except, maybe, authenticate
         authenticate();
     }
@@ -61,9 +61,10 @@ public abstract class AbstractExchanger<DataBlock> extends ActiveService {
     /**
      * Keep sending data that appears in {@link HttpConnector#upstreamQueue} to the server,
      * and accepting whatever they have to say.
-     * 
+     *
      * Exact strategy is determined by the implementation subclass.
      */
+    @Override
     protected abstract void execute() throws Throwable;
 
     @Override

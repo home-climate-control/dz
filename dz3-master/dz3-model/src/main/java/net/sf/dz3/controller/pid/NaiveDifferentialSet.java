@@ -1,18 +1,16 @@
 package net.sf.dz3.controller.pid;
 
-import net.sf.dz3.controller.DataSet;
-
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+
+import net.sf.dz3.controller.DataSet;
 
 /**
  * Data set supporting the differential calculation.
  *
  * This is the old implementation, written in 2000 with little regard to performance, and updated to use a better data structure in 2015.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class NaiveDifferentialSet extends DataSet<Double> implements DifferentialSet {
@@ -37,6 +35,7 @@ public class NaiveDifferentialSet extends DataSet<Double> implements Differentia
    *
    * @return A differential value.
    */
+  @Override
   public final synchronized double getDifferential() {
 
       if (size() < 2) {

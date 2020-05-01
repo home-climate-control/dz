@@ -17,9 +17,9 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
  */
 public abstract class AbstractProcessController implements ProcessController {
-    
+
     protected final Logger logger = LogManager.getLogger(getClass());
-    
+
     /**
      * Process controller signal broadcaster.
      */
@@ -39,14 +39,14 @@ public abstract class AbstractProcessController implements ProcessController {
      * Last known signal. This is used to support the listener notification.
      */
     private DataSample<Double> lastKnownSignal = null;
-    
+
     /**
      * Create an instance.
-     * 
+     *
      * @param setpoint Initial setpoint.
      */
     public AbstractProcessController(double setpoint) {
-	
+
 	this.setpoint = setpoint;
     }
 
@@ -74,7 +74,7 @@ public abstract class AbstractProcessController implements ProcessController {
 
     /**
      * Perform any actions necessary for the controller to handle the setpoint change
-     * (other than actually changing the setpoint). 
+     * (other than actually changing the setpoint).
      */
     abstract protected void setpointChanged();
 
@@ -89,6 +89,7 @@ public abstract class AbstractProcessController implements ProcessController {
      *
      * @return The process variable.
      */
+    @Override
     public final DataSample<Double> getProcessVariable() {
 
         return pv;
@@ -96,9 +97,9 @@ public abstract class AbstractProcessController implements ProcessController {
 
     @Override
     public final synchronized double getError() {
-	
+
 	if (pv == null) {
-	    
+
 	    // No sample, no error
 	    return 0;
 	}
@@ -108,26 +109,26 @@ public abstract class AbstractProcessController implements ProcessController {
 
     @Override
     public final synchronized DataSample<Double> compute(DataSample<Double> pv) {
-	
+
 	if (pv == null) {
 	    throw new IllegalArgumentException("pv can't be null");
 	}
-	
+
 	if (pv.isError()) {
 	    throw new IllegalArgumentException("pv can't be an error");
 	}
-	
+
 	if (lastKnownSignal != null) {
 	    long then = lastKnownSignal.timestamp;
 	    long now = pv.timestamp;
 	    long diff = now - then;
-	    
+
 	    if (diff <= 0) {
 		throw new IllegalArgumentException("Can't go back in time: last sample was @"
 			+ then + ", this is @" + now + ", " + diff + "ms difference");
 	    }
 	}
-	
+
         this.pv = pv;
 
         return wrapCompute();
@@ -135,7 +136,7 @@ public abstract class AbstractProcessController implements ProcessController {
 
     @Override
     public void consume(DataSample<Double> sample) {
-        
+
         compute(sample);
     }
 
@@ -155,7 +156,7 @@ public abstract class AbstractProcessController implements ProcessController {
 
             // This will not throw anything
             statusChanged();
-            
+
             return lastKnownSignal;
 
         } finally {
@@ -187,29 +188,29 @@ public abstract class AbstractProcessController implements ProcessController {
     protected synchronized final void statusChanged() {
 
         if (lastKnownSignal == null) {
-            
+
             // It is happening at instantiation
             return;
         }
 
         ProcessControllerStatus status = getStatus();
-            
+
 	// VT: NOTE: This will not be an error signal even if the original signal is,
         // the purpose is not control but instrumentation
-        
+
         String sourceName = lastKnownSignal.sourceName + "." + getShortName();
         String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
 
         DataSample<ProcessControllerStatus> sample = new DataSample<ProcessControllerStatus>(lastKnownSignal.timestamp,
                 sourceName, signature, status, null);
-        
+
         dataBroadcaster.broadcast(sample);
     }
 
     /**
      * @return A short name to add to the instrumentation data sample source name, to distinguish it from
      * the actual source signal.
-     * 
+     *
      */
     abstract protected String getShortName();
 

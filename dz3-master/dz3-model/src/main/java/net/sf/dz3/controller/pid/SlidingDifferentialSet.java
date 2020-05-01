@@ -7,7 +7,7 @@ import net.sf.dz3.controller.DataSet;
  *
  * Unlike {@link NaiveDifferentialSet} (which has the time complexity of {@code O(n)}), this class
  * provides {@code O(1)} time complexity.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class SlidingDifferentialSet implements DifferentialSet {
@@ -40,7 +40,7 @@ public class SlidingDifferentialSet implements DifferentialSet {
      */
     @Override
     public synchronized void record(final long millis, final Double value) {
-        
+
         if (value == null) {
             throw new IllegalArgumentException("null value mustn't propagate here");
         }
@@ -71,8 +71,9 @@ public class SlidingDifferentialSet implements DifferentialSet {
      *
      * @return A differential value.
      */
+    @Override
     public final synchronized double getDifferential() {
-        
+
         return dataSet.getIntegral();
     }
 }

@@ -72,7 +72,7 @@ import com.dalsemi.onewire.utils.CRC8;
  * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
  */
 public class OneWireContainer26 extends OneWireContainer implements ADContainer, TemperatureContainer, ClockContainer, HumidityContainer {
-    
+
     public static final double RESOLUTION_TEMPERATURE = 0.03125;
     public static final double RESOLUTION_HUMIDIY = 0.1;
 
@@ -217,8 +217,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * and {@link com.dalsemi.onewire.container.OTPMemoryBank OTPMemoryBank}.
      * @return <CODE>Enumeration</CODE> of memory banks
      */
+    @Override
     public Enumeration<MemoryBank> getMemoryBanks() {
-        
+
         Vector<MemoryBank> bank_vector = new Vector<MemoryBank>(8);
 
         // Status
@@ -318,6 +319,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *  @return representation of this 1-Wire device's name
      *
      */
+    @Override
     public String getName() {
         return "DS2438";
     }
@@ -328,6 +330,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      *  @return representation of the alternate name(s)
      */
+    @Override
     public String getAlternateNames() {
         return "Smart Battery Monitor";
     }
@@ -337,6 +340,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      *  @return representation of the functional description
      */
+    @Override
     public String getDescription() {
         return "1-Wire device that integrates the total current charging or "
         + "discharging through a battery and stores it in a register. "
@@ -398,7 +402,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public byte[] readPage(int page) throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] buffer = new byte [11];
         byte[] result = new byte [8];
         int    crc8;   // this device uses a crc 8
@@ -463,7 +467,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public void writePage(int page, byte[] source, int offset) throws OneWireIOException, OneWireException {
-        
+
         byte[] buffer = new byte [10];
 
         /* check parameter validity */
@@ -518,10 +522,10 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public boolean getFlag(byte flagToGet) throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] data = readPage(0);
 
-        return (data [0] & flagToGet) != 0 ? true : false; 
+        return (data [0] & flagToGet) != 0 ? true : false;
     }
 
     /**
@@ -560,7 +564,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @return current value in Amperes
      */
     public double getCurrent(byte[] state) {
-        
+
         short rawCurrent = ( short ) ((state [6] << 8) | (state [5] & 0x0ff));
 
         return rawCurrent / (4096.0 * Rsens);
@@ -576,7 +580,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public double getRemainingCapacity() throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         int ica = getICA();
 
         return (1000 * ica / (2048 * Rsens));
@@ -611,7 +615,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public void calibrateCurrentADC() throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] data;
         byte   currentLSB, currentMSB;
 
@@ -664,7 +668,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public void setThreshold(byte thresholdValue) throws OneWireIOException, OneWireException {
-        
+
         byte   thresholdReg;
         byte[] data;
 
@@ -713,10 +717,10 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public int getICA() throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] data = readPage(1);
 
-        return ( int ) (data [4] & 0x000000ff);
+        return data [4] & 0x000000ff;
     }
 
     /**
@@ -731,7 +735,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public int getCCA() throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] data = readPage(7);
 
         return ((data [5] << 8) & 0x0000ff00) | (data [4] & 0x000000ff);
@@ -749,7 +753,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public int getDCA() throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] data = readPage(7);
 
         return ((data [7] << 8) & 0x0000ff00) | (data [6] & 0x000000ff);
@@ -765,7 +769,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public void setICA (int icaValue) throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] data = readPage(1);
 
         data [4] = ( byte ) (icaValue & 0x000000ff);
@@ -783,7 +787,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public void setCCA (int ccaValue) throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] data = readPage(7);
 
         data [4] = ( byte ) (ccaValue & 0x00ff);
@@ -802,7 +806,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws IllegalArgumentException Bad parameters passed
      */
     public void setDCA(int dcaValue) throws OneWireIOException, OneWireException, IllegalArgumentException {
-        
+
         byte[] data = readPage(7);
 
         data [6] = ( byte ) (dcaValue & 0x00ff);
@@ -831,14 +835,14 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return time in milliseconds that have occurred since 1970.
      */
-    public long getEndOfChargeTime(byte[] state) 
+    public long getEndOfChargeTime(byte[] state)
     {
         return getTime(state, 20) * 1000;
     }
 
     //actually could be called byteArrayToLong, only used in time functions
     private long getTime(byte[] state, int start) {
-        
+
         long time = (state [start] & 0x0ff)
         | ((state [start + 1] & 0x0ff) << 8)
         | ((state [start + 2] & 0x0ff) << 16)
@@ -860,8 +864,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return number of channels
      */
+    @Override
     public int getNumberADChannels() {
-        
+
         return 3;   //has VDD, VAD channel  (battery, gen purpose)
         // and it has a Vsense channel for current sensing
     }
@@ -872,8 +877,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return true if has high/low trips
      */
+    @Override
     public boolean hasADAlarms() {
-        
+
         return false;
     }
 
@@ -886,8 +892,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return available ranges
      */
+    @Override
     public double[] getADRanges(int channel) {
-        
+
         double[] result = new double [1];
 
         if(channel==CHANNEL_VSENSE) {
@@ -926,8 +933,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return available resolutions
      */
+    @Override
     public double[] getADResolutions(int channel, double range) {
-        
+
         double[] result = new double [1];
 
         if(channel == CHANNEL_VSENSE) {
@@ -945,6 +953,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return true if device can do multi-channel voltage reads
      */
+    @Override
     public boolean canADMultiChannelRead() {
         return false;
     }
@@ -966,10 +975,11 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws OneWireIOException Error writing data
      * @throws OneWireException Could not find part
      */
+    @Override
     public void doADConvert(int channel, byte[] state) throws OneWireIOException, OneWireException {
-        
+
         if(channel == CHANNEL_VSENSE) {
-            
+
             if((state[0]&IAD_FLAG) == 0) {
                 // enable the current sense channel
                 setFlag(IAD_FLAG, true);
@@ -994,11 +1004,11 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
             }
 
             if (adapter.select(address)) {
-                
+
                 adapter.putByte(CONVERT_VOLTAGE_COMMAND);
 
                 try {
-                    
+
                     Thread.sleep(4);
                 } catch (InterruptedException ex){
                     logger.debug("Interrupted", ex);
@@ -1032,6 +1042,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws OneWireIOException Error writing data
      * @throws OneWireException Could not find part
      */
+    @Override
     public void doADConvert(boolean[] doConvert, byte[] state) throws OneWireIOException, OneWireException {
         throw new OneWireException(address, "This device cannot do multi-channel reads");
     }
@@ -1051,6 +1062,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws OneWireIOException Error reading data
      * @throws OneWireException Could not find part
      */
+    @Override
     public double[] getADVoltage(byte[] state) throws OneWireIOException, OneWireException {
         throw new OneWireException(address, "This device cannot do multi-channel reads");
     }
@@ -1074,8 +1086,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws OneWireIOException Error reading data
      * @throws OneWireException Could not find part
      */
+    @Override
     public double getADVoltage(int channel, byte[] state) throws OneWireIOException, OneWireException {
-        
+
         double result = 0;
 
         if(channel == CHANNEL_VSENSE) {
@@ -1109,6 +1122,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not support A/D alarms
      */
+    @Override
     public double getADAlarm(int channel, int alarmType, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have A/D alarms");
     }
@@ -1129,6 +1143,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not support A/D alarms
      */
+    @Override
     public boolean getADAlarmEnable(int channel, int alarmType, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have A/D alarms");
     }
@@ -1149,6 +1164,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not support A/D alarms
      */
+    @Override
     public boolean hasADAlarmed(int channel, int alarmType, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have A/D alarms");
     }
@@ -1166,6 +1182,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return resolution of channel in volts
      */
+    @Override
     public double getADResolution(int channel, byte[] state) {
 
         //this is easy, its always 0.01 V = 10 mV
@@ -1184,8 +1201,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return input voltage range
      */
+    @Override
     public double getADRange(int channel, byte[] state) {
-        
+
         if(channel==CHANNEL_VSENSE) {
             return .250;
         } else {
@@ -1215,6 +1233,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not support A/D alarms
      */
+    @Override
     public void setADAlarm(int channel, int alarmType, double alarm, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have A/D alarms");
     }
@@ -1237,6 +1256,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not support A/D alarms
      */
+    @Override
     public void setADAlarmEnable(int channel, int alarmType, boolean alarmEnable, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have AD alarms");
     }
@@ -1255,6 +1275,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @param state current state of the
      *               device returned from <CODE>readDevice()</CODE>
      */
+    @Override
     public void setADResolution(int channel, double resolution, byte[] state) {
 
         //but you can't select the resolution for this part!!!!
@@ -1276,6 +1297,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @param state current state of the
      *               device returned from <CODE>readDevice()</CODE>
      */
+    @Override
     public void setADRange(int channel, double range, byte[] state) {
 
         //you can't change the ranges here without changing VDD!!!
@@ -1292,14 +1314,15 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireIOException Error reading data
      * @throws OneWireException Could not find part
-     * 
+     *
      * @deprecated Use {@link #readDevice(byte[])} instead, it doesn't allocate memory.
      */
+    @Deprecated
     @Override
     public byte[] readDevice () throws OneWireIOException, OneWireException {
 
         byte[] state = new byte [28];
-        
+
         readDevice(state);
 
         return state;
@@ -1313,7 +1336,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
         //2 for channel 2 voltage
 
         for (int i = 0; i < 3; i++) {
-            
+
             byte[] pg = readPage(i);
 
             System.arraycopy(pg, 0, state, i * 8, 8);
@@ -1360,6 +1383,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return true if has high/low trip alarms
      */
+    @Override
     public boolean hasTemperatureAlarms () {
         return false;
     }
@@ -1369,6 +1393,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return true if device has selectable resolution
      */
+    @Override
     public boolean hasSelectableTemperatureResolution () {
         return false;
     }
@@ -1378,8 +1403,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return available resolutions in degrees C
      */
+    @Override
     public double[] getTemperatureResolutions() {
-        
+
         return new double[] { RESOLUTION_TEMPERATURE };
     }
 
@@ -1390,6 +1416,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not have temperature alarms
      */
+    @Override
     public double getTemperatureAlarmResolution() throws OneWireException {
         throw new OneWireException(address, "This device does not have temperature alarms");
     }
@@ -1399,6 +1426,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return maximum temperature in degrees C
      */
+    @Override
     public double getMaxTemperature() {
         return 125.0;
     }
@@ -1408,8 +1436,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return minimum temperature in degrees C
      */
+    @Override
     public double getMinTemperature() {
-        
+
         return -55.0;
     }
 
@@ -1426,8 +1455,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws OneWireIOException Error writting data
      * @throws OneWireException Could not find part
      */
+    @Override
     public void doTemperatureConvert(byte[] state) throws OneWireIOException, OneWireException {
-        
+
         byte[] data;   // hold page
 
         if (doSpeedEnable) {
@@ -1465,6 +1495,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return temperature in degrees C from the last <CODE>doTemperature()</CODE>
      */
+    @Override
     public double getTemperature(byte[] state) {
         double temp = (( short ) ((state [2] << 8) | (state [1] & 0x0ff)) >> 3) * RESOLUTION_TEMPERATURE;
 
@@ -1483,6 +1514,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not have temperature alarms
      */
+    @Override
     public double getTemperatureAlarm(int alarmType, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have temperature alarms");
     }
@@ -1495,6 +1527,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return temperature resolution in degrees C
      */
+    @Override
     public double getTemperatureResolution (byte[] state) {
         return RESOLUTION_TEMPERATURE;
     }
@@ -1515,6 +1548,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not have temperature alarms
      */
+    @Override
     public void setTemperatureAlarm(int alarmType, double alarmValue, byte[] state) throws OneWireException, OneWireIOException {
         throw new OneWireException(address, "This device does not have temperature alarms");
     }
@@ -1530,6 +1564,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws OneWireIOException Error writting data
      * @throws OneWireException Could not find part
      */
+    @Override
     public void setTemperatureResolution(double resolution, byte[] state) throws OneWireException, OneWireIOException {
 
         //airball, only one resolution!!!
@@ -1545,6 +1580,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return true if real-time-clock has an alarm
      */
+    @Override
     public boolean hasClockAlarm() {
         return false;
     }
@@ -1556,6 +1592,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @return true if the clock can be enabled and
      * disabled
      */
+    @Override
     public boolean canDisableClock() {
         return false;
     }
@@ -1565,6 +1602,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return clock resolution in milliseconds.
      */
+    @Override
     public long getClockResolution() {
         return 1000;
     }
@@ -1581,6 +1619,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return time in milliseconds that have occurred since 1970.
      */
+    @Override
     public long getClock(byte[] state) {
         return getTime(state, 8) * 1000;
     }
@@ -1596,6 +1635,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not have clock alarm.
      */
+    @Override
     public long getClockAlarm(byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have a clock alarm!");
     }
@@ -1609,6 +1649,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return true if clock is alarming
      */
+    @Override
     public boolean isClockAlarming(byte[] state) {
         return false;
     }
@@ -1622,6 +1663,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return true if clock alarm is enabled
      */
+    @Override
     public boolean isClockAlarmEnabled(byte[] state) {
         return false;
     }
@@ -1636,6 +1678,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @return true if clock is running
      */
+    @Override
     public boolean isClockRunning(byte[] state) {
         return true;
     }
@@ -1652,8 +1695,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @param time new clock setting in milliseconds
      * @param state device state
      */
+    @Override
     public synchronized void setClock(long time, byte[] state) {
-        
+
         time       = time / 1000;   //convert to seconds
         state [8]  = ( byte ) time;
         state [9]  = ( byte ) (time >> 8);
@@ -1671,6 +1715,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not support clock alarm
      */
+    @Override
     public synchronized void setClockAlarm(long time, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have a clock alarm!");
     }
@@ -1685,6 +1730,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not support disabled clock
      */
+    @Override
     public void setClockRunEnable(boolean runEnable, byte[] state) throws OneWireException {
         if (!runEnable) {
             throw new OneWireException(address, "This device's clock cannot be disabled!");
@@ -1701,6 +1747,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      *
      * @throws OneWireException Device does not support clock alarm
      */
+    @Override
     public void setClockAlarmEnable(boolean alarmEnable, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have a clock alarm!");
     }
@@ -1719,6 +1766,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #getHumidityResolutions
      * @see    #setHumidityResolution
      */
+    @Override
     public boolean isRelative() {
         return true;
     }
@@ -1733,6 +1781,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #getHumidityAlarm
      * @see    #setHumidityAlarm
      */
+    @Override
     public boolean hasHumidityAlarms() {
         return false;
     }
@@ -1747,6 +1796,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #getHumidityResolutions
      * @see    #setHumidityResolution
      */
+    @Override
     public boolean hasSelectableHumidityResolution() {
         return false;
     }
@@ -1762,6 +1812,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #getHumidityResolution
      * @see    #setHumidityResolution
      */
+    @Override
     public double[] getHumidityResolutions() {
 
         return new double[] { RESOLUTION_HUMIDIY };
@@ -1780,6 +1831,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #setHumidityAlarm
      *
      */
+    @Override
     public double getHumidityAlarmResolution() throws OneWireException {
         throw new OneWireException(address, "This device does not have a humidity alarm!");
     }
@@ -1800,6 +1852,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @throws OneWireException on a communication or setup error with the 1-Wire
      *         adapter
      */
+    @Override
     public synchronized void doHumidityConvert(byte[] state) throws OneWireIOException, OneWireException {
         // do temp convert
         doTemperatureConvert(state);
@@ -1825,8 +1878,9 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #getHumidityResolution
      * @see    #setHumidityResolution
      */
+    @Override
     public double getHumidity(byte[] state) {
-        
+
         double temp=0,vdd=0,vad=0,rh=0;
 
         try {
@@ -1856,7 +1910,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
         } else if (rh > 100.0) {
             rh = 100.0;
         }
-        
+
         return rh;
     }
 
@@ -1873,6 +1927,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #getHumidityResolutions
      * @see    #setHumidityResolution
      */
+    @Override
     public double getHumidityResolution(byte[] state) {
         return RESOLUTION_HUMIDIY;
     }
@@ -1894,6 +1949,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #hasHumidityAlarms
      * @see    #setHumidityAlarm
      */
+    @Override
     public double getHumidityAlarm(int alarmType, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have a humidity alarm!");
     }
@@ -1919,6 +1975,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #hasHumidityAlarms
      * @see    #getHumidityAlarm
      */
+    @Override
     public void setHumidityAlarm(int alarmType, double alarmValue, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have a humidity alarm!");
     }
@@ -1938,6 +1995,7 @@ public class OneWireContainer26 extends OneWireContainer implements ADContainer,
      * @see    #getHumidityResolution
      * @see    #getHumidityResolutions
      */
+    @Override
     public void setHumidityResolution(double resolution, byte[] state) throws OneWireException {
         throw new OneWireException(address, "This device does not have selectable humidity resolution!");
     }
