@@ -1765,14 +1765,12 @@ public abstract class DSPortAdapter {
      */
     @Override
     public boolean equals(Object o) {
+        return (o instanceof DSPortAdapter) && (this == o || toString().equals(o.toString()));
+    }
 
-        if (o != null && o instanceof DSPortAdapter) {
-            if (o == this || o.toString().equals(this.toString())) {
-                return true;
-            }
-        }
-
-        return false;
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 
     /**
@@ -1787,7 +1785,7 @@ public abstract class DSPortAdapter {
         try {
             return this.getAdapterName() + " " + this.getPortName();
         } catch (OneWireException owe) {
-            return this.getAdapterName() + " Unknown Port";
+            return this.getAdapterName() + " Unknown Port (" + owe.getMessage() + ")";
         }
     }
 }
