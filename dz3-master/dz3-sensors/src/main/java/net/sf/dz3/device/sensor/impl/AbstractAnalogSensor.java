@@ -14,25 +14,25 @@ import net.sf.jukebox.service.ActiveService;
 
 /**
  * An abstract analog sensor.
- * 
+ *
  * Supports common configuration and listener notification features.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractAnalogSensor extends ActiveService implements AnalogSensor {
 
     /**
      * Current signal value.
-     * 
+     *
      * <p>
-     * 
+     *
      * This value has to be updated by {@link #execute()} and used by {@link #getSignal()} in order to provide a fast
      * response.
-     * 
+     *
      * <p>
-     * 
+     *
      * If the value is <code>null</code>, it means that no signal readings are available yet.
-     * 
+     *
      * VT: FIXME: Visibility of this member is set to protected to allow reverse update mechanism - see
      * <code>AbstractDeviceFactory$SensorProxy</code>.
      */
@@ -45,13 +45,13 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
 
     /**
      * The poll interval.
-     * 
+     *
      * <p>
-     * 
+     *
      * Sleep this many milliseconds between measuring the temperature and possibly reporting it.
-     * 
+     *
      * <p>
-     * 
+     *
      * 5000ms is a reasonable default for most applications.
      */
     private long pollIntervalMillis = 5000;
@@ -143,18 +143,20 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
 
     /**
      * Get the actual hardware device signal.
-     * 
+     *
      * @return The sensor signal.
-     * 
+     *
      * @exception IOException
      *                if there was a problem communicating with the hardware sensor.
      */
     public abstract DataSample<Double> getSensorSignal() throws IOException;
 
+    @Override
     public void addConsumer(DataSink<Double> consumer) {
         dataBroadcaster.addConsumer(consumer);
     }
 
+    @Override
     public void removeConsumer(DataSink<Double> consumer) {
         dataBroadcaster.removeConsumer(consumer);
     }

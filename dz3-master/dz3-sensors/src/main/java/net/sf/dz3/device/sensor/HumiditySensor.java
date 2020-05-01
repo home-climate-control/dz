@@ -11,7 +11,7 @@ import net.sf.jukebox.jmx.JmxAttribute;
  * Though dumb, the humidity sensor is an <strong>active</strong> entity,
  * not passive: it produces the humidity change notifications that drive
  * the rest of the system.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
  */
 public interface HumiditySensor extends AnalogSensor {
@@ -19,6 +19,7 @@ public interface HumiditySensor extends AnalogSensor {
     /**
      * @return The current humidity.
      */
+    @Override
     @JmxAttribute(description = "Current humidity")
     DataSample<Double> getSignal();
 }

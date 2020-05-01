@@ -15,14 +15,14 @@ public class TcpConnectionSignature implements Comparable<TcpConnectionSignature
 
     @Override
     public final boolean equals(Object other) {
-        
+
         if (other == null) {
             return false;
         }
-        
+
         return toString().equals(other.toString());
     }
-    
+
     @Override
     public final int hashCode() {
         return toString().hashCode();
@@ -34,21 +34,22 @@ public class TcpConnectionSignature implements Comparable<TcpConnectionSignature
         StringBuilder sb = new StringBuilder();
 
         sb.append("(");
-        
+
         render(sb);
-        
+
         sb.append(")");
 
         return sb.toString();
     }
-    
+
     protected void render(final StringBuilder sb) {
-        
+
         sb.append("port ").append(port);
         sb.append(secure ? ",secure" : "");
         sb.append(secure ? "," : "").append(secure ? password : "");
     }
 
+    @Override
     public int compareTo(TcpConnectionSignature o) {
 
         return toString().compareTo(o.toString());

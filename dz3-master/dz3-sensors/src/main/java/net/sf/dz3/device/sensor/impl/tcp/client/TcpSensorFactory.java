@@ -40,58 +40,58 @@ public class TcpSensorFactory extends PassiveService {
      * TCP reader map.
      */
     private final Map<ReaderSignature, TcpReader> sig2reader = new TreeMap<ReaderSignature, TcpReader>();
-    
+
     /**
      * Consumer map.
-     * 
+     *
      * We cheat by not associating the hardware sensor address with the host name and port, and thus enable individual
      * devices to be moved from one host to another.
      */
-    private final Map<String, TcpTemperatureSensor> address2sensor = new TreeMap<String, TcpTemperatureSensor>(); 
-    
+    private final Map<String, TcpTemperatureSensor> address2sensor = new TreeMap<String, TcpTemperatureSensor>();
+
     /**
      * Get a sensor instance using insecure connection to remote port 5000.
-     * 
+     *
      * @param address Sensor hardware address.
      * @param remoteHost Host to connect to.
      * @param port Port on the remote host to connect to.
      * @param pollInterval How often to return results.
-     * 
+     *
      * @return A sensor instance.
      */
     public TemperatureSensor getInstance(String address, String remoteHost, int pollInterval) {
-    
+
         return getInstance(address, remoteHost, 5000, pollInterval, false, null);
     }
 
     /**
      * Get a sensor instance.
-     * 
+     *
      * @param address Sensor hardware address.
      * @param remoteHost Host to connect to.
      * @param remotePort Port on the remote host to connect to.
      * @param pollInterval How often to return results.
      * @param secure Whether to attempt a secure connection.
      * @param password Password for a secure connection, {@code null} if not secure.
-     * 
+     *
      * @return A sensor instance.
      */
     public synchronized TemperatureSensor getInstance(String address, String remoteHost, int remotePort, int pollInterval, boolean secure, String password) {
-        
+
         ReaderSignature signature = new ReaderSignature(remoteHost, remotePort, secure, password);
         TcpReader listener = sig2reader.get(signature);
-        
+
         if (listener == null) {
-            
+
             listener = new TcpReader(signature);
-            
+
             // We don't give a damn if it actually starts successfully, it will be reflected
             // in the data sample as an error if it doesn't
             listener.start();
-            
+
             sig2reader.put(signature, listener);
         }
-        
+
         return listener.getInstance(address);
     }
 
@@ -102,11 +102,11 @@ public class TcpSensorFactory extends PassiveService {
 
     @Override
     protected void shutdown() throws Throwable {
-        
+
         ThreadContext.push("shutdown");
-        
+
         try {
-            
+
             SemaphoreGroup stopped = new SemaphoreGroup();
 
             for (Iterator<TcpReader> i = sig2reader.values().iterator(); i.hasNext(); ) {
@@ -117,18 +117,18 @@ public class TcpSensorFactory extends PassiveService {
 
                 stopped.add(reader.stop());
             }
-            
+
             stopped.waitForAll();
-            
+
             logger.info("All readers stopped");
-            
+
         } finally {
             ThreadContext.pop();
         }
     }
 
     private class TcpReader extends ActiveService {
-        
+
         private final ReaderSignature signature;
         private boolean secure;
 
@@ -136,7 +136,7 @@ public class TcpSensorFactory extends PassiveService {
         private BufferedReader br;
 
         public TcpReader(ReaderSignature signature) {
-            
+
             this.signature = signature;
             secure = signature.secure;
         }
@@ -148,7 +148,7 @@ public class TcpSensorFactory extends PassiveService {
 
         @Override
         protected void startup() throws Throwable {
-            
+
             if (secure) {
 
                 logger.info("Secure connection requested");
@@ -161,7 +161,7 @@ public class TcpSensorFactory extends PassiveService {
 
                     logger.warn("Can't establish a secure connection to " + signature.remoteHost + ":" + signature.port, ex);
                     logger.warn("REVERTING TO INSECURE CONNECTION");
-                    
+
                     secure = false;
                 }
             }
@@ -199,6 +199,7 @@ public class TcpSensorFactory extends PassiveService {
 
         final int RETRY_COUNT = 20;
 
+        @Override
         protected void execute() throws Throwable {
 
             int retryCount = RETRY_COUNT;
@@ -215,7 +216,7 @@ public class TcpSensorFactory extends PassiveService {
                     }
 
                     try {
-                        
+
                         if (!readLine()) {
                             break;
                         }
@@ -250,9 +251,9 @@ public class TcpSensorFactory extends PassiveService {
                 }
 
                 if (!isEnabled()) {
-                    
+
                     logger.info("Not enabled, terminating");
-                    
+
                     assert(socket == null);
 
                     return;
@@ -292,15 +293,15 @@ public class TcpSensorFactory extends PassiveService {
 
         @Override
         protected void shutdown() throws Throwable {
-            
+
             ThreadContext.push("shutdown");
-            
+
             try {
-                
+
                 if (socket != null) {
                     socket.close();
                 }
-                
+
             } finally {
                 ThreadContext.pop();
             }
@@ -308,11 +309,11 @@ public class TcpSensorFactory extends PassiveService {
         }
 
         private boolean readLine() throws IOException {
-            
+
             ThreadContext.push("readLine");
-            
+
             try {
-                
+
                 long timestamp = System.currentTimeMillis();
                 String line = br.readLine();
 
@@ -359,7 +360,7 @@ public class TcpSensorFactory extends PassiveService {
 
                     processData(timestamp, line);
                 }
-                
+
                 return true;
 
             } finally {
@@ -402,13 +403,13 @@ public class TcpSensorFactory extends PassiveService {
             if ( s == null ) {
 
                 logger.warn("General error: " + line);
-                
+
                 for (Iterator<String> i = address2sensor.keySet().iterator(); i.hasNext(); ) {
-                    
+
                     String sensorAddress = i.next();
                     TcpTemperatureSensor sensor = address2sensor.get(sensorAddress);
                     DataSample<Double> sample = new DataSample<Double>(timestamp, sensorAddress, "FIXME", null, new IOException(line));
-                    
+
                     sensor.consume(sample);
                 }
 
@@ -445,57 +446,59 @@ public class TcpSensorFactory extends PassiveService {
             }
         }
     }
-    
+
     private static class ReaderSignature extends TcpConnectionSignature {
-        
+
         public final String remoteHost;
-        
+
         public ReaderSignature(String remoteHost, int port, boolean secure, String password) {
-            
+
             super(port, secure, password);
 
             this.remoteHost = remoteHost;
         }
 
+        @Override
         protected void render(final StringBuilder sb) {
-            
+
             sb.append("(").append(remoteHost).append(":").append(port);
             sb.append(secure ? ",secure" : "");
             sb.append(secure ? "," : "").append(secure ? password : "");
         }
     }
-    
+
     private class TcpTemperatureSensor extends AbstractAnalogSensor implements DataSink<Double> {
-        
+
         private DataSample<Double> lastKnownSignal;
 
         public TcpTemperatureSensor(String address, int pollIntervalMillis) {
             super(address, pollIntervalMillis);
-            
+
             lastKnownSignal = new DataSample<Double>(System.currentTimeMillis(), address, "FIXME", null, new IllegalStateException("Not Available"));
         }
 
         @Override
         public DataSample<Double> getSensorSignal() throws IOException {
-            
+
             return lastKnownSignal;
         }
 
         @Override
         protected void shutdown() throws Throwable {
-            
+
             // They don't need us anymore
             address2sensor.remove(getAddress());
         }
 
         @Override
         protected void startup() throws Throwable {
-            
+
             // Do nothing
         }
 
+        @Override
         public void consume(DataSample<Double> sample) {
-            
+
             lastKnownSignal = sample;
         }
     }

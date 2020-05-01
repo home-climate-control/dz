@@ -8,7 +8,7 @@ import net.sf.dz3.device.sensor.SensorType;
 
 /**
  * Implementation independent device container abstraction.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2000-2010
  */
 abstract public class AbstractDeviceContainer implements DeviceContainer {
@@ -18,21 +18,25 @@ abstract public class AbstractDeviceContainer implements DeviceContainer {
     /**
      * @return Device name.
      */
+    @Override
     abstract public String getName();
 
     /**
      * @return Device address.
      */
+    @Override
     abstract public String getAddress();
 
     /**
      * @return Device type.
      */
+    @Override
     abstract public SensorType getType();
 
     /**
      * @return Device signature.
      */
+    @Override
     public final String getSignature() {
 
         return getType() + getAddress();
@@ -46,6 +50,6 @@ abstract public class AbstractDeviceContainer implements DeviceContainer {
             throw new IllegalArgumentException("Can't compare to null");
         }
 
-        return getSignature().compareTo(((DeviceContainer) other).getSignature());
+        return getSignature().compareTo(other.getSignature());
     }
 }
