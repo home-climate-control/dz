@@ -11,22 +11,10 @@ subprojects {
     group = 'net.sf.dz3'
     version = '3.6.8-SNAPSHOT'
 
-
-
     jacoco {
         toolVersion = "0.8.5"
     }
 
-
-/*
-    apply plugin: 'findbugs'
-
-    findbugs {
-
-        excludeFilter = file("$rootProject.projectDir/findbugs-exclude.xml")
-        ignoreFailures = true
-    }
- */
 
     repositories {
 
