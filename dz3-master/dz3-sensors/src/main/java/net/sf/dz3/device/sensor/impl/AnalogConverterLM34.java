@@ -6,7 +6,7 @@ import net.sf.dz3.device.sensor.AnalogConverter;
  * Converts voltage in mV to temperature in °C for
  * {@link http://www.national.com/ds/LM/LM34.pdf LM34} analog temperature sensor.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2010-2020
  *
  * @see AnalogConverterTMP36
  */
@@ -26,30 +26,11 @@ public class AnalogConverterLM34 implements AnalogConverter {
     public Double convert(Double signal) {
 
         if (signal == null) {
-
             return null;
         }
 
         // 0mV @0°F, 10mV/°F
         // convert to Celsius
         return (((signal / 10) - 32) * 5) / 9d;
-    }
-
-    /**
-     * Any two instances of this are stateless, execute the same conversion algorithm and
-     * therefore are equal.
-     *
-     * @param o Object to compare to.
-     *
-     * @return {@code true} if the other object is also of the same class.
-     */
-    @Override
-    public boolean equals(Object o) {
-
-        if (o == null) {
-            return false;
-        }
-
-        return getClass().equals(o.getClass());
     }
 }
