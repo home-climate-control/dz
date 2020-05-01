@@ -1,3 +1,7 @@
+plugins {
+  id 'net.ltgt.errorprone' version '1.1.1' apply false
+}
+
 group = 'net.sf.dz3'
 version = '3.6.8-SNAPSHOT'
 
@@ -22,11 +26,15 @@ subprojects {
         toolVersion = "0.8.5"
     }
 
+    apply plugin: 'net.ltgt.errorprone'
+
     dependencies {
 
         implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.11.0'
         implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 
         testImplementation 'junit:junit:4.12'
+
+        errorprone 'com.google.errorprone:error_prone_core:2.3.4'
     }
 }
