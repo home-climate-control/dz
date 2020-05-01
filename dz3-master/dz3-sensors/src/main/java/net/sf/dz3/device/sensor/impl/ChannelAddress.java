@@ -8,7 +8,7 @@ package net.sf.dz3.device.sensor.impl;
  *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
  */
-public abstract class ChannelAddress<ChannelId> implements Comparable<ChannelAddress<ChannelId>> {
+public abstract class ChannelAddress<T> implements Comparable<ChannelAddress<T>> {
 
     /**
      * Hardware address as a string.
@@ -18,7 +18,7 @@ public abstract class ChannelAddress<ChannelId> implements Comparable<ChannelAdd
     /**
      * Channel identifier.
      */
-    public final ChannelId channel;
+    public final T channel;
 
     /**
      * Create an instance out of a colon separated string.
@@ -45,7 +45,7 @@ public abstract class ChannelAddress<ChannelId> implements Comparable<ChannelAdd
     }
 
     @Override
-    public int compareTo(ChannelAddress<ChannelId> o) {
+    public int compareTo(ChannelAddress<T> o) {
 
         return toString().compareTo(o.toString());
     }
@@ -61,7 +61,7 @@ public abstract class ChannelAddress<ChannelId> implements Comparable<ChannelAdd
         if (getClass() != obj.getClass())
             return false;
 
-        ChannelAddress<ChannelId> other = (ChannelAddress<ChannelId>) obj;
+        ChannelAddress<T> other = (ChannelAddress<T>) obj;
 
         if (!channel.equals(other.channel)) {
             return false;
@@ -95,5 +95,5 @@ public abstract class ChannelAddress<ChannelId> implements Comparable<ChannelAdd
     }
 
 
-    protected abstract ChannelId parseChannel(String rawChannel);
+    protected abstract T parseChannel(String rawChannel);
 }
