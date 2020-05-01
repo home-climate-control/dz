@@ -50,32 +50,18 @@ public abstract class ChannelAddress<T> implements Comparable<ChannelAddress<T>>
         return toString().compareTo(o.toString());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(Object other) {
 
-        if (this == obj)
+        if (this == other) {
             return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
+        }
 
-        ChannelAddress<T> other = (ChannelAddress<T>) obj;
-
-        if (!channel.equals(other.channel)) {
+        if (other == null) {
             return false;
         }
 
-        if (hardwareAddress == null) {
-            if (other.hardwareAddress != null) {
-                return false;
-            }
-        } else if (!hardwareAddress.equals(other.hardwareAddress)) {
-            return false;
-        }
-
-        return true;
+        return toString().equals(other.toString());
     }
 
     @Override
