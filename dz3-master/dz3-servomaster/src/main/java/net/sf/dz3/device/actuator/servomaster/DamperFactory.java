@@ -1,6 +1,8 @@
 package net.sf.dz3.device.actuator.servomaster;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,20 +33,21 @@ public class DamperFactory {
                 throw new IllegalArgumentException("Not a servo controller: " + controllerClass.getName());
             }
 
-            Object controllerObject = controllerClass.newInstance();
+            Constructor<?> c = controllerClass.getDeclaredConstructor(String.class);
+            Object controllerObject = c.newInstance(portName);
 
             theController = (ServoController) controllerObject;
+            theController.open();
+
             logger.info("Controller instantiated: {}", theController.getMeta());
 
-            theController.init(portName);
-
-        } catch (ClassNotFoundException|SecurityException|InstantiationException|IllegalAccessException ex) {
+        } catch (ClassNotFoundException|InstantiationException|IllegalAccessException|InvocationTargetException|SecurityException|NoSuchMethodException ex) {
 
             throw new IllegalArgumentException("can't instantitate '" + className + "'", ex);
 
         } catch (IOException ex) {
 
-            throw new IllegalArgumentException("don't know how to handle", ex);
+            throw new IllegalStateException("don't know how to handle", ex);
 
         } finally {
             ThreadContext.pop();
