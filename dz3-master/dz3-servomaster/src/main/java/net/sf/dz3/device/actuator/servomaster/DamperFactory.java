@@ -25,39 +25,26 @@ public class DamperFactory {
         try {
 
             Class<?> controllerClass = Class.forName(className);
-            logger.info("Found class: " + controllerClass.getCanonicalName());
+            logger.debug("found class: {}", controllerClass.getCanonicalName());
 
             if (!ServoController.class.isAssignableFrom(controllerClass)) {
                 throw new IllegalArgumentException("Not a servo controller: " + controllerClass.getName());
             }
 
-            logger.info("new " + className + "()");
             Object controllerObject = controllerClass.newInstance();
 
             theController = (ServoController) controllerObject;
-            logger.info("Controller instantiated: " + theController.getMeta());
+            logger.info("Controller instantiated: {}", theController.getMeta());
 
             theController.init(portName);
 
-        } catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException|SecurityException|InstantiationException|IllegalAccessException ex) {
 
-            throw new IllegalArgumentException("Can't find class for name '" + className + "'", ex);
-
-        } catch (SecurityException ex) {
-
-            throw new IllegalArgumentException("Don't know how to handle", ex);
-
-        } catch (InstantiationException ex) {
-
-            throw new IllegalArgumentException("Don't know how to handle", ex);
-
-        } catch (IllegalAccessException ex) {
-
-            throw new IllegalArgumentException("Don't know how to handle", ex);
+            throw new IllegalArgumentException("can't instantitate '" + className + "'", ex);
 
         } catch (IOException ex) {
 
-            throw new IllegalArgumentException("Don't know how to handle", ex);
+            throw new IllegalArgumentException("don't know how to handle", ex);
 
         } finally {
             ThreadContext.pop();
