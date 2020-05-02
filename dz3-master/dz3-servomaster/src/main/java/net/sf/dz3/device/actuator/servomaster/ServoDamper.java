@@ -17,7 +17,7 @@ import net.sf.servomaster.device.model.transition.CrawlTransitionController;
 /**
  * Damper controlled by a RC Servo.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
 public class ServoDamper extends AbstractDamper {
 
@@ -28,31 +28,31 @@ public class ServoDamper extends AbstractDamper {
 
     /**
      * Create an instance with no reversing and no range or limit calibration.
-     * 
+     *
      * @param name Human readable name.
      * @param servo Servo instance to use.
      */
     public ServoDamper(String name, Servo servo) {
-        
+
         this(name, servo, false, null, null);
     }
-    
+
     /**
      * Create an instance with range calibration only.
-     * 
+     *
      * @param name Human readable name.
      * @param servo Servo instance to use.
      * @param reverse {@code true} if the servo movement should be reversed.
      * @param rangeCalibration Range calibration object.
      */
     public ServoDamper(String name, Servo servo, boolean reverse, RangeCalibration rangeCalibration) {
-    
+
         this(name, servo, reverse, rangeCalibration, null);
     }
-    
+
     /**
      * Create an instance with limit calibration only.
-     * 
+     *
      * @param name Human readable name.
      * @param servo Servo instance to use.
      * @param reverse {@code true} if the servo movement should be reversed.
@@ -62,12 +62,12 @@ public class ServoDamper extends AbstractDamper {
 
         this(name, servo, reverse, null, limitCalibration);
     }
-    
+
     /**
      * Create an instance.
-     * 
+     *
      * Only one of {@code rangeCalibration} and {@code limitCalibration} can be not null at the same time.
-     * 
+     *
      * @param name Human readable name.
      * @param servo Servo instance to use.
      * @param reverse {@code true} if the servo movement should be reversed.
@@ -80,13 +80,13 @@ public class ServoDamper extends AbstractDamper {
             boolean reverse,
             RangeCalibration rangeCalibration,
             LimitCalibration limitCalibration) {
-        
+
         super(name);
 
         ThreadContext.push("ServoDamper()");
-        
+
         try {
-            
+
             if (servo == null ) {
                 throw new IllegalArgumentException("servo can't be null");
             }
@@ -100,14 +100,14 @@ public class ServoDamper extends AbstractDamper {
             logger.info("limit: " + limitCalibration);
 
             if (rangeCalibration != null) {
-                
+
                 servo.getMeta().setProperty("servo/range/min", Integer.toString(rangeCalibration.min));
                 servo.getMeta().setProperty("servo/range/max", Integer.toString(rangeCalibration.max));
             }
 
             // Until it is actually done in configuration, let's just install a crawl controller
             // But only if it is specifically requested (see dz-runner script)
-            
+
             if (System.getProperty(getClass().getName() + ".crawl") != null) {
 
                 logger.info("Will be crawling");
@@ -115,7 +115,7 @@ public class ServoDamper extends AbstractDamper {
             }
 
             if (limitCalibration != null) {
-                
+
                 servo = new LimitTransformer(servo, limitCalibration.min, limitCalibration.max);
             }
 
@@ -125,7 +125,7 @@ public class ServoDamper extends AbstractDamper {
             }
 
             // VT: NOTE: This may not always be the case, there will be
-            // contraptions with angle range other than 0..180. This   
+            // contraptions with angle range other than 0..180. This
             // will have to be configurable. On the other hand, nobody
             // complained in five years, so it should be fine as is.
 
@@ -142,7 +142,7 @@ public class ServoDamper extends AbstractDamper {
     public Future<TransitionStatus> moveDamper(double throttle) {
 
         ThreadContext.push("moveDamper");
-        
+
         try {
 
             if (Double.compare(servo.getPosition(), throttle) != 0) {
@@ -171,7 +171,7 @@ public class ServoDamper extends AbstractDamper {
 
     @Override
     public JmxDescriptor getJmxDescriptor() {
-        
+
         return new JmxDescriptor(
                 "dz",
                 "Servo based damper",
