@@ -20,11 +20,6 @@ export BASENAME=`dirname $0`
 
 # MEM_LIMITS="-Xms4m -Xmx4m"
 
-# Uncomment the next line if you experience random freezes.
-# Please see http://code.google.com/p/diy-zoning/issues/detail?id=6 for more details and instructions.
-
-#DATA_ASYNC-Dnet.sf.jukebox.datastream.logger.impl.DataBroadcaster.async=true
-
 # The DAMPER_CRAWL settings has been made explicit (see https://github.com/home-climate-control/dz/issues/129)
 # This is the default behavior; if you want to disable it, specify the right arguments to ServoDamper
 # in your configuration file
@@ -56,7 +51,5 @@ fi
 
 (cd ${BASENAME} && \
     ${JAVA} ${MEM_LIMITS} \
-            ${EVENT_ASYNC} \
-            ${DATA_ASYNC} \
             ${JMX} \
             -cp ${CLASSPATH} net.sf.dz3.runtime.Container $*)
