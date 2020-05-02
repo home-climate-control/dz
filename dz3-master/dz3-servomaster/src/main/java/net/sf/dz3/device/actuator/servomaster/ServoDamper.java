@@ -1,14 +1,14 @@
 package net.sf.dz3.device.actuator.servomaster;
 
 import java.io.IOException;
+import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.impl.AbstractDamper;
 import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.sem.ACT;
-import net.sf.jukebox.service.Messenger;
 import net.sf.servomaster.device.model.Servo;
+import net.sf.servomaster.device.model.TransitionStatus;
 import net.sf.servomaster.device.model.transform.LimitTransformer;
 import net.sf.servomaster.device.model.transform.LinearTransformer;
 import net.sf.servomaster.device.model.transform.Reverser;
@@ -139,7 +139,7 @@ public class ServoDamper extends AbstractDamper {
     }
 
     @Override
-    public void moveDamper(double throttle) throws IOException {
+    public Future<TransitionStatus> moveDamper(double throttle) {
 
         ThreadContext.push("moveDamper");
         
@@ -150,7 +150,7 @@ public class ServoDamper extends AbstractDamper {
                 logger.debug(servo.getName() + ": " + throttle);
             }
 
-            servo.setPosition(throttle);
+            return servo.setPosition(throttle);
 
         } finally {
 
@@ -164,18 +164,9 @@ public class ServoDamper extends AbstractDamper {
     }
 
     @Override
-    public ACT park() {
+    public Future<TransitionStatus> park() {
 
-        // VT: This implementation is awkward, but there seems to be no way
-        // of avoiding it - an abstraction adapter is required between
-        // TransitionCompletionToken from Servomaster and EventSemaphore
-        // from Jukebox. The former mustn't be visible beyond park()
-        // abstraction layer (there may be other damper implementations that
-        // don't use Servomaster), whereas the latter is native for DZ.
-
-        logger.info(servo.getName() + ": parking at " + getParkPosition());
-
-        return new ParkingAssistant().start();
+        return servo.setPosition(getParkPosition());
     }
 
     @Override
@@ -186,37 +177,5 @@ public class ServoDamper extends AbstractDamper {
                 "Servo based damper",
                 Integer.toHexString(hashCode()),
                 "Controls single servo");
-    }
-
-    /**
-     * Commands the {@link ServoDamper#servo} to move to {@link ServoDamper#getParkPosition
-     * parked position} and waits until the servo has done so.
-     */
-    private class ParkingAssistant extends Messenger {
-
-        /**
-         * Move the {@link ServoDamper#servo} and wait until it gets there.
-         */
-        @Override
-        protected final Object execute() throws Throwable {
-
-            ThreadContext.push("execute");
-
-            try {
-
-                servo.setPosition(getParkPosition()).get();
-
-                logger.info(servo.getName() + ": parked at " + getParkPosition());
-
-            } catch (Throwable t) {
-
-                logger.error(servo.getName() + ": failed to park at " + getParkPosition(), t);
-                
-            } finally {
-                ThreadContext.pop();
-            }
-
-            return null;
-        }
     }
 }

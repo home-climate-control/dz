@@ -1,7 +1,10 @@
 package net.sf.dz3.device.model;
 
+import java.util.concurrent.Future;
+
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * A damper controller.
@@ -32,6 +35,8 @@ public interface DamperController extends DataSink<UnitSignal> {
     
     /**
      * Disable the controller and put all dampers into parked position, synchronously.
+     *
+     * @return Status. If some dampers couldn't be parked, it will be reflected here.
      */
-    void powerOff();
+    Future<TransitionStatus> powerOff();
 }

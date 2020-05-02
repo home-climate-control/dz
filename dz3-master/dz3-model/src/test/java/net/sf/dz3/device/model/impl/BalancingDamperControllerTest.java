@@ -1,6 +1,13 @@
 package net.sf.dz3.device.model.impl;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.SimplePidController;
@@ -12,52 +19,113 @@ import net.sf.dz3.device.sensor.impl.NullSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.sem.ACT;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 public class BalancingDamperControllerTest extends TestCase {
     
+    private final Logger logger = LogManager.getLogger(getClass());
+
     /**
      * Make sure that thermostats with negative demand don't cause damper control signals
      * out of acceptable range.
      */
     public void testBoundaries() {
         
-        Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
-        Thermostat ts2 = new ThermostatModel("ts2", new NullSensor("address2", 0), new SimplePidController(20, 1, 0, 0, 0));
+        ThreadContext.push("testBoundaries");
         
-        Damper d1 = new DummyDamper("d1");
-        Damper d2 = new DummyDamper("d2");
-        
-        BalancingDamperController damperController = new BalancingDamperController();
-        
-        damperController.put(ts1, d1);
-        damperController.put(ts2, d2);
-        
-        long timestamp = 0;
-        
-        damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts1", "ts1", 50.0, null)));
-        damperController.stateChanged(ts2, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts2", "ts2", -50.0, null)));
+        try {
+
+            Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+            Thermostat ts2 = new ThermostatModel("ts2", new NullSensor("address2", 0), new SimplePidController(20, 1, 0, 0, 0));
+
+            Damper d1 = new DummyDamper("d1");
+            Damper d2 = new DummyDamper("d2");
+
+            BalancingDamperController damperController = new BalancingDamperController();
+
+            damperController.put(ts1, d1);
+            damperController.put(ts2, d2);
+
+            long timestamp = 0;
+
+            damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts1", "ts1", 50.0, null)));
+            damperController.stateChanged(ts2, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts2", "ts2", -50.0, null)));
+
+        } finally {
+
+            ThreadContext.pop();
+        }
     }
     
     /**
      * Make sure that zero demand from all thermostats doesn't cause NaN sent to dampers.
      */
-    public void testNaN() {
+    public void testNaN() throws InterruptedException, ExecutionException {
         
-        Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+        ThreadContext.push("testNaN");
         
-        DummyDamper d1 = new DummyDamper("d1");
-        
-        BalancingDamperController damperController = new BalancingDamperController();
-        
-        damperController.put(ts1, d1);
-        
-        // No calculations are performed unless the HVAC unit signal is present
-        damperController.consume(new DataSample<UnitSignal>("unit1", "unit1", new UnitSignal(1.0, true, 0), null));
-        
-        damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>("ts1", "ts1", -50.0, null)));
-        
-        assertEquals("Wrong damper position", 0.0, d1.get(), 0.000000000001);
+        try {
+
+            Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+
+            DummyDamper d1 = new DummyDamper("d1");
+
+            BalancingDamperController damperController = new BalancingDamperController();
+
+            damperController.put(ts1, d1);
+
+            // No calculations are performed unless the HVAC unit signal is present
+            damperController.consume(new DataSample<UnitSignal>("unit1", "unit1", new UnitSignal(1.0, true, 0), null));
+
+            Future<TransitionStatus> done = damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>("ts1", "ts1", -50.0, null)));
+
+            TransitionStatus status = done.get();
+
+            assertTrue(status.isOK());
+
+            // VT: NOTE: Need this because of asynchronous nature of damper transitions
+            logger.debug("about to assert");
+
+            assertEquals("Wrong damper position", 0.0, d1.get(), 0.000000000001);
+
+        } finally {
+
+            ThreadContext.pop();
+        }
+    }
+
+    /**
+     * Make sure that dampers are correctly parked on power off.
+     */
+    public void testPowerOff() throws InterruptedException, ExecutionException {
+
+        ThreadContext.push("testPowerOff");
+
+        try {
+
+            Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+
+            DummyDamper d1 = new DummyDamper("d1");
+
+            BalancingDamperController damperController = new BalancingDamperController();
+
+            damperController.put(ts1, d1);
+
+            Future<TransitionStatus> done = damperController.powerOff();
+
+            TransitionStatus status = done.get();
+
+            assertTrue(status.isOK());
+
+            // VT: NOTE: Need this because of asynchronous nature of damper transitions
+            logger.debug("about to assert");
+
+            assertEquals("Wrong damper position", 1.0, d1.get(), 0.000000000001);
+
+        } finally {
+
+            ThreadContext.pop();
+        }
     }
 
     private static class DummyDamper implements Damper {
@@ -69,30 +137,45 @@ public class BalancingDamperControllerTest extends TestCase {
             this.name = name;
         }
 
+        @Override
         public String getName() {
             return name;
         }
 
+        @Override
         public double getParkPosition() {
             return 1.0;
         }
 
+        @Override
+        public boolean isCustomParkPosition() {
+            return true;
+        }
+
+        @Override
         public double getPosition() throws IOException {
             throw new UnsupportedOperationException("Not Implemented");
         }
 
-        public ACT park() {
+        @Override
+        public Future<TransitionStatus> park() {
             throw new UnsupportedOperationException("Not Implemented");
         }
 
         @Override
-        public void set(double position) throws IOException {
+        public Future<TransitionStatus> set(double position) {
             
             assertTrue("got NaN", Double.compare(position, Double.NaN) != 0);
             assertTrue("position is above 1.0: " + position, position <= 1.0);
             assertTrue("position is below 0.0: " + position, position >= 0.0);
-            
+
             currentPosition = position;
+
+            TransitionStatus status = new TransitionStatus(0);
+
+            status.complete(0, null);
+
+            return CompletableFuture.completedFuture(status);
         }
         
         public double get() {

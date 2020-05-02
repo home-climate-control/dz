@@ -1,6 +1,7 @@
 package net.sf.dz3.device.actuator.impl;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
@@ -10,7 +11,7 @@ import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.logger.LogAware;
-import net.sf.jukebox.sem.ACT;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
@@ -32,16 +33,27 @@ public abstract class AbstractDamper extends LogAware implements Damper {
     private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
 
     /**
+     * Position to park if there was no park position {@link #setParkPosition(double) explicitly specified}.
+     *
+     * Normally, the damper should be fully open in this position.
+     */
+    private double defaultParkPosition = 1.0;
+
+    /**
      * A damper position defined as 'parked'.
      *
-     * Default value is 1 (fully open).
+     * Default is {@code null} - none. See commits related to https://github.com/home-climate-control/dz/issues/51
+     * for more details.
+     *
+     * If the value is {@code null} and {@link #park()} method is called, the value of
+     * {@link #defaultParkPosition} is used.
      */
-    private double parkPosition = 1;
+    private Double parkPosition = null;
 
     /**
      * Current position.
      */
-    private double position = parkPosition;
+    private double position = defaultParkPosition;
     
     public AbstractDamper(String name) {
         
@@ -72,12 +84,18 @@ public abstract class AbstractDamper extends LogAware implements Damper {
     @Override
     public final double getParkPosition() {
 
-        return parkPosition;
+        return parkPosition == null ? defaultParkPosition : parkPosition;
     }
 
     @Override
-    public final void set(double throttle) {
+    public boolean isCustomParkPosition() {
 
+        return parkPosition != null;
+    }
+
+    @Override
+    public final Future<TransitionStatus> set(double throttle) {
+        
         ThreadContext.push("set");
 
         try {
@@ -93,14 +111,22 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
             try {
 
-                moveDamper(throttle);
+                Future<TransitionStatus> done = moveDamper(throttle);
                 stateChanged();
                 
+                return done;
+
             } catch (Throwable t) {
 
-                logger.error("Failed to move damper to position " + throttle, t);
+                logger.fatal("Failed to move damper to position " + throttle, t);
+
                 // VT: FIXME: Need to change Damper to be a producer of DataSample<Double>, not Double
                 stateChanged();
+
+                TransitionStatus done = new TransitionStatus(t.hashCode());
+                done.complete(t.hashCode(), t);
+
+                return CompletableFuture.completedFuture(done);
             }
 
         } finally {
@@ -112,37 +138,20 @@ public abstract class AbstractDamper extends LogAware implements Damper {
      * Move the actual damper.
      *
      * @param position Position to set.
-     * 
-     * @exception IOException if there was a problem moving the damper.
      */
-    protected abstract void moveDamper(double position) throws IOException;
+    protected abstract Future<TransitionStatus> moveDamper(double position);
 
     @Override
-    public ACT park() {
+    public Future<TransitionStatus> park() {
 
         ThreadContext.push("park");
-        
+
         try {
-            
-            // VT: NOTE: Careful here. This implementation will work correctly only if
-            // moveDamper() works synchronously. For others (ServoDamper being a good example)
-            // you will have to provide your own implementation (again, ServoDamper is an
-            // example of how this is done).
-            
-            ACT done = new ACT();
 
-            try {
-                
-                moveDamper(parkPosition);
-                done.complete(true);
-                
-            } catch (Throwable t) {
-                
-                done.complete(false);
-            }
+            logger.debug("parking at " + getParkPosition());
 
-            return done;
-        
+            return set(getParkPosition());
+
         } finally {
             ThreadContext.pop();
         }

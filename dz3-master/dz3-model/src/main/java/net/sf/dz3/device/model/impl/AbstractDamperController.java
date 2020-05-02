@@ -1,27 +1,29 @@
 package net.sf.dz3.device.model.impl;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.DamperController;
-import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;
+import net.sf.dz3.device.model.UnitSignal;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
 import net.sf.jukebox.logger.LogAware;
-import net.sf.jukebox.sem.SemaphoreGroup;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Base logic for the damper controller.
@@ -29,6 +31,13 @@ import net.sf.jukebox.sem.SemaphoreGroup;
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractDamperController extends LogAware implements DamperController, JmxAware {
+
+    /**
+     * Completion service for asynchronous transitions.
+     *
+     * This pool requires exactly one thread.
+     */
+    CompletionService<Future<TransitionStatus>> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
 
     /**
      * Association from a thermostat to a damper.
@@ -121,7 +130,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         ts2damper.remove(ts);
     }
 
-    public synchronized void stateChanged(Thermostat source, ThermostatSignal signal) {
+    public synchronized Future<TransitionStatus> stateChanged(Thermostat source, ThermostatSignal signal) {
 
         ThreadContext.push("signalChanged");
 
@@ -137,12 +146,11 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
             logger.info("Demand: " + source.getName() + "=" + signal.demand.sample);
             logger.info("ts2signal.size()=" + ts2signal.size());
             
-            sync();
+            return sync();
 
         } finally {
             ThreadContext.pop();
         }
-
     }
 
     public synchronized void consume(DataSample<UnitSignal> signal) {
@@ -171,7 +179,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
                 } else {
 
                     // Might've been killed last time, need to set the dampers straight
-                    park();
+                    park(true);
                 }
                 
             } else if (!this.hvacSignal.sample.running && signal.sample.running) {
@@ -182,7 +190,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
             } else if (this.hvacSignal.sample.running && !signal.sample.running) {
                 
-                park();
+                park(true);
 
             } else {
 
@@ -197,7 +205,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         }
     }
     
-    private void park() {
+    private Future<TransitionStatus> park(boolean async) {
 
         ThreadContext.push("park");
         
@@ -215,7 +223,11 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
                 damperMap.put(d, d.getParkPosition());
             }
 
-            shuffle(damperMap);
+            Future<TransitionStatus> done = shuffle(damperMap, async);
+
+            logger.info("parked");
+
+            return done;
 
         } finally {
             ThreadContext.pop();
@@ -224,37 +236,35 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
     /**
      * Set positions of dampers in the map.
-     * 
+     *
+     * Normally, the positions will be set asynchronously. The only exception to this is
+     * when {@code shuffle()} is called via {@link #park()} from {@link #powerOff()}.
+     *
      * @param damperMap Key is the damper, value is the position to set.
+     * @param async {@code true} if the positions are to be set asynchronously.
      */
-    private void shuffle(Map<Damper, Double> damperMap) {
+    private Future<TransitionStatus> shuffle(Map<Damper, Double> damperMap, boolean async) {
         
         ThreadContext.push("shuffle");
         
         try {
-            
-            logger.info("damperMap.size()=" + damperMap.size());
-        
-            for (Iterator<Damper> i = damperMap.keySet().iterator(); i.hasNext(); ) {
 
-                Damper d = i.next();
+            transitionCompletionService.submit(new Damper.MoveGroup(damperMap, async));
 
-                try {
-                    
-                    double position = damperMap.get(d);
-                    
-                    logger.info("damper position: " + d.getName() + "=" + position);
+            try {
 
-                    d.set(position);
+                // VT: NOTE: The following line unwraps one level of Future. The first Future
+                // is completed when the transitions have been fired, and the second is
+                // when they all complete.
 
-                } catch (IOException ex) {
+                return transitionCompletionService.take().get();
 
-                    // This can be really bad, for it's possible that all the dampers
-                    // are controlled by the same controller and it's the controller that is faulty.
-                    // Don't want the HVAC to suffocate with all the dampers closed.
+            } catch (InterruptedException | ExecutionException ex) {
 
-                    logger.fatal("Can't set the damper position for " + d, ex);
-                }
+                // VT: FIXME: Oops... Really don't know what to do with this, will have to collect stats
+                // before this can be reasonably handled
+
+                throw new IllegalStateException("Unhandled exception", ex);
             }
             
         } finally {
@@ -301,7 +311,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
     /**
      * Recalculate the damper state according to [possibly] changed internal state.
      */
-    protected final void sync() {
+    protected final Future<TransitionStatus> sync() {
         
         // VT: NOTE: This assumes compute() is stateless, ideally, it should stay that way.
         // If there is ever a need to make it stateful, compute() should be called outside
@@ -309,11 +319,11 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         
         if (this.hvacSignal != null && this.hvacSignal.sample.running) {
         
-            shuffle(compute());
+            return shuffle(compute(), true);
             
         } else {
             
-            park();
+            return park(true);
         }
     }
 
@@ -324,7 +334,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
     }
 
     @Override
-    public final synchronized void powerOff() {
+    public final synchronized Future<TransitionStatus> powerOff() {
         
         ThreadContext.push("powerOff");
         
@@ -333,38 +343,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
             enabled = false;
             logger.warn("Powering off");
             
-            // Can't use normal park() here, for it is asynchronous and this method
-            // must finish everything before returning
-            
-            Set<Damper> damperSet = new HashSet<Damper>(); 
-
-            for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
-
-                Thermostat ts = i.next();
-                Damper d = ts2damper.get(ts);
-
-                damperSet.add(d);
-            }
-
-            SemaphoreGroup parked = new SemaphoreGroup();
-            
-            for (Iterator<Damper> i = damperSet.iterator(); i.hasNext(); ) {
-
-                Damper d = i.next();
-                
-                parked.add(d.park());
-                logger.info("Issued park() to " + d.getName());
-            }
-            
-            try {
-                
-                parked.waitForAll();
-                logger.info("Parked dampers");
-                
-            } catch (InterruptedException ex) {
-
-                logger.warn("Failed to park all dampers, some may be in a wrong position", ex);
-            }
+            return park(false);
             
         } finally {
             ThreadContext.pop();
@@ -375,21 +354,21 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      * Compute damper positions based on known data.
      */
     protected abstract Map<Damper, Double> compute();
-    
+
     private class ThermostatListener implements DataSink<ThermostatSignal> {
 
-		@Override
-		public void consume(DataSample<ThermostatSignal> signal) {
-			
-			assert(signal != null);
+        @Override
+        public void consume(DataSample<ThermostatSignal> signal) {
 
-			Thermostat source = name2ts.get(signal.sourceName);
-			
-			if (source == null) {
-				throw new IllegalArgumentException("Don't know anything about '" + signal.sourceName + "'");
-			}
-			
-			stateChanged(source, signal.sample);
-		}
+            assert(signal != null);
+
+            Thermostat source = name2ts.get(signal.sourceName);
+
+            if (source == null) {
+                throw new IllegalArgumentException("Don't know anything about '" + signal.sourceName + "'");
+            }
+
+            stateChanged(source, signal.sample);
+        }
     }
 }
