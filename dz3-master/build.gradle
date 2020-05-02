@@ -26,6 +26,11 @@ subprojects {
         toolVersion = "0.8.5"
     }
 
+    // VT: NOTE: This will break under JDK 1.8. Since Gradle is mostly used
+    // for development and works slower on actual Raspberry Pi boxes, this
+    // will not be fixed. If you want Gradle build to work on Pi, upgrade
+    // the JDK (OpenJDK 11 works fine).
+
     apply plugin: 'net.ltgt.errorprone'
 
     dependencies {
