@@ -13,7 +13,7 @@ import net.sf.dz3.controller.DataSet;
  * is used, however, make sure you record the right values. If this class is
  * used for the {@link PID_Controller}, it must be fed with controller error,
  * and anti-windup action must be programmed outside of this class.
- * 
+ *
  * Unlike {@link NaiveIntegralSet} (which has the time complexity of {@code O(n)}), this class
  * provides {@code O(1)} time complexity.
  *
@@ -128,6 +128,7 @@ public class SlidingIntegralSet implements IntegralSet {
      *
      * @return An integral value (of the {@link #lastIntegral}).
      */
+    @Override
     public final synchronized double getIntegral() {
 
         return lastIntegral;

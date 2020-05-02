@@ -34,13 +34,14 @@ public class PID_Controller extends AbstractPidController implements PidControll
      */
     public PID_Controller(final double setpoint, final double P, final double I, final long Ispan, final double D, final long Dspan,
             final double saturationLimit) {
-	
+
 	super(setpoint, P, I, D, saturationLimit);
 
         this.integralSet = new SlidingIntegralSet(Ispan);
         this.differentialSet = new NaiveDifferentialSet(Dspan);
     }
 
+    @Override
     @JmxAttribute(description = "Proportional component time span")
     public void setIspan(long iSpan) {
 
@@ -51,6 +52,7 @@ public class PID_Controller extends AbstractPidController implements PidControll
       statusChanged();
     }
 
+    @Override
     @JmxAttribute(description = "Derivative component time span")
     public void setDspan(long dSpan) {
 
@@ -71,7 +73,7 @@ public class PID_Controller extends AbstractPidController implements PidControll
 
     @Override
     protected double getDerivative(DataSample<Double> lastKnownSignal, DataSample<Double>  pv, double error) {
-        
+
         differentialSet.record(getProcessVariable().timestamp, error);
 
         return differentialSet.getDifferential();
@@ -79,7 +81,7 @@ public class PID_Controller extends AbstractPidController implements PidControll
 
     @Override
     protected void setpointChanged() {
-        
+
         // Do absolutely nothing
     }
 }

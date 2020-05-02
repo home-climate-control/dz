@@ -27,7 +27,7 @@ import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Base logic for the damper controller.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractDamperController extends LogAware implements DamperController, JmxAware {
@@ -43,30 +43,30 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      * Association from a thermostat to a damper.
      */
     protected final Map<Thermostat, Damper> ts2damper = new HashMap<Thermostat, Damper>();
-    
+
     /**
      * Association from a thermostat to its last known signal.
      */
     protected final Map<Thermostat, ThermostatSignal> ts2signal = new TreeMap<Thermostat, ThermostatSignal>();
-    
+
     /**
      * Last known unit signal.
      */
     protected DataSample<UnitSignal> hvacSignal = null;
-    
+
     /**
      * Instrumentation map.
-     * 
+     *
      * The only purpose is to be accessed via JMX ({@link #getDamperMap()}). Content is not used in any calculations.
      * Value is refreshed in {@link #shuffle(Map)}.
      */
     private final Map<Damper, Double> lastMap = new HashMap<Damper, Double>();
-    
+
     /**
      * Thermostat signal consumer.
      */
     private final ThermostatListener tsListener = new ThermostatListener();
-    
+
     /**
      * Mapping from thermostat name to thermostat instance - needed to support the {@link #tsListener}.
      */
@@ -74,9 +74,9 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
 	/**
      * Stays {@code true} until {@link #powerOff} is called.
-     * 
+     *
      * If this flag is {@code false} (i.e. {@link #powerOff} was called), all other methods will
-     * throw {@link IllegalStateException} upon invocation 
+     * throw {@link IllegalStateException} upon invocation
      */
     private boolean enabled = true;
 
@@ -84,40 +84,40 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      * Create an instance with nothing attached.
      */
     public AbstractDamperController() {
-        
+
     }
-    
+
     /**
      * Create an instance and make it listen to the unit and thermostats.
-     * 
+     *
      * @param unit Unit to listen to.
      * @param ts2damper Thermostats to listen to and dampers to associate them with.
      */
     public AbstractDamperController(Unit unit, Map<Thermostat, Damper> ts2damper) {
-        
+
         if (unit == null) {
             throw new IllegalArgumentException("unit can't be null");
         }
-        
+
         if (ts2damper == null) {
             throw new IllegalArgumentException("ts2damper can't be null");
         }
-        
+
         unit.addConsumer(this);
-        
+
         for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
 
         	Thermostat ts = i.next();
             Damper d = ts2damper.get(ts);
-            
+
             put(ts, d);
-            
+
             ts.addConsumer(tsListener);
 
 			name2ts.put(ts.getName(), ts);
         }
     }
-    
+
     @Override
     public synchronized void put(Thermostat ts, Damper damper) {
 
@@ -135,17 +135,17 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         ThreadContext.push("signalChanged");
 
         try {
-            
+
             checkEnabled();
-            
+
             if (!ts2damper.containsKey(source)) {
                 throw new IllegalArgumentException("Don't know anything about " + source);
             }
-            
+
             ts2signal.put(source, signal);
             logger.info("Demand: " + source.getName() + "=" + signal.demand.sample);
             logger.info("ts2signal.size()=" + ts2signal.size());
-            
+
             return sync();
 
         } finally {
@@ -153,35 +153,36 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         }
     }
 
+    @Override
     public synchronized void consume(DataSample<UnitSignal> signal) {
-        
+
         ThreadContext.push("consume");
-        
+
         try {
-            
+
             checkEnabled();
-            
+
             if (signal == null) {
                 throw new IllegalArgumentException("signal can't be null");
             }
-            
+
             logger.info("UnitSignal: " + signal.sample);
-            
+
             if (this.hvacSignal == null) {
-                
+
                 if (signal.sample.running) {
-                    
+
                     // It would be realistic to assume it's been off, right?
                     logger.info("Turning ON");
 
                     sync();
-                    
+
                 } else {
 
                     // Might've been killed last time, need to set the dampers straight
                     park(true);
                 }
-                
+
             } else if (!this.hvacSignal.sample.running && signal.sample.running) {
 
                 logger.info("Turning ON");
@@ -189,7 +190,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
                 sync();
 
             } else if (this.hvacSignal.sample.running && !signal.sample.running) {
-                
+
                 park(true);
 
             } else {
@@ -197,23 +198,23 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
                 // No change except for recalculating the damper positions
                 sync();
             }
-            
+
 
         } finally {
             this.hvacSignal = signal;
             ThreadContext.pop();
         }
     }
-    
+
     private Future<TransitionStatus> park(boolean async) {
 
         ThreadContext.push("park");
-        
+
         try {
-            
+
             logger.info("Turning OFF");
 
-            Map<Damper, Double> damperMap = new HashMap<Damper, Double>(); 
+            Map<Damper, Double> damperMap = new HashMap<Damper, Double>();
 
             for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
 
@@ -244,9 +245,9 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      * @param async {@code true} if the positions are to be set asynchronously.
      */
     private Future<TransitionStatus> shuffle(Map<Damper, Double> damperMap, boolean async) {
-        
+
         ThreadContext.push("shuffle");
-        
+
         try {
 
             transitionCompletionService.submit(new Damper.MoveGroup(damperMap, async));
@@ -266,63 +267,63 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
                 throw new IllegalStateException("Unhandled exception", ex);
             }
-            
+
         } finally {
-            
+
             lastMap.clear();
             lastMap.putAll(damperMap);
-            
+
             ThreadContext.pop();
         }
     }
-    
+
     /**
      * Get the damper position map for instrumentation purposes.
-     * 
+     *
      * @return Damper positions as array of strings.
      */
     @JmxAttribute(description = "Damper positions")
     public synchronized String[] getDamperMap() {
-     
+
         String[] result = new String[lastMap.size()];
-        
+
         Map<String, Double> resultMap = new TreeMap<String, Double>();
-        
+
         for (Iterator<Damper> i = lastMap.keySet().iterator(); i.hasNext(); ) {
-            
+
             Damper d = i.next();
             Double position = lastMap.get(d);
-            
+
             resultMap.put(d.getName(), position);
         }
-        
+
         int offset = 0;
         for (Iterator<String> i = resultMap.keySet().iterator(); i.hasNext(); ) {
-            
+
             String name = i.next();
             Double position = resultMap.get(name);
-            
-            result[offset++] = name + "=" + position; 
+
+            result[offset++] = name + "=" + position;
         }
-        
+
         return result;
     }
-    
+
     /**
      * Recalculate the damper state according to [possibly] changed internal state.
      */
     protected final Future<TransitionStatus> sync() {
-        
+
         // VT: NOTE: This assumes compute() is stateless, ideally, it should stay that way.
         // If there is ever a need to make it stateful, compute() should be called outside
         // of the fork and the map passed to shuffle) within.
-        
+
         if (this.hvacSignal != null && this.hvacSignal.sample.running) {
-        
+
             return shuffle(compute(), true);
-            
+
         } else {
-            
+
             return park(true);
         }
     }
@@ -335,21 +336,21 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
     @Override
     public final synchronized Future<TransitionStatus> powerOff() {
-        
+
         ThreadContext.push("powerOff");
-        
+
         try {
 
             enabled = false;
             logger.warn("Powering off");
-            
+
             return park(false);
-            
+
         } finally {
             ThreadContext.pop();
         }
     }
-    
+
     /**
      * Compute damper positions based on known data.
      */

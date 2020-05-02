@@ -28,16 +28,17 @@
 
 package com.dalsemi.onewire.container;
 
-// imports
-import com.dalsemi.onewire.utils.Address;
 import java.util.Enumeration;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.dalsemi.onewire.adapter.*;
 import com.dalsemi.onewire.OneWireException;
+import com.dalsemi.onewire.adapter.DSPortAdapter;
+import com.dalsemi.onewire.adapter.OneWireIOException;
+// imports
+import com.dalsemi.onewire.utils.Address;
 
 
 /**
@@ -427,7 +428,7 @@ public class OneWireContainer {
      * @throws OneWireException if adapter is not open
      */
     public synchronized boolean isPresent() throws OneWireIOException, OneWireException {
-        
+
         return adapter.isPresent(address);
     }
 
@@ -460,7 +461,7 @@ public class OneWireContainer {
      */
     @SuppressWarnings("static-access")
     public void doSpeed() throws OneWireIOException, OneWireException {
-        
+
         boolean is_present = false;
 
         try {
@@ -474,14 +475,14 @@ public class OneWireContainer {
 
         // speed Overdrive
         if (speed == adapter.SPEED_OVERDRIVE) {
-            
+
             try {
                 // get this device and adapter to overdrive
                 adapter.setSpeed(adapter.SPEED_REGULAR);
                 adapter.reset();
                 adapter.putByte(( byte ) 0x69);
                 adapter.setSpeed(adapter.SPEED_OVERDRIVE);
-                
+
             } catch (OneWireIOException ex) {
                 // VOID
                 logger.fatal("DalSemi ignored this exception", ex);
@@ -495,7 +496,7 @@ public class OneWireContainer {
                         (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                         (byte) 0x00, (byte) 0x00, (byte) 0x00,(byte) 0x00,
                         };
-                
+
                 System.arraycopy(address, 0, addressCopy, 0, 8);
                 adapter.dataBlock(addressCopy, 0, 8);
             }
@@ -540,9 +541,10 @@ public class OneWireContainer {
      * @return  a hash code value for this object.
      * @see     java.util.Hashtable
      */
+    @Override
     public int hashCode() {
-        
-        if(this.address==null) { 
+
+        if(this.address==null) {
             return 0;
         } else {
             return (new Long(Address.toLong(this.address))).hashCode();
@@ -555,14 +557,15 @@ public class OneWireContainer {
      * @return  <code>true</code> if this object is the same as the obj
      *          argument; <code>false</code> otherwise.
      */
+    @Override
     public boolean equals(Object o) {
-        
+
         if(o==this) {
             return true;
         }
 
         if(o instanceof OneWireContainer) {
-         
+
             OneWireContainer owc = (OneWireContainer)o;
             // don't claim that all subclasses of a specific container are
             // equivalent to the parent container
@@ -579,6 +582,7 @@ public class OneWireContainer {
      *
      * @return  a string representation of the object.
      */
+    @Override
     public String toString() {
         return Address.toString(this.address) + " " + this.getName();
     }

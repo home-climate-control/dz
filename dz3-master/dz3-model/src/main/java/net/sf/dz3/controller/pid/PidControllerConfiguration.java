@@ -21,6 +21,7 @@ public interface PidControllerConfiguration extends AbstractPidControllerConfigu
   )
   void setDspan(long dSpan);
 
+  @Override
   @ConfigurableProperty(
       propertyName = "limit",
       description = "Anti-windup saturation limit, 0 is no limit",

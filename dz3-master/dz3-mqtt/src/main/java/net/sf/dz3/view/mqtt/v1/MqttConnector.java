@@ -160,7 +160,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             Set<Object> initSet,
             Set<ConnectorFactory<JsonRenderer>> factorySet) throws MqttException {
 
-        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, factorySet);
     }
 
     /**

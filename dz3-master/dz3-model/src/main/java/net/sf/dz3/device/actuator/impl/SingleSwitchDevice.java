@@ -19,11 +19,11 @@ import net.sf.jukebox.datastream.signal.model.DataSource;
 /**
  * Extremely simplified implementation of a consumer for a {@link ZoneController}, {@link Economizer},
  * and other sources that might have a simple actuator.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
  */
 public class SingleSwitchDevice implements DataSink<Double> {
-    
+
     private final Logger logger = LogManager.getLogger(getClass());
 
     private final BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<Runnable>();
@@ -33,17 +33,17 @@ public class SingleSwitchDevice implements DataSink<Double> {
      * Hardware switch to control.
      */
     private final Switch theSwitch;
-    
+
     /**
      * Stays {@code true} until {@link #powerOff()} is called, then becomes {@code false}
      * and causes all subsequent invocations of {@link #consume(DataSample)} to throw
      * {@link IllegalStateException}.
      */
     private boolean enabled = true;
-    
+
     /**
      * Current state.
-     * 
+     *
      * Used to avoid wasting time on setting hardware to the state it is already at.
      * {@code null} until first invocation.
      */
@@ -51,50 +51,50 @@ public class SingleSwitchDevice implements DataSink<Double> {
 
     /**
      * Create an instance.
-     * 
+     *
      * @param source Data source to use to control {@link #theSwitch}. Non-zero output from the data source (or any other signal
      * passed to {@link #consume(DataSample)}, for that matter) will cause {@link #theSwitch} to be set to {@code true}.
-     * 
+     *
      * @param target Switch to control.
      */
     public SingleSwitchDevice(DataSource<Double> source, Switch target) {
-        
+
         executor = new ThreadPoolExecutor(1, 1, 60, TimeUnit.SECONDS, commandQueue);
 
         this.theSwitch = target;
-        
+
         source.addConsumer(this);
     }
 
     @Override
     public synchronized void consume(DataSample<Double> signal) {
-        
+
         ThreadContext.push("consume");
-        
+
         try {
-            
+
             checkEnabled();
-            
+
             if (signal.isError()) {
                 throw new IllegalStateException("Not accepting error input");
             }
-            
+
             boolean newState = signal.sample > 0 ? true : false;
-            
+
             if (state != null && newState == state.booleanValue()) {
-                
+
                 logger.info("Switch " + theSwitch.getAddress() + "=" + newState + " (unchanged)");
                 return;
             }
-            
+
             logger.info("Switch " + theSwitch.getAddress() + "=" + newState);
-            
+
             executor.execute(new Command(newState));
-            
+
         } finally {
             ThreadContext.pop();
         }
-        
+
     }
 
     private void checkEnabled() {
@@ -109,60 +109,61 @@ public class SingleSwitchDevice implements DataSink<Double> {
     public synchronized void powerOff() {
 
         ThreadContext.push("powerOff");
-        
+
         try {
 
             logger.warn("Powering off");
 
             executor.execute(new Command(false));
             enabled = false;
-        
+
         } finally {
             ThreadContext.pop();
         }
     }
 
     private class Command implements Runnable {
-        
+
         private final boolean state;
-        
+
         public Command(boolean state) {
-            
+
             this.state = state;
         }
-        
+
+        @Override
         public void run() {
-            
+
             int retry = 0;
             while (true) {
-                
+
                 ThreadContext.push("run" + (retry > 0 ? "#retry-" + retry : ""));
-                
+
                 try {
 
                     logger.debug("Running " + toString());
-                    
+
                     theSwitch.setState(state);
                     SingleSwitchDevice.this.state = state;
-                    
+
                     logger.debug("Success");
                     return;
 
                 } catch (Throwable t) {
 
                     logger.fatal("Failed to execute " + getClass().getSimpleName(), t);
-                    
+
                     // We're going to retry this till the end of time, because
                     // hardware operations are critical
-                    
+
                     retry++;
-                    
+
                     try {
-                    
+
                         Thread.sleep(1000);
-                    
+
                     } catch (InterruptedException ex) {
-                        
+
                         logger.error("Interrupted, ignored", ex);
                     }
 

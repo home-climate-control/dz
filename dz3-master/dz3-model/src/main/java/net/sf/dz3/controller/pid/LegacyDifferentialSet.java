@@ -1,18 +1,18 @@
 package net.sf.dz3.controller.pid;
 
-import net.sf.dz3.controller.DataSet;
-import net.sf.dz3.controller.LegacyDataSet;
-
 import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.sf.dz3.controller.DataSet;
+import net.sf.dz3.controller.LegacyDataSet;
+
 /**
  * Data set supporting the differential calculation.
  *
  * This is the old implementation, written in 2000 with little regard to performance.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
  */
 public class LegacyDifferentialSet extends LegacyDataSet<Double> implements DifferentialSet {
@@ -37,6 +37,7 @@ public class LegacyDifferentialSet extends LegacyDataSet<Double> implements Diff
    *
    * @return A differential value.
    */
+  @Override
   public final synchronized double getDifferential() {
 
       if (size() < 2) {

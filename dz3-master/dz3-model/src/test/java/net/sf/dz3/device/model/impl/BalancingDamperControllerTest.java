@@ -22,7 +22,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.servomaster.device.model.TransitionStatus;
 
 public class BalancingDamperControllerTest extends TestCase {
-    
+
     private final Logger logger = LogManager.getLogger(getClass());
 
     /**
@@ -30,9 +30,9 @@ public class BalancingDamperControllerTest extends TestCase {
      * out of acceptable range.
      */
     public void testBoundaries() {
-        
+
         ThreadContext.push("testBoundaries");
-        
+
         try {
 
             Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
@@ -56,14 +56,14 @@ public class BalancingDamperControllerTest extends TestCase {
             ThreadContext.pop();
         }
     }
-    
+
     /**
      * Make sure that zero demand from all thermostats doesn't cause NaN sent to dampers.
      */
     public void testNaN() throws InterruptedException, ExecutionException {
-        
+
         ThreadContext.push("testNaN");
-        
+
         try {
 
             Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
@@ -129,10 +129,10 @@ public class BalancingDamperControllerTest extends TestCase {
     }
 
     private static class DummyDamper implements Damper {
-        
+
         private final String name;
         private Double currentPosition = null;
-        
+
         public DummyDamper(String name) {
             this.name = name;
         }
@@ -164,7 +164,7 @@ public class BalancingDamperControllerTest extends TestCase {
 
         @Override
         public Future<TransitionStatus> set(double position) {
-            
+
             assertTrue("got NaN", Double.compare(position, Double.NaN) != 0);
             assertTrue("position is above 1.0: " + position, position <= 1.0);
             assertTrue("position is below 0.0: " + position, position >= 0.0);
@@ -177,13 +177,13 @@ public class BalancingDamperControllerTest extends TestCase {
 
             return CompletableFuture.completedFuture(status);
         }
-        
+
         public double get() {
-            
+
             if (currentPosition == null) {
                 throw new IllegalStateException("Attempt to get a position that wasn never set");
             }
-            
+
             return currentPosition;
         }
 

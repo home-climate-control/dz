@@ -1,13 +1,5 @@
 package net.sf.dz3.controller;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
-import net.sf.dz3.controller.pid.DifferentialSet;
-import net.sf.dz3.controller.pid.LegacyDifferentialSet;
-import net.sf.dz3.controller.pid.NaiveDifferentialSet;
-import net.sf.dz3.controller.pid.SlidingDifferentialSet;
-import net.sf.dz3.instrumentation.Marker;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +9,14 @@ import java.util.concurrent.Semaphore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+
+import junit.framework.AssertionFailedError;
+import junit.framework.TestCase;
+import net.sf.dz3.controller.pid.DifferentialSet;
+import net.sf.dz3.controller.pid.LegacyDifferentialSet;
+import net.sf.dz3.controller.pid.NaiveDifferentialSet;
+import net.sf.dz3.controller.pid.SlidingDifferentialSet;
+import net.sf.dz3.instrumentation.Marker;
 
 /**
  * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
@@ -35,7 +35,7 @@ public class DifferentialSetTest extends TestCase {
 
     /**
      * Compare slow and fast implementation speed.
-     * 
+     *
      * This test doesn't test the implementation correctness.
      */
     public void testAll() throws InterruptedException {
@@ -57,17 +57,17 @@ public class DifferentialSetTest extends TestCase {
 
         logger.info("done");
     }
-    
+
     /**
      * Make sure the slow and fast implementation yield the same results, without triggering expiration.
      */
     public void testSameNoExpiration() {
-        
+
         int count = 100;
-        
+
         // Make sure the expiration interval is beyond the possible timestamp advance
-        long expirationInterval = (count + count/2) * TICK; 
-                
+        long expirationInterval = (count + count/2) * TICK;
+
         testSame(count, expirationInterval);
     }
 
@@ -75,12 +75,12 @@ public class DifferentialSetTest extends TestCase {
      * Make sure the slow and fast implementation yield the same results, triggering expiration.
      */
     public void DISABLED_testSameWithExpiration() {
-        
+
         int count = 10000;
-        
+
         // Make sure the expiration interval is within the possible timestamp advance. Statistically.
-        long expirationInterval = (count/10) * TICK; 
-                
+        long expirationInterval = (count/10) * TICK;
+
         testSame(count, expirationInterval);
     }
 
@@ -95,7 +95,7 @@ public class DifferentialSetTest extends TestCase {
         int count = 0;
 
         Long lastGoodTimestamp = null;
-        
+
         try {
 
             DifferentialSet dataSet2000 = new LegacyDifferentialSet(expirationInterval);
@@ -115,16 +115,16 @@ public class DifferentialSetTest extends TestCase {
 
                 assertEquals("2000/2015 differ", dataSet2000.getDifferential(), dataSet2015.getDifferential(), 0.0001);
                 assertEquals("2015/slide differ", dataSet2015.getDifferential(), dataSetFast.getDifferential(), 0.0001);
-                
+
                 lastGoodTimestamp = timestamp;
             }
 
         } finally {
-            
+
             if (count < limit) {
                 logger.info("Survived " + count + "/" + limit + " iterations, last good timestamp is " + lastGoodTimestamp);
             }
-        
+
             m.close();
             ThreadContext.pop();
         }
@@ -135,7 +135,7 @@ public class DifferentialSetTest extends TestCase {
      * Make sure the slow and fast implementation yield the same results, step by step, with NO more than one record ever expired.
      */
     public void testSameSingleExpiration80() {
-        
+
         List<Long> timestamps = new LinkedList<Long>();
 
         // Make sure no intervals exceed the expiration interval so no more than one entry ever needs to be expired
@@ -153,7 +153,7 @@ public class DifferentialSetTest extends TestCase {
      * Make sure the slow and fast implementation yield the same results, step by step, with NO more than one record ever expired.
      */
     public void testSameSingleExpiration50() {
-        
+
         List<Long> timestamps = new LinkedList<Long>();
 
         // Make sure no intervals exceed the expiration interval so no more than one entry ever needs to be expired
@@ -171,7 +171,7 @@ public class DifferentialSetTest extends TestCase {
      * Make sure the slow and fast implementation yield the same results, step by step, with MORE than one record ever expired.
      */
     public void testSameMultipleExpiration() {
-        
+
         List<Long> timestamps = new LinkedList<Long>();
 
         timestamps.add(80L);
@@ -191,7 +191,7 @@ public class DifferentialSetTest extends TestCase {
      * Make sure the slow and fast implementation yield the same results, step by step, with MORE than one record ever expired.
      */
     public void testSameFirstExpiration() {
-        
+
         List<Long> timestamps = new LinkedList<Long>();
 
         // The first item added will trigger the expiration already
@@ -211,7 +211,7 @@ public class DifferentialSetTest extends TestCase {
         ThreadContext.push("testSameSteps/D-" + marker);
 
         try {
-            
+
             DifferentialSet dataSet2000 = new LegacyDifferentialSet(expirationInterval);
             DifferentialSet dataSet2015 = new NaiveDifferentialSet(expirationInterval);
             DifferentialSet dataSetFast = new SlidingDifferentialSet(expirationInterval);
@@ -220,9 +220,9 @@ public class DifferentialSetTest extends TestCase {
             long count = 0;
 
             for (Iterator<Long> i = timestamps.iterator(); i.hasNext(); ) {
-                
+
                 ThreadContext.push("" + count++);
-                
+
                 try {
 
                     timestamp += i.next();
@@ -246,33 +246,34 @@ public class DifferentialSetTest extends TestCase {
                     ThreadContext.pop();
                 }
             }
-            
+
             logger.debug("Success");
 
         } catch (AssertionFailedError e) {
-            
+
             logger.error("Failure");
-            
+
             throw e;
-            
+
         } finally {
-            
+
             ThreadContext.pop();
         }
 
     }
 
     private abstract class Runner implements Runnable {
-        
+
         protected final long expirationInterval;
-        
+
         Runner(long expirationInterval) throws InterruptedException {
-            
+
             this.expirationInterval = expirationInterval;
-            
+
             stopGate.acquire();
         }
 
+        @Override
         public void run() {
 
             DifferentialSet dataSet = createSet(expirationInterval);
@@ -314,7 +315,7 @@ public class DifferentialSetTest extends TestCase {
         protected DifferentialSet createSet(long expirationInterval) {
             return new NaiveDifferentialSet(expirationInterval);
         }
-        
+
         @Override
         protected void sample(DifferentialSet dataSet) {
             dataSet.getDifferential();

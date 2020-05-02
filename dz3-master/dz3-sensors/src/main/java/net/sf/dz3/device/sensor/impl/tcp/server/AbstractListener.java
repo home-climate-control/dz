@@ -71,7 +71,7 @@ public abstract class AbstractListener extends PassiveService {
 
     /*
      * The multicast server.
-     * 
+     *
      * VT: FIXME: WIll reinstate it later, after things are solidified with direct connections.
      */
     //private MulticastServer multicastServer;
@@ -83,7 +83,7 @@ public abstract class AbstractListener extends PassiveService {
     public AbstractListener(Set<String> addressSet, int port, int broadcastPort, boolean secure, String password) {
 
         this.addressSet.addAll(addressSet);
-        
+
         this.signature = new TcpConnectionSignature(port, secure, password);
         this.broadcastPort = broadcastPort;
     }
@@ -366,16 +366,19 @@ public abstract class AbstractListener extends PassiveService {
             this.port = port;
         }
 
+        @Override
         @JmxAttribute(description="Host pattern to listen to")
         public String getHost() {
             return (addr == null ? "*" : addr.toString()) + ":" + port;
         }
 
+        @Override
         @JmxAttribute(description="true if secure connection is requested by configuration")
         public boolean isSecureRequested() {
             return signature.secure;
         }
 
+        @Override
         @JmxAttribute(description="true if connected in secure mode")
         public boolean isSecure() {
             return ss instanceof SSLServerSocket;
@@ -587,7 +590,7 @@ public abstract class AbstractListener extends PassiveService {
 
         @Override
         public int compareTo(Listener other) {
-            
+
             if (other == null) {
                 throw new IllegalArgumentException("other can't be null");
             }
@@ -666,7 +669,7 @@ public abstract class AbstractListener extends PassiveService {
             // Start the command parser thread
 
             parser = new Thread(createParser());
-            
+
             if (parser != null) {
                 parser.start();
             }
@@ -768,6 +771,7 @@ public abstract class AbstractListener extends PassiveService {
              * Keep reading the data from {@link ConnectionHandler#br the reader} and
              * {@link #parse(String) parsing} it.
              */
+            @Override
             public void run() {
 
                 while (true) {
