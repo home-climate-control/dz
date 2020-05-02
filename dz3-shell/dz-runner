@@ -25,11 +25,11 @@ export BASENAME=`dirname $0`
 
 #DATA_ASYNC-Dnet.sf.jukebox.datastream.logger.impl.DataBroadcaster.async=true
 
-# Comment out the following line if you want to disable servo dampers crawling
-# (You'd want this if they move too slowly, for example, with 16 servo serial servo controllers)
-# Keep in mind that you will start hearing them if you do so.
+# The DAMPER_CRAWL settings has been made explicit (see https://github.com/home-climate-control/dz/issues/129)
+# This is the default behavior; if you want to disable it, specify the right arguments to ServoDamper
+# in your configuration file
 
-DAMPER_CRAWL=-Dnet.sf.dz3.device.actuator.servomaster.ServoDamper.crawl=true
+#DAMPER_CRAWL=-Dnet.sf.dz3.device.actuator.servomaster.ServoDamper.crawl=true
 
 # Comment out the following line if you want to disable JMX
 # (why would you, though??? this makes sense only in EXTREMELY tight memory conditions)
@@ -58,6 +58,5 @@ fi
     ${JAVA} ${MEM_LIMITS} \
             ${EVENT_ASYNC} \
             ${DATA_ASYNC} \
-            ${DAMPER_CRAWL} \
             ${JMX} \
             -cp ${CLASSPATH} net.sf.dz3.runtime.Container $*)

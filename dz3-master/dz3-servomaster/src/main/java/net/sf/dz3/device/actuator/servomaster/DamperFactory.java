@@ -74,8 +74,7 @@ public class DamperFactory {
      * @throws IOException if things go wrong.
      */
     public Damper getDamper(String name, String id) throws IOException {
-
-        return getDamper(name, id, false, null, null);
+        return getDamper(name, id, true, false, null, null);
     }
 
     /**
@@ -83,6 +82,7 @@ public class DamperFactory {
      *
      * @param name Human readable name.
      * @param id Controller specific servo ID.
+     * @param crawl {@code true} if the damper needs to be crawling.
      * @param reverse {@code true} if the damper needs to be reversed.
      * @param rangeCalibration Range calibration object.
      *
@@ -92,10 +92,11 @@ public class DamperFactory {
     public Damper getDamper(
             String name,
             String id,
+            boolean crawl,
             boolean reverse,
             RangeCalibration rangeCalibration) throws IOException {
 
-        return getDamper(name, id, reverse, rangeCalibration, null);
+        return getDamper(name, id, crawl, reverse, rangeCalibration, null);
     }
 
     /**
@@ -103,6 +104,7 @@ public class DamperFactory {
      *
      * @param name Human readable name.
      * @param id Controller specific servo ID.
+     * @param crawl {@code true} if the damper needs to be crawling.
      * @param reverse {@code true} if the damper needs to be reversed.
      * @param limitCalibration Limit calibration object.
      *
@@ -112,19 +114,21 @@ public class DamperFactory {
     public Damper getDamper(
             String name,
             String id,
+            boolean crawl,
             boolean reverse,
             LimitCalibration limitCalibration) throws IOException {
 
-        return getDamper(name, id, reverse, null, limitCalibration);
+        return getDamper(name, id, crawl, reverse, null, limitCalibration);
     }
 
     private Damper getDamper(
             String name,
             String id,
+            boolean crawl,
             boolean reverse,
             RangeCalibration rangeCalibration,
             LimitCalibration limitCalibration) throws IOException {
 
-        return new ServoDamper(name, theController.getServo(id), reverse, rangeCalibration, limitCalibration);
+        return new ServoDamper(name, theController.getServo(id), crawl, reverse, rangeCalibration, limitCalibration);
     }
 }

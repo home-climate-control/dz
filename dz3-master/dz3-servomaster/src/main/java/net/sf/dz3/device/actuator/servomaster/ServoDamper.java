@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.impl.AbstractDamper;
+import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.servomaster.device.model.Servo;
 import net.sf.servomaster.device.model.TransitionStatus;
@@ -27,14 +28,25 @@ public class ServoDamper extends AbstractDamper {
     private final Servo servo;
 
     /**
+     * Whether the servo is ordered to crawl.
+     *
+     * Default is {@code true}.
+     */
+    private final boolean crawl;
+
+    /**
+     * Whether the servo is ordered to be reversed.
+     */
+    private final boolean reverse;
+
+    /**
      * Create an instance with no reversing and no range or limit calibration.
      *
      * @param name Human readable name.
      * @param servo Servo instance to use.
      */
     public ServoDamper(String name, Servo servo) {
-
-        this(name, servo, false, null, null);
+        this(name, servo, true, false, null, null);
     }
 
     /**
@@ -45,9 +57,8 @@ public class ServoDamper extends AbstractDamper {
      * @param reverse {@code true} if the servo movement should be reversed.
      * @param rangeCalibration Range calibration object.
      */
-    public ServoDamper(String name, Servo servo, boolean reverse, RangeCalibration rangeCalibration) {
-
-        this(name, servo, reverse, rangeCalibration, null);
+    public ServoDamper(String name, Servo servo, boolean crawl, boolean reverse, RangeCalibration rangeCalibration) {
+        this(name, servo, crawl, reverse, rangeCalibration, null);
     }
 
     /**
@@ -58,9 +69,8 @@ public class ServoDamper extends AbstractDamper {
      * @param reverse {@code true} if the servo movement should be reversed.
      * @param limitCalibration Limit calibration object.
      */
-    public ServoDamper(String name, Servo servo, boolean reverse, LimitCalibration limitCalibration) {
-
-        this(name, servo, reverse, null, limitCalibration);
+    public ServoDamper(String name, Servo servo, boolean crawl, boolean reverse, LimitCalibration limitCalibration) {
+        this(name, servo, crawl, reverse, null, limitCalibration);
     }
 
     /**
@@ -70,6 +80,7 @@ public class ServoDamper extends AbstractDamper {
      *
      * @param name Human readable name.
      * @param servo Servo instance to use.
+     * @param reverse {@code true} if the servo should be crawling.
      * @param reverse {@code true} if the servo movement should be reversed.
      * @param rangeCalibration Range calibration object.
      * @param limitCalibration Limit calibration object.
@@ -77,11 +88,15 @@ public class ServoDamper extends AbstractDamper {
     public ServoDamper(
             String name,
             Servo servo,
+            boolean crawl,
             boolean reverse,
             RangeCalibration rangeCalibration,
             LimitCalibration limitCalibration) {
 
         super(name);
+
+        this.crawl = crawl;
+        this.reverse = reverse;
 
         ThreadContext.push("ServoDamper()");
 
@@ -108,9 +123,9 @@ public class ServoDamper extends AbstractDamper {
             // Until it is actually done in configuration, let's just install a crawl controller
             // But only if it is specifically requested (see dz-runner script)
 
-            if (System.getProperty(getClass().getName() + ".crawl") != null) {
+            if (crawl) {
 
-                logger.info("Will be crawling");
+                logger.debug("Will be crawling");
                 servo.attach(new CrawlTransitionController(), false);
             }
 
@@ -156,6 +171,16 @@ public class ServoDamper extends AbstractDamper {
 
             ThreadContext.pop();
         }
+    }
+
+    @JmxAttribute(description = "true if the servo is crawling")
+    public boolean isCrawling() {
+        return crawl;
+    }
+
+    @JmxAttribute(description = "true if the servo is reversed")
+    public boolean isReversed() {
+        return reverse;
     }
 
     @Override
