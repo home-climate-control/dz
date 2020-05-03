@@ -25,9 +25,9 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 /**
  * The virtual thermostat implementation.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
-public final class ThermostatModel implements Thermostat, ThermostatController {
+public class ThermostatModel implements Thermostat, ThermostatController {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
