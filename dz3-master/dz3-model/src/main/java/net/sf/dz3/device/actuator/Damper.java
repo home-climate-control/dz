@@ -29,13 +29,13 @@ import net.sf.servomaster.device.model.TransitionStatus;
  *
  * Classes implementing this interface control the hardware.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
-    
+
     /**
      * Get damper name.
-     * 
+     *
      * @return Damper name.
      */
     String getName();
@@ -45,17 +45,17 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      *
      * This method is intentionally not made available to JMX instrumentation,
      * to avoid interference.
-     * 
+     *
      * @param position 0 is fully closed, 1 is fully open, 0...1 corresponds
      * to partially open position.
      *
      * @return A token that allows to track the completion of the damper
      * movement.
-     * 
+     *
      * @exception IllegalArgumentException if {@code position} is outside of 0...1 range.
      */
     Future<TransitionStatus> set(double position);
-    
+
     /**
      * Get current damper position.
      *
@@ -66,7 +66,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      */
     @JmxAttribute(description = "Current position")
     double getPosition() throws IOException;
-    
+
     /**
      * Set 'park' position.
      *
@@ -82,11 +82,11 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * @param position A value that is considered 'parked'.
      *
      * @see #park
-     * 
+     *
      * @exception IllegalArgumentException if {@code position} is outside of 0...1 range.
      */
     void setParkPosition(double position);
-    
+
     /**
      * Get 'safe' position.
      *
@@ -95,7 +95,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      */
     @JmxAttribute(description = "Parked position")
     double getParkPosition();
-    
+
     /**
      * Determine whether the park position has been explicitly specified.
      *

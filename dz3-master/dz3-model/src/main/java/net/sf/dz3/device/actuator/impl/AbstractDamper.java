@@ -14,17 +14,17 @@ import net.sf.jukebox.logger.LogAware;
 import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
 public abstract class AbstractDamper extends LogAware implements Damper {
-    
+
     /**
      * Damper name.
-     * 
+     *
      * Necessary evil to allow instrumentation signature.
      */
      private final String name;
-     
+
      /**
       * Instrumentation signature.
       */
@@ -54,17 +54,17 @@ public abstract class AbstractDamper extends LogAware implements Damper {
      * Current position.
      */
     private double position = defaultParkPosition;
-    
+
     public AbstractDamper(String name) {
-        
+
         if (name == null || "".equals(name)) {
             throw new IllegalArgumentException("name can't be null");
         }
-        
+
         this.name = name;
-        signature = MessageDigestCache.getMD5(name).substring(0, 19); 
+        signature = MessageDigestCache.getMD5(name).substring(0, 19);
     }
-    
+
     @Override
     public final String getName() {
         return name;
@@ -95,11 +95,11 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
     @Override
     public final Future<TransitionStatus> set(double throttle) {
-        
+
         ThreadContext.push("set");
 
         try {
-            
+
             logger.info("position=" + throttle);
 
             if ( throttle < 0 || throttle > 1.0 || Double.compare(throttle, Double.NaN) == 0) {
@@ -113,7 +113,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
                 Future<TransitionStatus> done = moveDamper(throttle);
                 stateChanged();
-                
+
                 return done;
 
             } catch (Throwable t) {
@@ -164,19 +164,19 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
     @Override
     public void addConsumer(DataSink<Double> consumer) {
-        
+
         dataBroadcaster.addConsumer(consumer);
     }
 
     @Override
     public void removeConsumer(DataSink<Double> consumer) {
-        
+
         dataBroadcaster.removeConsumer(consumer);
     }
 
     @Override
     public void consume(DataSample<Double> signal) {
-        
+
         set(signal.sample);
     }
 }

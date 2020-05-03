@@ -13,10 +13,10 @@ import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Damper controlled by a switch.
- * 
+ *
  * Most existing HVAC dampers are like this, controlled by 24VAC.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
 public class SwitchDamper extends AbstractDamper {
 
@@ -24,15 +24,15 @@ public class SwitchDamper extends AbstractDamper {
      * Current position.
      */
     private double position;
-    
+
     /**
      * Hardware switch that controls the actual damper.
      */
     private final Switch target;
-    
+
     /**
      * Switch threshold.
-     * 
+     *
      * Values passed to {@link #moveDamper(double)} above the threshold
      * will set the switch to 1,values equal or less will set the switch to 0.
      */
@@ -82,29 +82,29 @@ public class SwitchDamper extends AbstractDamper {
     public SwitchDamper(String name, Switch target, double threshold, double parkPosition, boolean inverted) {
 
         super(name);
-        
+
         check(target);
         check(threshold);
-        
+
         this.target = target;
         this.threshold = threshold;
-        
+
         this.inverted = inverted;
 
         setParkPosition(parkPosition);
-        
+
         set(getParkPosition());
     }
 
     private void check(Switch target) {
-        
+
         if (target == null) {
             throw new IllegalArgumentException("target can't be null");
         }
     }
 
     private void check(double threshold) {
-        
+
         if (threshold <= 0 || threshold >= 1.0 ) {
             throw new IllegalArgumentException("Unreasonable threshold value given ("
                     + threshold + "), valid values are (0 < threshold < 1)");
@@ -156,13 +156,13 @@ public class SwitchDamper extends AbstractDamper {
 
     @Override
     public double getPosition() throws IOException {
-        
-        return position; 
+
+        return position;
     }
 
     @Override
     public JmxDescriptor getJmxDescriptor() {
-        
+
         return new JmxDescriptor(
                 "dz",
                 "Switch based damper",

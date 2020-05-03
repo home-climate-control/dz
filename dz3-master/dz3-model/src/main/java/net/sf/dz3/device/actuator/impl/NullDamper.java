@@ -17,7 +17,7 @@ import net.sf.servomaster.device.model.TransitionStatus;
  * systems.
  *
  * @author <a href="mailto:tim at buttersideup dot company">Tim Small</a>
- * @author improvements Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author improvements Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
 public class NullDamper extends AbstractDamper {
 

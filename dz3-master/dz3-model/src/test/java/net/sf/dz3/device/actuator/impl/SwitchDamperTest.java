@@ -15,21 +15,21 @@ import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Test case for {@link SwitchDamper}.
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2020
  */
 public class SwitchDamperTest extends TestCase {
 
     private final Logger logger = LogManager.getLogger(getClass());
-    
+
     /**
      * Test whether the {@link SwitchDamper} is properly parked.
      */
     public void testPark() {
-        
+
         NullSwitch s = new NullSwitch("switch");
         Damper d = new SwitchDamper("damper", s, 0.5);
-        
+
         try {
 
             // Test with default parked position first
@@ -41,33 +41,33 @@ public class SwitchDamperTest extends TestCase {
             }
 
         } catch (Throwable t) {
-            
+
             logger.fatal("Oops", t);
             fail(t.getMessage());
         }
     }
 
-    
+
     /**
-     * Test if the damper is properly parked in a given position. 
-     * 
+     * Test if the damper is properly parked in a given position.
+     *
      * @param target Damper to test.
      * @param parkedPosition Position to park in.
      */
     private void testPark(Damper target, Double parkedPosition) throws IOException, InterruptedException, ExecutionException {
-        
+
         if (parkedPosition != null) {
-            
+
             target.setParkPosition(parkedPosition);
             assertEquals("Couldn't properly set parked position", parkedPosition, target.getParkPosition());
         }
-        
+
         logger.info("park position: " + parkedPosition);
-        
+
         target.set(0);
         target.set(1);
         target.set(0);
-        
+
         Future<TransitionStatus> parked = target.park();
 
         assertNotNull("Future is null", parked);
@@ -77,7 +77,7 @@ public class SwitchDamperTest extends TestCase {
         if (!s.isOK()) {
             fail("Failed to park, see the log");
         }
-        
+
         assertEquals("Wrong parked position", target.getParkPosition(), target.getPosition());
     }
 

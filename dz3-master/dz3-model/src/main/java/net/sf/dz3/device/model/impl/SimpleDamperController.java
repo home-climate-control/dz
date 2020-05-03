@@ -14,11 +14,11 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
  * Simple damper controller, supports bang/bang dampers only.
- * 
+ *
  * If bang/bang dampers is all you have, there's no sense to go beyond this.
  * If you have modulating dampers, use {@link BalancingDamperController} instead.
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class SimpleDamperController extends AbstractDamperController {
 
@@ -26,28 +26,28 @@ public class SimpleDamperController extends AbstractDamperController {
      * Create an instance with nothing attached.
      */
     public SimpleDamperController() {
-        
+
     }
-    
+
     /**
      * Create an instance and make it listen to the unit and thermostats.
-     * 
+     *
      * @param unit Unit to listen to.
      * @param ts2damper Thermostats to listen to and dampers to associate them with.
      */
     public SimpleDamperController(Unit unit, Map<Thermostat, Damper> ts2damper) {
         super(unit, ts2damper);
     }
-    
+
     @Override
     protected Map<Damper, Double> compute() {
-        
+
         ThreadContext.push("compute");
-        
+
         try {
-            
+
             Map<Damper, Double> damperMap = new HashMap<Damper, Double>();
-            
+
             for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
 
                 Thermostat ts = i.next();
@@ -76,7 +76,7 @@ public class SimpleDamperController extends AbstractDamperController {
             }
 
             return damperMap;
-            
+
         } finally {
             ThreadContext.pop();
         }
