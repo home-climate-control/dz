@@ -28,7 +28,7 @@ import net.sf.servomaster.device.model.TransitionStatus;
 /**
  * Base logic for the damper controller.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public abstract class AbstractDamperController extends LogAware implements DamperController, JmxAware {
 
@@ -42,12 +42,12 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
     /**
      * Association from a thermostat to a damper.
      */
-    protected final Map<Thermostat, Damper> ts2damper = new HashMap<Thermostat, Damper>();
+    protected final Map<Thermostat, Damper> ts2damper = new HashMap<>();
 
     /**
      * Association from a thermostat to its last known signal.
      */
-    protected final Map<Thermostat, ThermostatSignal> ts2signal = new TreeMap<Thermostat, ThermostatSignal>();
+    protected final Map<Thermostat, ThermostatSignal> ts2signal = new TreeMap<>();
 
     /**
      * Last known unit signal.
@@ -60,7 +60,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
      * The only purpose is to be accessed via JMX ({@link #getDamperMap()}). Content is not used in any calculations.
      * Value is refreshed in {@link #shuffle(Map)}.
      */
-    private final Map<Damper, Double> lastMap = new HashMap<Damper, Double>();
+    private final Map<Damper, Double> lastMap = new HashMap<>();
 
     /**
      * Thermostat signal consumer.
@@ -70,9 +70,9 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
     /**
      * Mapping from thermostat name to thermostat instance - needed to support the {@link #tsListener}.
      */
-	private final Map<String, Thermostat> name2ts = new TreeMap<String, Thermostat>();
+    private final Map<String, Thermostat> name2ts = new TreeMap<>();
 
-	/**
+    /**
      * Stays {@code true} until {@link #powerOff} is called.
      *
      * If this flag is {@code false} (i.e. {@link #powerOff} was called), all other methods will
@@ -107,14 +107,14 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
         for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
 
-        	Thermostat ts = i.next();
+            Thermostat ts = i.next();
             Damper d = ts2damper.get(ts);
 
             put(ts, d);
 
             ts.addConsumer(tsListener);
 
-			name2ts.put(ts.getName(), ts);
+            name2ts.put(ts.getName(), ts);
         }
     }
 
@@ -214,7 +214,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
             logger.info("Turning OFF");
 
-            Map<Damper, Double> damperMap = new HashMap<Damper, Double>();
+            Map<Damper, Double> damperMap = new HashMap<>();
 
             for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
 
@@ -287,7 +287,7 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
 
         String[] result = new String[lastMap.size()];
 
-        Map<String, Double> resultMap = new TreeMap<String, Double>();
+        Map<String, Double> resultMap = new TreeMap<>();
 
         for (Iterator<Damper> i = lastMap.keySet().iterator(); i.hasNext(); ) {
 
