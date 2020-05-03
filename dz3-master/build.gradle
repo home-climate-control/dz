@@ -34,6 +34,7 @@ subprojects {
         implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.11.0'
 
         testImplementation 'junit:junit:4.12'
+        testImplementation 'org.mockito:mockito-core:3.3.3'
 
         errorprone 'com.google.errorprone:error_prone_core:2.3.4'
     }
