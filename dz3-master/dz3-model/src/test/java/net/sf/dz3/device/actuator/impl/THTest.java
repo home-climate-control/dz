@@ -11,6 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.junit.Test;
 
 import net.sf.dz3.device.actuator.Damper;
@@ -28,6 +31,7 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
  */
 public class THTest {
 
+    private final Logger logger = LogManager.getLogger(getClass());
     private static final String WRONG_POSITION = "wrong position";
 
     @Test
@@ -63,6 +67,15 @@ public class THTest {
 
         Damper damperMultiplexerWest = new DamperMultiplexer("damper_multiplexer_west", west);
 
+        Set<Damper> dampers = new LinkedHashSet<>();
+
+        dampers.add(damperLivingRoom);
+        dampers.add(damperKitchen);
+        dampers.add(damperWestBathroom);
+        dampers.add(damperWest);
+        dampers.add(damperWestBoosterFan);
+        dampers.add(damperMultiplexerWest);
+
         // TreeMap will not work here because of the way Mockito works
         // Note 'Thermostat' here vs. 'ThermostatModel' for the mock
         Map<Thermostat, Damper> ts2damper = new LinkedHashMap<>();
@@ -87,6 +100,8 @@ public class THTest {
 
         // The unit is off, dampers are parked
 
+        logPositions(dampers);
+
         assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
         assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
         assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
@@ -95,6 +110,22 @@ public class THTest {
         assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
 
         // To be continued...
+
+        // VT: FIXME: Assert and log switch states
+    }
+
+    private void logPositions(Set<Damper> dampers) {
+        ThreadContext.push("position");
+
+        dampers.stream().forEach(d -> {
+            try {
+                logger.info("{}: {}", d.getName(), d.getPosition());
+            } catch (IOException ex) {
+                // This damper won't throw it
+            }
+        });
+
+        ThreadContext.pop();
     }
 
 }
