@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
@@ -20,6 +21,7 @@ import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;
+import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.model.impl.BalancingDamperController;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Switch;
@@ -32,6 +34,8 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 public class THTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
+    private final Random rg = new Random();
+
     private static final String WRONG_POSITION = "wrong position";
     private static final String WRONG_STATE = "wrong switch state";
 
@@ -124,7 +128,55 @@ public class THTest {
         assertEquals(WRONG_STATE, true, switchWestDamper.getState());
         assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
 
+        // The above stateChanged() also changed the state of the Unit to "running",
+        // next stateChanged() will be handled differently
+
+        // For a good measure, let's advance the timestamp between signals
+        timestamp += 50 + rg.nextInt(100);
+        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(0, true, 0), null));
+
+        timestamp += 50 + rg.nextInt(100);
+        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(3.0625, true, 0), null));
+
+        timestamp += 50 + rg.nextInt(100);
+        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(6.875, true, 0), null));
+
+        timestamp += 50 + rg.nextInt(100);
+        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(10.3125, true, 0), null));
+
+        timestamp += 50 + rg.nextInt(100);
+        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(13.6875, true, 0), null));
+
+
+        // After that, the demand rises by small increments until the whole thing blows up
+        // The count in the crash log is 9, let's make sure it's exceeded
+
+        double demand = 13.6875;
+        for (int count = 0; count < 50; count++) {
+
+            timestamp += 50 + rg.nextInt(100);
+            demand += rg.nextDouble()/10;
+
+            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
+        }
+
         // To be continued...
+
+        dc.powerOff().get();
+
+        assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
+        assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
+        assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
+        assertEquals(WRONG_POSITION, damperMultiplexerWest.getParkPosition(), damperMultiplexerWest.getPosition(), 0.0001);
+        assertEquals(WRONG_POSITION, damperWest.getParkPosition(), damperWest.getPosition(), 0.0001);
+        assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
+
+        assertEquals(WRONG_STATE, true, switchLivingRoom.getState());
+        assertEquals(WRONG_STATE, true, switchKitchen.getState());
+        assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
+        assertEquals(WRONG_STATE, true, switchWestDamper.getState());
+        assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
+
     }
 
     private void logStatus(Set<Damper> dampers, Set<Switch> switches) {
