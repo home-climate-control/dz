@@ -16,6 +16,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import net.sf.dz3.device.actuator.Damper;
@@ -45,6 +46,10 @@ public class THTest {
         testSync(0, 0);
     }
 
+    /**
+     * VT: NOTE: This test may take up to 8+ seconds - too slow for development work. Enable if you need it.
+     */
+    @Ignore
     @Test
     public void testSyncSlow() throws InterruptedException, ExecutionException, IOException {
         testSync(100, 500);
