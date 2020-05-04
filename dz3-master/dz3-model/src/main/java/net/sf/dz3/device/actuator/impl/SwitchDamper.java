@@ -125,11 +125,11 @@ public class SwitchDamper extends AbstractDamper {
 
         try {
 
-            boolean state = position > threshold ? true : false;
+            boolean state = position > threshold;
 
             state = inverted ? !state : state;
 
-            logger.debug("translated " + position + " => " + state + (inverted ? " (inverted)" : ""));
+            logger.debug("translated {} => {}{}", position, state, (inverted ? " (inverted)" : ""));
 
             target.setState(state);
 
