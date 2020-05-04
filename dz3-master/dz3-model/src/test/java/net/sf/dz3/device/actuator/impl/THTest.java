@@ -69,12 +69,12 @@ public class THTest {
         switches.add(switchWestDamper);
         switches.add(switchWestBoosterFan);
 
-        Damper damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0);
-        Damper damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0);
-        Damper damperWestBathroom = new SwitchDamper("damper_westbathroom", switchWestBathroom, 0.8, 1.0);
+        Damper damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0, 10);
+        Damper damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0, 10);
+        Damper damperWestBathroom = new SwitchDamper("damper_westbathroom", switchWestBathroom, 0.8, 1.0, 10);
 
-        Damper damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0);
-        Damper damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0, true);
+        Damper damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0, 10);
+        Damper damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0, 10, true);
 
         Set<Damper> west = new LinkedHashSet<>();
 

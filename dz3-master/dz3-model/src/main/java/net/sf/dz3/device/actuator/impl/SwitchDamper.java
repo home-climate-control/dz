@@ -45,29 +45,39 @@ public class SwitchDamper extends AbstractDamper {
     private final boolean inverted;
 
     /**
+     * Heartbeat interval.
+     *
+     * Command to set the state will not be sent to {@link #target} if it was last
+     * sent less than this many milliseconds ago.
+     */
+    private long heartbeatMillis;
+
+    /**
+     * Last time the command was successfully sent to the {@link #target}.
+     *
+     * Set in {@link #moveDamper(double)}.
+     */
+    private long lastKnown = 0;
+
+    /**
+     * Last known target state.
+     *
+     * Set in {@link #moveDamper(double)}.
+     */
+    private boolean targetState;
+
+    /**
      * Create an instance with default (1.0) park position.
      *
      * @param name Damper name. Necessary evil to allow instrumentation signature.
      * @param target Switch that controls the actual damper.
      * @param threshold Switch threshold.
+     * @param heartbeatSeconds The command to set the position will not be sent to the actual switch
+     * more often than once in this many seconds.
      */
-    public SwitchDamper(String name, Switch target, double threshold) {
+    public SwitchDamper(String name, Switch target, double threshold, int heartbeatSeconds) {
 
-        this(name, target, threshold, 1.0, false);
-    }
-
-
-    /**
-     * Create an instance.
-     *
-     * @param name Damper name. Necessary evil to allow instrumentation signature.
-     * @param target Switch that controls the actual damper.
-     * @param threshold Switch threshold.
-     * @param parkPosition Damper position defined as 'parked'.
-     */
-    public SwitchDamper(String name, Switch target, double threshold, double parkPosition) {
-
-        this(name, target, threshold, parkPosition, false);
+        this(name, target, threshold, 1.0, heartbeatSeconds, false);
     }
 
     /**
@@ -77,9 +87,26 @@ public class SwitchDamper extends AbstractDamper {
      * @param target Switch that controls the actual damper.
      * @param threshold Switch threshold.
      * @param parkPosition Damper position defined as 'parked'.
+     * @param heartbeatSeconds The command to set the position will not be sent to the actual switch
+     * more often than once in this many seconds.
+     */
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, int heartbeatSeconds) {
+
+        this(name, target, threshold, parkPosition, heartbeatSeconds, false);
+    }
+
+    /**
+     * Create an instance.
+     *
+     * @param name Damper name. Necessary evil to allow instrumentation signature.
+     * @param target Switch that controls the actual damper.
+     * @param threshold Switch threshold.
+     * @param parkPosition Damper position defined as 'parked'.
+     * @param heartbeatSeconds The command to set the position will not be sent to the actual switch
+     * more often than once in this many seconds.
      * @param inverted {@code true} if the switch position needs to be inverted.
      */
-    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, boolean inverted) {
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, int heartbeatSeconds, boolean inverted) {
 
         super(name);
 
@@ -90,6 +117,12 @@ public class SwitchDamper extends AbstractDamper {
         this.threshold = threshold;
 
         this.inverted = inverted;
+
+        if (heartbeatSeconds < 0) {
+            throw new IllegalArgumentException("hearbeatSeconds must be positive (received " + heartbeatSeconds + ")");
+        }
+
+        heartbeatMillis = heartbeatSeconds * 1000L;
 
         setParkPosition(parkPosition);
 
@@ -131,7 +164,24 @@ public class SwitchDamper extends AbstractDamper {
 
             logger.debug("translated {} => {}{}", position, state, (inverted ? " (inverted)" : ""));
 
-            target.setState(state);
+            // VT: NOTE: This call makes it a royal PITA to troubleshoot;
+            // might want to think of injectable TimeSource
+            long now = System.currentTimeMillis();
+            long elapsed = now - lastKnown;
+
+            if (elapsed > heartbeatMillis || state != targetState) {
+
+                if (state == targetState) {
+                    // It's a timeout, then
+                    logger.debug("heartbeat exceeded by {}ms, invoking hardware", elapsed - heartbeatMillis);
+                }
+
+                target.setState(state);
+
+                // This will not be set if the command failed
+                lastKnown = now;
+                targetState = state;
+            }
 
             this.position = position;
 
