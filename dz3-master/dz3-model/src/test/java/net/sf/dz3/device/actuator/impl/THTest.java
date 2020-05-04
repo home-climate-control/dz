@@ -40,7 +40,16 @@ public class THTest {
     private static final String WRONG_STATE = "wrong switch state";
 
     @Test
-    public void testSync() throws InterruptedException, ExecutionException, IOException {
+    public void testSyncFast() throws InterruptedException, ExecutionException, IOException {
+        testSync(0, 0);
+    }
+
+    @Test
+    public void testSyncSlow() throws InterruptedException, ExecutionException, IOException {
+        testSync(100, 500);
+    }
+
+    private void testSync(long minDelay, int maxDelay) throws InterruptedException, ExecutionException, IOException {
 
         ThermostatModel tsLivingRoom = mock(ThermostatModel.class);
         ThermostatModel tsKitchen = mock(ThermostatModel.class);
@@ -51,9 +60,6 @@ public class THTest {
         doReturn("thermostat-kitchen").when(tsKitchen).getName();
         doReturn("thermostat-westbathroom").when(tsWestBathroom).getName();
         doReturn("thermostat-west").when(tsWest).getName();
-
-        long minDelay = 100;
-        int maxDelay = 500;
 
         Switch switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay);
         Switch switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay);
