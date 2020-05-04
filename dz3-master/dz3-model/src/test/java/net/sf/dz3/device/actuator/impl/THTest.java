@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -110,6 +111,8 @@ public class THTest {
         Unit u = mock(Unit.class);
         BalancingDamperController dc = new BalancingDamperController(u, ts2damper);
 
+        logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
+
         // VT: NOTE: It may be a better idea to inject fixed time; let's see if this works
         long timestamp = System.currentTimeMillis();
 
@@ -186,6 +189,7 @@ public class THTest {
         assertEquals(WRONG_STATE, true, switchWestDamper.getState());
         assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
 
+        logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
     }
 
     private void logStatus(Set<Damper> dampers, Set<Switch> switches) {
