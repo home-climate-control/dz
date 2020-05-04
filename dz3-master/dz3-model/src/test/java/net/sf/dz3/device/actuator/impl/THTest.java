@@ -52,11 +52,14 @@ public class THTest {
         doReturn("thermostat-westbathroom").when(tsWestBathroom).getName();
         doReturn("thermostat-west").when(tsWest).getName();
 
-        Switch switchLivingRoom = new NullSwitch("switch_livingroom_damper");
-        Switch switchKitchen = new NullSwitch("switch_kitchen_damper");
-        Switch switchWestBathroom = new NullSwitch("switch_westbathroom_damper");
-        Switch switchWestDamper = new NullSwitch("switch_west_damper");
-        Switch switchWestBoosterFan = new NullSwitch("switch_west_boosterfan");
+        long minDelay = 100;
+        int maxDelay = 500;
+
+        Switch switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay);
+        Switch switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay);
+        Switch switchWestBathroom = new NullSwitch("switch_westbathroom_damper", minDelay, maxDelay);
+        Switch switchWestDamper = new NullSwitch("switch_west_damper", minDelay, maxDelay);
+        Switch switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", minDelay, maxDelay);
 
         Set<Switch> switches = new LinkedHashSet<>();
 
