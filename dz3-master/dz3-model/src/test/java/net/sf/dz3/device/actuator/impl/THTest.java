@@ -33,6 +33,7 @@ public class THTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
     private static final String WRONG_POSITION = "wrong position";
+    private static final String WRONG_STATE = "wrong switch state";
 
     @Test
     public void testSync() throws InterruptedException, ExecutionException, IOException {
@@ -52,6 +53,14 @@ public class THTest {
         Switch switchWestBathroom = new NullSwitch("switch_westbathroom_damper");
         Switch switchWestDamper = new NullSwitch("switch_west_damper");
         Switch switchWestBoosterFan = new NullSwitch("switch_west_boosterfan");
+
+        Set<Switch> switches = new LinkedHashSet<>();
+
+        switches.add(switchLivingRoom);
+        switches.add(switchKitchen);
+        switches.add(switchWestBathroom);
+        switches.add(switchWestDamper);
+        switches.add(switchWestBoosterFan);
 
         Damper damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0);
         Damper damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0);
@@ -100,7 +109,7 @@ public class THTest {
 
         // The unit is off, dampers are parked
 
-        logPositions(dampers);
+        logStatus(dampers, switches);
 
         assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
         assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
@@ -109,17 +118,32 @@ public class THTest {
         assertEquals(WRONG_POSITION, damperWest.getParkPosition(), damperWest.getPosition(), 0.0001);
         assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
 
-        // To be continued...
+        assertEquals(WRONG_STATE, true, switchLivingRoom.getState());
+        assertEquals(WRONG_STATE, true, switchKitchen.getState());
+        assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
+        assertEquals(WRONG_STATE, true, switchWestDamper.getState());
+        assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
 
-        // VT: FIXME: Assert and log switch states
+        // To be continued...
     }
 
-    private void logPositions(Set<Damper> dampers) {
+    private void logStatus(Set<Damper> dampers, Set<Switch> switches) {
         ThreadContext.push("position");
 
         dampers.stream().forEach(d -> {
             try {
                 logger.info("{}: {}", d.getName(), d.getPosition());
+            } catch (IOException ex) {
+                // This damper won't throw it
+            }
+        });
+
+        ThreadContext.pop();
+        ThreadContext.push("state");
+
+        switches.stream().forEach(s -> {
+            try {
+                logger.info("{}: {}", s.getAddress(), s.getState());
             } catch (IOException ex) {
                 // This damper won't throw it
             }
