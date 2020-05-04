@@ -21,7 +21,7 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 public abstract class AbstractSwitch implements Switch {
 
     protected final Logger logger = LogManager.getLogger(getClass());
-    private final DataBroadcaster<Boolean> dataBroadcaster = new DataBroadcaster<Boolean>();
+    private final DataBroadcaster<Boolean> dataBroadcaster = new DataBroadcaster<>();
 
     /**
      * Switch address.
@@ -40,12 +40,12 @@ public abstract class AbstractSwitch implements Switch {
     }
 
     @Override
-    public final synchronized boolean getState() throws IOException {
+    public synchronized boolean getState() throws IOException {
         return state;
     }
 
     @Override
-    public final synchronized void setState(boolean state) throws IOException {
+    public synchronized void setState(boolean state) throws IOException {
 
         ThreadContext.push("setState");
 
