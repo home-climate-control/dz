@@ -195,109 +195,101 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
             int count = targetPosition.size();
             CompletionService<TransitionStatus> cs = new ExecutorCompletionService<>(Executors.newFixedThreadPool(count));
 
-            Runnable scatter = new Runnable() {
+            Runnable scatter = () -> {
 
-                @Override
-                public void run() {
+                ThreadContext.push("run/scatter");
 
-                    ThreadContext.push("run/scatter");
-
-                    try {
+                try {
 
 
-                        for (Iterator<Entry<Damper, Double>> i = targetPosition.entrySet().iterator(); i.hasNext(); ) {
+                    for (Iterator<Entry<Damper, Double>> i = targetPosition.entrySet().iterator(); i.hasNext(); ) {
 
-                            Entry<Damper, Double> entry = i.next();
-                            Damper d = entry.getKey();
-                            double position = entry.getValue();
+                        Entry<Damper, Double> entry = i.next();
+                        Damper d = entry.getKey();
+                        double position = entry.getValue();
 
-                            logger.debug(d.getName() + ": " + position);
+                        logger.debug("{}: {}", d.getName(), position);
 
-                            cs.submit(new Damper.Move(d, position));
-                        }
-
-                        logger.debug("fired transitions");
-                        scatterStatus.complete(authTokenScatter, null);
-
-                    } catch (Throwable t) {
-
-                        // This is potentially expensive - may slug the HVAC if the dampers are
-                        // left closed while it is running, hence fatal level
-
-                        logger.fatal("can't set damper position", t);
-
-                        scatterStatus.complete(authTokenScatter, t);
-
-                    } finally {
-
-                        ThreadContext.pop();
-                        ThreadContext.clearStack();
+                        cs.submit(new Damper.Move(d, position));
                     }
+
+                    logger.debug("fired transitions");
+                    scatterStatus.complete(authTokenScatter, null);
+
+                } catch (Throwable t) {
+
+                    // This is potentially expensive - may slug the HVAC if the dampers are
+                    // left closed while it is running, hence fatal level
+
+                    logger.fatal("can't set damper position", t);
+
+                    scatterStatus.complete(authTokenScatter, t);
+
+                } finally {
+
+                    ThreadContext.pop();
+                    ThreadContext.clearStack();
                 }
             };
 
             Future<TransitionStatus> scatterDone = transitionExecutor.submit(scatter, scatterStatus);
 
-            Runnable gather = new Runnable() {
+            Runnable gather = () -> {
 
-                @Override
-                public void run() {
+                ThreadContext.push("run/gather");
 
-                    ThreadContext.push("run/gather");
+                try {
 
-                    try {
+                    logger.debug("waiting for transitions to be fired...");
 
-                        logger.debug("waiting for transitions to be fired...");
+                    scatterDone.get();
 
-                        scatterDone.get();
+                    logger.debug("gathering transition results");
 
-                        logger.debug("gathering transition results");
+                    boolean ok = true;
+                    int left = count;
 
-                        boolean ok = true;
-                        int left = count;
+                    while (left-- > 0) {
 
-                        while (left-- > 0) {
+                        Future<TransitionStatus> result = cs.take();
+                        TransitionStatus s = result.get();
 
-                            Future<TransitionStatus> result = cs.take();
-                            TransitionStatus s = result.get();
+                        // This will cause the whole park() call to report failure
 
-                            // This will cause the whole park() call to report failure
+                        ok = s.isOK();
 
-                            ok = s.isOK();
+                        if (!s.isOK()) {
 
-                            if (!s.isOK()) {
+                            // This is potentially expensive - may slug the HVAC if the dampers are
+                            // left closed while it is running, hence fatal level
 
-                                // This is potentially expensive - may slug the HVAC if the dampers are
-                                // left closed while it is running, hence fatal level
-
-                                logger.fatal("can't set damper position", s.getCause());
-                            }
+                            logger.fatal("can't set damper position", s.getCause());
                         }
-
-                        logger.debug("transitions complete, ok=" + ok);
-
-                        if (ok) {
-
-                            gatherStatus.complete(authTokenGather, null);
-                            return;
-                        }
-
-                        gatherStatus.complete(authTokenGather, new IllegalStateException("one or more dampers failed to set position"));
-
-                    } catch (Throwable t) {
-
-                        // This is potentially expensive - may slug the HVAC if the dampers are
-                        // left closed while it is running, hence fatal level
-
-                        logger.fatal("can't set damper position", t);
-
-                        scatterStatus.complete(authTokenGather, t);
-
-                    } finally {
-
-                        ThreadContext.pop();
-                        ThreadContext.clearStack();
                     }
+
+                    logger.debug("transitions complete, ok={}", ok);
+
+                    if (ok) {
+
+                        gatherStatus.complete(authTokenGather, null);
+                        return;
+                    }
+
+                    gatherStatus.complete(authTokenGather, new IllegalStateException("one or more dampers failed to set position"));
+
+                } catch (Throwable t) {
+
+                    // This is potentially expensive - may slug the HVAC if the dampers are
+                    // left closed while it is running, hence fatal level
+
+                    logger.fatal("can't set damper position", t);
+
+                    scatterStatus.complete(authTokenGather, t);
+
+                } finally {
+
+                    ThreadContext.pop();
+                    ThreadContext.clearStack();
                 }
             };
 
