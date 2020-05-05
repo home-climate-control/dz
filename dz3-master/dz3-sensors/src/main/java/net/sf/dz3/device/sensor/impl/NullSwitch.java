@@ -20,6 +20,7 @@ public class NullSwitch extends AbstractSwitch {
 
     private final long minDelay;
     private final int maxDelay;
+    private final Object semaphore;
 
     /**
      * Create an instance without delay.
@@ -27,7 +28,7 @@ public class NullSwitch extends AbstractSwitch {
      * @param address Address to use.
      */
     public NullSwitch(String address) {
-        this(address, 0, 0);
+        this(address, 0, 0, null);
     }
 
     /**
@@ -37,11 +38,12 @@ public class NullSwitch extends AbstractSwitch {
      * @param minDelay Minimim switch deley, milliseconds.
      * @param maxDelay Max delay. Total delay is calculated as {@code minDelay + rg.nextInt(maxDelay)}.
      */
-    public NullSwitch(String address, long minDelay, int maxDelay) {
+    public NullSwitch(String address, long minDelay, int maxDelay, Object semaphore) {
         super(address, false);
 
         this.minDelay = minDelay;
         this.maxDelay = maxDelay;
+        this.semaphore = semaphore;
     }
 
     @Override
@@ -80,7 +82,20 @@ public class NullSwitch extends AbstractSwitch {
         try {
 
             long delay = minDelay + rg.nextInt(maxDelay);
-            Thread.sleep(delay);
+
+            if (semaphore != null) {
+
+                // Simulate the lock on a common resource
+                synchronized (semaphore) {
+                    Thread.sleep(delay);
+                }
+
+            } else {
+
+                // No lock, just sleep
+                Thread.sleep(delay);
+            }
+
             logger.info("slept {}ms", delay);
 
         } catch (InterruptedException ex) {
