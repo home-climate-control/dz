@@ -29,7 +29,9 @@
         <constructor-arg index="2" value="0.8" />
         <!-- park -->
         <!-- this is not a default park position (default is 1.0) -->
-        <constructor-arg index="3" value="0" />
+        <constructor-arg index="3" value="0d" />
+        <!--  heartbeat -->
+        <constructor-arg index="4" value="30" />
     </bean>
 
     <bean id="switch_damper_1" class="net.sf.dz3.device.actuator.impl.SwitchDamper">
@@ -39,6 +41,8 @@
         <constructor-arg index="2" value="0.8" />
         <!-- park position is omitted, defaults to 1.0 -->
         <!--  <constructor-arg index="3" value="0" /> -->
+        <!--  heartbeat -->
+        <constructor-arg index="3" value="30" />
     </bean>
 
     <bean id="damper_multiplexer_0" class="net.sf.dz3.device.actuator.impl.DamperMultiplexer">
