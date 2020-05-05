@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import net.sf.dz3.device.actuator.Damper;
@@ -31,6 +32,7 @@ import net.sf.dz3.device.model.impl.SimpleDamperController;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 
 /**
@@ -49,19 +51,19 @@ public class THTest {
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        testSync(SimpleDamperController.class, 0, 0);
+        testSync("fast/simple", SimpleDamperController.class, 0, 0);
     }
 
     /**
      * VT: NOTE: This test may take up to 8+ seconds - too slow for development work. Enable if you need it.
      */
-    //@Ignore
+    @Ignore
     @Test
     public void testSyncSlowSimple()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        testSync(SimpleDamperController.class, 100, 500);
+        testSync("slow/simple", SimpleDamperController.class, 100, 500);
     }
 
     @Test
@@ -69,165 +71,175 @@ public class THTest {
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        testSync(BalancingDamperController.class, 0, 0);
+        testSync("fast/balancing", BalancingDamperController.class, 0, 0);
     }
 
     /**
      * VT: NOTE: This test may take up to 8+ seconds - too slow for development work. Enable if you need it.
      */
-    //@Ignore
+    @Ignore
     @Test
     public void testSyncSlowBalancing()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        testSync(BalancingDamperController.class, 100, 500);
+        testSync("slow/balancing", BalancingDamperController.class, 100, 500);
     }
 
-    private void testSync(Class<? extends AbstractDamperController> controllerClass, long minDelay, int maxDelay)
+    private void testSync(String marker, Class<? extends AbstractDamperController> controllerClass, long minDelay, int maxDelay)
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        ThermostatModel tsLivingRoom = mock(ThermostatModel.class);
-        ThermostatModel tsKitchen = mock(ThermostatModel.class);
-        ThermostatModel tsWestBathroom = mock(ThermostatModel.class);
-        ThermostatModel tsWest = mock(ThermostatModel.class);
+        Marker m = new Marker(marker);
+        ThreadContext.push(marker);
 
-        doReturn("thermostat-livingroom").when(tsLivingRoom).getName();
-        doReturn("thermostat-kitchen").when(tsKitchen).getName();
-        doReturn("thermostat-westbathroom").when(tsWestBathroom).getName();
-        doReturn("thermostat-west").when(tsWest).getName();
+        try {
 
-        Switch switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay);
-        Switch switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay);
-        Switch switchWestBathroom = new NullSwitch("switch_westbathroom_damper", minDelay, maxDelay);
-        Switch switchWestDamper = new NullSwitch("switch_west_damper", minDelay, maxDelay);
-        Switch switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", minDelay, maxDelay);
+            ThermostatModel tsLivingRoom = mock(ThermostatModel.class);
+            ThermostatModel tsKitchen = mock(ThermostatModel.class);
+            ThermostatModel tsWestBathroom = mock(ThermostatModel.class);
+            ThermostatModel tsWest = mock(ThermostatModel.class);
 
-        Set<Switch> switches = new LinkedHashSet<>();
+            doReturn("thermostat-livingroom").when(tsLivingRoom).getName();
+            doReturn("thermostat-kitchen").when(tsKitchen).getName();
+            doReturn("thermostat-westbathroom").when(tsWestBathroom).getName();
+            doReturn("thermostat-west").when(tsWest).getName();
 
-        switches.add(switchLivingRoom);
-        switches.add(switchKitchen);
-        switches.add(switchWestBathroom);
-        switches.add(switchWestDamper);
-        switches.add(switchWestBoosterFan);
+            Switch switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay);
+            Switch switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay);
+            Switch switchWestBathroom = new NullSwitch("switch_westbathroom_damper", minDelay, maxDelay);
+            Switch switchWestDamper = new NullSwitch("switch_west_damper", minDelay, maxDelay);
+            Switch switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", minDelay, maxDelay);
 
-        Damper damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0, 10);
-        Damper damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0, 10);
-        Damper damperWestBathroom = new SwitchDamper("damper_westbathroom", switchWestBathroom, 0.8, 1.0, 10);
+            Set<Switch> switches = new LinkedHashSet<>();
 
-        Damper damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0, 10);
-        Damper damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0, 10, true);
+            switches.add(switchLivingRoom);
+            switches.add(switchKitchen);
+            switches.add(switchWestBathroom);
+            switches.add(switchWestDamper);
+            switches.add(switchWestBoosterFan);
 
-        Set<Damper> west = new LinkedHashSet<>();
+            Damper damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0, 10);
+            Damper damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0, 10);
+            Damper damperWestBathroom = new SwitchDamper("damper_westbathroom", switchWestBathroom, 0.8, 1.0, 10);
 
-        west.add(damperWest);
-        west.add(damperWestBoosterFan);
+            Damper damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0, 10);
+            Damper damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0, 10, true);
 
-        Damper damperMultiplexerWest = new DamperMultiplexer("damper_multiplexer_west", west);
+            Set<Damper> west = new LinkedHashSet<>();
 
-        Set<Damper> dampers = new LinkedHashSet<>();
+            west.add(damperWest);
+            west.add(damperWestBoosterFan);
 
-        dampers.add(damperLivingRoom);
-        dampers.add(damperKitchen);
-        dampers.add(damperWestBathroom);
-        dampers.add(damperWest);
-        dampers.add(damperWestBoosterFan);
-        dampers.add(damperMultiplexerWest);
+            Damper damperMultiplexerWest = new DamperMultiplexer("damper_multiplexer_west", west);
 
-        // TreeMap will not work here because of the way Mockito works
-        // Note 'Thermostat' here vs. 'ThermostatModel' for the mock
-        Map<Thermostat, Damper> ts2damper = new LinkedHashMap<>();
+            Set<Damper> dampers = new LinkedHashSet<>();
 
-        ts2damper.put(tsLivingRoom, damperLivingRoom);
-        ts2damper.put(tsKitchen, damperKitchen);
-        ts2damper.put(tsWestBathroom, damperWestBathroom);
-        ts2damper.put(tsWest, damperMultiplexerWest);
+            dampers.add(damperLivingRoom);
+            dampers.add(damperKitchen);
+            dampers.add(damperWestBathroom);
+            dampers.add(damperWest);
+            dampers.add(damperWestBoosterFan);
+            dampers.add(damperMultiplexerWest);
 
-        Unit u = mock(Unit.class);
+            // TreeMap will not work here because of the way Mockito works
+            // Note 'Thermostat' here vs. 'ThermostatModel' for the mock
+            Map<Thermostat, Damper> ts2damper = new LinkedHashMap<>();
 
-        Constructor<? extends AbstractDamperController> c = controllerClass.getDeclaredConstructor(Unit.class, Map.class);
-        AbstractDamperController dc = c.newInstance(u, ts2damper);
+            ts2damper.put(tsLivingRoom, damperLivingRoom);
+            ts2damper.put(tsKitchen, damperKitchen);
+            ts2damper.put(tsWestBathroom, damperWestBathroom);
+            ts2damper.put(tsWest, damperMultiplexerWest);
 
-        logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
+            Unit u = mock(Unit.class);
 
-        // VT: NOTE: It may be a better idea to inject fixed time; let's see if this works
-        long timestamp = System.currentTimeMillis();
+            Constructor<? extends AbstractDamperController> c = controllerClass.getDeclaredConstructor(Unit.class, Map.class);
+            AbstractDamperController dc = c.newInstance(u, ts2damper);
 
-        // This will wait until all the movements are complete - unlike real life scenario;
-        // that'll come later
+            logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
 
-        dc.stateChanged(tsWest, new ThermostatSignal(
-                true, false, true, true,
-                new DataSample<Double>(timestamp, "sensor_west", "sensor_west", 3.0625, null))).get();
+            // VT: NOTE: It may be a better idea to inject fixed time; let's see if this works
+            long timestamp = System.currentTimeMillis();
 
-        // The unit is off, dampers are parked
+            // This will wait until all the movements are complete - unlike real life scenario;
+            // that'll come later
 
-        logStatus(dampers, switches);
+            dc.stateChanged(tsWest, new ThermostatSignal(
+                    true, false, true, true,
+                    new DataSample<Double>(timestamp, "sensor_west", "sensor_west", 3.0625, null))).get();
 
-        assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperMultiplexerWest.getParkPosition(), damperMultiplexerWest.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperWest.getParkPosition(), damperWest.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
+            // The unit is off, dampers are parked
 
-        assertEquals(WRONG_STATE, true, switchLivingRoom.getState());
-        assertEquals(WRONG_STATE, true, switchKitchen.getState());
-        assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
-        assertEquals(WRONG_STATE, true, switchWestDamper.getState());
-        assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
+            logStatus(dampers, switches);
 
-        // The above stateChanged() also changed the state of the Unit to "running",
-        // next stateChanged() will be handled differently
+            assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperMultiplexerWest.getParkPosition(), damperMultiplexerWest.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperWest.getParkPosition(), damperWest.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
 
-        // For a good measure, let's advance the timestamp between signals
-        timestamp += 50 + rg.nextInt(100);
-        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(0, true, 0), null));
+            assertEquals(WRONG_STATE, true, switchLivingRoom.getState());
+            assertEquals(WRONG_STATE, true, switchKitchen.getState());
+            assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
+            assertEquals(WRONG_STATE, true, switchWestDamper.getState());
+            assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
 
-        timestamp += 50 + rg.nextInt(100);
-        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(3.0625, true, 0), null));
+            // The above stateChanged() also changed the state of the Unit to "running",
+            // next stateChanged() will be handled differently
 
-        timestamp += 50 + rg.nextInt(100);
-        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(6.875, true, 0), null));
-
-        timestamp += 50 + rg.nextInt(100);
-        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(10.3125, true, 0), null));
-
-        timestamp += 50 + rg.nextInt(100);
-        dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(13.6875, true, 0), null));
-
-
-        // After that, the demand rises by small increments until the whole thing blows up
-        // The count in the crash log is 9, let's make sure it's exceeded
-
-        double demand = 13.6875;
-        for (int count = 0; count < 50; count++) {
+            // For a good measure, let's advance the timestamp between signals
+            timestamp += 50 + rg.nextInt(100);
+            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(0, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
-            demand += rg.nextDouble()/10;
+            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(3.0625, true, 0), null));
 
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
+            timestamp += 50 + rg.nextInt(100);
+            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(6.875, true, 0), null));
+
+            timestamp += 50 + rg.nextInt(100);
+            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(10.3125, true, 0), null));
+
+            timestamp += 50 + rg.nextInt(100);
+            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(13.6875, true, 0), null));
+
+
+            // After that, the demand rises by small increments until the whole thing blows up
+            // The count in the crash log is 9, let's make sure it's exceeded
+
+            double demand = 13.6875;
+            for (int count = 0; count < 50; count++) {
+
+                timestamp += 50 + rg.nextInt(100);
+                demand += rg.nextDouble()/10;
+
+                dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
+            }
+
+            // To be continued...
+
+            dc.powerOff().get();
+
+            assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperMultiplexerWest.getParkPosition(), damperMultiplexerWest.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperWest.getParkPosition(), damperWest.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
+
+            assertEquals(WRONG_STATE, true, switchLivingRoom.getState());
+            assertEquals(WRONG_STATE, true, switchKitchen.getState());
+            assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
+            assertEquals(WRONG_STATE, true, switchWestDamper.getState());
+            assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
+
+            logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
+
+        } finally {
+            m.close();
+            ThreadContext.pop();
         }
-
-        // To be continued...
-
-        dc.powerOff().get();
-
-        assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperMultiplexerWest.getParkPosition(), damperMultiplexerWest.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperWest.getParkPosition(), damperWest.getPosition(), 0.0001);
-        assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
-
-        assertEquals(WRONG_STATE, true, switchLivingRoom.getState());
-        assertEquals(WRONG_STATE, true, switchKitchen.getState());
-        assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
-        assertEquals(WRONG_STATE, true, switchWestDamper.getState());
-        assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
-
-        logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
     }
 
     private void logStatus(Set<Damper> dampers, Set<Switch> switches) {
