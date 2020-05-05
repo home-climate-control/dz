@@ -5,6 +5,8 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -16,7 +18,6 @@ import java.util.concurrent.ExecutionException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import net.sf.dz3.device.actuator.Damper;
@@ -24,7 +25,9 @@ import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
+import net.sf.dz3.device.model.impl.AbstractDamperController;
 import net.sf.dz3.device.model.impl.BalancingDamperController;
+import net.sf.dz3.device.model.impl.SimpleDamperController;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
@@ -42,20 +45,48 @@ public class THTest {
     private static final String WRONG_STATE = "wrong switch state";
 
     @Test
-    public void testSyncFast() throws InterruptedException, ExecutionException, IOException {
-        testSync(0, 0);
+    public void testSyncFastSimple()
+            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+        testSync(SimpleDamperController.class, 0, 0);
     }
 
     /**
      * VT: NOTE: This test may take up to 8+ seconds - too slow for development work. Enable if you need it.
      */
-    @Ignore
+    //@Ignore
     @Test
-    public void testSyncSlow() throws InterruptedException, ExecutionException, IOException {
-        testSync(100, 500);
+    public void testSyncSlowSimple()
+            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+        testSync(SimpleDamperController.class, 100, 500);
     }
 
-    private void testSync(long minDelay, int maxDelay) throws InterruptedException, ExecutionException, IOException {
+    @Test
+    public void testSyncFastBalancing()
+            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+        testSync(BalancingDamperController.class, 0, 0);
+    }
+
+    /**
+     * VT: NOTE: This test may take up to 8+ seconds - too slow for development work. Enable if you need it.
+     */
+    //@Ignore
+    @Test
+    public void testSyncSlowBalancing()
+            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+        testSync(BalancingDamperController.class, 100, 500);
+    }
+
+    private void testSync(Class<? extends AbstractDamperController> controllerClass, long minDelay, int maxDelay)
+            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
         ThermostatModel tsLivingRoom = mock(ThermostatModel.class);
         ThermostatModel tsKitchen = mock(ThermostatModel.class);
@@ -114,7 +145,9 @@ public class THTest {
         ts2damper.put(tsWest, damperMultiplexerWest);
 
         Unit u = mock(Unit.class);
-        BalancingDamperController dc = new BalancingDamperController(u, ts2damper);
+
+        Constructor<? extends AbstractDamperController> c = controllerClass.getDeclaredConstructor(Unit.class, Map.class);
+        AbstractDamperController dc = c.newInstance(u, ts2damper);
 
         logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
 
