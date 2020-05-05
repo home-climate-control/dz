@@ -16,12 +16,12 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
  *
  * Supports common configuration and listener notification features.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
-abstract public class AbstractSwitch implements Switch {
+public abstract class AbstractSwitch implements Switch {
 
     protected final Logger logger = LogManager.getLogger(getClass());
-    private final DataBroadcaster<Boolean> dataBroadcaster = new DataBroadcaster<Boolean>();
+    private final DataBroadcaster<Boolean> dataBroadcaster = new DataBroadcaster<>();
 
     /**
      * Switch address.
@@ -40,19 +40,18 @@ abstract public class AbstractSwitch implements Switch {
     }
 
     @Override
-    public final boolean getState() throws IOException {
-
+    public synchronized boolean getState() throws IOException {
         return state;
     }
 
     @Override
-    public synchronized final void setState(boolean state) throws IOException {
+    public synchronized void setState(boolean state) throws IOException {
 
         ThreadContext.push("setState");
 
         try {
 
-            logger.debug("Switch " + address + "=" + state);
+            logger.debug("{}: {}", address, state);
             this.state = state;
             dataBroadcaster.broadcast(new DataSample<Boolean>(System.currentTimeMillis(), getAddress(), getAddress(), state, null));
 
@@ -63,7 +62,6 @@ abstract public class AbstractSwitch implements Switch {
 
     @Override
     public final String getAddress() {
-
         return address;
     }
 
@@ -80,15 +78,15 @@ abstract public class AbstractSwitch implements Switch {
     @Override
     public String toString() {
 
-        String state;
+        String s;
 
         try {
-            state = Boolean.toString(getState());
+            s = Boolean.toString(getState());
         } catch (IOException ex) {
             logger.error("exception ignored in toString()", ex);
-            state = "error";
+            s = "error";
         }
 
-        return "{" + getClass().getName() + ", address=" + getAddress() + ", state=" + state + "}";
+        return "{" + getClass().getName() + ", address=" + getAddress() + ", state=" + s + "}";
     }
 }
