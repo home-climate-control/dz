@@ -66,7 +66,6 @@ public class THTest {
         testSync("slow/simple", SimpleDamperController.class, 100, 500);
     }
 
-    @Ignore
     @Test
     public void testSyncFastBalancing()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
@@ -220,7 +219,17 @@ public class THTest {
                 dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
             }
 
-            // To be continued...
+            {
+                // VT: NOTE: This may need to be increased on a slow system to make the test
+                // pass - but it's a temporary block anyway; it'll go away with the proper
+                // implementation
+
+                long delay = 1000;
+
+                logger.warn("sleeping {}ms to let things settle down...", delay);
+                Thread.sleep(delay);
+                logger.warn("the sleep is over");
+            }
 
             dc.powerOff().get();
 
