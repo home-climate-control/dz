@@ -66,6 +66,7 @@ public class THTest {
         testSync("slow/simple", SimpleDamperController.class, 100, 500);
     }
 
+    @Ignore
     @Test
     public void testSyncFastBalancing()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
