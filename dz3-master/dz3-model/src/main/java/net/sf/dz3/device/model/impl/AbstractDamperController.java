@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.Damper;
@@ -22,7 +24,6 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxAware;
-import net.sf.jukebox.logger.LogAware;
 import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
@@ -30,7 +31,9 @@ import net.sf.servomaster.device.model.TransitionStatus;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
-public abstract class AbstractDamperController extends LogAware implements DamperController, JmxAware {
+public abstract class AbstractDamperController implements DamperController, JmxAware {
+
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * Completion service for asynchronous transitions.
@@ -206,6 +209,11 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         }
     }
 
+    /**
+     * Park the dampers.
+     *
+     * @return The {@link Future} that will be completed when all the dampers are parked.
+     */
     private Future<TransitionStatus> park(boolean async) {
 
         ThreadContext.push("park");
