@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
@@ -220,23 +221,34 @@ public abstract class AbstractDamperController implements DamperController, JmxA
 
         try {
 
-            logger.info("Turning OFF");
+            logger.info("Turning OFF, async={}", async);
 
-            Map<Damper, Double> damperMap = new HashMap<>();
+            for (Damper d : ts2damper.values()) {
 
-            for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
+                Future<TransitionStatus> done = d.park();
 
-                Thermostat ts = i.next();
-                Damper d = ts2damper.get(ts);
+                if (!async) {
 
-                damperMap.put(d, d.getParkPosition());
+                    // VT: FIXME: Fire all of them at once and wait upon the collection of futures instead
+
+                    try {
+                        done.get();
+                    } catch (InterruptedException | ExecutionException ex) {
+                        logger.error("failed to park " + d.getName() + ", nothing we can do now", ex);
+                    }
+                }
+
             }
-
-            Future<TransitionStatus> done = shuffle(damperMap, async);
 
             logger.info("parked");
 
-            return done;
+            // VT: FIXME: Do it right when #51 is sorted out
+
+            TransitionStatus status = new TransitionStatus(0);
+
+            status.complete(0, null);
+
+            return CompletableFuture.completedFuture(status);
 
         } finally {
             ThreadContext.pop();
