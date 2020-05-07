@@ -20,11 +20,11 @@ import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Damper multiplexer.
- * 
+ *
  * Allows to control several physical dampers via one logical one. Each of controlled dampers
  * can be calibrated individually.
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
 public class DamperMultiplexer extends AbstractDamper {
 
@@ -33,12 +33,12 @@ public class DamperMultiplexer extends AbstractDamper {
      *
      * This pool requires exactly one thread.
      */
-    CompletionService<Future<TransitionStatus>> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
+    CompletionService<Future<TransitionStatus>> transitionCompletionService = new ExecutorCompletionService<>(Executors.newSingleThreadExecutor());
 
     /**
      * Dampers to control.
      */
-    private final Set<Damper> dampers = new HashSet<Damper>();
+    private final Set<Damper> dampers = new HashSet<>();
 
     /**
      * Our own position. Different from {@link AbstractDamper#position}.
@@ -49,7 +49,7 @@ public class DamperMultiplexer extends AbstractDamper {
 
     /**
      * Create an instance.
-     * 
+     *
      * @param name Name to use.
      * @param dampers Set of dampers to control.
      * @param parkPosition Park position.
@@ -115,13 +115,13 @@ public class DamperMultiplexer extends AbstractDamper {
 
     @Override
     public synchronized double getPosition() throws IOException {
-        
+
         return multiPosition;
     }
 
     @Override
     public JmxDescriptor getJmxDescriptor() {
-        
+
         return new JmxDescriptor(
                 "dz",
                 "Damper multiplexer",
@@ -151,13 +151,13 @@ public class DamperMultiplexer extends AbstractDamper {
 
                 targetPosition.put(d, position);
 
-                logger.debug(d.getName() + ": " + position + " (" + (custom ? "custom" : "multiplexer") + ")");
+                logger.debug("{}: {} ({})", d.getName(), position, custom ? "custom" : "multiplexer");
 
                 if (custom) {
 
                     // Dude, you better know what you're doing
 
-                    logger.warn(d.getName() + " will be parked at custom position, consider changing hardware layout so override is not necessary");
+                    logger.warn("{} will be parked at custom position, consider changing hardware layout so override is not necessary", d.getName());
                 }
             }
 

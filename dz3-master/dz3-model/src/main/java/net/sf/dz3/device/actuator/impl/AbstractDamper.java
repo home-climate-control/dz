@@ -3,6 +3,8 @@ package net.sf.dz3.device.actuator.impl;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.Damper;
@@ -10,13 +12,14 @@ import net.sf.dz3.util.digest.MessageDigestCache;
 import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.logger.LogAware;
 import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
-public abstract class AbstractDamper extends LogAware implements Damper {
+public abstract class AbstractDamper implements Damper {
+
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * Damper name.
@@ -30,7 +33,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
       */
      private final String signature;
 
-    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
 
     /**
      * Position to park if there was no park position {@link #setParkPosition(double) explicitly specified}.
@@ -148,7 +151,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
         try {
 
-            logger.debug("parking at " + getParkPosition());
+            logger.debug("parking at {}", getParkPosition());
 
             return set(getParkPosition());
 
