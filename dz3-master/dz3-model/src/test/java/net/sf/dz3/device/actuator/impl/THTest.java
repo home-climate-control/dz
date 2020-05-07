@@ -126,7 +126,7 @@ public class THTest {
             Damper damperWestBathroom = new SwitchDamper("damper_westbathroom", switchWestBathroom, 0.8, 1.0, 10);
 
             Damper damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0, 10);
-            Damper damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0, 10, true);
+            Damper damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 0.0, 10, true);
 
             Set<Damper> west = new LinkedHashSet<>();
 
@@ -185,7 +185,7 @@ public class THTest {
             assertEquals(WRONG_STATE, true, switchKitchen.getState());
             assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
             assertEquals(WRONG_STATE, true, switchWestDamper.getState());
-            assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
+            assertEquals(WRONG_STATE, true, switchWestBoosterFan.getState());
 
             // The above stateChanged() also changed the state of the Unit to "running",
             // next stateChanged() will be handled differently
@@ -234,7 +234,7 @@ public class THTest {
             assertEquals(WRONG_STATE, true, switchKitchen.getState());
             assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
             assertEquals(WRONG_STATE, true, switchWestDamper.getState());
-            assertEquals(WRONG_STATE, false, switchWestBoosterFan.getState());
+            assertEquals(WRONG_STATE, true, switchWestBoosterFan.getState());
 
             logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
 
