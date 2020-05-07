@@ -182,4 +182,9 @@ public abstract class AbstractDamper implements Damper {
 
         set(signal.sample);
     }
+
+    @Override
+    public final String toString() {
+        return getClass().getSimpleName() + "@" + hashCode() + "(" + getName() + ")";
+    }
 }
