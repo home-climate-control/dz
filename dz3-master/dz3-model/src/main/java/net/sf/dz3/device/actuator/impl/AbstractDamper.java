@@ -100,7 +100,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
         try {
 
-            logger.info("position=" + throttle);
+            logger.info("{}: position={}", getName(), throttle);
 
             if ( throttle < 0 || throttle > 1.0 || Double.compare(throttle, Double.NaN) == 0) {
 
