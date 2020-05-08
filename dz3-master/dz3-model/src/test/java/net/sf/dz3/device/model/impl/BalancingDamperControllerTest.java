@@ -159,7 +159,14 @@ public class BalancingDamperControllerTest extends TestCase {
 
         @Override
         public Future<TransitionStatus> park() {
-            throw new UnsupportedOperationException("Not Implemented");
+
+            currentPosition = getParkPosition();
+
+            TransitionStatus status = new TransitionStatus(0);
+
+            status.complete(0, null);
+
+            return CompletableFuture.completedFuture(status);
         }
 
         @Override
@@ -181,7 +188,7 @@ public class BalancingDamperControllerTest extends TestCase {
         public double get() {
 
             if (currentPosition == null) {
-                throw new IllegalStateException("Attempt to get a position that wasn never set");
+                throw new IllegalStateException("Attempt to get a position that was never set");
             }
 
             return currentPosition;
