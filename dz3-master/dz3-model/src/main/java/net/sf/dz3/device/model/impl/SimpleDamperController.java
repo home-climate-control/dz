@@ -40,7 +40,7 @@ public class SimpleDamperController extends AbstractDamperController {
     }
 
     @Override
-    protected Map<Damper, Double> compute() {
+    Map<Damper, Double> compute(Map<Thermostat, Damper> ts2damper, Map<Thermostat, ThermostatSignal> ts2signal) {
 
         ThreadContext.push("compute");
 
