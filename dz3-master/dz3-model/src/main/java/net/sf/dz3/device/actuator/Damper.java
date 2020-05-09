@@ -231,6 +231,8 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
                     }
                 }
 
+                logger.debug("transitions complete");
+
                 return result;
 
             } finally {
