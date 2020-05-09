@@ -156,7 +156,7 @@ public class DamperMultiplexer extends AbstractDamper {
 
                     // Dude, you better know what you're doing
 
-                    logger.warn("{} will be parked at custom position, consider changing hardware layout so override is not necessary", d.getName());
+                    logger.warn("{} will be parked at custom position {}, consider changing hardware layout so override is not necessary", d.getName(), position);
                 }
             }
 
