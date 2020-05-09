@@ -20,10 +20,10 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
  * Balancing damper controller, supports modulating dampers.
- * 
+ *
  * If bang/bang dampers is all you have, use {@link SimpleDamperController} instead.
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class BalancingDamperController extends AbstractDamperController {
 
@@ -55,12 +55,12 @@ public class BalancingDamperController extends AbstractDamperController {
      * Create an instance with nothing attached.
      */
     public BalancingDamperController() {
-        
+
     }
-    
+
     /**
      * Create an instance and make it listen to the unit and thermostats.
-     * 
+     *
      * @param unit Unit to listen to.
      * @param ts2damper Thermostats to listen to and dampers to associate them with.
      */
@@ -70,7 +70,7 @@ public class BalancingDamperController extends AbstractDamperController {
 
     /**
      * Get the dump threshold.
-     * 
+     *
      * @return Current value of the dump threshold.
      */
     @JmxAttribute(description = "Dump threshold")
@@ -81,9 +81,9 @@ public class BalancingDamperController extends AbstractDamperController {
 
     /**
      * Set the dump threshold.
-     * 
+     *
      * @param threshold Dump threshold to set.
-     * 
+     *
      * @exception IllegalArgumentException if the parameter value is outside of 0...1.0 range.
      */
     @ConfigurableProperty(
@@ -99,7 +99,7 @@ public class BalancingDamperController extends AbstractDamperController {
         }
 
         this.dumpThreshold = dumpThreshold;
-        
+
         sync();
     }
 
@@ -107,7 +107,7 @@ public class BalancingDamperController extends AbstractDamperController {
     protected Map<Damper, Double> compute() {
 
         ThreadContext.push("compute");
-        
+
         try {
 
             // Calculate the mapping between the thermostat signal and the
@@ -118,83 +118,83 @@ public class BalancingDamperController extends AbstractDamperController {
             // - Room with the most demand gets 1.0
             // - Room with the least demand gets 0.0
             // - All the rest line up accordingly
-            
+
             // VT: FIXME: Implement dump threshold logic
 
-            SortedMap<Double, Set<Thermostat>> demand2ts = new TreeMap<Double, Set<Thermostat>>();
-            Map<Damper, Double> damperMap = new HashMap<Damper, Double>();
+            SortedMap<Double, Set<Thermostat>> demand2ts = new TreeMap<>();
+            Map<Damper, Double> damperMap = new HashMap<>();
 
             for (Iterator<Thermostat> i = ts2signal.keySet().iterator(); i.hasNext(); ) {
-                
+
                 Thermostat ts = i.next();
                 ThermostatSignal signal = ts2signal.get(ts);
-                
+
                 if (signal.demand.isError()) {
 
                     // We have no idea what temperature this zone is at,
                     // let's assume the worst case
-                    
+
                     Damper d = ts2damper.get(ts);
-                    
+
                     damperMap.put(d, d.getParkPosition());
-                    
+
                     continue;
                 }
-                
+
                 // Negative demand counts as 0, otherwise damper positions will go
                 // below 0 - boom
-                Double demand = new Double(signal.demand.sample >= 0.0 ? signal.demand.sample : 0);
-                
+                Double demand = Double.valueOf(signal.demand.sample >= 0.0 ? signal.demand.sample : 0);
+
                 Set<Thermostat> tsSet = demand2ts.get(demand);
-                
+
                 if (tsSet == null) {
-                    
-                    tsSet = new TreeSet<Thermostat>();
+
+                    tsSet = new TreeSet<>();
                     demand2ts.put(demand, tsSet);
                 }
-                
+
                 tsSet.add(ts);
             }
-            
-            logger.debug("demand2ts: " + demand2ts);
-            
+
+            logger.debug("demand2ts: {}", demand2ts);
+
             double most = demand2ts.isEmpty() ? 1 : demand2ts.lastKey();
-            
+
             // Normalize
-            
+
             double scale = 1 / most;
-            
+
             // See if most was 0
             // Have to compare to all extremes due to funky nature of division by zero
 
             scale = Double.compare(scale, Double.NaN) == 0 ? 0 : scale;
             scale = Double.compare(scale, Double.POSITIVE_INFINITY) == 0 ? 0 : scale;
             scale = Double.compare(scale, Double.NEGATIVE_INFINITY) == 0 ? 0 : scale;
-            
-            logger.debug("scale=" + scale);
-            
+
+            logger.debug("scale={}", scale);
+
             // Now, (signal + offset) * scale should be a value for the
             // damper position.
 
             // Shuffle the dampers
-            
+
             for (Iterator<Double> i = demand2ts.keySet().iterator(); i.hasNext(); ) {
-                
+
                 Double key = i.next();
                 Set<Thermostat> tsSet = demand2ts.get(key);
-                
+
                 double value = key.doubleValue() * scale;
-                
+
                 for (Iterator<Thermostat> i2 = tsSet.iterator(); i2.hasNext(); ) {
-                    
+
                     Thermostat ts = i2.next();
-                    
+
                     damperMap.put(ts2damper.get(ts), value);
                 }
             }
-            
+
             return damperMap;
-            
+
         } finally {
             ThreadContext.pop();
         }

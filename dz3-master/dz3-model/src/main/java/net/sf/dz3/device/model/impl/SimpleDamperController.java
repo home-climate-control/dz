@@ -46,7 +46,7 @@ public class SimpleDamperController extends AbstractDamperController {
 
         try {
 
-            Map<Damper, Double> damperMap = new HashMap<Damper, Double>();
+            Map<Damper, Double> damperMap = new HashMap<>();
 
             for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
 
