@@ -134,7 +134,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
         ts2damper.remove(ts);
     }
 
-    public synchronized Future<TransitionStatus> stateChanged(Thermostat source, ThermostatSignal signal) {
+    public Future<TransitionStatus> stateChanged(Thermostat source, ThermostatSignal signal) {
 
         ThreadContext.push("signalChanged");
 
@@ -146,7 +146,10 @@ public abstract class AbstractDamperController implements DamperController, JmxA
                 throw new IllegalArgumentException("Don't know anything about " + source);
             }
 
-            ts2signal.put(source, signal);
+            synchronized (this) {
+                ts2signal.put(source, signal);
+            }
+
             logger.info("Demand: {}={}", source.getName(), signal.demand.sample);
             logger.info("ts2signal.size()={}", ts2signal.size());
 
