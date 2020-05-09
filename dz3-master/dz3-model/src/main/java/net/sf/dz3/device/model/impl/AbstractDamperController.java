@@ -41,7 +41,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
      *
      * This pool requires exactly one thread.
      */
-    CompletionService<Future<TransitionStatus>> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
+    CompletionService<TransitionStatus> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
 
     /**
      * Association from a thermostat to a damper.
@@ -278,9 +278,9 @@ public abstract class AbstractDamperController implements DamperController, JmxA
                 // is completed when the transitions have been fired, and the second is
                 // when they all complete.
 
-                return transitionCompletionService.take().get();
+                return transitionCompletionService.take();
 
-            } catch (InterruptedException | ExecutionException ex) {
+            } catch (InterruptedException ex) {
 
                 // VT: FIXME: Oops... Really don't know what to do with this, will have to collect stats
                 // before this can be reasonably handled

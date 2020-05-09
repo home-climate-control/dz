@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -33,7 +32,7 @@ public class DamperMultiplexer extends AbstractDamper {
      *
      * This pool requires exactly one thread.
      */
-    CompletionService<Future<TransitionStatus>> transitionCompletionService = new ExecutorCompletionService<>(Executors.newSingleThreadExecutor());
+    CompletionService<TransitionStatus> transitionCompletionService = new ExecutorCompletionService<>(Executors.newSingleThreadExecutor());
 
     /**
      * Dampers to control.
@@ -102,9 +101,9 @@ public class DamperMultiplexer extends AbstractDamper {
             // is completed when the transitions have been fired, and the second is
             // when they all complete.
 
-            return transitionCompletionService.take().get();
+            return transitionCompletionService.take();
 
-        } catch (InterruptedException | ExecutionException ex) {
+        } catch (InterruptedException ex) {
 
             // VT: FIXME: Oops... Really don't know what to do with this, will have to collect stats
             // before this can be reasonably handled
