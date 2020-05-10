@@ -1,13 +1,10 @@
 package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * 'Null' damper - this damper does not interact with hardware, just logs
@@ -33,7 +30,7 @@ public class NullDamper extends AbstractDamper {
     }
 
     @Override
-    public Future<TransitionStatus> moveDamper(double throttle) {
+    public void moveDamper(double throttle) throws IOException {
 
 	ThreadContext.push("moveDamper");
 
@@ -41,12 +38,6 @@ public class NullDamper extends AbstractDamper {
 
 	    logger.debug("new position: " + throttle);
 	    this.throttle = throttle;
-
-	    TransitionStatus status = new TransitionStatus(0);
-
-	    status.complete(0, null);
-
-	    return CompletableFuture.completedFuture(status);
 
 	} finally {
 	    ThreadContext.pop();

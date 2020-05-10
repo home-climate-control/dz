@@ -6,14 +6,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.Damper;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxDescriptor;
 import net.sf.servomaster.device.model.TransitionStatus;
 
@@ -26,13 +26,6 @@ import net.sf.servomaster.device.model.TransitionStatus;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
 public class DamperMultiplexer extends AbstractDamper {
-
-    /**
-     * Completion service for asynchronous transitions.
-     *
-     * This pool requires exactly one thread.
-     */
-    CompletionService<TransitionStatus> transitionCompletionService = new ExecutorCompletionService<>(Executors.newSingleThreadExecutor());
 
     /**
      * Dampers to control.
@@ -77,7 +70,7 @@ public class DamperMultiplexer extends AbstractDamper {
     }
 
     @Override
-    protected synchronized Future<TransitionStatus> moveDamper(double position) {
+    protected void moveDamper(double position) throws IOException {
 
         multiPosition = position;
 
@@ -88,27 +81,19 @@ public class DamperMultiplexer extends AbstractDamper {
             targetPosition.put(i.next(), position);
         }
 
-        return moveDampers(targetPosition);
+        moveDampers(targetPosition);
     }
 
-    private Future<TransitionStatus> moveDampers(Map<Damper, Double> targetPosition) {
+    private void moveDampers(Map<Damper, Double> targetPosition) throws IOException {
 
         transitionCompletionService.submit(new Damper.MoveGroup(targetPosition, false));
 
         try {
 
-            // VT: NOTE: The following line unwraps one level of Future. The first Future
-            // is completed when the transitions have been fired, and the second is
-            // when they all complete.
+            transitionCompletionService.take().get();
 
-            return transitionCompletionService.take();
-
-        } catch (InterruptedException ex) {
-
-            // VT: FIXME: Oops... Really don't know what to do with this, will have to collect stats
-            // before this can be reasonably handled
-
-            throw new IllegalStateException("Unhandled exception", ex);
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new IOException("failed to move dampers?", ex);
         }
     }
 
@@ -131,39 +116,54 @@ public class DamperMultiplexer extends AbstractDamper {
     @Override
     public Future<TransitionStatus> park() {
 
-        ThreadContext.push("park");
+        // VT: NOTE: This object is bogus - the whole concept needs to be revisited; see #132
 
-        try {
+        int authToken = hashCode();
+        TransitionStatus result = new TransitionStatus(authToken);
 
-            multiPosition = getParkPosition();
+        Callable<TransitionStatus> c = () -> {
 
-            // Need to park dampers at their individual positions if they were specified,
-            // or to the multiplexer parking position if they weren't.
 
-            Map<Damper, Double> targetPosition = new HashMap<>();
+            Marker m = new Marker("park/multi");
+            ThreadContext.push("park/multi");
 
-            for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
+            try {
 
-                Damper d = i.next();
-                boolean custom = d.isCustomParkPosition();
-                double position = custom ? d.getParkPosition() : getParkPosition();
+                multiPosition = getParkPosition();
 
-                targetPosition.put(d, position);
+                // Need to park dampers at their individual positions if they were specified,
+                // or to the multiplexer parking position if they weren't.
 
-                logger.debug("{}: {} ({})", d.getName(), position, custom ? "custom" : "multiplexer");
+                Map<Damper, Double> targetPosition = new HashMap<>();
 
-                if (custom) {
+                for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
 
-                    // Dude, you better know what you're doing
+                    Damper d = i.next();
+                    boolean custom = d.isCustomParkPosition();
+                    double position = custom ? d.getParkPosition() : getParkPosition();
 
-                    logger.warn("{} will be parked at custom position {}, consider changing hardware layout so override is not necessary", d.getName(), position);
+                    targetPosition.put(d, position);
+
+                    logger.debug("{}: {} ({})", d.getName(), position, custom ? "custom" : "multiplexer");
+
+                    if (custom) {
+                        logger.warn("{} will be parked at custom position {}, consider changing hardware layout so override is not necessary", d.getName(), position);
+                    }
                 }
+
+                moveDampers(targetPosition);
+
+                result.complete(authToken, null);
+                return result;
+
+            } finally {
+
+                m.close();
+                ThreadContext.pop();
+                ThreadContext.clearStack();
             }
+        };
 
-            return moveDampers(targetPosition);
-
-        } finally {
-            ThreadContext.pop();
-        }
+        return transitionCompletionService.submit(c);
     }
 }

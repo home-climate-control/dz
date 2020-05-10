@@ -1,6 +1,10 @@
 package net.sf.dz3.device.actuator.impl;
 
-import java.util.concurrent.CompletableFuture;
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.LogManager;
@@ -20,6 +24,14 @@ import net.sf.servomaster.device.model.TransitionStatus;
 public abstract class AbstractDamper implements Damper {
 
     protected final Logger logger = LogManager.getLogger(getClass());
+
+    /**
+     * Completion service for asynchronous transitions.
+     *
+     * This pool requires exactly one thread, to honor the happened-before relation
+     * between the series of commands sent to this damper.
+     */
+    CompletionService<TransitionStatus> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
 
     /**
      * Damper name.
@@ -99,55 +111,54 @@ public abstract class AbstractDamper implements Damper {
     @Override
     public final Future<TransitionStatus> set(double throttle) {
 
-        ThreadContext.push("set");
+        // VT: NOTE: This object is bogus - the whole concept needs to be revisited; see #132
 
-        try {
+        int authToken = hashCode();
+        TransitionStatus result = new TransitionStatus(authToken);
 
-            logger.info("{}: position={}", getName(), throttle);
+        Callable<TransitionStatus> c = () -> {
 
-            if ( throttle < 0 || throttle > 1.0 || Double.compare(throttle, Double.NaN) == 0) {
-
-                throw new IllegalArgumentException("Throttle out of 0...1 range: " + throttle);
-            }
-
-            this.position = throttle;
+            ThreadContext.push("set/" + getName());
 
             try {
 
-                Future<TransitionStatus> done = moveDamper(throttle);
+                logger.info("position={}", throttle);
+
+                if ( throttle < 0 || throttle > 1.0 || Double.compare(throttle, Double.NaN) == 0) {
+
+                    throw new IllegalArgumentException("Throttle out of 0...1 range: " + throttle);
+                }
+
+                this.position = throttle;
+
+                moveDamper(throttle);
                 stateChanged();
 
-                return done;
+                result.complete(authToken, null);
 
-            } catch (Throwable t) {
+                return result;
 
-                logger.fatal("Failed to move damper to position " + throttle, t);
-
-                // VT: FIXME: Need to change Damper to be a producer of DataSample<Double>, not Double
-                stateChanged();
-
-                TransitionStatus done = new TransitionStatus(t.hashCode());
-                done.complete(t.hashCode(), t);
-
-                return CompletableFuture.completedFuture(done);
+            } finally {
+                ThreadContext.pop();
             }
+        };
 
-        } finally {
-            ThreadContext.pop();
-        }
+        return transitionCompletionService.submit(c);
     }
 
     /**
      * Move the actual damper.
      *
      * @param position Position to set.
+     *
+     * @exception IOException if there was a problem moving the damper.
      */
-    protected abstract Future<TransitionStatus> moveDamper(double position);
+    protected abstract void moveDamper(double position) throws IOException;
 
     @Override
     public Future<TransitionStatus> park() {
 
-        ThreadContext.push("park");
+        ThreadContext.push("park/" + getName());
 
         try {
 

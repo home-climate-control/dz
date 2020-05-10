@@ -1,15 +1,12 @@
 package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Damper controlled by a switch.
@@ -145,16 +142,10 @@ public class SwitchDamper extends AbstractDamper {
     }
 
     @Override
-    public Future<TransitionStatus> moveDamper(double position) {
+    public void moveDamper(double position) throws IOException {
 
         ThreadContext.push("moveDamper");
-
-        // VT: NOTE: For now, let's assume that transition is instantaneous.
-        // However, let's keep an eye on it - there may be slow acting switches
-        // such as ShellSwitch.
-
         Marker m = new Marker("moveDamper");
-        TransitionStatus status = new TransitionStatus(m.hashCode());
 
         try {
 
@@ -185,23 +176,20 @@ public class SwitchDamper extends AbstractDamper {
 
             this.position = position;
 
-            status.complete(m.hashCode(), null);
-
         } catch (Throwable t) {
 
             // This is pretty serious, closed damper may cause the compressor to slug
-            // or the boiler to blow up
-            logger.fatal("Failed to set the damper state", t);
+            // or the boiler to blow up - so no harm in logging this multiple times, hopefully
 
-            status.complete(m.hashCode(), t);
+            logger.fatal("failed to set state for {}", target.getAddress(), t);
+
+            throw new IOException("failed to set state for " + target.getAddress(), t);
 
         } finally {
 
             m.close();
             ThreadContext.pop();
         }
-
-        return CompletableFuture.completedFuture(status);
     }
 
     @Override
