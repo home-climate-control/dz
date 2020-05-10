@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
@@ -21,6 +22,7 @@ import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
+import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.jmx.JmxAttribute;
@@ -220,38 +222,67 @@ public abstract class AbstractDamperController implements DamperController, JmxA
      */
     private Future<TransitionStatus> park(boolean async) {
 
-        ThreadContext.push("park");
+        ThreadContext.push("park/main");
+
+        // VT: NOTE: This object is bogus - the whole concept needs to be revisited; see #132
+
+        TransitionStatus result = new TransitionStatus(hashCode());
 
         try {
 
-            logger.info("Turning OFF, async={}", async);
+            Callable<TransitionStatus> c = () -> {
 
-            for (Damper d : ts2damper.values()) {
+                Marker m = new Marker("park/callable");
+                ThreadContext.push("park/callable");
 
-                Future<TransitionStatus> done = d.park();
+                try {
 
-                if (!async) {
+                    logger.info("Turning OFF, async={}", async);
 
-                    // VT: FIXME: Fire all of them at once and wait upon the collection of futures instead
+                    for (Damper d : ts2damper.values()) {
 
-                    try {
-                        done.get();
-                    } catch (InterruptedException | ExecutionException ex) {
-                        logger.error("failed to park " + d.getName() + ", nothing we can do now", ex);
+                        // The underlying system is likely a singleton, no sense to spawn parallel threads
+
+                        logger.debug("{}: parking",  d.getName());
+                        d.park().get();
+                        logger.info("{}: parked", d.getName());
                     }
-                }
 
+                    result.complete(hashCode(), null);
+
+                    return result;
+
+                } finally {
+
+                    m.close();
+                    ThreadContext.pop();
+                    ThreadContext.clearStack();
+                }
+            };
+
+            Future<TransitionStatus> done = transitionCompletionService.submit(c);
+
+            if (async) {
+                logger.debug("async call, bailing out");
+                return done;
             }
 
+            done.get();
             logger.info("parked");
 
-            // VT: FIXME: Do it right when #51 is sorted out
+            return done;
 
-            TransitionStatus status = new TransitionStatus(0);
+        } catch (InterruptedException| ExecutionException ex) {
 
-            status.complete(0, null);
+            // This is potentially expensive - may slug the HVAC if the dampers are
+            // left closed while it is running, hence fatal level. Can't afford to disrupt
+            // the parking sequence, though - we're likely shutting down.
 
-            return CompletableFuture.completedFuture(status);
+            logger.fatal("failed to park dampers", ex);
+
+            result.complete(hashCode(), ex);
+
+            return CompletableFuture.completedFuture(result);
 
         } finally {
             ThreadContext.pop();
@@ -276,10 +307,6 @@ public abstract class AbstractDamperController implements DamperController, JmxA
             transitionCompletionService.submit(new Damper.MoveGroup(damperMap, async));
 
             try {
-
-                // VT: NOTE: The following line unwraps one level of Future. The first Future
-                // is completed when the transitions have been fired, and the second is
-                // when they all complete.
 
                 return transitionCompletionService.take();
 
