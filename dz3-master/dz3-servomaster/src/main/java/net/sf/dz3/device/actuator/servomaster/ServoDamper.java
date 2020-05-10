@@ -1,6 +1,7 @@
 package net.sf.dz3.device.actuator.servomaster;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
@@ -154,7 +155,7 @@ public class ServoDamper extends AbstractDamper {
     }
 
     @Override
-    public Future<TransitionStatus> moveDamper(double throttle) {
+    public void moveDamper(double throttle) throws IOException {
 
         ThreadContext.push("moveDamper");
 
@@ -165,7 +166,11 @@ public class ServoDamper extends AbstractDamper {
                 logger.debug(servo.getName() + ": " + throttle);
             }
 
-            return servo.setPosition(throttle);
+            servo.setPosition(throttle).get();
+
+        } catch (InterruptedException | ExecutionException ex) {
+
+            throw new IOException("failed to move " + getName(), ex);
 
         } finally {
 
