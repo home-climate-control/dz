@@ -219,18 +219,6 @@ public class THTest {
                 dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
             }
 
-            {
-                // VT: NOTE: This may need to be increased on a slow system to make the test
-                // pass - but it's a temporary block anyway; it'll go away with the proper
-                // implementation
-
-                long delay = 1000;
-
-                logger.warn("sleeping {}ms to let things settle down...", delay);
-                Thread.sleep(delay);
-                logger.warn("the sleep is over");
-            }
-
             dc.powerOff().get();
 
             assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);

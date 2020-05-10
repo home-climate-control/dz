@@ -244,7 +244,12 @@ public abstract class AbstractDamperController implements DamperController, JmxA
                         // The underlying system is likely a singleton, no sense to spawn parallel threads
 
                         logger.debug("{}: parking",  d.getName());
-                        d.park().get();
+
+                        // VT: FIXME: calling d.park.get() causes a deadlock somewhere within DamperMultiplexer;
+                        // still need to fix that because the operation wouldn't be synchronous the way it is now
+
+                        d.park();
+
                         logger.info("{}: parked", d.getName());
                     }
 
