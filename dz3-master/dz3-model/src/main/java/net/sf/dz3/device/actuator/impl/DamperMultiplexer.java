@@ -86,11 +86,10 @@ public class DamperMultiplexer extends AbstractDamper {
 
     private void moveDampers(Map<Damper, Double> targetPosition) throws IOException {
 
-        transitionCompletionService.submit(new Damper.MoveGroup(targetPosition, false));
 
         try {
 
-            transitionCompletionService.take().get();
+            executor.submit(new Damper.MoveGroup(targetPosition, false)).get();
 
         } catch (InterruptedException | ExecutionException ex) {
             throw new IOException("failed to move dampers?", ex);
@@ -164,6 +163,6 @@ public class DamperMultiplexer extends AbstractDamper {
             }
         };
 
-        return transitionCompletionService.submit(c);
+        return executor.submit(c);
     }
 }

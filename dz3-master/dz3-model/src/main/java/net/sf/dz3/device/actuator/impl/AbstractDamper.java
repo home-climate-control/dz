@@ -2,8 +2,7 @@ package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
@@ -31,7 +30,7 @@ public abstract class AbstractDamper implements Damper {
      * This pool requires exactly one thread, to honor the happened-before relation
      * between the series of commands sent to this damper.
      */
-    CompletionService<TransitionStatus> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
+    ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Damper name.
@@ -143,7 +142,7 @@ public abstract class AbstractDamper implements Damper {
             }
         };
 
-        return transitionCompletionService.submit(c);
+        return executor.submit(c);
     }
 
     /**
