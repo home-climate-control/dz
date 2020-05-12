@@ -4,8 +4,18 @@
 # It is safe to run it multiple times, each time a separate file will be created.
 
 if test -z "${JAVA_HOME}"; then
-    echo "JAVA_HOME undefined, aborting"
-    exit 1;
+    export JMAP=`which jmap`
+    if ! test -x "${JMAP}"; then
+        echo "Can't find JConsole binary";
+        exit 1;
+    fi
+else
+    export JMAP="${JAVA_HOME}/bin/jmap"
+    if ! test -x "${JMAP}"; then
+        echo "JAVA_HOME seems to point into a wrong place (${JAVA_HOME}), can't find jmap binary";
+        exit 1;
+    fi
 fi
 
-${JAVA_HOME}/bin/jmap -dump:file=`date +"%Y.%m.%d-%H:%M:%S"`.jmap `ps ax|grep net.sf.dz3.runtime.Container|grep -v grep|tr -s " "|sed -e "s:^ ::;"|cut -f 1 -d " "`
+
+${JMAP} -dump:file=`date +"%Y.%m.%d-%H:%M:%S"`.jmap `ps ax|grep net.sf.dz3.runtime.Container|grep -v grep|tr -s " "|sed -e "s:^ ::;"|cut -f 1 -d " "`

@@ -3,14 +3,25 @@
 # The following line will get the thread stack dump from the running DZ process.
 # It is safe to run it multiple times, each time a separate file will be created.
 
+# We don't need ${JAVA_HOME} *that* much, but if it is set, it'd be nice to honor it
+
 if test -z "${JAVA_HOME}"; then
-    echo "JAVA_HOME undefined, aborting"
-    exit 1;
+    export JSTACK=`which jstack`
+    if ! test -x "${JSTACK}"; then
+        echo "Can't find JConsole binary";
+        exit 1;
+    fi
+else
+    export JSTACK="${JAVA_HOME}/bin/jstack"
+    if ! test -x "${JSTACK}"; then
+        echo "JAVA_HOME seems to point into a wrong place (${JAVA_HOME}), can't find jstack binary";
+        exit 1;
+    fi
 fi
 
 OUTPUT_FILE=`date +"%Y.%m.%d-%H:%M:%S"`.stack
 
 echo "Dumping thread stack into ${OUTPUT_FILE}"
 
-${JAVA_HOME}/bin/jstack `ps ax|grep net.sf.dz3.runtime.Container|grep -v grep|tr -s " "|sed -e "s:^ ::;"|cut -f 1 -d " "` > ${OUTPUT_FILE}
+${JSTACK} `ps ax|grep net.sf.dz3.runtime.Container|grep -v grep|tr -s " "|sed -e "s:^ ::;"|cut -f 1 -d " "` > ${OUTPUT_FILE}
 
