@@ -195,16 +195,19 @@ public class THTest {
             dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(0, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
+
+            // VT: FIXME: The next line will now lock up the damper movement system. Figuring out why.
+
             dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(3.0625, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(6.875, true, 0), null));
+            //dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(6.875, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(10.3125, true, 0), null));
+            //dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(10.3125, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(13.6875, true, 0), null));
+            //dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(13.6875, true, 0), null));
 
 
             // After that, the demand rises by small increments until the whole thing blows up
@@ -216,7 +219,7 @@ public class THTest {
                 timestamp += 50 + rg.nextInt(100);
                 demand += rg.nextDouble()/10;
 
-                dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
+                //dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
             }
 
             dc.powerOff().get();

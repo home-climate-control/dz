@@ -6,9 +6,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
@@ -39,11 +38,11 @@ public abstract class AbstractDamperController implements DamperController, JmxA
     protected final Logger logger = LogManager.getLogger(getClass());
 
     /**
-     * Completion service for asynchronous transitions.
+     * Executor for asynchronous transitions.
      *
      * This pool requires exactly one thread.
      */
-    CompletionService<TransitionStatus> transitionCompletionService = new ExecutorCompletionService<>(Executors.newFixedThreadPool(1));
+    ExecutorService executor = Executors.newSingleThreadExecutor();
 
     /**
      * Association from a thermostat to a damper.
@@ -265,13 +264,14 @@ public abstract class AbstractDamperController implements DamperController, JmxA
                 }
             };
 
-            Future<TransitionStatus> done = transitionCompletionService.submit(c);
+            Future<TransitionStatus> done = executor.submit(c);
 
             if (async) {
-                logger.debug("async call, bailing out");
+                logger.debug("parking asynchronously");
                 return done;
             }
 
+            logger.debug("parking...");
             done.get();
             logger.info("parked");
 
@@ -309,13 +309,20 @@ public abstract class AbstractDamperController implements DamperController, JmxA
 
         try {
 
-            transitionCompletionService.submit(new Damper.MoveGroup(damperMap, async));
+            Future<TransitionStatus> done = executor.submit(new Damper.MoveGroup(damperMap));
+
+            if (async) {
+
+                logger.debug("async call, bailing out");
+                return done;
+            }
 
             try {
 
-                return transitionCompletionService.take();
+                done.get();
+                return done;
 
-            } catch (InterruptedException ex) {
+            } catch (InterruptedException | ExecutionException ex) {
 
                 // VT: FIXME: Oops... Really don't know what to do with this, will have to collect stats
                 // before this can be reasonably handled

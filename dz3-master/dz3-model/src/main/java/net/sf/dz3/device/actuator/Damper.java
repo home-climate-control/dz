@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
@@ -159,24 +160,19 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
         protected final Logger logger = LogManager.getLogger(getClass());
 
         private final Map<Damper, Double> targetPosition;
-        private final boolean async;
 
         /**
          * @param targetPosition Map between damper and positions they're supposed to be set to.
-         * @param async {@code true} if the {@code Future<TransitionStatus>} will be returned immediately
-         * and positions will be set in background, {@code false} if all the transitions need to end
-         * before this {@link #call()} returns.
          */
-        public MoveGroup(Map<Damper, Double> targetPosition, boolean async) {
+        public MoveGroup(Map<Damper, Double> targetPosition) {
 
             this.targetPosition = Collections.unmodifiableMap(targetPosition);
-            this.async = async;
         }
 
         @Override
         public TransitionStatus call() throws Exception {
 
-            ThreadContext.push("run/scatter");
+            ThreadContext.push("run/scatter@" + hashCode());
 
             try {
 
@@ -188,7 +184,8 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
                 result.complete(hashCode(), null);
 
                 int count = targetPosition.size();
-                CompletionService<TransitionStatus> cs = new ExecutorCompletionService<>(Executors.newFixedThreadPool(count));
+                ExecutorService executor = Executors.newFixedThreadPool(count);
+                CompletionService<TransitionStatus> cs = new ExecutorCompletionService<>(executor);
 
                 for (Iterator<Entry<Damper, Double>> i = targetPosition.entrySet().iterator(); i.hasNext(); ) {
 
@@ -201,23 +198,22 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
                     cs.submit(new Damper.Move(d, position));
                 }
 
-                logger.debug("fired transitions");
-
-                if (async) {
-                    logger.debug("async call, bailing out");
-                    return result;
-                }
+                logger.debug("fired {} transitions: {}", targetPosition.size(), targetPosition);
 
                 ThreadContext.pop();
-                ThreadContext.push("run/gather");
+                ThreadContext.push("run/gather@" + hashCode());
 
                 int left = count;
 
-                while (left-- > 0) {
+                while (left > 0) {
 
                     try {
 
+                        logger.debug("{} tasks still running...", left);
+
                         cs.take().get();
+
+                        left--;
 
                     } catch (ExecutionException ex) {
 
@@ -232,6 +228,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
                 }
 
                 logger.debug("transitions complete");
+                executor.shutdownNow();
 
                 return result;
 

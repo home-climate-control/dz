@@ -72,27 +72,43 @@ public class DamperMultiplexer extends AbstractDamper {
     @Override
     protected void moveDamper(double position) throws IOException {
 
-        multiPosition = position;
+        ThreadContext.push("moveDamper");
+        Marker m = new Marker("moveDamper");
 
-        Map<Damper, Double> targetPosition = new HashMap<>();
+        try {
 
-        for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
+            multiPosition = position;
 
-            targetPosition.put(i.next(), position);
+            Map<Damper, Double> targetPosition = new HashMap<>();
+
+            for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
+
+                targetPosition.put(i.next(), position);
+            }
+
+            moveDampers(targetPosition);
+
+        } finally {
+            m.close();
+            ThreadContext.pop();
         }
-
-        moveDampers(targetPosition);
     }
 
     private void moveDampers(Map<Damper, Double> targetPosition) throws IOException {
 
-
+        ThreadContext.push("moveDampers");
         try {
 
-            executor.submit(new Damper.MoveGroup(targetPosition, false)).get();
+            Future<TransitionStatus> done = executor.submit(new Damper.MoveGroup(targetPosition));
+
+            logger.debug("fired transitions: {}", targetPosition);
+
+            done.get();
 
         } catch (InterruptedException | ExecutionException ex) {
             throw new IOException("failed to move dampers?", ex);
+        } finally {
+            ThreadContext.pop();
         }
     }
 
