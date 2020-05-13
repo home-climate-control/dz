@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.ThreadContext;
@@ -99,13 +98,9 @@ public class DamperMultiplexer extends AbstractDamper {
         ThreadContext.push("moveDampers");
         try {
 
-            Future<TransitionStatus> done = executor.submit(new Damper.MoveGroup(targetPosition));
+            new Damper.MoveGroup(targetPosition).call();
 
-            logger.debug("fired transitions: {}", targetPosition);
-
-            done.get();
-
-        } catch (InterruptedException | ExecutionException ex) {
+        } catch (Exception ex) {
             throw new IOException("failed to move dampers?", ex);
         } finally {
             ThreadContext.pop();
