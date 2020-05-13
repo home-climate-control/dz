@@ -1,6 +1,7 @@
 package net.sf.dz3.device.actuator.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -34,6 +37,7 @@ import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.jukebox.datastream.signal.model.DataSample;
+import net.sf.servomaster.device.model.TransitionStatus;
 
 /**
  * Set of test cases to replicate https://github.com/home-climate-control/dz/issues/130.
@@ -46,6 +50,73 @@ public class THTest {
     private static final String WRONG_POSITION = "wrong position";
     private static final String WRONG_STATE = "wrong switch state";
 
+    @Test
+    public void moveGroup() throws Exception {
+        ThreadContext.push("moveGroup");
+
+        try {
+
+            Damper d1 = new NullDamper("d1");
+            Damper d2 = new NullDamper("d2");
+            Damper d3 = new NullDamper("d3");
+
+            Map<Damper, Double> targetPosition = new HashMap<>();
+
+            targetPosition.put(d1, 0.1);
+            targetPosition.put(d2, 0.2);
+            targetPosition.put(d3, 0.3);
+
+            TransitionStatus t = new Damper.MoveGroup(targetPosition).call();
+
+            assertTrue(t.isOK());
+
+            assertEquals(WRONG_POSITION, 0.1, d1.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, 0.2, d2.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, 0.3, d3.getPosition(), 0.0001);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    @Test
+    public void lockUp() throws Exception {
+        ThreadContext.push("lockUp");
+
+        try {
+
+            Damper d1 = new NullDamper("d1");
+            Damper d2 = new NullDamper("d2");
+            Damper d3 = new NullDamper("d3");
+
+            Set<Damper> dampers = new HashSet<>();
+
+            dampers.add(d2);
+            dampers.add(d3);
+
+            Damper dm = new DamperMultiplexer("dm", dampers);
+
+            Map<Damper, Double> targetPosition = new HashMap<>();
+
+            targetPosition.put(d1, 0.1);
+            targetPosition.put(d2, 0.2);
+            targetPosition.put(dm, 0.3);
+
+            TransitionStatus t = new Damper.MoveGroup(targetPosition).call();
+
+            assertTrue(t.isOK());
+
+            assertEquals(WRONG_POSITION, 0.1, d1.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, 0.3, d2.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, 0.3, d3.getPosition(), 0.0001);
+            assertEquals(WRONG_POSITION, 0.3, dm.getPosition(), 0.0001);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    @Ignore
     @Test
     public void testSyncFastSimple()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
@@ -66,6 +137,7 @@ public class THTest {
         testSync("slow/simple", SimpleDamperController.class, 100, 500);
     }
 
+    @Ignore
     @Test
     public void testSyncFastBalancing()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
