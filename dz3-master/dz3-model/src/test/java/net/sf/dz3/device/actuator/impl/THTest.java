@@ -173,14 +173,14 @@ public class THTest {
 
             doReturn("thermostat-livingroom").when(tsLivingRoom).getName();
             doReturn("thermostat-kitchen").when(tsKitchen).getName();
-            doReturn("thermostat-westbathroom").when(tsWestBathroom).getName();
+            doReturn("thermostat-west_bathroom").when(tsWestBathroom).getName();
             doReturn("thermostat-west").when(tsWest).getName();
 
             Object lock = "lock";
 
             Switch switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay, lock);
             Switch switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay, lock);
-            Switch switchWestBathroom = new NullSwitch("switch_westbathroom_damper", minDelay, maxDelay, lock);
+            Switch switchWestBathroom = new NullSwitch("switch_west_bathroom_damper", minDelay, maxDelay, lock);
             Switch switchWestDamper = new NullSwitch("switch_west_damper", minDelay, maxDelay, lock);
             Switch switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", minDelay, maxDelay, lock);
 
@@ -194,10 +194,10 @@ public class THTest {
 
             Damper damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0, 10);
             Damper damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0, 10);
-            Damper damperWestBathroom = new SwitchDamper("damper_westbathroom", switchWestBathroom, 0.8, 1.0, 10);
+            Damper damperWestBathroom = new SwitchDamper("damper_west_bathroom", switchWestBathroom, 0.8, 1.0, 10);
 
             Damper damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0, 10);
-            Damper damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 0.0, 10, true);
+            Damper damperWestBoosterFan = new SwitchDamper("damper_west_boosterfan", switchWestBoosterFan, 0.8, 0.0, 10, true);
 
             Set<Damper> west = new LinkedHashSet<>();
 
