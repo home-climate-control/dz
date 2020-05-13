@@ -32,3 +32,7 @@ ESP8266/ESP32 is now a future direction for edge device development and integrat
 
 * ~~[hcc-esp8266](https://github.com/home-climate-control/hcc-esp8266) - 1-Wire over MQTT over WiFi on [ESP8266](https://en.wikipedia.org/wiki/ESP8266) ([Arduino IDE](https://github.com/esp8266/Arduino))~~ Use [ESPHome Integration](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-to-ESPHome-integration) instead
 * [hcc-esp32](https://github.com/home-climate-control/hcc-esp32) - 1-Wire over MQTT over WiFi on [ESP32](https://en.wikipedia.org/wiki/ESP32) ([ESP-IDF](https://github.com/espressif/esp-idf))
+
+InfluxDB is now supported as a data sink.
+
+* [HOWTO: DZ as InfluxDB Data Source](https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-as-InfluxDB-Data-Source)
