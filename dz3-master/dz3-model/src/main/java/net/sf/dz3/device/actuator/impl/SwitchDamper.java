@@ -1,6 +1,7 @@
 package net.sf.dz3.device.actuator.impl;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.ThreadContext;
 
@@ -72,7 +73,7 @@ public class SwitchDamper extends AbstractDamper {
      * @param heartbeatSeconds The command to set the position will not be sent to the actual switch
      * more often than once in this many seconds.
      */
-    public SwitchDamper(String name, Switch target, double threshold, int heartbeatSeconds) {
+    public SwitchDamper(String name, Switch target, double threshold, int heartbeatSeconds) throws IOException {
 
         this(name, target, threshold, 1.0, heartbeatSeconds, false);
     }
@@ -87,7 +88,7 @@ public class SwitchDamper extends AbstractDamper {
      * @param heartbeatSeconds The command to set the position will not be sent to the actual switch
      * more often than once in this many seconds.
      */
-    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, int heartbeatSeconds) {
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, int heartbeatSeconds) throws IOException {
 
         this(name, target, threshold, parkPosition, heartbeatSeconds, false);
     }
@@ -103,7 +104,7 @@ public class SwitchDamper extends AbstractDamper {
      * more often than once in this many seconds.
      * @param inverted {@code true} if the switch position needs to be inverted.
      */
-    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, int heartbeatSeconds, boolean inverted) {
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, int heartbeatSeconds, boolean inverted) throws IOException {
 
         super(name);
 
@@ -123,7 +124,11 @@ public class SwitchDamper extends AbstractDamper {
 
         setParkPosition(parkPosition);
 
-        set(getParkPosition());
+        try {
+            set(getParkPosition()).get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new IOException("can't set switch position", ex);
+        }
     }
 
     private void check(Switch target) {

@@ -83,8 +83,7 @@ public class BalancingDamperControllerTest extends TestCase {
 
             assertTrue(status.isOK());
 
-            // VT: NOTE: Need this because of asynchronous nature of damper transitions
-            logger.debug("about to assert");
+            damperController.powerOff().get();
 
             assertEquals("Wrong damper position", d1.getParkPosition(), d1.get(), 0.000000000001);
 

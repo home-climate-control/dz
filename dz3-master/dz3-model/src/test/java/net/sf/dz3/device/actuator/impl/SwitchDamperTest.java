@@ -25,7 +25,7 @@ public class SwitchDamperTest extends TestCase {
     /**
      * Test whether the {@link SwitchDamper} is properly parked.
      */
-    public void testPark() {
+    public void testPark() throws IOException {
 
         NullSwitch s = new NullSwitch("switch");
         Damper d = new SwitchDamper("damper", s, 0.5, 0);
