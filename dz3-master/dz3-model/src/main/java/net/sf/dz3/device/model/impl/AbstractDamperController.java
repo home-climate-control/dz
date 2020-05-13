@@ -244,10 +244,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
 
                         logger.debug("{}: parking",  d.getName());
 
-                        // VT: FIXME: calling d.park.get() causes a deadlock somewhere within DamperMultiplexer;
-                        // still need to fix that because the operation wouldn't be synchronous the way it is now
-
-                        d.park();
+                        d.park().get();
 
                         logger.info("{}: parked", d.getName());
                     }

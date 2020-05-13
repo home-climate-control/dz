@@ -297,6 +297,8 @@ public class THTest {
 
             dc.powerOff().get();
 
+            logger.warn("powerOff complete? (if there are any damper log messages below, no, it's not");
+
             assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
             assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
             assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
