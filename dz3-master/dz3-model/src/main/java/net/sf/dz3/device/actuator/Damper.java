@@ -205,15 +205,17 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
 
                 int left = count;
 
-                while (left > 0) {
+                logger.debug("{} tasks running", left);
+
+                while (left-- > 0) {
 
                     try {
 
-                        logger.debug("{} tasks still running...", left);
-
                         cs.take().get();
 
-                        left--;
+                        if (left > 0) {
+                            logger.debug("{} tasks still running...", left);
+                        }
 
                     } catch (ExecutionException ex) {
 
