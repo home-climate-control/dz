@@ -113,7 +113,7 @@ public class Console extends Connector<JComponent> {
      */
     @Deprecated
     public synchronized void show() {
-
+        logger.warn("use 'init-method=\"activate\"' instead of 'init-method=\"show\"'");
         activate();
     }
 
@@ -187,7 +187,6 @@ public class Console extends Connector<JComponent> {
 
             display.setLayout(layout);
 
-            //JComponent unitPanel = createUnitPanel(componentMap);
             zonePanel = new ZonePanel(getComponentMap());
 
             cs.fill = GridBagConstraints.BOTH;
@@ -208,28 +207,6 @@ public class Console extends Connector<JComponent> {
         } finally {
             ThreadContext.pop();
         }
-    }
-
-    /**
-     * Create the display zone where unit state will be reflected.
-     *
-     * @param display
-     * @param componentMap
-     */
-//    private JComponent createUnitPanel(Map<Object, JComponent> componentMap) {
-//
-//        return new JLabel("<unit status>", JLabel.CENTER);
-//    }
-
-    /**
-     * Hide the console.
-     *
-     * @deprecated Use {@link Connector#deactivate()} instead.
-     */
-    @Deprecated
-    public synchronized void hide() {
-
-        deactivate();
     }
 
     @Override
@@ -254,7 +231,7 @@ public class Console extends Connector<JComponent> {
 
         try {
 
-            logger.info("requested visible=" + visible);
+            logger.info("requested visible={}", visible);
 
             if (visible && mainFrame != null) {
 
@@ -292,42 +269,25 @@ public class Console extends Connector<JComponent> {
                 "Swing Console");
     }
 
-    private void setScreenSize(ScreenDescriptor screenDescriptor) {
+    private static final String FONT_NAME = "Lucida Bright";
 
-        ThreadContext.push("setScreenSize");
-
-        try {
-
-            logger.info("Setting screen size " + screenDescriptor.name + "(" + screenDescriptor.displaySize.width + "x" + screenDescriptor.displaySize.height + ")");
-
-            zonePanel.setSize(screenDescriptor);
-            mainFrame.setSize(screenDescriptor.displaySize);
-            mainFrame.invalidate();
-
-        } finally {
-            ThreadContext.pop();
-        }
-    }
-
-    private final String fontName = "Lucida Bright";
-
-    private final Font font20 = new Font(fontName, Font.ROMAN_BASELINE, 20);
-    private final Font font24 = new Font(fontName, Font.ROMAN_BASELINE, 24);
+    private final Font font20 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 20);
+    private final Font font24 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 24);
     @SuppressWarnings("unused")
-    private final Font font30 = new Font(fontName, Font.ROMAN_BASELINE, 30);
-    private final Font font36 = new Font(fontName, Font.ROMAN_BASELINE, 36);
+    private final Font font30 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 30);
+    private final Font font36 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 36);
     @SuppressWarnings("unused")
-    private final Font fontBold36 = new Font(fontName, Font.ROMAN_BASELINE, 36);
-    private final Font fontBold48 = new Font(fontName, Font.ROMAN_BASELINE, 48);
-    private final Font fontBold72 = new Font(fontName, Font.ROMAN_BASELINE, 72);
-    private final Font fontBold96 = new Font(fontName, Font.ROMAN_BASELINE, 96);
-    private final Font fontBold120 = new Font(fontName, Font.ROMAN_BASELINE, 120);
-    private final Font fontBold144 = new Font(fontName, Font.ROMAN_BASELINE, 144);
+    private final Font fontBold36 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 36);
+    private final Font fontBold48 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 48);
+    private final Font fontBold72 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 72);
+    private final Font fontBold96 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 96);
+    private final Font fontBold120 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 120);
+    private final Font fontBold144 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 144);
 
     /**
      * Possible screen sizes.
      */
-    private ScreenDescriptor screenSizes[] = {
+    private ScreenDescriptor[] screenSizes = {
             new ScreenDescriptor("QVGA", new Dimension(240, 320), fontBold72, fontBold48, font20),
             new ScreenDescriptor("WQVGA", new Dimension(240, 400), fontBold72, fontBold48, font20),
             new ScreenDescriptor("FWQVGA", new Dimension(240, 432), fontBold72, fontBold48, font20),
@@ -402,12 +362,33 @@ public class Console extends Connector<JComponent> {
 
             // Do nothing
         }
+
+        private void setScreenSize(ScreenDescriptor screenDescriptor) {
+
+            ThreadContext.push("setScreenSize");
+
+            try {
+
+                logger.info("Setting screen size {} ({}x{})",
+                        screenDescriptor.name,
+                        screenDescriptor.displaySize.width,
+                        screenDescriptor.displaySize.height);
+
+                zonePanel.setSize(screenDescriptor);
+                mainFrame.setSize(screenDescriptor.displaySize);
+                mainFrame.invalidate();
+
+            } finally {
+                ThreadContext.pop();
+            }
+        }
+
     }
 
     @Override
     protected Map<String, Object> createContext() {
 
-        Map<String, Object> context = new TreeMap<String, Object>();
+        Map<String, Object> context = new TreeMap<>();
 
         findScheduler();
 
