@@ -3,6 +3,7 @@ package net.sf.dz3.device.actuator.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +25,7 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_single_nondefault() throws IOException {
+    public void test41_single_nondefault() throws IOException, InterruptedException, ExecutionException {
 
         ThreadContext.push("test41_single_nondefault");
 
@@ -43,7 +44,7 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_single_default() throws IOException {
+    public void test41_single_default() throws IOException, InterruptedException, ExecutionException {
 
         ThreadContext.push("test41_single_default");
 
@@ -62,7 +63,7 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_multi_nondefault() throws IOException {
+    public void test41_multi_nondefault() throws IOException, InterruptedException, ExecutionException {
 
         ThreadContext.push("test41_multi_nondefault");
 
@@ -81,7 +82,7 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_multi_default() throws IOException {
+    public void test41_multi_default() throws IOException, InterruptedException, ExecutionException {
 
         ThreadContext.push("test41_multi_default");
 
@@ -100,7 +101,7 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_sub_nondefault() throws IOException, InterruptedException {
+    public void test41_sub_nondefault() throws IOException, InterruptedException, ExecutionException {
 
         ThreadContext.push("test41_sub_nondefault");
 
@@ -130,7 +131,7 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_sub_default() throws IOException, InterruptedException {
+    public void test41_sub_default() throws IOException, InterruptedException, ExecutionException {
 
         ThreadContext.push("test41_sub_default");
 
@@ -165,7 +166,7 @@ public class SwitchDamperTest {
      * @param damperId Damper to park.
      * @param expectedState Expected switch/damper state.
      */
-    private void testParkSingleSwitch(String switchId, String damperId, String expectedState) throws IOException {
+    private void testParkSingleSwitch(String switchId, String damperId, String expectedState) throws IOException, InterruptedException, ExecutionException {
 
         AbstractApplicationContext springContext = new ClassPathXmlApplicationContext("dampers.conf.xml");
 
@@ -175,7 +176,7 @@ public class SwitchDamperTest {
         logger.info("Damper: " + damper);
         logger.info("Switch: " + targetSwitch);
 
-        damper.park();
+        damper.park().get();
 
         String state = targetSwitch.getState() + ":" + damper.getPosition();
 
@@ -190,13 +191,13 @@ public class SwitchDamperTest {
      * @param damperId Damper to park.
      * @param expectedPosition Expected damper position.
      */
-    private void testMultiplexer(String damperId, double expectedPosition) throws IOException {
+    private void testMultiplexer(String damperId, double expectedPosition) throws IOException, InterruptedException, ExecutionException {
 
         AbstractApplicationContext springContext = new ClassPathXmlApplicationContext("dampers.conf.xml");
 
         Damper damper = (Damper) springContext.getBean(damperId, Damper.class);
 
-        damper.park();
+        damper.park().get();
 
         assertEquals("wrong parked position", expectedPosition, damper.getPosition(), 0.0001);
     }
@@ -214,13 +215,13 @@ public class SwitchDamperTest {
     private void testMultiplexer(String damperId,
             String subSwitchId0, String subDamperId0,
             String subSwitchId1, String subDamperId1,
-            String expectedState) throws IOException, InterruptedException {
+            String expectedState) throws IOException, InterruptedException, ExecutionException {
 
         AbstractApplicationContext springContext = new ClassPathXmlApplicationContext("dampers.conf.xml");
 
         Damper damper = (Damper) springContext.getBean(damperId, Damper.class);
 
-        damper.park();
+        damper.park().get();
 
         Damper sub0 = (Damper) springContext.getBean(subDamperId0, Damper.class);
         Damper sub1 = (Damper) springContext.getBean(subDamperId1, Damper.class);
