@@ -49,9 +49,9 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * - {@link Scheduler}.
  *
  * All others will be ignored with a log message produced. Panel rendering is happening as a part of
- * {@link #show()}.
+ * {@link #activate()}.
  *
- * {@code init-method="show"} attribute must be used in Spring bean definition, otherwise
+ * {@code init-method="activate"} attribute must be used in Spring bean definition, otherwise
  * the panel will not display.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
@@ -61,7 +61,7 @@ public class Console extends Connector<JComponent> {
     /**
      * Application main frame.
      *
-     * Shown in {@link #show()}, destroyed again in {@link #hide()} in a way that allows it
+     * Shown in {@link activate()}, destroyed again in {@link #deactivate()} in a way that allows it
      * to be completely rebuilt from scratch again.
      */
     private JFrame mainFrame;
