@@ -36,7 +36,7 @@ public class SwitchDamperTest {
             ThreadContext.pop();
         }
     }
-    
+
     /**
      * Make sure a switch damper puts the switch into default position when it is parked.
      *
@@ -55,7 +55,7 @@ public class SwitchDamperTest {
             ThreadContext.pop();
         }
     }
-    
+
     /**
      * Make sure a damper multiplexer puts itself into default position when it is parked.
      *
@@ -100,7 +100,7 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_sub_nondefault() throws IOException {
+    public void test41_sub_nondefault() throws IOException, InterruptedException {
 
         ThreadContext.push("test41_sub_nondefault");
 
@@ -130,7 +130,7 @@ public class SwitchDamperTest {
      * See https://github.com/home-climate-control/dz/issues/41
      */
     @Test
-    public void test41_sub_default() throws IOException {
+    public void test41_sub_default() throws IOException, InterruptedException {
 
         ThreadContext.push("test41_sub_default");
 
@@ -166,7 +166,7 @@ public class SwitchDamperTest {
      * @param expectedState Expected switch/damper state.
      */
     private void testParkSingleSwitch(String switchId, String damperId, String expectedState) throws IOException {
-        
+
         AbstractApplicationContext springContext = new ClassPathXmlApplicationContext("dampers.conf.xml");
 
         Damper damper = (Damper) springContext.getBean(damperId, Damper.class);
@@ -174,13 +174,13 @@ public class SwitchDamperTest {
 
         logger.info("Damper: " + damper);
         logger.info("Switch: " + targetSwitch);
-        
+
         damper.park();
-        
+
         String state = targetSwitch.getState() + ":" + damper.getPosition();
-        
+
         logger.info("parked state: " + state);
-        
+
         assertEquals("wrong parked state", expectedState, state);
     }
 
@@ -202,7 +202,7 @@ public class SwitchDamperTest {
     }
 
     /**
-     * Make sure the damper multiplexer uts subs at the right positions after it's parked.
+     * Make sure the damper multiplexer puts subs at the right positions after it's parked.
      *
      * @param damperId Damper to park.
      * @param subSwitchId0 Sub switch ID 0.
@@ -214,7 +214,7 @@ public class SwitchDamperTest {
     private void testMultiplexer(String damperId,
             String subSwitchId0, String subDamperId0,
             String subSwitchId1, String subDamperId1,
-            String expectedState) throws IOException {
+            String expectedState) throws IOException, InterruptedException {
 
         AbstractApplicationContext springContext = new ClassPathXmlApplicationContext("dampers.conf.xml");
 

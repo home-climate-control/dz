@@ -96,6 +96,12 @@ public class SwitchDamperTest extends TestCase {
 
             Damper d = new SwitchDamper("damper", s, 0.5, 0);
 
+            // VT: NOTE: *have* to sleep there. The call is asynchronous, and trying to
+            // force the pace by making it synchronous will currently cause the whole Spring
+            // instantiation to break. The fix is coming.
+
+            Thread.sleep(500);
+
             assertEquals("wrong switch state", true, s.getState());
 
             d.set(0).get();
@@ -129,6 +135,12 @@ public class SwitchDamperTest extends TestCase {
             assertEquals("wrong switch state", true, s.getState());
 
             Damper d = new SwitchDamper("damper", s, 0.5, 1.0, 0, true);
+
+            // VT: NOTE: *have* to sleep there. The call is asynchronous, and trying to
+            // force the pace by making it synchronous will currently cause the whole Spring
+            // instantiation to break. The fix is coming.
+
+            Thread.sleep(500);
 
             assertEquals("wrong switch state", false, s.getState());
 
