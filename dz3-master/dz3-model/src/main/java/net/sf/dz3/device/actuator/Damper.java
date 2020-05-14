@@ -37,6 +37,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      *
      * @return Damper name.
      */
+    @JmxAttribute(description = "Damper name")
     String getName();
 
     /**
@@ -103,6 +104,7 @@ public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
      * @return {@code true} if park position was specified either via constructor, or by calling
      * {@link #setParkPosition(double)}.
      */
+    @JmxAttribute(description = "If true, park position is custom")
     boolean isCustomParkPosition();
 
     /**
