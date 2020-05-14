@@ -41,18 +41,18 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 
 /**
  * Thermostat panel.
- * 
+ *
  * Even though it implements {@link KeyListener}, it never request focus,
  * but gets event notifications from {@link ZonePanel} instead.
  * This is done in order not to fiddle with focus changes.
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class ThermostatPanel extends JPanel implements KeyListener {
 
     /**
      * Setpoint change upon a keypress.
-     * 
+     *
      * VT: FIXME: This must be made configurable.
      */
     public static final double SETPOINT_DELTA = 0.1d;
@@ -109,7 +109,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         this.source = source;
         this.scheduler = scheduler;
 
-        setFontSize(screenDescriptor); 
+        setFontSize(screenDescriptor);
 
         initGraphics();
 
@@ -391,7 +391,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                         break;
                     }
 
-                    ProcessController controller = source.getController(); 
+                    ProcessController controller = source.getController();
                     double setpoint = controller.getSetpoint();
 
                     setpoint += needFahrenheit ? SETPOINT_DELTA / 1.8: SETPOINT_DELTA;
@@ -420,7 +420,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                         break;
                     }
 
-                    ProcessController controller = source.getController(); 
+                    ProcessController controller = source.getController();
                     double setpoint = controller.getSetpoint();
 
                     setpoint -= needFahrenheit ? SETPOINT_DELTA / 1.8: SETPOINT_DELTA;
@@ -523,7 +523,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         public void refresh() {
 
             DataSample<Double> pv = source.getController().getProcessVariable();
-            ThermostatSignal sample = signal == null ? null : signal.sample; 
+            ThermostatSignal sample = signal == null ? null : signal.sample;
 
             String displayTemperature;
 
@@ -579,7 +579,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 return;
             }
 
-            StringBuilder sb = new StringBuilder(); 
+            StringBuilder sb = new StringBuilder();
 
             ZoneStatus status = scheduler.getCurrentStatus(source);
 

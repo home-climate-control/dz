@@ -7,9 +7,9 @@ import java.util.TreeMap;
 import net.sf.dz3.device.model.HvacMode;
 
 public class ColorScheme {
-    
+
     private static Map<HvacMode, ColorScheme> colorMap = new TreeMap<HvacMode, ColorScheme>();
-    
+
     public final Color BOTTOM;
     public final Color TOP;
     public final Color SETPOINT;
@@ -19,30 +19,30 @@ public class ColorScheme {
     public final Color GREEN;
     public final Color NOTICE_DEFAULT;
     public final Color NOTICE_ACTIVE;
-    
+
     /**
      * Background color.
-     * 
+     *
      * Limitation: it must be the same for all three maps (heating cooling, off), or things will look really funny
      * because some zones may be in heating and some in cooling mode.
      */
     public final Color BACKGROUND;
-    
+
     public synchronized static ColorScheme getScheme(HvacMode mode) {
-        
+
         if (colorMap.isEmpty()) {
-            
+
             colorMap.put(HvacMode.COOLING, coolingMap);
             colorMap.put(HvacMode.OFF, offMap);
             colorMap.put(HvacMode.HEATING, heatingMap);
         }
-        
+
         if (mode == null) {
-            
+
             // VT: FIXME: For old installations
             mode = HvacMode.HEATING;
         }
-        
+
         return colorMap.get(mode);
     }
 
@@ -57,7 +57,7 @@ public class ColorScheme {
     		Color noticeDefault,
     		Color noticeActive,
     		Color background) {
-        
+
         this.BOTTOM = bottom;
         this.TOP = top;
         this.SETPOINT = setpoint;
@@ -69,7 +69,7 @@ public class ColorScheme {
         this.NOTICE_ACTIVE = noticeActive;
         this.BACKGROUND = background;
     }
-    
+
     public static final ColorScheme coolingMap = new ColorScheme(
             new Color(10, 70, 240),  // 0A46F0 BLUE
             new Color(240, 70, 10),  // F0460A ORANGE-RED

@@ -12,9 +12,9 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import javax.swing.JPanel;
 
@@ -26,8 +26,8 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.util.Interval;
 
 /**
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public abstract class AbstractChart extends JPanel implements DataSink<TintedValueAndSetpoint> {
 
@@ -43,7 +43,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Grid color.
-     * 
+     *
      * Default is dark gray.
      */
     protected final Color gridColor = Color.darkGray;
@@ -55,21 +55,21 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Dead timeout, in milliseconds.
-     * 
+     *
      * It is possible that the data readings don't come for a long time, in this
      * case the chart becomes funny - there will be interruptions at the right,
      * but when the data becomes available quite a bit longer, there'll be a
      * change in appearance - what should have been a horizontal line with a
      * step, will become a slightly sloped line. In order to avoid this, the
      * gaps longer than the dead timeout will be painted differently.
-     * 
+     *
      * Default is one minute.
      */
     protected final long deadTimeout = 1000 * 60;
 
     /**
      * Horizontal grid spacing.
-     * 
+     *
      * Vertical grid lines will be painted every <code>timeSpacing</code>
      * milliseconds. Default is 30 minutes.
      */
@@ -77,7 +77,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Vertical grid spacing.
-     * 
+     *
      * Horizontal grid lines will be painted every <code>valueSpacing</code>
      * units. Default is 1.0.
      */
@@ -100,7 +100,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Timestamp on {@link #dataMin} or {@link #dataMax}, whichever is younger.
-     * 
+     *
      * @see #adjustVerticalLimits(double)
      */
     private Long minmaxTime = null;
@@ -108,7 +108,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     /**
      * Amount of extra time to wait before {@link #recalculateVerticalLimits()
      * recalculating} the limits.
-     * 
+     *
      * Chances are, new min/max values will be pretty close to old, so unless
      * this value is used, recalculation will be happening more often than
      * necessary.
@@ -154,7 +154,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             return;
         }
 
-        double y_scale = (double) (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + padding * 2);
+        double y_scale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + padding * 2);
         double y_offset = dataMax + padding;
 
         paintValueGrid(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset);
@@ -271,7 +271,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         g2d.setStroke(gridStroke);
 
         double valueOffset = 0;
-        double halfWidth = ((double) (boundary.width - insets.right - 1)) / 2d;
+        double halfWidth = (boundary.width - insets.right - 1) / 2d;
 
         for (valueOffset = valueSpacing; valueOffset < dataMax + padding; valueOffset += valueSpacing) {
 
@@ -318,7 +318,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Draw the gradient line between given points and given colors.
-     * 
+     *
      * @param emphasize {@code true} if this particular line has to stand out.
      * Exact way of emphasizing is left to the implementation.
      */
@@ -342,7 +342,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Convert signal from -1 to +1 to color from low color to high color.
-     * 
+     *
      * @param signal Signal to convert to color.
      * @param low Color corresponding to -1 signal value.
      * @param high Color corresponding to +1 signal value.
@@ -360,7 +360,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         if ( result == null) {
 
-            float[] hsbLow = resolve(low); 
+            float[] hsbLow = resolve(low);
             float[] hsbHigh = resolve(high);
 
             float h = transform(signal, hsbLow[0], hsbHigh[0]);
@@ -388,7 +388,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Cache medium for {@link #resolve()}.
-     * 
+     *
      * According to "worse is better" rule, there's no error checking against
      * the array size - too expensive. In all likelihood, this won't grow beyond 2 entries.
      */
@@ -397,7 +397,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     /**
      * Resolve a possibly cached {@link Color#RGBtoHSB(int, int, int, float[])} result,
      * or compute it and store it for later retrieval if it hasn't been done.
-     * 
+     *
      * @param color Color to transform.
      * @return Transformation result.
      */
@@ -423,11 +423,11 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Get the point between the start and end values corresponding to the value of the signal.
-     * 
+     *
      * @param signal Signal value, from -1 to +1.
      * @param start Start point.
      * @param end End point.
-     * 
+     *
      * @return Desired position between the start and end points.
      */
     private float transform(double signal, float start, float end) {
@@ -440,11 +440,11 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     /**
      * Adjust the vertical limits, if necessary.
-     * 
+     *
      * @param timestamp Value timestamp.
      * @param value Incoming data element.
      * @param setpoint Incoming setpoint.
-     * 
+     *
      * @see #dataMax
      * @see #dataMin
      */
@@ -460,7 +460,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         }
 
         // Treating minmaxTime like this still allows for lopsided chart if a long up or down trend continues,
-        // but we probably do want to know about that, so let's just make a note and ignore it for the moment 
+        // but we probably do want to know about that, so let's just make a note and ignore it for the moment
 
         if (dataMax == null || value > dataMax) {
 

@@ -14,7 +14,7 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.util.Interval;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class FasterChart extends AbstractChart {
 
@@ -24,14 +24,14 @@ public class FasterChart extends AbstractChart {
      * Chart width in pixels for all the charts. Undefined until the first time
      * {@link #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)}
      * for any instance of this class is called.
-     * 
+     *
      * Making it static is ugly, but gets the job done - the screen size will not change.
      */
     private static int globalWidth = 0;
 
     /**
      * Chart width of this instance.
-     * 
+     *
      * @see #globalWidth
      * @see #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)
      */
@@ -60,10 +60,10 @@ public class FasterChart extends AbstractChart {
 
     /**
      * Record the signal, properly spacing it out.
-     * 
+     *
      * @param channel Channel to use.
      * @param signal Signal to record.
-     * 
+     *
      * @return {@code true} if the component needs to be repainted.
      */
     private boolean record(String channel, DataSample<TintedValueAndSetpoint> signal) {
@@ -309,9 +309,9 @@ public class FasterChart extends AbstractChart {
 
         /**
          * Record a value.
-         * 
+         *
          * @param signal Signal to record.
-         * 
+         *
          * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
          * away from the first sample stored, {@code null} otherwise.
          */
