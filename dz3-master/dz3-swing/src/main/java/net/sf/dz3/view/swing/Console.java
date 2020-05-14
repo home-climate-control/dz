@@ -311,44 +311,50 @@ public class Console extends Connector<JComponent> {
 
             try {
 
-                logger.info(e.toString());
-
                 switch (e.getKeyChar()) {
 
                 case '-':
 
-                    // Cycle display size to next bigger (and possibly roll over
-
-                {
-                    int sizeOffset = screenSizeOffset - 1;
-
-                    sizeOffset = sizeOffset < 0 ? screenSizes.length - 1 : sizeOffset;
-                    screenSizeOffset = sizeOffset;
-
-                    setScreenSize(screenSizes[screenSizeOffset]);
-                }
-
-                break;
+                    reduce();
+                    break;
 
                 case '+':
 
-                    // Cycle display size to next smaller (and possibly roll under
+                    enlarge();
+                    break;
 
-                {
-                    int sizeOffset = screenSizeOffset + 1;
+                default:
 
-                    sizeOffset = sizeOffset >= screenSizes.length ? 0 : sizeOffset;
-                    screenSizeOffset = sizeOffset;
-
-                    setScreenSize(screenSizes[screenSizeOffset]);
-                }
-
-                break;
+                    // Not our key, do nothing
                 }
 
             } finally {
                 ThreadContext.pop();
             }
+        }
+
+        /**
+         * Cycle display size to next smaller (and possibly roll under).
+         */
+        private void reduce() {
+            int sizeOffset = screenSizeOffset - 1;
+
+            sizeOffset = sizeOffset < 0 ? screenSizes.length - 1 : sizeOffset;
+            screenSizeOffset = sizeOffset;
+
+            setScreenSize(screenSizes[screenSizeOffset]);
+        }
+
+        /**
+         * Cycle display size to next bigger (and possibly roll over).
+         */
+        private void enlarge() {
+            int sizeOffset = screenSizeOffset + 1;
+
+            sizeOffset = sizeOffset >= screenSizes.length ? 0 : sizeOffset;
+            screenSizeOffset = sizeOffset;
+
+            setScreenSize(screenSizes[screenSizeOffset]);
         }
 
         @Override
@@ -369,7 +375,7 @@ public class Console extends Connector<JComponent> {
 
             try {
 
-                logger.info("Setting screen size {} ({}x{})",
+                logger.info("Setting {} ({}x{})",
                         screenDescriptor.name,
                         screenDescriptor.displaySize.width,
                         screenDescriptor.displaySize.height);
