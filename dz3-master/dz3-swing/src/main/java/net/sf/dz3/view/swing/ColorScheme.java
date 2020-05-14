@@ -4,21 +4,23 @@ import java.awt.Color;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.logging.log4j.LogManager;
+
 import net.sf.dz3.device.model.HvacMode;
 
 public class ColorScheme {
 
-    private static Map<HvacMode, ColorScheme> colorMap = new TreeMap<HvacMode, ColorScheme>();
+    private static Map<HvacMode, ColorScheme> colorMap = new TreeMap<>();
 
-    public final Color BOTTOM;
-    public final Color TOP;
-    public final Color SETPOINT;
-    public final Color SETPOINT_CHANGING;
-    public final Color ERROR;
-    public final Color OFF;
-    public final Color GREEN;
-    public final Color NOTICE_DEFAULT;
-    public final Color NOTICE_ACTIVE;
+    public final Color bottom;
+    public final Color top;
+    public final Color setpoint;
+    public final Color setpointChanging;
+    public final Color error;
+    public final Color off;
+    public final Color green;
+    public final Color noticeDefault;
+    public final Color noticeActive;
 
     /**
      * Background color.
@@ -26,9 +28,9 @@ public class ColorScheme {
      * Limitation: it must be the same for all three maps (heating cooling, off), or things will look really funny
      * because some zones may be in heating and some in cooling mode.
      */
-    public final Color BACKGROUND;
+    public final Color background;
 
-    public synchronized static ColorScheme getScheme(HvacMode mode) {
+    public static synchronized ColorScheme getScheme(HvacMode mode) {
 
         if (colorMap.isEmpty()) {
 
@@ -39,13 +41,17 @@ public class ColorScheme {
 
         if (mode == null) {
 
-            // VT: FIXME: For old installations
+            // VT: NOTE: the commend was "For old installations". So old, I don't even
+            // remember what's that about.
+
+            LogManager.getLogger(ColorScheme.class).error("mode == null???", new IllegalArgumentException("trace"));
             mode = HvacMode.HEATING;
         }
 
         return colorMap.get(mode);
     }
 
+    @SuppressWarnings("squid:S107")
     private ColorScheme(
     		Color bottom,
     		Color top,
@@ -58,16 +64,18 @@ public class ColorScheme {
     		Color noticeActive,
     		Color background) {
 
-        this.BOTTOM = bottom;
-        this.TOP = top;
-        this.SETPOINT = setpoint;
-        this.SETPOINT_CHANGING = setpointChanging;
-        this.ERROR = error;
-        this.OFF = off;
-        this.GREEN = green;
-        this.NOTICE_DEFAULT = noticeDefault;
-        this.NOTICE_ACTIVE = noticeActive;
-        this.BACKGROUND = background;
+        // VT: NOTE: squid:S107 - sorry, dudes, this is unavoidable here.
+
+        this.bottom = bottom;
+        this.top = top;
+        this.setpoint = setpoint;
+        this.setpointChanging = setpointChanging;
+        this.error = error;
+        this.off = off;
+        this.green = green;
+        this.noticeDefault = noticeDefault;
+        this.noticeActive = noticeActive;
+        this.background = background;
     }
 
     public static final ColorScheme coolingMap = new ColorScheme(

@@ -32,7 +32,7 @@ public class BackgroundRenderer {
         startHeight = startHeight > 0 ? startHeight : 1;
 
         Color startColor = getTopColor(mode);
-        Color endColor = ColorScheme.getScheme(mode).BACKGROUND;
+        Color endColor = ColorScheme.getScheme(mode).background;
 
         GradientPaint gp = new GradientPaint(
                 0, 0, startColor,
@@ -64,8 +64,8 @@ public class BackgroundRenderer {
             if (!errorGradient) {
 
                 Color bgColor = state == null
-                        ? ColorScheme.offMap.ERROR
-                                : ColorScheme.getScheme(mode).ERROR;
+                        ? ColorScheme.offMap.error
+                                : ColorScheme.getScheme(mode).error;
 
                 g2d.setPaint(bgColor);
 
@@ -93,7 +93,7 @@ public class BackgroundRenderer {
         startHeight = startHeight > 0 ? startHeight : 1;
 
         Color startColor = getBottomColor(state, mode);
-        Color endColor = ColorScheme.getScheme(mode).BACKGROUND;
+        Color endColor = ColorScheme.getScheme(mode).background;
 
         GradientPaint gp = new GradientPaint(
                 boundary.x, startHeight, endColor,
@@ -117,7 +117,7 @@ public class BackgroundRenderer {
      */
     private static Color getTopColor(HvacMode mode) {
 
-        return mode == null ? ColorScheme.offMap.ERROR : ColorScheme.getScheme(mode).TOP;
+        return mode == null ? ColorScheme.offMap.error : ColorScheme.getScheme(mode).top;
     }
 
     /**
@@ -132,12 +132,12 @@ public class BackgroundRenderer {
 
         if (state == null || state == ZoneState.ERROR) {
 
-            return ColorScheme.offMap.ERROR;
+            return ColorScheme.offMap.error;
         }
 
         if (state == ZoneState.OFF) {
 
-            return ColorScheme.offMap.OFF;
+            return ColorScheme.offMap.off;
         }
 
         if (mode == null) {
@@ -145,6 +145,6 @@ public class BackgroundRenderer {
         	throw new IllegalStateException("mode == null");
         }
 
-        return ColorScheme.getScheme(mode).BOTTOM;
+        return ColorScheme.getScheme(mode).bottom;
     }
 }

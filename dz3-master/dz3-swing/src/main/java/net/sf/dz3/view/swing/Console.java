@@ -180,7 +180,7 @@ public class Console extends Connector<JComponent> {
 
             Container display = mainFrame.getContentPane();
 
-            display.setBackground(ColorScheme.offMap.BACKGROUND);
+            display.setBackground(ColorScheme.offMap.background);
 
             GridBagLayout layout = new GridBagLayout();
             GridBagConstraints cs = new GridBagConstraints();

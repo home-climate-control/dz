@@ -121,7 +121,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private void initGraphics() {
 
-        setBackground(ColorScheme.offMap.BACKGROUND);
+        setBackground(ColorScheme.offMap.background);
 
         currentLabel.setFont(currentFontC);
         currentLabel.setToolTipText("Current temperature (Left/Right to change zone)");
@@ -161,7 +161,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             this.add(chart);
 
             chart.setPreferredSize(getPreferredSize());
-            Color bg = ColorScheme.offMap.BACKGROUND;
+            Color bg = ColorScheme.offMap.background;
             Color chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
             chart.setBackground(chartBg);
         }
@@ -198,7 +198,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
         JPanel controls = new JPanel();
 
-        controls.setBackground(ColorScheme.offMap.BACKGROUND);
+        controls.setBackground(ColorScheme.offMap.background);
         controls.setOpaque(false);
 
         GridBagLayout layout = new GridBagLayout();
@@ -544,7 +544,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 //logger.debug("VALUE: " + v);
             }
 
-            Color fg = ColorScheme.getScheme(getMode()).SETPOINT;
+            Color fg = ColorScheme.getScheme(getMode()).setpoint;
             Font font = needFahrenheit  && displayTemperature.length() > 4 ? currentFontF : currentFontC;
 
             currentLabel.setFont(font);
@@ -555,8 +555,8 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             votingLabel.setText(source.isVoting() ? VOTING : NOT_VOTING);
             holdLabel.setText(source.isOnHold() ? ON_HOLD : HOLD);
 
-            votingLabel.setForeground(source.isVoting() ? ColorScheme.getScheme(getMode()).NOTICE_DEFAULT : ColorScheme.getScheme(getMode()).NOTICE_ACTIVE);
-            holdLabel.setForeground(source.isOnHold() ? ColorScheme.getScheme(getMode()).NOTICE_ACTIVE : ColorScheme.getScheme(getMode()).NOTICE_DEFAULT);
+            votingLabel.setForeground(source.isVoting() ? ColorScheme.getScheme(getMode()).noticeDefault : ColorScheme.getScheme(getMode()).noticeActive);
+            holdLabel.setForeground(source.isOnHold() ? ColorScheme.getScheme(getMode()).noticeActive : ColorScheme.getScheme(getMode()).noticeDefault);
 
             renderPeriod();
 
@@ -632,7 +632,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 label = source.isOn() ? new Formatter().format(Locale.getDefault(), "%.1f\u00b0", setpoint).toString() : "OFF";
             }
 
-            Color fg = ColorScheme.getScheme(getMode()).SETPOINT;
+            Color fg = ColorScheme.getScheme(getMode()).setpoint;
 
             setpointLabel.setText(label);
             setpointLabel.setForeground(fg);

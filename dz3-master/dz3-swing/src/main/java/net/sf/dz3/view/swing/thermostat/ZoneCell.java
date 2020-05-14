@@ -107,7 +107,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
 
         // Background should be set, or edges will bleed white
 
-        g2d.setColor(ColorScheme.getScheme(getMode()).BACKGROUND);
+        g2d.setColor(ColorScheme.getScheme(getMode()).background);
         g2d.fillRect(0, 0, d.width, d.height);
 
         Double signal = this.signal == null ? null : this.signal.sample.demand.sample;
@@ -154,7 +154,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
 
     private void paintBorder(HvacMode mode, Graphics2D g2d, Rectangle boundary) {
 
-        Color borderColor = ColorScheme.getScheme(mode).SETPOINT;
+        Color borderColor = ColorScheme.getScheme(mode).setpoint;
 
         if (selected) {
 
@@ -177,22 +177,22 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
 
     	case HAPPY:
 
-    		bgColor = ColorScheme.getScheme(mode).GREEN;
+    		bgColor = ColorScheme.getScheme(mode).green;
     		break;
 
     	case ERROR:
 
-    		bgColor = ColorScheme.getScheme(mode).ERROR;
+    		bgColor = ColorScheme.getScheme(mode).error;
     		break;
 
     	case OFF:
 
-    		bgColor = ColorScheme.getScheme(mode).OFF;
+    		bgColor = ColorScheme.getScheme(mode).off;
     		break;
 
     	default:
 
-    		bgColor = ColorScheme.getScheme(mode).BOTTOM;
+    		bgColor = ColorScheme.getScheme(mode).bottom;
     	}
 
     	g2d.setPaint(bgColor);
