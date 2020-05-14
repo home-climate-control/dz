@@ -50,7 +50,6 @@ public class THTest {
     private static final String WRONG_POSITION = "wrong position";
     private static final String WRONG_STATE = "wrong switch state";
 
-    @Ignore
     @Test
     public void moveGroup() throws Exception {
         ThreadContext.push("moveGroup");
@@ -80,7 +79,6 @@ public class THTest {
         }
     }
 
-    @Ignore
     @Test
     public void lockUp() throws Exception {
         ThreadContext.push("lockUp");
@@ -138,7 +136,6 @@ public class THTest {
         testSync("slow/simple", SimpleDamperController.class, 100, 500);
     }
 
-    @Ignore
     @Test
     public void testSyncFastBalancing()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
