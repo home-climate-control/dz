@@ -514,7 +514,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private class ThermostatListener implements DataSink<ThermostatSignal> {
 
-        public DataSample<ThermostatSignal> signal;
+        private DataSample<ThermostatSignal> signal;
 
         @Override
         public void consume(DataSample<ThermostatSignal> signal) {
@@ -605,7 +605,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private class PidControllerListener implements DataSink<ProcessControllerStatus> {
 
-        public DataSample<PidControllerStatus> signal;
+        private DataSample<PidControllerStatus> signal;
 
         @Override
         public void consume(DataSample<ProcessControllerStatus> signal) {
