@@ -25,40 +25,47 @@ import net.sf.dz3.view.swing.ScreenDescriptor;
 /**
  * Panel that contains all {@link ThermostatPanel} instances (and all {@code SensorPanel} instances
  * in a {@link CardLayout}, and an indicator bar that displays abbreviated status for all zones.
- *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
+@SuppressWarnings("squid:S1700")
 public class ZonePanel extends JPanel implements KeyListener {
-    
+
     private static final long serialVersionUID = 6400746493551083129L;
-    
-    private final Logger logger = LogManager.getLogger(getClass());
+
+    private final transient Logger logger = LogManager.getLogger(getClass());
 
     private int currentZoneOffset = 0;
-    private final Zone[] zones;
-    
+    private final transient Zone[] zones;
+
     /**
      * Panel to display bars for all zones.
      */
     private final JPanel zoneBar = new JPanel();
-    
+
     /**
      * Panel to display {@link ThermostatPanel} instances.
+     *
+     * VT: NOTE: squid:S1700 - the name reflects the semantics exactly.
      */
     private final JPanel zonePanel = new JPanel();
-    
+
     /**
      * Layout to control which zone is showing.
      */
     private final CardLayout cardLayout = new CardLayout();
-    
+
+    @SuppressWarnings("squid:S1199")
     public ZonePanel(Map<Object, JComponent> componentMap) {
-        
+
         GridBagLayout layout = new GridBagLayout();
         GridBagConstraints cs = new GridBagConstraints();
-        
+
         this.setLayout(layout);
-        
+
+        // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
+        // blocks are for readability
+
         {
             // Zone bar spans all the horizontal space available (as many cells as there are zones),
             // but the height is limited
@@ -89,53 +96,53 @@ public class ZonePanel extends JPanel implements KeyListener {
             layout.setConstraints(zonePanel, cs);
             this.add(zonePanel);
         }
-        
+
         SortedMap<Thermostat, JComponent> thermostatMap = new TreeMap<Thermostat, JComponent>();
 
         for (Iterator<Entry<Object, JComponent>> i = componentMap.entrySet().iterator(); i.hasNext(); ) {
-            
+
             Entry<Object, JComponent> entry = i.next();
             Object dataSource = entry.getKey();
             JComponent panel = entry.getValue();
-            
+
             // VT: FIXME: Extend this to all sensors
-            
+
             if (dataSource instanceof Thermostat) {
-                
+
                 thermostatMap.put((Thermostat)dataSource, panel);
             }
         }
-        
+
         zones = new Zone[thermostatMap.size()];
-        
+
         zoneBar.setLayout(new GridLayout(1, thermostatMap.size()));
         zonePanel.setLayout(cardLayout);
-        
+
         int offset = 0;
         for (Iterator<Thermostat> i = thermostatMap.keySet().iterator(); i.hasNext(); ) {
-            
+
             Thermostat ts = i.next();
             JComponent panel = componentMap.get(ts);
             ZoneCell cell = new ZoneCell(ts);
-            
+
             Zone zone = new Zone(cell, (ThermostatPanel) panel);
 
             zoneBar.add(cell);
             zonePanel.add(panel, "" + offset);
-            
+
             zones[offset++] = zone;
         }
-        
+
         setCurrentZone(0);
     }
-    
+
     private static class Zone {
-        
+
         public final ZoneCell zoneCell;
         public final ThermostatPanel thermostatPanel;
-        
+
         public Zone(ZoneCell zoneCell, ThermostatPanel thermostatPanel) {
-            
+
             this.zoneCell = zoneCell;
             this.thermostatPanel = thermostatPanel;
         }
@@ -145,51 +152,53 @@ public class ZonePanel extends JPanel implements KeyListener {
      * Handle arrow right and left (change zone).
      */
     @Override
+    @SuppressWarnings("squid:S1199")
     public synchronized void keyPressed(KeyEvent e) {
-        
+
+        // VT: NOTE: squid:S1199 - between this rule, and avoiding extra hassle and
+        // violating consistency, guess what.
+
         ThreadContext.push("keyPressed");
-        
+
         try {
-            
+
             logger.info(e.toString());
-            
+
             switch (e.getKeyChar()) {
-            
+
             case 'c':
             case 'C':
             case 'f':
             case 'F':
-                
-                // Toggle between Celsius and Fahrenheit
-                
-                {
-                    // This must work for all zones
-                    for (int offset = 0; offset < zones.length; offset++) {
 
-                        zones[offset].thermostatPanel.keyPressed(e);
-                    }
+                // Toggle between Celsius and Fahrenheit
+
+                // This must work for all zones
+                for (int offset = 0; offset < zones.length; offset++) {
+
+                    zones[offset].thermostatPanel.keyPressed(e);
                 }
-                
+
                 break;
-                
+
             case 'h':
             case 'H':
-                
+
                     // Toggle hold status
 
             case 'v':
             case 'V':
-                
+
                     // Toggle voting status
-                
+
             case 'o':
             case 'O':
-                
+
                     // Toggle off status
-                
+
             case 's':
             case 'S':
-                
+
                 // Go back to schedule
 
             case '0':
@@ -202,26 +211,26 @@ public class ZonePanel extends JPanel implements KeyListener {
             case '7':
             case '8':
             case '9':
-                
+
                 // Change dump priority
-                
+
                 zones[currentZoneOffset].thermostatPanel.keyPressed(e);
                 break;
-                
+
             case KeyEvent.CHAR_UNDEFINED:
-            
+
                 switch (e.getKeyCode()) {
 
                 case KeyEvent.VK_KP_LEFT:
                 case KeyEvent.VK_LEFT:
-                    
+
                     // Cycle displayed zone to the left
 
                     {
                         int zoneOffset = currentZoneOffset - 1;
-        
+
                         zoneOffset = zoneOffset < 0 ? zones.length - 1 : zoneOffset;
-        
+
                         setCurrentZone(zoneOffset);
                     }
 
@@ -231,35 +240,41 @@ public class ZonePanel extends JPanel implements KeyListener {
                 case KeyEvent.VK_RIGHT:
 
                     // Cycle displayed zone to the right
-                    
+
                     {
                         int zoneOffset = currentZoneOffset + 1;
-        
+
                         zoneOffset = zoneOffset >= zones.length ? 0 : zoneOffset;
-        
+
                         setCurrentZone(zoneOffset);
                     }
-                    
+
                     break;
 
                 case KeyEvent.VK_KP_UP:
                 case KeyEvent.VK_UP:
 
                     // Raise setpoint for currently selected zone
-                    
+
                 case KeyEvent.VK_KP_DOWN:
                 case KeyEvent.VK_DOWN:
 
                     // Lower setpoint for currently selected zone
-                    
-                    {
-                        zones[currentZoneOffset].thermostatPanel.keyPressed(e);
-                    }
+
+                    zones[currentZoneOffset].thermostatPanel.keyPressed(e);
 
                     break;
+
+                default:
+
+                    // Do nothing
                 }
+
+                default:
+
+                    // Do nothing
             }
-            
+
         } finally {
             ThreadContext.pop();
         }
@@ -267,7 +282,7 @@ public class ZonePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        
+
         // No special handling
     }
 
@@ -276,28 +291,28 @@ public class ZonePanel extends JPanel implements KeyListener {
 
         // No special handling
     }
-    
+
     /**
      * Change the currently displayed zone to the one with the given offset.
-     * 
+     *
      * @param zoneOffset Offset of the zone to display.
      */
     private void setCurrentZone(int zoneOffset) {
-        
+
         zones[currentZoneOffset].zoneCell.setSelected(false);
         zones[zoneOffset].zoneCell.setSelected(true);
-        
+
         cardLayout.show(zonePanel, "" + zoneOffset);
-        
+
         currentZoneOffset = zoneOffset;
     }
 
     public synchronized void setSize(ScreenDescriptor screenDescriptor) {
-        
+
         for (int offset = 0; offset < zones.length; offset++) {
-            
+
             ThermostatPanel tp = zones[offset].thermostatPanel;
-            
+
             tp.setFontSize(screenDescriptor);
         }
     }

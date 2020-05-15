@@ -17,6 +17,7 @@ import java.util.Locale;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.border.TitledBorder;
 
 import org.apache.logging.log4j.LogManager;
@@ -41,18 +42,18 @@ import net.sf.jukebox.datastream.signal.model.DataSink;
 
 /**
  * Thermostat panel.
- * 
+ *
  * Even though it implements {@link KeyListener}, it never request focus,
  * but gets event notifications from {@link ZonePanel} instead.
  * This is done in order not to fiddle with focus changes.
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class ThermostatPanel extends JPanel implements KeyListener {
 
     /**
      * Setpoint change upon a keypress.
-     * 
+     *
      * VT: FIXME: This must be made configurable.
      */
     public static final double SETPOINT_DELTA = 0.1d;
@@ -60,13 +61,13 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     private static final long serialVersionUID = 3420150515187693627L;
     private static final DecimalFormat numberFormat = new DecimalFormat("#0.0;-#0.0");
 
-    private Logger logger = LogManager.getLogger(getClass());
+    private final transient Logger logger = LogManager.getLogger(getClass());
 
-    private final ThermostatModel source;
-    private final Scheduler scheduler;
+    private final transient ThermostatModel source;
+    private final transient Scheduler scheduler;
 
-    private final ThermostatListener thermostatListener = new ThermostatListener();
-    private final PidControllerListener pidListener = new PidControllerListener();
+    private final transient ThermostatListener thermostatListener = new ThermostatListener();
+    private final transient PidControllerListener pidListener = new PidControllerListener();
 
     private static final String UNDEFINED = "--.-";
 
@@ -76,11 +77,11 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     private static final String HOLD = "HOLD";
     private static final String ON_HOLD = "ON HOLD";
 
-    private final JLabel currentLabel = new JLabel(UNDEFINED, JLabel.RIGHT);
-    private final JLabel setpointLabel = new JLabel(UNDEFINED + "\u00b0", JLabel.RIGHT);
-    private final JLabel votingLabel = new JLabel(VOTING, JLabel.RIGHT);
-    private final JLabel holdLabel = new JLabel(HOLD, JLabel.RIGHT);
-    private final JLabel periodLabel = new JLabel("", JLabel.LEFT);
+    private final JLabel currentLabel = new JLabel(UNDEFINED, SwingConstants.RIGHT);
+    private final JLabel setpointLabel = new JLabel(UNDEFINED + "\u00b0", SwingConstants.RIGHT);
+    private final JLabel votingLabel = new JLabel(VOTING, SwingConstants.RIGHT);
+    private final JLabel holdLabel = new JLabel(HOLD, SwingConstants.RIGHT);
+    private final JLabel periodLabel = new JLabel("", SwingConstants.LEFT);
 
     // 3 hours
     private final AbstractChart chart = new FasterChart(1000 * 60 * 60 * 3);
@@ -109,7 +110,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         this.source = source;
         this.scheduler = scheduler;
 
-        setFontSize(screenDescriptor); 
+        setFontSize(screenDescriptor);
 
         initGraphics();
 
@@ -119,9 +120,10 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         source.getController().addConsumer(pidListener);
     }
 
+    @SuppressWarnings("squid:S1199")
     private void initGraphics() {
 
-        setBackground(ColorScheme.offMap.BACKGROUND);
+        setBackground(ColorScheme.offMap.background);
 
         currentLabel.setFont(currentFontC);
         currentLabel.setToolTipText("Current temperature (Left/Right to change zone)");
@@ -133,6 +135,9 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         GridBagConstraints cs = new GridBagConstraints();
 
         this.setLayout(layout);
+
+        // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
+        // blocks are for readability
 
         {
             // Controls take the upper quarter of the display
@@ -161,7 +166,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             this.add(chart);
 
             chart.setPreferredSize(getPreferredSize());
-            Color bg = ColorScheme.offMap.BACKGROUND;
+            Color bg = ColorScheme.offMap.background;
             Color chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
             chart.setBackground(chartBg);
         }
@@ -178,33 +183,23 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 Color.WHITE);
 
         this.setBorder(border);
-
-        //        nonVotingLabel.setFont(setpointFont);
-        //        holdLabel.setFont(setpointFont);
-
-        {
-            // Borders are to debug the layout, pain in the butt
-
-//            currentLabel.setBorder(BorderFactory.createEtchedBorder());
-//            setpointLabel.setBorder(BorderFactory.createEtchedBorder());
-//            votingLabel.setBorder(BorderFactory.createEtchedBorder());
-//            holdLabel.setBorder(BorderFactory.createEtchedBorder());
-//            periodLabel.setBorder(BorderFactory.createEtchedBorder());
-//            chart.setBorder(javax.swing.BorderFactory.createTitledBorder("Chart"));
-        }
     }
 
+    @SuppressWarnings("squid:S1199")
     private JPanel createControls() {
 
         JPanel controls = new JPanel();
 
-        controls.setBackground(ColorScheme.offMap.BACKGROUND);
+        controls.setBackground(ColorScheme.offMap.background);
         controls.setOpaque(false);
 
         GridBagLayout layout = new GridBagLayout();
         GridBagConstraints cs = new GridBagConstraints();
 
         controls.setLayout(layout);
+
+        // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
+        // blocks are for readability
 
         {
             // Period label is on top left
@@ -302,7 +297,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 needFahrenheit = !needFahrenheit;
                 refresh();
 
-                logger.info("Displaying temperature in " + (needFahrenheit ? "Fahrenheit" : "Celsius"));
+                logger.info("Displaying temperature in {}", (needFahrenheit ? "Fahrenheit" : "Celsius"));
 
                 break;
 
@@ -314,7 +309,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 source.setOnHold(!source.isOnHold());
                 refresh();
 
-                logger.info("Hold status for " + source.getName() + " is now " + source.isOnHold());
+                logger.info("Hold status for {} is now {}", source.getName(), source.isOnHold());
 
                 break;
 
@@ -326,7 +321,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 source.setVoting(!source.isVoting());
                 refresh();
 
-                logger.info("Voting status for " + source.getName() + " is now " + source.isVoting());
+                logger.info("Voting status for {} is now {}", source.getName(), source.isVoting());
 
                 break;
 
@@ -338,7 +333,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 source.setOn(!source.isOn());
                 refresh();
 
-                logger.info("On status for " + source.getName() + " is now " + source.isOn());
+                logger.info("On status for {} is now {}", source.getName(), source.isOn());
 
                 break;
 
@@ -370,7 +365,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 source.setDumpPriority(e.getKeyChar() - '0');
                 refresh();
 
-                logger.info("Dump priority for " + source.getName() + " is now " + source.getDumpPriority());
+                logger.info("Dump priority for{} is now {}", source.getName(), source.getDumpPriority());
 
                 break;
 
@@ -387,11 +382,11 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                     // unpleasant surprises later
 
                     if (!source.isOn()) {
-                        logger.info(source.getName() + " zone is off, not changing setpoint");
+                        logger.info("{} zone is off, not changing setpoint", source.getName());
                         break;
                     }
 
-                    ProcessController controller = source.getController(); 
+                    ProcessController controller = source.getController();
                     double setpoint = controller.getSetpoint();
 
                     setpoint += needFahrenheit ? SETPOINT_DELTA / 1.8: SETPOINT_DELTA;
@@ -401,7 +396,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                         controller.setSetpoint(setpoint);
                     } else {
-                        logger.warn("Setpoint change to " + setpoint + " denied, over high limit");
+                        logger.warn("Setpoint change to {} denied, over high limit", setpoint);
                     }
                 }
 
@@ -416,11 +411,11 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                     // unpleasant surprises later
 
                     if (!source.isOn()) {
-                        logger.info(source.getName() + " zone is off, not changing setpoint");
+                        logger.info("{} zone is off, not changing setpoint", source.getName());
                         break;
                     }
 
-                    ProcessController controller = source.getController(); 
+                    ProcessController controller = source.getController();
                     double setpoint = controller.getSetpoint();
 
                     setpoint -= needFahrenheit ? SETPOINT_DELTA / 1.8: SETPOINT_DELTA;
@@ -430,13 +425,20 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                         controller.setSetpoint(setpoint);
                     } else {
-                        logger.warn("Setpoint change to " + setpoint + " denied, under low limit");
+                        logger.warn("Setpoint change to {} denied, under low limit", setpoint);
                     }
                 }
 
                 refresh();
                 break;
+
+                default:
+
+                    // Do nothing
                 }
+            default:
+
+                // Do nothing
             }
 
         } finally {
@@ -479,7 +481,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
             if (status == null) {
 
-                logger.error("Period is resolved as " + p + ", but no status???");
+                logger.error("Period is resolved as {}, but no status???", p);
                 return;
             }
 
@@ -489,7 +491,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 return;
             }
 
-            logger.info("Activating period: " + p);
+            logger.info("Activating period: {}", p);
             source.set(status);
 
         } finally {
@@ -523,7 +525,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         public void refresh() {
 
             DataSample<Double> pv = source.getController().getProcessVariable();
-            ThermostatSignal sample = signal == null ? null : signal.sample; 
+            ThermostatSignal sample = signal == null ? null : signal.sample;
 
             String displayTemperature;
 
@@ -540,11 +542,9 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                 TintedValueAndSetpoint v = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample.calling, source.getSetpoint());
                 chart.consume(new DataSample<TintedValueAndSetpoint>(pidListener.signal.timestamp, "temp", "temp", v, null));
-
-                //logger.debug("VALUE: " + v);
             }
 
-            Color fg = ColorScheme.getScheme(getMode()).SETPOINT;
+            Color fg = ColorScheme.getScheme(getMode()).setpoint;
             Font font = needFahrenheit  && displayTemperature.length() > 4 ? currentFontF : currentFontC;
 
             currentLabel.setFont(font);
@@ -555,8 +555,8 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             votingLabel.setText(source.isVoting() ? VOTING : NOT_VOTING);
             holdLabel.setText(source.isOnHold() ? ON_HOLD : HOLD);
 
-            votingLabel.setForeground(source.isVoting() ? ColorScheme.getScheme(getMode()).NOTICE_DEFAULT : ColorScheme.getScheme(getMode()).NOTICE_ACTIVE);
-            holdLabel.setForeground(source.isOnHold() ? ColorScheme.getScheme(getMode()).NOTICE_ACTIVE : ColorScheme.getScheme(getMode()).NOTICE_DEFAULT);
+            votingLabel.setForeground(source.isVoting() ? ColorScheme.getScheme(getMode()).noticeDefault : ColorScheme.getScheme(getMode()).noticeActive);
+            holdLabel.setForeground(source.isOnHold() ? ColorScheme.getScheme(getMode()).noticeActive : ColorScheme.getScheme(getMode()).noticeDefault);
 
             renderPeriod();
 
@@ -579,13 +579,13 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 return;
             }
 
-            StringBuilder sb = new StringBuilder(); 
+            StringBuilder sb = new StringBuilder();
 
             ZoneStatus status = scheduler.getCurrentStatus(source);
 
             if (status == null) {
 
-                logger.warn("Period is resolved as " + p + ", but no status???");
+                logger.warn("Period is resolved as {}, but no status???", p);
 
             } else {
 
@@ -610,7 +610,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
             PidControllerStatus sample = (PidControllerStatus) signal.sample;
 
-            this.signal = new DataSample<PidControllerStatus>(signal.timestamp, signal.sourceName, signal.signature, sample, signal.error);
+            this.signal = new DataSample<>(signal.timestamp, signal.sourceName, signal.signature, sample, signal.error);
 
             refresh();
         }
@@ -632,7 +632,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 label = source.isOn() ? new Formatter().format(Locale.getDefault(), "%.1f\u00b0", setpoint).toString() : "OFF";
             }
 
-            Color fg = ColorScheme.getScheme(getMode()).SETPOINT;
+            Color fg = ColorScheme.getScheme(getMode()).setpoint;
 
             setpointLabel.setText(label);
             setpointLabel.setForeground(fg);

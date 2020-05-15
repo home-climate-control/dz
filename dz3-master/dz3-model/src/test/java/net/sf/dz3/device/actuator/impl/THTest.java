@@ -266,8 +266,6 @@ public class THTest {
 
             timestamp += 50 + rg.nextInt(100);
 
-            // VT: FIXME: The next line will now lock up the damper movement system. Figuring out why.
-
             dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(3.0625, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);

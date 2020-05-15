@@ -3,7 +3,7 @@ package net.sf.dz3.view.swing.thermostat;
 /**
  * Intended to hold a data sample for the {@link AbstractChart variable color chart}.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class TintedValueAndSetpoint extends TintedValue {
 

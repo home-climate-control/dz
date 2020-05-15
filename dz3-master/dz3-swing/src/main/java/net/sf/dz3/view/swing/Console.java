@@ -49,19 +49,19 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * - {@link Scheduler}.
  *
  * All others will be ignored with a log message produced. Panel rendering is happening as a part of
- * {@link #show()}.
+ * {@link #activate()}.
  *
- * {@code init-method="show"} attribute must be used in Spring bean definition, otherwise
+ * {@code init-method="activate"} attribute must be used in Spring bean definition, otherwise
  * the panel will not display.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class Console extends Connector<JComponent> {
 
     /**
      * Application main frame.
      *
-     * Shown in {@link #show()}, destroyed again in {@link #hide()} in a way that allows it
+     * Shown in {@link activate()}, destroyed again in {@link #deactivate()} in a way that allows it
      * to be completely rebuilt from scratch again.
      */
     private JFrame mainFrame;
@@ -113,7 +113,7 @@ public class Console extends Connector<JComponent> {
      */
     @Deprecated
     public synchronized void show() {
-
+        logger.warn("use 'init-method=\"activate\"' instead of 'init-method=\"show\"'");
         activate();
     }
 
@@ -180,14 +180,13 @@ public class Console extends Connector<JComponent> {
 
             Container display = mainFrame.getContentPane();
 
-            display.setBackground(ColorScheme.offMap.BACKGROUND);
+            display.setBackground(ColorScheme.offMap.background);
 
             GridBagLayout layout = new GridBagLayout();
             GridBagConstraints cs = new GridBagConstraints();
 
             display.setLayout(layout);
 
-            //JComponent unitPanel = createUnitPanel(componentMap);
             zonePanel = new ZonePanel(getComponentMap());
 
             cs.fill = GridBagConstraints.BOTH;
@@ -208,28 +207,6 @@ public class Console extends Connector<JComponent> {
         } finally {
             ThreadContext.pop();
         }
-    }
-
-    /**
-     * Create the display zone where unit state will be reflected.
-     *
-     * @param display
-     * @param componentMap
-     */
-//    private JComponent createUnitPanel(Map<Object, JComponent> componentMap) {
-//
-//        return new JLabel("<unit status>", JLabel.CENTER);
-//    }
-
-    /**
-     * Hide the console.
-     *
-     * @deprecated Use {@link Connector#deactivate()} instead.
-     */
-    @Deprecated
-    public synchronized void hide() {
-
-        deactivate();
     }
 
     @Override
@@ -254,7 +231,7 @@ public class Console extends Connector<JComponent> {
 
         try {
 
-            logger.info("requested visible=" + visible);
+            logger.info("requested visible={}", visible);
 
             if (visible && mainFrame != null) {
 
@@ -292,42 +269,25 @@ public class Console extends Connector<JComponent> {
                 "Swing Console");
     }
 
-    private void setScreenSize(ScreenDescriptor screenDescriptor) {
+    private static final String FONT_NAME = "Lucida Bright";
 
-        ThreadContext.push("setScreenSize");
-
-        try {
-
-            logger.info("Setting screen size " + screenDescriptor.name + "(" + screenDescriptor.displaySize.width + "x" + screenDescriptor.displaySize.height + ")");
-
-            zonePanel.setSize(screenDescriptor);
-            mainFrame.setSize(screenDescriptor.displaySize);
-            mainFrame.invalidate();
-
-        } finally {
-            ThreadContext.pop();
-        }
-    }
-
-    private final String fontName = "Lucida Bright";
-
-    private final Font font20 = new Font(fontName, Font.ROMAN_BASELINE, 20);
-    private final Font font24 = new Font(fontName, Font.ROMAN_BASELINE, 24);
+    private final Font font20 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 20);
+    private final Font font24 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 24);
     @SuppressWarnings("unused")
-    private final Font font30 = new Font(fontName, Font.ROMAN_BASELINE, 30);
-    private final Font font36 = new Font(fontName, Font.ROMAN_BASELINE, 36);
+    private final Font font30 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 30);
+    private final Font font36 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 36);
     @SuppressWarnings("unused")
-    private final Font fontBold36 = new Font(fontName, Font.ROMAN_BASELINE, 36);
-    private final Font fontBold48 = new Font(fontName, Font.ROMAN_BASELINE, 48);
-    private final Font fontBold72 = new Font(fontName, Font.ROMAN_BASELINE, 72);
-    private final Font fontBold96 = new Font(fontName, Font.ROMAN_BASELINE, 96);
-    private final Font fontBold120 = new Font(fontName, Font.ROMAN_BASELINE, 120);
-    private final Font fontBold144 = new Font(fontName, Font.ROMAN_BASELINE, 144);
+    private final Font fontBold36 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 36);
+    private final Font fontBold48 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 48);
+    private final Font fontBold72 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 72);
+    private final Font fontBold96 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 96);
+    private final Font fontBold120 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 120);
+    private final Font fontBold144 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 144);
 
     /**
      * Possible screen sizes.
      */
-    private ScreenDescriptor screenSizes[] = {
+    private ScreenDescriptor[] screenSizes = {
             new ScreenDescriptor("QVGA", new Dimension(240, 320), fontBold72, fontBold48, font20),
             new ScreenDescriptor("WQVGA", new Dimension(240, 400), fontBold72, fontBold48, font20),
             new ScreenDescriptor("FWQVGA", new Dimension(240, 432), fontBold72, fontBold48, font20),
@@ -351,44 +311,50 @@ public class Console extends Connector<JComponent> {
 
             try {
 
-                logger.info(e.toString());
-
                 switch (e.getKeyChar()) {
 
                 case '-':
 
-                    // Cycle display size to next bigger (and possibly roll over
-
-                {
-                    int sizeOffset = screenSizeOffset - 1;
-
-                    sizeOffset = sizeOffset < 0 ? screenSizes.length - 1 : sizeOffset;
-                    screenSizeOffset = sizeOffset;
-
-                    setScreenSize(screenSizes[screenSizeOffset]);
-                }
-
-                break;
+                    reduce();
+                    break;
 
                 case '+':
 
-                    // Cycle display size to next smaller (and possibly roll under
+                    enlarge();
+                    break;
 
-                {
-                    int sizeOffset = screenSizeOffset + 1;
+                default:
 
-                    sizeOffset = sizeOffset >= screenSizes.length ? 0 : sizeOffset;
-                    screenSizeOffset = sizeOffset;
-
-                    setScreenSize(screenSizes[screenSizeOffset]);
-                }
-
-                break;
+                    // Not our key, do nothing
                 }
 
             } finally {
                 ThreadContext.pop();
             }
+        }
+
+        /**
+         * Cycle display size to next smaller (and possibly roll under).
+         */
+        private void reduce() {
+            int sizeOffset = screenSizeOffset - 1;
+
+            sizeOffset = sizeOffset < 0 ? screenSizes.length - 1 : sizeOffset;
+            screenSizeOffset = sizeOffset;
+
+            setScreenSize(screenSizes[screenSizeOffset]);
+        }
+
+        /**
+         * Cycle display size to next bigger (and possibly roll over).
+         */
+        private void enlarge() {
+            int sizeOffset = screenSizeOffset + 1;
+
+            sizeOffset = sizeOffset >= screenSizes.length ? 0 : sizeOffset;
+            screenSizeOffset = sizeOffset;
+
+            setScreenSize(screenSizes[screenSizeOffset]);
         }
 
         @Override
@@ -402,12 +368,33 @@ public class Console extends Connector<JComponent> {
 
             // Do nothing
         }
+
+        private void setScreenSize(ScreenDescriptor screenDescriptor) {
+
+            ThreadContext.push("setScreenSize");
+
+            try {
+
+                logger.info("Setting {} ({}x{})",
+                        screenDescriptor.name,
+                        screenDescriptor.displaySize.width,
+                        screenDescriptor.displaySize.height);
+
+                zonePanel.setSize(screenDescriptor);
+                mainFrame.setSize(screenDescriptor.displaySize);
+                mainFrame.invalidate();
+
+            } finally {
+                ThreadContext.pop();
+            }
+        }
+
     }
 
     @Override
     protected Map<String, Object> createContext() {
 
-        Map<String, Object> context = new TreeMap<String, Object>();
+        Map<String, Object> context = new TreeMap<>();
 
         findScheduler();
 

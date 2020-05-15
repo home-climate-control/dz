@@ -9,7 +9,7 @@ import net.sf.dz3.view.ConnectorFactory;
 /**
  * Component factory base.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public abstract class ComponentFactory extends ConnectorFactory<JComponent> {
 
