@@ -80,7 +80,7 @@ public class Chart extends AbstractChart {
 
                 // Decide whether the line is alive or dead
 
-                if (time_now - time_trailer <= deadTimeout) {
+                if (time_now - time_trailer <= DEAD_TIMEOUT) {
 
                 } else {
 
@@ -116,7 +116,7 @@ public class Chart extends AbstractChart {
             trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize);
         }
 
-        if (time_trailer != null && now - time_trailer > deadTimeout) {
+        if (time_trailer != null && now - time_trailer > DEAD_TIMEOUT) {
 
             // There's a gap on the right, let's fill it
 

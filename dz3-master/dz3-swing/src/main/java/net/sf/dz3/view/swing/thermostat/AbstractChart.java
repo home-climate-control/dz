@@ -36,17 +36,17 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     private static final Stroke strokeSingle = new BasicStroke();
     private static final Stroke strokeDouble = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10.0f, null, 0.0f);
 
-    protected transient final Logger logger = LogManager.getLogger(getClass());
+    protected final transient Logger logger = LogManager.getLogger(getClass());
 
-    protected transient final SortedMap<String, DataSet<TintedValue>> channel2dsValue = new TreeMap<String, DataSet<TintedValue>>();
-    protected transient final SortedMap<String, DataSet<Double>> channel2dsSetpoint = new TreeMap<String, DataSet<Double>>();
+    protected final transient SortedMap<String, DataSet<TintedValue>> channel2dsValue = new TreeMap<>();
+    protected final transient SortedMap<String, DataSet<Double>> channel2dsSetpoint = new TreeMap<>();
 
     /**
      * Grid color.
      *
      * Default is dark gray.
      */
-    protected final Color gridColor = Color.darkGray;
+    protected static final Color gridColor = Color.darkGray;
 
     /**
      * Chart length, in milliseconds.
@@ -65,7 +65,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      *
      * Default is one minute.
      */
-    protected final long deadTimeout = 1000 * 60;
+    protected static final long DEAD_TIMEOUT = 1000L * 60;
 
     /**
      * Horizontal grid spacing.
@@ -73,7 +73,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * Vertical grid lines will be painted every <code>timeSpacing</code>
      * milliseconds. Default is 30 minutes.
      */
-    protected final long timeSpacing = 1000 * 60 * 30;
+    protected static final long SPACING_TIME = 1000L * 60 * 30;
 
     /**
      * Vertical grid spacing.
@@ -81,12 +81,12 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * Horizontal grid lines will be painted every <code>valueSpacing</code>
      * units. Default is 1.0.
      */
-    protected final double valueSpacing = 1.0;
+    protected static final double SPACING_VALUE = 1.0;
 
     /**
      * How much space to leave between the chart and the edge.
      */
-    protected final double padding = 0.2;
+    protected static final double PADDING = 0.2;
 
     /**
      * Maximum known data value.
@@ -113,15 +113,17 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * this value is used, recalculation will be happening more often than
      * necessary.
      */
-    protected final double minmaxOverhead = 1.1;
+    protected static final double MINMAX_OVERHEAD = 1.1;
 
-    protected final static Color SIGNAL_COLOR_LOW = Color.GREEN;
-    protected final static Color SIGNAL_COLOR_HIGH = Color.RED;
-    protected final static Color SETPOINT_COLOR = Color.YELLOW;
+    protected static final Color SIGNAL_COLOR_LOW = Color.GREEN;
+    protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
+    protected static final Color SETPOINT_COLOR = Color.YELLOW;
 
     public AbstractChart(long chartLengthMillis) {
 
-        assert(chartLengthMillis > 1000 * 10);
+        if (chartLengthMillis < 1000 * 10) {
+            throw new IllegalArgumentException("Unreasonably short chart length " + chartLengthMillis + "ms");
+        }
 
         this.chartLengthMillis = chartLengthMillis;
     }
@@ -129,7 +131,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     @Override
     public synchronized void paintComponent(Graphics g) {
 
-        // VT: FIXME: Consider replacing this with a Marker - careful, though, this is a time sensitive path
+        // VT: NOTE: Consider replacing this with a Marker - careful, though, this is a time sensitive path
         long startTime = System.currentTimeMillis();
 
         // Draw background
@@ -142,10 +144,10 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         paintBackground(g2d, boundary, insets);
 
         long now = System.currentTimeMillis();
-        double x_scale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
-        long x_offset = now - chartLengthMillis;
+        double xScale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
+        long xOffset = now - chartLengthMillis;
 
-        paintTimeGrid(g2d, boundary, insets, now, x_scale, x_offset);
+        paintTimeGrid(g2d, boundary, insets, now, xScale, xOffset);
 
         // VT: FIXME: Ugly hack.
         checkWidth(boundary);
@@ -154,19 +156,22 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             return;
         }
 
-        double y_scale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + padding * 2);
-        double y_offset = dataMax + padding;
+        double yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
+        double yOffset = dataMax + PADDING;
 
-        paintValueGrid(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset);
+        paintValueGrid(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
-        paintCharts(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset);
+        paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
-        logger.info("Painted in " + (System.currentTimeMillis() - startTime) + "ms");
+        logger.info("Painted in {}ms", (System.currentTimeMillis() - startTime));
     }
 
     protected abstract void checkWidth(Dimension boundary);
 
+    @SuppressWarnings("squid:S1126")
     protected final boolean isDataAvailable() {
+
+        // VT: NOTE: squid:S1126 - following this rule will hurt readability, so no.
 
         if (channel2dsValue.isEmpty() || dataMax == null || dataMin == null) {
 
@@ -178,9 +183,12 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
     }
 
+    @SuppressWarnings("squid:S107")
     protected final void paintCharts(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
-            double x_scale, long x_offset, double y_scale, double y_offset) {
+            double xScale, long xOffset, double yScale, double yOffset) {
+
+        // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -193,14 +201,17 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             DataSet<TintedValue> dsValues = entry.getValue();
             DataSet<Double> dsSetpoints = channel2dsSetpoint.get(channel);
 
-            paintChart(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, dsValues, dsSetpoints);
+            paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, channel, dsValues, dsSetpoints);
         }
     }
 
-
+    /**
+     * VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
+     */
+    @SuppressWarnings("squid:S107")
     protected abstract void paintChart(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
-            double x_scale, long x_offset, double y_scale, double y_offset,
+            double xScale, long xOffset, double yScale, double yOffset,
             String channel, DataSet<TintedValue> dsValues, DataSet<Double> dsSetpoints);
 
     private void paintBackground(Graphics2D g2d, Dimension boundary, Insets insets) {
@@ -209,12 +220,13 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         Rectangle2D.Double background = new Rectangle2D.Double(
                 insets.left, insets.top,
-                boundary.width - insets.right - insets.left, boundary.height - insets.bottom - insets.top);
+                (double)boundary.width - insets.right - insets.left,
+                (double)boundary.height - insets.bottom - insets.top);
 
         g2d.fill(background);
     }
 
-    private void paintTimeGrid(Graphics2D g2d, Dimension boundary, Insets insets, long now, double x_scale, long x_offset) {
+    private void paintTimeGrid(Graphics2D g2d, Dimension boundary, Insets insets, long now, double xScale, long xOffset) {
 
         BasicStroke originalStroke = (BasicStroke) g2d.getStroke();
 
@@ -230,18 +242,25 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         g2d.setStroke(gridStroke);
 
-        for (long timeOffset = now - timeSpacing; timeOffset > now - chartLengthMillis; timeOffset -= timeSpacing) {
+        for (long timeOffset = now - SPACING_TIME; timeOffset > now - chartLengthMillis; timeOffset -= SPACING_TIME) {
 
-            double gridX = (timeOffset - x_offset) * x_scale + insets.left;
+            double gridX = (timeOffset - xOffset) * xScale + insets.left;
 
-            drawGradientLine(g2d, gridX, insets.top, gridX, boundary.height - insets.bottom - 1,
+            drawGradientLine(g2d,
+                    gridX, insets.top,
+                    gridX, (double)boundary.height - insets.bottom - 1,
                     getBackground(), Color.GRAY.darker().darker(), false);
         }
 
         g2d.setStroke(originalStroke);
     }
 
-    private void paintValueGrid(Graphics2D g2d, Dimension boundary, Insets insets, long now, double x_scale, long x_offset, double y_scale, double y_offset) {
+    @SuppressWarnings("squid:S107")
+    private void paintValueGrid(
+            Graphics2D g2d, Dimension boundary, Insets insets, long now,
+            double xScale, long xOffset, double yScale, double yOffset) {
+
+        // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
         BasicStroke originalStroke = (BasicStroke) g2d.getStroke();
 
@@ -259,10 +278,13 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         g2d.setStroke(originalStroke);
 
-        double gridY = y_offset * y_scale + insets.top;
+        double gridY = yOffset * yScale + insets.top;
 
-        Line2D gridLine = new Line2D.Double(insets.left, gridY, boundary.width
-                - insets.right - 1, gridY);
+        Line2D gridLine = new Line2D.Double(
+                insets.left,
+                gridY,
+                (double)boundary.width - insets.right - 1,
+                gridY);
 
         g2d.draw(gridLine);
 
@@ -273,12 +295,9 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         double valueOffset = 0;
         double halfWidth = (boundary.width - insets.right - 1) / 2d;
 
-        for (valueOffset = valueSpacing; valueOffset < dataMax + padding; valueOffset += valueSpacing) {
+        for (valueOffset = SPACING_VALUE; valueOffset < dataMax + PADDING; valueOffset += SPACING_VALUE) {
 
-            gridY = (y_offset - valueOffset) * y_scale + insets.top;
-
-            //                  gridLine = new Line2D.Double(insets.left, gridY, boundary.width - insets.right - 1, gridY);
-            //                  g2d.draw(gridLine);
+            gridY = (yOffset - valueOffset) * yScale + insets.top;
 
             drawGradientLine(g2d,
                     insets.left, gridY,
@@ -288,17 +307,14 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
             drawGradientLine(g2d,
                     halfWidth, gridY,
-                    boundary.width - insets.right - 1, gridY,
+                    (double)boundary.width - insets.right - 1, gridY,
                     getBackground(), Color.GRAY.darker().darker(),
                     false);
         }
 
-        for (valueOffset = -valueSpacing; valueOffset > dataMin - padding; valueOffset -= valueSpacing) {
+        for (valueOffset = -SPACING_VALUE; valueOffset > dataMin - PADDING; valueOffset -= SPACING_VALUE) {
 
-            gridY = (y_offset - valueOffset) * y_scale + insets.top;
-
-            //                  gridLine = new Line2D.Double(insets.left, gridY, boundary.width - insets.right - 1, gridY);
-            //                  g2d.draw(gridLine);
+            gridY = (yOffset - valueOffset) * yScale + insets.top;
 
             drawGradientLine(g2d,
                     insets.left, gridY,
@@ -308,7 +324,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
             drawGradientLine(g2d,
                     halfWidth, gridY,
-                    boundary.width - insets.right - 1, gridY,
+                    (double)boundary.width - insets.right - 1, gridY,
                     getBackground(), Color.GRAY.darker().darker(),
                     false);
         }
@@ -322,11 +338,14 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * @param emphasize {@code true} if this particular line has to stand out.
      * Exact way of emphasizing is left to the implementation.
      */
+    @SuppressWarnings("squid:S107")
     protected final void drawGradientLine(
             Graphics2D g2d,
             double x0, double y0, double x1, double y1,
             Color startColor, Color endColor,
             boolean emphasize) {
+
+        // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
         GradientPaint gp = new GradientPaint(
                 (int) x0, (int) y0, startColor,
@@ -356,28 +375,31 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         int index = (int) (signal * 255);
 
-        Color result = signalCache[index];
+        synchronized (signalCache) {
 
-        if ( result == null) {
+            Color result = signalCache[index];
 
-            float[] hsbLow = resolve(low);
-            float[] hsbHigh = resolve(high);
+            if ( result == null) {
 
-            float h = transform(signal, hsbLow[0], hsbHigh[0]);
-            float s = transform(signal, hsbLow[1], hsbHigh[1]);
-            float b = transform(signal, hsbLow[2], hsbHigh[2]);
+                float[] hsbLow = resolve(low);
+                float[] hsbHigh = resolve(high);
 
-            result = new Color(Color.HSBtoRGB(h, s, b));
-            signalCache[index] = result;
+                float h = transform(signal, hsbLow[0], hsbHigh[0]);
+                float s = transform(signal, hsbLow[1], hsbHigh[1]);
+                float b = transform(signal, hsbLow[2], hsbHigh[2]);
+
+                result = new Color(Color.HSBtoRGB(h, s, b));
+                signalCache[index] = result;
+            }
+
+            return result;
         }
-
-        return result;
     }
 
     private static class RGB2HSB {
 
         public final int rgb;
-        public final float hsb[];
+        public final float[] hsb;
 
         public RGB2HSB(int rgb, float[] hsb) {
 
@@ -414,9 +436,15 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             }
         }
 
-        rgb2hsb[offset] = new RGB2HSB(rgb, Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null));
+        synchronized (rgb2hsb) {
 
-        logger.info("RGB2HSB offset=" + offset );
+            // VT: NOTE: Not the cleanest solution. It is possible that someone has just tried to do the same thing
+            // and we'll end up writing the same value twice, but oh well, it's the same value in an array of size 16
+
+            rgb2hsb[offset] = new RGB2HSB(rgb, Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null));
+        }
+
+        logger.info("RGB2HSB offset={}", offset );
 
         return rgb2hsb[offset].hsb;
     }
@@ -448,11 +476,14 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * @see #dataMax
      * @see #dataMin
      */
+    @SuppressWarnings("squid:S2629")
     protected final void adjustVerticalLimits(long timestamp, double value, double setpoint) {
 
-        if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * minmaxOverhead)) {
+        if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * MINMAX_OVERHEAD)) {
 
-            logger.info("minmax too old (" + Interval.toTimeInterval(timestamp - minmaxTime) + "), recalculating");
+            // VT: NOTE: squid:S2629 - give me a break, this will happen once in more than three hours
+
+            logger.info("minmax too old ({}), recalculating", Interval.toTimeInterval(timestamp - minmaxTime));
 
             // Total recalculation is required
 
@@ -492,6 +523,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     /**
      * Calculate {@link #dataMin} and {@link #dataMax} based on all values available in {@link #channel2dsValue}.
      */
+    @SuppressWarnings("squid:S2629")
     private synchronized void recalculateVerticalLimits() {
 
         long startTime = System.currentTimeMillis();
@@ -523,7 +555,10 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             }
         }
 
-        logger.info("Recalculated in " + (System.currentTimeMillis() - startTime) + "ms");
-        logger.info("New minmaxTime set to + " + Interval.toTimeInterval(System.currentTimeMillis() - minmaxTime));
+        logger.info("Recalculated in {}ms", (System.currentTimeMillis() - startTime));
+
+        // VT: NOTE: squid:S2629 - give me a break, this will happen once in more than three hours
+
+        logger.info("New minmaxTime set to + {}", Interval.toTimeInterval(System.currentTimeMillis() - minmaxTime));
     }
 }

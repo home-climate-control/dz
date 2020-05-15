@@ -184,7 +184,7 @@ public class FasterChart extends AbstractChart {
 
                 // Decide whether the line is alive or dead
 
-                if (time_now - time_trailer > deadTimeout) {
+                if (time_now - time_trailer > DEAD_TIMEOUT) {
 
                     // It's dead, all right
                     // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
@@ -212,7 +212,7 @@ public class FasterChart extends AbstractChart {
             trailer = cursor;
         }
 
-        if (time_trailer != null && now - time_trailer > deadTimeout) {
+        if (time_trailer != null && now - time_trailer > DEAD_TIMEOUT) {
 
             // There's a gap on the right, let's fill it
 
