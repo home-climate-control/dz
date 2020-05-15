@@ -537,6 +537,15 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
             } else {
 
+                // VT: This block is embarrassing - wonder what I was smoking back when I wrote
+                // it. The net result is that values are written into the chart in *currently
+                // selected* unit, resulting in a miniature clone of Mars Climate Orbiter
+                // disaster right here in case someone decides to switch between Celsius and
+                // Fahrenheit and then back.
+
+                // The right way to deal with this would be to use SI units everywhere except
+                // final display.
+
                 double currentTemperature = pv.sample;
 
                 currentTemperature = needFahrenheit ? (currentTemperature * 9) / 5 + 32: currentTemperature;
