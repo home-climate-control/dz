@@ -389,10 +389,10 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                     }
 
                     ProcessController controller = source.getController();
-                    double setpoint = controller.getSetpoint();
+                    double setpoint = getDisplayValue(controller.getSetpoint());
 
-                    setpoint += needFahrenheit ? SETPOINT_DELTA / 1.8: SETPOINT_DELTA;
-                    setpoint = Double.parseDouble(numberFormat.format(setpoint));
+                    setpoint += SETPOINT_DELTA;
+                    setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
                     if (setpoint <= ThermostatModel.SETPOINT_MAX) {
 
@@ -418,10 +418,10 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                     }
 
                     ProcessController controller = source.getController();
-                    double setpoint = controller.getSetpoint();
+                    double setpoint = getDisplayValue(controller.getSetpoint());
 
-                    setpoint -= needFahrenheit ? SETPOINT_DELTA / 1.8: SETPOINT_DELTA;
-                    setpoint = Double.parseDouble(numberFormat.format(setpoint));
+                    setpoint -= SETPOINT_DELTA;
+                    setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
                     if (setpoint >= ThermostatModel.SETPOINT_MIN) {
 
@@ -514,7 +514,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private class ThermostatListener implements DataSink<ThermostatSignal> {
 
-        public DataSample<ThermostatSignal> signal;
+        private DataSample<ThermostatSignal> signal;
 
         @Override
         public void consume(DataSample<ThermostatSignal> signal) {
@@ -537,12 +537,24 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
             } else {
 
-                double currentTemperature = pv.sample;
+                // VT: This block is embarrassing - wonder what I was smoking back when I wrote
+                // it. The net result is that values are written into the chart in *currently
+                // selected* unit, resulting in a miniature clone of Mars Climate Orbiter
+                // disaster right here in case someone decides to switch between Celsius and
+                // Fahrenheit and then back.
 
-                currentTemperature = needFahrenheit ? (currentTemperature * 9) / 5 + 32: currentTemperature;
+                // The right way to deal with this would be to use SI units everywhere except
+                // final display.
+
+                double currentTemperature = pv.sample;
+                double currentSetpoint = source.getSetpoint();
+
+                currentTemperature = getDisplayValue(currentTemperature);
+                currentSetpoint = getDisplayValue(currentSetpoint);
+
                 displayTemperature = (sample == null) ? UNDEFINED : (sample.demand.isError() ? UNDEFINED : new Formatter().format(Locale.getDefault(), "%.1f", currentTemperature).toString());
 
-                TintedValueAndSetpoint v = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample.calling, source.getSetpoint());
+                TintedValueAndSetpoint v = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample.calling, currentSetpoint);
                 chart.consume(new DataSample<TintedValueAndSetpoint>(pidListener.signal.timestamp, "temp", "temp", v, null));
             }
 
@@ -605,7 +617,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     private class PidControllerListener implements DataSink<ProcessControllerStatus> {
 
-        public DataSample<PidControllerStatus> signal;
+        private DataSample<PidControllerStatus> signal;
 
         @Override
         public void consume(DataSample<ProcessControllerStatus> signal) {
@@ -629,7 +641,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                 double setpoint = this.signal.sample.setpoint;
 
-                setpoint = needFahrenheit ? (setpoint * 9) / 5 + 32: setpoint;
+                setpoint = getDisplayValue(setpoint);
 
                 label = source.isOn() ? new Formatter().format(Locale.getDefault(), "%.1f\u00b0", setpoint).toString() : "OFF";
             }
@@ -706,4 +718,27 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
         return d;
     }
+
+    /**
+     * Convert SI value into display value depending on whether the display is
+     * currently in {@link #needFahrenheit Fahrenheit}.
+     *
+     * @param value Value to possibly convert.
+     * @return Display value.
+     */
+    private double getDisplayValue(double value) {
+        return needFahrenheit ? (value * 9) / 5d + 32: value;
+    }
+
+    /**
+     * Convert display value into SI value depending on whether the display is
+     * currently in {@link #needFahrenheit Fahrenheit}.
+     *
+     * @param value Value to possibly convert.
+     * @return SI value.
+     */
+    private double getSIValue(double value) {
+        return needFahrenheit ? (value - 32) * (5d / 9d) : value;
+    }
+
 }
