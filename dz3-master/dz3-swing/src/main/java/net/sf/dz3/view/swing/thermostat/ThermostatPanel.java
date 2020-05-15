@@ -398,7 +398,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                         controller.setSetpoint(setpoint);
                     } else {
-                        logger.warn("Setpoint change to {} denied, over high limit", setpoint);
+                        logger.warn("Setpoint change to {} denied, over high limit of {}", setpoint, ThermostatModel.SETPOINT_MAX);
                     }
                 }
 
@@ -427,7 +427,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                         controller.setSetpoint(setpoint);
                     } else {
-                        logger.warn("Setpoint change to {} denied, under low limit", setpoint);
+                        logger.warn("Setpoint change to {} denied, under low limit of {}", setpoint, ThermostatModel.SETPOINT_MIN);
                     }
                 }
 
