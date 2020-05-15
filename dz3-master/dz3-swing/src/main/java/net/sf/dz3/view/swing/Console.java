@@ -58,6 +58,8 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  */
 public class Console extends Connector<JComponent> {
 
+    private final TemperatureUnit defaultUnit;
+
     /**
      * Application main frame.
      *
@@ -79,7 +81,7 @@ public class Console extends Connector<JComponent> {
      * This one will produce an empty console panel.
      */
     public Console() {
-        this(new HashSet<Object>());
+        this(new HashSet<Object>(), "C");
     }
 
     /**
@@ -88,10 +90,21 @@ public class Console extends Connector<JComponent> {
      * @param initSet Objects to display.
      */
     public Console(Set<Object> initSet) {
+        this(initSet, "C");
+    }
+
+    /**
+     * Create an instance and fill it up with objects to display.
+     *
+     * @param initSet Objects to display.
+     * @param Unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
+     */
+    public Console(Set<Object> initSet, String unit) {
 
         super(initSet);
+        this.defaultUnit = TemperatureUnit.resolve(unit);
 
-        register(ThermostatModel.class, new ThermostatFactory());
+        register(ThermostatModel.class, new ThermostatFactory(this.defaultUnit));
     }
 
     /**
@@ -102,9 +115,23 @@ public class Console extends Connector<JComponent> {
      * @param factorySet Set of {@link ComponentFactory} objects to use for component creation.
      */
     public Console(Set<Object> initSet, Set<ConnectorFactory<JComponent>> factorySet) {
+        this(initSet, factorySet, "C");
+    }
+
+    /**
+     * Create an instance and fill it up with objects to display,
+     * using custom factory set.
+     *
+     * @param initSet Objects to display.
+     * @param factorySet Set of {@link ComponentFactory} objects to use for component creation.
+     * @param Unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
+     */
+    public Console(Set<Object> initSet, Set<ConnectorFactory<JComponent>> factorySet, String unit) {
 
         super(initSet, factorySet);
+        this.defaultUnit = TemperatureUnit.resolve(unit);
     }
+
 
     /**
      * Show the console.
