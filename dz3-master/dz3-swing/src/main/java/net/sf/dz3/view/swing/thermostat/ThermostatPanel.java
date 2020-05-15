@@ -391,7 +391,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                     ProcessController controller = source.getController();
                     double setpoint = controller.getSetpoint();
 
-                    setpoint += needFahrenheit ? SETPOINT_DELTA / 1.8: SETPOINT_DELTA;
+                    setpoint += SETPOINT_DELTA;
                     setpoint = Double.parseDouble(numberFormat.format(setpoint));
 
                     if (setpoint <= ThermostatModel.SETPOINT_MAX) {
@@ -420,7 +420,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                     ProcessController controller = source.getController();
                     double setpoint = controller.getSetpoint();
 
-                    setpoint -= needFahrenheit ? SETPOINT_DELTA / 1.8: SETPOINT_DELTA;
+                    setpoint -= SETPOINT_DELTA;
                     setpoint = Double.parseDouble(numberFormat.format(setpoint));
 
                     if (setpoint >= ThermostatModel.SETPOINT_MIN) {
