@@ -182,16 +182,6 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         //        nonVotingLabel.setFont(setpointFont);
         //        holdLabel.setFont(setpointFont);
 
-        {
-            // Borders are to debug the layout, pain in the butt
-
-//            currentLabel.setBorder(BorderFactory.createEtchedBorder());
-//            setpointLabel.setBorder(BorderFactory.createEtchedBorder());
-//            votingLabel.setBorder(BorderFactory.createEtchedBorder());
-//            holdLabel.setBorder(BorderFactory.createEtchedBorder());
-//            periodLabel.setBorder(BorderFactory.createEtchedBorder());
-//            chart.setBorder(javax.swing.BorderFactory.createTitledBorder("Chart"));
-        }
     }
 
     private JPanel createControls() {
