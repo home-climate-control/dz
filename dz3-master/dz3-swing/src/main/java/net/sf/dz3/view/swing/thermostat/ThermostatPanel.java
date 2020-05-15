@@ -37,6 +37,7 @@ import net.sf.dz3.scheduler.Period;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.dz3.view.swing.ScreenDescriptor;
+import net.sf.dz3.view.swing.TemperatureUnit;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 
@@ -103,12 +104,13 @@ public class ThermostatPanel extends JPanel implements KeyListener {
      */
     private Font setpointFont;
 
-    private boolean needFahrenheit = false;
+    private boolean needFahrenheit;
 
-    public ThermostatPanel(ThermostatModel source, ScreenDescriptor screenDescriptor, Scheduler scheduler) {
+    public ThermostatPanel(ThermostatModel source, ScreenDescriptor screenDescriptor, Scheduler scheduler, TemperatureUnit defaultUnit) {
 
         this.source = source;
         this.scheduler = scheduler;
+        this.needFahrenheit = defaultUnit == TemperatureUnit.FAHRENHEIT;
 
         setFontSize(screenDescriptor);
 
