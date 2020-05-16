@@ -394,7 +394,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
     }
 
     @Override
-    public final synchronized Future<TransitionStatus> powerOff() {
+    public final Future<TransitionStatus> powerOff() {
 
         ThreadContext.push("powerOff");
 
