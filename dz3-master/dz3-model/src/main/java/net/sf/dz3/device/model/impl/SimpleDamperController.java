@@ -23,13 +23,6 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 public class SimpleDamperController extends AbstractDamperController {
 
     /**
-     * Create an instance with nothing attached.
-     */
-    public SimpleDamperController() {
-
-    }
-
-    /**
      * Create an instance and make it listen to the unit and thermostats.
      *
      * @param unit Unit to listen to.

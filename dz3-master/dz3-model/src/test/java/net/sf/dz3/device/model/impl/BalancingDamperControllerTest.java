@@ -1,6 +1,9 @@
 package net.sf.dz3.device.model.impl;
 
+import static org.mockito.Mockito.mock;
+
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -14,6 +17,7 @@ import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
+import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.sensor.impl.NullSensor;
 import net.sf.jukebox.datastream.signal.model.DataSample;
@@ -41,7 +45,8 @@ public class BalancingDamperControllerTest extends TestCase {
             Damper d1 = new DummyDamper("d1");
             Damper d2 = new DummyDamper("d2");
 
-            BalancingDamperController damperController = new BalancingDamperController();
+            Unit u = mock(Unit.class);
+            BalancingDamperController damperController = new BalancingDamperController(u, new HashMap<Thermostat, Damper>());
 
             damperController.put(ts1, d1);
             damperController.put(ts2, d2);
@@ -70,7 +75,8 @@ public class BalancingDamperControllerTest extends TestCase {
 
             DummyDamper d1 = new DummyDamper("d1");
 
-            BalancingDamperController damperController = new BalancingDamperController();
+            Unit u = mock(Unit.class);
+            BalancingDamperController damperController = new BalancingDamperController(u, new HashMap<Thermostat, Damper>());
 
             damperController.put(ts1, d1);
 
@@ -106,7 +112,8 @@ public class BalancingDamperControllerTest extends TestCase {
 
             DummyDamper d1 = new DummyDamper("d1");
 
-            BalancingDamperController damperController = new BalancingDamperController();
+            Unit u = mock(Unit.class);
+            BalancingDamperController damperController = new BalancingDamperController(u, new HashMap<Thermostat, Damper>());
 
             damperController.put(ts1, d1);
 

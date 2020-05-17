@@ -52,13 +52,6 @@ public class BalancingDamperController extends AbstractDamperController {
     protected double dumpThreshold = 0.3;
 
     /**
-     * Create an instance with nothing attached.
-     */
-    public BalancingDamperController() {
-
-    }
-
-    /**
      * Create an instance and make it listen to the unit and thermostats.
      *
      * @param unit Unit to listen to.
