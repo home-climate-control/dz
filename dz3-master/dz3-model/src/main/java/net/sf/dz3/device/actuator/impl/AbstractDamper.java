@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
 
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.logging.log4j.LogManager;
@@ -26,12 +27,20 @@ public abstract class AbstractDamper implements Damper {
     protected final Logger logger = LogManager.getLogger(getClass());
 
     /**
+     * Custom thread factory providing human-readable names to executor threads.
+     */
+    private final ThreadFactory tf;
+
+    /**
      * Completion service for asynchronous transitions.
      *
      * This pool requires exactly one thread, to honor the happened-before relation
      * between the series of commands sent to this damper.
+     *
+     * {@link #park()} will {@link #releaseExecutor()}, and {@link #set(double)} will create it
+     * until the next {@link #park()}.
      */
-    protected final ExecutorService executor;
+    private ExecutorService executor;
 
     /**
      * Damper name.
@@ -79,16 +88,30 @@ public abstract class AbstractDamper implements Damper {
         this.name = name;
         signature = MessageDigestCache.getMD5(name).substring(0, 19);
 
-        executor = Executors.newSingleThreadExecutor(
-                new BasicThreadFactory.Builder()
-                    .wrappedFactory(Executors.defaultThreadFactory())
-                    .namingPattern(getClass().getSimpleName() + "(" + name + ")@%d")
-                    .build());
+        tf = new BasicThreadFactory.Builder()
+                .wrappedFactory(Executors.defaultThreadFactory())
+                .namingPattern(getClass().getSimpleName() + "(" + name + ")@%d")
+                .build();
     }
 
     @Override
     public final String getName() {
         return name;
+    }
+
+    protected final synchronized ExecutorService getExecutor() {
+
+        if (executor == null) {
+            executor = Executors.newSingleThreadExecutor(tf);
+        }
+
+        return executor;
+    }
+
+    protected final synchronized void releaseExecutor() {
+
+        executor.shutdown();
+        executor = null;
     }
 
     @Override
@@ -149,7 +172,7 @@ public abstract class AbstractDamper implements Damper {
             }
         };
 
-        return executor.submit(c);
+        return getExecutor().submit(c);
     }
 
     /**
@@ -170,7 +193,11 @@ public abstract class AbstractDamper implements Damper {
 
             logger.debug("parking at {}", getParkPosition());
 
-            return set(getParkPosition());
+            Future<TransitionStatus> done = set(getParkPosition());
+
+            releaseExecutor();
+
+            return done;
 
         } finally {
             ThreadContext.pop();

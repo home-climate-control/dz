@@ -174,6 +174,10 @@ public class DamperMultiplexer extends AbstractDamper {
             }
         };
 
-        return executor.submit(c);
+        Future<TransitionStatus> done = getExecutor().submit(c);
+
+        releaseExecutor();
+
+        return done;
     }
 }
