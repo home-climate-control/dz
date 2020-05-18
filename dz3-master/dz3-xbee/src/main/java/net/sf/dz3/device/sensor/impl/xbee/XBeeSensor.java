@@ -91,11 +91,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
 
         } catch (Throwable t) {
 
-            IOException secondary = new IOException("Unable to read " + address);
-
-            secondary.initCause(t);
-
-            throw new IllegalStateException("Not Implemented", t);
+            throw new IllegalStateException("Unable to read " + address, t);
 
         } finally {
 
