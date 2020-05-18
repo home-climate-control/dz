@@ -233,7 +233,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
             Callable<TransitionStatus> c = () -> {
 
                 Marker m = new Marker("park/callable");
-                ThreadContext.push("park/callable");
+                ThreadContext.push("park/callable@" + Integer.toHexString(hashCode()));
 
                 try {
 
