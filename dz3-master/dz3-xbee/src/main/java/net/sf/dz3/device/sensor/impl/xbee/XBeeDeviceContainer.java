@@ -21,7 +21,7 @@ import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
 /**
  * XBee device container.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2001-2020
  */
 public final class XBeeDeviceContainer extends AbstractDeviceContainer implements PrototypeContainer {
 
@@ -147,7 +147,7 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
                 String channel = compositeAddress.substring(18);
                 Double value = sample.getChannel(channel);
 
-                logger.debug("channel: " + channel + "=" + value);
+                logger.debug("channel: {}={}", channel, value);
 
                 if (value != null) {
 

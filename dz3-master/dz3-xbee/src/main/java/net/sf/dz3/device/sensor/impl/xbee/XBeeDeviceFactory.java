@@ -40,7 +40,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 /**
  * Factory for sensors and actuators implemented with XBee modules.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2020
  */
 public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer> {
 
@@ -53,7 +53,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
     /**
      * Contains timestamps for sensor readings.
      */
-    private final Map<String, Long> lastSeen = new TreeMap<String, Long>();
+    private final Map<String, Long> lastSeen = new TreeMap<>();
 
     /**
      * How open to perform {@link #browse(XBee)}.
@@ -141,7 +141,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
             coordinator.open(port, baud);
 
-            logger.info("Opened " + port + " @" + baud + " baud");
+            logger.info("Opened {} @{} baud", port, baud);
 
             // Just in case, let's set AP=2 (xbee-api is unable to deal with API=1,
             // doesn't enforce AP=2 and causes subtle problems trying to communicate
@@ -181,7 +181,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
             while (isEnabled()) {
 
-                logger.debug("Sleeping for " + rescanDelayMillis + "ms");
+                logger.debug("Sleeping for {}ms", rescanDelayMillis);
                 Thread.sleep(rescanDelayMillis);
 
                 browse(coordinator);
@@ -239,7 +239,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         this.staleAgeMillis = staleAgeMillis;
     }
 
-    private void AP2(XBee target) throws XBeeTimeoutException, XBeeException, IOException {
+    private void AP2(XBee target) throws XBeeException, IOException {
 
         XBeeResponse rsp = target.sendSynchronous(new AtCommand("AP", 2), XBeeConstants.TIMEOUT_AP_MILLIS);
 
@@ -268,7 +268,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             // default is 6 seconds
             long nodeDiscoveryTimeout = (ByteUtils.convertMultiByteToInt(nodeTimeout.getValue())) * 100L;
 
-            logger.debug("Node discovery timeout is " + nodeDiscoveryTimeout + " milliseconds");
+            logger.debug("Node discovery timeout is {} milliseconds", nodeDiscoveryTimeout);
 
 
             logger.debug("Sending node discover command");
@@ -310,10 +310,10 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                 }
             }
 
-            logger.info(address2dcGlobal.size() + " devices found: " + sb.toString());
+            logger.info("{} devices found: {}", address2dcGlobal.size(), sb);
 
             for (Iterator<String> i = address2dcGlobal.iterator(); i.hasNext(); ) {
-                logger.info("found: " + i.next());
+                logger.info("found: {}", i.next());
             }
         }
     }
@@ -333,7 +333,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
         try {
 
-            logger.debug("Raw response: " + nd);
+            logger.debug("Raw response: {}", nd);
 
             XBeeDeviceContainer proxy = new XBeeDeviceContainer(this, nd.getNodeAddress64());
 
@@ -368,13 +368,13 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
                 if (age > staleAgeMillis) {
 
-                    logger.warn("Stale sensor: " + address);
+                    logger.warn("Stale sensor: {}", address);
 
                     XBeeDeviceContainer prototype = resolve(address);
 
                     if (prototype == null) {
 
-                        logger.error("No prototype found for " + address + "???");
+                        logger.error("No prototype found for {}???", address);
                         continue;
                     }
 
@@ -415,7 +415,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                 //
                 // This will correct itself at next browse().
 
-                logger.warn("No devices for " + deviceAddress + " (first sample arrived before network browse?)");
+                logger.warn("No devices for {} (first sample arrived before network browse?)", deviceAddress);
                 return null;
             }
 
@@ -446,7 +446,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
             // Let's proceed even if the prototype is null,
             // to record lastSeen and log the sample
 
-            logger.debug("prototype: " + prototype);
+            logger.debug("prototype: {}", prototype);
 
             int buffer[] = packet.getRawPacketBytes();
             int[] sampleBytes = new int[buffer.length - 14];
@@ -459,7 +459,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
             IoSample sample = new IoSample(sampleBytes, xbeeAddress, logger);
 
-            logger.debug("sample: " + sample);
+            logger.debug("sample: {}", sample);
 
             if (prototype != null) {
                 prototype.broadcastIoSample(sample);
@@ -532,7 +532,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
             String address = type.type + sb.toString();
 
-            logger.debug("JMX address for " + rawAddress + " is '" + address + "'");
+            logger.debug("JMX address for {} is '{}'", rawAddress, address);
 
             return new JmxDescriptor(
                     "dz",
@@ -624,7 +624,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
             try {
 
-                logger.debug("packet: " + packet);
+                logger.debug("packet: {}", packet);
 
                 ApiId apiId = packet.getApiId();
 
@@ -645,7 +645,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
                     } else {
 
-                        logger.warn("Unexpected response received (command: " + command + ")");
+                        logger.warn("Unexpected response received (command: {})", command);
                     }
 
                     break;

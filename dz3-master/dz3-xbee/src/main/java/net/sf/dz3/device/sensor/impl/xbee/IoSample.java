@@ -10,19 +10,12 @@ import com.rapplogic.xbee.api.XBeeAddress64;
 /**
  * XBee IO Sample.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2010-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2010-2020
  */
 public class IoSample {
 
-    /**
-     * XBee ZB hardware ADC resolution.
-     *
-     * 0 corresponds to 0V, 0x3FF corresponds to 1.2V.
-     */
-    final static double resolution = 1024d / 1200d;
-
-    final static int[] analogBit = new int[] { 0x01, 0x02, 0x04, 0x08, 0x40 };
-    final static String[] analogChannel = new String[] { "A0", "A1", "A2", "A3", "%V" };
+    static final int[] analogBit = new int[] { 0x01, 0x02, 0x04, 0x08, 0x40 };
+    static final String[] analogChannel = new String[] { "A0", "A1", "A2", "A3", "%V" };
 
     /**
      * Indicates which digital IO lines have sampling enabled. Each bit corresponds to one
@@ -142,13 +135,13 @@ public class IoSample {
 
                 if ((raw & ~0x3FF) == 0) {
 
-                    sample[bitOffset] = Double.valueOf(rawDouble / resolution);
+                    sample[bitOffset] = Double.valueOf(rawDouble / XBeeConstants.ADC_RESOLUTION);
 
                 } else {
 
                     logger.error("ADC sample out of range for " + Parser.render4x4(xbeeAddress) + ":"
                             + bitOffset + " (0x" + Integer.toHexString(raw)
-                            + "), sample would've been " + Double.valueOf(rawDouble / resolution));
+                            + "), sample would've been " + Double.valueOf(rawDouble / XBeeConstants.ADC_RESOLUTION));
 
                     sample[bitOffset] = null;
 
