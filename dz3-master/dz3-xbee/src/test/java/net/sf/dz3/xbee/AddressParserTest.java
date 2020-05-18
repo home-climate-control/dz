@@ -40,7 +40,8 @@ public class AddressParserTest {
         assertEquals("00000013a200405d:2", s4.toString());
     }
 
-    public void testHighBit() {
+    @Test
+    public void highBit() {
 
         assertEquals("0013A200.405D8027", Parser.render4x4("00 13 a2 00 40 5d 80 27"));
         assertEquals("0013A200.F05D8027", Parser.render4x4("00 13 a2 00 f0 5d 80 27"));
