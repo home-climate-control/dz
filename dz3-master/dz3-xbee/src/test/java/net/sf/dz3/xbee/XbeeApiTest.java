@@ -1,8 +1,14 @@
 package net.sf.dz3.xbee;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
@@ -14,19 +20,14 @@ import com.rapplogic.xbee.api.XBeePacket;
 import com.rapplogic.xbee.api.XBeeResponse;
 import com.rapplogic.xbee.util.ByteUtils;
 
-import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.impl.xbee.Parser;
 
-public class XbeeApiTest extends TestCase {
+public class XbeeApiTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
-    public void testNothing() {
-
-        // To make JUnit happy while other hardware specific tests are disabled
-    }
-
-    public void testPacketEscape() {
+    @Test
+    public void packetEscape() {
 
         final int[] knownGoodPacket = new int[] {
                 0x7E, // Start delimiter
@@ -85,7 +86,12 @@ public class XbeeApiTest extends TestCase {
         }
     }
 
-    public void xtestXbee() throws XBeeException {
+    @SuppressWarnings("squid:S1607")
+    @Ignore
+    @Test
+    public void testXbee() throws XBeeException {
+
+        // VT: NOTE: squid:S1607 - Actual hardware is necessary for this test, so disabled
 
         ThreadContext.push("testXBee");
 
@@ -205,7 +211,6 @@ public class XbeeApiTest extends TestCase {
                     } finally {
                         ThreadContext.pop();
                     }
-
                 }
 
             } catch (Throwable t) {
@@ -215,6 +220,9 @@ public class XbeeApiTest extends TestCase {
                 // shutdown the serial port and associated threads
                 xbee.close();
             }
+
+            // Just pass.
+            assertTrue(true);
 
         } finally {
             ThreadContext.pop();

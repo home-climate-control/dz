@@ -1,17 +1,20 @@
 package net.sf.dz3.xbee;
 
+import static org.junit.Assert.assertEquals;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Test;
 
-import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.device.sensor.impl.xbee.Parser;
 
-public class AddressParserTest extends TestCase {
+public class AddressParserTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
-    public void testParser() {
+    @Test
+    public void Parser() {
 
         Parser.parse("48 fe 00 13 a2 00 40 5d");
         Parser.parse("48fe0013 a200405d");
@@ -30,6 +33,11 @@ public class AddressParserTest extends TestCase {
         logger.info("Address 2: " + s2);
         logger.info("Address 3: " + s3);
         logger.info("Address 4: " + s4);
+
+        assertEquals("48 fe 00 13 a2 00 40 5d:0", s1.toString());
+        assertEquals("48fe0013 a200405d:1", s2.toString());
+        assertEquals("48fe0013a200405d:2", s3.toString());
+        assertEquals("00000013a200405d:2", s4.toString());
     }
 
     public void testHighBit() {
