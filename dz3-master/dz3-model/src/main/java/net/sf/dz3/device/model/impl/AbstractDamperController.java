@@ -404,7 +404,12 @@ public abstract class AbstractDamperController implements DamperController, JmxA
             enabled = false;
             logger.warn("Powering off");
 
-            return park(false);
+            // This is a synchronous operation
+            Future<TransitionStatus> done = park(false);
+
+            logger.info("shut down.");
+
+            return done;
 
         } finally {
             ThreadContext.pop();

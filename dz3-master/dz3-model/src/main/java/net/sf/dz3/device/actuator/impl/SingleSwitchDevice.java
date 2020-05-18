@@ -20,7 +20,7 @@ import net.sf.jukebox.datastream.signal.model.DataSource;
  * Extremely simplified implementation of a consumer for a {@link ZoneController}, {@link Economizer},
  * and other sources that might have a simple actuator.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class SingleSwitchDevice implements DataSink<Double> {
 
@@ -116,6 +116,8 @@ public class SingleSwitchDevice implements DataSink<Double> {
 
             executor.execute(new Command(false));
             enabled = false;
+
+            logger.info("shut down.");
 
         } finally {
             ThreadContext.pop();
