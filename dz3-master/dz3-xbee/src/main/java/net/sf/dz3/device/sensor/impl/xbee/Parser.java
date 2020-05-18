@@ -14,7 +14,7 @@ import com.rapplogic.xbee.api.XBeeAddress64;
  */
 public class Parser {
 
-    private final static Logger logger = LogManager.getLogger(Parser.class);
+    private static final Logger logger = LogManager.getLogger(Parser.class);
 
 
     /**
@@ -31,11 +31,11 @@ public class Parser {
 
         try {
 
-            logger.debug("raw address: '" + rawAddress + "'");
+            logger.debug("raw address: '{}'", rawAddress);
 
             String denseAddress = compress(rawAddress);
 
-            logger.debug("dense address: " + denseAddress);
+            logger.debug("dense address: {}", denseAddress);
 
             if (denseAddress.length() != 16) {
 
@@ -59,7 +59,7 @@ public class Parser {
 
             String result = sb.toString();
 
-            logger.debug("Rapp address: " + result);
+            logger.debug("Rapp address: {}", result);
 
             return new XBeeAddress64(result);
 

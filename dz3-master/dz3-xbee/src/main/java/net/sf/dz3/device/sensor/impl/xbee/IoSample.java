@@ -14,8 +14,8 @@ import com.rapplogic.xbee.api.XBeeAddress64;
  */
 public class IoSample {
 
-    final static int[] analogBit = new int[] { 0x01, 0x02, 0x04, 0x08, 0x40 };
-    final static String[] analogChannel = new String[] { "A0", "A1", "A2", "A3", "%V" };
+    static final int[] analogBit = new int[] { 0x01, 0x02, 0x04, 0x08, 0x40 };
+    static final String[] analogChannel = new String[] { "A0", "A1", "A2", "A3", "%V" };
 
     /**
      * Indicates which digital IO lines have sampling enabled. Each bit corresponds to one

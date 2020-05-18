@@ -31,7 +31,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  */
 public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor {
 
-    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
 
     private final XBeeDeviceContainer container;
     private final StringChannelAddress address;
@@ -76,7 +76,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
             RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, "IS");
             AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_IS_MILLIS);
 
-            logger.debug(channel + " response: " + rsp);
+            logger.debug("{} response: {}", channel, rsp);
 
             if (rsp.isError()) {
 
@@ -85,9 +85,9 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
 
             IoSample sample = new IoSample(rsp.getValue(), xbeeAddress, logger);
 
-            logger.debug("sample: " + sample);
+            logger.debug("sample: {}", sample);
 
-            return new DataSample<Double>(System.currentTimeMillis(), sourceName, signature, sample.getChannel(channel), null);
+            return new DataSample<>(System.currentTimeMillis(), sourceName, signature, sample.getChannel(channel), null);
 
         } catch (Throwable t) {
 
@@ -131,7 +131,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
      */
     public void broadcast(long timestamp, Double value, Throwable t) {
 
-        DataSample<Double> signal = new DataSample<Double>(timestamp, sourceName, signature, value, t);
+        DataSample<Double> signal = new DataSample<>(timestamp, sourceName, signature, value, t);
 
         dataBroadcaster.broadcast(signal);
     }

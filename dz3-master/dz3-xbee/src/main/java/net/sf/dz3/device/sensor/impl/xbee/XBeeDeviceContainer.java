@@ -147,7 +147,7 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
                 String channel = compositeAddress.substring(18);
                 Double value = sample.getChannel(channel);
 
-                logger.debug("channel: " + channel + "=" + value);
+                logger.debug("channel: {}={}", channel, value);
 
                 if (value != null) {
 

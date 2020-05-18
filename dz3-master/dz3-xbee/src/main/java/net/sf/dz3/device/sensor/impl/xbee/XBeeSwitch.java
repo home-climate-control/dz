@@ -62,14 +62,14 @@ public class XBeeSwitch implements Switch {
             RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, channel);
             AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
-            logger.info(channel + " response: " + rsp);
+            logger.info("{} response: {}", channel, rsp);
 
             if (rsp.isError()) {
 
                 throw new IOException(channel + " + query failed, status: " + rsp.getStatus());
             }
 
-            int buffer[] = rsp.getValue();
+            int[] buffer = rsp.getValue();
 
             if (buffer.length != 1) {
 
@@ -116,7 +116,7 @@ public class XBeeSwitch implements Switch {
             RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, channel, new int[] {deviceState});
             AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
-            logger.info(channel + " response: " + rsp);
+            logger.info("{} response: {}", channel, rsp);
             dataBroadcaster.broadcast(new DataSample<Boolean>(System.currentTimeMillis(), getAddress(), getAddress(), state, null));
 
             if (rsp.isError()) {
