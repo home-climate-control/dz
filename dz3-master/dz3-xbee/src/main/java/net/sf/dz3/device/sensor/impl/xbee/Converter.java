@@ -8,13 +8,6 @@ package net.sf.dz3.device.sensor.impl.xbee;
 public class Converter {
 
     /**
-     * XBee ZB hardware ADC resolution.
-     *
-     * 0 corresponds to 0V, 0x3FF corresponds to 1.2V.
-     */
-    final static double resolution = 1024d / 1200d;
-
-    /**
      * Convert the sensor reading returned by IS command to temperature,
      * assuming TMP36 sensor is connected.
      *
@@ -35,6 +28,6 @@ public class Converter {
      */
     public static double raw2mV(int sensorReading) {
 
-        return sensorReading / resolution;
+        return sensorReading / XBeeConstants.ADC_RESOLUTION;
     }
 }
