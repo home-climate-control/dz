@@ -92,11 +92,7 @@ public class XBeeSwitch implements Switch {
 
         } catch (Throwable t) {
 
-            IOException secondary = new IOException("Unable to read " + address);
-
-            secondary.initCause(t);
-
-            throw secondary;
+            throw new IOException("Unable to read " + address, t);
 
         } finally {
 
@@ -130,11 +126,7 @@ public class XBeeSwitch implements Switch {
 
         } catch (Throwable t) {
 
-            IOException secondary = new IOException("Unable to write " + address);
-
-            secondary.initCause(t);
-
-            throw secondary;
+            throw new IOException("Unable to write " + address, t);
 
         } finally {
 
