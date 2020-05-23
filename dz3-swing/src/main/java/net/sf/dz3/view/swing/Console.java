@@ -324,9 +324,9 @@ public class Console extends Connector<JComponent> {
     };
 
     /**
-     * Offset into {@link #screenSizes}, default is 3 (WVGA800).
+     * Offset into {@link #screenSizes}, default is 5 (WVGA854).
      */
-    private int screenSizeOffset = 4;
+    private int screenSizeOffset = 5;
 
     private class ResizeKeyListener implements KeyListener {
 
