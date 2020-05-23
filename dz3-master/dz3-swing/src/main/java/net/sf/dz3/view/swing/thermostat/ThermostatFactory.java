@@ -10,20 +10,23 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.swing.ComponentFactory;
 import net.sf.dz3.view.swing.ScreenDescriptor;
+import net.sf.dz3.view.swing.TemperatureUnit;
 
 /**
  * Factory to create a panel to represent a {@link ThermostatModel}.
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class ThermostatFactory extends ComponentFactory {
 
-    /**
-     * {@inheritDoc}
-     */
+    private final TemperatureUnit defaultUnit;
+
+    public ThermostatFactory(TemperatureUnit defaultUnit) {
+        this.defaultUnit = defaultUnit;
+    }
     @Override
     public Class<?> getSourceClass() {
-        
+
         return ThermostatModel.class;
     }
 
@@ -32,13 +35,17 @@ public class ThermostatFactory extends ComponentFactory {
      */
     @Override
     public JComponent createComponent(Object source, Map<String, Object> context) {
-        
+
         ThreadContext.push("createComponent");
-        
+
         try {
-        
-            return new ThermostatPanel((ThermostatModel) source, (ScreenDescriptor) context.get("screen descriptor"), (Scheduler) context.get("scheduler"));
-            
+
+            return new ThermostatPanel(
+                    (ThermostatModel) source,
+                    (ScreenDescriptor) context.get("screen descriptor"),
+                    (Scheduler) context.get("scheduler"),
+                    defaultUnit);
+
         } finally {
             ThreadContext.pop();
         }
