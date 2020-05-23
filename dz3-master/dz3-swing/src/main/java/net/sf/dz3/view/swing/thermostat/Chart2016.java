@@ -19,7 +19,7 @@ import net.sf.jukebox.util.Interval;
  * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
 @SuppressWarnings("squid:S110")
-public class FasterChart extends AbstractChart {
+public class Chart2016 extends AbstractChart {
 
     private static final long serialVersionUID = 8739949924865459025L;
 
@@ -42,7 +42,7 @@ public class FasterChart extends AbstractChart {
 
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
-    public FasterChart(long chartLengthMillis) {
+    public Chart2016(long chartLengthMillis) {
 
         super(chartLengthMillis);
     }
