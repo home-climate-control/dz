@@ -2,6 +2,7 @@ package net.sf.dz3.view.swing.thermostat;
 
 import static org.junit.Assert.assertTrue;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -114,6 +115,7 @@ public class ChartBenchmark {
 
             BufferedImage image = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = image.createGraphics();
+            target.setBackground(Color.black);
             target.printAll(g);
 
             double setpoint = 28.75;
