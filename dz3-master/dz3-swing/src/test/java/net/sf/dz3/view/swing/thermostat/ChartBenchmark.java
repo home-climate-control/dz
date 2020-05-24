@@ -111,14 +111,21 @@ public class ChartBenchmark {
 
             double setpoint = 28.75;
 
+            // VT: NOTE:This calculation tends to lean towards the red end if the sample
+            // span is over the chart length
+
+            double tint = 0;
+            double tintDelta = 2d / series.size();
+
             for (Entry<Long, Double> kv: series.entrySet()) {
 
-                TintedValueAndSetpoint payload = new TintedValueAndSetpoint(kv.getValue(), 0.5, false, setpoint);
+                TintedValueAndSetpoint payload = new TintedValueAndSetpoint(kv.getValue(), tint, false, setpoint);
                 DataSample<TintedValueAndSetpoint> sample = new DataSample<TintedValueAndSetpoint>(
                         kv.getKey(),
                         "source", "signature", payload, null);
 
                 target.consume(sample);
+                tint += tintDelta;
             }
 
             target.printAll(g);
