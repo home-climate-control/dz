@@ -10,14 +10,14 @@ import java.util.NoSuchElementException;
  *
  * VT: FIXME: Implement variable expiration time.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@homaclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
 public class DataSet<T> {
 
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private LinkedHashMap<Long, T> dataSet = new LinkedHashMap<Long, T>();
+    private LinkedHashMap<Long, T> dataSet = new LinkedHashMap<>();
 
     /**
      * The expiration interval. Values older than the last key by this many
@@ -33,12 +33,12 @@ public class DataSet<T> {
      * This is not necessarily a good thing.
      */
     private final boolean strict;
-    
+
     /**
      * Last known timestamp. {@code null} if none recorded yet.
      */
     private Long lastTimestamp;
-    
+
     /**
      * Create the instance allowing out-of-order updates.
      *
@@ -55,9 +55,9 @@ public class DataSet<T> {
      * Create the instance.
      *
      * @param expirationInterval How many milliseconds to keep the data.
-     * 
+     *
      * @param strict If set to true, out-of-order updates will not be accepted.
-     * 
+     *
      * @exception IllegalArgumentException if the expiration interval is
      * non-positive (<= 0). Be careful with the short intervals, it's going to
      * be your fault, not mine.
@@ -95,21 +95,17 @@ public class DataSet<T> {
         // We don't care if there was a value associated with the given key
         // before, so we return nothing.
 
-        if (strict) {
-            
-            if (lastTimestamp != null && lastTimestamp >= millis)
+        if (strict && lastTimestamp != null && lastTimestamp >= millis) {
 
                 throw new IllegalArgumentException("Data element out of sequence: last key is " + lastTimestamp
                         + ", key being added is " + millis);
         }
-        
+
         lastTimestamp = millis;
 
         dataSet.put(Long.valueOf(millis), value);
 
         expire();
-        
-        // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
     }
 
     /**
@@ -128,13 +124,10 @@ public class DataSet<T> {
 
                 if (found < expireBefore) {
 
-                    // System.err.println("Expired: " + found + ", left: " +
-                    // dataSet.size());
-
                     i.remove();
 
                 } else {
-                    
+
                     // We're done, all other keys will be younger
                     return;
                 }
@@ -176,7 +169,7 @@ public class DataSet<T> {
      * @param time Time to look up the data for. Must be exact, otherwise,
      * exception will be thrown.
      * @return Value recorded at the given time.
-     * 
+     *
      * @exception NoSuchElementException if the value for the given time is not
      * in the set.
      */
