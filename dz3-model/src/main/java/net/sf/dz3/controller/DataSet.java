@@ -10,14 +10,14 @@ import java.util.NoSuchElementException;
  *
  * VT: FIXME: Implement variable expiration time.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@homaclimatecontrol.com"> Vadim Tkachenko</a> 2001-2020
  */
 public class DataSet<T> {
 
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private LinkedHashMap<Long, T> dataSet = new LinkedHashMap<Long, T>();
+    private LinkedHashMap<Long, T> dataSet = new LinkedHashMap<>();
 
     /**
      * The expiration interval. Values older than the last key by this many
@@ -95,9 +95,7 @@ public class DataSet<T> {
         // We don't care if there was a value associated with the given key
         // before, so we return nothing.
 
-        if (strict) {
-
-            if (lastTimestamp != null && lastTimestamp >= millis)
+        if (strict && lastTimestamp != null && lastTimestamp >= millis) {
 
                 throw new IllegalArgumentException("Data element out of sequence: last key is " + lastTimestamp
                         + ", key being added is " + millis);
@@ -108,8 +106,6 @@ public class DataSet<T> {
         dataSet.put(Long.valueOf(millis), value);
 
         expire();
-
-        // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
     }
 
     /**
@@ -127,9 +123,6 @@ public class DataSet<T> {
                 Long found = i.next();
 
                 if (found < expireBefore) {
-
-                    // System.err.println("Expired: " + found + ", left: " +
-                    // dataSet.size());
 
                     i.remove();
 
