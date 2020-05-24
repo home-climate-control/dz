@@ -13,6 +13,48 @@ import net.sf.dz3.instrumentation.Marker;
 public class DataSetTest {
 
     @Test
+    public void merge() {
+
+        DataSet<Double> ds = new DataSet<Double>(100);
+
+        ds.record(0, 1.0);
+        ds.record(1, 1.0);
+
+        assertEquals("wrong size", 2, ds.size());
+
+        ds.record(2, 1.0, true);
+
+        assertEquals("wrong data set size", 2, ds.size());
+    }
+
+    /**
+     * Make sure that the value that would've been merged if not expired is correctly expired.
+     */
+    @Test
+    public void mergeExpire() {
+
+        DataSet<Double> ds = new DataSet<Double>(100);
+
+        ds.record(1, 1.0);
+
+        assertEquals("wrong data set size", 1, ds.size());
+
+        ds.record(2, 1.0, true);
+
+        assertEquals("wrong data set size", 1, ds.size());
+
+        // This one blows the old one past expiration, but nothing will happen
+        // because new timestamp will not be recorded
+
+        ds.record(200, 1.0, true);
+
+        // The very first timestamp will be still retained
+
+        assertEquals("Wrong value after expiration", 1, ds.iterator().next().longValue());
+        assertEquals("Wrong data set size", 1, ds.size());
+    }
+
+    @Test
     public void nonexistentValue() {
 
         DataSet<Double> ds = new DataSet<Double>(100);

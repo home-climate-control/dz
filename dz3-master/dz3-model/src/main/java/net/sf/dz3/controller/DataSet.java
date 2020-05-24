@@ -40,6 +40,11 @@ public class DataSet<T> {
     private Long lastTimestamp;
 
     /**
+     * Last known value. {@code null} if none recorded yet.
+     */
+    private T lastValue;
+
+    /**
      * Create the instance allowing out-of-order updates.
      *
      * @param expirationInterval How many milliseconds to keep the data.
@@ -91,6 +96,18 @@ public class DataSet<T> {
      * @param value The sample value.
      */
     public final synchronized void record(final long millis, final T value) {
+        record(millis, value, false);
+    }
+
+    /**
+     * Record the sample.
+     *
+     * @param millis Absolute time, milliseconds.
+     * @param value The sample value.
+     * @param merge if {@code false}, record the value in any case. If {@code true}, record only
+     * if it is different from the last one recorded.
+     */
+    public final synchronized void record(final long millis, final T value, boolean merge) {
 
         // We don't care if there was a value associated with the given key
         // before, so we return nothing.
@@ -101,9 +118,19 @@ public class DataSet<T> {
                         + ", key being added is " + millis);
         }
 
-        lastTimestamp = millis;
+        if (lastValue != null && merge && lastValue.equals(value)) {
 
-        dataSet.put(Long.valueOf(millis), value);
+            // Skip this one, we already have it
+            //LogManager.getLogger(getClass()).error("dupe: " + value);
+
+        } else {
+
+            //LogManager.getLogger(getClass()).error("take: " + value);
+
+            dataSet.put(Long.valueOf(millis), value);
+            lastValue = value;
+            lastTimestamp = millis;
+        }
 
         expire();
     }
@@ -129,6 +156,7 @@ public class DataSet<T> {
                 } else {
 
                     // We're done, all other keys will be younger
+
                     return;
                 }
 
