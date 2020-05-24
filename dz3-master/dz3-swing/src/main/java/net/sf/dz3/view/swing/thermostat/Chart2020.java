@@ -74,7 +74,7 @@ public class Chart2020 extends AbstractChart2020 {
 
         adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
-        synchronized (AbstractChart2009.class) {
+        synchronized (AbstractChart.class) {
 
             if (width != globalWidth) {
 
@@ -127,7 +127,7 @@ public class Chart2020 extends AbstractChart2020 {
 
         // Chart size *can* change during runtime - see +/- Console#ResizeKeyListener.
 
-        synchronized (AbstractChart2009.class) {
+        synchronized (AbstractChart.class) {
 
             if (globalWidth != boundary.width) {
 
