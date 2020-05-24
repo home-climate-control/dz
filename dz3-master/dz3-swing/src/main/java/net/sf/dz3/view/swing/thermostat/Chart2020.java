@@ -113,19 +113,8 @@ public class Chart2020 extends AbstractChart2020 {
             return false;
         }
 
-        DataSet<TintedValue> dsValues = channel2dsValue.get(channel);
-        DataSet<Double> dsSetpoints = channel2dsSetpoint.get(channel);
-
-        if (dsValues == null) {
-
-            dsValues = new DataSet<>(chartLengthMillis);
-            channel2dsValue.put(channel, dsValues);
-
-            // Most definitely, setpoints aren't there either
-
-            dsSetpoints = new DataSet<>(chartLengthMillis);
-            channel2dsSetpoint.put(channel, dsSetpoints);
-        }
+        DataSet<TintedValue> dsValues = channel2dsValue.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
+        DataSet<Double> dsSetpoints = channel2dsSetpoint.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
 
         dsValues.record(signal.timestamp, tv);
         dsSetpoints.record(signal.timestamp, signal.sample.setpoint);
