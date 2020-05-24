@@ -85,25 +85,39 @@ public class ChartBenchmark {
     @Test
     public void benchmark2009() throws IOException {
 
-        benchmark("2009", new Chart2009(testClock, chartLengthMillis));
+        benchmark("2009", new Chart2009(testClock, chartLengthMillis), false);
         assertTrue(true);
     }
 
     @Test
     public void benchmark2016() throws IOException {
 
-        benchmark("2016", new Chart2016(testClock, chartLengthMillis));
+        benchmark("2016", new Chart2016(testClock, chartLengthMillis), false);
+        assertTrue(true);
+    }
+
+    @Test
+    public void benchmark2016s() throws IOException {
+
+        benchmark("2016s", new Chart2016(testClock, chartLengthMillis), true);
         assertTrue(true);
     }
 
     @Test
     public void benchmark2020() throws IOException {
 
-        benchmark("2020", new Chart2020(testClock, chartLengthMillis));
+        benchmark("2020", new Chart2020(testClock, chartLengthMillis), false);
         assertTrue(true);
     }
 
-    private void benchmark(String marker, AbstractChart target) throws IOException {
+    @Test
+    public void benchmark2020s() throws IOException {
+
+        benchmark("2020s", new Chart2020(testClock, chartLengthMillis), true);
+        assertTrue(true);
+    }
+
+    private void benchmark(String marker, AbstractChart target, boolean changeSetpoint) throws IOException {
         ThreadContext.push(marker);
         Marker m = new Marker(marker);
 
@@ -128,9 +142,12 @@ public class ChartBenchmark {
 
             for (Entry<Long, Double> kv: series.entrySet()) {
 
-                TintedValueAndSetpoint payload = new TintedValueAndSetpoint(kv.getValue(), tint, false, setpoint);
+                long timestamp = kv.getKey();
+                double setpointOffset = changeSetpoint &&  testClock.instant().toEpochMilli() - timestamp > chartLengthMillis / 2 ? 0.5 : 0;
+
+                TintedValueAndSetpoint payload = new TintedValueAndSetpoint(kv.getValue(), tint, false, setpoint - setpointOffset);
                 DataSample<TintedValueAndSetpoint> sample = new DataSample<TintedValueAndSetpoint>(
-                        kv.getKey(),
+                        timestamp,
                         "source", "signature", payload, null);
 
                 target.consume(sample);
