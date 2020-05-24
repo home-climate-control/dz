@@ -12,7 +12,6 @@ import java.util.Map.Entry;
 
 import net.sf.dz3.controller.DataSet;
 import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.util.Interval;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
@@ -334,7 +333,7 @@ public class Chart2016 extends AbstractChart {
 
             // VT: NOTE: squid:S2629 - this happens once in 25-40 seconds, acceptable loss
 
-            logger.debug("RingBuffer: flushing at {}", Interval.toTimeInterval(age));
+            //logger.debug("RingBuffer: flushing at {}", Interval.toTimeInterval(age));
 
             TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 
