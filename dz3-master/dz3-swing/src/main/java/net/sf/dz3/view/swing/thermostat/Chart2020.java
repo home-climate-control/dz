@@ -19,7 +19,7 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
  * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
 @SuppressWarnings("squid:S110")
-public class Chart2016 extends AbstractChart2009 {
+public class Chart2020 extends AbstractChart2020 {
 
     private static final long serialVersionUID = 8739949924865459025L;
 
@@ -42,7 +42,7 @@ public class Chart2016 extends AbstractChart2009 {
 
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
-    public Chart2016(Clock clock, long chartLengthMillis) {
+    public Chart2020(Clock clock, long chartLengthMillis) {
 
         super(clock, chartLengthMillis);
     }
@@ -74,7 +74,7 @@ public class Chart2016 extends AbstractChart2009 {
 
         adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
-        synchronized (AbstractChart.class) {
+        synchronized (AbstractChart2009.class) {
 
             if (width != globalWidth) {
 
@@ -138,7 +138,7 @@ public class Chart2016 extends AbstractChart2009 {
 
         // Chart size *can* change during runtime - see +/- Console#ResizeKeyListener.
 
-        synchronized (AbstractChart.class) {
+        synchronized (AbstractChart2009.class) {
 
             if (globalWidth != boundary.width) {
 

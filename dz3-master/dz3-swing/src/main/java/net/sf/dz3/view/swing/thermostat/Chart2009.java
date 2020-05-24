@@ -17,9 +17,12 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  * @deprecated Use {@link Chart2016} instead.
+ *
+ * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
+@SuppressWarnings("squid:S110")
 @Deprecated
-public class Chart2009 extends AbstractChart {
+public class Chart2009 extends AbstractChart2009 {
 
     private static final long serialVersionUID = -8138341010404232436L;
 

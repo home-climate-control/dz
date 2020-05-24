@@ -95,6 +95,13 @@ public class ChartBenchmark {
         assertTrue(true);
     }
 
+    @Test
+    public void benchmark2020() throws IOException {
+
+        benchmark("2020", new Chart2020(testClock, chartLengthMillis));
+        assertTrue(true);
+    }
+
     private void benchmark(String marker, AbstractChart target) throws IOException {
         ThreadContext.push(marker);
         Marker m = new Marker(marker);
