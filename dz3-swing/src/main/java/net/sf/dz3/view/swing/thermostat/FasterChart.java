@@ -1,7 +1,6 @@
 package net.sf.dz3.view.swing.thermostat;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.util.Interval;
 import net.sf.dz3.controller.DataSet;
 
 import java.awt.Color;
@@ -334,7 +333,7 @@ public class FasterChart extends AbstractChart {
 
             // VT: NOTE: squid:S2629 - this happens once in 25-40 seconds, acceptable loss
 
-            logger.debug("RingBuffer: flushing at {}", Interval.toTimeInterval(age));
+            //logger.debug("RingBuffer: flushing at {}", Interval.toTimeInterval(age));
 
             TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 
