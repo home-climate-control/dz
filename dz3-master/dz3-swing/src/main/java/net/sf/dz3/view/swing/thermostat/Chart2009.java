@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.time.Clock;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -22,9 +23,9 @@ public class Chart2009 extends AbstractChart {
 
     private static final long serialVersionUID = -8138341010404232436L;
 
-    public Chart2009(long chartLengthMillis) {
+    public Chart2009(Clock clock, long chartLengthMillis) {
 
-        super(chartLengthMillis);
+        super(clock, chartLengthMillis);
     }
 
     @Override

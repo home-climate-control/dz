@@ -11,6 +11,7 @@ import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.time.Clock;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -47,6 +48,11 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * Default is dark gray.
      */
     protected static final Color gridColor = Color.darkGray;
+
+    /**
+     * Clock used.
+     */
+    private final Clock clock;
 
     /**
      * Chart length, in milliseconds.
@@ -119,12 +125,13 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
     protected static final Color SETPOINT_COLOR = Color.YELLOW;
 
-    public AbstractChart(long chartLengthMillis) {
+    public AbstractChart(Clock clock, long chartLengthMillis) {
 
         if (chartLengthMillis < 1000 * 10) {
             throw new IllegalArgumentException("Unreasonably short chart length " + chartLengthMillis + "ms");
         }
 
+        this.clock = clock;
         this.chartLengthMillis = chartLengthMillis;
     }
 
@@ -132,7 +139,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     public synchronized void paintComponent(Graphics g) {
 
         // VT: NOTE: Consider replacing this with a Marker - careful, though, this is a time sensitive path
-        long startTime = System.currentTimeMillis();
+        long startTime = clock.instant().toEpochMilli();
 
         // Draw background
         super.paintComponent(g);
@@ -143,7 +150,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         paintBackground(g2d, boundary, insets);
 
-        long now = System.currentTimeMillis();
+        long now = clock.instant().toEpochMilli();
         double xScale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
         long xOffset = now - chartLengthMillis;
 
@@ -163,7 +170,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
 
         paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
-        logger.info("Painted in {}ms", (System.currentTimeMillis() - startTime));
+        logger.info("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
     }
 
     protected abstract void checkWidth(Dimension boundary);
@@ -526,7 +533,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     @SuppressWarnings("squid:S2629")
     private synchronized void recalculateVerticalLimits() {
 
-        long startTime = System.currentTimeMillis();
+        long startTime = clock.instant().toEpochMilli();
 
         dataMin = null;
         dataMax = null;
@@ -555,10 +562,10 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
             }
         }
 
-        logger.info("Recalculated in {}ms", (System.currentTimeMillis() - startTime));
+        logger.info("Recalculated in {}ms", (clock.instant().toEpochMilli() - startTime));
 
         // VT: NOTE: squid:S2629 - give me a break, this will happen once in more than three hours
 
-        logger.info("New minmaxTime set to + {}", Interval.toTimeInterval(System.currentTimeMillis() - minmaxTime));
+        logger.info("New minmaxTime set to + {}", Interval.toTimeInterval(clock.instant().toEpochMilli() - minmaxTime));
     }
 }

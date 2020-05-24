@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -42,9 +43,9 @@ public class Chart2016 extends AbstractChart {
 
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
-    public Chart2016(long chartLengthMillis) {
+    public Chart2016(Clock clock, long chartLengthMillis) {
 
-        super(chartLengthMillis);
+        super(clock, chartLengthMillis);
     }
 
     @Override
