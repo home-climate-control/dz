@@ -1,17 +1,18 @@
 package net.sf.dz3.view.swing.thermostat;
 
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.util.Interval;
+import net.sf.dz3.controller.DataSet;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import net.sf.dz3.controller.DataSet;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.util.Interval;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
@@ -42,9 +43,9 @@ public class FasterChart extends AbstractChart {
 
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
-    public FasterChart(long chartLengthMillis) {
+    public Chart2016(Clock clock, long chartLengthMillis) {
 
-        super(chartLengthMillis);
+        super(clock, chartLengthMillis);
     }
 
     @Override

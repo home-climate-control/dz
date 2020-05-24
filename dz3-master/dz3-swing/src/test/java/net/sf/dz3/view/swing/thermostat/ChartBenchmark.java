@@ -11,6 +11,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Clock;
+import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -32,6 +35,7 @@ public class ChartBenchmark {
     private final static Logger logger = LogManager.getLogger(ChartBenchmark.class);
 
     private static TreeMap<Long, Double> series = new TreeMap<>();
+    private static Clock testClock;
 
     @BeforeClass
     public static void loadSeries() throws IOException, URISyntaxException {
@@ -51,9 +55,18 @@ public class ChartBenchmark {
                 series.put(Long.parseLong(kv[0]), Double.parseDouble(kv[1]));
             });
 
-            long span = series.lastKey() - series.firstKey();
+            long last = series.lastKey();
+            long span = last - series.firstKey();
 
             logger.info("series time span is {}", Interval.toTimeInterval(span));
+
+            long now = Clock.systemUTC().instant().toEpochMilli();
+            long offset = now - last;
+
+            testClock = Clock.offset(Clock.systemUTC(), Duration.ofMillis(-offset));
+
+            logger.info("last sample is at {}", new Date(last));
+            logger.info("test clock time is {}", testClock.instant());
 
         } finally {
             m.close();
@@ -71,14 +84,14 @@ public class ChartBenchmark {
     @Test
     public void benchmark2009() throws IOException {
 
-        benchmark("2009", new Chart2009(chartLengthMillis));
+        benchmark("2009", new Chart2009(testClock, chartLengthMillis));
         assertTrue(true);
     }
 
     @Test
     public void benchmark2016() throws IOException {
 
-        benchmark("2016", new Chart2016(chartLengthMillis));
+        benchmark("2016", new Chart2016(testClock, chartLengthMillis));
         assertTrue(true);
     }
 
