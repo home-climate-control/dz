@@ -16,6 +16,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -35,16 +36,26 @@ public class ChartBenchmark {
 
     private final static Logger logger = LogManager.getLogger(ChartBenchmark.class);
 
-    private static TreeMap<Long, Double> series = new TreeMap<>();
+    private static TreeMap<Long, Double> series1;
+    private static TreeMap<Long, Double> series2;
     private static Clock testClock;
 
     @BeforeClass
     public static void loadSeries() throws IOException, URISyntaxException {
+        series1 = load("./chart/series1");
+        series2 = load("./chart/series2");
+    }
 
-        Marker m = new Marker("load");
+    private static TreeMap<Long, Double> load(String series) throws URISyntaxException, IOException {
+
+        ThreadContext.push("load:" + series);
+        Marker m = new Marker("load:" + series);
+
         try {
 
-            Path source = Paths.get(ClassLoader.getSystemResource("./chart/series1").toURI());
+            TreeMap<Long, Double> result = new TreeMap<>();
+
+            Path source = Paths.get(ClassLoader.getSystemResource(series).toURI());
             logger.info("reading {}", source);
 
             List<String> raw = Files.readAllLines(source);
@@ -53,11 +64,11 @@ public class ChartBenchmark {
             raw.stream()
             .map(line -> line.split(" "))
             .forEach(kv -> {
-                series.put(Long.parseLong(kv[0]), Double.parseDouble(kv[1]));
+                result.put(Long.parseLong(kv[0]), Double.parseDouble(kv[1]));
             });
 
-            long last = series.lastKey();
-            long span = last - series.firstKey();
+            long last = result.lastKey();
+            long span = last - result.firstKey();
 
             logger.info("series time span is {}", Interval.toTimeInterval(span));
 
@@ -69,8 +80,11 @@ public class ChartBenchmark {
             logger.info("last sample is at {}", new Date(last));
             logger.info("test clock time is {}", testClock.instant());
 
+            return result;
+
         } finally {
             m.close();
+            ThreadContext.pop();
         }
     }
 
@@ -85,39 +99,53 @@ public class ChartBenchmark {
     @Test
     public void benchmark2009() throws IOException {
 
-        benchmark("2009", new Chart2009(testClock, chartLengthMillis), false);
+        benchmark("2009", series1, new Chart2009(testClock, chartLengthMillis), false);
         assertTrue(true);
     }
 
     @Test
     public void benchmark2016() throws IOException {
 
-        benchmark("2016", new Chart2016(testClock, chartLengthMillis), false);
+        benchmark("2016", series1, new Chart2016(testClock, chartLengthMillis), false);
         assertTrue(true);
     }
 
     @Test
     public void benchmark2016s() throws IOException {
 
-        benchmark("2016s", new Chart2016(testClock, chartLengthMillis), true);
+        benchmark("2016s", series1, new Chart2016(testClock, chartLengthMillis), true);
+        assertTrue(true);
+    }
+
+    @Test
+    public void benchmark2016gap() throws IOException {
+
+        benchmark("2016gap", series2, new Chart2016(testClock, chartLengthMillis), true);
         assertTrue(true);
     }
 
     @Test
     public void benchmark2020() throws IOException {
 
-        benchmark("2020", new Chart2020(testClock, chartLengthMillis), false);
+        benchmark("2020", series1, new Chart2020(testClock, chartLengthMillis), false);
         assertTrue(true);
     }
 
     @Test
     public void benchmark2020s() throws IOException {
 
-        benchmark("2020s", new Chart2020(testClock, chartLengthMillis), true);
+        benchmark("2020s", series1, new Chart2020(testClock, chartLengthMillis), true);
         assertTrue(true);
     }
 
-    private void benchmark(String marker, AbstractChart target, boolean changeSetpoint) throws IOException {
+    @Test
+    public void benchmark2020gap() throws IOException {
+
+        benchmark("2020gap", series2, new Chart2020(testClock, chartLengthMillis), true);
+        assertTrue(true);
+    }
+
+    private void benchmark(String marker, Map<Long, Double> source, AbstractChart target, boolean changeSetpoint) throws IOException {
         ThreadContext.push(marker);
         Marker m = new Marker(marker);
 
@@ -138,9 +166,9 @@ public class ChartBenchmark {
             // span is over the chart length
 
             double tint = 0;
-            double tintDelta = 2d / series.size();
+            double tintDelta = 2d / source.size();
 
-            for (Entry<Long, Double> kv: series.entrySet()) {
+            for (Entry<Long, Double> kv: source.entrySet()) {
 
                 long timestamp = kv.getKey();
                 double setpointOffset = changeSetpoint &&  testClock.instant().toEpochMilli() - timestamp > chartLengthMillis / 2 ? 0.5 : 0;
