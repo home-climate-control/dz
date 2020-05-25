@@ -116,8 +116,8 @@ public class Chart2020 extends AbstractChart2020 {
         DataSet<TintedValue> dsValues = channel2dsValue.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
         DataSet<Double> dsSetpoints = channel2dsSetpoint.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
 
-        dsValues.record(signal.timestamp, tv);
-        dsSetpoints.record(signal.timestamp, signal.sample.setpoint);
+        dsValues.record(signal.timestamp, tv, true);
+        dsSetpoints.record(signal.timestamp, signal.sample.setpoint, true);
 
         return true;
     }
@@ -227,16 +227,7 @@ public class Chart2020 extends AbstractChart2020 {
         Color startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
         Color endColor = SETPOINT_COLOR;
 
-        // VT: FIXME: At this point, we're making a second pass over ds (heavily redundant) and wasting a lot of time
-        // to do very little (it may so happen that there's been just one setpoint value over the whole chart).
-        // However, commit 369f1344a58fbceaa5a174f2def81200954ae9a3 (adding setpoint to TintedValue) was extremely
-        // wasteful already, so let's just get the visuals right for now, and find a way of changing the data flow
-        // in a way that would a) not break the DataSink<TintedValue> interface b) not introduce memory chatter
-        // during fast processing cycles. It will most probably involve having a separate efficient structure
-        // to hold setpoint history, so this method is exactly where rendering belongs.
-
         Long timeTrailer = null;
-        Double trailer = null;
 
         for (Iterator<Entry<Long, Double>> di = ds.entryIterator(); di.hasNext();) {
 
@@ -244,27 +235,24 @@ public class Chart2020 extends AbstractChart2020 {
             long timeNow = entry.getKey();
             Double cursor = entry.getValue();
 
+            double x0;
+            double x1;
+            double y = (yOffset - cursor) * yScale + insets.top;
+
             if (timeTrailer == null) {
 
-                timeTrailer = timeNow;
-                trailer = cursor;
+                x0 = insets.left;
+                x1 = (timeNow - xOffset) * xScale + insets.left;
 
-                continue;
+            } else {
+
+                x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                x1 = (timeNow - xOffset) * xScale + insets.left;
             }
 
-            if (Double.compare(trailer, cursor) != 0 || !di.hasNext()) {
+            drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
 
-                // Setpoint changed, or we're at the last sample, time to draw the line
-
-                double x0 = (timeTrailer - xOffset) * xScale + insets.left;
-                double x1 = (timeNow - xOffset) * xScale + insets.left;
-                double y = (yOffset - trailer) * yScale + insets.top;
-
-                drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
-
-                timeTrailer = timeNow;
-                trailer = cursor;
-            }
+            timeTrailer = timeNow;
         }
     }
 
