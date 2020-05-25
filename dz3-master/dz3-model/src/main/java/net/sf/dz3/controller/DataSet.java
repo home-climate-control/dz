@@ -120,17 +120,15 @@ public class DataSet<T> {
 
         if (lastValue != null && merge && lastValue.equals(value)) {
 
-            // Skip this one, we already have it
-            //LogManager.getLogger(getClass()).error("dupe: " + value);
+            // Will replace it with the same value and new timestamp right below. Slower on
+            // the way in, faster on the way out.
 
-        } else {
-
-            //LogManager.getLogger(getClass()).error("take: " + value);
-
-            dataSet.put(Long.valueOf(millis), value);
-            lastValue = value;
-            lastTimestamp = millis;
+            dataSet.remove(lastTimestamp);
         }
+
+        dataSet.put(Long.valueOf(millis), value);
+        lastValue = value;
+        lastTimestamp = millis;
 
         expire();
     }

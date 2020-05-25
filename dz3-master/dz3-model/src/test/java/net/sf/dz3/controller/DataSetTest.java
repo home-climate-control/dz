@@ -43,14 +43,11 @@ public class DataSetTest {
 
         assertEquals("wrong data set size", 1, ds.size());
 
-        // This one blows the old one past expiration, but nothing will happen
-        // because new timestamp will not be recorded
+        // This one blows the old one past expiration
 
         ds.record(200, 1.0, true);
 
-        // The very first timestamp will be still retained
-
-        assertEquals("Wrong value after expiration", 1, ds.iterator().next().longValue());
+        assertEquals("Wrong value after expiration", 200, ds.iterator().next().longValue());
         assertEquals("Wrong data set size", 1, ds.size());
     }
 
