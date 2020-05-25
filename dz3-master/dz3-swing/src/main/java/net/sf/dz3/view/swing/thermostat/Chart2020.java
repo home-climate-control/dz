@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.time.Clock;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,7 +12,6 @@ import java.util.Map.Entry;
 
 import net.sf.dz3.controller.DataSet;
 import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.util.Interval;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
@@ -19,7 +19,7 @@ import net.sf.jukebox.util.Interval;
  * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
 @SuppressWarnings("squid:S110")
-public class FasterChart extends AbstractChart {
+public class Chart2020 extends AbstractChart2020 {
 
     private static final long serialVersionUID = 8739949924865459025L;
 
@@ -42,9 +42,9 @@ public class FasterChart extends AbstractChart {
 
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
-    public FasterChart(long chartLengthMillis) {
+    public Chart2020(Clock clock, long chartLengthMillis) {
 
-        super(chartLengthMillis);
+        super(clock, chartLengthMillis);
     }
 
     @Override
@@ -113,22 +113,11 @@ public class FasterChart extends AbstractChart {
             return false;
         }
 
-        DataSet<TintedValue> dsValues = channel2dsValue.get(channel);
-        DataSet<Double> dsSetpoints = channel2dsSetpoint.get(channel);
+        DataSet<TintedValue> dsValues = channel2dsValue.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
+        DataSet<Double> dsSetpoints = channel2dsSetpoint.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
 
-        if (dsValues == null) {
-
-            dsValues = new DataSet<>(chartLengthMillis);
-            channel2dsValue.put(channel, dsValues);
-
-            // Most definitely, setpoints aren't there either
-
-            dsSetpoints = new DataSet<>(chartLengthMillis);
-            channel2dsSetpoint.put(channel, dsSetpoints);
-        }
-
-        dsValues.record(signal.timestamp, tv);
-        dsSetpoints.record(signal.timestamp, signal.sample.setpoint);
+        dsValues.record(signal.timestamp, tv, true);
+        dsSetpoints.record(signal.timestamp, signal.sample.setpoint, true);
 
         return true;
     }
@@ -238,16 +227,7 @@ public class FasterChart extends AbstractChart {
         Color startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
         Color endColor = SETPOINT_COLOR;
 
-        // VT: FIXME: At this point, we're making a second pass over ds (heavily redundant) and wasting a lot of time
-        // to do very little (it may so happen that there's been just one setpoint value over the whole chart).
-        // However, commit 369f1344a58fbceaa5a174f2def81200954ae9a3 (adding setpoint to TintedValue) was extremely
-        // wasteful already, so let's just get the visuals right for now, and find a way of changing the data flow
-        // in a way that would a) not break the DataSink<TintedValue> interface b) not introduce memory chatter
-        // during fast processing cycles. It will most probably involve having a separate efficient structure
-        // to hold setpoint history, so this method is exactly where rendering belongs.
-
         Long timeTrailer = null;
-        Double trailer = null;
 
         for (Iterator<Entry<Long, Double>> di = ds.entryIterator(); di.hasNext();) {
 
@@ -255,27 +235,24 @@ public class FasterChart extends AbstractChart {
             long timeNow = entry.getKey();
             Double cursor = entry.getValue();
 
+            double x0;
+            double x1;
+            double y = (yOffset - cursor) * yScale + insets.top;
+
             if (timeTrailer == null) {
 
-                timeTrailer = timeNow;
-                trailer = cursor;
+                x0 = insets.left;
+                x1 = (timeNow - xOffset) * xScale + insets.left;
 
-                continue;
+            } else {
+
+                x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                x1 = (timeNow - xOffset) * xScale + insets.left;
             }
 
-            if (Double.compare(trailer, cursor) != 0 || !di.hasNext()) {
+            drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
 
-                // Setpoint changed, or we're at the last sample, time to draw the line
-
-                double x0 = (timeTrailer - xOffset) * xScale + insets.left;
-                double x1 = (timeNow - xOffset) * xScale + insets.left;
-                double y = (yOffset - trailer) * yScale + insets.top;
-
-                drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
-
-                timeTrailer = timeNow;
-                trailer = cursor;
-            }
+            timeTrailer = timeNow;
         }
     }
 
@@ -333,7 +310,7 @@ public class FasterChart extends AbstractChart {
 
             // VT: NOTE: squid:S2629 - this happens once in 25-40 seconds, acceptable loss
 
-            logger.debug("RingBuffer: flushing at {}", Interval.toTimeInterval(age));
+            //logger.debug("RingBuffer: flushing at {}", Interval.toTimeInterval(age));
 
             TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 

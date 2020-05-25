@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.time.Clock;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -15,16 +16,19 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 /**
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
- * @deprecated Use {@link FasterChart} instead.
+ * @deprecated Use {@link Chart2016} instead.
+ *
+ * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
+@SuppressWarnings("squid:S110")
 @Deprecated
-public class Chart extends AbstractChart {
+public class Chart2009 extends AbstractChart2009 {
 
     private static final long serialVersionUID = -8138341010404232436L;
 
-    public Chart(long chartLengthMillis) {
+    public Chart2009(Clock clock, long chartLengthMillis) {
 
-        super(chartLengthMillis);
+        super(clock, chartLengthMillis);
     }
 
     @Override
