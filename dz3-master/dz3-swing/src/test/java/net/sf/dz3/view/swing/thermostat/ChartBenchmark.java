@@ -157,7 +157,7 @@ public class ChartBenchmark {
             target.printAll(g);
             g.dispose();
 
-            ImageIO.write(image, "png", new File("/tmp/panel-" + marker + ".png"));
+            ImageIO.write(image, "png", new File(System.getProperty("java.io.tmpdir") + "/panel-" + marker + ".png"));
 
         } finally {
             m.close();
