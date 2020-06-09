@@ -6,6 +6,7 @@ import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.instrumentation.Marker;
+import net.sf.jukebox.jmx.JmxAttribute;
 import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
@@ -206,5 +207,14 @@ public class SwitchDamper extends AbstractDamper {
                 "Switch based damper",
                 Integer.toHexString(hashCode()),
                 "Controls a switch that controls a damper");
+    }
+
+    @JmxAttribute(description = "threshold")
+    public double getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(double threshold) {
+        this.threshold = threshold;
     }
 }
