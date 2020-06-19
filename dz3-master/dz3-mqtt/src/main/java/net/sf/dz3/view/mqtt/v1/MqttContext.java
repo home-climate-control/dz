@@ -119,6 +119,8 @@ public class MqttContext {
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
+            options.setUserName(username);
+            options.setPassword(password != null ? password.toCharArray() : null);
 
             client.setCallback(callback);
             client.connect(options);
