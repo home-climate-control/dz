@@ -406,6 +406,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
             options.setAutomaticReconnect(true);
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
+            options.setUserName(mqttBrokerUsername);
+            options.setPassword(mqttBrokerPassword != null ? mqttBrokerPassword.toCharArray() : null);
 
             client.setCallback(new Callback());
             client.connect(options);
