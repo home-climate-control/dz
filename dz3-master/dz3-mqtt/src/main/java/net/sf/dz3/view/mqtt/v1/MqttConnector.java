@@ -37,15 +37,15 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 
 /**
  * MQTT broker interface.
- * 
+ *
  * This object is supposed to be instantiated via Spring configuration file, with objects
  * that are supposed to be rendered and/or controlled being present in a set passed to the constructor.
- * 
+ *
  * See {@code net.sf.dz3.view.swing.Console} for more information.
- * 
+ *
  * {@code init-method="start"} attribute must be used in Spring bean definition, otherwise
  * the connector will not work.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
  */
 public class MqttConnector extends Connector<JsonRenderer> {
@@ -61,6 +61,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
         SWITCH,
         THERMOSTAT;
 
+        @Override
         public String toString() {
             return super.toString().toLowerCase();
         }
