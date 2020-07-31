@@ -1,0 +1,202 @@
+package net.sf.dz3.device.sensor.impl;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import net.sf.dz3.device.sensor.AnalogFilter;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
+import net.sf.jukebox.datastream.signal.model.DataSample;
+import net.sf.jukebox.datastream.signal.model.DataSink;
+import net.sf.jukebox.jmx.JmxAttribute;
+import net.sf.jukebox.jmx.JmxDescriptor;
+
+/**
+ * A median filter on a set of sources.
+ *
+ * Unlike {@link MedianFilter} which will filter subsequent samples, this filter
+ * will yield the median of all available last readings from all the sensors in
+ * the set.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012-2020
+ */
+public class MedianSetFilter implements AnalogFilter {
+
+    private final Logger logger = LogManager.getLogger(getClass());
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
+
+    public final String address;
+
+    /**
+     * Known sample mapping.
+     *
+     * The key is the sensor address, the value is the data sample.
+     */
+    private final Map<String, DataSample<Double>> lastKnown = new LinkedHashMap<>();
+
+    /**
+     * Last computed sample.
+     */
+    private DataSample<Double> currentSignal;
+
+    public MedianSetFilter(String address, Set<AnalogSensor> source) {
+
+        if (address == null || "".equals(address)) {
+            throw new IllegalArgumentException("address can't be null or empty");
+        }
+
+        if (source == null) {
+            throw new IllegalArgumentException("source can't be null");
+        }
+
+        if (source.isEmpty()) {
+            throw new IllegalArgumentException("empty source, doesn't make sense");
+        }
+
+        this.address = address;
+
+        for (AnalogSensor s : source) {
+
+            s.addConsumer(this);
+            lastKnown.put(s.getAddress(),  null);
+        }
+    }
+
+    @Override
+    @JmxAttribute(description = "Current signal")
+    public DataSample<Double> getSignal() {
+        return currentSignal;
+    }
+
+    @Override
+    public void addConsumer(DataSink<Double> consumer) {
+        dataBroadcaster.addConsumer(consumer);
+    }
+
+    @Override
+    public void removeConsumer(DataSink<Double> consumer) {
+        dataBroadcaster.removeConsumer(consumer);
+    }
+
+    @Override
+    @JmxAttribute(description = "Sensor address")
+    public final String getAddress() {
+        return address;
+    }
+
+    @Override
+    public synchronized void consume(DataSample<Double> sample) {
+
+        ThreadContext.push("consume(" + sample + ")");
+
+        try {
+
+            if (sample == null) {
+                throw new IllegalArgumentException("sample can't be null");
+            }
+
+            lastKnown.put(sample.sourceName, sample);
+
+            dataBroadcaster.broadcast(filter(lastKnown.values()));
+
+        } finally {
+
+            ThreadContext.pop();
+        }
+    }
+
+    /**
+     * Filter the samples.
+     *
+     * @param source Known data samples.
+     *
+     * @return The median value with the latest timestamp.
+     */
+    DataSample<Double> filter(Collection<DataSample<Double>> source) {
+
+        SortedSet<Long> timestamps = new TreeSet<>();
+        List<Double> samples = new LinkedList<>();
+
+        for (DataSample<Double> s : source) {
+
+            if (s == null) {
+                continue;
+            }
+
+            timestamps.add(s.timestamp);
+
+            if (s.sample != null) {
+                samples.add(s.sample);
+            }
+        }
+
+        Collections.sort(samples);
+
+        Double sample;
+        Throwable error;
+
+        if (!samples.isEmpty()) {
+
+            error = null;
+            sample = filter(samples.toArray(new Double[0]));
+
+        } else {
+
+            // All the latest values are errors
+
+            ThreadContext.push("errors");
+
+            for (DataSample<Double> s : source) {
+
+                logger.error("Error sample", s.error);
+            }
+
+            ThreadContext.pop();
+
+            sample = null;
+            error = new IllegalArgumentException("All samples are errors, see the logs for details");
+        }
+
+        currentSignal = new DataSample<>(timestamps.last(), address, address, sample, error);
+
+        return currentSignal;
+    }
+
+    Double filter(Double[] array) {
+
+        int size = array.length;
+
+        if (size % 2 == 1) {
+
+            return array[(size - 1) / 2];
+
+        } else {
+
+            double low = array[(size - 1) / 2];
+            double high = array[(size - 1) / 2 +1];
+
+            return (high + low) / 2;
+        }
+    }
+
+    @Override
+    public JmxDescriptor getJmxDescriptor() {
+
+        return new JmxDescriptor(
+                "dz",
+                getClass().getSimpleName(),
+                Integer.toHexString(hashCode()),
+                "Return the median signal from " + lastKnown.keySet());
+      }
+}
