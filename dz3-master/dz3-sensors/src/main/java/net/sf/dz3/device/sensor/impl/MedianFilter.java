@@ -21,13 +21,13 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  *
  * Careful, first ({@link #depth} - 1) samples will get out unfiltered.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012-2020
  */
 public class MedianFilter implements AnalogFilter {
 
     private final Logger logger = LogManager.getLogger(getClass());
-    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
-    private final List<Double> buffer = new LinkedList<Double>();
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
+    private final List<Double> buffer = new LinkedList<>();
 
     public final String address;
 
@@ -68,7 +68,7 @@ public class MedianFilter implements AnalogFilter {
     @JmxAttribute(description = "Current signal")
     public DataSample<Double> getSignal() {
 
-        throw new Error("Not Implemented");
+        throw new UnsupportedOperationException("Not Implemented");
     }
 
     @Override
@@ -116,13 +116,13 @@ public class MedianFilter implements AnalogFilter {
 
             if (buffer.size() < depth) {
 
-                logger.debug("buffer too small (" + buffer.size() + " < "  + depth + ")");
+                logger.debug("buffer too small ({} < {})", buffer.size(), depth);
                 dataBroadcaster.broadcast(mirror(sample));
                 return;
             }
 
             if (buffer.size() > depth) {
-                logger.debug("removing first element from " + buffer);
+                logger.debug("removing first element from {}", buffer);
                 buffer.remove(0);
             }
 
@@ -130,13 +130,13 @@ public class MedianFilter implements AnalogFilter {
 
         } finally {
 
-            logger.debug("buffer: " + buffer);
+            logger.debug("buffer: {}", buffer);
             ThreadContext.pop();
         }
     }
 
     private DataSample<Double> mirror(DataSample<Double> source) {
-        return new DataSample<Double>(source.timestamp, address, address, source.sample, source.error);
+        return new DataSample<>(source.timestamp, address, address, source.sample, source.error);
     }
 
     private DataSample<Double> filter(DataSample<Double> source) {
@@ -146,13 +146,13 @@ public class MedianFilter implements AnalogFilter {
         try {
 
             // By this time, the buffer contains exactly #depth elements
-            List<Double> sorted = new LinkedList<Double>(buffer);
+            List<Double> sorted = new LinkedList<>(buffer);
             Collections.sort(sorted);
 
             Double[] array = sorted.toArray(new Double[0]);
             double median = array[(depth - 1) / 2];
 
-            return new DataSample<Double>(source.timestamp, address, address, median, source.error);
+            return new DataSample<>(source.timestamp, address, address, median, source.error);
 
         } finally {
             ThreadContext.pop();
