@@ -2,10 +2,13 @@ package net.sf.dz3.device.sensor.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -36,7 +39,17 @@ public class MedianSetFilter implements AnalogFilter {
     private final Logger logger = LogManager.getLogger(getClass());
     private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
 
+    /**
+     * Filter address.
+     */
     public final String address;
+
+    /**
+     * Max sample age to start discarding as stale, in milliseconds.
+     *
+     * Value of zero means never expire.
+     */
+    private long maxStaleMillis;
 
     /**
      * Known sample mapping.
@@ -50,7 +63,24 @@ public class MedianSetFilter implements AnalogFilter {
      */
     private DataSample<Double> currentSignal;
 
+    /**
+     * Create a filter with a given address, a set of data sources, and default expiration timeout of a minute.
+     *
+     * @param address Filter address.
+     * @param source Data source set.
+     */
     public MedianSetFilter(String address, Set<AnalogSensor> source) {
+        this(address, source, 60 * 1000);
+    }
+
+    /**
+     * Create a filter with a given address, a set of data sources, and expiration timeout.
+     *
+     * @param address Filter address.
+     * @param source Data source set.
+     * @param maxStaleMillis Expiration timeout.
+     */
+    public MedianSetFilter(String address, Set<AnalogSensor> source, long maxStaleMillis) {
 
         if (address == null || "".equals(address)) {
             throw new IllegalArgumentException("address can't be null or empty");
@@ -66,6 +96,8 @@ public class MedianSetFilter implements AnalogFilter {
 
         this.address = address;
 
+        setMaxStaleMillis(maxStaleMillis);
+
         for (AnalogSensor s : source) {
 
             s.addConsumer(this);
@@ -76,6 +108,10 @@ public class MedianSetFilter implements AnalogFilter {
     @Override
     @JmxAttribute(description = "Current signal")
     public DataSample<Double> getSignal() {
+
+        // VT: NOTE: This signal may be stale. It is the responsibility of the caller
+        // to deal with it.
+
         return currentSignal;
     }
 
@@ -95,6 +131,25 @@ public class MedianSetFilter implements AnalogFilter {
         return address;
     }
 
+    @JmxAttribute(description = "Max sample age to take into account, in milliseconds")
+    public long getMaxStaleMillis() {
+        return maxStaleMillis;
+    }
+
+    public void setMaxStaleMillis(long maxStaleMillis) {
+
+        if (maxStaleMillis < 0) {
+            throw new IllegalArgumentException("maxStaleMillis can't be negative (" + maxStaleMillis + " given)");
+        }
+
+        this.maxStaleMillis = maxStaleMillis;
+    }
+
+    /**
+     * Consume the sample, expire others if necessary, emit the calculation result.
+     *
+     * @param sample Sample to consume.
+     */
     @Override
     public synchronized void consume(DataSample<Double> sample) {
 
@@ -106,6 +161,8 @@ public class MedianSetFilter implements AnalogFilter {
                 throw new IllegalArgumentException("sample can't be null");
             }
 
+            expire(sample.timestamp);
+
             lastKnown.put(sample.sourceName, sample);
 
             dataBroadcaster.broadcast(filter(lastKnown.values()));
@@ -113,6 +170,26 @@ public class MedianSetFilter implements AnalogFilter {
         } finally {
 
             ThreadContext.pop();
+        }
+    }
+
+    private void expire(long timestamp) {
+
+        // To avoid the need to consult real time, we'll just expire the readings that are maxStaleMillis older than
+        // the timestamp of the sample we're consuming
+
+        long retire = timestamp - maxStaleMillis;
+
+        logger.debug("retire before {}", new Date(retire));
+
+        for (Iterator<Entry<String, DataSample<Double>>> i = lastKnown.entrySet().iterator(); i.hasNext(); ) {
+
+            Entry<String, DataSample<Double>> e = i.next();
+
+            if (e.getValue() != null && e.getValue().timestamp < retire) {
+                logger.debug("expiring {}", e.getValue());
+                i.remove();
+            }
         }
     }
 
