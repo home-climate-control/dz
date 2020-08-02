@@ -120,7 +120,13 @@ public class MqttContext {
             options.setCleanSession(true);
             options.setConnectionTimeout(10);
             options.setUserName(username);
-            options.setPassword(password != null ? password.toCharArray() : null);
+
+            // https://github.com/eclipse/paho.mqtt.java/issues/804
+            // https://github.com/home-climate-control/dz/issues/148
+
+            if (password != null) {
+                options.setPassword(password.toCharArray());
+            }
 
             client.setCallback(callback);
             client.connect(options);
