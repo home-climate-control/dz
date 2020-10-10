@@ -233,6 +233,10 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
 
             String args[] = parseTopic(topic);
 
+            if (args == null) {
+                return;
+            }
+
             // VT: FIXME: use java.time.Clock
             processSensorInput(args[1], new BigDecimal(new String(source)), System.currentTimeMillis(), args[1], args[0]);
 
@@ -256,6 +260,7 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
      * @return An array where the first element is the topic prefix (interpreted as device ID)
      * and the second is the sensor name.
      */
+    @java.lang.SuppressWarnings({"squid:S1168"})
     private String[] parseTopic(String source) {
 
         // The typical ESPHome topic will look like this:
@@ -264,6 +269,14 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
 
         Matcher m = p.matcher(source);
         m.find();
+
+        if (!m.matches()) {
+
+            logger.debug("not a sensor");
+
+            // VT: NOTE: squid:S1168 I'm not going to waste memory to indicate a "skip" condition
+            return null;
+        }
 
         return new String[] { m.group("deviceId"), m.group("sensorName")};
     }
