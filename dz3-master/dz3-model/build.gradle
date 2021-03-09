@@ -1,5 +1,4 @@
 dependencies {
 
-    compile project(':dz3-sensors')
-
+    api project(':dz3-sensors')
 }

@@ -13,8 +13,8 @@ import net.sf.dz3.controller.DataSet;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 
 /**
- * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2016
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  * @deprecated Use {@link FasterChart} instead.
  */
 @Deprecated
@@ -23,7 +23,7 @@ public class Chart extends AbstractChart {
     private static final long serialVersionUID = -8138341010404232436L;
 
     public Chart(long chartLengthMillis) {
-        
+
         super(chartLengthMillis);
     }
 
@@ -80,8 +80,8 @@ public class Chart extends AbstractChart {
 
                 // Decide whether the line is alive or dead
 
-                if (time_now - time_trailer <= deadTimeout) {
-                    
+                if (time_now - time_trailer <= DEAD_TIMEOUT) {
+
                 } else {
 
                     if (!dead) {
@@ -116,7 +116,7 @@ public class Chart extends AbstractChart {
             trailer = new TintedValue(cursor.value, cursor.tint, cursor.emphasize);
         }
 
-        if (time_trailer != null && now - time_trailer > deadTimeout) {
+        if (time_trailer != null && now - time_trailer > DEAD_TIMEOUT) {
 
             // There's a gap on the right, let's fill it
 
@@ -141,7 +141,7 @@ public class Chart extends AbstractChart {
 
     private DataSet<TintedValue> spaceOut(DataSet<TintedValue> source, int width) {
 
-        DataSet<TintedValue> target = new DataSet<TintedValue>(source.getExpirationInterval()); 
+        DataSet<TintedValue> target = new DataSet<TintedValue>(source.getExpirationInterval());
         long step = chartLengthMillis / width;
 
         logger.info("Source: " + source.size() + " samples");

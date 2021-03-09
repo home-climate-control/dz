@@ -14,8 +14,11 @@ import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.util.Interval;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ *
+ * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
+@SuppressWarnings("squid:S110")
 public class FasterChart extends AbstractChart {
 
     private static final long serialVersionUID = 8739949924865459025L;
@@ -24,20 +27,20 @@ public class FasterChart extends AbstractChart {
      * Chart width in pixels for all the charts. Undefined until the first time
      * {@link #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)}
      * for any instance of this class is called.
-     * 
+     *
      * Making it static is ugly, but gets the job done - the screen size will not change.
      */
     private static int globalWidth = 0;
 
     /**
      * Chart width of this instance.
-     * 
+     *
      * @see #globalWidth
      * @see #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)
      */
     private int width = 0;
 
-    private final Map<String, Averager> channel2avg = new HashMap<String, Averager>();
+    private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
     public FasterChart(long chartLengthMillis) {
 
@@ -47,8 +50,9 @@ public class FasterChart extends AbstractChart {
     @Override
     public synchronized void consume(DataSample<TintedValueAndSetpoint> signal) {
 
-        assert(signal != null);
-        assert(signal.sample != null);
+        if (signal == null || signal.sample == null) {
+            throw new IllegalArgumentException("signal or sample are null: " + signal);
+        }
 
         String channel = signal.sourceName;
 
@@ -60,10 +64,10 @@ public class FasterChart extends AbstractChart {
 
     /**
      * Record the signal, properly spacing it out.
-     * 
+     *
      * @param channel Channel to use.
      * @param signal Signal to record.
-     * 
+     *
      * @return {@code true} if the component needs to be repainted.
      */
     private boolean record(String channel, DataSample<TintedValueAndSetpoint> signal) {
@@ -80,7 +84,7 @@ public class FasterChart extends AbstractChart {
 
                 long step = chartLengthMillis / width;
 
-                logger.info("new width " + width + ", " + step + " ms per pixel");
+                logger.info("new width {}, {}ms per pixel", width, step);
 
                 // We lose one sample this way, might want to improve it later, for now, no big deal
 
@@ -114,12 +118,12 @@ public class FasterChart extends AbstractChart {
 
         if (dsValues == null) {
 
-            dsValues = new DataSet<TintedValue>(chartLengthMillis);
+            dsValues = new DataSet<>(chartLengthMillis);
             channel2dsValue.put(channel, dsValues);
 
             // Most definitely, setpoints aren't there either
 
-            dsSetpoints = new DataSet<Double>(chartLengthMillis);
+            dsSetpoints = new DataSet<>(chartLengthMillis);
             channel2dsSetpoint.put(channel, dsSetpoints);
         }
 
@@ -138,13 +142,13 @@ public class FasterChart extends AbstractChart {
 
             if (globalWidth != boundary.width) {
 
-                logger.info("width changed from " + globalWidth + " to " + boundary.width);
+                logger.info("width changed from {} to {}", globalWidth, boundary.width);
 
                 globalWidth = boundary.width;
 
                 long step = chartLengthMillis / globalWidth;
 
-                logger.info("ms per pixel: " + step);
+                logger.info("ms per pixel: {}", step);
             }
         }
 
@@ -152,39 +156,39 @@ public class FasterChart extends AbstractChart {
 
     @Override
     protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
-            long now, double x_scale, long x_offset, double y_scale, double y_offset,
+            long now, double xScale, long xOffset, double yScale, double yOffset,
             String channel, DataSet<TintedValue> dsValues, DataSet<Double> dsSetpoints) {
 
         // Setpoint history is rendered over the value history
 
-        paintValues(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, dsValues);
-        paintSetpoints(g2d, boundary, insets, now, x_scale, x_offset, y_scale, y_offset, channel, dsSetpoints);
+        paintValues(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, channel, dsValues);
+        paintSetpoints(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, channel, dsSetpoints);
     }
 
     private void paintValues(Graphics2D g2d, Dimension boundary, Insets insets,
-            long now, double x_scale, long x_offset, double y_scale, double y_offset,
+            long now, double xScale, long xOffset, double yScale, double yOffset,
             String channel, DataSet<TintedValue> ds) {
 
-        Long time_trailer = null;
+        Long timeTrailer = null;
         TintedValue trailer = null;
 
         for (Iterator<Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext();) {
 
             Entry<Long, TintedValue> entry = di.next();
-            long time_now = entry.getKey();
+            long timeNow = entry.getKey();
             TintedValue cursor = entry.getValue();
 
-            if (time_trailer != null) {
+            if (timeTrailer != null) {
 
-                double x0 = (time_trailer - x_offset) * x_scale + insets.left;
-                double y0 = (y_offset - trailer.value) * y_scale + insets.top;
+                double x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                double y0 = (yOffset - trailer.value) * yScale + insets.top;
 
-                double x1 = (time_now - x_offset) * x_scale + insets.left;
-                double y1 = (y_offset - cursor.value) * y_scale + insets.top;
+                double x1 = (timeNow - xOffset) * xScale + insets.left;
+                double y1 = (yOffset - cursor.value) * yScale + insets.top;
 
                 // Decide whether the line is alive or dead
 
-                if (time_now - time_trailer > deadTimeout) {
+                if (timeNow - timeTrailer > DEAD_TIMEOUT) {
 
                     // It's dead, all right
                     // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
@@ -208,34 +212,27 @@ public class FasterChart extends AbstractChart {
                 drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, cursor.emphasize);
             }
 
-            time_trailer = time_now;
+            timeTrailer = timeNow;
             trailer = cursor;
         }
 
-        if (time_trailer != null && now - time_trailer > deadTimeout) {
+        if (timeTrailer != null && now - timeTrailer > DEAD_TIMEOUT) {
 
             // There's a gap on the right, let's fill it
 
-            double x0 = (time_trailer - x_offset) * x_scale + insets.left;
-            double x1 = (now - x_offset) * x_scale + insets.left;
-            double y = (y_offset - trailer.value) * y_scale + insets.top;
+            double x0 = (timeTrailer - xOffset) * xScale + insets.left;
+            double x1 = (now - xOffset) * xScale + insets.left;
+            double y = (yOffset - trailer.value) * yScale + insets.top;
 
             Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
             Color endColor = getBackground();
 
             drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
         }
-
-        // Store the values so the readings can be displayed
-        // over the curves
-
-        //              if (value_trailer != null) {
-        //                      values.put(name, value_trailer);
-        //              }
     }
 
     private void paintSetpoints(Graphics2D g2d, Dimension boundary, Insets insets,
-            long now, double x_scale, long x_offset, double y_scale, double y_offset,
+            long now, double xScale, long xOffset, double yScale, double yOffset,
             String channel, DataSet<Double> ds) {
 
         Color startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
@@ -249,18 +246,18 @@ public class FasterChart extends AbstractChart {
         // during fast processing cycles. It will most probably involve having a separate efficient structure
         // to hold setpoint history, so this method is exactly where rendering belongs.
 
-        Long time_trailer = null;
+        Long timeTrailer = null;
         Double trailer = null;
 
         for (Iterator<Entry<Long, Double>> di = ds.entryIterator(); di.hasNext();) {
 
             Entry<Long, Double> entry = di.next();
-            long time_now = entry.getKey();
+            long timeNow = entry.getKey();
             Double cursor = entry.getValue();
 
-            if (time_trailer == null) {
+            if (timeTrailer == null) {
 
-                time_trailer = time_now;
+                timeTrailer = timeNow;
                 trailer = cursor;
 
                 continue;
@@ -270,13 +267,13 @@ public class FasterChart extends AbstractChart {
 
                 // Setpoint changed, or we're at the last sample, time to draw the line
 
-                double x0 = (time_trailer - x_offset) * x_scale + insets.left;
-                double x1 = (time_now - x_offset) * x_scale + insets.left;
-                double y = (y_offset - trailer) * y_scale + insets.top;
+                double x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                double x1 = (timeNow - xOffset) * xScale + insets.left;
+                double y = (yOffset - trailer) * yScale + insets.top;
 
                 drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
 
-                time_trailer = time_now;
+                timeTrailer = timeNow;
                 trailer = cursor;
             }
         }
@@ -309,12 +306,13 @@ public class FasterChart extends AbstractChart {
 
         /**
          * Record a value.
-         * 
+         *
          * @param signal Signal to record.
-         * 
+         *
          * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
          * away from the first sample stored, {@code null} otherwise.
          */
+        @SuppressWarnings("squid:S2629")
         public TintedValue record(DataSample<? extends TintedValue> signal) {
 
             if (timestamp == null) {
@@ -333,7 +331,9 @@ public class FasterChart extends AbstractChart {
                 return null;
             }
 
-            logger.debug("RingBuffer: flushing at " + Interval.toTimeInterval(age));
+            // VT: NOTE: squid:S2629 - this happens once in 25-40 seconds, acceptable loss
+
+            logger.debug("RingBuffer: flushing at {}", Interval.toTimeInterval(age));
 
             TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 

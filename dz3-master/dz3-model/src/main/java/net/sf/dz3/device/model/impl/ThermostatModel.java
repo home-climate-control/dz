@@ -27,7 +27,7 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  *
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
  */
-public final class ThermostatModel implements Thermostat, ThermostatController {
+public class ThermostatModel implements Thermostat, ThermostatController {
 
     private final Logger logger = LogManager.getLogger(getClass());
     

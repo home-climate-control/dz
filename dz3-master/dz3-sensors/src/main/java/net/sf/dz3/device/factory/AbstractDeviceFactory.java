@@ -20,7 +20,6 @@ import net.sf.dz3.device.sensor.impl.AbstractAnalogSensor;
 import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
 import net.sf.dz3.device.sensor.impl.ContainerMap;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
 import net.sf.jukebox.datastream.signal.model.DataSample;
 import net.sf.jukebox.datastream.signal.model.DataSink;
 import net.sf.jukebox.datastream.signal.model.DataSource;
@@ -35,29 +34,12 @@ import net.sf.jukebox.service.ActiveService;
  * This class behaves like a singleton, but is not built like one - the intent is to instantiate
  * it with Spring Framework, which will take care of creating as few instances as needed.
  * 
- * @param <SwitchContainer> Implementation class of the hardware dependent switch container.
+ * @param <T> Implementation class of the hardware dependent switch container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2020
  */
-public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveService implements DeviceFactory {
+public abstract class AbstractDeviceFactory<T> extends ActiveService implements DeviceFactory {
 
-    protected final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
-    
-    /**
-     * Constant to use as a key for humidity data.
-     */
-    public static final String DATA_HUM = "humidity";
-    
-    /**
-     * Constant to use as a key for temperature data.
-     */
-    public static final String DATA_TEMP = "temperature";
-    
-    /**
-     * Constant to use as a key for switch data.
-     */
-    public static final String DATA_SWITCH = "switch";
-    
     /**
      * Read/write lock controlling the exclusive access to hardware devices.
      * 
@@ -186,19 +168,6 @@ public abstract class AbstractDeviceFactory<SwitchContainer> extends ActiveServi
             ThreadContext.pop();
         }
     }
-
-    @Override
-    public void addConsumer(DataSink<Double> consumer) {
-    
-        dataBroadcaster.addConsumer(consumer);
-    }
-
-    @Override
-    public void removeConsumer(DataSink<Double> consumer) {
-    
-        dataBroadcaster.removeConsumer(consumer);
-    }
-
     /**
      * @return Size of {@link #address2path} map.
      * @deprecated This method is intended to help finding a memory leak and has no other reason to exist.

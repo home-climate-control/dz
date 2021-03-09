@@ -2,14 +2,20 @@ package net.sf.dz3.device.sensor;
 
 import java.io.IOException;
 
-import net.sf.jukebox.datastream.signal.model.DataSource;
+import net.sf.jukebox.datastream.signal.model.DataSample;
 
 /**
  * Factory for sensors and actuators.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
-public interface DeviceFactory extends DataSource<Double>{
+public interface DeviceFactory {
+
+    public enum Type {
+        TEMPERATURE,
+        HUMIDITY,
+        SWITCH
+    }
 
     /**
      * Get an instance of a temperature sensor.

@@ -1,11 +1,15 @@
 package net.sf.dz3.util.digest;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import java.util.Random;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
 import net.sf.jukebox.util.MessageDigestFactory;
 
-public class MessageDigestCacheTest extends TestCase {
+public class MessageDigestCacheTest {
 
     private final MessageDigestFactory md = new MessageDigestFactory();
     private final Random rg = new Random();
@@ -15,12 +19,7 @@ public class MessageDigestCacheTest extends TestCase {
         return Long.toHexString(rg.nextLong());
     }
     
-    public void testInstantiation() {
-        
-        // To make Cobertura happy
-        new MessageDigestCache();
-    }
-    
+    @Test
     public void testHit() {
         
         MessageDigestCache.cache.clear();
@@ -38,6 +37,7 @@ public class MessageDigestCacheTest extends TestCase {
         assertEquals("Wrong cache size", 1, MessageDigestCache.cache.size());
     }
 
+    @Test
     public void testMiss() {
         
         MessageDigestCache.cache.clear();
@@ -56,6 +56,7 @@ public class MessageDigestCacheTest extends TestCase {
         assertEquals("Wrong cache size", 2, MessageDigestCache.cache.size());
     }
     
+    @Test
     public void testLimitSoft() {
         
         MessageDigestCache.cache.clear();
@@ -72,6 +73,7 @@ public class MessageDigestCacheTest extends TestCase {
         assertEquals("Wrong soft limit", limit * 2, MessageDigestCache.cacheSizeLimitSoft);
     }
 
+    @Test
     public void testLimitHard() {
         
         MessageDigestCache.cache.clear();

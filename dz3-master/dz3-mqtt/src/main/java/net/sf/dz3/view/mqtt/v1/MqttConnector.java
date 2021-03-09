@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -16,11 +15,8 @@ import javax.json.JsonReader;
 import javax.json.JsonString;
 
 import org.apache.logging.log4j.ThreadContext;
-import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
@@ -29,7 +25,6 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.Switch;
-import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
@@ -46,7 +41,9 @@ import net.sf.jukebox.jmx.JmxDescriptor;
  * {@code init-method="start"} attribute must be used in Spring bean definition, otherwise
  * the connector will not work.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @see MqttDeviceFactory
+ *
+ * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
  */
 public class MqttConnector extends Connector<JsonRenderer> {
 
@@ -67,45 +64,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
         }
     }
 
-    private static final int MQTT_DEFAULT_PORT = 1883;
-
-    /**
-     * VT: FIXME: Provide an ability to generate and keep a persistent UUID
-     */
-    private final String clientId = UUID.randomUUID().toString();
-    private IMqttClient client;
-
-    private final String mqttBrokerHost;
-    private final int mqttBrokerPort;
-    private final String mqttBrokerUsername;
-    private final String mqttBrokerPassword;
-
-    /**
-     * Root topic for publishing. Can't be the same as the topic for subscriptions.
-     */
-    private final String mqttRootTopicPub;
-
-    /**
-     * Root topic for subscriptions. Can't be the same as the topic for publishing.
-     */
-    private final String mqttRootTopicSub;
-
-    /**
-     * Quality of Service.
-     *
-     * VT: FIXME: It may be a good idea to make this a constructor argument, to provide the right QOS
-     * for the right application (wall dashboard is one thing, control system is totally another).
-     *
-     * VT: FIXME: QOS for publishing and subscriptions may need to be different.
-     *
-     * Just a reminder to self,
-     *
-     * QOS 0 is "at most once"
-     * QOS 1 is "at least once"
-     * QOS 2 is "exactly once"
-     */
-    private final int QOS = 0;
-
+    private final MqttContext mqtt;
     private final BlockingQueue<UpstreamBlock> upstreamQueue = new LinkedBlockingQueue<UpstreamBlock>();
 
     private Thread exchanger;
@@ -121,9 +80,9 @@ public class MqttConnector extends Connector<JsonRenderer> {
     public MqttConnector(
             String mqttBrokerHost,
             String mqttRootTopicPub, String mqttRootTopicSub,
-            Set<Object> initSet) {
+            Set<Object> initSet) throws MqttException {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -138,7 +97,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
     public MqttConnector(
             String mqttBrokerHost, int mqttBrokerPort,
             String mqttRootTopicPub, String mqttRootTopicSub,
-            Set<Object> initSet) {
+            Set<Object> initSet) throws MqttException {
 
         this(mqttBrokerHost, mqttBrokerPort, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
@@ -147,7 +106,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
      * Authenticated constructor with a default port.
      *
      * @param mqttBrokerHost Host to connect to.
-     * @param mqttBrokerPort Port to connect to.
+     * @param port Port to connect to.
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
@@ -158,9 +117,9 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerHost,
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub,
-            Set<Object> initSet) {
+            Set<Object> initSet) throws MqttException {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -178,7 +137,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerHost, int mqttBrokerPort,
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub,
-            Set<Object> initSet) {
+            Set<Object> initSet) throws MqttException {
 
         this(mqttBrokerHost, mqttBrokerPort, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
@@ -199,9 +158,9 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet,
-            Set<ConnectorFactory<JsonRenderer>> factorySet) {
+            Set<ConnectorFactory<JsonRenderer>> factorySet) throws MqttException {
 
-        this(mqttBrokerHost, MQTT_DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -221,16 +180,14 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet,
-            Set<ConnectorFactory<JsonRenderer>> factorySet) {
+            Set<ConnectorFactory<JsonRenderer>> factorySet) throws MqttException {
 
         super(initSet, factorySet);
 
-        this.mqttBrokerHost = mqttBrokerHost;
-        this.mqttBrokerPort = mqttBrokerPort;
-        this.mqttBrokerUsername = mqttBrokerUsername;
-        this.mqttBrokerPassword = mqttBrokerPassword;
-        this.mqttRootTopicPub = mqttRootTopicPub;
-        this.mqttRootTopicSub = mqttRootTopicSub;
+        this.mqtt = new MqttContext(
+                mqttBrokerHost, mqttBrokerPort,
+                mqttBrokerUsername, mqttBrokerPassword,
+                mqttRootTopicPub, mqttRootTopicSub, new Callback());
 
         checkTopics(mqttRootTopicPub, mqttRootTopicSub);
 
@@ -288,9 +245,10 @@ public class MqttConnector extends Connector<JsonRenderer> {
         return new JmxDescriptor(
                 "dz",
                 getClass().getSimpleName(),
-                mqttBrokerHost
-                + (mqttBrokerPort == MQTT_DEFAULT_PORT ? "" : " port " + mqttBrokerPort)
-                + " topic " + mqttRootTopicPub,
+                mqtt.host
+                + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
+                + " topic/pub " + mqtt.rootTopicPub
+                + " topic/sub " + mqtt.rootTopicSub,
                 "MQTT Connector v1");
     }
 
@@ -308,7 +266,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         try {
 
-            startMqtt();
+            mqtt.start();
             startExchanger();
 
             // Connectors are initialized very late in the game, it is likely that the control logic
@@ -379,46 +337,9 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private void startExchanger() {
 
-        exchanger = new Thread(new UpstreamBlockExchanger(mqttBrokerHost, mqttBrokerPort, mqttRootTopicPub, upstreamQueue));
+        exchanger = new Thread(new UpstreamBlockExchanger(mqtt.host, mqtt.port, mqtt.rootTopicPub, upstreamQueue));
 
         exchanger.start();
-    }
-
-    private void startMqtt() throws MqttException {
-
-        ThreadContext.push("startMqtt");
-        Marker m = new Marker("startMqtt");
-
-        try {
-
-            /* only authenticate if both credentials are present */
-            if (mqttBrokerUsername != null && mqttBrokerPassword != null) {
-                client = new MqttClient("tcp://" + mqttBrokerUsername + ":" + mqttBrokerPassword + "@" + mqttBrokerHost + ":" + mqttBrokerPort, clientId);
-            } else {
-                if (mqttBrokerUsername != null) {
-                    // Bad idea to have no password
-                    logger.warn("Missing MQTT password, connecting unauthenticated. This behavior will not be allowed in future releases.");
-                }
-                client = new MqttClient("tcp://" + mqttBrokerHost + ":" + mqttBrokerPort, clientId);
-            }
-
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setAutomaticReconnect(true);
-            options.setCleanSession(true);
-            options.setConnectionTimeout(10);
-            options.setUserName(mqttBrokerUsername);
-            options.setPassword(mqttBrokerPassword != null ? mqttBrokerPassword.toCharArray() : null);
-
-            client.setCallback(new Callback());
-            client.connect(options);
-
-            client.subscribe(mqttRootTopicSub, QOS);
-
-        } finally {
-
-            m.close();
-            ThreadContext.pop();
-        }
     }
 
     @Override
@@ -429,7 +350,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
         try {
 
             exchanger.interrupt();
-            client.disconnect();
+            mqtt.disconnect();
 
         } catch (MqttException ex) {
 
@@ -461,10 +382,10 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                 MqttMessage message = new MqttMessage(dataBlock.payload.getBytes());
 
-                message.setQos(QOS);
+                message.setQos(mqtt.QOS);
                 message.setRetained(true);
 
-                client.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
+                mqtt.publish(mqttRootTopicPub + "/" + dataBlock.topic, message);
 
                 logger.debug(mqttRootTopicPub + "/" + dataBlock.topic + ": " + dataBlock.payload);
 
@@ -497,9 +418,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             // VT: FIXME: Currently, this code does NOT support reconnects.
             logger.fatal(
-                    "connection to tcp://" + mqttBrokerHost + ":" + mqttBrokerPort +
+                    "connection to tcp://" + mqtt.host + ":" + mqtt.port +
                     " lost, will not reconnect, MQTT interface is now dead");
-
         }
 
         /**
@@ -516,35 +436,35 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                 logger.debug(topic + " " + message);
 
-                ByteArrayInputStream in = new ByteArrayInputStream(message.getPayload());
-                JsonReader reader = Json.createReader(in);
+                try (JsonReader reader = Json.createReader(new ByteArrayInputStream(message.getPayload()))) {
 
-                JsonObject payload = reader.readObject();
-                JsonString eventType = payload.getJsonString("event_type");
+                    JsonObject payload = reader.readObject();
+                    JsonString eventType = payload.getJsonString(MqttContext.JsonTag.EVENT_TYPE.name);
 
-                // We know and care about two event types at this point:
-                //
-                // call_service: somebody moved a slider
-                // state_changed: something changed
+                    // We know and care about two event types at this point:
+                    //
+                    // call_service: somebody moved a slider
+                    // state_changed: something changed
 
-                switch (eventType.getString()) {
+                    switch (eventType.getString()) {
 
-                case "call_service":
+                    case "call_service":
 
-                    callService(payload.getJsonObject("event_data"));
-                    return;
+                        callService(payload.getJsonObject(MqttContext.JsonTag.EVENT_DATA.name));
+                        return;
 
-                case "state_changed":
+                    case "state_changed":
 
-                    stateChanged(payload.getJsonObject("event_data"));
-                    return;
+                        stateChanged(payload.getJsonObject(MqttContext.JsonTag.EVENT_DATA.name));
+                        return;
 
-                default:
+                    default:
 
-                    logger.warn("don't know how to handle '" + eventType + "' event_type");
-                    logger.warn("event_data is:" + payload.getJsonObject("event_data"));
+                        logger.warn("don't know how to handle '" + eventType + "' event_type");
+                        logger.warn("event_data is:" + payload.getJsonObject(MqttContext.JsonTag.EVENT_DATA.name));
 
-                    return;
+                        return;
+                    }
                 }
 
             } catch (Throwable t) {
