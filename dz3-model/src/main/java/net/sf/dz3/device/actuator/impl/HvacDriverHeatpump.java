@@ -6,7 +6,7 @@ import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.sensor.Switch;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Single stage heatpump driver, energize to heat.

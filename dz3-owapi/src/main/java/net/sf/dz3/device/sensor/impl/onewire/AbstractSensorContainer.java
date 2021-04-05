@@ -2,9 +2,9 @@ package net.sf.dz3.device.sensor.impl.onewire;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.SensorDeviceContainer;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 import com.dalsemi.onewire.container.OneWireContainer;
 

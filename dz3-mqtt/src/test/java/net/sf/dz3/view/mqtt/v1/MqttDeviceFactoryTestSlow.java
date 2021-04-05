@@ -9,7 +9,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * The slow part of {@link MqttDeviceFactory} test. The fast part is in {@link MqttDeviceFactoryTest}.

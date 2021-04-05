@@ -3,8 +3,8 @@ package net.sf.dz3.device.actuator;
 import java.io.IOException;
 
 import net.sf.dz3.device.model.HvacMode;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 
 /**
  * The actual HVAC unit driver.

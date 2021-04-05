@@ -13,10 +13,10 @@ import com.rapplogic.xbee.api.XBeeAddress64;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.instrumentation.Marker;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * XBee switch container.

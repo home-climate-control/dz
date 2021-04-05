@@ -5,9 +5,9 @@ import java.util.Map;
 
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.scheduler.AbstractScheduleUpdater;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxAware;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Base class for schedule updaters using Google Calendar as a back end.

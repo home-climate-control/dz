@@ -8,7 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.view.http.v1.HttpConnector;
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * Keeps sending data that appears in {@link HttpConnector#upstreamQueue} to the server

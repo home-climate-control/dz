@@ -1,7 +1,7 @@
 package net.sf.dz3.controller.pid;
 
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * Classical PID - Proportional, Integral, Derivative controller.

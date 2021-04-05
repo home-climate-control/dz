@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.Switch;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Damper controlled by a switch.

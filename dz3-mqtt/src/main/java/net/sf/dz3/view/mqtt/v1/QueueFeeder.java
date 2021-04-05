@@ -3,7 +3,7 @@ package net.sf.dz3.view.mqtt.v1;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import net.sf.jukebox.util.MessageDigestFactory;
+import com.homeclimatecontrol.jukebox.util.MessageDigestFactory;
 
 /**
  * Basic contraption to feed the {@link #upstreamQueue}.

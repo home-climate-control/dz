@@ -7,8 +7,8 @@ import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.sensor.impl.NullSensor;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 public class ThermostatSplitterTest extends TestCase {
     

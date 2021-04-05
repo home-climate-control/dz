@@ -13,9 +13,9 @@ import org.influxdb.dto.Point;
 import org.influxdb.dto.Point.Builder;
 import org.influxdb.dto.Query;
 
-import net.sf.jukebox.datastream.logger.impl.AbstractLogger;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.AbstractLogger;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 
 /**
  * Simple InfluxDB logger.

@@ -9,9 +9,9 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.view.swing.ScreenDescriptor;
 import net.sf.dz3.view.swing.TemperatureUnit;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 public class ThermostatPanelTest extends TestCase {
 

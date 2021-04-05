@@ -7,11 +7,11 @@ import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.device.model.Economizer;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.util.digest.MessageDigestCache;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 
 /**
  * Base class for {@link Economizer} implementations.

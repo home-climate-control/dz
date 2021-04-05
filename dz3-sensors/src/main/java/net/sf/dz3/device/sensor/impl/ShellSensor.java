@@ -6,9 +6,9 @@ import java.io.InputStreamReader;
 
 import org.apache.logging.log4j.ThreadContext;
 
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Get a reading returned by a shell command.

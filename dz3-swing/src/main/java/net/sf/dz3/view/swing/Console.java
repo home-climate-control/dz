@@ -30,8 +30,8 @@ import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
 import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
 import net.sf.dz3.view.swing.thermostat.ZonePanel;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Entry point into the user interface implemented with Swing.

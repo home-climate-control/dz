@@ -2,7 +2,7 @@ package net.sf.dz3.device.sensor;
 
 import java.io.IOException;
 
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * Factory for sensors and actuators.

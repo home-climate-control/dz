@@ -14,7 +14,7 @@ import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.PID_Controller;
 import net.sf.dz3.controller.pid.PidControllerStatus;
 import net.sf.dz3.controller.pid.SimplePidController;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 public class PID_ControllerTest extends TestCase {
 

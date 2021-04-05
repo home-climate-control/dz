@@ -15,12 +15,12 @@ import java.util.concurrent.TimeUnit;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneStatus;
 import net.sf.dz3.device.model.impl.ZoneStatusImpl;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxAware;
-import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.sem.ACT;
-import net.sf.jukebox.sem.EventSemaphore;
-import net.sf.jukebox.service.StoppableService;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.sem.ACT;
+import com.homeclimatecontrol.jukebox.sem.EventSemaphore;
+import com.homeclimatecontrol.jukebox.service.StoppableService;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

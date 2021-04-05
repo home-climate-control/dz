@@ -56,7 +56,7 @@
     <bean id="rrdbase_onewire" class="java.io.File">
         <constructor-arg type="java.lang.String" value="./rrd" />
     </bean>
-    <bean id="rrdlogger_onewire" class="net.sf.jukebox.datastream.logger.impl.rrd.RrdLogger" init-method="start">
+    <bean id="rrdlogger_onewire" class="com.homeclimatecontrol.jukebox.datastream.logger.impl.rrd.RrdLogger" init-method="start">
         <constructor-arg index="0" type="java.util.Set">
             <set>
                 <ref bean="splitter-pid_controller-vcgencmd" />
@@ -69,7 +69,7 @@
     </bean>
 
     <!-- JMX configuration -->
-    <bean id="jmx-wrapper" class="net.sf.jukebox.jmx.JmxWrapper">
+    <bean id="jmx-wrapper" class="com.homeclimatecontrol.jukebox.jmx.JmxWrapper">
         <constructor-arg index="0" type="java.util.Set">
             <set>
                 <ref bean="temperature_sensor-vcgencmd" />

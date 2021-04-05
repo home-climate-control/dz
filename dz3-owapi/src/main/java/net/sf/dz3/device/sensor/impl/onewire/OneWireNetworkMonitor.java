@@ -6,12 +6,12 @@ import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.utils.OWPath;
 
 import net.sf.dz3.instrumentation.Marker;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.sem.EventSemaphore;
-import net.sf.jukebox.sem.SemaphoreTimeoutException;
-import net.sf.jukebox.service.ActiveService;
-import net.sf.jukebox.util.CollectionSynchronizer;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.sem.EventSemaphore;
+import com.homeclimatecontrol.jukebox.sem.SemaphoreTimeoutException;
+import com.homeclimatecontrol.jukebox.service.ActiveService;
+import com.homeclimatecontrol.jukebox.util.CollectionSynchronizer;
 
 import java.util.Enumeration;
 import java.util.HashSet;

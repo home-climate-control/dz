@@ -6,8 +6,8 @@ import org.apache.logging.log4j.Logger;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.PidControllerSignalSplitter;
 import net.sf.dz3.controller.pid.SimplePidController;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import junit.framework.TestCase;
 
 public class ProcessControllerSplitterTest extends TestCase {

@@ -14,9 +14,9 @@ import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;
-import net.sf.jukebox.conf.ConfigurableProperty;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Balancing damper controller, supports modulating dampers.

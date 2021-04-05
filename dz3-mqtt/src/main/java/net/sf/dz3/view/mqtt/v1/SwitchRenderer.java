@@ -9,8 +9,8 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonWriter;
 
 import net.sf.dz3.device.sensor.Switch;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 /**
  * Keeps {@link #consume(DataSample) receiving} data notifications and

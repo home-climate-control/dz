@@ -5,11 +5,11 @@ import org.apache.logging.log4j.ThreadContext;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.util.digest.MessageDigestCache;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.logger.model.DataLogger;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.logger.model.DataLogger;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 
 /**
  * Receives a complex {@link ThermostatSignal} signal and converts it into several simpler

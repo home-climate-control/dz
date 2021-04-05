@@ -9,9 +9,9 @@ import java.util.Set;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.Test;
 
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 
 public class InfluxDbLoggerTest {
 

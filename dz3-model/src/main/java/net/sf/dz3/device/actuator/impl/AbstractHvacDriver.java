@@ -6,8 +6,8 @@ import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.HvacDriver;
 import net.sf.dz3.device.model.HvacMode;
-import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.logger.LogAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.logger.LogAware;
 
 /**
  * Abstract HVAC driver.

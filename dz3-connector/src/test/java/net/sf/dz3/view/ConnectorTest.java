@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 public class ConnectorTest {
 

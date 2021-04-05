@@ -5,8 +5,8 @@ import java.util.TreeMap;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.view.http.common.QueueFeeder;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 /**
  * Keeps {@link #consume(DataSample) receiving} data notifications and

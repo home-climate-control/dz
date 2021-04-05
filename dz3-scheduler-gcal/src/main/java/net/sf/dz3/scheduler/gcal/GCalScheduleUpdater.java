@@ -21,9 +21,9 @@ import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneStatus;
 import net.sf.dz3.scheduler.AbstractScheduleUpdater;
 import net.sf.dz3.scheduler.Period;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxAware;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.NDC;

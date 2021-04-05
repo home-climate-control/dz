@@ -4,9 +4,9 @@ import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.HvacSignal;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * Whereas {@link Unit} is a control logic abstraction, the class implementing this interface

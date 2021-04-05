@@ -15,11 +15,11 @@ import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ThermostatStatus;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.util.digest.MessageDigestCache;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.logger.LogAware;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.logger.LogAware;
 
 /**
  * The zone controller abstraction.

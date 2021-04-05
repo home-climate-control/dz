@@ -1,6 +1,6 @@
 package net.sf.dz3.device.model;
 
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009

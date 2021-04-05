@@ -16,7 +16,7 @@ import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.impl.NullSensor;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  *

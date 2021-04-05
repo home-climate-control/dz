@@ -8,10 +8,10 @@ import java.util.Set;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.Damper;
-import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.sem.ACT;
-import net.sf.jukebox.sem.SemaphoreGroup;
-import net.sf.jukebox.service.Messenger;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.sem.ACT;
+import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
+import com.homeclimatecontrol.jukebox.service.Messenger;
 
 /**
  * Damper multiplexer.

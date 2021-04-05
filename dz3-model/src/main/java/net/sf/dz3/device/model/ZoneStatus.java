@@ -1,6 +1,6 @@
 package net.sf.dz3.device.model;
 
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * Set of variables that define the desired zone status.

@@ -1,10 +1,10 @@
 package net.sf.dz3.controller;
 
-import net.sf.jukebox.conf.ConfigurableProperty;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * A process controller abstraction.

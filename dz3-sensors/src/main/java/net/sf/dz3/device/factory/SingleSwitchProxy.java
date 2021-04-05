@@ -14,9 +14,9 @@ import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.ContainerMap;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * A proxy for a single channel switch device.

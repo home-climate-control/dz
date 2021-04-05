@@ -13,7 +13,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.junit.Test;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 public class MedianSetFilterTest {
 

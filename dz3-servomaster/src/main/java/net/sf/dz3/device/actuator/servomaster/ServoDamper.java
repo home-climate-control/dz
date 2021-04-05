@@ -5,9 +5,9 @@ import java.io.IOException;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.actuator.impl.AbstractDamper;
-import net.sf.jukebox.jmx.JmxDescriptor;
-import net.sf.jukebox.sem.ACT;
-import net.sf.jukebox.service.Messenger;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.sem.ACT;
+import com.homeclimatecontrol.jukebox.service.Messenger;
 import net.sf.servomaster.device.model.Servo;
 import net.sf.servomaster.device.model.transform.LimitTransformer;
 import net.sf.servomaster.device.model.transform.LinearTransformer;

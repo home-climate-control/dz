@@ -2,7 +2,7 @@ package net.sf.dz3.device.sensor.impl.onewire;
 
 import net.sf.dz3.device.sensor.HumiditySensor;
 import net.sf.dz3.device.sensor.SensorType;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 import com.dalsemi.onewire.container.OneWireContainer;
 

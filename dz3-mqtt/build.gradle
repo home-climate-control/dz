@@ -9,7 +9,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.glassfish/javax.json
     implementation 'org.glassfish:javax.json:1.1.4'
 
-    implementation 'net.sf.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
+    implementation 'com.homeclimatecontrol.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
 
     implementation project(':dz3-connector')
     implementation project(':dz3-scheduler')

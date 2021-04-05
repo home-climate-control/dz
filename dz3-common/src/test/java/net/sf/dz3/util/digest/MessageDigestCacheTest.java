@@ -7,7 +7,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import net.sf.jukebox.util.MessageDigestFactory;
+import com.homeclimatecontrol.jukebox.util.MessageDigestFactory;
 
 public class MessageDigestCacheTest {
 

@@ -19,8 +19,8 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.scheduler.Period;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.scheduler.Scheduler.Deviation;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 /**
 /**

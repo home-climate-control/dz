@@ -1,9 +1,9 @@
 package net.sf.dz3.controller;
 
 import net.sf.dz3.util.digest.MessageDigestCache;
-import net.sf.jukebox.conf.ConfigurableProperty;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * A hysteresis controller.

@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.sf.jukebox.util.MessageDigestFactory;
+import com.homeclimatecontrol.jukebox.util.MessageDigestFactory;
 
 /**
  * Caching wrapper for {@link MessageDigestFactory}

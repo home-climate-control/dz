@@ -23,7 +23,7 @@ import net.sf.dz3.view.ConnectorFactory;
 import net.sf.dz3.view.http.common.AbstractExchanger;
 import net.sf.dz3.view.http.common.ImmediateExchanger;
 import net.sf.dz3.view.http.common.QueueFeeder;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * HTTP client side interface.

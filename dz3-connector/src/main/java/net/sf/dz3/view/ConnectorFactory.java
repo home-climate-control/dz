@@ -2,7 +2,7 @@ package net.sf.dz3.view;
 
 import java.util.Map;
 
-import net.sf.jukebox.logger.LogAware;
+import com.homeclimatecontrol.jukebox.logger.LogAware;
 
 /**
  * Connector factory base.

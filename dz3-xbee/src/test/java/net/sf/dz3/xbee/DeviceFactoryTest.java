@@ -23,8 +23,8 @@ import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.xbee.Converter;
 import net.sf.dz3.device.sensor.impl.xbee.IoSample;
 import net.sf.dz3.device.sensor.impl.xbee.XBeeDeviceFactory;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 @Ignore
 public class DeviceFactoryTest extends TestCase implements DataSink<Double> {

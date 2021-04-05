@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
-import net.sf.jukebox.sem.ACT;
+import com.homeclimatecontrol.jukebox.sem.ACT;
 import junit.framework.TestCase;
 
 /**

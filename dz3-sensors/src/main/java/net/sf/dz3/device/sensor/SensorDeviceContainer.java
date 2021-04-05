@@ -1,6 +1,6 @@
 package net.sf.dz3.device.sensor;
 
-import net.sf.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 
 /**
  * 1-Wire device that is a single channel signal sensor.

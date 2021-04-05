@@ -83,7 +83,7 @@
     </distributionManagement>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jukebox.groupId>net.sf.jukebox</jukebox.groupId>
+        <jukebox.groupId>com.homeclimatecontrol.jukebox</jukebox.groupId>
         <jukebox.version>7.0.0-SNAPSHOT</jukebox.version>
     </properties>
     <dependencyManagement>

@@ -18,11 +18,11 @@ import net.sf.dz3.device.sensor.TemperatureSensor;
 import net.sf.dz3.device.sensor.impl.AbstractAnalogSensor;
 import net.sf.dz3.device.sensor.impl.tcp.TcpConnectionSignature;
 import net.sf.dz3.util.SSLContextFactory;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.sem.SemaphoreGroup;
-import net.sf.jukebox.service.ActiveService;
-import net.sf.jukebox.service.PassiveService;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
+import com.homeclimatecontrol.jukebox.service.ActiveService;
+import com.homeclimatecontrol.jukebox.service.PassiveService;
 
 /**
  * TCP temperature sensor.

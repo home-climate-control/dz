@@ -22,8 +22,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.sf.dz3.controller.DataSet;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.util.Interval;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.util.Interval;
 
 /**
  *

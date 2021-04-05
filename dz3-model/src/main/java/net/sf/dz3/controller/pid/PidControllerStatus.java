@@ -1,7 +1,7 @@
 package net.sf.dz3.controller.pid;
 
 import net.sf.dz3.controller.ProcessControllerStatus;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * 

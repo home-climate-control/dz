@@ -1,6 +1,6 @@
 package net.sf.dz3.controller.pid;
 
-import net.sf.jukebox.conf.ConfigurableProperty;
+import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
 
 /**
  * @author <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2005-2009

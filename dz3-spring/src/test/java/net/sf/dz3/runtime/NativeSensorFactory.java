@@ -3,9 +3,9 @@ package net.sf.dz3.runtime;
 import org.apache.logging.log4j.LogManager;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 public class NativeSensorFactory implements SensorFactory<NativeSensorDescriptor> {
 

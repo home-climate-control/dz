@@ -16,7 +16,7 @@ import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.impl.NullSensor;
 import net.sf.dz3.view.http.common.QueueFeeder;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 public class JsonRendererTest {
 

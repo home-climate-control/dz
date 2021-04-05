@@ -1,6 +1,6 @@
 package net.sf.dz3.device.sensor;
 
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * An object that has an address.

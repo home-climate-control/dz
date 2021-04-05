@@ -28,7 +28,7 @@ import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * MQTT broker interface.
@@ -48,9 +48,9 @@ import net.sf.jukebox.jmx.JmxDescriptor;
 public class MqttConnector extends Connector<JsonRenderer> {
 
     /**
-     * @see SensorRenderer#render(net.sf.jukebox.datastream.signal.model.DataSample)
-     * @see SwitchRenderer#render(net.sf.jukebox.datastream.signal.model.DataSample)
-     * @see ThermostatRenderer#render(net.sf.jukebox.datastream.signal.model.DataSample)
+     * @see SensorRenderer#render(com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample)
+     * @see SwitchRenderer#render(com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample)
+     * @see ThermostatRenderer#render(com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample)
      */
     static enum EntityType {
 

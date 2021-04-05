@@ -1,6 +1,6 @@
 package net.sf.dz3.controller;
 
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * Process controller status object.

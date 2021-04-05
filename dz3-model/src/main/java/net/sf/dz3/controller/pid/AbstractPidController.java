@@ -5,10 +5,10 @@ import org.apache.logging.log4j.ThreadContext;
 import net.sf.dz3.controller.AbstractProcessController;
 import net.sf.dz3.controller.ProcessControllerStatus;
 import net.sf.dz3.util.digest.MessageDigestCache;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxAware;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Abstract base for a PID controller implementation.

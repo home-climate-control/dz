@@ -18,7 +18,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.view.http.v1.HttpConnector;
-import net.sf.jukebox.service.ActiveService;
+import com.homeclimatecontrol.jukebox.service.ActiveService;
 
 /**
  * The facilitator between the client {@link #send(Object) sending} data and the server

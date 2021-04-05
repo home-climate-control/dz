@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.ThreadContext;
 
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * 'Null' damper - this damper does not interact with hardware, just logs

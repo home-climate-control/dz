@@ -2,7 +2,7 @@ package net.sf.dz3.device.model;
 
 import java.io.Serializable;
 
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * Simplified version of {@link ThermosatStatus} intended for {@link ZoneController} consumption.

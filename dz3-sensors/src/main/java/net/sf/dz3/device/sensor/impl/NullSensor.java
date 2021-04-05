@@ -3,7 +3,7 @@ package net.sf.dz3.device.sensor.impl;
 import java.io.IOException;
 
 import net.sf.dz3.device.sensor.TemperatureSensor;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * No-op {@link TemperatureSensor} implementation for the purpose of testing.

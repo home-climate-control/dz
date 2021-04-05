@@ -1,7 +1,7 @@
 package net.sf.dz3.device.model;
 
 import net.sf.dz3.device.actuator.Damper;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 /**
  * A damper controller.

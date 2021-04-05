@@ -19,8 +19,8 @@ import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneState;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.view.swing.ColorScheme;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 /**
  * Condensed zone status indicator. {@link ZonePanel} displays these for all zones in a bar on top.

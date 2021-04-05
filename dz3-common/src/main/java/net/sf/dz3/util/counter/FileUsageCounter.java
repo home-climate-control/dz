@@ -10,7 +10,7 @@ import java.util.StringTokenizer;
 
 import org.apache.logging.log4j.ThreadContext;
 
-import net.sf.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 
 /**
  * Usage counter storing the state into a file.

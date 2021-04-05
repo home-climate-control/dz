@@ -33,7 +33,7 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
 import net.sf.dz3.instrumentation.Marker;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * Set of test cases to replicate https://github.com/home-climate-control/dz/issues/130.

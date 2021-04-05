@@ -19,11 +19,11 @@ import javax.net.ssl.SSLServerSocket;
 
 import net.sf.dz3.device.sensor.impl.tcp.TcpConnectionSignature;
 import net.sf.dz3.util.SSLContextFactory;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.sem.SemaphoreGroup;
-import net.sf.jukebox.service.ActiveService;
-import net.sf.jukebox.service.PassiveService;
-import net.sf.jukebox.util.network.HostHelper;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
+import com.homeclimatecontrol.jukebox.service.ActiveService;
+import com.homeclimatecontrol.jukebox.service.PassiveService;
+import com.homeclimatecontrol.jukebox.util.network.HostHelper;
 
 /**
  * The TCP connection listener.
@@ -268,7 +268,7 @@ public abstract class AbstractListener extends PassiveService {
 
         SemaphoreGroup stop = new SemaphoreGroup();
 
-        for (Iterator<Listener> i = new net.sf.jukebox.util.CollectionSynchronizer<Listener>().copy(listenerSet).iterator(); i.hasNext();) {
+        for (Iterator<Listener> i = new com.homeclimatecontrol.jukebox.util.CollectionSynchronizer<Listener>().copy(listenerSet).iterator(); i.hasNext();) {
 
             Listener l = i.next();
 
@@ -280,7 +280,7 @@ public abstract class AbstractListener extends PassiveService {
 
         // VT: clientSet is modified only by ConnectionHandler
 
-        for (Iterator<ConnectionHandler> i = new net.sf.jukebox.util.CollectionSynchronizer<ConnectionHandler>().copy(clientSet).iterator(); i.hasNext();) {
+        for (Iterator<ConnectionHandler> i = new com.homeclimatecontrol.jukebox.util.CollectionSynchronizer<ConnectionHandler>().copy(clientSet).iterator(); i.hasNext();) {
 
             ConnectionHandler ch = i.next();
 

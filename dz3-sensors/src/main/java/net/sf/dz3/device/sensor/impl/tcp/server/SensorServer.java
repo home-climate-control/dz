@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import net.sf.dz3.device.sensor.TemperatureSensor;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 
 public class SensorServer extends AbstractListener {
 

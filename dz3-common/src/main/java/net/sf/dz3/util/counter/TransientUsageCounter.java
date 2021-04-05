@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.ThreadContext;
 
-import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Usage counter proof of concept with no persistent state.

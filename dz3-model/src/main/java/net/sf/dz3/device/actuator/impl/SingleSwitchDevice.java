@@ -12,9 +12,9 @@ import org.apache.logging.log4j.ThreadContext;
 import net.sf.dz3.device.model.Economizer;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.device.sensor.Switch;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 
 /**
  * Extremely simplified implementation of a consumer for a {@link ZoneController}, {@link Economizer},

@@ -1,5 +1,5 @@
 dependencies {
 
     implementation 'org.apache.commons:commons-lang3:3.3.2'
-    api 'net.sf.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
+    api 'com.homeclimatecontrol.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
 }

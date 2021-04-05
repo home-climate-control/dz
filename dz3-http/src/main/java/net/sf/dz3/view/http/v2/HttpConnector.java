@@ -26,8 +26,8 @@ import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
 import net.sf.dz3.view.http.common.BufferedExchanger;
 import net.sf.dz3.view.http.common.QueueFeeder;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * HTTP client side interface.

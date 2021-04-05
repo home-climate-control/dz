@@ -5,12 +5,12 @@ import java.io.IOException;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.jukebox.conf.ConfigurableProperty;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.jmx.JmxAttribute;
-import net.sf.jukebox.service.ActiveService;
+import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.service.ActiveService;
 
 /**
  * An abstract analog sensor.

@@ -23,7 +23,7 @@ export BASENAME=`dirname $0`
 # Uncomment the next line if you experience random freezes.
 # Please see http://code.google.com/p/diy-zoning/issues/detail?id=6 for more details and instructions.
 
-#DATA_ASYNC-Dnet.sf.jukebox.datastream.logger.impl.DataBroadcaster.async=true
+#DATA_ASYNC-Dcom.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster.async=true
 
 # Comment out the following line if you want to disable servo dampers crawling
 # (You'd want this if they move too slowly, for example, with 16 servo serial servo controllers)

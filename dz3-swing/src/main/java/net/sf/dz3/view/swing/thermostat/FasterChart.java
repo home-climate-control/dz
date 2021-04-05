@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import net.sf.dz3.controller.DataSet;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.util.Interval;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.util.Interval;
 
 /**
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020

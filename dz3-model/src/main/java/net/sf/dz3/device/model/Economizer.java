@@ -1,7 +1,7 @@
 package net.sf.dz3.device.model;
 
-import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * An abstraction for the economizer.

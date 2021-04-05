@@ -11,7 +11,7 @@ import org.junit.Test;
 import net.sf.dz3.device.model.impl.UnitSignalSplitter;
 import net.sf.dz3.util.counter.FileUsageCounter;
 import net.sf.dz3.util.counter.TimeBasedUsage;
-import net.sf.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * Test case for {@link FileUsageCounter}. The difference between {@link net.sf.dz3.util.counter.FileUsageCounterTest}

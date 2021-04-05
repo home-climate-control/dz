@@ -5,7 +5,7 @@ import java.util.Set;
 
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
-import net.sf.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * InfluxDB data source.

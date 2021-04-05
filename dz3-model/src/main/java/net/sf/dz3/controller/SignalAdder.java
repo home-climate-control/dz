@@ -8,11 +8,11 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.ThreadContext;
 
 import net.sf.dz3.util.digest.MessageDigestCache;
-import net.sf.jukebox.datastream.logger.impl.DataBroadcaster;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.datastream.signal.model.DataSink;
-import net.sf.jukebox.datastream.signal.model.DataSource;
-import net.sf.jukebox.logger.LogAware;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.logger.LogAware;
 
 /**
  * Analog signal adder.
