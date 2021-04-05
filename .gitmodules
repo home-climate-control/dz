@@ -1,0 +1,6 @@
+[submodule "jukebox"]
+	path = jukebox
+	url = https://github.com/climategadgets/jukebox.git
+[submodule "servomaster"]
+	path = servomaster
+	url = https://github.com/climategadgets/servomaster.git

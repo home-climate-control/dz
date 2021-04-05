@@ -1,3 +1,5 @@
+include 'jukebox'
+include 'servomaster'
 include 'dz3-common'
 include 'dz3-connector'
 include 'dz3-http'
