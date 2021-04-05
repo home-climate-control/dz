@@ -1,6 +1,6 @@
 dependencies {
 
-    implementation 'com.homeclimatecontrol.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
+    implementation project(':jukebox:jukebox-datastream')
     implementation 'org.apache.httpcomponents:httpclient:4.5.6'
 
     // https://cloud.google.com/docs/authentication/production#auth-cloud-implicit-java
