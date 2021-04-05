@@ -33,8 +33,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * @see MqttDeviceFactoryTestSlow
- */
-/**
+ *
  * VT: FIXME: Get smarter about running non-unit tests - pipeline will suffer from things like this
  */
 @Ignore

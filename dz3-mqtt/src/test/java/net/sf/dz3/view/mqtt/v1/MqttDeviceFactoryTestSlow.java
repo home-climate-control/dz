@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
@@ -13,7 +14,9 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * The slow part of {@link MqttDeviceFactory} test. The fast part is in {@link MqttDeviceFactoryTest}.
+ * VT: FIXME: Get smarter about running non-unit tests - pipeline will suffer from things like this
  */
+@Ignore
 public class MqttDeviceFactoryTestSlow extends MqttDeviceFactoryTestBase {
 
     @BeforeClass
