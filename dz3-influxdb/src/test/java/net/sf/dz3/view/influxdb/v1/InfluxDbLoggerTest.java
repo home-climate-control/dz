@@ -7,12 +7,17 @@ import java.util.Random;
 import java.util.Set;
 
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 
+/**
+ * VT: FIXME: Get smarter about running non-unit tests - pipeline will suffer from things like this
+ */
+@Ignore
 public class InfluxDbLoggerTest {
 
     @Test
