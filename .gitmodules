@@ -4,3 +4,6 @@
 [submodule "servomaster"]
 	path = servomaster
 	url = https://github.com/climategadgets/servomaster.git
+[submodule "xbee-api"]
+	path = xbee-api
+	url = https://github.com/home-climate-control/xbee-api.git
