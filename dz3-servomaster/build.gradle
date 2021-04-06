@@ -1,6 +1,5 @@
 dependencies {
 
-    implementation 'net.sf.servomaster:servomaster-common:2.0.0-SNAPSHOT'
-
+    implementation project(':servomaster:servomaster-common')
     implementation project(':dz3-model')
 }
