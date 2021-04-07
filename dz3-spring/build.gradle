@@ -1,3 +1,12 @@
+plugins {
+    id 'application'
+}
+
+application {
+    applicationName = 'dz'
+    mainClass = 'net.sf.dz3.runtime.Container'
+}
+
 dependencies {
 
     implementation 'org.springframework:spring:2.5.6'
