@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * An object to keep track of time spent on something in a convenient manner.
  * 
- * Usage pattern (just like {@link NDC}:
+ * Usage pattern (just like {@link org.apache.logging.log4j.ThreadContext}:
  * 
  * {@code
  * 
@@ -43,7 +43,7 @@ public class Marker {
     /**
      * Timekeeper.
      */
-    private StopWatch stopWatch;
+    private final StopWatch stopWatch;
     
     /**
      * Redundant invocation preventer.
@@ -115,7 +115,7 @@ public class Marker {
         
         getSignature(sb);
         sb.append(marker);
-        sb.append(") checkpoint '" + checkpointMessage + "' reached at ");
+        sb.append(") checkpoint '").append(checkpointMessage).append("' reached at ");
 
         printTimeMarker(sb, stopWatch);
         
@@ -159,7 +159,7 @@ public class Marker {
     }
 
     protected void printTimeMarker(StringBuilder sb, StopWatch stopWatch) {
-        sb.append(stopWatch.getTime()).append(" ms (").append(stopWatch.toString()).append(")");
+        sb.append(stopWatch.getTime()).append(" ms (").append(stopWatch).append(")");
     }
     
     /**
@@ -173,7 +173,13 @@ public class Marker {
         sb.append('#').append(Integer.toHexString(hashCode()));
         sb.append(": (");
     }
-    
+
+    /**
+     * This method has a right to exist because it doesn't perform any actions, but, on the contrary,
+     * alerts about mistakes made.
+     */
+    @Override
+    @SuppressWarnings("deprecation")
     protected void finalize() {
         
         if (!closed) {
