@@ -1,28 +1,27 @@
 package net.sf.dz3.runtime;
 
-import net.sf.dz3.device.model.DamperController;
 import net.sf.dz3.instrumentation.Marker;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  * Entry point into DZ Core.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2009-2021
  */
 public class Container {
 
     /**
      * Logger to use.
      */
-    private static Logger logger = LogManager.getLogger(Container.class);
+    private final static Logger logger = LogManager.getLogger(Container.class);
 
     /**
      * Name of the configuration file embedded into the jar file.
@@ -34,10 +33,8 @@ public class Container {
      * 
      * Must be on the root of the classpath.
      */
-    public static final String CF_LOCAL = "spring-config-local.xml";
+    public static final String CF_PI = "raspberry-pi.xml";
     
-    private ApplicationContext applicationContext;
-
     /**
      * @param args None expected.
      */
@@ -55,16 +52,26 @@ public class Container {
 
         try {
 
-            loadSampleConfiguration();
-            
+            boolean configFound = false;
+
             if (args.length == 0) {
-                loadConfiguration(CF_LOCAL);
+
+                logger.warn("Usage: dz <configuration file>");
+                logger.warn("Trying to load a sample configuration from '{}'", CF_PI);
+
+                configFound = loadConfiguration(CF_PI);
+
             } else {
-                for (int offset = 0; offset < args.length; offset++) {
-                    loadConfiguration(args[offset]);
+                for (String arg : args) {
+                    configFound = loadConfiguration(arg) || configFound;
                 }
             }
-            
+
+            if (!configFound) {
+                logger.error("No configuration was found, terminating");
+                return;
+            }
+
             logger.info("Sleeping until killed");
             
             while (true) {
@@ -81,65 +88,71 @@ public class Container {
     }
 
     /**
-     * Load the configuration already present in the jar file.
+     * Load the configuration.
      * 
-     * With some luck, all objects instantiated here will be garbage collected
-     * pretty soon and won't matter.
+     * @param source Configuration source.
      * 
-     * If this bothers you, remove the method invocation and recompile.
-     * 
-     * @see #CF_EMBEDDED
+     * @see #CF_PI
      */
-    private void loadSampleConfiguration() {
+    private boolean loadConfiguration(String source) {
 
-        ThreadContext.push("loadSampleConfiguration");
-        
+        ThreadContext.push("loadConfiguration(" + source + ")");
+        Marker m = new Marker("loadConfiguration(" + source + ")");
+
         try {
-            
-            // We don't need it for anything other than loading a sample,
-            // hence local scope.
-            ApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[] { CF_EMBEDDED });
 
-            // This class is the root of the instantiation hierarchy -
-            // if it can be instantiated, then everything else is fine
-            @SuppressWarnings("unused")
-            DamperController dc = (DamperController) applicationContext.getBean("damper_controller-sample1");
+            // Classpath loading is much less likely, let's try this first
+            if (loadFromPath(source)) {
+                return true;
+            };
 
-        } catch (NoSuchBeanDefinitionException ex) {
+            return loadFromClasspath(source);
 
-            logger.debug("Oh, they found and deleted the sample configuration! Good.");
-            
         } finally {
+
+            m.close();
             ThreadContext.pop();
         }
     }
 
     /**
-     * Load the user supplied configuration.
-     * 
-     * This will be the configuration actually used to run the system.
-     * 
-     * @see #CF_LOCAL
+     * Load the configuration from a file.
+     *
+     * @param source File to load the configuration from.
+     * @return {@code true} if an attempt succeeded.
      */
-    private void loadConfiguration(String file) {
-
-        ThreadContext.push("loadConfiguration(" + file + ")");
-        Marker m = new Marker("loadConfiguration(" + file + ")");
-
+    private boolean loadFromPath(String source) {
         try {
-            
-            applicationContext = new ClassPathXmlApplicationContext(new String[] { file });
 
-            ((AbstractApplicationContext) applicationContext).registerShutdownHook();
-            
+            if (source.startsWith("/")) {
+                logger.warn("Absolute location, using Spring file: quirk");
+                source = "file:" + source;
+            }
+
+            AbstractApplicationContext applicationContext = new FileSystemXmlApplicationContext(new String[]{source});
+
+            applicationContext.registerShutdownHook();
+            return true;
+
         } catch (BeanDefinitionStoreException ex) {
-            
-            logger.error("Failed to load " + file, ex);
-            
-        } finally {
-            
-            m.close();
-            ThreadContext.pop();
+
+            logger.warn(String.format("Failed to load %s, reason: %s", source, ex.getMessage()));
+            return false;
+        }
+    }
+
+    private boolean loadFromClasspath(String source) {
+        try {
+
+            AbstractApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[]{source});
+
+            applicationContext.registerShutdownHook();
+            return true;
+
+        } catch (BeanDefinitionStoreException ex) {
+
+            logger.warn(String.format("Failed to load %s, reason: %s", source, ex.getMessage()));
+            return false;
         }
     }
 }
