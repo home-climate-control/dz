@@ -6,3 +6,5 @@
 /target/
 gradlew.bat
 *~
+.idea/
+*.iml
