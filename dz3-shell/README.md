@@ -8,6 +8,9 @@ from top level project directory, and will be then located at
 Without arguments, it will try to read configuration from
 `raspberry-pi.xml` file in the current directory (or at the specified path).
 
+**IMPORTANT**: previously the command line argument specified classpath, now
+it is a filesystem location.
+
 ### NEXT STEPS
 
 Go to https://github.com/home-climate-control/dz/wiki for further
