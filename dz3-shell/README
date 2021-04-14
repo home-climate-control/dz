@@ -10,11 +10,6 @@ Run this to start JMX instrumentation for the above:
 
 	./dz-jconsole
 
-Run this to produce PNG graphs for your RRD database content (look in
-./rrd/html):
-
-	./dz_graph_temperature.v2
-
 For the rest, go to:
 
 	http://diy-zoning.blogspot.com/
