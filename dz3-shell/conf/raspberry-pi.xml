@@ -50,22 +50,14 @@
     </bean>
 
     <!-- Loggers -->
-    <bean id="rrdtool" class="java.io.File">
-        <constructor-arg type="java.lang.String" value="/usr/bin/rrdtool" />
-    </bean>
-    <bean id="rrdbase_onewire" class="java.io.File">
-        <constructor-arg type="java.lang.String" value="./rrd" />
-    </bean>
-    <bean id="rrdlogger_onewire" class="com.homeclimatecontrol.jukebox.datastream.logger.impl.rrd.RrdLogger" init-method="start">
+    <bean id="influxdb_sensors" class="net.sf.dz3.view.influxdb.v1.InfluxDbLogger" init-method="start">
         <constructor-arg index="0" type="java.util.Set">
             <set>
-                <ref bean="splitter-pid_controller-vcgencmd" />
-                <ref bean="splitter-thermostat-vcgencmd" />
-                <ref bean="zone_controller-vcgencmd" />
+                <ref bean="temperature_sensor-vcgencmd" />
             </set>
         </constructor-arg>
-        <constructor-arg index="1" type="java.io.File" ref="rrdbase_onewire" />
-        <constructor-arg index="2" type="java.io.File" ref="rrdtool" />
+        <constructor-arg index="1" type="java.lang.String" value="raspberry-pi"/>
+        <constructor-arg index="2" type="java.lang.String" value="http://localhost:8086/"/>
     </bean>
 
     <!-- JMX configuration -->

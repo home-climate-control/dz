@@ -53,24 +53,6 @@
     </bean>
 
     <!-- Loggers -->
-    <bean id="rrdtool" class="java.io.File">
-        <constructor-arg type="java.lang.String" value="/usr/bin/rrdtool" />
-    </bean>
-    <bean id="rrdbase_onewire" class="java.io.File">
-        <constructor-arg type="java.lang.String" value="./rrd" />
-    </bean>
-    <bean id="rrdlogger_onewire" class="com.homeclimatecontrol.jukebox.datastream.logger.impl.rrd.RrdLogger" init-method="start">
-        <constructor-arg index="0" type="java.util.Set">
-            <set>
-                <ref bean="device_factory" />
-                <ref bean="splitter-pid_controller-6500000055FF1A26" />
-                <ref bean="splitter-thermostat-6500000055FF1A26" />
-                <ref bean="zone_controller-6500000055FF1A26" />
-            </set>
-        </constructor-arg>
-        <constructor-arg index="1" type="java.io.File" ref="rrdbase_onewire" />
-        <constructor-arg index="2" type="java.io.File" ref="rrdtool" />
-    </bean>
 
     <!-- JMX configuration -->
     <bean id="jmx-wrapper" class="com.homeclimatecontrol.jukebox.jmx.JmxWrapper">
