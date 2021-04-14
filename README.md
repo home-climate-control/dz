@@ -1,10 +1,10 @@
 Home Climate Control, a.k.a. DZ
 ==
 
-Create as many climates in your home as you never thought imaginable.
-Control temperature, humidity and ventilation.
-Do it on a schedule.
-Have everything measured and recorded.
+Create as many climates in your home as you never thought imaginable.  
+Control temperature, humidity and ventilation.  
+Do it on a schedule.  
+Have everything measured and recorded.  
 Do it from anywhere.
 
 A few useful links:
