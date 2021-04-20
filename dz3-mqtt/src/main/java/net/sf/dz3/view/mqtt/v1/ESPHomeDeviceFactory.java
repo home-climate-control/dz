@@ -1,7 +1,9 @@
 package net.sf.dz3.view.mqtt.v1;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
@@ -43,6 +45,7 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
     private final Watchdog watchdog;
     private final Thread watchdogThread;
     private final CountDownLatch stopGate = new CountDownLatch(1);
+    private Set<String> seenAlienTopic = new HashSet<>();
 
     static final long POLL_INTERVAL = 10000L;
     static final long STALE_AGE = POLL_INTERVAL * 5;
@@ -258,6 +261,16 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
     @java.lang.SuppressWarnings({"squid:S1168"})
     private String[] parseTopic(String source) {
 
+        // That "not a sensor" debug statement below will drive the disk into the ground, better avoid it if possible
+        if (seenAlienTopic.contains(source)) {
+
+            // Trace is rarely enabled, no big deal
+            logger.trace("seen '{}' already, not matching", source);
+
+            // VT: NOTE: squid:S1168 I'm not going to waste memory to indicate a "skip" condition
+            return null;
+        }
+
         // The typical ESPHome topic will look like this:
         //
         // ${ESPHome-topic-prefix}/sensor/${ESPHome-sensor-name}/state
@@ -267,7 +280,10 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
 
         if (!m.matches()) {
 
-            logger.debug("not a sensor");
+            logger.debug("not a sensor (this message will repeat once per run)");
+
+            // We don't want to see this message again
+            seenAlienTopic.add(source);
 
             // VT: NOTE: squid:S1168 I'm not going to waste memory to indicate a "skip" condition
             return null;
