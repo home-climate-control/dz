@@ -17,4 +17,16 @@ dependencies {
 
     // Enable InfluxDB logger
     runtimeOnly project(':dz3-influxdb')
+
+    // Enable 1-Wire bus
+    runtimeOnly project(':dz3-owapi')
+
+    // Enable XBee
+    runtimeOnly project(':dz3-xbee')
+
+    // Enable MQTT
+    runtimeOnly project(':dz3-mqtt')
+
+    // Enable remote control over HTTP
+    runtimeOnly project(':dz3-http')
 }
