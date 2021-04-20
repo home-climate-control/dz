@@ -280,7 +280,7 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
 
         if (!m.matches()) {
 
-            logger.debug("not a sensor (this message will repeat once per run)");
+            logger.debug("{}: not a sensor (this message will repeat once per run)", source);
 
             // We don't want to see this message again
             seenAlienTopic.add(source);
