@@ -33,7 +33,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * Common details to be pushed into an abstract superclass as soon as the
  * implementation is usable.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxAware {
 
@@ -60,7 +60,6 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
      * @param mqttBrokerHost Host to connect to.
      * @param mqttRootTopicPub Root topic to publish to.
      * @param mqttRootTopicSub Root topic to subscribe to.
-     * @param initSet Entities to publish the status of.
      */
     public ESPHomeDeviceFactory(
             String mqttBrokerHost,
@@ -76,7 +75,6 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
      * @param mqttBrokerPort Port to connect to.
      * @param mqttRootTopicPub Root topic to publish to.
      * @param mqttRootTopicSub Root topic to subscribe to.
-     * @param initSet Entities to publish the status of.
      */
     public ESPHomeDeviceFactory(
             String mqttBrokerHost, int mqttBrokerPort,
@@ -89,12 +87,10 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
      * Authenticated constructor with a default port.
      *
      * @param mqttBrokerHost Host to connect to.
-     * @param port Port to connect to.
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
      * @param mqttRootTopicSub Root topic to subscribe to.
-     * @param initSet Entities to publish the status of.
      */
     public ESPHomeDeviceFactory(
             String mqttBrokerHost,
@@ -113,7 +109,6 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
      * @param mqttRootTopicSub Root topic to subscribe to.
-     * @param initSet Entities to publish the status of.
      */
     public ESPHomeDeviceFactory(
             String mqttBrokerHost, int mqttBrokerPort,
