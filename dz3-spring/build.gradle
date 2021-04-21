@@ -29,4 +29,7 @@ dependencies {
 
     // Enable remote control over HTTP
     runtimeOnly project(':dz3-http')
+
+    // Enable Google Calendar integration
+    runtimeOnly project(':dz3-scheduler-gcal-v3')
 }
