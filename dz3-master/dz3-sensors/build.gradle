@@ -1,7 +1,0 @@
-dependencies {
-
-    compile 'net.sf.jukebox:jukebox-datastream:7.0.0-SNAPSHOT'
-
-    compile project(':dz3-common')
-
-}

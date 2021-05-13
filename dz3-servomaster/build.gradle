@@ -1,0 +1,5 @@
+dependencies {
+
+    implementation project(':servomaster:servomaster-common')
+    implementation project(':dz3-model')
+}

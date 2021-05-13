@@ -1,5 +1,0 @@
-dependencies {
-
-    compile project(':dz3-sensors')
-
-}

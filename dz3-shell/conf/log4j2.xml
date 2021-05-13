@@ -37,17 +37,17 @@
         
     </Appenders>
     <Loggers>
-        <Logger name="net.sf.jukebox.datastream" level="info" />
-        <Logger name="net.sf.jukebox.jmx" level="warn" />
-        <Logger name="net.sf.jukebox.datastream.logger.impl.DataBroadcaster" level="info" />
+        <Logger name="com.homeclimatecontrol.jukebox.datastream" level="info" />
+        <Logger name="com.homeclimatecontrol.jukebox.jmx" level="warn" />
+        <Logger name="com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster" level="info" />
         <Logger name="net.sf.dz3.device.model.impl.SimpleZoneController" level="info" />
         <Logger name="net.sf.dz3.device.sensor" level="info" />
         <Logger name="net.sf.dz3.device.model.HvacSignal" level="error" />
         <Logger name="net.sf.dz3" level="debug" />
         <Logger name="com.dalsemi" level="info" />
         <Logger name="org.springframework" level="info" />
-        <Logger name="net.sf.jukebox.datastream" level="info" />
-        <Logger name="net.sf.jukebox.datastream" level="info" />
+        <Logger name="com.homeclimatecontrol.jukebox.datastream" level="info" />
+        <Logger name="com.homeclimatecontrol.jukebox.datastream" level="info" />
 
         <Root level="INFO">
 

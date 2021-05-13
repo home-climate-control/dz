@@ -1,0 +1,6 @@
+dependencies {
+
+    implementation 'org.rxtx:rxtx:2.1.7'
+
+    implementation project(':dz3-sensors')
+}

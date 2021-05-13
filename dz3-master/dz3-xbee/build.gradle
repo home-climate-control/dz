@@ -1,7 +1,0 @@
-dependencies {
-
-    compile 'com.rapplogic:xbeeapi:0.9.1-dz'
-
-    compile project(':dz3-sensors')
-
-}

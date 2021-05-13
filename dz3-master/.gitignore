@@ -1,8 +1,0 @@
-.classpath
-.settings
-.project
-/.gradle/
-/build/
-/target/
-gradlew.bat
-*~
