@@ -7,6 +7,24 @@ Do it on a schedule.
 Have everything measured and recorded.  
 Do it from anywhere.
 
+# Pardon Our Dust...
+
+A brief glance at the [version control history](https://github.com/home-climate-control/dz/network) will tell you that something major has just happened. Yes, a major change is underway. In short, it is now possible to build the project in one take. Due to the separation between the code itself, and the [project Wiki](https://github.com/home-climate-control/dz/wiki), it will take a bit to make it all consistent. If in doubt, don't hesitate to post a message to our [user forum](http://groups.google.com/group/home-climate-control), help will come fast.
+
+Meanwhile, this should get you going:
+
+```
+git clone https://github.com/home-climate-control/dz.git && \
+cd dz && \
+git submodule init && \
+git submodule update && \
+./gradlew build installDist
+```
+
+When completed successfully, it will create an executable script in `${project_root}./dz3-spring/build/install/dz/bin/dz`. The next step would be to [create the configuration](https://github.com/home-climate-control/dz/wiki/Configuration) and run the script with its path as an argument.
+
+## And now back to our regularly scheduled programming...
+
 A few useful links:
 
 * [FAQ: DZ on Raspberry Pi](https://github.com/home-climate-control/dz/wiki/FAQ:-DZ-on-Raspberry-Pi) - the platform of choice
