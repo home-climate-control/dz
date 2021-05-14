@@ -1,6 +1,8 @@
 Home Climate Control, a.k.a. DZ
 ==
 
+[![Build Status](https://travis-ci.com/home-climate-control/dz.svg?branch=master)](https://travis-ci.com/home-climate-control/dz)
+
 Create as many climates in your home as you never thought imaginable.  
 Control temperature, humidity and ventilation.  
 Do it on a schedule.  
