@@ -169,9 +169,10 @@ public abstract class AbstractDeviceFactory<T> extends ActiveService implements 
         }
     }
     /**
-     * @return Size of {@link #address2path} map.
+     * @return Size of {@link #address2dcGlobal} map.
      * @deprecated This method is intended to help finding a memory leak and has no other reason to exist.
      */
+    @Deprecated
     @JmxAttribute(description = "address2dcGlobal size")
     public synchronized int getAddress2dcGlobalSize() {
         return address2dcGlobal.size();

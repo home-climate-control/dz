@@ -82,7 +82,7 @@ public class BalancingDamperController extends AbstractDamperController {
     /**
      * Set the dump threshold.
      * 
-     * @param threshold Dump threshold to set.
+     * @param dumpThreshold Dump threshold to set.
      * 
      * @exception IllegalArgumentException if the parameter value is outside of 0...1.0 range.
      */
@@ -143,13 +143,13 @@ public class BalancingDamperController extends AbstractDamperController {
                 
                 // Negative demand counts as 0, otherwise damper positions will go
                 // below 0 - boom
-                Double demand = new Double(signal.demand.sample >= 0.0 ? signal.demand.sample : 0);
+                Double demand = Double.valueOf(signal.demand.sample >= 0.0 ? signal.demand.sample : 0);
                 
                 Set<Thermostat> tsSet = demand2ts.get(demand);
                 
                 if (tsSet == null) {
                     
-                    tsSet = new TreeSet<Thermostat>();
+                    tsSet = new TreeSet<>();
                     demand2ts.put(demand, tsSet);
                 }
                 

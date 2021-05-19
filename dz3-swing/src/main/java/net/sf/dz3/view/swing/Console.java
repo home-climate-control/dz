@@ -63,7 +63,7 @@ public class Console extends Connector<JComponent> {
     /**
      * Application main frame.
      *
-     * Shown in {@link activate()}, destroyed again in {@link #deactivate()} in a way that allows it
+     * Shown in {@link #activate()}, destroyed again in {@link #deactivate()} in a way that allows it
      * to be completely rebuilt from scratch again.
      */
     private JFrame mainFrame;
@@ -97,7 +97,7 @@ public class Console extends Connector<JComponent> {
      * Create an instance and fill it up with objects to display.
      *
      * @param initSet Objects to display.
-     * @param Unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
+     * @param unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
      */
     public Console(Set<Object> initSet, String unit) {
 
@@ -124,7 +124,7 @@ public class Console extends Connector<JComponent> {
      *
      * @param initSet Objects to display.
      * @param factorySet Set of {@link ComponentFactory} objects to use for component creation.
-     * @param Unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
+     * @param unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
      */
     public Console(Set<Object> initSet, Set<ConnectorFactory<JComponent>> factorySet, String unit) {
 

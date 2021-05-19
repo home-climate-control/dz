@@ -612,7 +612,7 @@ public class SchedulerTest extends TestCase {
     }
 
     /**
-     * @see https://github.com/home-climate-control/dz/issues/13
+     * @see <a href="https://github.com/home-climate-control/dz/issues/13">Once setpoint is changed, the zone never returns to schedule</a>
      */
     public void testSchedule3() {
         

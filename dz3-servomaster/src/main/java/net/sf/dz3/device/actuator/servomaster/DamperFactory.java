@@ -43,22 +43,10 @@ public class DamperFactory {
 
             throw new IllegalArgumentException("Can't find class for name '" + className + "'", ex);
             
-        } catch (SecurityException ex) {
+        } catch (SecurityException | InstantiationException | IllegalAccessException | IOException ex) {
             
             throw new IllegalArgumentException("Don't know how to handle", ex);
-            
-        } catch (InstantiationException ex) {
 
-            throw new IllegalArgumentException("Don't know how to handle", ex);
-            
-        } catch (IllegalAccessException ex) {
-
-            throw new IllegalArgumentException("Don't know how to handle", ex);
-            
-        } catch (IOException ex) {
-
-            throw new IllegalArgumentException("Don't know how to handle", ex);
-            
         } finally {
             ThreadContext.pop();
         }
