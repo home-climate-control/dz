@@ -14,7 +14,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * Analog passthrough reading the data from the source sensor and
  * passing it down after converting the sample.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2010-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2010-2012
  */
 public final class ConvertingSensor implements AnalogSensor, DataSink<Double> {
 

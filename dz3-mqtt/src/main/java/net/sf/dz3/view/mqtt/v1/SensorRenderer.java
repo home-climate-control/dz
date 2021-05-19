@@ -16,7 +16,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
  * Keeps {@link #consume(DataSample) receiving} data notifications and
  * {@link #emit(UpstreamBlock) stuffing} them into the queue. 
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public class SensorRenderer extends QueueFeeder<UpstreamBlock> implements DataSink<Double>, JsonRenderer<DataSample<Double>> {
 

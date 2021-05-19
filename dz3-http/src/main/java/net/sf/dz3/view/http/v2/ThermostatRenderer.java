@@ -23,7 +23,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
  * Keeps {@link #consume(DataSample) receiving} data notifications and
  * {@link #emit(ZoneSnapshot) stuffing} them into the queue. 
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 
 public class ThermostatRenderer extends QueueFeeder<ZoneSnapshot> implements DataSink<ThermostatSignal>, JsonRenderer<DataSample<ThermostatSignal>> {

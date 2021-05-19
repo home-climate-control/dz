@@ -21,7 +21,7 @@ import com.homeclimatecontrol.jukebox.logger.LogAware;
  * 
  * @param <Source> Defines the type of the signal source.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
  */
 public class SignalAdder extends LogAware implements DataSink<Double>, DataSource<Double> {
 

@@ -38,7 +38,7 @@ import org.apache.logging.log4j.ThreadContext;
  * Note that DS2409 devices cannot be used as payload switches with this code,
  * only as branch couplers.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class OneWireNetworkMonitor extends ActiveService {
 

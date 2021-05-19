@@ -11,7 +11,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 /**
  * Test cases for {@link MedianFilter}.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2012-2018
  */
 public class MedianFilterTest extends TestCase {
     

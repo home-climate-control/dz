@@ -16,7 +16,7 @@ import com.homeclimatecontrol.jukebox.util.Interval;
 
 /**
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public class UnitModel extends LogAware implements Unit {
 

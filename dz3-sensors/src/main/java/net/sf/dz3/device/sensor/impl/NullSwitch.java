@@ -12,7 +12,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  *
  * Does absolutely nothing other than reflecting itself in the log and via JMX.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2020
  */
 public class NullSwitch extends AbstractSwitch {
 

@@ -10,7 +10,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 /**
  * Usage counter proof of concept with no persistent state.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class TransientUsageCounter extends AbstractUsageCounter {
 

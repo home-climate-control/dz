@@ -9,7 +9,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 /**
  * Dumb single channel switch.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2019
  */
 public interface Switch extends DataSource<Boolean>, JmxAware, Addressable {
 

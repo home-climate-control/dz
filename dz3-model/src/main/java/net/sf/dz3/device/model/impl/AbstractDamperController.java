@@ -26,7 +26,7 @@ import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
 /**
  * Base logic for the damper controller.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractDamperController extends LogAware implements DamperController, JmxAware {
 

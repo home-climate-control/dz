@@ -6,7 +6,7 @@ package net.sf.dz3.device.actuator.servomaster;
  * @param <E> Payload type.
  * @see {@link RangeCalibration}, {@link LimitCalibration}
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class Calibration<E extends Number> {
 

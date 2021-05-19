@@ -6,7 +6,7 @@ package net.sf.dz3.device.sensor;
  * The address of the device to be produced is not necessarily the same as
  * the address of the prototype, but necessarily the address of one of its channels.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2000-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2010
  */
 public interface PrototypeContainer extends DeviceContainer {
 

@@ -26,7 +26,7 @@ import com.homeclimatecontrol.jukebox.service.ActiveService;
  * 
  * @param <DataBlock> Data type to send out to the server.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public abstract class AbstractExchanger<DataBlock> extends ActiveService {
     

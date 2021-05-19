@@ -27,7 +27,7 @@ import com.homeclimatecontrol.jukebox.logger.LogAware;
  * Implements the behavior common for all the zone controller, and provides
  * the template methods for the rest.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractZoneController extends LogAware implements ZoneController {
 

@@ -12,7 +12,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  * not passive: it produces the humidity change notifications that drive
  * the rest of the system.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2010
  */
 public interface HumiditySensor extends AnalogSensor {
 

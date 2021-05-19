@@ -11,7 +11,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
  * For now that would be just {@link TemperatureSensor} and {@link HumiditySensor}, later pressure sensor
  * and possibly others.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2012
  */
 public interface AnalogSensor  extends DataSource<Double>, JmxAware, Addressable {
 

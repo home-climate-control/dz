@@ -8,7 +8,7 @@ package net.sf.dz3.device.model;
  * It is an interface to allow the adapters to be implemented - in
  * particular, for remote access.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public interface ThermostatController  {
 

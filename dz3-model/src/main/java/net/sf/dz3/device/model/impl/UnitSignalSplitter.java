@@ -17,7 +17,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
  * Add this object as a listener to the unit, and add the data logger as a listener to this object,
  * to record the data stream.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
  */
 public class UnitSignalSplitter implements DataSink<UnitSignal>, DataSource<Double> {
 

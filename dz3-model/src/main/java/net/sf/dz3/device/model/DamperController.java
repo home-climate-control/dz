@@ -10,7 +10,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
  * Unit unit} based on the inputs from the {@link ZoneController zone
  * controller} and manual fan override.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public interface DamperController extends DataSink<UnitSignal> {
 

@@ -3,7 +3,7 @@ package net.sf.dz3.device.sensor;
 /**
  * Sensor type definitions.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2010
  */
 public enum SensorType {
 

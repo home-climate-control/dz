@@ -6,7 +6,7 @@ package net.sf.dz3.device.sensor.impl;
  * Useful for cases where a device with a single hardware address has several independently
  * addressable channels.
  *   
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2010
  */
 public abstract class ChannelAddress<ChannelId> implements Comparable<ChannelAddress<ChannelId>> {
 

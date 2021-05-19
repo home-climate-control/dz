@@ -39,7 +39,7 @@ import com.dalsemi.onewire.utils.CRC8;
  *
  *  @version    0.00, 30 Oct 2001
  *  @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 class MemoryBankSBM implements MemoryBank {
 

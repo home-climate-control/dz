@@ -3,7 +3,7 @@ package net.sf.dz3.view.mqtt.v1;
 /**
  * Block of information to send to MQTT broker.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public class UpstreamBlock {
 

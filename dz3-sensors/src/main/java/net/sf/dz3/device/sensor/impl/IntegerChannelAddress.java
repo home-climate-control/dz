@@ -4,7 +4,7 @@ package net.sf.dz3.device.sensor.impl;
  * One channel hardware switch address translated from hardware independent form
  * with the channel identifier being an non-negative integer.
  *   
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2010
  */
 public class IntegerChannelAddress extends ChannelAddress<Integer> {
     

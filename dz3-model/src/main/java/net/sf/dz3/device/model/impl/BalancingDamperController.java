@@ -23,7 +23,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * 
  * If bang/bang dampers is all you have, use {@link SimpleDamperController} instead.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class BalancingDamperController extends AbstractDamperController {
 

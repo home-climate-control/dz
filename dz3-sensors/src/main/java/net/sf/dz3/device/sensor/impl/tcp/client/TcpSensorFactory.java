@@ -32,7 +32,7 @@ import com.homeclimatecontrol.jukebox.service.PassiveService;
  * Connects to DAC over TCP and reads temperature values, then distributes
  * them to listeners.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class TcpSensorFactory extends PassiveService {
 

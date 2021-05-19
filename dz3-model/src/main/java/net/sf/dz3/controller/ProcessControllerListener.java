@@ -3,7 +3,7 @@ package net.sf.dz3.controller;
 /**
  * Process controller listener.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001
  * @version $Id: ProcessControllerListener.java,v 1.2 2004-06-28 20:35:46 vtt Exp $
  */
 public interface ProcessControllerListener {

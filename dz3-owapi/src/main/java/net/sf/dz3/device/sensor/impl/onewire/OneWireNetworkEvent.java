@@ -9,7 +9,7 @@ import java.util.EventObject;
  * com.dalsemi.onewire.utils.NetworkMonitor}, but
  * {@code net.sf.dz.daemon.onewire.owapi.OneWireNetworkMonitor}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class OneWireNetworkEvent extends EventObject {
 

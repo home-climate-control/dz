@@ -3,7 +3,7 @@ package net.sf.dz3.device.model;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public interface ThermostatStatus extends ZoneStatus {
     

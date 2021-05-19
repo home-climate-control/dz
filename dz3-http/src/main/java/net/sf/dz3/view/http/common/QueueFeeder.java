@@ -8,7 +8,7 @@ import net.sf.dz3.view.http.v1.UpstreamBlock;
 /**
  * Basic contraption to feed the {@link #upstreamQueue}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2017
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2017
  */
 public abstract class QueueFeeder<DataBlock> {
     

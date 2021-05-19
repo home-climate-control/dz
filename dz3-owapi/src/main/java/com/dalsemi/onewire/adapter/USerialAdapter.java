@@ -165,7 +165,7 @@ import com.dalsemi.onewire.utils.Address;
  * @see OneWireContainer
  * @version 0.10, 24 Aug 2001
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class USerialAdapter extends DSPortAdapter {
 

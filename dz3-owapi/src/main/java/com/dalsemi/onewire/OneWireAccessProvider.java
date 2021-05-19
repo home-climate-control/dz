@@ -96,7 +96,7 @@ import com.dalsemi.onewire.adapter.TMEXAdapter;
  * @see DSPortAdapter
  * @version 0.00, 30 August 2000
  * @author DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class OneWireAccessProvider {
 

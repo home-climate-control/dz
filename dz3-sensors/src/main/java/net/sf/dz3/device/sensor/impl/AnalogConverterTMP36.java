@@ -7,7 +7,7 @@ import net.sf.dz3.device.sensor.AnalogConverter;
  * {@link http://www.analog.com/en/temperature-sensing-and-thermal-management/digital-temperature-sensors/tmp36/products/product.html
  * TMP36} analog temperature sensor.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2010
  * 
  * @see AnalogConverterLM34
  */

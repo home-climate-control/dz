@@ -13,7 +13,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
  * Note that there is no abstraction for directly influencing the consumed resource -
  * this is intended to be provided via {@link DataSink} framework, to enforce loose coupling.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
  */
 public interface ResourceUsageCounter extends DataSink<Double>, DataSource<Double>, JmxAware {
     

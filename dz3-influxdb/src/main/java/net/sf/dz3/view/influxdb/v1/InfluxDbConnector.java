@@ -18,7 +18,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * {@code init-method="start"} attribute must be used in Spring bean definition, otherwise
  * the connector will not work.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public class InfluxDbConnector extends Connector<InfluxDbRenderer> {
 

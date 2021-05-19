@@ -13,7 +13,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 /**
  * Get a reading returned by a shell command.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class ShellSensor extends AbstractAnalogSensor {
 

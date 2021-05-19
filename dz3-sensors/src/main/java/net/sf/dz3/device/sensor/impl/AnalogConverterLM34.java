@@ -6,7 +6,7 @@ import net.sf.dz3.device.sensor.AnalogConverter;
  * Converts voltage in mV to temperature in °C for
  * {@link http://www.national.com/ds/LM/LM34.pdf LM34} analog temperature sensor.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2010
  * 
  * @see AnalogConverterTMP36
  */

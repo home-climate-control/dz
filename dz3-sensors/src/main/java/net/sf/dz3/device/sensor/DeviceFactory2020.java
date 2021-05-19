@@ -11,7 +11,7 @@ package net.sf.dz3.device.sensor;
  * This class' documentation will also skip the drivel about how the returned
  * objects must behave, deferring it to actual implementation.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public interface DeviceFactory2020 {
 

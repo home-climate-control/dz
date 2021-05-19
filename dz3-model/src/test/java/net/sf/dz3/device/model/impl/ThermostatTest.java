@@ -19,7 +19,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 /**
  * Test cases for {@link ThermostatModel}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
  */
 public class ThermostatTest extends TestCase {
 

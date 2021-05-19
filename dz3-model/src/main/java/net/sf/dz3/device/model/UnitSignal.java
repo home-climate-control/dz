@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Representation of HVAC state in a form suitable for consumption by signal listeners.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2010
  */
 public class UnitSignal implements Serializable {
 

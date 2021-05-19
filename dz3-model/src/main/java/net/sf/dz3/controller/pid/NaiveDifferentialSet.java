@@ -13,7 +13,7 @@ import java.util.TreeMap;
  *
  * This is the old implementation, written in 2000 with little regard to performance, and updated to use a better data structure in 2015.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
  */
 public class NaiveDifferentialSet extends DataSet<Double> implements DifferentialSet {
 

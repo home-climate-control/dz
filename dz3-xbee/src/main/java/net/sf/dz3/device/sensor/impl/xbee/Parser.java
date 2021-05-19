@@ -10,7 +10,7 @@ import com.rapplogic.xbee.api.XBeeAddress64;
 
 /**
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2010-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2010-2020
  */
 public class Parser {
 

@@ -69,7 +69,7 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
  *
  * @version    1.10, 26 September 2001
  * @author DalSemi
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class OneWireContainer22 extends OneWireContainer28 {
 

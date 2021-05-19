@@ -17,7 +17,7 @@ import net.sf.servomaster.device.model.transition.CrawlTransitionController;
 /**
  * Damper controlled by a RC Servo.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class ServoDamper extends AbstractDamper {
 

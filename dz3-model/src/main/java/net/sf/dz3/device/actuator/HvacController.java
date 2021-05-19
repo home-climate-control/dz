@@ -12,7 +12,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  * Whereas {@link Unit} is a control logic abstraction, the class implementing this interface
  * issues commands to the actual {@link HvacDriver HVAC unit device driver}.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public interface HvacController extends DataSink<UnitSignal>, DataSource<HvacSignal>, Comparable<HvacController> {
 

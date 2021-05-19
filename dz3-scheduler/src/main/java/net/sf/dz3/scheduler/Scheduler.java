@@ -28,7 +28,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.joda.time.DateTime;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class Scheduler implements Runnable, StoppableService, JmxAware {
 

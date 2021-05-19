@@ -15,7 +15,7 @@ import junit.framework.TestCase;
 /**
  * Test for {@link OwapiDeviceFactory#getSwitch(String)} and underlying {@link Switch} implementation.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2018
  */
 public class SwitchTest extends TestCase {
 

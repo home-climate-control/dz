@@ -8,7 +8,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 /**
  * No-op {@link TemperatureSensor} implementation for the purpose of testing.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009
  */
 public class NullSensor extends AbstractAnalogSensor {
 

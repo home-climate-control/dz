@@ -29,7 +29,7 @@ import com.homeclimatecontrol.jukebox.logger.LogAware;
  * 
  * Provides common functions - input sanity checks, mode switching, signal rebroadcasts, etc.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class HvacControllerImpl extends LogAware implements HvacController, JmxAware {
     

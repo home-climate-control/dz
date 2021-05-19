@@ -3,7 +3,7 @@ package net.sf.dz3.modelhome;
 /**
  * A room full of air.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public class Room extends AmbientTemperatureAware {
     

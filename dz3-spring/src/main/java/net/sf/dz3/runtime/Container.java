@@ -14,7 +14,7 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 /**
  * Entry point into DZ Core.
  * 
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko</a> 2009-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
 public class Container {
 

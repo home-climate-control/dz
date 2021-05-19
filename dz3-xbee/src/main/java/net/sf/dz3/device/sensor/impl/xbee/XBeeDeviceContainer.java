@@ -21,7 +21,7 @@ import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
 /**
  * XBee device container.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2020
  */
 public final class XBeeDeviceContainer extends AbstractDeviceContainer implements PrototypeContainer {
 

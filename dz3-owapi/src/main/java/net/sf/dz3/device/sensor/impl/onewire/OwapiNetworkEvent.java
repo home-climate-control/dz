@@ -11,7 +11,7 @@ import com.dalsemi.onewire.utils.OWPath;
  * com.dalsemi.onewire.utils.NetworkMonitor}, but
  * {@link OneWireNetworkMonitor OneWireNetworkMonitor}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class OwapiNetworkEvent extends OneWireNetworkEvent {
 

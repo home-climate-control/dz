@@ -7,7 +7,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  * An abstraction for the economizer.
  * 
  * @see http://diy-zoning.sourceforge.net/Homeowners/faq.html#economizer
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
  */
 public interface Economizer extends DataSource<Double> {
 

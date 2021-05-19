@@ -13,7 +13,7 @@ import com.homeclimatecontrol.jukebox.sem.ACT;
  *
  * Classes implementing this interface control the hardware.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public interface Damper extends DataSink<Double>, DataSource<Double>, JmxAware {
     

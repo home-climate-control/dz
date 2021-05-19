@@ -5,7 +5,7 @@ import net.sf.dz3.device.model.HvacMode;
 /**
  * A generic HVAC unit.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public class HvacUnit extends AmbientTemperatureAware {
     

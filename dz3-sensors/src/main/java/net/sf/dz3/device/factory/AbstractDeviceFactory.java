@@ -36,7 +36,7 @@ import com.homeclimatecontrol.jukebox.service.ActiveService;
  * 
  * @param <T> Implementation class of the hardware dependent switch container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2020
  */
 public abstract class AbstractDeviceFactory<T> extends ActiveService implements DeviceFactory {
 

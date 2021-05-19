@@ -5,7 +5,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 /**
  * Simple stateless PID controller implementation.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009
  */
 public class SimplePidController extends AbstractPidController {
 

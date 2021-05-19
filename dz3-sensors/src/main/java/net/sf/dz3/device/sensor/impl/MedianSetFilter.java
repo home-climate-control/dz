@@ -32,7 +32,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * will yield the median of all available last readings from all the sensors in
  * the set.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2012-2020
  */
 public class MedianSetFilter implements AnalogFilter {
 

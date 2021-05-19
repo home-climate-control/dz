@@ -13,7 +13,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 /**
  * Abstract base for a PID controller implementation.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractPidController extends AbstractProcessController implements AbstractPidControllerConfiguration, JmxAware {
 

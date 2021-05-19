@@ -21,7 +21,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  * Controllers normally have one source of input data. DZ3 implementation, so far, doesn't have
  * consumers that feed from more than one process controller that need to be distinguished other than by signature. 
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public interface ProcessController extends DataSink<Double>, DataSource<ProcessControllerStatus> {
 

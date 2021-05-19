@@ -10,7 +10,7 @@ import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 /**
  * Set of test cases for {@link StringChannelAddress}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2009
  */
 public class SwitchAddressTest extends TestCase {
     

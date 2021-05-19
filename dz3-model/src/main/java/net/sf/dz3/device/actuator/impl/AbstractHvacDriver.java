@@ -14,7 +14,7 @@ import com.homeclimatecontrol.jukebox.logger.LogAware;
  * 
  * Provides common logic for state housekeeping and JMX reporting.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractHvacDriver extends LogAware implements HvacDriver {
 

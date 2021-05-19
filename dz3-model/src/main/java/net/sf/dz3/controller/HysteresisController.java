@@ -12,7 +12,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  * higher than the setpoint plus hysteresis, and it becomes negative when the
  * process variable becomes lower than the setpoint minus hysteresis.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class HysteresisController extends AbstractProcessController {
 

@@ -9,7 +9,7 @@ import com.dalsemi.onewire.container.OneWireContainer;
 /**
  * A platform independent temperature container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
  */
 public class OneWireTemperatureContainer extends AbstractSensorContainer implements TemperatureSensor {
 

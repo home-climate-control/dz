@@ -105,7 +105,7 @@ import com.dalsemi.onewire.OneWireException;
  *
  *  @version    0.00, 28 Aug 2000
  *  @author     KLA,DSS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class OneWireContainer05 extends OneWireContainer implements SwitchContainer {
 

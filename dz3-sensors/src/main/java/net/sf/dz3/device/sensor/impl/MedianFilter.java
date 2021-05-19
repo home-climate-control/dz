@@ -21,7 +21,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  *
  * Careful, first ({@link #depth} - 1) samples will get out unfiltered.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2012-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2012-2020
  */
 public class MedianFilter implements AnalogFilter {
 

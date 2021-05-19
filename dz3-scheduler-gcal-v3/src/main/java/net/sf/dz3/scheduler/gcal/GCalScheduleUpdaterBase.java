@@ -12,7 +12,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 /**
  * Base class for schedule updaters using Google Calendar as a back end.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2014
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2014
  */
 public abstract class GCalScheduleUpdaterBase extends AbstractScheduleUpdater implements JmxAware {
 

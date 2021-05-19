@@ -24,7 +24,7 @@ import net.sf.dz3.device.sensor.DeviceContainer;
  * logical devices of different types (such as DS2438 posing as both temperature
  * and humidity container).
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class ContainerMap {
 

@@ -11,7 +11,7 @@ import net.sf.servomaster.device.model.ServoController;
 
 /**
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class DamperFactory {
     

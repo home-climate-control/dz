@@ -5,7 +5,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 /**
  * Set of variables that define the desired zone status.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public interface ZoneStatus {
 

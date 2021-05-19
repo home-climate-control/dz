@@ -10,7 +10,7 @@ import net.sf.dz3.device.model.ZoneStatus;
 /**
  * Abstraction to support back end independent schedule update.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
  */
 public interface ScheduleUpdater {
 

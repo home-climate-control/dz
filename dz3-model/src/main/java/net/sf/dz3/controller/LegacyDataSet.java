@@ -15,7 +15,7 @@ import java.util.TreeMap;
  * 
  * @see DatSet
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public class LegacyDataSet<T> {
 

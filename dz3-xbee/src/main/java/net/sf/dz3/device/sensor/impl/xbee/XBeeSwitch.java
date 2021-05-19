@@ -26,7 +26,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * but support will be soon extended to all XBee pins that can be configured as
  * digital outputs.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2020
  */
 public class XBeeSwitch implements Switch {
 

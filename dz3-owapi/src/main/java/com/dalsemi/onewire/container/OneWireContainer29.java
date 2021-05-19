@@ -59,7 +59,7 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
  *
  *  @version    1.00, 01 Jun 2002
  *  @author     JPE
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class OneWireContainer29 extends OneWireContainer implements SwitchContainer {
 

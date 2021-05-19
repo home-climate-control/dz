@@ -9,7 +9,7 @@ import com.dalsemi.onewire.container.OneWireContainer;
 /**
  * A platform independent humidity container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
  */
 public class OneWireHumidityContainer extends AbstractSensorContainer implements HumiditySensor {
 

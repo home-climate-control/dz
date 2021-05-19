@@ -10,7 +10,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
  *
  * @see https://github.com/home-climate-control/dz/issues/80
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public class HttpClientFactory {
 

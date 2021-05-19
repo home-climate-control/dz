@@ -73,7 +73,7 @@ import com.dalsemi.onewire.utils.Convert;
  * @version    1.00, 1 Sep 2000
  * @author     DS,JK
  * Converted to use TemperatureContainer interface 9-1-2000 KLA
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class OneWireContainer10 extends OneWireContainer implements TemperatureContainer {
     private boolean normalResolution = true;

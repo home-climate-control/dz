@@ -26,7 +26,7 @@ import com.dalsemi.onewire.utils.Convert;
 
 /**
  * @author Original implementation &copy; Dallas Semiconductor
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class SerialService implements SerialPortEventListener {
 

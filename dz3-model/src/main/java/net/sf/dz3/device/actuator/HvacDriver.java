@@ -18,7 +18,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
  * Same goes for timings - the operations performed
  * by this class may have to be as slow as it takes, it is irrelevant.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public interface HvacDriver extends JmxAware {
 

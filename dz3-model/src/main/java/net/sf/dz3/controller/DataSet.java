@@ -10,7 +10,7 @@ import java.util.NoSuchElementException;
  *
  * VT: FIXME: Implement variable expiration time.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
  */
 public class DataSet<T> {
 

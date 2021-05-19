@@ -14,7 +14,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  *  This is a proof of concept implementation, not protected from the jitter possible when
  *  temperature readings fluctuate around triggering point.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class SimpleEconomizer extends AbstractEconomizer {
     

@@ -10,7 +10,7 @@ import net.sf.dz3.controller.DataSet;
  * used for the {@link PID_Controller}, it must be fed with controller error,
  * and anti-windup action must be programmed outside of this class.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
  */
 public interface IntegralSet {
     

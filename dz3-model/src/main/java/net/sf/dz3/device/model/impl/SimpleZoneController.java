@@ -20,7 +20,7 @@ import net.sf.dz3.device.model.Thermostat;
  * <strong>Correction:</strong> those -1.0 and 1.0 not absolute, but
  * relative - they have to be adjusted depending on the A/C mode.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class SimpleZoneController extends AbstractZoneController {
     

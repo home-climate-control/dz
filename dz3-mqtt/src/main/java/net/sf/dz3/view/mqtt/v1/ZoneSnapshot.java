@@ -15,7 +15,7 @@ import net.sf.dz3.device.model.ZoneState;
  * NOTE: The deviation* variables support fast "return to schedule" function on remote devices (otherwise, it'll take 
  * the full round trip time for them to reflect proper values, oscillating feedback loop becomes possible).
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2013
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2013
  */
 public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
 

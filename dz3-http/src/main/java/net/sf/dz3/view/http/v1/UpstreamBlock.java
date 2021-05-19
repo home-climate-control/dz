@@ -5,7 +5,7 @@ import java.util.Map;
 /**
  * Block of information to send to HTTP server.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
  */
 public class UpstreamBlock {
 

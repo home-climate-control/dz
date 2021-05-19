@@ -53,7 +53,7 @@ import com.google.api.services.calendar.model.Events;
  * Look for V3 API docs starting at https://developers.google.com/google-apps/calendar/ - but as time goes, it'll slip, there's no
  * specific URL for V3 docs while it is the last version.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public final class GCalScheduleUpdater extends GCalScheduleUpdaterBase {
 

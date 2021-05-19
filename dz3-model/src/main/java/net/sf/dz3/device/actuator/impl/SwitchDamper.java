@@ -12,7 +12,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * 
  * Most existing HVAC dampers are like this, controlled by 24VAC.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class SwitchDamper extends AbstractDamper {
 

@@ -5,7 +5,7 @@ import net.sf.dz3.controller.DataSet;
 /**
  * Data set supporting the differential calculation.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
  */
 public interface DifferentialSet {
 

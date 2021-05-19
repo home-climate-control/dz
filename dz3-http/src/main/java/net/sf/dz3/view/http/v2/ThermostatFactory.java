@@ -7,7 +7,7 @@ import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.ConnectorFactory;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2011
  */
 public class ThermostatFactory extends ConnectorFactory<JsonRenderer> {
     

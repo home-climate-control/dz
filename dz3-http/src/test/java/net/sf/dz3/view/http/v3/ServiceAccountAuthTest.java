@@ -15,7 +15,7 @@ import net.sf.dz3.view.http.common.ContextChecker;
 /**
  * Test case for {@link https://cloud.google.com/docs/authentication/production Google Service Account Authentication}.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class ServiceAccountAuthTest {
     

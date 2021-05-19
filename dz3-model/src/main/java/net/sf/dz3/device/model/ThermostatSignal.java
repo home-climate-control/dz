@@ -7,7 +7,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 /**
  * Simplified version of {@link ThermosatStatus} intended for {@link ZoneController} consumption.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2010
  */
 public class ThermostatSignal implements Serializable {
 

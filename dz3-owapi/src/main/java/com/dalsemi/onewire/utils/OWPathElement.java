@@ -63,7 +63,7 @@ import com.dalsemi.onewire.container.OneWireContainer;
  *
  * @version    0.00, 18 September 2000
  * @author     DS
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class OWPathElement {
 

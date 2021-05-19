@@ -82,7 +82,7 @@ import com.dalsemi.onewire.utils.Bit;
  * @version 0.00, 13 Sept 2000
  * @author DSS
  * @author Stability enhancements &copy; <a
- *         href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a>
+ *         href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a>
  *         2001-2009
  */
 public class OneWireContainer1F extends OneWireContainer implements

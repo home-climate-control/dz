@@ -55,7 +55,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * being the reason. Hence, DZ will be matching the message digest of the email used to authenticate
  * both on HCC Core and HCC Remote side on the proxy in this protocol version.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class HttpConnector extends Connector<JsonRenderer>{
 

@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
  * 
  * @see IntegralSet
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-20012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-20012
  */
 public class LegacyIntegralSet extends LegacyDataSet<Double> implements IntegralSet {
 

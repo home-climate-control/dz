@@ -3,7 +3,7 @@ package net.sf.dz3.view.http.v2;
 /**
  * JSON renderer abstraction.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2010
  */
 public interface JsonRenderer<State> {
     

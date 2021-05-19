@@ -72,7 +72,7 @@ import com.dalsemi.onewire.utils.Convert;
  *
  * @version    1.00, 15 September 2000
  * @author     BH
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class OneWireContainer28 extends OneWireContainer implements TemperatureContainer {
 

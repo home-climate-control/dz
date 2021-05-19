@@ -3,7 +3,7 @@ package net.sf.dz3.util.counter;
 /**
  * Strategy for counting resource usage.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
  */
 public interface CounterStrategy {
 

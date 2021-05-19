@@ -3,7 +3,7 @@ package net.sf.dz3.modelhome;
 /**
  * An entity aware of ambient temperature and heat transfer from inside out.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public class AmbientTemperatureAware {
 

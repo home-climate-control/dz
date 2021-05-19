@@ -6,7 +6,7 @@ import java.io.IOException;
 /**
  * Switch container abstraction.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2000-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2010
  */
 public interface DzSwitchContainer extends DeviceContainer {
 

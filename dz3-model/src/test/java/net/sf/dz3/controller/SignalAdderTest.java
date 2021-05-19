@@ -9,7 +9,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 /**
  * Test cases for {@link SignalAdder}.
  *  
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2009-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2012
  */
 public class SignalAdderTest extends TestCase {
     

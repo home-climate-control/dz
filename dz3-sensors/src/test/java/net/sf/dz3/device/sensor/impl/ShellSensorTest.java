@@ -19,7 +19,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
  * to make them work on your system - or feel free to make tests generic enough so they can be
  * reused without modification.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
  */
 public class ShellSensorTest extends TestCase {
 

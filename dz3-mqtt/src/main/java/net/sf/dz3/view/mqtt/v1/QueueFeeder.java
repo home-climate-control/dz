@@ -8,7 +8,7 @@ import com.homeclimatecontrol.jukebox.util.MessageDigestFactory;
 /**
  * Basic contraption to feed the {@link #upstreamQueue}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public abstract class QueueFeeder<DataBlock> {
     

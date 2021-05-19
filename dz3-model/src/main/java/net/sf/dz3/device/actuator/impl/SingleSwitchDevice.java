@@ -20,7 +20,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
  * Extremely simplified implementation of a consumer for a {@link ZoneController}, {@link Economizer},
  * and other sources that might have a simple actuator.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class SingleSwitchDevice implements DataSink<Double> {
     

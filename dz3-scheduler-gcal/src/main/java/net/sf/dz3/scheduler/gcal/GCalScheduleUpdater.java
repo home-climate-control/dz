@@ -44,7 +44,7 @@ import com.google.gdata.util.ServiceException;
 /**
  * Schedule updater using Google Calendar as a back end.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2011
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2011
  */
 public class GCalScheduleUpdater extends AbstractScheduleUpdater implements JmxAware {
 

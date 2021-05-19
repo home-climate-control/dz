@@ -27,7 +27,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  *
  * @see https://www.digi.com/resources/documentation/digidocs/pdfs/90000976.pdf, I/O sample rate (IR command).
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2020
  */
 public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor {
 

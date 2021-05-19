@@ -6,7 +6,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * Simple time based usage counter.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class TimeBasedUsage implements CounterStrategy {
     

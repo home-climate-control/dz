@@ -33,7 +33,7 @@ package com.dalsemi.onewire.utils;
  *
  * @version    1.00, 28 December 2001
  * @author     SH
- * @author Stability enhancements &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2009
+ * @author Stability enhancements &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
 public class Convert {
 

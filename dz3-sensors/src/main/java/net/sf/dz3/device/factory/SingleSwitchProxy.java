@@ -23,7 +23,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  *  
  * @param <SwitchContainerType> Implementation class of the hardware dependent switch container.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2019
  */
 public abstract class SingleSwitchProxy<SwitchContainerType> implements Switch {
 

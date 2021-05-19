@@ -23,7 +23,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
  * This class serves the same purpose that {@link InfluxDbConnector} finally
  * will, but the functionality is straightforward and limited.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 

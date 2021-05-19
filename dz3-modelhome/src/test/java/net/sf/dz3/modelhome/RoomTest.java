@@ -10,7 +10,7 @@ import junit.framework.TestCase;
 /**
  * Test case for {@link Room room simulator}.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public class RoomTest extends TestCase {
     

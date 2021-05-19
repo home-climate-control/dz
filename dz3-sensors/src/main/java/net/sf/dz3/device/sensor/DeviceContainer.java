@@ -3,7 +3,7 @@ package net.sf.dz3.device.sensor;
 /**
  * Implementation independent device container abstraction.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2000-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2010
  */
 public interface DeviceContainer extends Comparable<DeviceContainer> {
 

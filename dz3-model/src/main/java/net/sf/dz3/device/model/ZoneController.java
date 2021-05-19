@@ -17,7 +17,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
  * 
  * To take HVAC mode into account, thermostat settings need to be adjusted.
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2012
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public interface ZoneController extends DataSink<ThermostatSignal>, DataSource<Double>, JmxAware {
 

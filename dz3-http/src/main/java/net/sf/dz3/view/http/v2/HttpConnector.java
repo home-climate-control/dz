@@ -44,7 +44,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * too much request data transfer and processing overhead, this connector caches data from all sources
  * and then submits them in bigger packets more rarely. 
  * 
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class HttpConnector extends Connector<JsonRenderer>{
 

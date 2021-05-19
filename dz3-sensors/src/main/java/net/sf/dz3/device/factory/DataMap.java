@@ -16,7 +16,7 @@ import net.sf.dz3.device.sensor.DeviceFactory.Type;
  * DS2438 posing as both temperature and humidity container, or XBee based
  * devices which can act as practically anything).
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2004-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2004-2020
  */
 public class DataMap {
 

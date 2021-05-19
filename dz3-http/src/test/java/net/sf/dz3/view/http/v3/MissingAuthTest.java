@@ -28,7 +28,7 @@ import net.sf.dz3.view.http.common.ContextChecker;
  * Test for {@link AbstractExchanger} being instantiated without username and password
  * (required for {@link HttpConnector}.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class MissingAuthTest {
 

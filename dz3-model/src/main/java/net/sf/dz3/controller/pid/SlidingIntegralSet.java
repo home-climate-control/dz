@@ -17,7 +17,7 @@ import net.sf.dz3.controller.DataSet;
  * Unlike {@link NaiveIntegralSet} (which has the time complexity of {@code O(n)}), this class
  * provides {@code O(1)} time complexity.
  *
- * @author Copyright &copy; <a href="mailto:vt@freehold.crocodile.org"> Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
  */
 public class SlidingIntegralSet implements IntegralSet {
 
