@@ -1,0 +1,35 @@
+plugins {
+    id 'application'
+}
+
+application {
+    applicationName = 'dz'
+    mainClass = 'net.sf.dz3.runtime.Container'
+}
+
+dependencies {
+
+    implementation 'org.springframework:spring:2.5.6'
+    implementation project(':dz3-model')
+
+    // Enable the Swing console
+    runtimeOnly project(':dz3-swing')
+
+    // Enable InfluxDB logger
+    runtimeOnly project(':dz3-influxdb')
+
+    // Enable 1-Wire bus
+    runtimeOnly project(':dz3-owapi')
+
+    // Enable XBee
+    runtimeOnly project(':dz3-xbee')
+
+    // Enable MQTT
+    runtimeOnly project(':dz3-mqtt')
+
+    // Enable remote control over HTTP
+    runtimeOnly project(':dz3-http')
+
+    // Enable Google Calendar integration
+    runtimeOnly project(':dz3-scheduler-gcal-v3')
+}

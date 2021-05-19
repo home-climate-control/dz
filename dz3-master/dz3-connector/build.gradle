@@ -1,5 +1,0 @@
-dependencies {
-
-    implementation 'net.sf.jukebox:jukebox-common:7.0.0-SNAPSHOT'
-    implementation 'net.sf.jukebox:jukebox-jmx:7.0.0-SNAPSHOT'
-}

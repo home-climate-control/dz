@@ -1,0 +1,6 @@
+dependencies {
+
+    api project(':servomaster:servomaster-common')
+    api project(':dz3-owapi')
+    api project(':dz3-sensors')
+}

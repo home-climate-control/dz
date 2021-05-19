@@ -1,0 +1,13 @@
+diff --git a/dz3-master/dz3-sensors/src/main/java/net/sf/dz3/device/factory/SingleSwitchProxy.java b/dz3-master/dz3-sensors/src/main/java/net/sf/dz3/device/factory/SingleSwitchProxy.java
+index 8703b50..dcdda76 100644
+--- a/dz3-master/dz3-sensors/src/main/java/net/sf/dz3/device/factory/SingleSwitchProxy.java
++++ b/dz3-master/dz3-sensors/src/main/java/net/sf/dz3/device/factory/SingleSwitchProxy.java
+@@ -62,7 +62,7 @@ public abstract class SingleSwitchProxy<T> implements Switch {
+             for (Iterator<DeviceContainer> i = devices.iterator(); i.hasNext(); ) {
+ 
+                 DeviceContainer dc = i.next();
+-                logger.debug("Found: " + dc + ", " + dc.getType());
++                logger.debug("Found: {}, {}", dc, dc.getType());
+ 
+                 if (SensorType.SWITCH.equals(dc.getType())) {
+ 

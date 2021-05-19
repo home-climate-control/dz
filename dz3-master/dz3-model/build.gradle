@@ -1,6 +1,0 @@
-dependencies {
-
-    api 'net.sf.servomaster:servomaster-common:2.0.0-SNAPSHOT'
-    api project(':dz3-owapi')
-    api project(':dz3-sensors')
-}
