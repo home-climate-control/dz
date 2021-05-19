@@ -1,3 +1,10 @@
+pluginManagement {
+    plugins {
+        id 'com.github.spotbugs' version '4.0.5'
+        id 'net.ltgt.errorprone' version '1.1.1'
+    }
+}
+
 include 'jukebox:jukebox-common'
 include 'jukebox:jukebox-datastream'
 include 'jukebox:jukebox-jmx'
