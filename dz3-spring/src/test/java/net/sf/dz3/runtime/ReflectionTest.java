@@ -1,22 +1,24 @@
 package net.sf.dz3.runtime;
-import java.lang.reflect.Method;
-
-import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.AnalogSensor;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.lang.reflect.Method;
 
-public class ReflectionTest extends TestCase {
+import static org.assertj.core.api.Assertions.fail;
+
+
+class ReflectionTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
     private final NativeSensorFactory nativeFactory = new NativeSensorFactory();
 
     private static final String PROBLEM_METHOD = "getSensor";
 
+    @Test
     public void testGetMethod() {
 
         try {
@@ -34,6 +36,7 @@ public class ReflectionTest extends TestCase {
         }
     }
 
+    @Test
     public void testMethodMatching() {
 
         Method[] methods = nativeFactory.getClass().getMethods();
@@ -53,6 +56,7 @@ public class ReflectionTest extends TestCase {
         fail("Failed to find method: " + PROBLEM_METHOD);
     }
 
+    @Test
     public void testSpring() {
 
         AbstractApplicationContext springContext = new ClassPathXmlApplicationContext("dz.conf.xml");

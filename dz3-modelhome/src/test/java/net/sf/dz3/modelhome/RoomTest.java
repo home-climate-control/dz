@@ -1,21 +1,21 @@
 package net.sf.dz3.modelhome;
 
+import net.sf.dz3.device.model.HvacMode;
+import org.junit.jupiter.api.Test;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
-import net.sf.dz3.device.model.HvacMode;
-
-import junit.framework.TestCase;
 
 /**
  * Test case for {@link Room room simulator}.
  * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
-public class RoomTest extends TestCase {
+class RoomTest {
     
     private final NumberFormat format = new DecimalFormat("###.###");
 
+    @Test
     public void test() {
         
         // Play with values...

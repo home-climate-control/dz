@@ -1,17 +1,23 @@
 package net.sf.dz3.device.actuator.impl;
 
-import java.io.IOException;
-
-import junit.framework.TestCase;
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
+import org.junit.jupiter.api.Test;
 
-public class HvacDriverHeatpumpTest extends TestCase {
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+
+class HvacDriverHeatpumpTest {
     
     /**
      * See {@link https://github.com/home-climate-control/dz/issues/3} for details.
      */
-    public void xtestRunaway() throws IOException {
+    @Test
+    public void testRunaway() throws IOException {
+
+        // VT: FIXME: This test was disabled, why?
         
         NullSwitch switchMode = new NullSwitch("mode");
         NullSwitch switchRunning = new NullSwitch("running");
@@ -22,9 +28,9 @@ public class HvacDriverHeatpumpTest extends TestCase {
         {
             // Change the mode and verify that it worked
 
-            assertEquals("Wrong mode before the switch", false, switchMode.getState());
+            assertThat(switchMode.getState()).as("mode before the switch").isFalse();
             driver.setMode(HvacMode.HEATING);
-            assertEquals("Wrong mode after the switch", true, switchMode.getState());
+            assertThat(switchMode.getState()).as("mode after the switch").isTrue();
         }
 
         {
@@ -36,14 +42,14 @@ public class HvacDriverHeatpumpTest extends TestCase {
             double[] fanSpeed = driver.getFanSpeed();
             int[] stage = driver.getStage();
             
-            assertEquals("Wrong expected fan speed", 1.0, fanSpeed[0]);
-            assertEquals("Wrong actual fan speed", 1.0, fanSpeed[1]);
-            assertEquals("Wrong fan speed switch state", true, switchFan.getState());
-            assertEquals("Wrong expected stage", 1, stage[0]);
-            assertEquals("Wrong actual stage", 1, stage[1]);
-            assertEquals("Wrong stage switch state", true, switchFan.getState());
-            
-            assertEquals("Wrong mode after the normal cycle", true, switchMode.getState());
+            assertThat(fanSpeed[0]).as("expected fan speed").isEqualTo(1.0);
+            assertThat(fanSpeed[1]).as("actual fan speed").isEqualTo(1.0);
+            assertThat(switchFan.getState()).as("fan speed switch state").isEqualTo(true);
+            assertThat(stage[0]).as("expected stage").isEqualTo(1);
+            assertThat(stage[1]).as("actual stage").isEqualTo(1);
+            assertThat(switchFan.getState()).as("stage switch state").isEqualTo(true);
+
+            assertThat(switchMode.getState()).as("mode after the normal cycle").isEqualTo(true);
         }
 
         {
@@ -60,16 +66,16 @@ public class HvacDriverHeatpumpTest extends TestCase {
 
             double[] fanSpeed = driver.getFanSpeed();
             int[] stage = driver.getStage();
-            
-            assertEquals("Wrong expected fan speed", 0.0, fanSpeed[0]);
-            assertEquals("Wrong actual fan speed", 0.0, fanSpeed[1]);
-            assertEquals("Wrong fan speed switch state", false, switchFan.getState());
-            assertEquals("Wrong expected stage", 0, stage[0]);
-            assertEquals("Wrong actual stage", 0, stage[1]);
-            assertEquals("Wrong stage switch state", false, switchFan.getState());
-            
-            // Not checking this switch now, irrelevant 
-            // assertEquals("Wrong mode after the normal cycle", true, switchMode.getState());
+
+            assertThat(fanSpeed[0]).as("expected fan speed").isEqualTo(0.0);
+            assertThat(fanSpeed[1]).as("actual fan speed").isEqualTo(0.0);
+            assertThat(switchFan.getState()).as("fan speed switch state").isEqualTo(false);
+            assertThat(stage[0]).as("expected stage").isEqualTo(0);
+            assertThat(stage[1]).as("actual stage").isEqualTo(0);
+            assertThat(switchFan.getState()).as("stage switch state").isEqualTo(false);
+
+            // Not checking this switch now, irrelevant
+            //assertThat(switchMode.getState()).as("mode after the normal cycle").isEqualTo(true);
         }
         
         {
@@ -83,7 +89,7 @@ public class HvacDriverHeatpumpTest extends TestCase {
             
             // Let's make sure the switch is still in its "power loss" state
             
-            assertEquals("Wrong 'power loss' mode switch state", false, switchMode.getState());
+            assertThat(switchMode.getState()).as("'power loss' mode switch state").isFalse();
 
             
             driver.setFanSpeed(1);
@@ -92,15 +98,16 @@ public class HvacDriverHeatpumpTest extends TestCase {
             double[] fanSpeed = driver.getFanSpeed();
             int[] stage = driver.getStage();
             
-            assertEquals("Wrong expected fan speed", 1.0, fanSpeed[0]);
-            assertEquals("Wrong actual fan speed", 1.0, fanSpeed[1]);
-            assertEquals("Wrong expected stage", 1, stage[0]);
-            assertEquals("Wrong actual stage", 1, stage[1]);
-            
-            assertEquals("Wrong mode after the power loss cycle", true, switchMode.getState());
+            assertThat(fanSpeed[0]).as("expected fan speed").isEqualTo(1.0);
+            assertThat(fanSpeed[1]).as("actual fan speed").isEqualTo(1.0);
+            assertThat(stage[0]).as("expected stage").isEqualTo(1);
+            assertThat(stage[1]).as("actual stage").isEqualTo(1);
+
+            assertThat(switchMode.getState()).as("mode after the power loss cycle").isTrue();
         }
     }
-    
+
+    @Test
     public void testNullMode() throws IOException {
         
         NullSwitch switchMode = new NullSwitch("mode");
@@ -112,14 +119,9 @@ public class HvacDriverHeatpumpTest extends TestCase {
         // The mode is not set, but we're shutting it off, that's OK
         
         driver.setStage(0);
-        
-        try {
-            
-            driver.setStage(1);
-            fail("Should've failed by now");
-            
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Wrong exception message", "mode can't be null", ex.getMessage());
-        }
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> driver.setStage(1))
+                .withMessage("mode can't be null");
     }
 }

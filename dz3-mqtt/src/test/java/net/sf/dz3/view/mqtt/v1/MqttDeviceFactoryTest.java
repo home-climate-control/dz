@@ -1,13 +1,16 @@
 package net.sf.dz3.view.mqtt.v1;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.ByteArrayInputStream;
-import java.math.BigDecimal;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.ThreadContext;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import javax.json.Json;
 import javax.json.JsonNumber;
@@ -15,34 +18,22 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.stream.JsonParsingException;
+import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.ThreadContext;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-
-import net.sf.dz3.device.sensor.AnalogSensor;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * @see MqttDeviceFactoryTestSlow
  *
  * VT: FIXME: Get smarter about running non-unit tests - pipeline will suffer from things like this
  */
-@Ignore
+@Disabled("Enable if you have a MQTT broker running on localhost (or elsewhere, see the source)")
 public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @BeforeClass
+    @BeforeAll
     public static void init() throws MqttException {
 
         String root = "/dz-test-" + Math.abs(rg.nextInt()) + "/";
@@ -53,7 +44,7 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
         mdf = new MqttDeviceFactory("localhost", pubTopic, subTopic);
     }
 
-    @AfterClass
+    @AfterAll
     public static void shutdown() throws Exception {
         mdf.powerOff();
     }
@@ -94,46 +85,46 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     public void processPass() {
         mdf.process(MQTT_MESSAGE_ACTUAL.getBytes());
         // This is a simple pass test
-        assertTrue(true);
+        assertThat(true).isTrue();
     }
 
     @Test
     public void processNoEntity() {
         mdf.process(MQTT_MESSAGE_NO_ENTITY.getBytes());
         // This is a simple pass test
-        assertTrue(true);
+        assertThat(true).isTrue();
     }
 
     @Test
     public void processUnknown() {
         mdf.process(MQTT_MESSAGE_SWITCH.getBytes());
         // This is a simple pass test
-        assertTrue(true);
+        assertThat(true).isTrue();
     }
 
     @Test
     public void allMandatoryPresent() {
-        assertTrue(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_ACTUAL)));
+        assertThat(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_ACTUAL))).isTrue();
     }
 
     @Test
     public void missingEntityType() {
-        assertFalse(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_ENTITY)));
+        assertThat(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_ENTITY))).isFalse();
     }
 
     @Test
     public void missingName() {
-        assertFalse(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_NAME)));
+        assertThat(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_NAME))).isFalse();
     }
 
     @Test
     public void missingSignal() {
-        assertFalse(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_SIGNAL)));
+        assertThat(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_SIGNAL))).isFalse();
     }
 
     @Test
     public void allOptionalPresent() {
-        assertTrue(mdf.checkFields("optional", Level.WARN, MqttDeviceFactory.OPTIONAL_JSON_FIELDS, getOptionalFields(MQTT_MESSAGE_OPTIONAL)));
+        assertThat(mdf.checkFields("optional", Level.WARN, MqttDeviceFactory.OPTIONAL_JSON_FIELDS, getOptionalFields(MQTT_MESSAGE_OPTIONAL))).isTrue();
     }
 
     private Object[] getMandatoryFields(String message) {
@@ -175,24 +166,21 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     @Test
     public void notJson() {
 
-        thrown.expect(JsonParsingException.class);
-
-        mdf.process("28C06879A20003CE: 23.5C".getBytes());
+        assertThatExceptionOfType(JsonParsingException.class)
+                .isThrownBy(() -> mdf.process("28C06879A20003CE: 23.5C".getBytes()));
     }
 
     @Test
     public void getSwitch() {
 
-        thrown.expect(UnsupportedOperationException.class);
-
-        mdf.getSwitch("address");
+        assertThatExceptionOfType(UnsupportedOperationException.class)
+                .isThrownBy(() -> mdf.getSwitch("address"));
     }
 
     @Test
     public void getSensor() {
 
-        AnalogSensor s = mdf.getSensor("mqtt-sensor");
-        assertNotNull(s);
+        assertThat(mdf.getSensor("mqtt-sensor")).isNotNull();
     }
 
     @Test
@@ -200,7 +188,7 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     public void getProcessSensorInput() throws InterruptedException {
 
         AnalogSensor s = mdf.getSensor("mqtt-sensor");
-        assertNotNull(s);
+        assertThat(s).isNotNull();
 
         AtomicInteger receiver = new AtomicInteger(0);
         SensorListener sl = new SensorListener(receiver);
@@ -214,8 +202,8 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
 
         s.removeConsumer(sl);
 
-        assertEquals("wrong receiver status", 42, receiver.get());
-        assertEquals("wrong sensor status", 42, s.getSignal().sample.intValue());
+        assertThat(receiver.get()).as("receiver status").isEqualTo(42);
+        assertThat(s.getSignal().sample.intValue()).as("sensor status").isEqualTo(42);
     }
 
     private class SensorListener implements DataSink<Double> {

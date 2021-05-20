@@ -1,10 +1,8 @@
 package net.sf.dz3.device.model.impl;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import junit.framework.TestCase;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.model.Thermostat;
@@ -12,38 +10,42 @@ import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.impl.NullSensor;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Test cases for {@link ThermostatModel}.
  * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
  */
-public class ThermostatTest extends TestCase {
+class ThermostatTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * Make sure that the thermostat refuses null data sample.
      */
+    @Test
     public void testNull() {
 
         AnalogSensor sensor = new NullSensor("address", 0);
         AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
         Thermostat ts = new ThermostatModel("ts",  sensor, controller);
 
-        try {
-            ts.consume(null);
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Wrong exception message", "sample can't be null", ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> ts.consume(null))
+                .withMessage("sample can't be null");
     }
 
     /**
      * Make sure the surrounding logic doesn't break on the thermostat in initial state.
      */
+    @Test
     public void testInitialSignal() {
 
         AnalogSensor sensor = new NullSensor("address", 0);
@@ -52,10 +54,9 @@ public class ThermostatTest extends TestCase {
 
         ThermostatSignal signal = ts.getSignal();
 
-        assertTrue("Should be error", signal.demand.isError());
-        assertEquals("Wrong exception class", IllegalStateException.class, signal.demand.error.getClass());
-        assertEquals("Wrong exception message", "No data received yet", signal.demand.error.getMessage());
-
+        assertThat(signal.demand.isError()).isTrue();
+        assertThat(signal.demand.error).isInstanceOf(IllegalStateException.class);
+        assertThat(signal.demand.error.getMessage()).isEqualTo("No data received yet");
     }
 
     /**
@@ -63,6 +64,7 @@ public class ThermostatTest extends TestCase {
      * to the zone controller.
      * 
      */
+    @Test
     public void testError() throws InterruptedException {
 
         AnalogSensor sensor = new NullSensor("address", 0);
@@ -75,7 +77,7 @@ public class ThermostatTest extends TestCase {
 
         DataSample<Double> sample = new DataSample<Double>(System.currentTimeMillis(), null, "sig", null, new Error("Can't read sensor data"));
 
-        assertTrue(sample.isError());
+        assertThat(sample.isError()).isTrue();
 
         ts.consume(sample);
     }
@@ -88,15 +90,18 @@ public class ThermostatTest extends TestCase {
             logger.info("Signal: " + signal);
         }
 
+        @Override
         public DataSample<Double> getSignal() {
 
             throw new UnsupportedOperationException("Not Implemented");
         }
 
+        @Override
         public void addConsumer(DataSink<Double> consumer) {
             throw new UnsupportedOperationException("Not Implemented");
         }
 
+        @Override
         public void removeConsumer(DataSink<Double> consumer) {
             throw new UnsupportedOperationException("Not Implemented");
         }
@@ -109,6 +114,7 @@ public class ThermostatTest extends TestCase {
     }
 
     @SuppressWarnings("unchecked")
+    @Test
     public void testDataSequence() {
 
         ThreadContext.push("testDataSequence");
@@ -133,41 +139,41 @@ public class ThermostatTest extends TestCase {
             Thermostat ts = new ThermostatModel("ts", sensor, controller);
 
             // Initially, the thermostat is not calling
-            assertFalse(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isFalse();
 
             // This is a fake - data sample is injected, but it makes no difference
             ts.consume(tempSequence[0]);
 
             // still off
-            assertFalse(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isFalse();
             ts.consume(tempSequence[1]);
 
             // still off
-            assertFalse(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isFalse();
 
             // On now
             logger.info("TURNING ON");
             ts.consume(tempSequence[2]);
 
-            assertTrue(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isTrue();
 
             ts.consume(tempSequence[3]);
 
             // still on
-            assertTrue(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isTrue();
             ts.consume(tempSequence[4]);
 
             // still on
-            assertTrue(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isTrue();
             ts.consume(tempSequence[5]);
             // still on
-            assertTrue(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isTrue();
             ts.consume(tempSequence[6]);
 
             // and off again
             logger.info("TURNING OFF");
 
-            assertFalse(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isFalse();
 
         } finally {
             ThreadContext.pop();

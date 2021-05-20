@@ -1,27 +1,30 @@
 package net.sf.dz3.device.actuator.impl;
 
-import java.io.IOException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import com.homeclimatecontrol.jukebox.sem.ACT;
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
-import com.homeclimatecontrol.jukebox.sem.ACT;
-import junit.framework.TestCase;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test case for {@link SwitchDamper}.
  * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
-public class SwitchDamperTest extends TestCase {
+class SwitchDamperTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
     
     /**
      * Test whether the {@link SwitchDamper} is properly parked.
      */
+    @Test
     public void testPark() {
         
         NullSwitch s = new NullSwitch("switch");
@@ -56,7 +59,7 @@ public class SwitchDamperTest extends TestCase {
         if (parkedPosition != null) {
             
             target.setParkPosition(parkedPosition);
-            assertEquals("Couldn't properly set parked position", parkedPosition, target.getParkPosition());
+            assertThat(target.getParkPosition()).as("parked position").isEqualTo(parkedPosition);
         }
         
         logger.info("park position: " + parkedPosition);
@@ -70,7 +73,7 @@ public class SwitchDamperTest extends TestCase {
         if (!parked.waitFor()) {
             fail("Failed to park, see the log");
         }
-        
-        assertEquals("Wrong parked position", target.getParkPosition(), target.getPosition());
+
+        assertThat(target.getPosition()).as("parked position").isEqualTo(target.getParkPosition());
     }
 }

@@ -1,15 +1,5 @@
 package net.sf.dz3.xbee;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
@@ -19,10 +9,17 @@ import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeePacket;
 import com.rapplogic.xbee.api.XBeeResponse;
 import com.rapplogic.xbee.util.ByteUtils;
-
 import net.sf.dz3.device.sensor.impl.xbee.Parser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-public class XbeeApiTest {
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
+class XbeeApiTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -68,11 +65,11 @@ public class XbeeApiTest {
             logger.info("Source: " + ByteUtils.toBase16(knownGoodPacket));
             logger.info("Packet: " + ByteUtils.toBase16(byteBuffer));
 
-            assertEquals("Byte buffer length mismatch", knownGoodPacket.length, byteBuffer.length);
+            assertThat(byteBuffer.length).isEqualTo(knownGoodPacket.length);
 
             for (int offset = 0; offset < knownGoodPacket.length; offset++) {
 
-                assertEquals("Packet content mismatch @" + offset, knownGoodPacket[offset], byteBuffer[offset]);
+                assertThat(byteBuffer[offset]).as("Packet content mismatch @" + offset).isEqualTo(knownGoodPacket[offset]);
             }
 
         } catch (Throwable t) {
@@ -87,7 +84,7 @@ public class XbeeApiTest {
     }
 
     @SuppressWarnings("squid:S1607")
-    @Ignore
+    @Disabled("Enable this if you have the actual hardware (you will need to adjust the addresses, too")
     @Test
     public void testXbee() throws XBeeException {
 
@@ -222,7 +219,7 @@ public class XbeeApiTest {
             }
 
             // Just pass.
-            assertTrue(true);
+            assertThat(true).isTrue();
 
         } finally {
             ThreadContext.pop();

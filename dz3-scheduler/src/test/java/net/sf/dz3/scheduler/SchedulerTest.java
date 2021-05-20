@@ -1,5 +1,19 @@
 package net.sf.dz3.scheduler;
 
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.device.model.ThermostatSignal;
+import net.sf.dz3.device.model.ZoneStatus;
+import net.sf.dz3.device.model.impl.ZoneStatusImpl;
+import net.sf.dz3.scheduler.Scheduler.Deviation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.joda.time.DateTime;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -13,26 +27,16 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
 
-import junit.framework.TestCase;
-import net.sf.dz3.device.model.Thermostat;
-import net.sf.dz3.device.model.ThermostatSignal;
-import net.sf.dz3.device.model.ZoneStatus;
-import net.sf.dz3.device.model.impl.ZoneStatusImpl;
-import net.sf.dz3.scheduler.Scheduler.Deviation;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.within;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.joda.time.DateTime;
-
-public class SchedulerTest extends TestCase {
+class SchedulerTest {
     
     private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
-    
+
+    @Test
     public void testDeviationInstantiation() {
         
         double setpoint = rg.nextDouble();
@@ -41,11 +45,12 @@ public class SchedulerTest extends TestCase {
         
         Deviation d = new Deviation(setpoint, enabled, voting);
         
-        assertEquals(setpoint,d.setpoint);
-        assertEquals(enabled, d.enabled);
-        assertEquals(voting, d.voting);
+        assertThat(d.setpoint).isEqualTo(setpoint);
+        assertThat(d.enabled).isEqualTo(enabled);
+        assertThat(d.voting).isEqualTo(voting);
     }
 
+    @Test
     public void testInstantiation() {
         
         final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
@@ -62,37 +67,36 @@ public class SchedulerTest extends TestCase {
         new Scheduler(updater);
         new Scheduler(updater, null);
     }
-    
+
+    @Test
     public void testGranularity() {
         
         Scheduler s = new Scheduler();
         
         // This should be fine
         s.setScheduleGranularity(1);
-        
-        try {
 
-            // but this is not
-            s.setScheduleGranularity(0);
-
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Wrong exception message", "0: value doesn't make sense", ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> {
+                    // but this is not
+                    s.setScheduleGranularity(0);
+                })
+                .withMessage("0: value doesn't make sense");
 
         long value = -1 * Math.abs(rg.nextInt(Integer.MAX_VALUE));
 
-        try {
-            // and neither is this
-            s.setScheduleGranularity(value);
-
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Wrong exception message", value + ": value doesn't make sense", ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> {
+                    // and neither is this
+                    s.setScheduleGranularity(value);
+                })
+                .withMessage(value + ": value doesn't make sense");
     }
     
     /**
      * Test the no-argument {@link Scheduler#start()} method.
      */
+    @Test
     public void testStart() {
         
         ThreadContext.push("testStart");
@@ -108,6 +112,7 @@ public class SchedulerTest extends TestCase {
         }
     }
 
+    @Test
     public void testFastStart() {
         
         ThreadContext.push("testFastStart");
@@ -142,6 +147,7 @@ public class SchedulerTest extends TestCase {
         }
     }
 
+    @Test
     public void testStartStop() {
         
         ThreadContext.push("testStartStop");
@@ -212,6 +218,7 @@ public class SchedulerTest extends TestCase {
         }
     }
 
+    @Test
     public void testIOException() {
         
         ThreadContext.push("testIOException");
@@ -247,6 +254,7 @@ public class SchedulerTest extends TestCase {
         }
     }
 
+    @Test
     public void testExecute() {
         
         List<Map<Thermostat, SortedMap<Period, ZoneStatus>>> schedules = new LinkedList<Map<Thermostat, SortedMap<Period, ZoneStatus>>>();
@@ -483,7 +491,8 @@ public class SchedulerTest extends TestCase {
             ThreadContext.pop();
         }
     }
-    
+
+    @Test
     public void testSchedule1() {
         
         ThreadContext.push("testSchedule1");
@@ -505,45 +514,46 @@ public class SchedulerTest extends TestCase {
         Calendar cal = getMondayStart();
 
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "night", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("night");
+
         cal.set(Calendar.HOUR_OF_DAY, 8);
         cal.set(Calendar.MINUTE, 30);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "morning", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("morning");
+
         cal.set(Calendar.HOUR_OF_DAY, 9);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("day");
+
         cal.set(Calendar.HOUR_OF_DAY, 10);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("day");
+
         cal.set(Calendar.HOUR_OF_DAY, 18);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("evening");
+
         cal.set(Calendar.HOUR_OF_DAY, 21);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("evening");
     }
 
+    @Test
     public void testSchedule2() {
         
         ThreadContext.push("testSchedule2");
@@ -565,55 +575,56 @@ public class SchedulerTest extends TestCase {
         Calendar cal = getMondayStart();
 
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "background", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("background");
+
         cal.set(Calendar.HOUR_OF_DAY, 8);
         cal.set(Calendar.MINUTE, 30);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "morning", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("morning");
+
         cal.set(Calendar.HOUR_OF_DAY, 9);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("day");
+
         cal.set(Calendar.HOUR_OF_DAY, 10);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "day", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("day");
+
         cal.set(Calendar.HOUR_OF_DAY, 15);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "background", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("background");
+
         cal.set(Calendar.HOUR_OF_DAY, 18);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("evening");
+
         cal.set(Calendar.HOUR_OF_DAY, 21);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("evening");
     }
 
     /**
      * @see <a href="https://github.com/home-climate-control/dz/issues/13">Once setpoint is changed, the zone never returns to schedule</a>
      */
+    @Test
     public void testSchedule3() {
         
         ThreadContext.push("testSchedule3");
@@ -635,46 +646,46 @@ public class SchedulerTest extends TestCase {
         Calendar cal = getMondayStart();
 
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), null, s.getCurrentPeriod(ts));
-        
+
+        assertThat(s.getCurrentPeriod(ts)).as("period for " + cal.getTime()).isNull();
+
         cal.set(Calendar.HOUR_OF_DAY, 9);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "morning", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("morning");
+
         cal.set(Calendar.HOUR_OF_DAY, 15);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), null, s.getCurrentPeriod(ts));
-        
+
+        assertThat(s.getCurrentPeriod(ts)).as("period for " + cal.getTime()).isNull();
+
         cal.set(Calendar.HOUR_OF_DAY, 18);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
-        
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("evening");
+
         cal.set(Calendar.HOUR_OF_DAY, 21);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "evening", s.getCurrentPeriod(ts).name);
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("evening");
 
         cal.set(Calendar.HOUR_OF_DAY, 23);
         cal.set(Calendar.MINUTE, 0);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), null, s.getCurrentPeriod(ts));
-        
+
+        assertThat(s.getCurrentPeriod(ts)).as("period for " + cal.getTime()).isNull();
     }
 
+    @Test
     public void testSchedule4() {
         
         ThreadContext.push("testSchedule4");
@@ -701,24 +712,24 @@ public class SchedulerTest extends TestCase {
         
         // Has to be at +29C, enabled, voting - according to schedule
 
-        assertEquals("Wrong setpoint for " + cal.getTime(), 29.0, ts.getSetpoint());
-        
+        assertThat(ts.getSetpoint()).as("setpoint for " + cal.getTime()).isEqualTo(29.0);
+
         // Change the setpoint to 26C manually
         
         ts.set(new ZoneStatusImpl(26, 0, true, true));
-        
-        assertEquals("Wrong setpoint for " + cal.getTime(), 26.0, ts.getSetpoint());
-        
+
+        assertThat(ts.getSetpoint()).as("setpoint for " + cal.getTime()).isEqualTo(26.0);
+
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 10);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "away", s.getCurrentPeriod(ts).name);
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("away");
 
         // Has to be still at 26C
-        
-        assertEquals("Wrong setpoint for " + cal.getTime(), 26.0, ts.getSetpoint());
+
+        assertThat(ts.getSetpoint()).as("setpoint for " + cal.getTime()).isEqualTo(26.0);
 
         cal.set(Calendar.HOUR_OF_DAY, 1);
         cal.set(Calendar.MINUTE, 10);
@@ -738,6 +749,7 @@ public class SchedulerTest extends TestCase {
         // assertEquals("Wrong setpoint for " + cal.getTime(), 29.0, ts.getSetpoint());
     }
 
+    @Test
     public void testSchedule5() {
         
         ThreadContext.push("testSchedule5");
@@ -764,24 +776,24 @@ public class SchedulerTest extends TestCase {
         
         // Has to be at +29C, enabled, voting - according to schedule
 
-        assertEquals("Wrong setpoint for " + cal.getTime(), 29.0, ts.getSetpoint());
-        
+        assertThat(ts.getSetpoint()).as("setpoint for " + cal.getTime()).isEqualTo(29.0);
+
         // Change the setpoint to 26C manually
         
         ts.set(new ZoneStatusImpl(26, 0, true, true));
-        
-        assertEquals("Wrong setpoint for " + cal.getTime(), 26.0, ts.getSetpoint());
-        
+
+        assertThat(ts.getSetpoint()).as("setpoint for " + cal.getTime()).isEqualTo(26.0);
+
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.MINUTE, 10);
         
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
-        
-        assertEquals("Wrong period for " + cal.getTime(), "away", s.getCurrentPeriod(ts).name);
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("away");
 
         // Has to be still at 26C
-        
-        assertEquals("Wrong setpoint for " + cal.getTime(), 26.0, ts.getSetpoint());
+
+        assertThat(ts.getSetpoint()).as("setpoint for " + cal.getTime()).isEqualTo(26.0);
 
         cal.set(Calendar.HOUR_OF_DAY, 1);
         cal.set(Calendar.MINUTE, 10);
@@ -789,14 +801,15 @@ public class SchedulerTest extends TestCase {
         s.execute(schedule, new DateTime(cal.getTimeInMillis()));
         
         // 'reset' should've taken over by now
-        
-        assertEquals("Wrong period for " + cal.getTime(), "reset", s.getCurrentPeriod(ts).name);
+
+        assertThat(s.getCurrentPeriod(ts).name).as("period for " + cal.getTime()).isEqualTo("reset");
 
         // Has to be at 29.5C now
-        
-        assertEquals("Wrong setpoint for " + cal.getTime(), 29.5, ts.getSetpoint());
+
+        assertThat(ts.getSetpoint()).as("setpoint for " + cal.getTime()).isEqualTo(29.5);
     }
 
+    @Test
     public void testDeviation() {
         
         ThreadContext.push("testDeviation");
@@ -848,7 +861,7 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 22, true, true, new DateTime(cal.getTimeInMillis()));
 
-            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
+            assertThat(d.setpoint).as("setpoint deviation").isEqualTo(0.0, within(0.001));
         }
         
         Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = schedule.entrySet().iterator().next();
@@ -861,9 +874,9 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 22, false, false, new DateTime(cal.getTimeInMillis()));
 
-            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
-            assertEquals("Wrong enabled deviation ", false, d.enabled);
-            assertEquals("Wrong voting deviation ", false, d.voting);
+            assertThat(d.setpoint).as("setpoint deviation").isEqualTo(0.0);
+            assertThat(d.enabled).as("enabled deviation").isEqualTo(false);
+            assertThat(d.voting).as("voting deviation").isEqualTo(false);
         }
         
         {
@@ -874,9 +887,9 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 22, true, true, new DateTime(cal.getTimeInMillis()));
 
-            assertEquals("Wrong setpoint deviation ", -2.5, d.setpoint);
-            assertEquals("Wrong enabled deviation ", false, d.enabled);
-            assertEquals("Wrong voting deviation ", false, d.voting);
+            assertThat(d.setpoint).as("setpoint deviation").isEqualTo(-2.5);
+            assertThat(d.enabled).as("enabled deviation").isEqualTo(false);
+            assertThat(d.voting).as("voting deviation").isEqualTo(false);
         }
         
         {
@@ -889,9 +902,9 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 22, true, true, new DateTime(cal.getTimeInMillis()));
 
-            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
-            assertEquals("Wrong enabled deviation ", false, d.enabled);
-            assertEquals("Wrong voting deviation ", false, d.voting);
+            assertThat(d.setpoint).as("setpoint deviation").isEqualTo(0.0);
+            assertThat(d.enabled).as("enabled deviation").isEqualTo(false);
+            assertThat(d.voting).as("voting deviation").isEqualTo(false);
         }
         
         {
@@ -902,9 +915,9 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 22, true, false, new DateTime(cal.getTimeInMillis()));
 
-            assertEquals("Wrong setpoint deviation ", -2.8, d.setpoint, 0.0001);
-            assertEquals("Wrong enabled deviation ", false, d.enabled);
-            assertEquals("Wrong voting deviation ", true, d.voting);
+            assertThat(d.setpoint).as("setpoint deviation").isEqualTo(-2.8, within(0.001));
+            assertThat(d.enabled).as("enabled deviation").isEqualTo(false);
+            assertThat(d.voting).as("voting deviation").isEqualTo(true);
         }
 
         {
@@ -915,9 +928,9 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 24.8, false, true, new DateTime(cal.getTimeInMillis()));
 
-            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
-            assertEquals("Wrong enabled deviation ", true, d.enabled);
-            assertEquals("Wrong voting deviation ", false, d.voting);
+            assertThat(d.setpoint).as("setpoint deviation").isEqualTo(0.0);
+            assertThat(d.enabled).as("enabled deviation").isEqualTo(true);
+            assertThat(d.voting).as("voting deviation").isEqualTo(false);
         }
 
         {
@@ -928,9 +941,9 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 24.8, true, true, new DateTime(cal.getTimeInMillis()));
 
-            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
-            assertEquals("Wrong enabled deviation ", false, d.enabled);
-            assertEquals("Wrong voting deviation ", false, d.voting);
+            assertThat(d.setpoint).as("setpoint deviation").isEqualTo(0.0);
+            assertThat(d.enabled).as("enabled deviation").isEqualTo(false);
+            assertThat(d.voting).as("voting deviation").isEqualTo(false);
         }
         {
             // No period is present at this time
@@ -942,9 +955,8 @@ public class SchedulerTest extends TestCase {
 
             Deviation d = s.getDeviation(ts, 22, true, true, new DateTime(cal.getTimeInMillis()));
 
-            assertEquals("Wrong setpoint deviation ", 0.0, d.setpoint);
+            assertThat(d.setpoint).as("setpoint deviation").isEqualTo(0.0);
         }
-        
     }
 
     private static class NullThermostat implements Thermostat {
@@ -1061,6 +1073,7 @@ public class SchedulerTest extends TestCase {
             return null;
         }
         
+        @Override
         public String toString() {
             
             return getName();

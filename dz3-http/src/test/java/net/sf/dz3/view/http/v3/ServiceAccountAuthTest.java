@@ -1,23 +1,21 @@
 package net.sf.dz3.view.http.v3;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Test;
-
 import com.google.api.gax.paging.Page;
 import com.google.cloud.storage.Bucket;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
-
 import net.sf.dz3.view.http.common.ContextChecker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test case for {@link https://cloud.google.com/docs/authentication/production Google Service Account Authentication}.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
-public class ServiceAccountAuthTest {
+class ServiceAccountAuthTest {
     
     private final Logger logger = LogManager.getLogger(getClass());
 

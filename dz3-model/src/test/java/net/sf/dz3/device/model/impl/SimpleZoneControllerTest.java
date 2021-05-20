@@ -1,28 +1,29 @@
 package net.sf.dz3.device.model.impl;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import junit.framework.TestCase;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.impl.NullSensor;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
+
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
  */
-public class SimpleZoneControllerTest extends TestCase {
+class SimpleZoneControllerTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -31,6 +32,7 @@ public class SimpleZoneControllerTest extends TestCase {
      * one thermostat using a {@link SimplePidController}.
      * @throws InterruptedException 
      */
+    @Test
     public void test1H() throws InterruptedException {
 
         ThreadContext.push("test1H");
@@ -60,22 +62,22 @@ public class SimpleZoneControllerTest extends TestCase {
             logger.info("Zone controller: " + zc);
 
             // Initially, the thermostat is not calling and controller is off
-            assertFalse(ts.getSignal().calling);
+            assertThat(ts.getSignal().calling).isFalse();
 
             {
                 // This is a fake - data sample is injected, but it makes no difference
                 ts.consume(tempSequence.remove());
 
                 // still off
-                assertFalse(ts.getSignal().calling);
-                assertEquals(1.0, ts.getSignal().demand.sample);
+                assertThat(ts.getSignal().calling).isFalse();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(1.0);
             }
             {
                 ts.consume(tempSequence.remove());
 
                 // still off
-                assertFalse(ts.getSignal().calling);
-                assertEquals(1.5, ts.getSignal().demand.sample);
+                assertThat(ts.getSignal().calling).isFalse();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(1.5);
             }
 
             {
@@ -83,39 +85,39 @@ public class SimpleZoneControllerTest extends TestCase {
                 logger.info("TURNING ON");
                 ts.consume(tempSequence.remove());
 
-                assertTrue(ts.getSignal().calling);
-                assertEquals(2.0, ts.getSignal().demand.sample);
+                assertThat(ts.getSignal().calling).isTrue();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(2.0);
 
                 // Zone controller should've flipped to on, this is the only thermostat
 
-                assertEquals(2.0, zc.getSignal().sample);
+                assertThat(zc.getSignal().sample).isEqualTo(2.0);
             }
             {
                 ts.consume(tempSequence.remove());
 
                 // still on
-                assertTrue(ts.getSignal().calling);
-                assertEquals(1.5, ts.getSignal().demand.sample);
+                assertThat(ts.getSignal().calling).isTrue();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(1.5);
 
-                assertEquals(1.5, zc.getSignal().sample);
+                assertThat(zc.getSignal().sample).isEqualTo(1.5);
             }
             {
                 ts.consume(tempSequence.remove());
 
                 // still on
-                assertTrue(ts.getSignal().calling);
-                assertEquals(1.0, ts.getSignal().demand.sample);
+                assertThat(ts.getSignal().calling).isTrue();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(1.0);
 
-                assertEquals(1.0, zc.getSignal().sample);
+                assertThat(zc.getSignal().sample).isEqualTo(1.0);
             }
             {
                 ts.consume(tempSequence.remove());
 
                 // still on
-                assertTrue(ts.getSignal().calling);
-                assertEquals(0.5, ts.getSignal().demand.sample);
+                assertThat(ts.getSignal().calling).isTrue();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(0.5);
 
-                assertEquals(0.5, zc.getSignal().sample);
+                assertThat(zc.getSignal().sample).isEqualTo(0.5);
             }
             {
                 // and off again
@@ -123,10 +125,10 @@ public class SimpleZoneControllerTest extends TestCase {
                 ts.consume(tempSequence.remove());
 
 
-                assertFalse(ts.getSignal().calling);
-                assertEquals(0.0, ts.getSignal().demand.sample);
+                assertThat(ts.getSignal().calling).isFalse();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(0.0);
 
-                assertEquals(0.0, zc.getSignal().sample);
+                assertThat(zc.getSignal().sample).isEqualTo(0.0);
             }
 
         } finally {
@@ -140,6 +142,7 @@ public class SimpleZoneControllerTest extends TestCase {
      * The zone controller should stay off without exceptions when the first ever signal
      * doesn't indicate calling.
      */
+    @Test
     public void testColdStartNotCalling() {
         
         ThreadContext.push("testColdStart");
@@ -154,7 +157,7 @@ public class SimpleZoneControllerTest extends TestCase {
             AnalogSensor s2 = new NullSensor("address2", 0);
             Thermostat t2 = new ThermostatModel("ts2", s2, c2);
 
-            assertFalse(t1.getSignal().calling);
+            assertThat(t1.getSignal().calling).isFalse();
 
             Set<Thermostat> tsSet = new TreeSet<Thermostat>();
             
@@ -167,13 +170,13 @@ public class SimpleZoneControllerTest extends TestCase {
             
             {
                 t2.consume(new DataSample<Double>(0, "source", "signature", 20.0, null));
-                assertFalse(t2.getSignal().calling);
+                assertThat(t2.getSignal().calling).isFalse();
                 
                 DataSample<Double> signal = zc.getSignal();
 
-                assertNotNull("Signal can't be null",signal);
+                assertThat(signal).isNotNull();
                 
-                assertEquals(0.0, signal.sample);
+                assertThat(signal.sample).isEqualTo(0.0);
             }
 
         } finally {
@@ -187,6 +190,7 @@ public class SimpleZoneControllerTest extends TestCase {
      * The zone controller should switch on when the first ever thermostat signal
      * indicates calling.
      */
+    @Test
     public void testColdStartCalling() {
         
         ThreadContext.push("testColdStart");
@@ -201,7 +205,7 @@ public class SimpleZoneControllerTest extends TestCase {
             AnalogSensor s2 = new NullSensor("address2", 0);
             Thermostat t2 = new ThermostatModel("ts2", s2, c2);
 
-            assertFalse(t1.getSignal().calling);
+            assertThat(t1.getSignal().calling).isFalse();
 
             Set<Thermostat> tsSet = new TreeSet<Thermostat>();
             
@@ -214,13 +218,13 @@ public class SimpleZoneControllerTest extends TestCase {
             
             {
                 t2.consume(new DataSample<Double>(0, "source", "signature", 30.0, null));
-                assertTrue(t2.getSignal().calling);
+                assertThat(t2.getSignal().calling).isTrue();
                 
                 DataSample<Double> signal = zc.getSignal();
 
-                assertNotNull("Signal can't be null",signal);
+                assertThat(signal).isNotNull();
                 
-                assertEquals(6.0, signal.sample);
+                assertThat(signal.sample).isEqualTo(6.0);
             }
 
         } finally {

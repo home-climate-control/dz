@@ -1,169 +1,153 @@
 package net.sf.dz3.device.model.impl;
 
+import net.sf.dz3.device.model.ZoneStatus;
+import org.junit.jupiter.api.Test;
+
 import java.util.Random;
 
-import net.sf.dz3.device.model.ZoneStatus;
-import junit.framework.TestCase;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-public class ZoneStatusTest extends TestCase {
+class ZoneStatusTest {
 
     private final Random rg = new Random();
-    
-    public void testEqualsDouble() {
-    
-        for (int count = 0; count < 1000; count++) {
 
-            double setpoint = rg.nextDouble();
-            double delta = rg.nextDouble() * 0.00000000000000001d;
-            
-            ZoneStatusImpl status1 = new ZoneStatusImpl(setpoint, 0, true, true);
-            ZoneStatusImpl status2 = new ZoneStatusImpl(setpoint + delta, 0, true, true);
-            
-            assertNotSame("Double comparison failure", status1, status2);
-        }
-    }
-    
+    @Test
     public void testSetpointNaN() {
 
-        try {
-        
-            new ZoneStatusImpl(Double.NaN, 0, true, true);
-            fail("Should've failed by now");
-        
-        } catch (IllegalArgumentException ex) {
-            assertEquals("wrong exception message", "Invalid setpoint NaN", ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new ZoneStatusImpl(Double.NaN, 0, true, true))
+                .withMessage("Invalid setpoint NaN");
     }
 
+    @Test
     public void testSetpointPositiveInfinity() {
 
-        try {
-        
-            new ZoneStatusImpl(Double.POSITIVE_INFINITY, 0, true, true);
-            fail("Should've failed by now");
-        
-        } catch (IllegalArgumentException ex) {
-            assertEquals("wrong exception message", "Invalid setpoint Infinity", ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new ZoneStatusImpl(Double.POSITIVE_INFINITY, 0, true, true))
+                .withMessage("Invalid setpoint Infinity");
     }
 
+    @Test
     public void testSetpointNegativeInfinity() {
 
-        try {
-        
-            new ZoneStatusImpl(Double.NEGATIVE_INFINITY, 0, true, true);
-            fail("Should've failed by now");
-        
-        } catch (IllegalArgumentException ex) {
-            assertEquals("wrong exception message", "Invalid setpoint -Infinity", ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new ZoneStatusImpl(Double.NEGATIVE_INFINITY, 0, true, true))
+                .withMessage("Invalid setpoint -Infinity");
     }
 
+    @Test
     public void testNegativeDumpPriority() {
 
-        try {
-        
-            new ZoneStatusImpl(0, -1, true, true);
-            fail("Should've failed by now");
-        
-        } catch (IllegalArgumentException ex) {
-            assertEquals("wrong exception message", "Dump priority must be non-negative (-1 given)", ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new ZoneStatusImpl(0, -1, true, true))
+                .withMessage("Dump priority must be non-negative (-1 given)");
     }
 
+    @Test
     public void testEqualsNull() {
 
-        assertFalse("Improper null comparison", new ZoneStatusImpl(0, 0, true, true).equals(null));
+        assertThat(new ZoneStatusImpl(0, 0, true, true).equals(null))
+                .as("null comparison")
+                .isFalse();
     }
 
     public void testEqualsAlien() {
 
         ZoneStatus zs = new ZoneStatusImpl(0, 0, true, true);
 
-        assertFalse("Improper null comparison", zs.equals(zs.toString()));
+        assertThat(zs.equals(zs.toString())).as("null comparison").isFalse();
     }
 
+    @Test
     public void testEqualsThermostatStatus() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ThermostatStatusImpl(0, 0, 0, true, true, true, false);
 
-        assertTrue("Improper heterogenous comparison", a.equals(b));
+        assertThat(a.equals(b)).as("heterogenous comparison").isTrue();
     }
 
+    @Test
     public void testEqualsSame() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 0, true, true);
 
-        assertTrue("Improper comparison", a.equals(b));
+        assertThat(a.equals(b)).as("comparison").isTrue();
     }
 
+    @Test
     public void testDifferentSetpoint() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(1, 0, true, true);
 
-        assertFalse("Improper comparison", a.equals(b));
+        assertThat(a.equals(b)).as("comparison").isFalse();
     }
 
+    @Test
     public void testDifferentDump() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 1, true, true);
 
-        assertFalse("Improper comparison", a.equals(b));
+        assertThat(a.equals(b)).as("comparison").isFalse();
     }
 
+    @Test
     public void testDifferentEnabled() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 0, false, true);
 
-        assertFalse("Improper comparison", a.equals(b));
+        assertThat(a.equals(b)).as("comparison").isFalse();
     }
 
+    @Test
     public void testDifferentVoting() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 0, true, false);
 
-        assertFalse("Improper comparison", a.equals(b));
+        assertThat(a.equals(b)).as("comparison").isFalse();
     }
 
+    @Test
     public void testHashCodeEquals() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 0, true, true);
 
-        assertTrue("Improper hashcode comparison", a.hashCode() == b.hashCode());
+        assertThat(a.hashCode()).as("hashcode comparison").isEqualTo(b.hashCode());
     }
 
+    @Test
     public void testHashCodeDiffers() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(1, 0, true, true);
 
-        assertFalse("Improper hashcode comparison", a.hashCode() == b.hashCode());
+        assertThat(a.hashCode()).as("hashcode comparison").isNotEqualTo(b.hashCode());
     }
 
+    @Test
     public void testToString0011() {
-
-        assertEquals("Wrong string representation", new ZoneStatusImpl(0, 0, true, true).toString(), "setpoint=0.0, enabled, voting");
+        assertThat(new ZoneStatusImpl(0, 0, true, true).toString()).as("string representation").isEqualTo("setpoint=0.0, enabled, voting");
     }
 
+    @Test
     public void testToString0111() {
-
-        assertEquals("Wrong string representation", new ZoneStatusImpl(0, 1, true, true).toString(), "setpoint=0.0, enabled, voting, dump priority=1");
+        assertThat(new ZoneStatusImpl(0, 1, true, true).toString()).as("string representation").isEqualTo("setpoint=0.0, enabled, voting, dump priority=1");
     }
 
+    @Test
     public void testToString0101() {
-
-        assertEquals("Wrong string representation", new ZoneStatusImpl(0, 1, false, true).toString(), "setpoint=0.0, disabled, voting, dump priority=1");
+        assertThat(new ZoneStatusImpl(0, 1, false, true).toString()).as("string representation").isEqualTo("setpoint=0.0, disabled, voting, dump priority=1");
     }
 
+    @Test
     public void testToString0110() {
-
-        assertEquals("Wrong string representation", new ZoneStatusImpl(0, 1, true, false).toString(), "setpoint=0.0, enabled, not voting, dump priority=1");
+        assertThat(new ZoneStatusImpl(0, 1, true, false).toString()).as("string representation").isEqualTo("setpoint=0.0, enabled, not voting, dump priority=1");
     }
 }

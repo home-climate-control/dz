@@ -1,26 +1,6 @@
 package net.sf.dz3.device.actuator.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Ignore;
-import org.junit.Test;
-
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
@@ -33,7 +13,26 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.NullSwitch;
 import net.sf.dz3.instrumentation.Marker;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 /**
  * Set of test cases to replicate https://github.com/home-climate-control/dz/issues/130.
@@ -43,8 +42,8 @@ public class THTest {
     private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
 
-    private static final String WRONG_POSITION = "wrong position";
-    private static final String WRONG_STATE = "wrong switch state";
+    private static final String POSITION = "position";
+    private static final String STATE = "switch state";
 
     @Test
     public void testSyncFastSimple()
@@ -54,10 +53,7 @@ public class THTest {
         testSync("fast/simple", SimpleDamperController.class, 0, 0);
     }
 
-    /**
-     * VT: NOTE: This test may take up to 8+ seconds - too slow for development work. Enable if you need it.
-     */
-    @Ignore
+    @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
     @Test
     public void testSyncSlowSimple()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
@@ -74,10 +70,7 @@ public class THTest {
         testSync("fast/balancing", BalancingDamperController.class, 0, 0);
     }
 
-    /**
-     * VT: NOTE: This test may take up to 8+ seconds - too slow for development work. Enable if you need it.
-     */
-    @Ignore
+    @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
     @Test
     public void testSyncSlowBalancing()
             throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
@@ -176,18 +169,18 @@ public class THTest {
 
             logStatus(dampers, switches);
 
-            assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperMultiplexerWest.getParkPosition(), damperMultiplexerWest.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperWest.getParkPosition(), damperWest.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
+            assertThat(damperLivingRoom.getPosition()).as(POSITION).isEqualTo(damperLivingRoom.getParkPosition());
+            assertThat(damperKitchen.getPosition()).as(POSITION).isEqualTo(damperKitchen.getParkPosition());
+            assertThat(damperWestBathroom.getPosition()).as(POSITION).isEqualTo(damperWestBathroom.getParkPosition());
+            assertThat(damperMultiplexerWest.getPosition()).as(POSITION).isEqualTo(damperMultiplexerWest.getParkPosition());
+            assertThat(damperWest.getPosition()).as(POSITION).isEqualTo(damperWest.getParkPosition());
+            assertThat(damperWestBoosterFan.getPosition()).as(POSITION).isEqualTo(damperWestBoosterFan.getParkPosition());
 
-            assertEquals(WRONG_STATE, true, switchLivingRoom.getState());
-            assertEquals(WRONG_STATE, true, switchKitchen.getState());
-            assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
-            assertEquals(WRONG_STATE, true, switchWestDamper.getState());
-            assertEquals(WRONG_STATE, true, switchWestBoosterFan.getState());
+            assertThat(switchLivingRoom.getState()).as(STATE).isTrue();
+            assertThat(switchKitchen.getState()).as(STATE).isTrue();
+            assertThat(switchWestBathroom.getState()).as(STATE).isTrue();
+            assertThat(switchWestDamper.getState()).as(STATE).isTrue();
+            assertThat(switchWestBoosterFan.getState()).as(STATE).isTrue();
 
             // The above stateChanged() also changed the state of the Unit to "running",
             // next stateChanged() will be handled differently
@@ -225,18 +218,18 @@ public class THTest {
 
             dc.powerOff();
 
-            assertEquals(WRONG_POSITION, damperLivingRoom.getParkPosition(), damperLivingRoom.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperKitchen.getParkPosition(), damperKitchen.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperWestBathroom.getParkPosition(), damperWestBathroom.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperMultiplexerWest.getParkPosition(), damperMultiplexerWest.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperWest.getParkPosition(), damperWest.getPosition(), 0.0001);
-            assertEquals(WRONG_POSITION, damperWestBoosterFan.getParkPosition(), damperWestBoosterFan.getPosition(), 0.0001);
+            assertThat(damperLivingRoom.getPosition()).as(POSITION).isEqualTo(damperLivingRoom.getParkPosition());
+            assertThat(damperKitchen.getPosition()).as(POSITION).isEqualTo(damperKitchen.getParkPosition());
+            assertThat(damperWestBathroom.getPosition()).as(POSITION).isEqualTo(damperWestBathroom.getParkPosition());
+            assertThat(damperMultiplexerWest.getPosition()).as(POSITION).isEqualTo(damperMultiplexerWest.getParkPosition());
+            assertThat(damperWest.getPosition()).as(POSITION).isEqualTo(damperWest.getParkPosition());
+            assertThat(damperWestBoosterFan.getPosition()).as(POSITION).isEqualTo(damperWestBoosterFan.getParkPosition());
 
-            assertEquals(WRONG_STATE, true, switchLivingRoom.getState());
-            assertEquals(WRONG_STATE, true, switchKitchen.getState());
-            assertEquals(WRONG_STATE, true, switchWestBathroom.getState());
-            assertEquals(WRONG_STATE, true, switchWestDamper.getState());
-            assertEquals(WRONG_STATE, true, switchWestBoosterFan.getState());
+            assertThat(switchLivingRoom.getState()).as(STATE).isTrue();
+            assertThat(switchKitchen.getState()).as(STATE).isTrue();
+            assertThat(switchWestBathroom.getState()).as(STATE).isTrue();
+            assertThat(switchWestDamper.getState()).as(STATE).isTrue();
+            assertThat(switchWestBoosterFan.getState()).as(STATE).isTrue();
 
             logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
 
@@ -270,5 +263,4 @@ public class THTest {
 
         ThreadContext.pop();
     }
-
 }

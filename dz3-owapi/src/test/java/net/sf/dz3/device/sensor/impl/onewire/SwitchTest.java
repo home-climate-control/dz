@@ -1,23 +1,25 @@
 package net.sf.dz3.device.sensor.impl.onewire;
 
+import net.sf.dz3.device.sensor.Switch;
+import net.sf.dz3.instrumentation.Marker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.device.sensor.Switch;
-import net.sf.dz3.instrumentation.Marker;
-import junit.framework.TestCase;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test for {@link OwapiDeviceFactory#getSwitch(String)} and underlying {@link Switch} implementation.
  *  
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2018
  */
-public class SwitchTest extends TestCase {
+class SwitchTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
     
@@ -41,12 +43,8 @@ public class SwitchTest extends TestCase {
         return false;
     }
 
-    public void testDummy() {
-        
-        // To make JUnit happy when the other test is disabled
-    }
-
-    public void testGet() throws InterruptedException {
+    @Test
+    public void get() throws InterruptedException {
         
         if (!isOsSupported()) {
             return;
@@ -59,7 +57,7 @@ public class SwitchTest extends TestCase {
 
         try {
 
-            assertTrue("Failed to start, check the logs", df.start().waitFor());
+            assertThat(df.start().waitFor()).isTrue();
 
         } catch (InterruptedException ex) {
 
@@ -75,8 +73,9 @@ public class SwitchTest extends TestCase {
 
         logger.info("done");
     }
-    
-    public void testGetGood() throws IOException, InterruptedException {
+
+    @Test
+    public void getGood() throws IOException, InterruptedException {
         
         ThreadContext.push("testGetGood");
         
@@ -93,7 +92,7 @@ public class SwitchTest extends TestCase {
 
             try {
 
-                assertTrue("Failed to start, check the logs", df.start().waitFor());
+                assertThat(df.start().waitFor()).isTrue();
 
             } catch (InterruptedException ex) {
 
@@ -134,8 +133,9 @@ public class SwitchTest extends TestCase {
             ThreadContext.pop();
         }
     }
-    
-    public void testSetGood() throws IOException, InterruptedException {
+
+    @Test
+    public void setGood() throws IOException, InterruptedException {
         
         ThreadContext.push("testSetGood");
         
@@ -152,7 +152,7 @@ public class SwitchTest extends TestCase {
 
             try {
 
-                assertTrue("Failed to start, check the logs", df.start().waitFor());
+                assertThat(df.start().waitFor()).isTrue();
 
             } catch (InterruptedException ex) {
 

@@ -1,16 +1,15 @@
 package net.sf.dz3.view.swing.thermostat;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Test;
+
 import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import junit.framework.TestCase;
-
-public class ChartTest extends TestCase {
+class ChartTest {
 
 	private final Logger logger = LogManager.getLogger(getClass());
 	private final static Random rg = new Random();
@@ -33,6 +32,7 @@ public class ChartTest extends TestCase {
 	 * Only a solid advantage (no less than 2+ times) will give a faint hope that one algorithm
 	 * is indeed faster than the other. Which is the case.
 	 */
+	@Test
 	public void testAll() {
 
 		long straightTime = 0;

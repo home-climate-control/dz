@@ -1,21 +1,18 @@
 package net.sf.dz3.device.sensor.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.mockito.Mockito.mock;
 
-import net.sf.dz3.device.sensor.AnalogSensor;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-
-public class MedianSetFilterTest {
+class MedianSetFilterTest {
 
     private final static double DELTA = 0.000001;
 
@@ -31,7 +28,7 @@ public class MedianSetFilterTest {
         Double[] samples = { 1d };
         double result = msf.filter(samples);
 
-        assertEquals(1d, result, DELTA);
+        assertThat(result).isEqualTo(1d);
     }
 
     @Test
@@ -46,7 +43,7 @@ public class MedianSetFilterTest {
         Double[] samples = { 1d, 15d, 17d };
         double result = msf.filter(samples);
 
-        assertEquals(15d, result, DELTA);
+        assertThat(result).isEqualTo(15d);
     }
 
     @Test
@@ -61,7 +58,7 @@ public class MedianSetFilterTest {
         Double[] samples = { 1d, 3d };
         double result = msf.filter(samples);
 
-        assertEquals(2d, result, DELTA);
+        assertThat(result).isEqualTo(2d);
     }
 
     @Test
@@ -76,7 +73,7 @@ public class MedianSetFilterTest {
         Double[] samples = { 1d, 3d, 4d, 5d };
         double result = msf.filter(samples);
 
-        assertEquals(3.5d, result, DELTA);
+        assertThat(result).isEqualTo(3.5d);
     }
 
     @Test
@@ -108,61 +105,56 @@ public class MedianSetFilterTest {
 
             // 2, null, null
             msf.consume(new DataSample<Double>(1, a1, a1, 2d, null));
-            assertEquals(1, msf.getSignal().timestamp);
-            assertEquals(2d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().timestamp).isEqualTo(1);
+            assertThat(msf.getSignal().sample).isEqualTo(2d);
 
             // 2, 1, null
             msf.consume(new DataSample<Double>(2, a2, a2, 1d, null));
-            assertEquals(2, msf.getSignal().timestamp);
-            assertEquals(1.5d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().timestamp).isEqualTo(2);
+            assertThat(msf.getSignal().sample).isEqualTo(1.5d);
 
             // 2, 1, 5
             msf.consume(new DataSample<Double>(3, a3, a3, 5d, null));
-            assertEquals(3, msf.getSignal().timestamp);
-            assertEquals(2d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().timestamp).isEqualTo(3);
+            assertThat(msf.getSignal().sample).isEqualTo(2d);
 
             // 2, 1, 4
             msf.consume(new DataSample<Double>(4, a3, a3, 4d, null));
-            assertEquals(4, msf.getSignal().timestamp);
-            assertEquals(2d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().timestamp).isEqualTo(4);
+            assertThat(msf.getSignal().sample).isEqualTo(2d);
 
             // 2, 1, 1.5
             msf.consume(new DataSample<Double>(5, a3, a3, 1.5d, null));
-            assertEquals(5, msf.getSignal().timestamp);
-            assertEquals(1.5d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().timestamp).isEqualTo(5);
+            assertThat(msf.getSignal().sample).isEqualTo(1.5d);
 
             // 1, 1, 1.5
             msf.consume(new DataSample<Double>(6, a1, a1, 1d, null));
-            assertEquals(6, msf.getSignal().timestamp);
-            assertEquals(1d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().timestamp).isEqualTo(6);
+            assertThat(msf.getSignal().sample).isEqualTo(1d);
 
             // Unhappy path
 
             // null, 1, 1.5
             msf.consume(new DataSample<Double>(7, a1, a1, null, new Error(a1)));
-            assertNotNull(msf.getSignal());
-            assertNotNull(msf.getSignal().sample);
-            assertEquals(1.25d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal()).isNotNull();
+            assertThat(msf.getSignal().sample).isNotNull();
+            assertThat(msf.getSignal().sample).isEqualTo(1.25d);
 
             // null, null, 1.5
             msf.consume(new DataSample<Double>(8, a2, a2, null, new Error(a1)));
-            assertNotNull(msf.getSignal());
-            assertNotNull(msf.getSignal().sample);
-            assertEquals(1.5d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal()).isNotNull();
+            assertThat(msf.getSignal().sample).isNotNull();
+            assertThat(msf.getSignal().sample).isEqualTo(1.5d);
 
             // null, null, null
             msf.consume(new DataSample<Double>(9, a3, a3, null, new Error(a1)));
-            assertNotNull(msf.getSignal());
-            assertNull(msf.getSignal().sample);
+            assertThat(msf.getSignal()).isNotNull();
+            assertThat(msf.getSignal().sample).isNull();
 
-            try {
-
-                msf.consume(null);
-                fail("Should've failed already");
-
-            } catch (IllegalArgumentException ex) {
-                assertEquals("sample can't be null", ex.getMessage());
-            }
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> msf.consume(null))
+                    .withMessage("sample can't be null");
 
         } finally {
             ThreadContext.pop();
@@ -196,24 +188,24 @@ public class MedianSetFilterTest {
 
             // 0, 2, null, null
             msf.consume(new DataSample<Double>(0, a1, a1, 2d, null));
-            assertEquals(2d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().sample).isEqualTo(2d);
 
             // 300, 1, null
             msf.consume(new DataSample<Double>(300, a2, a2, 1d, null));
-            assertEquals(1.5d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().sample).isEqualTo(1.5d);
 
             // 600, 1, 5
             msf.consume(new DataSample<Double>(600, a3, a3, 5d, null));
-            assertEquals(2d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().sample).isEqualTo(2d);
 
             // 900, 2, 1, 4
             msf.consume(new DataSample<Double>(4, a3, a3, 4d, null));
-            assertEquals(2d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().sample).isEqualTo(2d);
 
             // This one will expire a1 and a2
             // 1500, null, null, 1.25
             msf.consume(new DataSample<Double>(1500, a3, a3, 1.28d, null));
-            assertEquals(1.28d, msf.getSignal().sample, DELTA);
+            assertThat(msf.getSignal().sample).isEqualTo(1.28d);
 
         } finally {
             ThreadContext.pop();

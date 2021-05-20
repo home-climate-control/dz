@@ -1,36 +1,27 @@
 package net.sf.dz3.view.http.common;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-public class QueueFeederTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+class QueueFeederTest {
 
     @Test
     public void testNullContext() {
 
-        Map<String, Object> context = null;
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("null context, doesn't make sense");
-
-        new QueueFeeder<String>(context) {};
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new QueueFeeder<String>((Map<String, Object>) null) {})
+                .withMessage("null context, doesn't make sense");
     }
 
     @Test
     public void testNullQueue() {
 
-        Map<String, Object> context = new HashMap<String, Object>();
-
-        thrown.expect(IllegalArgumentException.class);
-        thrown.expectMessage("null queue, doesn't make sense");
-
-        new QueueFeeder<String>(context) {};
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new QueueFeeder<String>(new HashMap<String, Object>()) {})
+                .withMessage("null queue, doesn't make sense");
     }
 }

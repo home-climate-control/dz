@@ -1,79 +1,68 @@
 package net.sf.dz3.device.sensor.impl.onewire;
 
+import net.sf.dz3.device.sensor.impl.IntegerChannelAddress;
+import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import org.junit.jupiter.api.Test;
+
 import java.util.Set;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
-import net.sf.dz3.device.sensor.impl.IntegerChannelAddress;
-import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Set of test cases for {@link StringChannelAddress}.
  * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2009
  */
-public class SwitchAddressTest extends TestCase {
-    
-    public void testGood() {
+class SwitchAddressTest {
+
+    @Test
+    public void good() {
         
         new StringChannelAddress("1300000000E6B51F:1");
     }
 
-    public void testNoChannel() {
-        
-        try {
-        
-            new StringChannelAddress("1300000000E6B51F");
-            fail("Should've thrown an exception");
-        
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Wronge exception message", "Channel not present (separator is ':', remember?)", ex.getMessage());
-        }
+    @Test
+    public void noChannel() {
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new StringChannelAddress("1300000000E6B51F"))
+                .withMessage("Channel not present (separator is ':', remember?)");
     }
 
-    public void testNotDecimal() {
-        
-        try {
-            
-            new IntegerChannelAddress("1300000000E6B51F:0x0f");
-            fail("Should've thrown an exception");
-        
-        } catch (NumberFormatException ex) {
-            assertEquals("Wronge exception message", "For input string: \"0x0f\"", ex.getMessage());
-        }
+    @Test
+    public void notDecimal() {
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new IntegerChannelAddress("1300000000E6B51F:0x0f"))
+                .withMessage("For input string: \"0x0f\"");
     }
 
-    public void testTooManyParts() {
-        
-        try {
-            
-            new StringChannelAddress("1300000000E6B51F:1:2");
-            fail("Should've thrown an exception");
-        
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Wronge exception message", "Too many parts (separator is ':', remember?)", ex.getMessage());
-        }
+    @Test
+    public void tooManyParts() {
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new StringChannelAddress("1300000000E6B51F:1:2"))
+                .withMessage("Too many parts (separator is ':', remember?)");
     }
 
-    public void testNegativeChannel() {
-        
-        try {
-            
-            new IntegerChannelAddress("1300000000E6B51F:-1");
-            fail("Should've thrown an exception");
-        
-        } catch (IllegalArgumentException ex) {
-            assertEquals("Wronge exception message", "Channel number is non-negative (-1 given)", ex.getMessage());
-        }
+    @Test
+    public void negativeChannel() {
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new IntegerChannelAddress("1300000000E6B51F:-1"))
+                .withMessage("Channel number is non-negative (-1 given)");
     }
-    
-    public void testComparable() {
+
+    @Test
+    public void comparable() {
         
         StringChannelAddress s0 = new StringChannelAddress("1300000000E6B51F:0");
         StringChannelAddress s1 = new StringChannelAddress("1300000000E6B51F:1");
-        
-        assertTrue(s1.compareTo(s0) > 0);
-        
+
+        assertThat(s1.compareTo(s0)).isGreaterThan(0);
+
         Set<StringChannelAddress> set = new TreeSet<StringChannelAddress>();
         
         set.add(s0);

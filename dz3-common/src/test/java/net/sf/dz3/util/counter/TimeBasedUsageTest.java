@@ -1,10 +1,13 @@
 package net.sf.dz3.util.counter;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class TimeBasedUsageTest extends TestCase {
-    
-    public void testNormalOn() {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class TimeBasedUsageTest {
+
+    @Test
+    public void normalOn() {
         
         TimeBasedUsage tbu = new TimeBasedUsage();
         
@@ -12,11 +15,12 @@ public class TimeBasedUsageTest extends TestCase {
         long after = before + 10;
 
         tbu.consume(before, 1);
-        
-        assertEquals("Wrong consumed value", 10, tbu.consume(after, 1));
+
+        assertThat(tbu.consume(after, 1)).isEqualTo(10);
     }
 
-    public void testNormalOff() {
+    @Test
+    public void normalOff() {
         
         TimeBasedUsage tbu = new TimeBasedUsage();
         
@@ -24,11 +28,12 @@ public class TimeBasedUsageTest extends TestCase {
         long after = before + 10;
 
         tbu.consume(before, 0);
-        
-        assertEquals("Wrong consumed value", 0, tbu.consume(after, 0));
+
+        assertThat(tbu.consume(after, 0)).isEqualTo(0);
     }
 
-    public void testBackInTime() {
+    @Test
+    public void backInTime() {
         
         TimeBasedUsage tbu = new TimeBasedUsage();
         
@@ -36,7 +41,7 @@ public class TimeBasedUsageTest extends TestCase {
         long after = before + 10;
 
         tbu.consume(after, 1);
-        
-        assertEquals("Wrong consumed value", 0, tbu.consume(before, 1));
+
+        assertThat(tbu.consume(after, 1)).isEqualTo(0);
     }
 }

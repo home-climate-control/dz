@@ -1,11 +1,5 @@
 package net.sf.dz3.view.http.common;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Map;
-
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -23,7 +17,13 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HttpClient4PreemptiveAuthTest {
 
@@ -85,7 +85,7 @@ public class HttpClient4PreemptiveAuthTest {
 
             logger.info("RC=" + rc);
 
-            assertEquals("wrong unauthenticated call response code", 401, rc);
+            assertThat(rc).as("unauthenticated call response code").isEqualTo(401);
 
         } finally {
             ThreadContext.pop();
@@ -110,8 +110,8 @@ public class HttpClient4PreemptiveAuthTest {
                 int rc = rsp.getStatusLine().getStatusCode();
 
                 logger.info("RC=" + rc);
-                
-                assertEquals("wrong auth setup call response code", 200, rc);
+
+                assertThat(rc).as("auth setup call response code").isEqualTo(200);
             }
 
             {
@@ -121,8 +121,8 @@ public class HttpClient4PreemptiveAuthTest {
                 int rc = rsp.getStatusLine().getStatusCode();
 
                 logger.info("RC=" + rc);
-                
-                assertEquals("wrong second call response code", 200, rc);
+
+                assertThat(rc).as("second call response code").isEqualTo(200);
             }
 
         } finally {

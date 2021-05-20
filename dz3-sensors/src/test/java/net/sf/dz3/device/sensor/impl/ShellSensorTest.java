@@ -1,15 +1,17 @@
 package net.sf.dz3.device.sensor.impl;
 
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import junit.framework.TestCase;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Shell sensor tests.
@@ -21,7 +23,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
  * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
  */
-public class ShellSensorTest extends TestCase {
+class ShellSensorTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
     
@@ -30,7 +32,7 @@ public class ShellSensorTest extends TestCase {
      */
     private boolean isOsSupported() {
         
-        Set<String> supported = new TreeSet<String>();
+        Set<String> supported = new TreeSet<>();
         
         supported.add("Linux");
         
@@ -44,27 +46,13 @@ public class ShellSensorTest extends TestCase {
         return false;
     }
     
-    /*
-    public void testEnv() {
-        
-        Properties p = System.getProperties();
-        
-        for (Enumeration e = p.propertyNames(); e.hasMoreElements(); ) {
-            
-            String key = e.nextElement().toString();
-            Object value = p.getProperty(key);
-            
-            logger.debug(key + "=" + value); 
-        }
-    }
-    */
-    
     /**
      * Make sure the {@link ShellSensor} properly executes a shell command given.
      */
-    public void testGood() throws IOException {
+    @Test
+    public void good() throws IOException {
         
-        ThreadContext.push("testGood");
+        ThreadContext.push("good");
         
         try {
             
@@ -78,8 +66,8 @@ public class ShellSensorTest extends TestCase {
             DataSample<Double> sample = ss.getSensorSignal();        
             logger.info("Sample: " + sample);
             
-            assertFalse(sample.isError());
-            assertEquals(5.5, sample.sample);
+            assertThat(sample.isError()).isFalse();
+            assertThat(sample.sample).isEqualTo(5.5);
 
         } finally {
             ThreadContext.pop();
@@ -89,9 +77,10 @@ public class ShellSensorTest extends TestCase {
     /**
      * Make sure the {@link ShellSensor} properly reports a problem with the shell command given.
      */
-    public void testBad() throws IOException {
+    @Test
+    public void bad() throws IOException {
         
-        ThreadContext.push("testBad");
+        ThreadContext.push("bad");
         
         try {
 
@@ -104,7 +93,7 @@ public class ShellSensorTest extends TestCase {
             DataSample<Double> sample = ss.getSensorSignal();        
             logger.info("Sample: " + sample);
 
-            assertTrue(sample.isError());
+            assertThat(sample.isError()).isTrue();
 
         } finally {
             ThreadContext.pop();
@@ -116,7 +105,8 @@ public class ShellSensorTest extends TestCase {
      * 
      * Fiddle with arguments and see that pipes are not handled correctly.
      */
-    public void testPipeRaw() throws IOException, InterruptedException {
+    @Test
+    public void pipeRaw() throws IOException, InterruptedException {
         
         ThreadContext.push("testPipeRaw");
         
@@ -141,7 +131,7 @@ public class ShellSensorTest extends TestCase {
 
             }
 
-            assertEquals(0, rc);
+            assertThat(rc).isZero();
             
         } finally {
             ThreadContext.pop();
@@ -151,7 +141,8 @@ public class ShellSensorTest extends TestCase {
     /**
      * Make sure that {@link ShellSensor} implementation correctly handles commands with pipes in them.  
      */
-    public void testPipe() throws IOException {
+    @Test
+    public void pipe() throws IOException {
         
         ThreadContext.push("testPipe");
         
@@ -167,8 +158,8 @@ public class ShellSensorTest extends TestCase {
             DataSample<Double> sample = ss.getSensorSignal();        
             logger.info("Sample: " + sample);
             
-            assertFalse(sample.isError());
-            assertEquals(3210.0, sample.sample);
+            assertThat(sample.isError()).isFalse();
+            assertThat(sample.sample).isEqualTo(3210.0);
 
         } catch (Throwable t) {
             

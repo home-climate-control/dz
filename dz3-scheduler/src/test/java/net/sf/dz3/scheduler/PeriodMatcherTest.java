@@ -1,43 +1,39 @@
 package net.sf.dz3.scheduler;
 
+import net.sf.dz3.device.model.ZoneStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
+import org.junit.jupiter.api.Test;
+
 import java.util.EmptyStackException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import junit.framework.TestCase;
-import net.sf.dz3.device.model.ZoneStatus;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.joda.time.DateTime;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
-public class PeriodMatcherTest extends TestCase {
+class PeriodMatcherTest {
     
     private final Logger logger = LogManager.getLogger(getClass());
 
+    @Test
     public void testNone() {
         
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0).withMinuteOfHour(40);
         
         zoneSchedule.put(new Period("period", "0:15", "0:30", "......."), null);
-        
-        try {
-            
-            test(zoneSchedule, dt);
-            fail("Should have thrown an exception by now");
-            
-        } catch (EmptyStackException ex) {
-            
-           logger.info("Got the exception ('we're fine)");
-        }
-        
+
+        assertThatExceptionOfType(EmptyStackException.class)
+                .isThrownBy(() -> test(zoneSchedule, dt));
     }
-    
+
+    @Test
     public void testSimple() {
         
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
@@ -46,10 +42,11 @@ public class PeriodMatcherTest extends TestCase {
         zoneSchedule.put(p1, null);
 
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
-        
-        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(20)));
+
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(20))).isEqualTo(p1);
     }
 
+    @Test
     public void testSimple2() {
         
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
@@ -59,10 +56,11 @@ public class PeriodMatcherTest extends TestCase {
         zoneSchedule.put(p1, null);
 
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(2);
-        
-        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(20)));
+
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(20))).isEqualTo(p1);
     }
 
+    @Test
     public void testLadder() {
         
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
@@ -76,13 +74,14 @@ public class PeriodMatcherTest extends TestCase {
         zoneSchedule.put(p3, null);
 
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
-        
-        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(15)));
-        assertEquals("Improper match", p2, test(zoneSchedule, dt.withMinuteOfHour(25)));
-        assertEquals("Improper match", p3, test(zoneSchedule, dt.withMinuteOfHour(35)));
-        assertEquals("Improper match", p3, test(zoneSchedule, dt.withMinuteOfHour(45)));
+
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(15))).isEqualTo(p1);
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(25))).isEqualTo(p2);
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(35))).isEqualTo(p3);
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(45))).isEqualTo(p3);
     }
 
+    @Test
     public void testStack() {
         
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
@@ -99,16 +98,16 @@ public class PeriodMatcherTest extends TestCase {
 
         
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
-        
-        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(12)));
-        assertEquals("Improper match", p2, test(zoneSchedule, dt.withMinuteOfHour(18)));
-        assertEquals("Improper match", p3, test(zoneSchedule, dt.withMinuteOfHour(22)));
-        assertEquals("Improper match", p2, test(zoneSchedule, dt.withMinuteOfHour(32)));
-        assertEquals("Improper match", p1, test(zoneSchedule, dt.withMinuteOfHour(42)));
+
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(12))).isEqualTo(p1);
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(18))).isEqualTo(p2);
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(22))).isEqualTo(p3);
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(32))).isEqualTo(p2);
+        assertThat(test(zoneSchedule, dt.withMinuteOfHour(42))).isEqualTo(p1);
     }
 
     private Period test(SortedMap<Period, ZoneStatus> zoneSchedule, DateTime time) {
-        
+
         return new PeriodMatcher().match(zoneSchedule, time);
     }
 }

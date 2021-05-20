@@ -1,20 +1,19 @@
 package net.sf.dz3.xbee;
 
-import static org.junit.Assert.assertEquals;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.junit.Test;
-
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.device.sensor.impl.xbee.Parser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Test;
 
-public class AddressParserTest {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class AddressParserTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
     @Test
-    public void Parser() {
+    public void parser() {
 
         Parser.parse("48 fe 00 13 a2 00 40 5d");
         Parser.parse("48fe0013 a200405d");
@@ -34,16 +33,16 @@ public class AddressParserTest {
         logger.info("Address 3: " + s3);
         logger.info("Address 4: " + s4);
 
-        assertEquals("48 fe 00 13 a2 00 40 5d:0", s1.toString());
-        assertEquals("48fe0013 a200405d:1", s2.toString());
-        assertEquals("48fe0013a200405d:2", s3.toString());
-        assertEquals("00000013a200405d:2", s4.toString());
+        assertThat(s1.toString()).isEqualTo("48 fe 00 13 a2 00 40 5d:0");
+        assertThat(s2.toString()).isEqualTo("48fe0013 a200405d:1");
+        assertThat(s3.toString()).isEqualTo("48fe0013a200405d:2");
+        assertThat(s4.toString()).isEqualTo("00000013a200405d:2");
     }
 
     @Test
     public void highBit() {
 
-        assertEquals("0013A200.405D8027", Parser.render4x4("00 13 a2 00 40 5d 80 27"));
-        assertEquals("0013A200.F05D8027", Parser.render4x4("00 13 a2 00 f0 5d 80 27"));
+        assertThat(Parser.render4x4("00 13 a2 00 40 5d 80 27")).isEqualTo("0013A200.405D8027");
+        assertThat(Parser.render4x4("00 13 a2 00 f0 5d 80 27")).isEqualTo("0013A200.F05D8027");
     }
 }

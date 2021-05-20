@@ -1,18 +1,18 @@
 package net.sf.dz3.device.sensor;
 
+import net.sf.dz3.device.sensor.impl.AnalogConverterTMP36;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
-import net.sf.dz3.device.sensor.impl.AnalogConverterTMP36;
-
-public class AnalogConverterTMP36Test extends TestCase {
+class AnalogConverterTMP36Test {
     
     protected final Logger logger = LogManager.getLogger(getClass());
 
     private final AnalogConverter c = new AnalogConverterTMP36();
 
+    @Test
     public void testTMP36AnalogReference() {
 
         ThreadContext.push("TMP36");

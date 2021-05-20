@@ -1,45 +1,46 @@
 package net.sf.dz3.controller;
 
-import java.util.Random;
-
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import junit.framework.TestCase;
+import java.util.Random;
 
-public class HysteresisControllerTest extends TestCase {
+import static org.assertj.core.api.Assertions.assertThat;
+
+class HysteresisControllerTest {
     
     private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
 
     @SuppressWarnings("unchecked")
+	@Test
     public void testController() {
 	
-	long timestamp = 0;
+		long timestamp = 0;
 
-	@SuppressWarnings("rawtypes")
-	DataSample sequence[] = {
-    	    new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
-    	    new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
-    	    new DataSample<Double>(timestamp++, "source", "signature", 21.0, null),
-    	    new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
-    	    new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
-    	    new DataSample<Double>(timestamp++, "source", "signature", 19.5, null),
-    	    new DataSample<Double>(timestamp++, "source", "signature", 19.0, null)
-    	    };
-	
-	ProcessController pc = new HysteresisController(20);
-	
-	assertEquals(-1.0, pc.compute(sequence[0]).sample);
-	assertEquals(-1.0, pc.compute(sequence[1]).sample);
-	assertEquals(1.0, pc.compute(sequence[2]).sample);
-	assertEquals(1.0, pc.compute(sequence[3]).sample);
-	assertEquals(1.0, pc.compute(sequence[4]).sample);
-	assertEquals(1.0, pc.compute(sequence[5]).sample);
-	assertEquals(-1.0, pc.compute(sequence[6]).sample);
-	
+		@SuppressWarnings("rawtypes")
+        DataSample sequence[] = {
+                new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 21.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 19.5, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 19.0, null)
+                };
+
+		ProcessController pc = new HysteresisController(20);
+
+		assertThat(pc.compute(sequence[0]).sample).isEqualTo(-1.0);
+		assertThat(pc.compute(sequence[1]).sample).isEqualTo(-1.0);
+		assertThat(pc.compute(sequence[2]).sample).isEqualTo(1.0);
+		assertThat(pc.compute(sequence[3]).sample).isEqualTo(1.0);
+		assertThat(pc.compute(sequence[4]).sample).isEqualTo(1.0);
+		assertThat(pc.compute(sequence[5]).sample).isEqualTo(1.0);
+		assertThat(pc.compute(sequence[6]).sample).isEqualTo(-1.0);
     }
     
     /**
@@ -62,7 +63,7 @@ public class HysteresisControllerTest extends TestCase {
 	    logger.info("Sample: " + pv);
 	    logger.info("Signal: " + signal);
 	    
-	    assertEquals(timestamp, signal.timestamp);
+	    assertThat(signal.timestamp).isEqualTo(timestamp);
 	
 	} finally {
 	    ThreadContext.pop();

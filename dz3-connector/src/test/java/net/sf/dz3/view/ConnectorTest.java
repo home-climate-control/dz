@@ -1,28 +1,25 @@
 package net.sf.dz3.view;
 
-import static org.junit.Assert.assertTrue;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-
-public class ConnectorTest {
+class ConnectorTest {
 
     @Test
     public void testNullInitSet() {
 
-        new TestConnector(null);
-        assertTrue(true);
+        assertThat(new TestConnector(null)).isNotNull();
     }
 
     @Test
     public void testNullFactorySet() {
 
-        new TestConnector(null, null);
-        assertTrue(true);
+        assertThat(new TestConnector(null, null)).isNotNull();
     }
 
     private class TestConnector extends Connector<String> {

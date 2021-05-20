@@ -1,17 +1,15 @@
 package net.sf.dz3.device.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import net.sf.dz3.device.model.impl.UnitSignalSplitter;
+import net.sf.dz3.util.counter.FileUsageCounter;
+import net.sf.dz3.util.counter.TimeBasedUsage;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Test;
-
-import net.sf.dz3.device.model.impl.UnitSignalSplitter;
-import net.sf.dz3.util.counter.FileUsageCounter;
-import net.sf.dz3.util.counter.TimeBasedUsage;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test case for {@link FileUsageCounter}. The difference between {@link net.sf.dz3.util.counter.FileUsageCounterTest}
@@ -30,14 +28,14 @@ public class FileUsageCounterTest {
 
         // This sample will just prime the counter, but not add to it
         uss.consume(new DataSample<>("test-unit", "signature", sample, null));
-        assertEquals(0, c.getUsageAbsolute());
+        assertThat(c.getUsageAbsolute()).isZero();
         
         Thread.sleep(delay);
         
         // This one will add approximately delay milliseconds to it
         uss.consume(new DataSample<>("test-unit", "signature", sample, null));
         
-        assertTrue(c.getUsageAbsolute() >= delay);
+        assertThat(c.getUsageAbsolute()).isGreaterThanOrEqualTo(delay);
     }
     
     private File getTempName() throws IOException {

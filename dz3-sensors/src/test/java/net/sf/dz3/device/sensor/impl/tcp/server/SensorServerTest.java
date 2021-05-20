@@ -1,12 +1,13 @@
 package net.sf.dz3.device.sensor.impl.tcp.server;
 
+import org.junit.jupiter.api.Test;
+
 import java.util.Set;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
+class SensorServerTest {
 
-public class SensorServerTest extends TestCase {
-    
+    @Test
     public void testInstantiation() throws Throwable {
 
         Set<String> addresses = new TreeSet<String>();

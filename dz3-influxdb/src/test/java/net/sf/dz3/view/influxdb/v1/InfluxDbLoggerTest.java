@@ -1,23 +1,22 @@
 package net.sf.dz3.view.influxdb.v1;
 
-import static org.junit.Assert.fail;
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * VT: FIXME: Get smarter about running non-unit tests - pipeline will suffer from things like this
  */
-@Ignore
+@Disabled("Enable if you have InfluxDB running on localhost (or elsewhere, see the source)")
 public class InfluxDbLoggerTest {
 
     @Test

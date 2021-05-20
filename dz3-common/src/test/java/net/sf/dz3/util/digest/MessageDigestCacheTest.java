@@ -1,13 +1,11 @@
 package net.sf.dz3.util.digest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import com.homeclimatecontrol.jukebox.util.MessageDigestFactory;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
-import org.junit.Test;
-
-import com.homeclimatecontrol.jukebox.util.MessageDigestFactory;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MessageDigestCacheTest {
 
@@ -25,16 +23,14 @@ public class MessageDigestCacheTest {
         MessageDigestCache.cache.clear();
 
         String key = nextRandomString();
-        
         String hash = MessageDigestCache.getMD5(key);
-        
-        assertEquals("Wrong hash computed", md.getMD5(key), hash);
+
+        assertThat(hash).isEqualTo(md.getMD5(key));
 
         String hash2 = MessageDigestCache.getMD5(key);
-        
-        assertEquals("Different hashes computed???", hash, hash2);
-        
-        assertEquals("Wrong cache size", 1, MessageDigestCache.cache.size());
+        assertThat(hash2).isEqualTo(hash);
+
+        assertThat(MessageDigestCache.cache).hasSize(1);
     }
 
     @Test
@@ -44,16 +40,17 @@ public class MessageDigestCacheTest {
 
         String key1 = nextRandomString();
         String key2 = nextRandomString();
-        
-        assertFalse("Same random value twice in a row? That's a rarity", key1.equals(key2));
-        
+
+        // Same random value twice in a row? That's a rarity
+        assertThat(key2).isNotEqualTo(key1);
+
         String hash1 = MessageDigestCache.getMD5(key1);
         String hash2 = MessageDigestCache.getMD5(key2);
-        
-        assertEquals("Wrong hash computed", md.getMD5(key1), hash1);
-        assertEquals("Wrong hash computed", md.getMD5(key2), hash2);
 
-        assertEquals("Wrong cache size", 2, MessageDigestCache.cache.size());
+        assertThat(hash1).isEqualTo(md.getMD5(key1));
+        assertThat(hash2).isEqualTo(md.getMD5(key2));
+
+        assertThat(MessageDigestCache.cache).hasSize(2);
     }
     
     @Test
@@ -66,11 +63,10 @@ public class MessageDigestCacheTest {
         int count = limit + limit / 2;
         
         while (count-- > 0) {
-            
             MessageDigestCache.getMD5(nextRandomString());
         }
-        
-        assertEquals("Wrong soft limit", limit * 2, MessageDigestCache.cacheSizeLimitSoft);
+
+        assertThat(MessageDigestCache.cacheSizeLimitSoft).isEqualTo(limit * 2);
     }
 
     @Test
@@ -83,10 +79,9 @@ public class MessageDigestCacheTest {
         int count = limit + limit / 2;
         
         while (count-- > 0) {
-            
             MessageDigestCache.getMD5(nextRandomString());
         }
-        
-        assertEquals("Wrong limit", MessageDigestCache.cacheSizeLimitHard, MessageDigestCache.cacheSizeLimitSoft);
+
+        assertThat(MessageDigestCache.cacheSizeLimitSoft).isEqualTo(MessageDigestCache.cacheSizeLimitHard);
     }
 }

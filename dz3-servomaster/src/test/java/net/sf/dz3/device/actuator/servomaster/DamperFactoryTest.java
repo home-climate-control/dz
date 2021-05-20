@@ -2,37 +2,27 @@ package net.sf.dz3.device.actuator.servomaster;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-public class DamperFactoryTest extends TestCase {
+class DamperFactoryTest {
     
     private final Logger logger = LogManager.getLogger(getClass());
-    
+
+    @Test
     public void testBadClassName() {
         
-        try {
-
-            new DamperFactory("badClass", null);
-            fail("Should've thrown an exception already");
-            
-        } catch (IllegalArgumentException ex) {
-            logger.debug("We're fine", ex);
-            assertTrue("Wrong exception message", ex.getMessage().startsWith("Can't find class for name"));
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new DamperFactory("badClass", null))
+                .withMessageStartingWith("Can't find class for name");
     }
 
+    @Test
     public void testNotController() {
-        
-        try {
 
-            new DamperFactory("java.lang.String", null);
-            fail("Should've thrown an exception already");
-            
-        } catch (IllegalArgumentException ex) {
-            logger.debug("We're fine", ex);
-            assertTrue("Wrong exception message", ex.getMessage().startsWith("Not a servo controller"));
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new DamperFactory("java.lang.String", null))
+                .withMessageStartingWith("Not a servo controller");
     }
-
 }

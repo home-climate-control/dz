@@ -1,25 +1,23 @@
 package net.sf.dz3.view.mqtt.v1;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import net.sf.dz3.device.sensor.AnalogSensor;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The slow part of {@link MqttDeviceFactory} test. The fast part is in {@link MqttDeviceFactoryTest}.
  * VT: FIXME: Get smarter about running non-unit tests - pipeline will suffer from things like this
  */
-@Ignore
-public class MqttDeviceFactoryTestSlow extends MqttDeviceFactoryTestBase {
+@Disabled("Enable if you have a MQTT broker running on localhost (or elsewhere, see the source)")
+class MqttDeviceFactoryTestSlow extends MqttDeviceFactoryTestBase {
 
-    @BeforeClass
+    @BeforeAll
     public static void init() throws MqttException {
 
         String root = "/dz-test-" + Math.abs(rg.nextInt()) + "/";
@@ -30,7 +28,7 @@ public class MqttDeviceFactoryTestSlow extends MqttDeviceFactoryTestBase {
         mdf = new MqttDeviceFactory("localhost", pubTopic, subTopic);
     }
 
-    @AfterClass
+    @AfterAll
     public static void shutdown() throws Exception {
         mdf.powerOff();
     }
@@ -55,7 +53,7 @@ public class MqttDeviceFactoryTestSlow extends MqttDeviceFactoryTestBase {
 
         DataSample<Double> signal = s.getSignal();
 
-        assertNotNull("the error is missing", signal.error);
-        assertNull("the sample should not be persent", signal.sample);
+        assertThat(signal.error).as("signal error").isNotNull();
+        assertThat(signal.sample).as("signal sample").isNull();
     }
 }

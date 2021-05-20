@@ -1,25 +1,28 @@
 package net.sf.dz3.device.model.impl;
 
-import java.io.IOException;
-
-import junit.framework.TestCase;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.sem.ACT;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.sensor.impl.NullSensor;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import com.homeclimatecontrol.jukebox.sem.ACT;
+import org.junit.jupiter.api.Test;
 
-public class BalancingDamperControllerTest extends TestCase {
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class BalancingDamperControllerTest {
     
     /**
      * Make sure that thermostats with negative demand don't cause damper control signals
      * out of acceptable range.
      */
+    @Test
     public void testBoundaries() {
         
         Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
@@ -42,6 +45,7 @@ public class BalancingDamperControllerTest extends TestCase {
     /**
      * Make sure that zero demand from all thermostats doesn't cause NaN sent to dampers.
      */
+    @Test
     public void testNaN() {
         
         Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
@@ -57,7 +61,7 @@ public class BalancingDamperControllerTest extends TestCase {
         
         damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>("ts1", "ts1", -50.0, null)));
         
-        assertEquals("Wrong damper position", 0.0, d1.get(), 0.000000000001);
+        assertThat(d1.get()).as("damper position").isEqualTo(0.0);
     }
 
     private static class DummyDamper implements Damper {
@@ -69,29 +73,33 @@ public class BalancingDamperControllerTest extends TestCase {
             this.name = name;
         }
 
+        @Override
         public String getName() {
             return name;
         }
 
+        @Override
         public double getParkPosition() {
             return 1.0;
         }
 
+        @Override
         public double getPosition() throws IOException {
             throw new UnsupportedOperationException("Not Implemented");
         }
 
+        @Override
         public ACT park() {
             throw new UnsupportedOperationException("Not Implemented");
         }
 
         @Override
         public void set(double position) throws IOException {
-            
-            assertTrue("got NaN", Double.compare(position, Double.NaN) != 0);
-            assertTrue("position is above 1.0: " + position, position <= 1.0);
-            assertTrue("position is below 0.0: " + position, position >= 0.0);
-            
+
+            assertThat(position).isNotEqualTo(Double.NaN);
+            assertThat(position).isLessThanOrEqualTo(1.0);
+            assertThat(position).isGreaterThanOrEqualTo(0.0);
+
             currentPosition = position;
         }
         

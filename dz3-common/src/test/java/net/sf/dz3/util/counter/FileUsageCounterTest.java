@@ -1,9 +1,12 @@
 package net.sf.dz3.util.counter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -11,65 +14,48 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.UUID;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIOException;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.fail;
 
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
-
-public class FileUsageCounterTest {
+class FileUsageCounterTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
-    /**
-     * Make sure no null arguments are accepted.
-     */
     @Test
-    public void testNullArgs() throws IOException {
+    void nullName() {
 
-        try {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new FileUsageCounter(null, null, null, null))
+                .withMessage("name can't be null");
+    }
 
-            new FileUsageCounter(null, null, null, null);
-            fail("Should've failed by now");
+    @Test
+    void nullCounter() {
 
-        } catch (IllegalArgumentException ex) {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new FileUsageCounter("name", null, null, null))
+                .withMessage("counter can't be null");
+    }
 
-            assertEquals("Wrong exception message", "name can't be null", ex.getMessage());
-        }
+    void nullStorage() {
 
-        try {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), null, null))
+                .withMessage("persistentStorage can't be null");
+    }
 
-            new FileUsageCounter("name", null, null, null);
-            fail("Should've failed by now");
-
-        } catch (IllegalArgumentException ex) {
-
-            assertEquals("Wrong exception message", "counter can't be null", ex.getMessage());
-        }
-
-        try {
-
-            new FileUsageCounter("name", new TimeBasedUsage(), null, null);
-            fail("Should've failed by now");
-
-        } catch (IllegalArgumentException ex) {
-
-            assertEquals("Wrong exception message", "persistentStorage can't be null", ex.getMessage());
-        }
+    @Test
+    public void nullTarget() throws IOException {
 
         File f = createNonexistentDirect();
 
         try {
 
-            new FileUsageCounter("name", new TimeBasedUsage(), null, f);
-            fail("Should've failed by now");
-
-        } catch (IllegalArgumentException ex) {
-
-            assertEquals("Wrong exception message", "null target doesn't make sense", ex.getMessage());
+            assertThatIllegalArgumentException()
+                    .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), null, f))
+                    .withMessage("null target doesn't make sense");
 
         } finally {
             f.delete();
@@ -99,11 +85,12 @@ public class FileUsageCounterTest {
 
             // Can't really assert much, the timer is too inexact
 
-            assertTrue("Consumed value less than time passed???", counter.getUsageAbsolute() > delay);
+            // Consumed value less than time passed???
+            assertThat(counter.getUsageAbsolute()).isGreaterThan(delay);
 
             counter.reset();
 
-            assertEquals("Wrong value after reset", 0, counter.getUsageAbsolute());
+            assertThat(counter.getUsageAbsolute()).isZero();
 
         } finally {
             ThreadContext.pop();
@@ -113,19 +100,15 @@ public class FileUsageCounterTest {
     @Test
     public void testConsumeNull() throws IOException {
 
-        try {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> {
 
-            File f = createNonexistentDirect();
+                    File f = createNonexistentDirect();
+                    FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
+                    counter.consume(null);
 
-            FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
-
-            counter.consume(null);
-
-        } catch (IllegalArgumentException ex) {
-
-            assertEquals("Wrong exception message", "signal can't be null", ex.getMessage());
-
-        }
+                })
+                .withMessage("signal can't be null");
     }
 
     @Test
@@ -187,14 +170,9 @@ public class FileUsageCounterTest {
 
         f.deleteOnExit();
 
-        try {
-
-            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
-
-        } catch (IllegalArgumentException ex) {
-
-            assertEquals("Wrong exception message", "No 'threshold=NN' found in " + f.getCanonicalPath(), ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f))
+                .withMessage("No 'threshold=NN' found in " + f.getCanonicalPath());
     }
 
     @Test
@@ -210,14 +188,9 @@ public class FileUsageCounterTest {
 
         pw.close();
 
-        try {
-
-            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
-
-        } catch (IllegalArgumentException ex) {
-
-            assertEquals("Wrong exception message", "No 'current=NN' found in " + f.getCanonicalPath(), ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f))
+                .withMessage("No 'current=NN' found in " + f.getCanonicalPath());
     }
 
     @Test
@@ -233,14 +206,9 @@ public class FileUsageCounterTest {
 
         pw.close();
 
-        try {
-
-            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
-
-        } catch (IllegalArgumentException ex) {
-
-            assertEquals("Wrong exception message", "Failed to parse line 'threshold-100' out of " + f.getCanonicalPath() + " (line 1)", ex.getMessage());
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f))
+                .withMessage("Failed to parse line 'threshold-100' out of " + f.getCanonicalPath() + " (line 1)");
     }
 
     /**
@@ -252,14 +220,9 @@ public class FileUsageCounterTest {
         String tmp = System.getProperty("java.io.tmpdir");
         File dir = new File(tmp);
 
-        try {
-
-            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), dir);
-            fail("Should've failed by now");
-
-        } catch (IOException ex) {
-            assertEquals("Wrong exception message", tmp + ": is a directory", ex.getMessage());
-        }
+        assertThatIOException()
+                .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), dir))
+                .withMessage(tmp + ": is a directory");
     }
 
     @Test
@@ -269,14 +232,9 @@ public class FileUsageCounterTest {
 
         File devnull = new File("/dev/null");
 
-        try {
-
-            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), devnull);
-            fail("Should've failed by now");
-
-        } catch (IOException ex) {
-            assertEquals("Wrong exception message", devnull + ": not a regular file", ex.getMessage());
-        }
+        assertThatIOException()
+                .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), devnull))
+                .withMessage(devnull + ": not a regular file");
     }
 
     @Test
@@ -287,14 +245,9 @@ public class FileUsageCounterTest {
 
         File passwd = new File("/etc/passwd");
 
-        try {
-
-            new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), passwd);
-            fail("Should've failed by now");
-
-        } catch (IOException ex) {
-            assertEquals("Wrong exception message", passwd + ": can't write", ex.getMessage());
-        }
+        assertThatIOException()
+                .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), passwd))
+                .withMessage(passwd + ": can't write");
     }
 
     /**
@@ -306,12 +259,12 @@ public class FileUsageCounterTest {
         File f = createNonexistentDirect();
         FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
 
-        assertEquals("The file mustn't exist at this point yet", false, f.exists());
+        assertThat(f).doesNotExist();
         counter.save();
-        assertEquals("The file exist at this point", true, f.exists());
+        assertThat(f).exists();
 
         f.delete();
-        assertEquals("The file must have been deleted by now", false, f.exists());
+        assertThat(f).doesNotExist();
     }
 
     /**
@@ -335,16 +288,18 @@ public class FileUsageCounterTest {
         File f = createNonexistentIndirect();
         FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
 
-        assertEquals("The file mustn't exist at this point yet", false, f.exists());
-        assertEquals("The file parent directory mustn't exist at this point yet", false, f.getParentFile().exists());
+        assertThat(f).doesNotExist();
+        assertThat(f.getParentFile()).doesNotExist();
+
         counter.save();
-        assertEquals("The file exist at this point", true, f.exists());
+
+        assertThat(f).exists();
 
         f.delete();
         f.getParentFile().delete();
 
-        assertEquals("The file must have been deleted by now", false, f.exists());
-        assertEquals("The file parent directory must have been deleted by now", false, f.getParentFile().exists());
+        assertThat(f).doesNotExist();
+        assertThat(f.getParentFile()).doesNotExist();
     }
 
     /**
@@ -394,9 +349,9 @@ public class FileUsageCounterTest {
 
             File tmp = new File(System.getProperty("java.io.tmpdir"));
 
-            if (!tmp.exists() || !tmp.canWrite()) {
-                fail(tmp + ": doesn't exist or can't write");
-            }
+            assertThat(tmp).exists();
+            assertThat(tmp).canRead();
+            assertThat(tmp).canWrite();
 
             File counterFile = new File(tmp, UUID.randomUUID().toString());
             File backupFile = new File(tmp, counterFile.getName() + "-");
@@ -405,13 +360,13 @@ public class FileUsageCounterTest {
 
             counter.consume(new DataSample<Double>("source", "signature", 1d, null));
 
-            assertTrue("counter file must exist", counterFile.exists());
-            assertFalse("backup file must NOT exist", backupFile.exists());
+            assertThat(counterFile).exists();
+            assertThat(backupFile).doesNotExist();
 
             counter.consume(new DataSample<Double>("source", "signature", 1d, null));
 
-            assertTrue("counter file must exist", counterFile.exists());
-            assertTrue("backup file must exist", backupFile.exists());
+            assertThat(counterFile).exists();
+            assertThat(backupFile).exists();
 
         } finally {
             ThreadContext.pop();

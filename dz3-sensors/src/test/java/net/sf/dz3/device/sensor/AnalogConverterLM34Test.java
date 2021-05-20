@@ -1,36 +1,42 @@
 package net.sf.dz3.device.sensor;
 
 import net.sf.dz3.device.sensor.impl.AnalogConverterLM34;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
-public class AnalogConverterLM34Test extends TestCase {
+class AnalogConverterLM34Test {
     
     protected final Logger logger = LogManager.getLogger(getClass());
 
     private final AnalogConverter c = new AnalogConverterLM34();
 
+    @Test
     public void testLM34High() {
-        
-        
-        assertEquals("High boundary conversion failed", 148.889, c.convert(3000d), 0.001);
+
+        // High boundary conversion failed
+        assertThat(c.convert(3000d)).isEqualTo(148.889, within(0.001));
     }
 
+    @Test
     public void testLM34Middle() {
-        
-        
-        assertEquals("Midrange conversion failed", 22.222, c.convert(720d), 0.001);
+
+        // Midrange conversion failed
+        assertThat(c.convert(720d)).isEqualTo(22.222, within(0.001));
     }
 
+    @Test
     public void testLM34Low() {
-        
-        assertEquals("Low boundary conversion failed", -45.556, c.convert(-500d), 0.001);
+
+        // Low boundary conversion failed
+        assertThat(c.convert(-500d)).isEqualTo(-45.556, within(0.001));
     }
 
+    @Test
     public void testLM34AnalogReference() {
         
         ThreadContext.push("LM34");

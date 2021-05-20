@@ -1,12 +1,13 @@
 package net.sf.dz3.controller;
 
-import junit.framework.AssertionFailedError;
-import junit.framework.TestCase;
 import net.sf.dz3.controller.pid.DifferentialSet;
 import net.sf.dz3.controller.pid.LegacyDifferentialSet;
 import net.sf.dz3.controller.pid.NaiveDifferentialSet;
 import net.sf.dz3.controller.pid.SlidingDifferentialSet;
 import net.sf.dz3.instrumentation.Marker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,14 +15,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
-public class DifferentialSetTest extends TestCase {
+class DifferentialSetTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -113,9 +112,9 @@ public class DifferentialSetTest extends TestCase {
                 dataSet2015.record(timestamp, value);
                 dataSetFast.record(timestamp, value);
 
-                assertEquals("2000/2015 differ", dataSet2000.getDifferential(), dataSet2015.getDifferential(), 0.0001);
-                assertEquals("2015/slide differ", dataSet2015.getDifferential(), dataSetFast.getDifferential(), 0.0001);
-                
+                assertThat(dataSet2015.getDifferential()).as("2000/2015").isEqualTo(dataSet2000.getDifferential());
+                assertThat(dataSetFast.getDifferential()).as("2015/slide").isEqualTo(dataSet2015.getDifferential());
+
                 lastGoodTimestamp = timestamp;
             }
 
@@ -239,8 +238,8 @@ public class DifferentialSetTest extends TestCase {
                     logger.info("timestamp/value/expiration: " + timestamp + "/" + value + "/" + expirationInterval);
                     logger.debug("old/new/fast: " + i2000 + " " + i2015 + " " + iFast);
 
-                    assertEquals("2000/2015 differ", i2000, i2015, 0.0001);
-                    assertEquals("2015/slide differ", i2015, iFast, 0.0001);
+                    assertThat(i2015).as("2000/2015").isEqualTo(i2000);
+                    assertThat(iFast).as("2015/slide").isEqualTo(i2015);
 
                 } finally {
                     ThreadContext.pop();
@@ -249,14 +248,7 @@ public class DifferentialSetTest extends TestCase {
             
             logger.debug("Success");
 
-        } catch (AssertionFailedError e) {
-            
-            logger.error("Failure");
-            
-            throw e;
-            
         } finally {
-            
             ThreadContext.pop();
         }
 
@@ -273,6 +265,7 @@ public class DifferentialSetTest extends TestCase {
             stopGate.acquire();
         }
 
+        @Override
         public void run() {
 
             DifferentialSet dataSet = createSet(expirationInterval);

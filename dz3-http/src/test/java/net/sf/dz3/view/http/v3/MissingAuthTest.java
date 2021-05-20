@@ -1,6 +1,16 @@
 package net.sf.dz3.view.http.v3;
 
-import static org.junit.Assert.assertEquals;
+import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3.view.http.common.AbstractExchanger;
+import net.sf.dz3.view.http.common.BufferedExchanger;
+import net.sf.dz3.view.http.common.ContextChecker;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URL;
@@ -11,18 +21,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Test;
-
-import net.sf.dz3.instrumentation.Marker;
-import net.sf.dz3.view.http.common.AbstractExchanger;
-import net.sf.dz3.view.http.common.BufferedExchanger;
-import net.sf.dz3.view.http.common.ContextChecker;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link AbstractExchanger} being instantiated without username and password
@@ -75,7 +74,7 @@ public class MissingAuthTest {
             exchanger.stop().waitFor();
             logger.debug("stopped the exchanger");
 
-            assertEquals("wrong status", 200, exchanger.status.get());
+            assertThat(exchanger.status.get()).isEqualTo(200);
 
         } finally {
 

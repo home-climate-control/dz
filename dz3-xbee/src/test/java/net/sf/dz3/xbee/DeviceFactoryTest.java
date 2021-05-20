@@ -1,39 +1,41 @@
 package net.sf.dz3.xbee;
 
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Ignore;
-
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBee;
 import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeeResponse;
-
-import junit.framework.TestCase;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.xbee.Converter;
 import net.sf.dz3.device.sensor.impl.xbee.IoSample;
 import net.sf.dz3.device.sensor.impl.xbee.XBeeDeviceFactory;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
-public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
+@Disabled("Enable this if you have the actual hardware (you will need to adjust the addresses, too")
+class DeviceFactoryTest implements DataSink<Double> {
 
     private static final String serialPort = "/dev/ttyUSB0";
 
     private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
 
+    @Test
     public void testSensor() throws XBeeException {
 
         ThreadContext.push("testSensor");
@@ -81,7 +83,7 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
 
                     int[] data = ((AtCommandResponse) rsp).getValue();
 
-                    assertEquals("Unexpected buffer length", 12, data.length);
+                    assertThat(data.length).isEqualTo(12);
 
                     for (int offset = 4; offset < 12; offset += 2) {
 
@@ -117,7 +119,7 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
 
                 int[] data = ((AtCommandResponse) rsp).getValue();
 
-                assertEquals("Unexpected buffer length", 2, data.length);
+                assertThat(data.length).isEqualTo(2);
 
                 int sensorReading = data[0] << 8 | data[1];
 
@@ -153,6 +155,7 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
         }
     }
 
+    @Test
     public void testStartStop() throws InterruptedException {
 
         ThreadContext.push("testStartStop");
@@ -179,7 +182,7 @@ public class DeviceFactoryTest extends TestCase implements DataSink<Double> {
 
                 logger.info("@" + offset + ": " + step2.get(offset));
 
-                assertEquals("Mismatch @" + offset, step2.get(offset), step3.get(offset));
+                assertThat(step3.get(offset)).as("Mismatch @" + offset).isEqualTo(step2.get(offset));
             }
 
             readSensor(deviceFactory, sensorAddress);

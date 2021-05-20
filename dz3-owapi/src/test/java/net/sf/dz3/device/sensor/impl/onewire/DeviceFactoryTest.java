@@ -1,22 +1,23 @@
 package net.sf.dz3.device.sensor.impl.onewire;
 
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.service.ActiveService;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import junit.framework.TestCase;
-import net.sf.dz3.device.sensor.AnalogSensor;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.service.ActiveService;
-
-public class DeviceFactoryTest extends TestCase {
+class DeviceFactoryTest {
     
     private final Logger logger = LogManager.getLogger(getClass());
     
@@ -40,15 +41,11 @@ public class DeviceFactoryTest extends TestCase {
         return false;
     }
     
-    public void testDummy() {
-        
-        // To make JUnit happy when the other test is disabled
-    }
-
     /**
      * Test the {@link OwapiDeviceFactory} initialization.
      * @throws InterruptedException if it is thrown by {@link ActiveService#startup()}.
      */
+    @Test
     public void testFactory() throws InterruptedException {
         
         ThreadContext.push("testFactory");
@@ -80,12 +77,14 @@ public class DeviceFactoryTest extends TestCase {
             ThreadContext.pop();
         }
     }
-   
+
+    @Test
     public void testGetSensorDelayed() throws InterruptedException {
         
         testGetSensor(5000, 10000);
     }
 
+    @Test
     public void testGetSensorImmediate() throws InterruptedException {
         
         testGetSensor(0, 10000);
@@ -116,7 +115,7 @@ public class DeviceFactoryTest extends TestCase {
 
             OwapiDeviceFactory df = new OwapiDeviceFactory("/dev/ttyUSB0", "regular");
 
-            assertTrue("Failed to start, check the logs", df.start().waitFor());
+            assertThat(df.start().waitFor()).isTrue();
 
             Thread.sleep(initialDelay);
 
@@ -124,7 +123,7 @@ public class DeviceFactoryTest extends TestCase {
 
             logger.info("Sensor: " + sensor);
 
-            assertNotNull(sensor);
+            assertThat(sensor).isNotNull();
 
             List<DataSample<Double>> sink = new LinkedList<DataSample<Double>>();
 
@@ -143,7 +142,8 @@ public class DeviceFactoryTest extends TestCase {
                 logger.debug(i.next());
             }
 
-            assertFalse("Should have collected data samples", sink.isEmpty());
+            // Should have collected data samples
+            assertThat(sink).isNotEmpty();
 
             boolean gotData = false;
 
@@ -157,7 +157,8 @@ public class DeviceFactoryTest extends TestCase {
                 }
             }
 
-            assertTrue("No non-error samples were collected", gotData);
+            // No non-error samples were collected
+            assertThat(gotData).isTrue();
         } finally {
             ThreadContext.pop();
         }

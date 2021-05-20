@@ -1,7 +1,22 @@
 package net.sf.dz3.scheduler.gcal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import com.google.api.client.util.DateTime;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.device.model.ThermostatSignal;
+import net.sf.dz3.device.model.ZoneStatus;
+import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3.scheduler.Period;
+import net.sf.dz3.scheduler.PeriodMatcher;
+import net.sf.dz3.scheduler.ScheduleUpdater;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.joda.time.DateTimeZone;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -16,33 +31,14 @@ import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
 
-import net.sf.dz3.device.model.Thermostat;
-import net.sf.dz3.device.model.ThermostatSignal;
-import net.sf.dz3.device.model.ZoneStatus;
-import net.sf.dz3.instrumentation.Marker;
-import net.sf.dz3.scheduler.Period;
-import net.sf.dz3.scheduler.PeriodMatcher;
-import net.sf.dz3.scheduler.ScheduleUpdater;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.joda.time.DateTimeZone;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import com.google.api.client.util.DateTime;
-
-import junit.framework.AssertionFailedError;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
-public class GCalScheduleUpdaterTest {
+class GCalScheduleUpdaterTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -65,8 +61,9 @@ public class GCalScheduleUpdaterTest {
         dt = new DateTime(new Date(dt.getValue()), TimeZone.getTimeZone("GMT"));
 
         logger.info("GMT: " + dt);
-        
-        assertEquals("TZ shift problem", "2010-01-31T01:00:00.000Z", dt.toString());
+
+        // TZ shift problem
+        assertThat(dt.toString()).isEqualTo("2010-01-31T01:00:00.000Z");
     }
 
     /**
@@ -74,7 +71,7 @@ public class GCalScheduleUpdaterTest {
      *
      * Also see {@link https://github.com/home-climate-control/dz/issues/42}.
      */
-    @Ignore
+    @Disabled("Too cumbersome, read comments")
     @Test
     public void testDST() {
         
@@ -89,7 +86,7 @@ public class GCalScheduleUpdaterTest {
         
         try {
         
-            Map<Thermostat, String> ts2source = new TreeMap<Thermostat, String>();
+            Map<Thermostat, String> ts2source = new TreeMap<>();
             
             // This calendar has to be in Mountain Time Zone with the DST offset present, so do all the events (check individually
             // if your time zone is different).
@@ -114,10 +111,6 @@ public class GCalScheduleUpdaterTest {
             SortedMap<Period, ZoneStatus> events = schedule.values().iterator().next();
             
             testEvents(events);
-            
-        } catch (AssertionFailedError ex) {
-            
-            throw ex;
             
         } catch (Throwable t) {
             
@@ -184,8 +177,9 @@ public class GCalScheduleUpdaterTest {
             Period p = pm.match(events, timeMST);
 
             logger.info("Period matched: " + p);
-            
-            assertEquals("Wrong period matched", offset2name.get(hour), p.name);
+
+            // Wrong period matched
+            assertThat(p.name).isEqualTo(offset2name.get(hour));
         }
     }
     
@@ -350,6 +344,7 @@ public class GCalScheduleUpdaterTest {
             return null;
         }
         
+        @Override
         public String toString() {
             
             return getName();

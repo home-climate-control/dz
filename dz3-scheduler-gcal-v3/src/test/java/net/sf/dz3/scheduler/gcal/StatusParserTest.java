@@ -2,18 +2,19 @@ package net.sf.dz3.scheduler.gcal;
 
 import net.sf.dz3.device.model.ZoneStatus;
 import net.sf.dz3.device.model.impl.ZoneStatusImpl;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
-import junit.framework.TestCase;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
-public class StatusParserTest extends TestCase {
+class StatusParserTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -38,7 +39,8 @@ public class StatusParserTest extends TestCase {
             new ZoneStatusImpl(26.666666666666668, 0, false, false),
             new ZoneStatusImpl(26.666666666666668, 0, false, false),
     };
-    
+
+    @Test
     public void testAllGood() {
         
         StatusParser p = new StatusParser();
@@ -52,22 +54,23 @@ public class StatusParserTest extends TestCase {
                 ZoneStatus status = p.parse(inputs[offset]);
 
                 logger.info("Status: " + status);
-                
-                assertEquals("Failed to parse '" + inputs[offset], outputs[offset], status);
-                
+
+                assertThat(status).as("Failed to parse '" + inputs[offset]).isEqualTo(outputs[offset]);
+
             } finally {
                 ThreadContext.pop();
             }
         }
     }
-    
+
+    @Test
     public void testCut() {
         
         String source = "2010-02-04T14:59:00.000-07:00";
         String substring = source.substring(11, 16);
         logger.info("Substring: '" + substring + "'");
-        
-        assertEquals("Wrong substring", "14:59", substring);
+
+        assertThat(substring).isEqualTo("14:59");
     }
 
     private final String[] malformedSetpoints1 = {
@@ -75,6 +78,7 @@ public class StatusParserTest extends TestCase {
             "setpoint",
     };
 
+    @Test
     public void testBadSetpoints() {
 
         ThreadContext.push("testBadSetpoints");
@@ -90,54 +94,25 @@ public class StatusParserTest extends TestCase {
 
                 try {
 
-                    ZoneStatus status = p.parse(setpoint);
-
-                    fail("should've blown up by now");
-
-                } catch (IllegalArgumentException ex) {
-
-                    // This is expected
-                    logger.debug("Expected exception", ex);
-
-                    assertEquals("wrong exception message",
-                            "can't parse '" + setpoint + "' (malformed setpoint '" + setpoint + "')",
-                            ex.getMessage());
-
-                } catch (Throwable t) {
-
-                    logger.error("Oops", t);
-                    fail("wrong exception thrown, see the log");
+                    assertThatIllegalArgumentException()
+                            .isThrownBy(() -> p.parse(setpoint))
+                            .withMessage("can't parse '" + setpoint + "' (malformed setpoint '" + setpoint + "')");
 
                 } finally {
                     ThreadContext.pop();
                 }
             }
+
         } finally {
             ThreadContext.pop();
         }
     }
 
+    @Test
     public void testOff() {
 
-        ThreadContext.push("testBadSetpoints");
-
-        try {
-
-            StatusParser p = new StatusParser();
-
-            try {
-
-                ZoneStatus status = p.parse("off");
-
-                fail("should've blown up by now");
-
-            } catch (IllegalArgumentException ex) {
-
-                assertEquals("wrong exception message", "Could not parse setpoint out of 'off'", ex.getMessage());
-            }
-
-        } finally {
-            ThreadContext.pop();
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new StatusParser().parse("off"))
+                .withMessage("Could not parse setpoint out of 'off'");
     }
 }

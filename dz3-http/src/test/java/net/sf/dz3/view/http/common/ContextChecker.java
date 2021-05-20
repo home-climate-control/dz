@@ -1,14 +1,14 @@
 package net.sf.dz3.view.http.common;
 
 
-import static org.junit.Assert.fail;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.apache.logging.log4j.Logger;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Simple class to check whether the test cases run in an environment they need

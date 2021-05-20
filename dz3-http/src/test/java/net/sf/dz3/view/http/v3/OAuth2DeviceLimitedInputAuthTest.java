@@ -1,6 +1,19 @@
 package net.sf.dz3.view.http.v3;
 
-import static org.junit.Assert.fail;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import net.sf.dz3.view.http.common.ContextChecker;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,29 +25,14 @@ import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Test;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import net.sf.dz3.view.http.common.ContextChecker;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test case for {@link https://developers.google.com/identity/protocols/OAuth2ForDevices OAuth 2.0 for TV and Limited-Input Device Applications}.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
-public class OAuth2DeviceLimitedInputAuthTest {
+class OAuth2DeviceLimitedInputAuthTest {
     
     private final Logger logger = LogManager.getLogger(getClass());
 

@@ -1,24 +1,23 @@
 package net.sf.dz3.view.http.v2;
 
-import static org.junit.Assert.assertEquals;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import net.sf.dz3.device.model.ThermostatSignal;
+import net.sf.dz3.device.model.impl.ThermostatModel;
+import net.sf.dz3.device.sensor.impl.NullSensor;
+import net.sf.dz3.view.http.common.QueueFeeder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import net.sf.dz3.device.model.ThermostatSignal;
-import net.sf.dz3.device.model.impl.ThermostatModel;
-import net.sf.dz3.device.sensor.impl.NullSensor;
-import net.sf.dz3.view.http.common.QueueFeeder;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-
-public class JsonRendererTest {
+class JsonRendererTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
@@ -42,11 +41,11 @@ public class JsonRendererTest {
 
             tr.consume(new DataSample<ThermostatSignal>("source-ts", "signature-ts", ts, null));
 
-            assertEquals("wrong queue size", 1, queue.size());
+            assertThat(queue).hasSize(1);
 
             logger.debug("queue head: " + queue.peek());
 
-            assertEquals("wrong toString()", "json-thermostat: Cooling, CALLING, signal=0.0, current=0.0, setpoint=20.0, on hold", queue.peek().toString());
+            assertThat(queue.peek().toString()).isEqualTo("json-thermostat: Cooling, CALLING, signal=0.0, current=0.0, setpoint=20.0, on hold");
 
         } finally {
             ThreadContext.pop();
