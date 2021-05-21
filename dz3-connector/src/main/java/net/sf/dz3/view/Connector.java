@@ -1,18 +1,16 @@
 package net.sf.dz3.view;
 
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 
 /**
  * Base class for implementing the V in MVC.
@@ -150,7 +148,7 @@ public abstract class Connector<T> implements JmxAware {
     /**
      * Create the context.
      *
-     * This object will be used by {@link #createComponentMap(TreeMap)} and discarded. Don't bother keeping
+     * This object will be used by {@link #createComponentMap(Map)} and discarded. Don't bother keeping
      * the reference, it won't be called often, most probably once.
      *
      * @return The context.

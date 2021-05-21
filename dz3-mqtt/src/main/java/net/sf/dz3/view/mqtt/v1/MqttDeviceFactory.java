@@ -1,20 +1,15 @@
 package net.sf.dz3.view.mqtt.v1;
 
-import java.io.ByteArrayInputStream;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.concurrent.CountDownLatch;
-
-import javax.json.Json;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.Addressable;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import net.sf.dz3.device.sensor.DeviceFactory2020;
+import net.sf.dz3.device.sensor.Switch;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,16 +19,19 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import net.sf.dz3.device.sensor.Addressable;
-import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.dz3.device.sensor.DeviceFactory2020;
-import net.sf.dz3.device.sensor.Switch;
-import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
-import com.homeclimatecontrol.jukebox.jmx.JmxAware;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import javax.json.Json;
+import javax.json.JsonNumber;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Factory for sensors and actuators supported via MQTT.
@@ -78,7 +76,6 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
      * @param mqttBrokerHost Host to connect to.
      * @param mqttRootTopicPub Root topic to publish to.
      * @param mqttRootTopicSub Root topic to subscribe to.
-     * @param initSet Entities to publish the status of.
      */
     public MqttDeviceFactory(
             String mqttBrokerHost,
@@ -94,7 +91,6 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
      * @param mqttBrokerPort Port to connect to.
      * @param mqttRootTopicPub Root topic to publish to.
      * @param mqttRootTopicSub Root topic to subscribe to.
-     * @param initSet Entities to publish the status of.
      */
     public MqttDeviceFactory(
             String mqttBrokerHost, int mqttBrokerPort,
@@ -107,12 +103,10 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
      * Authenticated constructor with a default port.
      *
      * @param mqttBrokerHost Host to connect to.
-     * @param port Port to connect to.
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
      * @param mqttRootTopicSub Root topic to subscribe to.
-     * @param initSet Entities to publish the status of.
      */
     public MqttDeviceFactory(
             String mqttBrokerHost,
@@ -131,7 +125,6 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.
      * @param mqttRootTopicSub Root topic to subscribe to.
-     * @param initSet Entities to publish the status of.
      */
     public MqttDeviceFactory(
             String mqttBrokerHost, int mqttBrokerPort,

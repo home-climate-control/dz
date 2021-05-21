@@ -1,17 +1,17 @@
 package net.sf.dz3.view.mqtt.v1;
 
+import com.homeclimatecontrol.jukebox.util.MessageDigestFactory;
+
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import com.homeclimatecontrol.jukebox.util.MessageDigestFactory;
-
 /**
  * Basic contraption to feed the {@link #upstreamQueue}.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public abstract class QueueFeeder<DataBlock> {
-    
+
     /**
      * Key to extract the {@link #upstreamQueue queue} from the map given to the constructor.
      */
@@ -21,16 +21,16 @@ public abstract class QueueFeeder<DataBlock> {
 
     /**
      * Queue to put notifications into.
-     * 
-     *  {@link #emit(UpstreamBlock)} will take care of that.
+     *
+     *  {@link #emit} will take care of that.
      */
     private final BlockingQueue<DataBlock> upstreamQueue;
-    
+
     /**
      * Create an instance.
-     * 
+     *
      * @param context A map that contains the {@link #upstreamQueue} object under
-     * {@link #QUEUE_KEY} key. 
+     * {@link #QUEUE_KEY} key.
      */
     @SuppressWarnings("unchecked")
     public QueueFeeder(Map<String, Object> context) {
@@ -48,11 +48,11 @@ public abstract class QueueFeeder<DataBlock> {
 
     /**
      * Queue the notification.
-     * 
+     *
      * @param b Data block to queue.
      */
     protected final void emit(DataBlock b) {
-        
+
         upstreamQueue.add(b);
     }
 
