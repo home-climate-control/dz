@@ -1,3 +1,8 @@
+plugins {
+    id 'com.github.spotbugs'
+    id 'net.ltgt.errorprone' apply false
+}
+
 subprojects {
 
     apply plugin: 'java'
@@ -8,6 +13,8 @@ subprojects {
 
     apply plugin: 'maven-publish'
     apply plugin: 'jacoco'
+    apply plugin: 'net.ltgt.errorprone'
+
     group = 'net.sf.dz3'
     version = '3.6.8-SNAPSHOT'
 
@@ -44,6 +51,8 @@ subprojects {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
         testCompile('org.assertj:assertj-core:3.11.1')
+
+        errorprone 'com.google.errorprone:error_prone_core:2.6.0'
     }
 
     test {
