@@ -1,25 +1,6 @@
 package net.sf.dz3.view.mqtt.v1;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-
-import org.apache.logging.log4j.ThreadContext;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.Addressable;
@@ -28,7 +9,24 @@ import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import org.apache.logging.log4j.ThreadContext;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonString;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * MQTT broker interface.
@@ -160,7 +158,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             Set<Object> initSet,
             Set<ConnectorFactory<JsonRenderer>> factorySet) throws MqttException {
 
-        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, factorySet);
     }
 
     /**
