@@ -1,11 +1,10 @@
 package net.sf.dz3.runtime;
 
-import org.apache.logging.log4j.LogManager;
-
-import net.sf.dz3.device.sensor.AnalogSensor;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import org.apache.logging.log4j.LogManager;
 
 public class NativeSensorFactory implements SensorFactory<NativeSensorDescriptor> {
 
@@ -56,6 +55,7 @@ public class NativeSensorFactory implements SensorFactory<NativeSensorDescriptor
             return null;
         }
 
+        @Override
         public String toString() {
 
             return "Sensor[" + descriptor + "]";

@@ -1,10 +1,10 @@
 package net.sf.dz3.controller.pid;
 
+import net.sf.dz3.controller.DataSet;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
-
-import net.sf.dz3.controller.DataSet;
 
 /**
  * Data set supporting the integration calculation.
@@ -13,7 +13,7 @@ import net.sf.dz3.controller.DataSet;
  * is used, however, make sure you record the right values. If this class is
  * used for the {@link PID_Controller}, it must be fed with controller error,
  * and anti-windup action must be programmed outside of this class.
- * 
+ *
  * Unlike {@link NaiveIntegralSet} (which has the time complexity of {@code O(n)}), this class
  * provides {@code O(1)} time complexity.
  *
@@ -128,8 +128,8 @@ public class SlidingIntegralSet implements IntegralSet {
      *
      * @return An integral value (of the {@link #lastIntegral}).
      */
+    @Override
     public final synchronized double getIntegral() {
-
         return lastIntegral;
     }
 }

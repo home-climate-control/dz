@@ -30,7 +30,6 @@ class SimpleZoneControllerTest {
     /**
      * Test the simplest possible combination: {@link SimpleZoneController} with
      * one thermostat using a {@link SimplePidController}.
-     * @throws InterruptedException 
      */
     @Test
     public void test1H() throws InterruptedException {
@@ -42,7 +41,7 @@ class SimpleZoneControllerTest {
             long timestamp = 0;
 
 	    Queue<DataSample<Double>> tempSequence = new LinkedList<DataSample<Double>>();
-	    
+
 	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.0, null));
 	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.5, null));
 	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 21.0, null));
@@ -56,9 +55,9 @@ class SimpleZoneControllerTest {
             AnalogSensor sensor = new NullSensor("address", 0);
             Thermostat ts = new ThermostatModel("ts", sensor, controller);
             tsSet.add(ts);
-            
+
             ZoneController zc = new SimpleZoneController("zc", tsSet);
-            
+
             logger.info("Zone controller: " + zc);
 
             // Initially, the thermostat is not calling and controller is off
@@ -135,20 +134,20 @@ class SimpleZoneControllerTest {
             ThreadContext.pop();
         }
     }
-    
+
     /**
      * Test the "Cold Start" bug ({@link http://code.google.com/p/diy-zoning/issues/detail?id=1}.
-     * 
+     *
      * The zone controller should stay off without exceptions when the first ever signal
      * doesn't indicate calling.
      */
     @Test
     public void testColdStartNotCalling() {
-        
+
         ThreadContext.push("testColdStart");
-        
+
         try {
-        
+
             AbstractPidController c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
             AnalogSensor s1 = new NullSensor("address1", 0);
             Thermostat t1 = new ThermostatModel("ts1", s1, c1);
@@ -160,22 +159,22 @@ class SimpleZoneControllerTest {
             assertThat(t1.getSignal().calling).isFalse();
 
             Set<Thermostat> tsSet = new TreeSet<Thermostat>();
-            
+
             tsSet.add(t1);
             tsSet.add(t2);
-            
+
             ZoneController zc = new SimpleZoneController("zc", tsSet);
 
             logger.info("Zone controller: " + zc);
-            
+
             {
                 t2.consume(new DataSample<Double>(0, "source", "signature", 20.0, null));
                 assertThat(t2.getSignal().calling).isFalse();
-                
+
                 DataSample<Double> signal = zc.getSignal();
 
                 assertThat(signal).isNotNull();
-                
+
                 assertThat(signal.sample).isEqualTo(0.0);
             }
 
@@ -183,20 +182,20 @@ class SimpleZoneControllerTest {
             ThreadContext.pop();
         }
     }
-    
+
     /**
      * Test the "Cold Start" bug ({@link http://code.google.com/p/diy-zoning/issues/detail?id=1}.
-     * 
+     *
      * The zone controller should switch on when the first ever thermostat signal
      * indicates calling.
      */
     @Test
     public void testColdStartCalling() {
-        
+
         ThreadContext.push("testColdStart");
-        
+
         try {
-        
+
             AbstractPidController c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
             AnalogSensor s1 = new NullSensor("address1", 0);
             Thermostat t1 = new ThermostatModel("ts1", s1, c1);
@@ -208,22 +207,22 @@ class SimpleZoneControllerTest {
             assertThat(t1.getSignal().calling).isFalse();
 
             Set<Thermostat> tsSet = new TreeSet<Thermostat>();
-            
+
             tsSet.add(t1);
             tsSet.add(t2);
-            
+
             ZoneController zc = new SimpleZoneController("zc", tsSet);
 
             logger.info("Zone controller: " + zc);
-            
+
             {
                 t2.consume(new DataSample<Double>(0, "source", "signature", 30.0, null));
                 assertThat(t2.getSignal().calling).isTrue();
-                
+
                 DataSample<Double> signal = zc.getSignal();
 
                 assertThat(signal).isNotNull();
-                
+
                 assertThat(signal.sample).isEqualTo(6.0);
             }
 

@@ -104,7 +104,6 @@ public class MqttConnector extends Connector<JsonRenderer> {
      * Authenticated constructor with a default port.
      *
      * @param mqttBrokerHost Host to connect to.
-     * @param port Port to connect to.
      * @param mqttBrokerUsername MQTT broker username.
      * @param mqttBrokerPassword MQTT broker password.
      * @param mqttRootTopicPub Root topic to publish to.

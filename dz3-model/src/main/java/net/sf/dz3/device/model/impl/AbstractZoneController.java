@@ -1,5 +1,17 @@
 package net.sf.dz3.device.model.impl;
 
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.logger.LogAware;
+import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.device.model.ThermostatSignal;
+import net.sf.dz3.device.model.ThermostatStatus;
+import net.sf.dz3.device.model.ZoneController;
+import net.sf.dz3.util.digest.MessageDigestCache;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -7,19 +19,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.device.model.Thermostat;
-import net.sf.dz3.device.model.ThermostatSignal;
-import net.sf.dz3.device.model.ThermostatStatus;
-import net.sf.dz3.device.model.ZoneController;
-import net.sf.dz3.util.digest.MessageDigestCache;
-import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import com.homeclimatecontrol.jukebox.logger.LogAware;
 
 /**
  * The zone controller abstraction.
@@ -33,7 +32,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
     /**
      * Zone controller name.
-     * 
+     *
      * Necessary evil to allow instrumentation signature.
      */
     private final String name;
@@ -80,7 +79,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
     /**
      * Create an instance with no connected thermostats.
-     * 
+     *
      * @param name Zone controller name.
      */
     public AbstractZoneController(String name) {
@@ -90,7 +89,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
     /**
      * Create an instance with connected thermostats.
-     * 
+     *
      * @param name Zone controller name.
      * @param sources Thermostats to use as signal sources.
      */
@@ -134,9 +133,9 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
         ThreadContext.push("stateChanged");
 
         try {
-            
+
             if (logger.isTraceEnabled()) {
-                
+
                 // DataSample.toString() is expensive,and DataSample is a component of ThermostatSignal
 
                 logger.trace("Source: " + source);
@@ -168,7 +167,7 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
     /**
      * Execute {@link Thermostat#raise() on every thermostat for this zone other than {@code source}.
-     * 
+     *
      * @param source Thermostat to exclude from the {@code raise()}.
      */
     private void raise(Thermostat source) {
@@ -214,10 +213,10 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
     /**
      * See whether the thermostat is still calling.
-     * 
+     *
      * @param source Thermostat whose signal is being considered.
      * @param signal Thermostat signal.
-     * 
+     *
      * @return {@code true} if this signal indicates a need to bump the HVAC
      * into "running" state (and possibly other thermostats into "calling" state).
      */
@@ -274,9 +273,9 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
     }
 
     /**
-     * 
+     *
      * @param signalSet Set of thermostat signals to count the calling status for.
-     * 
+     *
      * @return Number of signals with calling bit set.
      */
     private int countCalling(Collection<ThermostatSignal> signalSet) {
@@ -295,10 +294,10 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
     /**
      * Compute the total zone controller demand.
-     * 
+     *
      * @param timestamp Last signal's timestamp.
      * @param needBump {@code true} if the unit needs to be kicked on.
-     * 
+     *
      * @return Total demand for this zone controller.
      */
     private DataSample<Double> computeDemand(long timestamp, boolean needBump) {
@@ -387,27 +386,28 @@ public abstract class AbstractZoneController extends LogAware implements ZoneCon
 
         sb.append("unhappy: ").append(unhappy).append(", ");
         sb.append("unhappyVoting: ").append(unhappyVoting).append(", ");
-        
+
         synchronized (this) {
             sb.append(signal);
         }
     }
 
+    @Override
     public synchronized DataSample<Double> getSignal() {
-
         return signal;
     }
 
+    @Override
     public void addConsumer(DataSink<Double> consumer) {
-
         dataBrodacaster.addConsumer(consumer);
     }
 
+    @Override
     public void removeConsumer(DataSink<Double> consumer) {
-
         dataBrodacaster.removeConsumer(consumer);
     }
 
+    @Override
     public JmxDescriptor getJmxDescriptor() {
 
         return new JmxDescriptor(

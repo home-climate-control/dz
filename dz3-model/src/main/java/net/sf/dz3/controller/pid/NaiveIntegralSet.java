@@ -15,7 +15,7 @@ import java.util.NoSuchElementException;
  * and anti-windup action must be programmed outside of this class.
  *
  * This is the old implementation, written in 2000 with little regard to performance, and updated to use a better data structure in 2015.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
  */
 public class NaiveIntegralSet extends DataSet<Double> implements IntegralSet {
@@ -30,15 +30,16 @@ public class NaiveIntegralSet extends DataSet<Double> implements IntegralSet {
         super(integrationTime, true);
     }
 
-  /**
-   * Get the integral starting with the first data element available and
-   * ending with the last data element available.
-   * <p>
-   * Integration time must have been taken care of by {@link DataSet#expire
-   * expiration}.
-   *
-   * @return An integral value.
-   */
+    /**
+    * Get the integral starting with the first data element available and
+    * ending with the last data element available.
+    * <p>
+    * Integration time must have been taken care of by {@link DataSet#expire
+    * expiration}.
+    *
+    * @return An integral value.
+    */
+    @Override
     public final synchronized double getIntegral() {
 
         double result = 0;

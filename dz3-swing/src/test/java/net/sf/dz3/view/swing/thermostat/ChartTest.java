@@ -84,7 +84,7 @@ class ChartTest {
 
 		long time = System.currentTimeMillis() - startTime;
 
-		logger.info("Straight: " + (time) + "ms for " + dump.size() + " items");
+		logger.info("Straight: " + time + "ms for " + dump.size() + " items");
 
 		return time;
 	}
@@ -102,7 +102,7 @@ class ChartTest {
 
 		long time = System.currentTimeMillis() - startTime;
 
-		logger.info("Cached: " + (time) + "ms for " + dump.size() + " items");
+		logger.info("Cached: " + time + "ms for " + dump.size() + " items");
 
 		return time;
 	}

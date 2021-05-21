@@ -1,5 +1,15 @@
 package net.sf.dz3.device.sensor.impl.tcp.server;
 
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
+import com.homeclimatecontrol.jukebox.service.ActiveService;
+import com.homeclimatecontrol.jukebox.service.PassiveService;
+import com.homeclimatecontrol.jukebox.util.network.HostHelper;
+import net.sf.dz3.device.sensor.impl.tcp.TcpConnectionSignature;
+import net.sf.dz3.util.SSLContextFactory;
+
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLServerSocket;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,17 +23,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.Semaphore;
-
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLServerSocket;
-
-import net.sf.dz3.device.sensor.impl.tcp.TcpConnectionSignature;
-import net.sf.dz3.util.SSLContextFactory;
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
-import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
-import com.homeclimatecontrol.jukebox.service.ActiveService;
-import com.homeclimatecontrol.jukebox.service.PassiveService;
-import com.homeclimatecontrol.jukebox.util.network.HostHelper;
 
 /**
  * The TCP connection listener.
@@ -71,7 +70,7 @@ public abstract class AbstractListener extends PassiveService {
 
     /*
      * The multicast server.
-     * 
+     *
      * VT: FIXME: WIll reinstate it later, after things are solidified with direct connections.
      */
     //private MulticastServer multicastServer;
@@ -83,7 +82,7 @@ public abstract class AbstractListener extends PassiveService {
     public AbstractListener(Set<String> addressSet, int port, int broadcastPort, boolean secure, String password) {
 
         this.addressSet.addAll(addressSet);
-        
+
         this.signature = new TcpConnectionSignature(port, secure, password);
         this.broadcastPort = broadcastPort;
     }
@@ -206,7 +205,7 @@ public abstract class AbstractListener extends PassiveService {
     public abstract String getServiceSignature();
 
     /**
-     * Provide a reasonable default for the {@link #listenPort port} to listen to.
+     * Provide a reasonable default for the {@link #getListenPort()}  port} to listen to.
      *
      * @return Default port to listen on.
      */
@@ -214,7 +213,7 @@ public abstract class AbstractListener extends PassiveService {
     public abstract int getDefaultListenPort();
 
     /**
-     * Provide a reasonable default for the {@link #listenPort port} to broadcast on.
+     * Provide a reasonable default for the {@link #getListenPort()}  port} to broadcast on.
      *
      * @return Default port to broadcast on.
      */
@@ -366,16 +365,19 @@ public abstract class AbstractListener extends PassiveService {
             this.port = port;
         }
 
+        @Override
         @JmxAttribute(description="Host pattern to listen to")
         public String getHost() {
             return (addr == null ? "*" : addr.toString()) + ":" + port;
         }
 
+        @Override
         @JmxAttribute(description="true if secure connection is requested by configuration")
         public boolean isSecureRequested() {
             return signature.secure;
         }
 
+        @Override
         @JmxAttribute(description="true if connected in secure mode")
         public boolean isSecure() {
             return ss instanceof SSLServerSocket;
@@ -587,7 +589,7 @@ public abstract class AbstractListener extends PassiveService {
 
         @Override
         public int compareTo(Listener other) {
-            
+
             if (other == null) {
                 throw new IllegalArgumentException("other can't be null");
             }
@@ -666,7 +668,7 @@ public abstract class AbstractListener extends PassiveService {
             // Start the command parser thread
 
             parser = new Thread(createParser());
-            
+
             if (parser != null) {
                 parser.start();
             }
@@ -768,6 +770,7 @@ public abstract class AbstractListener extends PassiveService {
              * Keep reading the data from {@link ConnectionHandler#br the reader} and
              * {@link #parse(String) parsing} it.
              */
+            @Override
             public void run() {
 
                 while (true) {

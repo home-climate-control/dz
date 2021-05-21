@@ -14,12 +14,12 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  * The controller is expected to produce an output based on the value of the
  * process variable and measurement time. The exact details are left to the
  * implementation.
- * 
+ *
  * <p>
- * 
+ *
  * VT: FIXME: Think about how to make this work nicely with {@link DataSource} and {@link DataSink} entities.
  * Controllers normally have one source of input data. DZ3 implementation, so far, doesn't have
- * consumers that feed from more than one process controller that need to be distinguished other than by signature. 
+ * consumers that feed from more than one process controller that need to be distinguished other than by signature.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
  */
@@ -68,19 +68,20 @@ public interface ProcessController extends DataSink<Double>, DataSource<ProcessC
      *
      * @return A computed controller output (corrective action), with the same timestamp as
      * the input value.
-     * 
+     *
      * @see #consume(DataSample)
      */
     DataSample<Double> compute(DataSample<Double> pv);
-    
+
     /**
      * The asynchronous counterpart to {@link #compute(DataSample)}.
-     * 
+     *
      * {@link #compute(DataSample)} will eventually result in a state change notification broadcast
      * (at least per current implementation), so the net result of {@link #compute(DataSample)} and
      * {@link #consume(DataSample)} invocations is the same - except that {@link #consume(DataSample)}
      * will not return a computed value.
      */
+    @Override
     void consume(DataSample<Double> sample);
 
     /**

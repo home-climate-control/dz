@@ -1,9 +1,7 @@
 package net.sf.dz3.view.http.common;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.concurrent.BlockingQueue;
-
+import com.homeclimatecontrol.jukebox.service.ActiveService;
+import net.sf.dz3.view.http.v1.HttpConnector;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
@@ -17,19 +15,19 @@ import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.logging.log4j.ThreadContext;
 
-import net.sf.dz3.view.http.v1.HttpConnector;
-import com.homeclimatecontrol.jukebox.service.ActiveService;
+import java.io.IOException;
+import java.net.URL;
+import java.util.concurrent.BlockingQueue;
 
 /**
- * The facilitator between the client {@link #send(Object) sending} data and the server
- * possibly returning some.
- * 
+ * The facilitator between the client sending data and the server possibly returning some.
+ *
  * @param <DataBlock> Data type to send out to the server.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
 public abstract class AbstractExchanger<DataBlock> extends ActiveService {
-    
+
     protected final HttpClient httpClient = HttpClientFactory.createClient();
     protected final HttpClientContext context = HttpClientContext.create();
 
@@ -38,9 +36,9 @@ public abstract class AbstractExchanger<DataBlock> extends ActiveService {
     private String password;
 
     protected final BlockingQueue<DataBlock> upstreamQueue;
-    
+
     public AbstractExchanger(URL serverContextRoot, String username, String password, BlockingQueue<DataBlock> upstreamQueue) {
-        
+
         this.serverContextRoot = serverContextRoot;
         this.upstreamQueue = upstreamQueue;
         this.username = username;
@@ -53,7 +51,7 @@ public abstract class AbstractExchanger<DataBlock> extends ActiveService {
         logger.info("Using " + serverContextRoot);
 
         // Do absolutely nothing
-        
+
         // Except, maybe, authenticate
         authenticate();
     }
@@ -61,9 +59,10 @@ public abstract class AbstractExchanger<DataBlock> extends ActiveService {
     /**
      * Keep sending data that appears in {@link HttpConnector#upstreamQueue} to the server,
      * and accepting whatever they have to say.
-     * 
+     *
      * Exact strategy is determined by the implementation subclass.
      */
+    @Override
     protected abstract void execute() throws Throwable;
 
     @Override

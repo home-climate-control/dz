@@ -17,7 +17,7 @@ public class HttpClientFactory {
     /**
      * Convenience method to hold an arbitrarily long chain of builder method invocations.
      *
-     * @return Fully built {@link #httpClient}.
+     * @return Fully built client.
      */
     public static HttpClient createClient() {
 

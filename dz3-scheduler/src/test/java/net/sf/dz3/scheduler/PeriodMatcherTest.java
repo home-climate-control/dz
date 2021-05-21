@@ -1,8 +1,6 @@
 package net.sf.dz3.scheduler;
 
 import net.sf.dz3.device.model.ZoneStatus;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 
@@ -14,19 +12,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 class PeriodMatcherTest {
-    
-    private final Logger logger = LogManager.getLogger(getClass());
 
     @Test
     public void testNone() {
-        
+
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0).withMinuteOfHour(40);
-        
+
         zoneSchedule.put(new Period("period", "0:15", "0:30", "......."), null);
 
         assertThatExceptionOfType(EmptyStackException.class)
@@ -35,9 +31,9 @@ class PeriodMatcherTest {
 
     @Test
     public void testSimple() {
-        
+
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
-        
+
         Period p1 = new Period("period", "00:15", "00:30", ".......");
         zoneSchedule.put(p1, null);
 
@@ -48,9 +44,9 @@ class PeriodMatcherTest {
 
     @Test
     public void testSimple2() {
-        
+
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
-        
+
         // Let's make sure that hours in Period.includes(long) are also properly converted
         Period p1 = new Period("period", "02:15", "02:30", ".......");
         zoneSchedule.put(p1, null);
@@ -62,9 +58,9 @@ class PeriodMatcherTest {
 
     @Test
     public void testLadder() {
-        
+
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
-        
+
         Period p1 = new Period("period 1", "00:10", "00:30", ".......");
         Period p2 = new Period("period 2", "00:20", "00:40", ".......");
         Period p3 = new Period("period 3", "00:30", "00:50", ".......");
@@ -83,9 +79,9 @@ class PeriodMatcherTest {
 
     @Test
     public void testStack() {
-        
+
         SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
-        
+
         Period p1 = new Period("period 1", "00:10", "00:50", ".......");
         Period p2 = new Period("period 2", "00:15", "00:40", ".......");
         Period p3 = new Period("period 3", "00:20", "00:30", ".......");
@@ -96,7 +92,7 @@ class PeriodMatcherTest {
         zoneSchedule.put(p3, null);
         zoneSchedule.put(p4, null);
 
-        
+
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
 
         assertThat(test(zoneSchedule, dt.withMinuteOfHour(12))).isEqualTo(p1);

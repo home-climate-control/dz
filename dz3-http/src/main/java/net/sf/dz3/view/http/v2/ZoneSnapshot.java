@@ -1,20 +1,20 @@
 package net.sf.dz3.view.http.v2;
 
-import java.io.Serializable;
-
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.ZoneState;
 
+import java.io.Serializable;
+
 /**
  * Zone snapshot.
- * 
+ *
  * This class is common across the DZ server application, Home Climate Control proxy, wherever it is running,
  * and Home Climate Control Remote Android application (https://play.google.com/store/apps/details?id=com.homeclimatecontrol.dz3.view.android).
  * Hence, a strange "public" implementation - it needs to support easy JSON, XML or other serialization/deserialization.
  *
- * NOTE: The deviation* variables support fast "return to schedule" function on remote devices (otherwise, it'll take 
+ * NOTE: The deviation* variables support fast "return to schedule" function on remote devices (otherwise, it'll take
  * the full round trip time for them to reflect proper values, oscillating feedback loop becomes possible).
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2013
  */
 public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
@@ -32,22 +32,22 @@ public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
     public boolean onHold;
     public boolean voting;
     public String periodName;
-    
+
     /**
      * How much does the {@link #setpointTemperature} differ from the schedule setpoint.
      */
     public double deviationSetpoint;
-    
+
     /**
      * {@code true} if the scheduled 'enabled' value differs from current.
      */
     public boolean deviationEnabled;
-    
+
     /**
      * {@code true} if the scheduled 'voting' value differs from current.
      */
     public boolean deviationVoting;
-    
+
     public String error;
 
     /**
@@ -55,12 +55,12 @@ public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
      */
     @SuppressWarnings("unused")
     private ZoneSnapshot() {
-        
+
     }
-    
+
     /**
      * Create an instance.
-     * 
+     *
      * @param timestamp Time when this snapshot was created.
      * @param name Zone name.
      * @param mode Zone HVAC mode.
@@ -72,9 +72,9 @@ public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
      * @param onHold Whether the zone is on hold.
      * @param voting Whether the zone is voting.
      * @param periodName Schedule period name currently running, or {@code null} if none.
-     * @param onSchedule Whether the zone is on schedule ({@code true}) or settings are
-     * altered ({@code false}).
-     * @param
+     * @param deviationSetpoint Difference between the current and schedule setpoint.
+     * @param deviationEnabled {@code true} if the {@link #enabled} status is different from schedule.
+     * @param deviationVoting {@code true} if the {@link #voting} status is different from schedule.
      * @param error Error message or {@code null} if no error condition exists.
      */
     public ZoneSnapshot(long timestamp, String name, HvacMode mode, ZoneState state,
@@ -107,23 +107,23 @@ public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
     public int compareTo(ZoneSnapshot o) {
 
 //    	org.apache.log4j.Logger.getLogger(getClass()).error("ZoneSnapshot#toString", new IllegalStateException("Trace"));
-    	
+
     	String us = Long.toString(timestamp) + "." + this;
     	String them = Long.toString(o.timestamp) + "." + o;
-    	
+
         return us.compareTo(them);
     }
 
     @Override
     public boolean equals(Object o) {
-        
+
         if (o == null) {
             return false;
         }
-        
+
         return toString().equals(o.toString());
     }
-    
+
     @Override
     public int hashCode() {
         return toString().hashCode();

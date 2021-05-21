@@ -1,18 +1,17 @@
 package net.sf.dz3.controller.pid;
 
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.controller.AbstractProcessController;
-import net.sf.dz3.controller.ProcessControllerStatus;
-import net.sf.dz3.util.digest.MessageDigestCache;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.controller.AbstractProcessController;
+import net.sf.dz3.controller.ProcessControllerStatus;
+import net.sf.dz3.util.digest.MessageDigestCache;
+import org.apache.logging.log4j.ThreadContext;
 
 /**
  * Abstract base for a PID controller implementation.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public abstract class AbstractPidController extends AbstractProcessController implements AbstractPidControllerConfiguration, JmxAware {
@@ -21,23 +20,23 @@ public abstract class AbstractPidController extends AbstractProcessController im
      * Name this object has in a {@link #getJmxDescriptor() JMX representation}.
      */
     private final String jmxName;
-    
+
     /**
      * Indicates whether to reset the {@link #getIntegral() accumulated integral component}
      * upon setpoint change.
      */
     private boolean resetOnSetpointChange = true;
-    
+
     /**
      * Proportional weight.
      */
     private double P;
-    
+
     /**
      * Integral weight.
      */
     private double I;
-    
+
     /**
      * Derivative weight.
      */
@@ -71,22 +70,22 @@ public abstract class AbstractPidController extends AbstractProcessController im
     private double lastD = 0;
 
     public AbstractPidController(String jmxName, final double setpoint, final double P, final double I, final double D, double saturationLimit) {
-	
+
         super(setpoint);
 
 	if ("".equals(jmxName)) {
 	    throw new IllegalArgumentException("jmxName can't be null or empty");
 	}
-	
+
 	if (jmxName == null) {
-	
+
 	    this.jmxName = Integer.toHexString(hashCode());
-	    
+
 	} else {
-	
+
 	    this.jmxName = jmxName;
 	}
-	
+
         setP(P);
         setI(I);
         setD(D);
@@ -96,7 +95,7 @@ public abstract class AbstractPidController extends AbstractProcessController im
     }
 
     public AbstractPidController(final double setpoint, final double P, final double I, final double D, double saturationLimit) {
-        
+
         this(null, setpoint, P, I, D, saturationLimit);
     }
 
@@ -137,13 +136,14 @@ public abstract class AbstractPidController extends AbstractProcessController im
 	this.D = D;
 	statusChanged();
     }
-    
+
+    @Override
     public void setLimit(double saturationLimit) {
 
         if (saturationLimit < 0) {
             throw new IllegalArgumentException("limit must be non-negative");
         }
-        
+
         this.saturationLimit = saturationLimit;
         statusChanged();
     }
@@ -157,7 +157,7 @@ public abstract class AbstractPidController extends AbstractProcessController im
     public final double getI() {
 	return I;
     }
-    
+
     @JmxAttribute(description = "Derivative weight")
     public final double getD() {
 	return D;
@@ -204,22 +204,22 @@ public abstract class AbstractPidController extends AbstractProcessController im
             }
 
             double derivative = getDerivative(lastKnownSignal, pv, error);
-            
+
             // One cause of this is setSetpoint(), which causes values
             // to be computed in a rapid succession, with chance of delta T being zero
             // being close to 1
             if (Double.compare(derivative, Double.NaN) != 0
                     && Double.compare(derivative, Double.NEGATIVE_INFINITY) != 0
                     && Double.compare(derivative, Double.POSITIVE_INFINITY) != 0) {
-            
+
                 lastD = derivative * getD();
                 signal += lastD;
             }
-            
+
             // VT: NOTE: When the hell was it NaN? I know this code wouldn't be
             // here for no reason, but can't remember the circumstances.
             // Need them to write the test case.
-            
+
             // VT: NOTE: Aha, one such case is right above. Need to see if this ever happens again.
 
             if (Double.compare(signal, Double.NaN) == 0) {
@@ -236,7 +236,7 @@ public abstract class AbstractPidController extends AbstractProcessController im
             ThreadContext.pop();
         }
     }
-    
+
     @Override
     protected final String getShortName() {
         return "pid";
@@ -250,7 +250,8 @@ public abstract class AbstractPidController extends AbstractProcessController im
 
     protected abstract double getIntegral(DataSample<Double> lastKnownSignal, DataSample<Double>  pv, double error);
     protected abstract double getDerivative(DataSample<Double> lastKnownSignal, DataSample<Double>  pv, double error);
-    
+
+    @Override
     public JmxDescriptor getJmxDescriptor() {
         return new JmxDescriptor(
                 "dz",
@@ -261,26 +262,26 @@ public abstract class AbstractPidController extends AbstractProcessController im
 
     @JmxAttribute(description = "Accumulated integral component")
     public final double getIntegral() {
-        
+
         return lastI;
     }
-    
+
     /**
      * @return {@link #resetOnSetpointChange}.
      */
     protected final boolean needResetOnSetpointChange() {
-        
+
         return resetOnSetpointChange;
     }
-    
+
     @JmxAttribute(description = "Whether to reset the accumulated integral component upon setpoint change")
     public boolean getResetOnSetpointChange() {
-        
+
         return resetOnSetpointChange;
     }
 
     public void setResetOnSetpointChange(boolean reset) {
-        
+
         this.resetOnSetpointChange = reset;
     }
 }

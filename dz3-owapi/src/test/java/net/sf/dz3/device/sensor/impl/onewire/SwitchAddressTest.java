@@ -12,14 +12,14 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 /**
  * Set of test cases for {@link StringChannelAddress}.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2009
  */
 class SwitchAddressTest {
 
     @Test
     public void good() {
-        
+
         new StringChannelAddress("1300000000E6B51F:1");
     }
 
@@ -57,15 +57,17 @@ class SwitchAddressTest {
 
     @Test
     public void comparable() {
-        
+
         StringChannelAddress s0 = new StringChannelAddress("1300000000E6B51F:0");
         StringChannelAddress s1 = new StringChannelAddress("1300000000E6B51F:1");
 
         assertThat(s1.compareTo(s0)).isGreaterThan(0);
 
         Set<StringChannelAddress> set = new TreeSet<StringChannelAddress>();
-        
+
         set.add(s0);
         set.add(s1);
+
+        assertThat(set).hasSize(2);
     }
 }

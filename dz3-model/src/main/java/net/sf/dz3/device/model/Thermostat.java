@@ -43,36 +43,37 @@ public interface Thermostat extends ThermostatStatus,
      */
     @JmxAttribute(description = "Zone name")
     String getName();
-    
+
     /**
      * Get the last signal issued.
-     * 
+     *
      * @return Last output signal.
      */
     @JmxAttribute(description = "Last output signal")
     ThermostatSignal getSignal();
- 
+
     /**
      * Get the current setpoint.
-     * 
+     *
      * @return Thermostat's setpoint.
      */
+    @Override
     @JmxAttribute(description = "Setpoint")
     double getSetpoint();
 
     /**
      * Make the thermostat reconsider its calling status.
-     * 
+     *
      * If it is calling, there must be no change.
      * If it is not calling, but the signal is within the hysteresis loop, status must change to calling.
      * If if it not calling, and the signal is below the hysteresis loop, there must be no change.
      */
     void raise();
 
-    
+
     /**
      * Set the zone status to the given status, unless the zone is {@link ThermostatStatus#isOnHold() on hold}.
-     * 
+     *
      * @param status Status to set.
      */
     void set(ZoneStatus status);

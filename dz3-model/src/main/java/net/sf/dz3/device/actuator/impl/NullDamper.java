@@ -1,10 +1,9 @@
 package net.sf.dz3.device.actuator.impl;
 
-import java.io.IOException;
-
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import org.apache.logging.log4j.ThreadContext;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import java.io.IOException;
 
 /**
  * 'Null' damper - this damper does not interact with hardware, just logs
@@ -28,36 +27,37 @@ public class NullDamper extends AbstractDamper {
 
     @Override
     public void moveDamper(double throttle) {
-	
-	ThreadContext.push("moveDamper");
 
-	try {
-	
-	    logger.debug("new position: " + throttle);
-	    this.throttle = throttle;
+        ThreadContext.push("moveDamper");
 
-	} finally {
-	    ThreadContext.pop();
-	}
+        try {
+
+            logger.debug("new position: " + throttle);
+            this.throttle = throttle;
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
+    @Override
     public double getPosition() throws IOException {
-	
-	ThreadContext.push("getThrottle");
-	
-	try {
 
-	    logger.debug("returning: " + throttle);
-	    return throttle;
-        
-	} finally {
-	    ThreadContext.pop();
-	}
+        ThreadContext.push("getThrottle");
+
+        try {
+
+            logger.debug("returning: " + throttle);
+            return throttle;
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     @Override
     public JmxDescriptor getJmxDescriptor() {
-        
+
         return new JmxDescriptor(
                 "dz",
                 "Null damper",

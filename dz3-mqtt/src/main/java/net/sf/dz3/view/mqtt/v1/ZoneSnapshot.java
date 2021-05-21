@@ -75,7 +75,6 @@ public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
      * @param deviationSetpoint Difference between the current and schedule setpoint.
      * @param deviationEnabled {@code true} if the {@link #enabled} status is different from schedule.
      * @param deviationVoting {@code true} if the {@link #voting} status is different from schedule.
-     * @param
      * @param error Error message or {@code null} if no error condition exists.
      */
     public ZoneSnapshot(long timestamp, String name, HvacMode mode, ZoneState state,

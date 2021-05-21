@@ -1,5 +1,12 @@
 package net.sf.dz3.view.swing.thermostat;
 
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.util.Interval;
+import net.sf.dz3.controller.DataSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.JPanel;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,15 +22,6 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import javax.swing.JPanel;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import net.sf.dz3.controller.DataSet;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.util.Interval;
 
 /**
  *
@@ -101,7 +99,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     /**
      * Timestamp on {@link #dataMin} or {@link #dataMax}, whichever is younger.
      *
-     * @see #adjustVerticalLimits(double)
+     * @see #adjustVerticalLimits(long, double, double)
      */
     private Long minmaxTime = null;
 
@@ -357,7 +355,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
         g2d.draw(line);
     }
 
-    private static Color[] signalCache = new Color[256];
+    private static final Color[] signalCache = new Color[256];
 
     /**
      * Convert signal from -1 to +1 to color from low color to high color.
@@ -365,7 +363,8 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
      * @param signal Signal to convert to color.
      * @param low Color corresponding to -1 signal value.
      * @param high Color corresponding to +1 signal value.
-     * @return
+     *
+     * @return Color corresponding to the signal.
      */
     protected final Color signal2color(double signal, Color low, Color high) {
 
@@ -409,12 +408,12 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     }
 
     /**
-     * Cache medium for {@link #resolve()}.
+     * Cache medium for {@link #resolve(Color)}.
      *
      * According to "worse is better" rule, there's no error checking against
      * the array size - too expensive. In all likelihood, this won't grow beyond 2 entries.
      */
-    private static RGB2HSB[] rgb2hsb = new RGB2HSB[16];
+    private static final RGB2HSB[] rgb2hsb = new RGB2HSB[16];
 
     /**
      * Resolve a possibly cached {@link Color#RGBtoHSB(int, int, int, float[])} result,

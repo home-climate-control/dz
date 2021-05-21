@@ -11,8 +11,8 @@ public class NativeSensorDescriptor extends SensorDescriptor {
         this.type = type;
     }
 
+    @Override
     public String toString() {
-
         return name + "(type=" + type + ")";
     }
 }

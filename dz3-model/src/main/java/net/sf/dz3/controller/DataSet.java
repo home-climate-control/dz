@@ -28,17 +28,17 @@ public class DataSet<T> {
     /**
      * Strictness. If this is set to true, the {@link #record record()} will not
      * accept values for the time less than already recorded, and {@link #record
-     * record()} will throw {@codeIllegalArgumentException}.
+     * record()} will throw {@code IllegalArgumentException}.
      * <p>
      * This is not necessarily a good thing.
      */
     private final boolean strict;
-    
+
     /**
      * Last known timestamp. {@code null} if none recorded yet.
      */
     private Long lastTimestamp;
-    
+
     /**
      * Create the instance allowing out-of-order updates.
      *
@@ -55,9 +55,9 @@ public class DataSet<T> {
      * Create the instance.
      *
      * @param expirationInterval How many milliseconds to keep the data.
-     * 
+     *
      * @param strict If set to true, out-of-order updates will not be accepted.
-     * 
+     *
      * @exception IllegalArgumentException if the expiration interval is
      * non-positive (<= 0). Be careful with the short intervals, it's going to
      * be your fault, not mine.
@@ -96,19 +96,19 @@ public class DataSet<T> {
         // before, so we return nothing.
 
         if (strict) {
-            
+
             if (lastTimestamp != null && lastTimestamp >= millis)
 
                 throw new IllegalArgumentException("Data element out of sequence: last key is " + lastTimestamp
                         + ", key being added is " + millis);
         }
-        
+
         lastTimestamp = millis;
 
         dataSet.put(Long.valueOf(millis), value);
 
         expire();
-        
+
         // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
     }
 
@@ -134,7 +134,7 @@ public class DataSet<T> {
                     i.remove();
 
                 } else {
-                    
+
                     // We're done, all other keys will be younger
                     return;
                 }
@@ -176,7 +176,7 @@ public class DataSet<T> {
      * @param time Time to look up the data for. Must be exact, otherwise,
      * exception will be thrown.
      * @return Value recorded at the given time.
-     * 
+     *
      * @exception NoSuchElementException if the value for the given time is not
      * in the set.
      */

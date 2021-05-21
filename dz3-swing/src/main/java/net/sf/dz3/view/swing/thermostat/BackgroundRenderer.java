@@ -1,23 +1,21 @@
 package net.sf.dz3.view.swing.thermostat;
 
-import java.awt.Canvas;
-import java.awt.Color;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.Rectangle2D;
-
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.ZoneState;
 import net.sf.dz3.view.swing.ColorScheme;
+
+import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
 
 public class BackgroundRenderer {
 
     /**
      * Draw the top gradient.
      *
-     * @param sample Sample to get the drawing parameters from.
+     * @param signal Sample to get the drawing parameters from.
      * @param g2d Canvas to paint on.
      * @param boundary Drawing area boundary.
      */
@@ -50,7 +48,7 @@ public class BackgroundRenderer {
     /**
      * Draw the bottom gradient.
      *
-     * @param sample Sample to get the drawing parameters from.
+     * @param signal Sample to get the drawing parameters from.
      * @param g2d Canvas to paint on.
      * @param boundary Drawing area boundary.
      * @param errorGradient {@code true} if the gradient needs to be drawn, {@code false} if solid color.
@@ -109,7 +107,7 @@ public class BackgroundRenderer {
     }
 
     /**
-     * Get the color to {@link #drawTop(ZoneSnapshot, Canvas, int, int) paint the top gradient} with.
+     * Get the color to {@link #drawTop(HvacMode, Double, Graphics2D, Rectangle)}  paint the top gradient} with.
      *
      * @param mode HVAC mode to get the color from. {@code null} means error.
      *
@@ -121,7 +119,7 @@ public class BackgroundRenderer {
     }
 
     /**
-     * Get the color to {@link #drawBottom(ZoneSnapshot, Graphics, int, int, boolean) paint the top gradient} with.
+     * Get the color to {@link #drawBottom(ZoneState, HvacMode, Double, Graphics2D, Rectangle, boolean)}  paint the top gradient} with.
      *
      * @param state Zone state to get the color from. {@code null} means error.
      * @param mode HVAC mode to get the color from.
