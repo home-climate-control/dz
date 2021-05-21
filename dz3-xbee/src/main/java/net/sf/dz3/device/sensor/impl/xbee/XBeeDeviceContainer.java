@@ -1,22 +1,20 @@
 package net.sf.dz3.device.sensor.impl.xbee;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.logging.log4j.ThreadContext;
-
 import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBeeAddress64;
 import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeeResponse;
-
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.PrototypeContainer;
 import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * XBee device container.
@@ -41,12 +39,6 @@ public final class XBeeDeviceContainer extends AbstractDeviceContainer implement
 
         this.factory = factory;
         this.xbeeAddress = xbeeAddress;
-    }
-
-    @Override
-    public SensorType getType() {
-
-        return SensorType.PROTOTYPE;
     }
 
     @Override
