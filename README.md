@@ -4,6 +4,7 @@ Home Climate Control, a.k.a. DZ
 [![Build Status](https://travis-ci.com/home-climate-control/dz.svg)](https://travis-ci.com/home-climate-control/dz)
 [![Build Status](https://github.com/home-climate-control/dz/actions/workflows/gradle.yml/badge.svg)](https://github.com/home-climate-control/dz/actions/workflows/gradle.yml)
 [![Build Status](https://github.com/home-climate-control/dz/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/home-climate-control/dz/actions/workflows/codeql-analysis.yml)
+[![SonarCloud](https://github.com/home-climate-control/dz/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/home-climate-control/dz/actions/workflows/sonarcloud.yml)
 
 Create as many climates in your home as you never thought imaginable.  
 Control temperature, humidity and ventilation.  
