@@ -1,29 +1,7 @@
 package net.sf.dz3.view.swing.thermostat;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.text.DecimalFormat;
-import java.util.Formatter;
-import java.util.Locale;
-
-import javax.swing.BorderFactory;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.border.TitledBorder;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.controller.ProcessController;
 import net.sf.dz3.controller.ProcessControllerStatus;
 import net.sf.dz3.controller.pid.AbstractPidController;
@@ -38,8 +16,27 @@ import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.dz3.view.swing.ScreenDescriptor;
 import net.sf.dz3.view.swing.TemperatureUnit;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.TitledBorder;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.text.DecimalFormat;
+import java.util.Locale;
 
 /**
  * Thermostat panel.
@@ -552,7 +549,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 currentTemperature = getDisplayValue(currentTemperature);
                 currentSetpoint = getDisplayValue(currentSetpoint);
 
-                displayTemperature = (sample == null) ? UNDEFINED : (sample.demand.isError() ? UNDEFINED : new Formatter().format(Locale.getDefault(), "%.1f", currentTemperature).toString());
+                displayTemperature = (sample == null) ? UNDEFINED : (sample.demand.isError() ? UNDEFINED : String.format(Locale.getDefault(), "%.1f", currentTemperature));
 
                 TintedValueAndSetpoint v = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample.calling, currentSetpoint);
                 chart.consume(new DataSample<TintedValueAndSetpoint>(pidListener.signal.timestamp, "temp", "temp", v, null));
@@ -643,7 +640,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                 setpoint = getDisplayValue(setpoint);
 
-                label = source.isOn() ? new Formatter().format(Locale.getDefault(), "%.1f\u00b0", setpoint).toString() : "OFF";
+                label = source.isOn() ? String.format(Locale.getDefault(), "%.1f\u00b0", setpoint) : "OFF";
             }
 
             Color fg = ColorScheme.getScheme(getMode()).setpoint;
