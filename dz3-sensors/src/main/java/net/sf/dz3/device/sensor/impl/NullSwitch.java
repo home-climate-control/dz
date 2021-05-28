@@ -73,7 +73,7 @@ public class NullSwitch extends AbstractSwitch {
         }
     }
 
-    @SuppressWarnings("squid::S2274")
+    @SuppressWarnings({"squid::S2273","squid::S2274"})
     private void delay() {
 
         if (minDelayMillis == 0 && maxDelayMillis == 0) {
