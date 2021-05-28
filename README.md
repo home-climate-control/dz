@@ -6,11 +6,15 @@ Home Climate Control, a.k.a. DZ
 [![Build Status](https://github.com/home-climate-control/dz/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/home-climate-control/dz/actions/workflows/codeql-analysis.yml)
 [![SonarCloud](https://github.com/home-climate-control/dz/actions/workflows/sonarcloud.yml/badge.svg)](https://github.com/home-climate-control/dz/actions/workflows/sonarcloud.yml)
 
-Create as many climates in your home as you never thought imaginable.  
-Control temperature, humidity and ventilation.  
-Do it on a schedule.  
-Have everything measured and recorded.  
-Do it from anywhere.
+*Create as many climates in your home as you never thought imaginable.*  
+*Control temperature, humidity and ventilation.*  
+*Do it on a schedule.*  
+*Have everything measured and recorded.*  
+*Do it from anywhere.*
+
+## Psst!
+
+Dallas Semiconductor 1-Wire API that was integrated into DZ codebase some 20 years ago, survived, was hardened and optimized, is now a separate project again, here: [https://github.com/home-climate-control/owapi-reborn/](https://github.com/home-climate-control/owapi-reborn/)
 
 # Pardon Our Dust...
 
