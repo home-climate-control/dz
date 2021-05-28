@@ -486,7 +486,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             // them all. Don't forget to check if there are any
             // temperature sensors on the branch.
 
-            for (Iterator<String> ai = address2dcForPath.iterator(); ai.hasNext();) {
+            for (var ai = address2dcForPath.iterator(); ai.hasNext();) {
 
                 // To improve the shutdown time, let's check if
                 // we're still enabled, otherwise we might be just
@@ -1159,9 +1159,10 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     public final OWPath getDevicePath(final String address) {
 
-        for (OWPath path : path2device.keySet()) {
+        for (var pd : path2device.entrySet()) {
 
-            var address2dcForPath = path2device.get(path);
+            var path = pd.getKey();
+            var address2dcForPath = pd.getValue();
 
             if (address2dcForPath.containsKey(address)) {
                 return path;

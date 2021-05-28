@@ -1,11 +1,11 @@
 package net.sf.dz3.device.sensor.impl;
 
-import java.io.IOException;
-import java.util.Random;
-
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import org.apache.logging.log4j.ThreadContext;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.Random;
 
 /**
  * Null switch.
@@ -16,7 +16,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  */
 public class NullSwitch extends AbstractSwitch {
 
-    private static final Random rg = new Random();
+    private static final Random rg = new SecureRandom();
 
     private final long minDelay;
     private final int maxDelay;
