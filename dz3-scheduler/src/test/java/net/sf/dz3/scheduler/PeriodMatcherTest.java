@@ -4,7 +4,7 @@ import net.sf.dz3.device.model.ZoneStatus;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 
-import java.util.EmptyStackException;
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -25,7 +25,7 @@ class PeriodMatcherTest {
 
         zoneSchedule.put(new Period("period", "0:15", "0:30", "......."), null);
 
-        assertThatExceptionOfType(EmptyStackException.class)
+        assertThatExceptionOfType(NoSuchElementException.class)
                 .isThrownBy(() -> test(zoneSchedule, dt));
     }
 

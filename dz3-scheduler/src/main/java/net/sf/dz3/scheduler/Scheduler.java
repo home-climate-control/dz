@@ -16,9 +16,9 @@ import org.joda.time.DateTime;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.EmptyStackException;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.Executors;
@@ -366,7 +366,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
                 ThreadContext.pop();
             }
 
-        } catch (EmptyStackException ex) {
+        } catch (NoSuchElementException ex) {
 
             logger.info("{}: no active period found", ts.getName());
 
@@ -461,7 +461,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
                 return result;
 
-            } catch (EmptyStackException ex) {
+            } catch (NoSuchElementException ex) {
 
                 logger.info("{}: no active period found", ts.getName());
                 return new Deviation(0, false, false);

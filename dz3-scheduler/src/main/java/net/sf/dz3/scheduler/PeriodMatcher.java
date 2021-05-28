@@ -6,9 +6,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.joda.time.DateTime;
 
+import java.util.ArrayDeque;
 import java.util.Map.Entry;
 import java.util.SortedMap;
-import java.util.Stack;
 import java.util.TreeMap;
 
 /**
@@ -36,7 +36,7 @@ public class PeriodMatcher {
 
         try {
 
-            var stack = new Stack<Period>();
+            var stack = new ArrayDeque<Period>();
 
             logger.debug("Matching {}", time);
 
