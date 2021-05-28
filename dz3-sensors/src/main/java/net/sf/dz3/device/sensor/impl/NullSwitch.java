@@ -18,8 +18,8 @@ public class NullSwitch extends AbstractSwitch {
 
     private static final Random rg = new SecureRandom();
 
-    private final long minDelay;
-    private final int maxDelay;
+    private final long minDelayMillis;
+    private final int maxDelayMillis;
     private final Object semaphore;
 
     /**
@@ -35,14 +35,14 @@ public class NullSwitch extends AbstractSwitch {
      * Create an instance with delay.
      *
      * @param address Address to use.
-     * @param minDelay Minimim switch deley, milliseconds.
-     * @param maxDelay Max delay. Total delay is calculated as {@code minDelay + rg.nextInt(maxDelay)}.
+     * @param minDelayMillis Minimim switch deley, milliseconds.
+     * @param maxDelayMillis Max delay. Total delay is calculated as {@code minDelay + rg.nextInt(maxDelay)}.
      */
-    public NullSwitch(String address, long minDelay, int maxDelay, Object semaphore) {
+    public NullSwitch(String address, long minDelayMillis, int maxDelayMillis, Object semaphore) {
         super(address, false);
 
-        this.minDelay = minDelay;
-        this.maxDelay = maxDelay;
+        this.minDelayMillis = minDelayMillis;
+        this.maxDelayMillis = maxDelayMillis;
         this.semaphore = semaphore;
     }
 
@@ -73,33 +73,37 @@ public class NullSwitch extends AbstractSwitch {
         }
     }
 
+    @SuppressWarnings("squid::S2274")
     private void delay() {
 
-        if (minDelay == 0 && maxDelay == 0) {
+        if (minDelayMillis == 0 && maxDelayMillis == 0) {
             return;
         }
 
         try {
 
-            long delay = minDelay + rg.nextInt(maxDelay);
+            long delay = minDelayMillis + rg.nextInt(maxDelayMillis);
 
             if (semaphore != null) {
 
                 // Simulate the lock on a common resource
                 synchronized (semaphore) {
-                    Thread.sleep(delay);
+                    // squid::S2274: Works as designed.
+                    wait(delay);
                 }
 
             } else {
 
                 // No lock, just sleep
-                Thread.sleep(delay);
+                // squid::S2274: Works as designed.
+                wait(delay);
             }
 
             logger.info("slept {}ms", delay);
 
         } catch (InterruptedException ex) {
             // Oh well,no delay.
+            Thread.currentThread().interrupt();
         }
     }
 }
