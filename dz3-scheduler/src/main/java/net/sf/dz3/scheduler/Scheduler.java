@@ -17,7 +17,6 @@ import org.joda.time.DateTime;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.EmptyStackException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -32,20 +31,20 @@ import java.util.concurrent.TimeUnit;
 public class Scheduler implements Runnable, StoppableService, JmxAware {
 
     private final Logger logger = LogManager.getLogger(getClass());
-    private final static DecimalFormat df = new DecimalFormat("#0.0###;-#0.0###");
+    private static final DecimalFormat df = new DecimalFormat("#0.0###;-#0.0###");
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
     private final ScheduleUpdater updater;
 
     /**
      * Schedule check and execution granularity, in milliseconds.
      */
-    private long scheduleGranularityMillis = 60 * 1000;
+    private long scheduleGranularityMillis = 60 * 1000L;
 
     /**
      * The schedule.
      */
-    private final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+    private final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule = new TreeMap<>();
 
     /**
      * Current settings.
@@ -53,18 +52,17 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      * VT: NOTE: It is possible to get rid of this using {@link ZoneStatusImpl#equals(Object)}
      * implementation, but let's think of it later, premature optimization is the mother of all evil.
      */
-    private final Map<Thermostat, ZoneStatus> currentStatus = new TreeMap<Thermostat, ZoneStatus>();
+    private final Map<Thermostat, ZoneStatus> currentStatus = new TreeMap<>();
 
     /**
      * Mapping of selected period to a thermostat.
      */
-    private final Map<Thermostat, Period> currentPeriod = new TreeMap<Thermostat, Period>();
+    private final Map<Thermostat, Period> currentPeriod = new TreeMap<>();
 
     /**
      * Create an instance using no updater with empty schedule.
      */
     public Scheduler() {
-
         this(null, null);
     }
 
@@ -110,7 +108,6 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      * Start with default delay.
      *
      * This method needs to be called in order for the scheduler to start functioning.
-     * @return
      *
      * @see #start(long)
      */
@@ -139,11 +136,11 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
         logger.warn("VT: FIXME: Synchronize to the minute boundary");
 
-        scheduler.scheduleAtFixedRate(this, initialDelayMillis, getScheduleGranularity(), TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(this, initialDelayMillis, getScheduleGranularity(), TimeUnit.MILLISECONDS);
 
         // We're cheating, for simplicity
 
-        ACT started = new ACT();
+        var started = new ACT();
 
         started.post();
 
@@ -159,11 +156,11 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
             logger.info("stopping");
 
-            scheduler.shutdown();
+            executorService.shutdown();
 
             try {
 
-                scheduler.awaitTermination(10000, TimeUnit.MILLISECONDS);
+                executorService.awaitTermination(10000, TimeUnit.MILLISECONDS);
 
             } catch (InterruptedException ex) {
 
@@ -174,7 +171,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
             // We're cheating, for simplicity
 
-            ACT stopped = new ACT();
+            var stopped = new ACT();
 
             stopped.post();
 
@@ -215,6 +212,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      *
      * VT: FIXME: It is a bad idea to have this method exposed, need to move the whole thing into an inner class after the test coverage is sufficient
      */
+    @SuppressWarnings("squid:S1181")
     @Override
     public void run() {
 
@@ -229,6 +227,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
         } catch (Throwable t) {
 
+            // squid:S1181: No.
             // If an exception is not caught, the executor will choke and never call us again
             logger.error("Unexpected exception", t);
 
@@ -255,7 +254,6 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
         try {
 
             if (updater == null) {
-
                 logger.debug("No updater specified, doing nothing");
                 return;
             }
@@ -296,15 +294,15 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      * @param target Schedule to apply.
      * @param when Time to use when applying the schedule, in milliseconds.
      */
+    @SuppressWarnings("squid:S1181")
     public void execute(final Map<Thermostat, SortedMap<Period, ZoneStatus>> target, DateTime when) {
 
         ThreadContext.push("execute");
 
         try {
 
-            for (Iterator<Entry<Thermostat, SortedMap<Period, ZoneStatus>>> i = target.entrySet().iterator(); i.hasNext(); ) {
+            for (Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry : target.entrySet()) {
 
-                Entry<Thermostat, SortedMap<Period, ZoneStatus>> entry = i.next();
                 Thermostat ts = entry.getKey();
                 SortedMap<Period, ZoneStatus> zoneSchedule = entry.getValue();
 
@@ -315,7 +313,8 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
                 } catch (Throwable t) {
 
                     // Errors with individual thermostats shouldn't affect others
-                    logger.error(ts.getName() + ": failed to set schedule, will retry on next run", t);
+                    // squid:S1181: No.
+                    logger.error("{}: failed to set schedule, will retry on next run", ts.getName(), t);
                 }
             }
 
@@ -341,12 +340,12 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
             try {
 
-                PeriodMatcher periodMatcher = new PeriodMatcher();
-                Period p = periodMatcher.match(zoneSchedule, time);
-                ZoneStatus status = zoneSchedule.get(p);
-                ZoneStatus currentZoneStatus = currentStatus.get(ts);
+                var periodMatcher = new PeriodMatcher();
+                var period = periodMatcher.match(zoneSchedule, time);
+                var status = zoneSchedule.get(period);
+                var currentZoneStatus = currentStatus.get(ts);
 
-                // VT: FIXME: https://github.com/home-climate-control/dz/issues/13
+                // VT: NOTE: https://github.com/home-climate-control/dz/issues/13
 
                 // The check below will only enforce the next event if it is different
                 // from the previous. Otherwise, if the setpoint or voting status were
@@ -358,9 +357,9 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
                     ts.set(status);
                     currentStatus.put(ts, status);
-                    currentPeriod.put(ts, p);
+                    currentPeriod.put(ts, period);
 
-                    logger.info(ts.getName() + " set to " + status);
+                    logger.info("{} set to {}", ts.getName(), status);
                 }
 
             } finally {
@@ -369,7 +368,7 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
         } catch (EmptyStackException ex) {
 
-            logger.info(ts.getName() + ": no active period found");
+            logger.info("{}: no active period found", ts.getName());
 
             currentStatus.remove(ts);
             currentPeriod.remove(ts);
@@ -387,7 +386,6 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
      * @return Currently selected status for the given thermostat, or {@code null} if there's none.
      */
     public ZoneStatus getCurrentStatus(Thermostat ts) {
-
         return currentStatus.get(ts);
     }
 
@@ -435,15 +433,15 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
 
                 if (zoneSchedule == null) {
 
-                    logger.debug("No schedule found for " + ts.getName() + " (yet?)");
+                    logger.debug("No schedule found for {} (yet?)", ts.getName());
                     return new Deviation(0, false, false);
                 }
 
-                PeriodMatcher periodMatcher = new PeriodMatcher();
-                Period p = periodMatcher.match(zoneSchedule, time);
-                ZoneStatus statusScheduled = zoneSchedule.get(p);
+                var periodMatcher = new PeriodMatcher();
+                var period = periodMatcher.match(zoneSchedule, time);
+                var statusScheduled = zoneSchedule.get(period);
 
-                // VT: FIXME: Dump priority should be taken into consideration as well
+                // VT: NOTE: Dump priority should be taken into consideration as well
                 ZoneStatus statusCurrent = new ZoneStatusImpl(setpointTemperature, 0, currentEnabled, currentVoting);
 
                 if (statusScheduled.equals(statusCurrent)) {
@@ -452,20 +450,20 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
                     return new Deviation(0, false, false);
                 }
 
-                Deviation result = new Deviation(
+                var result = new Deviation(
                         statusCurrent.getSetpoint() - statusScheduled.getSetpoint(),
                         statusCurrent.isOn() != statusScheduled.isOn(),
                         statusCurrent.isVoting() != statusScheduled.isVoting());
 
-                logger.debug("Scheduled: " + statusScheduled);
-                logger.debug("Actual:    " + statusCurrent);
-                logger.debug("Deviation: " + result);
+                logger.debug("Scheduled: {}", statusScheduled);
+                logger.debug("Actual:    {}", statusCurrent);
+                logger.debug("Deviation: {}", result);
 
                 return result;
 
             } catch (EmptyStackException ex) {
 
-                logger.info(ts.getName() + ": no active period found");
+                logger.info("{}: no active period found", ts.getName());
                 return new Deviation(0, false, false);
             }
 
@@ -490,14 +488,10 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
         @Override
         public String toString() {
 
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("(setpoint deviation=").append(df.format(setpoint));
-            sb.append(enabled ? ", enabled differs" : "");
-            sb.append(voting ? ", voting differs" : "");
-            sb.append(")");
-
-            return sb.toString();
+            return "(setpoint deviation=" + df.format(setpoint) +
+                    (enabled ? ", enabled differs" : "") +
+                    (voting ? ", voting differs" : "") +
+                    ")";
         }
     }
 }
