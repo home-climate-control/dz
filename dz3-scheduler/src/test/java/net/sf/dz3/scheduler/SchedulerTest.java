@@ -17,9 +17,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -102,175 +100,192 @@ class SchedulerTest {
     @Test
     void testStart() {
 
-        ThreadContext.push("testStart");
+        assertThatCode(() -> {
 
-        try {
+            ThreadContext.push("testStart");
 
-            Scheduler s = new Scheduler();
+            try {
 
-            s.start();
+                new Scheduler().start();
 
-        } finally {
-            ThreadContext.pop();
-        }
+            } finally {
+                ThreadContext.pop();
+            }
+
+        }).doesNotThrowAnyException();
     }
 
     @Test
     void testFastStart() {
 
-        ThreadContext.push("testFastStart");
+        assertThatCode(() -> {
 
-        try {
+            ThreadContext.push("testFastStart");
 
-            ScheduleUpdater u = new ScheduleUpdater() {
+            try {
 
-                @Override
-                public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+                ScheduleUpdater u = new ScheduleUpdater() {
 
-                    // Bad implementation, but shouldn't break anything
-                    return null;
-                }
-            };
+                    @Override
+                    public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
 
-            Scheduler s = new Scheduler(u);
+                        // Bad implementation, but shouldn't break anything
+                        return null;
+                    }
+                };
 
-            s.setScheduleGranularity(50);
+                Scheduler s = new Scheduler(u);
 
-            // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped
-            s.start(0);
+                s.setScheduleGranularity(50);
 
-            Thread.sleep(100);
+                // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped
+                s.start(0);
 
-        } catch (InterruptedException ex) {
+                Thread.sleep(100);
 
-            throw new IllegalStateException(ex);
+            } catch (InterruptedException ex) {
 
-        } finally {
-            ThreadContext.pop();
-        }
+                throw new IllegalStateException(ex);
+
+            } finally {
+                ThreadContext.pop();
+            }
+
+        }).doesNotThrowAnyException();
     }
 
     @Test
     void testStartStop() {
 
-        ThreadContext.push("testStartStop");
+        assertThatCode(() -> {
 
-        try {
+            ThreadContext.push("testStartStop");
 
-            final Semaphore syncLock = new Semaphore(1);
+            try {
 
-            ScheduleUpdater u = new ScheduleUpdater() {
+                final Semaphore syncLock = new Semaphore(1);
 
-                @Override
-                public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+                ScheduleUpdater u = new ScheduleUpdater() {
 
-                    ThreadContext.push("update");
+                    @Override
+                    public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
 
-                    try {
+                        ThreadContext.push("update");
 
-                        logger.info("started");
+                        try {
 
-                        syncLock.acquire();
+                            logger.info("started");
 
-                        logger.info("got the lock");
+                            syncLock.acquire();
 
-                        // This timeout should be longer than the run timeout so we can test the stop() properly
-                        Thread.sleep(200);
+                            logger.info("got the lock");
 
-                        logger.info("done");
+                            // This timeout should be longer than the run timeout so we can test the stop() properly
+                            Thread.sleep(200);
 
-                        return new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
+                            logger.info("done");
 
-                    } catch (InterruptedException ex) {
+                            return new TreeMap<Thermostat, SortedMap<Period, ZoneStatus>>();
 
-                        logger.info("Interrupted", ex);
-                        return null;
+                        } catch (InterruptedException ex) {
 
-                    } finally {
-                        ThreadContext.pop();
+                            logger.info("Interrupted", ex);
+                            return null;
+
+                        } finally {
+                            ThreadContext.pop();
+                        }
                     }
-                }
-            };
+                };
 
-            Scheduler s = new Scheduler(u);
+                Scheduler s = new Scheduler(u);
 
-            s.setScheduleGranularity(50);
+                s.setScheduleGranularity(50);
 
-            // Acquire the lock so update() will wait until it is released
+                // Acquire the lock so update() will wait until it is released
 
-            syncLock.acquire();
-            s.start(0);
+                syncLock.acquire();
+                s.start(0);
 
-            // Wait for a bit so update() has a chance to run
-            Thread.sleep(100);
+                // Wait for a bit so update() has a chance to run
+                Thread.sleep(100);
 
-            logger.info("releasing the lock");
-            syncLock.release();
+                logger.info("releasing the lock");
+                syncLock.release();
 
-            // Wait for a bit so update() has a chance to acquire the lock and start waiting
-            Thread.sleep(50);
+                // Wait for a bit so update() has a chance to acquire the lock and start waiting
+                Thread.sleep(50);
 
-            s.stop();
+                s.stop();
 
-        } catch (InterruptedException ex) {
+            } catch (InterruptedException ex) {
 
-            throw new IllegalStateException(ex);
+                throw new IllegalStateException(ex);
 
-        } finally {
-            ThreadContext.pop();
-        }
+            } finally {
+                ThreadContext.pop();
+            }
+
+        }).doesNotThrowAnyException();
     }
 
     @Test
     void testIOException() {
 
-        ThreadContext.push("testIOException");
+        assertThatCode(() -> {
 
-        try {
+            ThreadContext.push("testIOException");
 
-            ScheduleUpdater u = new ScheduleUpdater() {
+            try {
 
-                @Override
-                public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
+                ScheduleUpdater u = new ScheduleUpdater() {
 
-                    throw new IOException("Ouch!");
-                }
-            };
+                    @Override
+                    public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
 
-            Scheduler s = new Scheduler(u);
+                        throw new IOException("Ouch!");
+                    }
+                };
 
-            s.setScheduleGranularity(50);
+                Scheduler s = new Scheduler(u);
 
-            // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped
-            s.start(0);
+                s.setScheduleGranularity(50);
 
-            Thread.sleep(50);
+                // This instance will run until the JVM is gone or Scheduler#ScheduledExecutorService is otherwise stopped
+                s.start(0);
 
-            s.stop();
+                Thread.sleep(50);
 
-        } catch (InterruptedException ex) {
+                s.stop();
 
-            throw new IllegalStateException(ex);
+            } catch (InterruptedException ex) {
 
-        } finally {
-            ThreadContext.pop();
-        }
+                throw new IllegalStateException(ex);
+
+            } finally {
+                ThreadContext.pop();
+            }
+
+        }).doesNotThrowAnyException();
     }
 
     @Test
     void testExecute() {
 
-        List<Map<Thermostat, SortedMap<Period, ZoneStatus>>> schedules = new LinkedList<Map<Thermostat, SortedMap<Period, ZoneStatus>>>();
+        assertThatCode(() -> {
 
-        schedules.add(renderSchedule1());
-        schedules.add(renderSchedule2());
-        schedules.add(renderSchedule3());
+            var schedules = new LinkedList<Map<Thermostat, SortedMap<Period, ZoneStatus>>>();
 
-        int id = 0;
-        for (Iterator<Map<Thermostat, SortedMap<Period, ZoneStatus>>> i = schedules.iterator(); i.hasNext(); ) {
+            schedules.add(renderSchedule1());
+            schedules.add(renderSchedule2());
+            schedules.add(renderSchedule3());
 
-            testExecute(id++, i.next());
-        }
+            int id = 0;
+            for (Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule : schedules) {
+                testExecute(id++, schedule);
+            }
+
+        }).doesNotThrowAnyException();
     }
 
     void testExecute(int id, final Map<Thermostat, SortedMap<Period, ZoneStatus>> schedule) {
@@ -283,7 +298,6 @@ class SchedulerTest {
 
                 @Override
                 public Map<Thermostat, SortedMap<Period, ZoneStatus>> update() throws IOException {
-
                     return schedule;
                 }
             };
