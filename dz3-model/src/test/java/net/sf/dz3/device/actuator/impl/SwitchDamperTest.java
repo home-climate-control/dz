@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -21,7 +22,7 @@ import static org.mockito.Mockito.verify;
 /**
  * Test case for {@link SwitchDamper}.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 class SwitchDamperTest {
 
@@ -41,6 +42,19 @@ class SwitchDamperTest {
                 .withMessage("target can't be null");
     }
 
+    @Test
+    void parkDefault() throws IOException {
+
+        NullSwitch s = new NullSwitch("switch");
+        Damper d = new SwitchDamper("damper", s, 0.5);
+
+        assertThatCode(() -> {
+            // Parking position hasn't been explicitly set
+            d.park();
+        }).doesNotThrowAnyException();
+
+        assertThat(d.getPosition()).isEqualTo(d.getParkPosition());
+    }
     /**
      * Test whether the {@link SwitchDamper} is properly parked.
      */

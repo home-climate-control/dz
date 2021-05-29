@@ -3,10 +3,11 @@ package net.sf.dz3.device.actuator.impl;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.logger.LogAware;
 import com.homeclimatecontrol.jukebox.sem.ACT;
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.util.digest.MessageDigestCache;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
@@ -14,7 +15,9 @@ import java.io.IOException;
 /**
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractDamper extends LogAware implements Damper {
+public abstract class AbstractDamper implements Damper {
+
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     /**
      * Damper name.
@@ -31,18 +34,29 @@ public abstract class AbstractDamper extends LogAware implements Damper {
     private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
 
     /**
+     * Position to park if there was no park position {@link #setParkPosition(double) explicitly specified}.
+     *
+     * Normally, the damper should be fully open in this position.
+     */
+    private static final double DEFAULT_PARK_POSITION = 1.0;
+
+    /**
      * A damper position defined as 'parked'.
      *
-     * Default value is 1 (fully open).
+     * Default is {@code null} - none. See commits related to https://github.com/home-climate-control/dz/issues/51
+     * for more details.
+     *
+     * If the value is {@code null} and {@link #park()} method is called, the value of
+     * {@link #DEFAULT_PARK_POSITION} is used.
      */
-    private double parkPosition = 1;
+    private Double parkPosition = null;
 
     /**
      * Current position.
      */
-    private double position = parkPosition;
+    private double position = DEFAULT_PARK_POSITION;
 
-    AbstractDamper(String name) {
+    protected AbstractDamper(String name) {
 
         if (name == null || "".equals(name)) {
             throw new IllegalArgumentException("name can't be null");
@@ -69,7 +83,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
     @Override
     public final double getParkPosition() {
-        return parkPosition;
+        return parkPosition == null ? DEFAULT_PARK_POSITION : parkPosition;
     }
 
     @SuppressWarnings("squid:S1181")
