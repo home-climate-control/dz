@@ -51,13 +51,12 @@ class THTest {
         testSync("fast/simple", SimpleDamperController.class, 0, 0);
     }
 
-//    @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
     @Test
     void testSyncSlowSimple()
             throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        testSync("slow/simple", SimpleDamperController.class, 5, 20);
+        testSync("slow/simple", SimpleDamperController.class, 1, 5);
     }
 
     @Test
@@ -68,13 +67,12 @@ class THTest {
         testSync("fast/balancing", BalancingDamperController.class, 0, 0);
     }
 
-//    @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
     @Test
     void testSyncSlowBalancing()
             throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        testSync("slow/balancing", BalancingDamperController.class, 5, 20);
+        testSync("slow/balancing", BalancingDamperController.class, 1, 5);
     }
 
     private void testSync(String marker, Class<? extends AbstractDamperController> controllerClass, long minDelay, int maxDelay)
@@ -112,14 +110,14 @@ class THTest {
             switches.add(switchWestDamper);
             switches.add(switchWestBoosterFan);
 
-            var damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0);
-            var damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0);
-            var damperWestBathroom = new SwitchDamper("damper_west_bathroom", switchWestBathroom, 0.8, 1.0);
+            var damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0, 10);
+            var damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0, 10);
+            var damperWestBathroom = new SwitchDamper("damper_west_bathroom", switchWestBathroom, 0.8, 1.0, 10);
 
-            var damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0);
+            var damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0, 10);
 
             // VT: NOTE: This one is not inverted, like in damper-parking-2020 branch
-            var damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0);
+            var damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0, 10);
 
             var west = new LinkedHashSet<Damper>();
 

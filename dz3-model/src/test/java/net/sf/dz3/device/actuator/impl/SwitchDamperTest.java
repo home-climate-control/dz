@@ -135,8 +135,8 @@ class SwitchDamperTest {
                         s,
                         0.5,
                         1.0,
-                        false,
-                        -1))
+                        -1,
+                        false))
                 .withMessage("negative heartbeat not acceptable: PT-1S");
     }
 
@@ -160,7 +160,7 @@ class SwitchDamperTest {
     void lazy() throws IOException {
 
         var s = mock(Switch.class);
-        var d = new SwitchDamper("sd", s, 0.5, 1.0, false, 1);
+        var d = new SwitchDamper("sd", s, 0.5, 1.0, 1, false);
 
         // It must've been parked in the constructor
         verify(s, times(1)).setState(true);

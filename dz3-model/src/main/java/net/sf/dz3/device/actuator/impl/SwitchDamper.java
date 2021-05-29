@@ -86,15 +86,16 @@ public class SwitchDamper extends AbstractDamper {
     }
 
     /**
-     * Create a non-inverted instance.
+     * Create an instance.
      *
      * @param name Damper name. Necessary evil to allow instrumentation signature.
      * @param target Switch that controls the actual damper.
      * @param threshold Switch threshold.
      * @param parkPosition Damper position defined as 'parked'.
+     * @param inverted {@code true} if the switch is inverted.
      */
     public SwitchDamper(String name, Switch target, double threshold, double parkPosition, boolean inverted) {
-        this(name, target, threshold, parkPosition, inverted, 0);
+        this(name, target, threshold, parkPosition, 0, inverted);
     }
 
     /**
@@ -104,10 +105,23 @@ public class SwitchDamper extends AbstractDamper {
      * @param target Switch that controls the actual damper.
      * @param threshold Switch threshold.
      * @param parkPosition Damper position defined as 'parked'.
-     * @param inverted {@code true} if the switch is inverted.
      * @param heartbeatSeconds Set the {@link #heartbeat} to this interval in seconds.
      */
-    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, boolean inverted, long heartbeatSeconds) {
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, long heartbeatSeconds) {
+        this(name, target, threshold, parkPosition, heartbeatSeconds, false);
+    }
+
+    /**
+     * Create an instance.
+     *
+     * @param name Damper name. Necessary evil to allow instrumentation signature.
+     * @param target Switch that controls the actual damper.
+     * @param threshold Switch threshold.
+     * @param parkPosition Damper position defined as 'parked'.
+     * @param heartbeatSeconds Set the {@link #heartbeat} to this interval in seconds.
+     * @param inverted {@code true} if the switch is inverted.
+     */
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, long heartbeatSeconds, boolean inverted) {
         super(name);
 
         check(target);
