@@ -1,24 +1,23 @@
 package net.sf.dz3.device.actuator.impl;
 
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.sem.ACT;
+import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
+import com.homeclimatecontrol.jukebox.service.Messenger;
+import net.sf.dz3.device.actuator.Damper;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.device.actuator.Damper;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import com.homeclimatecontrol.jukebox.sem.ACT;
-import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
-import com.homeclimatecontrol.jukebox.service.Messenger;
-
 /**
  * Damper multiplexer.
- * 
+ *
  * Allows to control several physical dampers via one logical one. Each of controlled dampers
  * can be calibrated individually.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class DamperMultiplexer extends AbstractDamper {
@@ -26,31 +25,29 @@ public class DamperMultiplexer extends AbstractDamper {
     /**
      * Dampers to control.
      */
-    private final Set<Damper> dampers = new HashSet<Damper>();
-    
+    private final Set<Damper> dampers = new HashSet<>();
+
     /**
      * Create an instance.
-     * 
+     *
      * @param name Name to use.
      * @param dampers Set of dampers to control.
      */
     public DamperMultiplexer(String name, Set<Damper> dampers) {
         super(name);
-        
+
         this.dampers.addAll(dampers);
     }
 
     @Override
     protected synchronized void moveDamper(double position) throws IOException {
-        
-        for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
-            
-            Damper d = i.next();
-            
+
+        for (Damper d : dampers) {
+
             try {
-                
+
                 d.set(position);
-                
+
             } catch (IOException ex) {
 
                 // VT: NOTE: Multiplexer is less prone to errors than a regular damper,
@@ -58,7 +55,7 @@ public class DamperMultiplexer extends AbstractDamper {
                 // not fail all at once. However, low probability of this happening
                 // makes it impractical to handle such errors separately. If you feel otherwise,
                 // feel free to interfere (i.e. not throw an exception if not all dampers failed).
-                
+
                 throw new IOException("One of controlled dampers failed", ex);
             }
         }
@@ -66,16 +63,16 @@ public class DamperMultiplexer extends AbstractDamper {
 
     @Override
     public double getPosition() throws IOException {
-        
+
         // A random one (HashSet, remember?) is as good as any other,
         // they're supposed to be identical anyway
-        
+
         return dampers.iterator().next().getPosition();
     }
 
     @Override
     public JmxDescriptor getJmxDescriptor() {
-        
+
         return new JmxDescriptor(
                 "dz",
                 "Damper multiplexer",
@@ -107,15 +104,15 @@ public class DamperMultiplexer extends AbstractDamper {
         protected final Object execute() throws Throwable {
 
             ThreadContext.push("execute");
-            
+
             try {
-                
+
                 SemaphoreGroup parked = new SemaphoreGroup();
-                
+
                 for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
-                    
+
                     Damper d = i.next();
-                    
+
                     parked.add(d.park());
                 }
 
@@ -126,7 +123,7 @@ public class DamperMultiplexer extends AbstractDamper {
             } catch (Throwable t) {
 
                 logger.error(getName() + ": failed to park at " + getParkPosition(), t);
-                
+
             } finally {
                 ThreadContext.pop();
             }

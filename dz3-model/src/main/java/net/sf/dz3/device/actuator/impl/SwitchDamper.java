@@ -13,7 +13,7 @@ import java.time.Duration;
  *
  * Most existing HVAC dampers are like this, controlled by 24VAC.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class SwitchDamper extends AbstractDamper {
 
