@@ -28,7 +28,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
@@ -37,7 +36,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Set of test cases to replicate https://github.com/home-climate-control/dz/issues/130.
  */
-public class THTest {
+class THTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
@@ -46,8 +45,8 @@ public class THTest {
     private static final String STATE = "switch state";
 
     @Test
-    public void testSyncFastSimple()
-            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+    void testSyncFastSimple()
+            throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
         testSync("fast/simple", SimpleDamperController.class, 0, 0);
@@ -55,16 +54,16 @@ public class THTest {
 
     @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
     @Test
-    public void testSyncSlowSimple()
-            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+    void testSyncSlowSimple()
+            throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
         testSync("slow/simple", SimpleDamperController.class, 100, 500);
     }
 
     @Test
-    public void testSyncFastBalancing()
-            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+    void testSyncFastBalancing()
+            throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
         testSync("fast/balancing", BalancingDamperController.class, 0, 0);
@@ -72,41 +71,41 @@ public class THTest {
 
     @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
     @Test
-    public void testSyncSlowBalancing()
-            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+    void testSyncSlowBalancing()
+            throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
         testSync("slow/balancing", BalancingDamperController.class, 100, 500);
     }
 
     private void testSync(String marker, Class<? extends AbstractDamperController> controllerClass, long minDelay, int maxDelay)
-            throws InterruptedException, ExecutionException, IOException, NoSuchMethodException, SecurityException,
+            throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        Marker m = new Marker(marker);
+        var m = new Marker(marker);
         ThreadContext.push(marker);
 
         try {
 
-            ThermostatModel tsLivingRoom = mock(ThermostatModel.class);
-            ThermostatModel tsKitchen = mock(ThermostatModel.class);
-            ThermostatModel tsWestBathroom = mock(ThermostatModel.class);
-            ThermostatModel tsWest = mock(ThermostatModel.class);
+            var tsLivingRoom = mock(ThermostatModel.class);
+            var tsKitchen = mock(ThermostatModel.class);
+            var tsWestBathroom = mock(ThermostatModel.class);
+            var tsWest = mock(ThermostatModel.class);
 
             doReturn("thermostat-livingroom").when(tsLivingRoom).getName();
             doReturn("thermostat-kitchen").when(tsKitchen).getName();
-            doReturn("thermostat-westbathroom").when(tsWestBathroom).getName();
+            doReturn("thermostat-west_bathroom").when(tsWestBathroom).getName();
             doReturn("thermostat-west").when(tsWest).getName();
 
             Object lock = "lock";
 
             Switch switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay, lock);
             Switch switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay, lock);
-            Switch switchWestBathroom = new NullSwitch("switch_westbathroom_damper", minDelay, maxDelay, lock);
+            Switch switchWestBathroom = new NullSwitch("switch_west_bathroom_damper", minDelay, maxDelay, lock);
             Switch switchWestDamper = new NullSwitch("switch_west_damper", minDelay, maxDelay, lock);
             Switch switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", minDelay, maxDelay, lock);
 
-            Set<Switch> switches = new LinkedHashSet<>();
+            var switches = new LinkedHashSet<Switch>();
 
             switches.add(switchLivingRoom);
             switches.add(switchKitchen);
@@ -114,23 +113,23 @@ public class THTest {
             switches.add(switchWestDamper);
             switches.add(switchWestBoosterFan);
 
-            Damper damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0);
-            Damper damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0);
-            Damper damperWestBathroom = new SwitchDamper("damper_westbathroom", switchWestBathroom, 0.8, 1.0);
+            var damperLivingRoom = new SwitchDamper("damper_livingroom", switchLivingRoom, 0.8, 1.0);
+            var damperKitchen = new SwitchDamper("damper_kitchen", switchKitchen, 0.8, 1.0);
+            var damperWestBathroom = new SwitchDamper("damper_west_bathroom", switchWestBathroom, 0.8, 1.0);
 
-            Damper damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0);
+            var damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0);
 
             // VT: NOTE: This one is not inverted, like in damper-parking-2020 branch
-            Damper damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0);
+            var damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 1.0);
 
-            Set<Damper> west = new LinkedHashSet<>();
+            var west = new LinkedHashSet<Damper>();
 
             west.add(damperWest);
             west.add(damperWestBoosterFan);
 
-            Damper damperMultiplexerWest = new DamperMultiplexer("damper_multiplexer_west", west);
+            var damperMultiplexerWest = new DamperMultiplexer("damper_multiplexer_west", west);
 
-            Set<Damper> dampers = new LinkedHashSet<>();
+            var dampers = new LinkedHashSet<Damper>();
 
             dampers.add(damperLivingRoom);
             dampers.add(damperKitchen);
@@ -141,29 +140,29 @@ public class THTest {
 
             // TreeMap will not work here because of the way Mockito works
             // Note 'Thermostat' here vs. 'ThermostatModel' for the mock
-            Map<Thermostat, Damper> ts2damper = new LinkedHashMap<>();
+            var ts2damper = new LinkedHashMap<Thermostat, Damper>();
 
             ts2damper.put(tsLivingRoom, damperLivingRoom);
             ts2damper.put(tsKitchen, damperKitchen);
             ts2damper.put(tsWestBathroom, damperWestBathroom);
             ts2damper.put(tsWest, damperMultiplexerWest);
 
-            Unit u = mock(Unit.class);
+            var u = mock(Unit.class);
 
             Constructor<? extends AbstractDamperController> c = controllerClass.getDeclaredConstructor(Unit.class, Map.class);
-            AbstractDamperController dc = c.newInstance(u, ts2damper);
+            var dc = c.newInstance(u, ts2damper);
 
             logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
 
             // VT: NOTE: It may be a better idea to inject fixed time; let's see if this works
-            long timestamp = System.currentTimeMillis();
+            var timestamp = System.currentTimeMillis();
 
             // This will wait until all the movements are complete - unlike real life scenario;
             // that'll come later
 
             dc.stateChanged(tsWest, new ThermostatSignal(
                     true, false, true, true,
-                    new DataSample<Double>(timestamp, "sensor_west", "sensor_west", 3.0625, null)));
+                    new DataSample<>(timestamp, "sensor_west", "sensor_west", 3.0625, null)));
 
             // The unit is off, dampers are parked
 
@@ -187,31 +186,31 @@ public class THTest {
 
             // For a good measure, let's advance the timestamp between signals
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(0, true, 0), null));
+            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(0, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(3.0625, true, 0), null));
+            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(3.0625, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(6.875, true, 0), null));
+            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(6.875, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(10.3125, true, 0), null));
+            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(10.3125, true, 0), null));
 
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(13.6875, true, 0), null));
+            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(13.6875, true, 0), null));
 
 
             // After that, the demand rises by small increments until the whole thing blows up
             // The count in the crash log is 9, let's make sure it's exceeded
 
-            double demand = 13.6875;
+            var demand = 13.6875;
             for (int count = 0; count < 50; count++) {
 
                 timestamp += 50 + rg.nextInt(100);
                 demand += rg.nextDouble()/10;
 
-                dc.consume(new DataSample<UnitSignal>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
+                dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
             }
 
             // To be continued...
