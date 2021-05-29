@@ -15,6 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test case for {@link SwitchDamper}.
@@ -131,10 +133,27 @@ class SwitchDamperTest {
         // Parked at 1.0, inverted
         assertThat(s.getState()).isFalse();
 
-        d.moveDamper(0);
+        d.set(0);
         assertThat(s.getState()).isTrue();
 
-        d.moveDamper(1);
+        d.set(1);
         assertThat(s.getState()).isFalse();
+    }
+
+    @Test
+    void lazy() throws IOException {
+
+        var s = mock(Switch.class);
+        var d = new SwitchDamper("sd", s, 0.5, 1.0, false, 1);
+
+        // It must've been parked in the constructor
+        verify(s, times(1)).setState(true);
+
+        d.set(0.3);
+        d.set(0.3);
+        d.set(0.3);
+
+        // The switch must've been triggered *once*
+        verify(s, times(1)).setState(false);
     }
 }

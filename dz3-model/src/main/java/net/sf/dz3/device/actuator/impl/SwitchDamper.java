@@ -6,6 +6,7 @@ import net.sf.dz3.device.sensor.Switch;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
+import java.time.Duration;
 
 /**
  * Damper controlled by a switch.
@@ -40,6 +41,28 @@ public class SwitchDamper extends AbstractDamper {
     private final boolean inverted;
 
     /**
+     * Heartbeat interval.
+     *
+     * Command to set the state will not be sent to {@link #target} if it was last
+     * sent less than this much ago.
+     */
+    private Duration heartbeat = Duration.ofMillis(0);
+
+    /**
+     * Last time the command was successfully sent to the {@link #target}.
+     *
+     * Set in {@link #moveDamper(double)}.
+     */
+    private long lastKnown = 0;
+
+    /**
+     * Last known target state.
+     *
+     * Set in {@link #moveDamper(double)}.
+     */
+    private boolean targetState;
+
+    /**
      * Create a non-inverted instance with default (1.0) park position.
      *
      * @param name Damper name. Necessary evil to allow instrumentation signature.
@@ -61,8 +84,9 @@ public class SwitchDamper extends AbstractDamper {
     public SwitchDamper(String name, Switch target, double threshold, double parkPosition) {
         this(name, target, threshold, parkPosition, false);
     }
+
     /**
-     * Create an instance.
+     * Create a non-inverted instance.
      *
      * @param name Damper name. Necessary evil to allow instrumentation signature.
      * @param target Switch that controls the actual damper.
@@ -70,6 +94,20 @@ public class SwitchDamper extends AbstractDamper {
      * @param parkPosition Damper position defined as 'parked'.
      */
     public SwitchDamper(String name, Switch target, double threshold, double parkPosition, boolean inverted) {
+        this(name, target, threshold, parkPosition, inverted, 0);
+    }
+
+    /**
+     * Create an instance.
+     *
+     * @param name Damper name. Necessary evil to allow instrumentation signature.
+     * @param target Switch that controls the actual damper.
+     * @param threshold Switch threshold.
+     * @param parkPosition Damper position defined as 'parked'.
+     * @param inverted {@code true} if the switch is inverted.
+     * @param heartbeatSeconds Set the {@link #heartbeat} to this interval in seconds.
+     */
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, boolean inverted, long heartbeatSeconds) {
         super(name);
 
         check(target);
@@ -80,8 +118,32 @@ public class SwitchDamper extends AbstractDamper {
         this.inverted = inverted;
 
         setParkPosition(parkPosition);
+        setHeartbeatSeconds(heartbeatSeconds);
 
         set(getParkPosition());
+    }
+
+    @JmxAttribute(description = "Heartbeat duration")
+    public Duration getHeartbeat() {
+        return heartbeat;
+    }
+
+    public void setHeartbeat(Duration heartbeat) {
+
+        if (heartbeat.isNegative()) {
+            throw new IllegalArgumentException("negative heartbeat not acceptable: " + heartbeat);
+        }
+
+        this.heartbeat = heartbeat;
+    }
+
+    @JmxAttribute(description = "Heartbeat duration in seconds")
+    public long getHeartbeatSeconds() {
+        return heartbeat.getSeconds();
+    }
+
+    public void setHeartbeatSeconds(long heartbeatSeconds) {
+        setHeartbeat(Duration.ofSeconds(heartbeatSeconds));
     }
 
     private void check(Switch target) {
@@ -109,11 +171,11 @@ public class SwitchDamper extends AbstractDamper {
 
             boolean state = position > threshold;
 
-            state = inverted ? !state : state;
+            state = inverted != state;
 
-            logger.debug("translated {} => {}", position, state);
+            logger.debug("translated {} => {}{}", position, state, (inverted ? " (inverted)" : ""));
 
-            target.setState(state);
+            setState(state);
 
             this.position = position;
 
@@ -121,11 +183,38 @@ public class SwitchDamper extends AbstractDamper {
 
             // squid:S1181: No.
             // This is pretty serious, closed damper may cause the compressor to slug
-            // or the boiler to blow up
+            // or the boiler to blow up - so no harm in logging this multiple times, hopefully
             logger.fatal("failed to set state for {}", target.getAddress(), t);
 
         } finally {
             ThreadContext.pop();
+        }
+    }
+
+    /**
+     * Set the {@link #target} state, but only if it is beyond the {@link #heartbeat}.
+     *
+     * @param state State to set the {@link #target} to.
+     */
+    private void setState(boolean state) throws IOException {
+
+        // VT: NOTE: This call makes it a royal PITA to troubleshoot;
+        // might want to think of injectable TimeSource
+        long now = System.currentTimeMillis();
+        long elapsed = now - lastKnown;
+
+        if (elapsed > heartbeat.toMillis() || state != targetState) {
+
+            if (state == targetState) {
+                // It's a timeout, then
+                logger.debug("heartbeat exceeded by {}ms, invoking hardware", elapsed - heartbeat.toMillis());
+            }
+
+            target.setState(state);
+
+            // This will not be set if the command failed
+            lastKnown = now;
+            targetState = state;
         }
     }
 
