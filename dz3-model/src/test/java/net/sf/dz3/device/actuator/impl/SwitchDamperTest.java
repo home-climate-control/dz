@@ -25,11 +25,25 @@ class SwitchDamperTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
+    @Test
+    void validName() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new SwitchDamper(null, null, 0d))
+                .withMessage("name can't be null");
+    }
+
+    @Test
+    void validTarget() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new SwitchDamper("name", null, 0d))
+                .withMessage("target can't be null");
+    }
+
     /**
      * Test whether the {@link SwitchDamper} is properly parked.
      */
     @Test
-    void testPark() {
+    void park() {
 
         NullSwitch s = new NullSwitch("switch");
         Damper d = new SwitchDamper("damper", s, 0.5);
@@ -106,5 +120,21 @@ class SwitchDamperTest {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> d.setThreshold(2))
                 .withMessage("Unreasonable threshold value given (2.0), valid values are (0 < threshold < 1)");
+    }
+
+    @Test
+    void inverted() throws IOException {
+
+        var s = new NullSwitch("switch");
+        var d = new SwitchDamper("sd", s, 0.5, 1.0, true);
+
+        // Parked at 1.0, inverted
+        assertThat(s.getState()).isFalse();
+
+        d.moveDamper(0);
+        assertThat(s.getState()).isTrue();
+
+        d.moveDamper(1);
+        assertThat(s.getState()).isFalse();
     }
 }

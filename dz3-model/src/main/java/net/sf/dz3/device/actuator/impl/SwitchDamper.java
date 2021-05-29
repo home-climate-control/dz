@@ -33,18 +33,34 @@ public class SwitchDamper extends AbstractDamper {
      * will set the switch to 1,values equal or less will set the switch to 0.
      */
     private double threshold;
+    /**
+     * If {@code} true, then {@code 1.0} damper position would mean the switch in {@code false} state,
+     * not in {@code true} like it normally would.
+     */
+    private final boolean inverted;
 
     /**
-     * Create an instance with default (1.0) park position.
+     * Create a non-inverted instance with default (1.0) park position.
      *
      * @param name Damper name. Necessary evil to allow instrumentation signature.
      * @param target Switch that controls the actual damper.
      * @param threshold Switch threshold.
      */
     public SwitchDamper(String name, Switch target, double threshold) {
-        this(name, target, threshold, 1.0);
+        this(name, target, threshold, 1.0, false);
     }
 
+    /**
+     * Create a non-inverted instance.
+     *
+     * @param name Damper name. Necessary evil to allow instrumentation signature.
+     * @param target Switch that controls the actual damper.
+     * @param threshold Switch threshold.
+     * @param parkPosition Damper position defined as 'parked'.
+     */
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition) {
+        this(name, target, threshold, parkPosition, false);
+    }
     /**
      * Create an instance.
      *
@@ -53,7 +69,7 @@ public class SwitchDamper extends AbstractDamper {
      * @param threshold Switch threshold.
      * @param parkPosition Damper position defined as 'parked'.
      */
-    public SwitchDamper(String name, Switch target, double threshold, double parkPosition) {
+    public SwitchDamper(String name, Switch target, double threshold, double parkPosition, boolean inverted) {
         super(name);
 
         check(target);
@@ -61,6 +77,7 @@ public class SwitchDamper extends AbstractDamper {
 
         this.target = target;
         this.threshold = threshold;
+        this.inverted = inverted;
 
         setParkPosition(parkPosition);
 
@@ -91,6 +108,8 @@ public class SwitchDamper extends AbstractDamper {
         try {
 
             boolean state = position > threshold;
+
+            state = inverted ? !state : state;
 
             logger.debug("translated {} => {}", position, state);
 
