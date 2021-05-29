@@ -13,6 +13,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.byLessThan;
 import static org.assertj.core.api.Assertions.fail;
 
 /**
@@ -26,10 +27,10 @@ class DelayTest {
 
     /**
      * Test case to find out whether {@link ScheduledExecutorService} is suitable for
-     * implementing {@link HvacController].
+     * implementing {@code HvacController].
      */
     @Test
-    public void testScheduledExecutorService() throws InterruptedException {
+    void testScheduledExecutorService() throws InterruptedException {
 
         ThreadContext.push("testScheduledExecutorService");
 
@@ -42,20 +43,33 @@ class DelayTest {
             Command c3 = new Command(150);
 
             long start = System.currentTimeMillis();
-            service.schedule(c1, 200, TimeUnit.MILLISECONDS);
-            service.schedule(c2, 300, TimeUnit.MILLISECONDS);
-            service.schedule(c3, 400, TimeUnit.MILLISECONDS);
+            long delay1 = 200;
+            long delay2 = 300;
+            long delay3 = 400;
+            service.schedule(c1, delay1, TimeUnit.MILLISECONDS);
+            service.schedule(c2, delay2, TimeUnit.MILLISECONDS);
+            service.schedule(c3, delay3, TimeUnit.MILLISECONDS);
 
             Thread.sleep(3000);
 
-            logger.info(c1.getStart() - start);
-            logger.info(c2.getStart() - c1.getStart());
-            logger.info(c3.getStart() - c2.getStart());
+            logger.info("c1 relative: {}", c1.getStart() - start);
+            logger.info("c2 relative: {}", c2.getStart() - c1.getStart());
+            logger.info("c3 relative: {}", c3.getStart() - c2.getStart());
 
-            // VT: NOTE: Bottomline: no, this can't be used for keeping track on a command queue
-            // because the delays are fixed relative to the moment when the item was scheduled, not
-            // when the previous item execution was finished. It may be possible to fiddle with
-            // the service implementation, but that's not what I'd like to do now.
+            logger.info("c1 absolute: {}", c1.getStart() - start);
+            logger.info("c2 absolute: {}", c2.getStart() - start);
+            logger.info("c3 absolute: {}", c3.getStart() - start);
+
+            {
+                // VT: NOTE: Bottomline: no, this can't be used for keeping track on a command queue
+                // because the delays are fixed relative to the moment when the item was scheduled, not
+                // when the previous item execution was finished. It may be possible to fiddle with
+                // the service implementation, but that's not what I'd like to do now.
+
+                assertThat(c1.getStart() - start - delay1).isCloseTo(0, byLessThan(5L));
+                assertThat(c2.getStart() - start - delay2).isCloseTo(0, byLessThan(5L));
+                assertThat(c3.getStart() - start - delay3).isCloseTo(0, byLessThan(5L));
+            }
 
         } finally {
             ThreadContext.pop();
@@ -69,10 +83,10 @@ class DelayTest {
      */
     @Disabled("Ran almost like charm on JUnit 4, but consistently fails on JUnit 5")
     @Test
-    public void testDelayExact() {
+    void testDelayExact() {
 
         DelayedCommand c = new DelayedCommand(1000);
-        String message = "Delay mismatch, or slow system (@Ignore this test if it is)";
+        var message = "Delay mismatch, or slow system (@Ignore this test if it is)";
 
         assertThat(c.getDelay(TimeUnit.MILLISECONDS)).isEqualTo(1000);
         assertThat(c.getDelay(TimeUnit.SECONDS)).isEqualTo(1);
@@ -86,7 +100,7 @@ class DelayTest {
      * Any of these might fail on slow computers, or in slow (high load) environments. @Ignore them if this happens.
      */
     @Test
-    public void testDelaySlow() {
+    void testDelaySlow() {
 
         DelayedCommand c = new DelayedCommand(1000);
 
@@ -104,17 +118,20 @@ class DelayTest {
     }
 
     @Test
-    public void testDelayQueue() throws InterruptedException {
+    void testDelayQueue() throws InterruptedException {
 
         ThreadContext.push("testDelayQueue");
 
         try {
 
-            DelayQueue<DelayedCommand> queue = new DelayQueue<DelayedCommand>();
+            var queue = new DelayQueue<DelayedCommand>();
 
-            DelayedCommand c1 = new DelayedCommand(50);
-            DelayedCommand c2 = new DelayedCommand(100);
-            DelayedCommand c3 = new DelayedCommand(150);
+            long delay1 = 50;
+            long delay2 = 100;
+            long delay3 = 150;
+            DelayedCommand c1 = new DelayedCommand(delay1);
+            DelayedCommand c2 = new DelayedCommand(delay2);
+            DelayedCommand c3 = new DelayedCommand(delay3);
 
             queue.put(c1);
             logger.info("Queue: " + queue);
@@ -136,12 +153,19 @@ class DelayTest {
                 c.run();
             }
 
-            logger.info(c1.getStart() - start);
-            logger.info(c2.getStart() - c1.getStart());
-            logger.info(c3.getStart() - c2.getStart());
+            logger.info("c1 relative: {}", c1.getStart() - start);
+            logger.info("c2 relative: {}", c2.getStart() - c1.getStart());
+            logger.info("c3 relative: {}", c3.getStart() - c2.getStart());
 
-            // VT: NOTE: Better, but still too clumsy without manipulations with
-            // shared variable state.
+            {
+                // VT: NOTE: Better, but still too clumsy without manipulations with
+                // shared variable state.
+
+                // The first one is really bad (why?), the rest are fine
+                assertThat(c1.getStart() - start).isCloseTo(delay1, byLessThan(30L));
+                assertThat(c2.getStart() - c1.getStart()).isCloseTo(delay2, byLessThan(5L));
+                assertThat(c3.getStart() - c2.getStart()).isCloseTo(delay3, byLessThan(5L));
+            }
 
         } finally {
             ThreadContext.pop();
@@ -158,12 +182,12 @@ class DelayTest {
         }
 
         @Override
-        public void run() {
+        public synchronized void run() {
 
             try {
 
                 startedAt = System.currentTimeMillis();
-                Thread.sleep(delayMillis);
+                wait(delayMillis);
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -192,13 +216,13 @@ class DelayTest {
         }
 
         @Override
-        public void run() {
+        public synchronized void run() {
 
             try {
 
                 startedAt = System.currentTimeMillis();
                 marker = startedAt;
-                Thread.sleep(delayMillis);
+                wait(delayMillis);
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
