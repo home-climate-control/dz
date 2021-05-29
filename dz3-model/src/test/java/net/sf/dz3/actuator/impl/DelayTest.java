@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.byLessThan;
 import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.within;
 
 /**
  * Test cases for different delay handling strategies.
@@ -66,9 +67,9 @@ class DelayTest {
                 // when the previous item execution was finished. It may be possible to fiddle with
                 // the service implementation, but that's not what I'd like to do now.
 
-                assertThat(c1.getStart() - start - delay1).isCloseTo(0, byLessThan(5L));
-                assertThat(c2.getStart() - start - delay2).isCloseTo(0, byLessThan(5L));
-                assertThat(c3.getStart() - start - delay3).isCloseTo(0, byLessThan(5L));
+                assertThat(c1.getStart() - start).isCloseTo(delay1, byLessThan(20L));
+                assertThat(c2.getStart() - start).isCloseTo(delay2, byLessThan(20L));
+                assertThat(c3.getStart() - start).isCloseTo(delay3, byLessThan(20L));
             }
 
         } finally {
@@ -88,10 +89,10 @@ class DelayTest {
         DelayedCommand c = new DelayedCommand(1000);
         var message = "Delay mismatch, or slow system (@Ignore this test if it is)";
 
-        assertThat(c.getDelay(TimeUnit.MILLISECONDS)).isEqualTo(1000);
-        assertThat(c.getDelay(TimeUnit.SECONDS)).isEqualTo(1);
-        assertThat(c.getDelay(TimeUnit.MICROSECONDS)).isEqualTo(1000000);
-        assertThat(c.getDelay(TimeUnit.NANOSECONDS)).isEqualTo(1000000000);
+        assertThat(c.getDelay(TimeUnit.MILLISECONDS)).withFailMessage(message).isEqualTo(1000);
+        assertThat(c.getDelay(TimeUnit.SECONDS)).withFailMessage(message).isEqualTo(1);
+        assertThat(c.getDelay(TimeUnit.MICROSECONDS)).withFailMessage(message).isEqualTo(1000000);
+        assertThat(c.getDelay(TimeUnit.NANOSECONDS)).withFailMessage(message).isEqualTo(1000000000);
     }
 
     /**
@@ -134,14 +135,8 @@ class DelayTest {
             DelayedCommand c3 = new DelayedCommand(delay3);
 
             queue.put(c1);
-            logger.info("Queue: " + queue);
-
             queue.put(c2);
-
-            logger.info("Queue: " + queue);
-
             queue.put(c3);
-            logger.info("Queue: " + queue);
 
             long start = System.currentTimeMillis();
 
@@ -161,10 +156,9 @@ class DelayTest {
                 // VT: NOTE: Better, but still too clumsy without manipulations with
                 // shared variable state.
 
-                // The first one is really bad (why?), the rest are fine
-                assertThat(c1.getStart() - start).isCloseTo(delay1, byLessThan(30L));
-                assertThat(c2.getStart() - c1.getStart()).isCloseTo(delay2, byLessThan(5L));
-                assertThat(c3.getStart() - c2.getStart()).isCloseTo(delay3, byLessThan(5L));
+                assertThat(c1.getStart() - start).isCloseTo(delay1, within(10L));
+                assertThat(c2.getStart() - start).isCloseTo(delay1 + delay2, within(10L));
+                assertThat(c3.getStart() - start).isCloseTo(delay1 + delay2 + delay3, within(10L));
             }
 
         } finally {
@@ -190,7 +184,7 @@ class DelayTest {
                 wait(delayMillis);
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("run() failed", e);
             }
         }
 
@@ -225,7 +219,7 @@ class DelayTest {
                 wait(delayMillis);
 
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("run() failed", e);
             }
         }
 
@@ -240,7 +234,6 @@ class DelayTest {
 
         @Override
         public long getDelay(TimeUnit unit) {
-
             return unit.convert(marker + delayMillis - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
         }
 
