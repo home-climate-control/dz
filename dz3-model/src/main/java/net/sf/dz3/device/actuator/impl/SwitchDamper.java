@@ -131,6 +131,7 @@ public class SwitchDamper extends AbstractDamper {
     public void setHeartbeat(Duration heartbeat) {
 
         if (heartbeat.isNegative()) {
+            // VT: NOTE: The format is not that human friendly, but this should be pretty rare
             throw new IllegalArgumentException("negative heartbeat not acceptable: " + heartbeat);
         }
 

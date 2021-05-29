@@ -125,6 +125,22 @@ class SwitchDamperTest {
     }
 
     @Test
+    void heartbeatNegative() {
+
+        var s = mock(Switch.class);
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new SwitchDamper(
+                        "sd",
+                        s,
+                        0.5,
+                        1.0,
+                        false,
+                        -1))
+                .withMessage("negative heartbeat not acceptable: PT-1S");
+    }
+
+    @Test
     void inverted() throws IOException {
 
         var s = new NullSwitch("switch");
