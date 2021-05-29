@@ -16,7 +16,6 @@ import net.sf.dz3.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -52,13 +51,13 @@ class THTest {
         testSync("fast/simple", SimpleDamperController.class, 0, 0);
     }
 
-    @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
+//    @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
     @Test
     void testSyncSlowSimple()
             throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        testSync("slow/simple", SimpleDamperController.class, 100, 500);
+        testSync("slow/simple", SimpleDamperController.class, 5, 20);
     }
 
     @Test
@@ -69,13 +68,13 @@ class THTest {
         testSync("fast/balancing", BalancingDamperController.class, 0, 0);
     }
 
-    @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
+//    @Disabled("This test may take up to 8+ seconds - too slow for development work. Enable if you need it")
     @Test
     void testSyncSlowBalancing()
             throws IOException, NoSuchMethodException, SecurityException,
             InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 
-        testSync("slow/balancing", BalancingDamperController.class, 100, 500);
+        testSync("slow/balancing", BalancingDamperController.class, 5, 20);
     }
 
     private void testSync(String marker, Class<? extends AbstractDamperController> controllerClass, long minDelay, int maxDelay)
