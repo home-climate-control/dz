@@ -25,11 +25,8 @@ class ServoDamperTest {
         controller.open();
         Damper d = new ServoDamper("sd", controller.getServo("0"));
 
-        assertThatCode(() -> {
-            // Parking position hasn't been explicitly set
-            d.park();
-        }).doesNotThrowAnyException();
-
+        // Parking position hasn't been explicitly set
+        assertThatCode(d::park).doesNotThrowAnyException();
         assertThat(d.getPosition()).isEqualTo(d.getParkPosition());
     }
 

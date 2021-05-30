@@ -63,11 +63,8 @@ class SwitchDamperTest {
         NullSwitch s = new NullSwitch("switch");
         Damper d = new SwitchDamper("damper", s, 0.5);
 
-        assertThatCode(() -> {
-            // Parking position hasn't been explicitly set
-            d.park();
-        }).doesNotThrowAnyException();
-
+        // Parking position hasn't been explicitly set
+        assertThatCode(d::park).doesNotThrowAnyException();
         assertThat(d.getPosition()).isEqualTo(d.getParkPosition());
     }
 
