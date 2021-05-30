@@ -197,31 +197,6 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
         }
     }
 
-    private void park() {
-
-        ThreadContext.push("park");
-
-        try {
-
-            logger.info("Turning OFF");
-
-            Map<Damper, Double> damperMap = new HashMap<Damper, Double>();
-
-            for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
-
-                Thermostat ts = i.next();
-                Damper d = ts2damper.get(ts);
-
-                damperMap.put(d, d.getParkPosition());
-            }
-
-            shuffle(damperMap);
-
-        } finally {
-            ThreadContext.pop();
-        }
-    }
-
     /**
      * Set positions of dampers in the map.
      *
@@ -320,6 +295,31 @@ public abstract class AbstractDamperController extends LogAware implements Dampe
     private void checkEnabled() {
         if (!enabled) {
             throw new IllegalStateException("powerOff() was called already");
+        }
+    }
+
+    private void park() {
+
+        ThreadContext.push("park");
+
+        try {
+
+            logger.info("Turning OFF");
+
+            Map<Damper, Double> damperMap = new HashMap<Damper, Double>();
+
+            for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
+
+                Thermostat ts = i.next();
+                Damper d = ts2damper.get(ts);
+
+                damperMap.put(d, d.getParkPosition());
+            }
+
+            shuffle(damperMap);
+
+        } finally {
+            ThreadContext.pop();
         }
     }
 
