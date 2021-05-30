@@ -4,7 +4,6 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxAware;
-import com.homeclimatecontrol.jukebox.logger.LogAware;
 import com.homeclimatecontrol.jukebox.sem.SemaphoreGroup;
 import net.sf.dz3.device.actuator.Damper;
 import net.sf.dz3.device.model.DamperController;
@@ -12,6 +11,8 @@ import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
@@ -25,9 +26,11 @@ import java.util.TreeMap;
 /**
  * Base logic for the damper controller.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractDamperController extends LogAware implements DamperController, JmxAware {
+public abstract class AbstractDamperController implements DamperController, JmxAware {
+
+    protected final Logger logger = LogManager.getLogger();
 
     /**
      * Association from a thermostat to a damper.

@@ -7,7 +7,6 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import com.homeclimatecontrol.jukebox.logger.LogAware;
 import net.sf.dz3.device.actuator.HvacController;
 import net.sf.dz3.device.actuator.HvacDriver;
 import net.sf.dz3.device.model.HvacMode;
@@ -15,6 +14,8 @@ import net.sf.dz3.device.model.HvacSignal;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.util.digest.MessageDigestCache;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
@@ -28,9 +29,11 @@ import java.util.concurrent.TimeUnit;
  *
  * Provides common functions - input sanity checks, mode switching, signal rebroadcasts, etc.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class HvacControllerImpl extends LogAware implements HvacController, JmxAware {
+public class HvacControllerImpl implements HvacController, JmxAware {
+
+    protected final Logger logger = LogManager.getLogger();
 
     /**
      * The unit name.

@@ -1,29 +1,31 @@
 package net.sf.dz3.device.actuator.impl;
 
-import java.io.IOException;
-
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.device.actuator.Damper;
-import net.sf.dz3.util.digest.MessageDigestCache;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.logger.LogAware;
 import com.homeclimatecontrol.jukebox.sem.ACT;
+import net.sf.dz3.device.actuator.Damper;
+import net.sf.dz3.util.digest.MessageDigestCache;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.IOException;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractDamper extends LogAware implements Damper {
-    
+public abstract class AbstractDamper implements Damper {
+
+    protected final Logger logger = LogManager.getLogger();
+
     /**
      * Damper name.
-     * 
+     *
      * Necessary evil to allow instrumentation signature.
      */
      private final String name;
-     
+
      /**
       * Instrumentation signature.
       */
@@ -42,17 +44,17 @@ public abstract class AbstractDamper extends LogAware implements Damper {
      * Current position.
      */
     private double position = parkPosition;
-    
+
     public AbstractDamper(String name) {
-        
+
         if (name == null || "".equals(name)) {
             throw new IllegalArgumentException("name can't be null");
         }
-        
+
         this.name = name;
-        signature = MessageDigestCache.getMD5(name).substring(0, 19); 
+        signature = MessageDigestCache.getMD5(name).substring(0, 19);
     }
-    
+
     @Override
     public final String getName() {
         return name;
@@ -81,7 +83,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
         ThreadContext.push("set");
 
         try {
-            
+
             logger.info("position=" + throttle);
 
             if ( throttle < 0 || throttle > 1.0 || Double.compare(throttle, Double.NaN) == 0) {
@@ -95,7 +97,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
                 moveDamper(throttle);
                 stateChanged();
-                
+
             } catch (Throwable t) {
 
                 logger.error("Failed to move damper to position " + throttle, t);
@@ -112,7 +114,7 @@ public abstract class AbstractDamper extends LogAware implements Damper {
      * Move the actual damper.
      *
      * @param position Position to set.
-     * 
+     *
      * @exception IOException if there was a problem moving the damper.
      */
     protected abstract void moveDamper(double position) throws IOException;
@@ -121,28 +123,28 @@ public abstract class AbstractDamper extends LogAware implements Damper {
     public ACT park() {
 
         ThreadContext.push("park");
-        
+
         try {
-            
+
             // VT: NOTE: Careful here. This implementation will work correctly only if
             // moveDamper() works synchronously. For others (ServoDamper being a good example)
             // you will have to provide your own implementation (again, ServoDamper is an
             // example of how this is done).
-            
+
             ACT done = new ACT();
 
             try {
-                
+
                 moveDamper(parkPosition);
                 done.complete(true);
-                
+
             } catch (Throwable t) {
-                
+
                 done.complete(false);
             }
 
             return done;
-        
+
         } finally {
             ThreadContext.pop();
         }
@@ -155,19 +157,19 @@ public abstract class AbstractDamper extends LogAware implements Damper {
 
     @Override
     public void addConsumer(DataSink<Double> consumer) {
-        
+
         dataBroadcaster.addConsumer(consumer);
     }
 
     @Override
     public void removeConsumer(DataSink<Double> consumer) {
-        
+
         dataBroadcaster.removeConsumer(consumer);
     }
 
     @Override
     public void consume(DataSample<Double> signal) {
-        
+
         set(signal.sample);
     }
 }

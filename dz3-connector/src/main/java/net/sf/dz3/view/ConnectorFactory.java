@@ -1,15 +1,18 @@
 package net.sf.dz3.view;
 
-import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.homeclimatecontrol.jukebox.logger.LogAware;
+import java.util.Map;
 
 /**
  * Connector factory base.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class ConnectorFactory<T> extends LogAware {
+public abstract class ConnectorFactory<T> {
+
+    protected final Logger logger = LogManager.getLogger();
 
     /**
      * Get the base class or interface of the object that the component

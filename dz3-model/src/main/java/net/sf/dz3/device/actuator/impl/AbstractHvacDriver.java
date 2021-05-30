@@ -1,9 +1,10 @@
 package net.sf.dz3.device.actuator.impl;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import com.homeclimatecontrol.jukebox.logger.LogAware;
 import net.sf.dz3.device.actuator.HvacDriver;
 import net.sf.dz3.device.model.HvacMode;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
@@ -13,9 +14,11 @@ import java.io.IOException;
  *
  * Provides common logic for state housekeeping and JMX reporting.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractHvacDriver extends LogAware implements HvacDriver {
+public abstract class AbstractHvacDriver implements HvacDriver {
+
+    protected final Logger logger = LogManager.getLogger();
 
     private HvacState expected;
     private HvacState actual;
