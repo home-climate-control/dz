@@ -24,8 +24,38 @@ class DamperMultiplexerTest {
         var sd2 = new SwitchDamper("d2", s2, 0.5);
         var dm = new DamperMultiplexer("dm", Set.of(sd1, sd2));
 
-        // Parking position hasn't been explicitly set
-        assertThatCode(dm::park).doesNotThrowAnyException();
+        assertThatCode(() -> {
+            // Parking position hasn't been explicitly set
+            dm.park().waitFor();
+        }).doesNotThrowAnyException();
+
+        assertThat(sd1.getPosition()).isEqualTo(sd1.getParkPosition());
+        assertThat(sd2.getPosition()).isEqualTo(sd2.getParkPosition());
+
+        assertThat(s1.getState()).isTrue();
+        assertThat(s2.getState()).isTrue();
+    }
+
+    @Test
+    void parkCustomGroup() throws IOException {
+
+        NullSwitch s1 = new NullSwitch("s1");
+        NullSwitch s2 = new NullSwitch("s2");
+        var sd1 = new SwitchDamper("d1", s1, 0.5);
+        var sd2 = new SwitchDamper("d2", s2, 0.5);
+        var dm = new DamperMultiplexer("dm", Set.of(sd1, sd2));
+
+        // This is nonsense (read park() code), but let's have some innocent fun
+        var parkAt = rg.nextDouble();
+        dm.setParkPosition(parkAt);
+
+        assertThatCode(() -> {
+            dm.park().waitFor();
+        }).doesNotThrowAnyException();
+
+        assertThat(dm.getPosition()).isEqualTo(dm.getParkPosition());
+
+        // ... meanwhile, they park where they want to park
 
         assertThat(sd1.getPosition()).isEqualTo(sd1.getParkPosition());
         assertThat(sd2.getPosition()).isEqualTo(sd2.getParkPosition());
@@ -43,8 +73,10 @@ class DamperMultiplexerTest {
         var sd2 = new SwitchDamper("d2", s2, 0.5, 1, true);
         var dm = new DamperMultiplexer("dm", Set.of(sd1, sd2));
 
-        // Parking position hasn't been explicitly set
-        assertThatCode(dm::park).doesNotThrowAnyException();
+        assertThatCode(() -> {
+            // Parking position hasn't been explicitly set
+            dm.park().waitFor();
+        }).doesNotThrowAnyException();
 
         assertThat(sd1.getPosition()).isEqualTo(sd1.getParkPosition());
         assertThat(sd2.getPosition()).isEqualTo(sd2.getParkPosition());
@@ -62,8 +94,10 @@ class DamperMultiplexerTest {
         var sd2 = new SwitchDamper("d2", s2, 0.5, 0);
         var dm = new DamperMultiplexer("dm", Set.of(sd1, sd2));
 
-        // Parking position hasn't been explicitly set
-        assertThatCode(dm::park).doesNotThrowAnyException();
+        assertThatCode(() -> {
+            // Parking position hasn't been explicitly set
+            dm.park().waitFor();
+        }).doesNotThrowAnyException();
 
         assertThat(sd1.getPosition()).isEqualTo(sd1.getParkPosition());
         assertThat(sd2.getPosition()).isEqualTo(sd2.getParkPosition());
@@ -81,8 +115,10 @@ class DamperMultiplexerTest {
         var sd2 = new SwitchDamper("d2", s2, 0.5, 0, true);
         var dm = new DamperMultiplexer("dm", Set.of(sd1, sd2));
 
-        // Parking position hasn't been explicitly set
-        assertThatCode(dm::park).doesNotThrowAnyException();
+        assertThatCode(() -> {
+            // Parking position hasn't been explicitly set
+            dm.park().waitFor();
+        }).doesNotThrowAnyException();
 
         assertThat(sd1.getPosition()).isEqualTo(sd1.getParkPosition());
         assertThat(sd2.getPosition()).isEqualTo(sd2.getParkPosition());

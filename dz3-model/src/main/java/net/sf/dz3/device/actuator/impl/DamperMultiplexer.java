@@ -27,15 +27,40 @@ public class DamperMultiplexer extends AbstractDamper {
     private final Set<Damper> dampers = new HashSet<>();
 
     /**
+     * Our own position. Different from {@link AbstractDamper#position}.
+     *
+     * This variable doesn't participate in transitions, but is rather for reporting purposes.
+     */
+    private double multiPosition;
+
+    /**
      * Create an instance.
+     *
+     * @param name Name to use.
+     * @param dampers Set of dampers to control.
+     * @param parkPosition Park position.
+     */
+    public DamperMultiplexer(String name, Set<Damper> dampers, Double parkPosition) {
+        super(name);
+
+        this.dampers.addAll(dampers);
+
+        if (parkPosition != null) {
+            setParkPosition(parkPosition);
+        }
+
+        multiPosition = getParkPosition();
+    }
+
+    /**
+     * Create an instance with default parking position.
      *
      * @param name Name to use.
      * @param dampers Set of dampers to control.
      */
     public DamperMultiplexer(String name, Set<Damper> dampers) {
-        super(name);
 
-        this.dampers.addAll(dampers);
+        this(name, dampers, null);
     }
 
     @Override
@@ -58,15 +83,14 @@ public class DamperMultiplexer extends AbstractDamper {
                 throw new IOException("One of controlled dampers failed", ex);
             }
         }
+
+        // For fairness sake, let's set this bogus thing *after* we're done
+        multiPosition = position;
     }
 
     @Override
-    public double getPosition() throws IOException {
-
-        // A random one (HashSet, remember?) is as good as any other,
-        // they're supposed to be identical anyway
-
-        return dampers.iterator().next().getPosition();
+    public synchronized double getPosition() throws IOException {
+        return multiPosition;
     }
 
     @Override
@@ -107,6 +131,9 @@ public class DamperMultiplexer extends AbstractDamper {
                 parked.waitForAll();
 
                 logger.info("{}: parked", getName());
+
+                // For fairness sake, let's set this bogus thing *after* we're done
+                multiPosition = getParkPosition();
 
             } finally {
                 ThreadContext.pop();
