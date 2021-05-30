@@ -2,12 +2,14 @@ package net.sf.dz3.device.actuator.servomaster;
 
 import com.homeclimatecontrol.jukebox.sem.ACT;
 import net.sf.dz3.device.actuator.Damper;
+import net.sf.dz3.device.actuator.impl.DamperMultiplexer;
 import net.sf.servomaster.device.impl.debug.NullServoController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -25,9 +27,28 @@ class ServoDamperTest {
         controller.open();
         Damper d = new ServoDamper("sd", controller.getServo("0"));
 
-        // Parking position hasn't been explicitly set
-        assertThatCode(d::park).doesNotThrowAnyException();
+        assertThatCode(() -> {
+            // Parking position hasn't been explicitly set
+            d.park().waitFor();
+        }).doesNotThrowAnyException();
         assertThat(d.getPosition()).isEqualTo(d.getParkPosition());
+    }
+
+    @Test
+    void parkDefaultMultiplexer() throws IOException {
+
+        var controller = new NullServoController();
+        controller.open();
+        Damper sd1 = new ServoDamper("sd", controller.getServo("0"));
+        Damper sd2 = new ServoDamper("sd", controller.getServo("0"));
+        var dm = new DamperMultiplexer("dm", Set.of(sd1, sd2));
+
+        assertThatCode(() -> {
+            // Parking position hasn't been explicitly set
+            dm.park().waitFor();
+        }).doesNotThrowAnyException();
+        assertThat(sd1.getPosition()).isEqualTo(sd1.getParkPosition());
+        assertThat(sd2.getPosition()).isEqualTo(sd1.getParkPosition());
     }
 
     /**

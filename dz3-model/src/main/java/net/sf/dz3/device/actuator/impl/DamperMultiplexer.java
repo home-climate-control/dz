@@ -9,7 +9,6 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -18,7 +17,7 @@ import java.util.Set;
  * Allows to control several physical dampers via one logical one. Each of controlled dampers
  * can be calibrated individually.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class DamperMultiplexer extends AbstractDamper {
 
@@ -82,24 +81,15 @@ public class DamperMultiplexer extends AbstractDamper {
 
     @Override
     public ACT park() {
-
-        // VT: This implementation is similar to the one used in ServoDamper,
-        // but abstractions are different.
-
-        logger.info(getName() + ": parking at " + getParkPosition());
-
         return new ParkingAssistant().start();
     }
 
     /**
-     * Commands the {@link ServoDamper#servo} to move to {@link ServoDamper#getParkPosition
-     * parked position} and waits until the servo has done so.
+     * Commands the {@link #dampers} to move to their{@link Damper#getParkPosition
+     * parked position} and waits until the dampers have done so.
      */
     private class ParkingAssistant extends Messenger {
 
-        /**
-         * Move the {@link ServoDamper#servo} and wait until it gets there.
-         */
         @Override
         protected final Object execute() throws Throwable {
 
@@ -107,22 +97,16 @@ public class DamperMultiplexer extends AbstractDamper {
 
             try {
 
-                SemaphoreGroup parked = new SemaphoreGroup();
+                var parked = new SemaphoreGroup();
 
-                for (Iterator<Damper> i = dampers.iterator(); i.hasNext(); ) {
-
-                    Damper d = i.next();
-
+                for (Damper d : dampers) {
                     parked.add(d.park());
                 }
 
+                logger.info("{}: parking...", getName());
                 parked.waitForAll();
 
-                logger.info(getName() + ": parked at " + getParkPosition());
-
-            } catch (Throwable t) {
-
-                logger.error(getName() + ": failed to park at " + getParkPosition(), t);
+                logger.info("{}: parked", getName());
 
             } finally {
                 ThreadContext.pop();
