@@ -42,7 +42,7 @@ class THTest {
     private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
 
-    private static final String POSITION = "position";
+    private static final String POSITION = "parked position";
     private static final String STATE = "switch state";
 
     @Test
@@ -117,7 +117,7 @@ class THTest {
             var damperWestBathroom = new SwitchDamper("damper_west_bathroom", switchWestBathroom, 0.8, 1.0, 10);
 
             var damperWest = new SwitchDamper("damper_west", switchWestDamper, 0.8, 1.0, 10);
-            var damperWestBoosterFan = new SwitchDamper("damper_westboosterfan", switchWestBoosterFan, 0.8, 0.0, 10, true);
+            var damperWestBoosterFan = new SwitchDamper("damper_west_boosterfan", switchWestBoosterFan, 0.8, 0.0, 10, true);
 
             var west = new LinkedHashSet<Damper>();
 
