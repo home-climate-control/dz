@@ -67,9 +67,9 @@ class DelayTest {
                 // when the previous item execution was finished. It may be possible to fiddle with
                 // the service implementation, but that's not what I'd like to do now.
 
-                assertThat(c1.getStart() - start).isCloseTo(delay1, byLessThan(20L));
-                assertThat(c2.getStart() - start).isCloseTo(delay2, byLessThan(20L));
-                assertThat(c3.getStart() - start).isCloseTo(delay3, byLessThan(20L));
+                assertThat(c1.getStart() - start).isCloseTo(delay1, byLessThan(30L));
+                assertThat(c2.getStart() - start).isCloseTo(delay2, byLessThan(30L));
+                assertThat(c3.getStart() - start).isCloseTo(delay3, byLessThan(30L));
             }
 
         } finally {
