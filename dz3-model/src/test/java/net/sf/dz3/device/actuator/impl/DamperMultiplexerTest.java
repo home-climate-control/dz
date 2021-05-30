@@ -43,11 +43,10 @@ class DamperMultiplexerTest {
         NullSwitch s2 = new NullSwitch("s2");
         var sd1 = new SwitchDamper("d1", s1, 0.5);
         var sd2 = new SwitchDamper("d2", s2, 0.5);
-        var dm = new DamperMultiplexer("dm", Set.of(sd1, sd2));
 
         // This is nonsense (read park() code), but let's have some innocent fun
         var parkAt = rg.nextDouble();
-        dm.setParkPosition(parkAt);
+        var dm = new DamperMultiplexer("dm", Set.of(sd1, sd2), parkAt);
 
         assertThatCode(() -> {
             dm.park().waitFor();
