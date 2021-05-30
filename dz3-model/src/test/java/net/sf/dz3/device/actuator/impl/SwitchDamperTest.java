@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,6 +44,20 @@ class SwitchDamperTest {
     }
 
     @Test
+    void constructor1() throws IOException {
+        assertThatCode(() -> {
+            new SwitchDamper("damper", new NullSwitch("switch"), 0.5, 0.1, true);
+        }).doesNotThrowAnyException();
+    }
+
+    @Test
+    void constructor2() throws IOException {
+        assertThatCode(() -> {
+            new SwitchDamper("damper", new NullSwitch("switch"), 0.5, 0.1, 10);
+        }).doesNotThrowAnyException();
+    }
+
+    @Test
     void parkDefault() throws IOException {
 
         NullSwitch s = new NullSwitch("switch");
@@ -55,6 +70,7 @@ class SwitchDamperTest {
 
         assertThat(d.getPosition()).isEqualTo(d.getParkPosition());
     }
+
     /**
      * Test whether the {@link SwitchDamper} is properly parked.
      */
@@ -127,7 +143,7 @@ class SwitchDamperTest {
     void thresholdBad() {
 
         var s = mock(Switch.class);
-        var d = new SwitchDamper("sd", s, 0.5);
+        var d = new SwitchDamper("sd", s, 0.5, 0.8);
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> d.setThreshold(-1))
@@ -136,6 +152,15 @@ class SwitchDamperTest {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> d.setThreshold(2))
                 .withMessage("Unreasonable threshold value given (2.0), valid values are (0 < threshold < 1)");
+    }
+
+    @Test
+    void heartbeat() {
+
+        var sd = new SwitchDamper("damper", new NullSwitch("switch"), 0.5, 0.1, 10);
+
+        assertThat(sd.getHeartbeat()).isEqualTo(Duration.ofSeconds(10));
+        assertThat(sd.getHeartbeatSeconds()).isEqualTo(10);
     }
 
     @Test

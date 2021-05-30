@@ -191,6 +191,7 @@ public class ServoDamper extends AbstractDamper {
         /**
          * Move the {@link ServoDamper#servo} and wait until it gets there.
          */
+        @SuppressWarnings("squid:S1181")
         @Override
         protected final Object execute() throws Throwable {
 
@@ -211,6 +212,7 @@ public class ServoDamper extends AbstractDamper {
 
             } catch (Throwable t) {
 
+                // squid:S1181: No.
                 logger.error("{}: failed to park at {}", servo.getName(), getParkPosition(), t);
 
             } finally {
