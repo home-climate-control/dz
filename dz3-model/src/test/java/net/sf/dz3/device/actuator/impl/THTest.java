@@ -16,7 +16,6 @@ import net.sf.dz3.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -36,7 +35,6 @@ import static org.mockito.Mockito.mock;
 /**
  * Set of test cases to replicate https://github.com/home-climate-control/dz/issues/172.
  */
-@Disabled("Temporarily disabled to allow other #172 changes to be implemented without breaking the whole build")
 class THTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
