@@ -17,10 +17,8 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -200,31 +198,6 @@ public abstract class AbstractDamperController implements DamperController, JmxA
         }
     }
 
-    private void park() {
-
-        ThreadContext.push("park");
-
-        try {
-
-            logger.info("Turning OFF");
-
-            Map<Damper, Double> damperMap = new HashMap<Damper, Double>();
-
-            for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
-
-                Thermostat ts = i.next();
-                Damper d = ts2damper.get(ts);
-
-                damperMap.put(d, d.getParkPosition());
-            }
-
-            shuffle(damperMap);
-
-        } finally {
-            ThreadContext.pop();
-        }
-    }
-
     /**
      * Set positions of dampers in the map.
      *
@@ -326,6 +299,29 @@ public abstract class AbstractDamperController implements DamperController, JmxA
         }
     }
 
+    private SemaphoreGroup park() {
+
+        ThreadContext.push("park");
+
+        try {
+
+            logger.info("Turning OFF");
+
+            // This can't be handled like a regular setPosition(), there may be custom parking positions
+            // and damper multiplexers - everything must be parked.
+            var parked = new SemaphoreGroup();
+
+            for (Map.Entry<Thermostat, Damper> td : ts2damper.entrySet()) {
+                parked.add(td.getValue().park());
+            }
+
+            return parked;
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
     @Override
     public final synchronized void powerOff() {
 
@@ -339,34 +335,14 @@ public abstract class AbstractDamperController implements DamperController, JmxA
             // Can't use normal park() here, for it is asynchronous and this method
             // must finish everything before returning
 
-            Set<Damper> damperSet = new HashSet<Damper>();
-
-            for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
-
-                Thermostat ts = i.next();
-                Damper d = ts2damper.get(ts);
-
-                damperSet.add(d);
-            }
-
-            SemaphoreGroup parked = new SemaphoreGroup();
-
-            for (Iterator<Damper> i = damperSet.iterator(); i.hasNext(); ) {
-
-                Damper d = i.next();
-
-                parked.add(d.park());
-                logger.info("Issued park() to " + d.getName());
-            }
-
             try {
 
-                parked.waitForAll();
+                park().waitForAll();
                 logger.info("Parked dampers");
 
             } catch (InterruptedException ex) {
-
                 logger.warn("Failed to park all dampers, some may be in a wrong position", ex);
+                Thread.currentThread().interrupt();
             }
 
         } finally {

@@ -31,21 +31,32 @@ public abstract class AbstractDamper implements Damper {
       */
      private final String signature;
 
-    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
+
+    /**
+     * Position to park if there was no park position {@link #setParkPosition(double) explicitly specified}.
+     *
+     * Normally, the damper should be fully open in this position.
+     */
+    private static final double DEFAULT_PARK_POSITION = 1.0;
 
     /**
      * A damper position defined as 'parked'.
      *
-     * Default value is 1 (fully open).
+     * Default is {@code null} - none. See commits related to https://github.com/home-climate-control/dz/issues/51
+     * for more details.
+     *
+     * If the value is {@code null} and {@link #park()} method is called, the value of
+     * {@link #DEFAULT_PARK_POSITION} is used.
      */
-    private double parkPosition = 1;
+    private Double parkPosition = null;
 
     /**
      * Current position.
      */
-    private double position = parkPosition;
+    private double position = DEFAULT_PARK_POSITION;
 
-    public AbstractDamper(String name) {
+    protected AbstractDamper(String name) {
 
         if (name == null || "".equals(name)) {
             throw new IllegalArgumentException("name can't be null");
@@ -64,7 +75,6 @@ public abstract class AbstractDamper implements Damper {
     public final void setParkPosition(double parkPosition) {
 
         if (parkPosition < 0 || parkPosition > 1) {
-
             throw new IllegalArgumentException("Invalid position (" + parkPosition + ") - value can be 0..1.");
         }
 
@@ -73,10 +83,10 @@ public abstract class AbstractDamper implements Damper {
 
     @Override
     public final double getParkPosition() {
-
-        return parkPosition;
+        return parkPosition == null ? DEFAULT_PARK_POSITION : parkPosition;
     }
 
+    @SuppressWarnings("squid:S1181")
     @Override
     public final void set(double throttle) {
 
@@ -84,7 +94,7 @@ public abstract class AbstractDamper implements Damper {
 
         try {
 
-            logger.info("position=" + throttle);
+            logger.info("position={}", throttle);
 
             if ( throttle < 0 || throttle > 1.0 || Double.compare(throttle, Double.NaN) == 0) {
 
@@ -100,7 +110,8 @@ public abstract class AbstractDamper implements Damper {
 
             } catch (Throwable t) {
 
-                logger.error("Failed to move damper to position " + throttle, t);
+                // squid:S1181: No.
+                logger.error("Failed to move damper to position {}", throttle, t);
                 // VT: FIXME: Need to change Damper to be a producer of DataSample<Double>, not Double
                 stateChanged();
             }
@@ -119,6 +130,7 @@ public abstract class AbstractDamper implements Damper {
      */
     protected abstract void moveDamper(double position) throws IOException;
 
+    @SuppressWarnings("squid:S1181")
     @Override
     public ACT park() {
 
@@ -131,7 +143,7 @@ public abstract class AbstractDamper implements Damper {
             // you will have to provide your own implementation (again, ServoDamper is an
             // example of how this is done).
 
-            ACT done = new ACT();
+            var done = new ACT();
 
             try {
 
@@ -140,6 +152,7 @@ public abstract class AbstractDamper implements Damper {
 
             } catch (Throwable t) {
 
+                // squid:S1181: No.
                 done.complete(false);
             }
 
@@ -152,24 +165,21 @@ public abstract class AbstractDamper implements Damper {
 
     private synchronized void stateChanged() {
 
-        dataBroadcaster.broadcast(new DataSample<Double>(System.currentTimeMillis(), name, signature, position, null));
+        dataBroadcaster.broadcast(new DataSample<>(System.currentTimeMillis(), name, signature, position, null));
     }
 
     @Override
     public void addConsumer(DataSink<Double> consumer) {
-
         dataBroadcaster.addConsumer(consumer);
     }
 
     @Override
     public void removeConsumer(DataSink<Double> consumer) {
-
         dataBroadcaster.removeConsumer(consumer);
     }
 
     @Override
     public void consume(DataSample<Double> signal) {
-
         set(signal.sample);
     }
 }
