@@ -1,5 +1,10 @@
 package net.sf.dz3.view.swing.thermostat;
 
+import com.homeclimatecontrol.jukebox.util.Interval;
+import net.sf.dz3.controller.DataSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,17 +22,14 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import net.sf.dz3.controller.DataSet;
-import net.sf.jukebox.util.Interval;
-
 /**
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ *
+ * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
-public abstract class AbstractChart2009 extends AbstractChart {
+@SuppressWarnings("squid:S110")
+public abstract class AbstractChart2020 extends AbstractChart {
 
     private static final long serialVersionUID = -8584582539155161184L;
 
@@ -122,7 +124,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
     protected static final Color SETPOINT_COLOR = Color.YELLOW;
 
-    public AbstractChart2009(Clock clock, long chartLengthMillis) {
+    public AbstractChart2020(Clock clock, long chartLengthMillis) {
 
         if (chartLengthMillis < 1000 * 10) {
             throw new IllegalArgumentException("Unreasonably short chart length " + chartLengthMillis + "ms");

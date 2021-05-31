@@ -1,5 +1,8 @@
 package net.sf.dz3.view.swing.thermostat;
 
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import net.sf.dz3.controller.DataSet;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -10,11 +13,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import net.sf.dz3.controller.DataSet;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-
 /**
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  *
  * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */

@@ -1,7 +1,15 @@
 package net.sf.dz3.view.swing.thermostat;
 
-import static org.junit.Assert.assertTrue;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.util.Interval;
+import net.sf.dz3.instrumentation.Marker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
+import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -20,27 +28,17 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
-import javax.imageio.ImageIO;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.BeforeClass;
-import org.junit.Test;
+class ChartBenchmarkTest {
 
-import net.sf.dz3.instrumentation.Marker;
-import net.sf.jukebox.datastream.signal.model.DataSample;
-import net.sf.jukebox.util.Interval;
-
-public class ChartBenchmark {
-
-    private final static Logger logger = LogManager.getLogger(ChartBenchmark.class);
+    private final static Logger logger = LogManager.getLogger(ChartBenchmarkTest.class);
 
     private static TreeMap<Long, Double> series1;
     private static TreeMap<Long, Double> series2;
     private static Clock testClock;
 
-    @BeforeClass
+    @BeforeAll
     public static void loadSeries() throws IOException, URISyntaxException {
         series1 = load("./chart/series1");
         series2 = load("./chart/series2");
@@ -93,56 +91,63 @@ public class ChartBenchmark {
      *
      * Hardcoded to 3 hours (current Swing and Android chart length).
      */
-    private static long chartLengthMillis = 1000L * 60 * 60 * 3;
+    private static final long chartLengthMillis = 1000L * 60 * 60 * 3;
 
     @SuppressWarnings("deprecation")
     @Test
-    public void benchmark2009() throws IOException {
+    void benchmark2009() throws IOException {
 
-        benchmark("2009", series1, new Chart2009(testClock, chartLengthMillis), false);
-        assertTrue(true);
+        assertThatCode(() -> {
+            benchmark("2009", series1, new Chart2009(testClock, chartLengthMillis), false);
+        }).doesNotThrowAnyException();
     }
 
     @Test
-    public void benchmark2016() throws IOException {
+    void benchmark2016() throws IOException {
 
-        benchmark("2016", series1, new Chart2016(testClock, chartLengthMillis), false);
-        assertTrue(true);
+        assertThatCode(() -> {
+            benchmark("2016", series1, new Chart2016(testClock, chartLengthMillis), false);
+        }).doesNotThrowAnyException();
     }
 
     @Test
-    public void benchmark2016s() throws IOException {
+    void benchmark2016s() throws IOException {
 
-        benchmark("2016s", series1, new Chart2016(testClock, chartLengthMillis), true);
-        assertTrue(true);
+        assertThatCode(() -> {
+            benchmark("2016s", series1, new Chart2016(testClock, chartLengthMillis), true);
+        }).doesNotThrowAnyException();
     }
 
     @Test
-    public void benchmark2016gap() throws IOException {
+    void benchmark2016gap() throws IOException {
 
-        benchmark("2016gap", series2, new Chart2016(testClock, chartLengthMillis), true);
-        assertTrue(true);
+        assertThatCode(() -> {
+            benchmark("2016gap", series2, new Chart2016(testClock, chartLengthMillis), true);
+        }).doesNotThrowAnyException();
     }
 
     @Test
-    public void benchmark2020() throws IOException {
+    void benchmark2020() throws IOException {
 
-        benchmark("2020", series1, new Chart2020(testClock, chartLengthMillis), false);
-        assertTrue(true);
+        assertThatCode(() -> {
+            benchmark("2020", series1, new Chart2020(testClock, chartLengthMillis), false);
+        }).doesNotThrowAnyException();
     }
 
     @Test
-    public void benchmark2020s() throws IOException {
+    void benchmark2020s() throws IOException {
 
-        benchmark("2020s", series1, new Chart2020(testClock, chartLengthMillis), true);
-        assertTrue(true);
+        assertThatCode(() -> {
+            benchmark("2020s", series1, new Chart2020(testClock, chartLengthMillis), true);
+        }).doesNotThrowAnyException();
     }
 
     @Test
-    public void benchmark2020gap() throws IOException {
+    void benchmark2020gap() throws IOException {
 
-        benchmark("2020gap", series2, new Chart2020(testClock, chartLengthMillis), true);
-        assertTrue(true);
+        assertThatCode(() -> {
+            benchmark("2020gap", series2, new Chart2020(testClock, chartLengthMillis), true);
+        }).doesNotThrowAnyException();
     }
 
     private void benchmark(String marker, Map<Long, Double> source, AbstractChart target, boolean changeSetpoint) throws IOException {
