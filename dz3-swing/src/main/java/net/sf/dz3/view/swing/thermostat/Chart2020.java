@@ -1,6 +1,7 @@
 package net.sf.dz3.view.swing.thermostat;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.util.Interval;
 import net.sf.dz3.controller.DataSet;
 
 import java.awt.Color;
@@ -182,21 +183,21 @@ public class Chart2020 extends AbstractChart2020 {
                     // It's dead, all right
                     // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
 
-                    Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                    var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
 
                     // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
                     // Even though this is a memory allocation, it won't affect performance since [hopefully]
                     // there'll be just a few dead drops
 
-                    Color endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
+                    var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
 
                     drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
 
                     x0 = x1;
                 }
 
-                Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
-                Color endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                var endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
 
                 drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, cursor.emphasize);
             }
@@ -213,8 +214,8 @@ public class Chart2020 extends AbstractChart2020 {
             double x1 = (now - xOffset) * xScale + insets.left;
             double y = (yOffset - trailer.value) * yScale + insets.top;
 
-            Color startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
-            Color endColor = getBackground();
+            var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+            var endColor = getBackground();
 
             drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
         }
@@ -224,8 +225,8 @@ public class Chart2020 extends AbstractChart2020 {
             long now, double xScale, long xOffset, double yScale, double yOffset,
             String channel, DataSet<Double> ds) {
 
-        Color startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
-        Color endColor = SETPOINT_COLOR;
+        var startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
+        var endColor = SETPOINT_COLOR;
 
         Long timeTrailer = null;
 
@@ -289,14 +290,13 @@ public class Chart2020 extends AbstractChart2020 {
          * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
          * away from the first sample stored, {@code null} otherwise.
          */
-        @SuppressWarnings("squid:S2629")
         public TintedValue record(DataSample<? extends TintedValue> signal) {
 
             if (timestamp == null) {
                 timestamp = signal.timestamp;
             }
 
-            long age = signal.timestamp - timestamp;
+            var age = signal.timestamp - timestamp;
 
             if ( age < expirationInterval) {
 
@@ -308,11 +308,9 @@ public class Chart2020 extends AbstractChart2020 {
                 return null;
             }
 
-            // VT: NOTE: squid:S2629 - this happens once in 25-40 seconds, acceptable loss
+            logger.debug("RingBuffer: flushing at {}", () -> Interval.toTimeInterval(age));
 
-            //logger.debug("RingBuffer: flushing at {}", Interval.toTimeInterval(age));
-
-            TintedValue result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
+            var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 
             count = 1;
             valueAccumulator = signal.sample.value;
