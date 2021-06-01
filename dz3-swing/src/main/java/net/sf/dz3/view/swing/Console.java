@@ -1,5 +1,23 @@
 package net.sf.dz3.view.swing;
 
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.model.DamperController;
+import net.sf.dz3.device.model.ThermostatController;
+import net.sf.dz3.device.model.Unit;
+import net.sf.dz3.device.model.ZoneController;
+import net.sf.dz3.device.model.impl.ThermostatModel;
+import net.sf.dz3.device.sensor.TemperatureSensor;
+import net.sf.dz3.scheduler.Scheduler;
+import net.sf.dz3.view.Connector;
+import net.sf.dz3.view.ConnectorFactory;
+import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
+import net.sf.dz3.view.swing.thermostat.ZonePanel;
+import org.apache.logging.log4j.ThreadContext;
+
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -12,26 +30,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
-
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.device.model.DamperController;
-import net.sf.dz3.device.model.ThermostatController;
-import net.sf.dz3.device.model.Unit;
-import net.sf.dz3.device.model.ZoneController;
-import net.sf.dz3.device.model.impl.ThermostatModel;
-import net.sf.dz3.device.sensor.TemperatureSensor;
-import net.sf.dz3.scheduler.Scheduler;
-import net.sf.dz3.view.Connector;
-import net.sf.dz3.view.ConnectorFactory;
-import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
-import net.sf.dz3.view.swing.thermostat.ZonePanel;
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Entry point into the user interface implemented with Swing.
@@ -54,7 +52,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * {@code init-method="activate"} attribute must be used in Spring bean definition, otherwise
  * the panel will not display.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class Console extends Connector<JComponent> {
 
@@ -324,9 +322,9 @@ public class Console extends Connector<JComponent> {
     };
 
     /**
-     * Offset into {@link #screenSizes}, default is 3 (WVGA800).
+     * Offset into {@link #screenSizes}, default is 5 (WVGA854).
      */
-    private int screenSizeOffset = 4;
+    private int screenSizeOffset = 5;
 
     private class ResizeKeyListener implements KeyListener {
 

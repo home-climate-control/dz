@@ -10,9 +10,9 @@ import net.sf.dz3.controller.DataSet;
 public interface DifferentialSet {
 
     /**
-     * @see DataSet#record(long, Object)
+     * @see DataSet#append(long, Object)
      */
-    void record(long millis, Double value);
+    void append(long millis, Double value);
 
   /**
    * Get the differential starting with the first data element available and

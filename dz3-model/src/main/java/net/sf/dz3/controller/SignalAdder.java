@@ -1,35 +1,37 @@
 package net.sf.dz3.controller;
 
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import net.sf.dz3.util.digest.MessageDigestCache;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.util.digest.MessageDigestCache;
-import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
-import com.homeclimatecontrol.jukebox.logger.LogAware;
-
 /**
  * Analog signal adder.
- * 
+ *
  * Consumes signals from different sources. Emits aggregated sum.
- * 
+ *
  * @param <Source> Defines the type of the signal source.
- * 
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
-public class SignalAdder extends LogAware implements DataSink<Double>, DataSource<Double> {
+public class SignalAdder implements DataSink<Double>, DataSource<Double> {
+
+    private final Logger logger = LogManager.getLogger();
 
     private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
 
     /**
      * Adder's name.
-     * 
+     *
      * Necessary evil to allow instrumentation signature.
      */
     private final String sourceName;
@@ -41,7 +43,7 @@ public class SignalAdder extends LogAware implements DataSink<Double>, DataSourc
 
     /**
      * Coefficient map.
-     * 
+     *
      * The key is the source name, the value is the coefficient the input signal for this source will be
      * multiplied by when calculating the {@link #integral}.
      */
@@ -56,7 +58,7 @@ public class SignalAdder extends LogAware implements DataSink<Double>, DataSourc
 
     /**
      * Create an instance and add it as a listener to given sources.
-     * 
+     *
      * @param sourceName Name to use in instrumentation.
      * @param source2p See {@link #source2p}.
      */
@@ -89,7 +91,7 @@ public class SignalAdder extends LogAware implements DataSink<Double>, DataSourc
 
     /**
      * Associate the source with the coefficient.
-     * 
+     *
      * @param source Signal source.
      * @param p Coefficient to apply to this source's signal.
      */
@@ -143,7 +145,7 @@ public class SignalAdder extends LogAware implements DataSink<Double>, DataSourc
                     return;
                 }
 
-                integral += value.sample * p; 
+                integral += value.sample * p;
 
 
             }

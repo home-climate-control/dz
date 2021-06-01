@@ -4,7 +4,7 @@ import net.sf.dz3.device.model.ZoneStatus;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 
-import java.util.EmptyStackException;
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -18,21 +18,21 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class PeriodMatcherTest {
 
     @Test
-    public void testNone() {
+    void testNone() {
 
-        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
+        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<>();
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0).withMinuteOfHour(40);
 
         zoneSchedule.put(new Period("period", "0:15", "0:30", "......."), null);
 
-        assertThatExceptionOfType(EmptyStackException.class)
+        assertThatExceptionOfType(NoSuchElementException.class)
                 .isThrownBy(() -> test(zoneSchedule, dt));
     }
 
     @Test
-    public void testSimple() {
+    void testSimple() {
 
-        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
+        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<>();
 
         Period p1 = new Period("period", "00:15", "00:30", ".......");
         zoneSchedule.put(p1, null);
@@ -43,9 +43,9 @@ class PeriodMatcherTest {
     }
 
     @Test
-    public void testSimple2() {
+    void testSimple2() {
 
-        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
+        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<>();
 
         // Let's make sure that hours in Period.includes(long) are also properly converted
         Period p1 = new Period("period", "02:15", "02:30", ".......");
@@ -57,9 +57,9 @@ class PeriodMatcherTest {
     }
 
     @Test
-    public void testLadder() {
+    void testLadder() {
 
-        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
+        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<>();
 
         Period p1 = new Period("period 1", "00:10", "00:30", ".......");
         Period p2 = new Period("period 2", "00:20", "00:40", ".......");
@@ -78,9 +78,9 @@ class PeriodMatcherTest {
     }
 
     @Test
-    public void testStack() {
+    void testStack() {
 
-        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<Period, ZoneStatus>();
+        SortedMap<Period, ZoneStatus> zoneSchedule = new TreeMap<>();
 
         Period p1 = new Period("period 1", "00:10", "00:50", ".......");
         Period p2 = new Period("period 2", "00:15", "00:40", ".......");
@@ -92,7 +92,6 @@ class PeriodMatcherTest {
         zoneSchedule.put(p3, null);
         zoneSchedule.put(p4, null);
 
-
         DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
 
         assertThat(test(zoneSchedule, dt.withMinuteOfHour(12))).isEqualTo(p1);
@@ -103,7 +102,6 @@ class PeriodMatcherTest {
     }
 
     private Period test(SortedMap<Period, ZoneStatus> zoneSchedule, DateTime time) {
-
         return new PeriodMatcher().match(zoneSchedule, time);
     }
 }
