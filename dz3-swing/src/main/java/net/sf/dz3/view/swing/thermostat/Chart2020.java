@@ -1,7 +1,6 @@
 package net.sf.dz3.view.swing.thermostat;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.util.Interval;
 import net.sf.dz3.controller.DataSet;
 
 import java.awt.Color;
@@ -254,71 +253,6 @@ public class Chart2020 extends AbstractChart {
             drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
 
             timeTrailer = timeNow;
-        }
-    }
-
-    /**
-     * Averaging tool.
-     */
-    private class Averager {
-
-        /**
-         * The expiration interval. Values older than the last key by this many
-         * milliseconds are expired.
-         */
-        private final long expirationInterval;
-
-        /**
-         * The timestamp of the oldest recorded sample.
-         */
-        private Long timestamp;
-
-        private int count;
-        private double valueAccumulator = 0;
-        private double tintAccumulator = 0;
-        private double emphasizeAccumulator = 0;
-
-        public Averager(long expirationInterval) {
-            this.expirationInterval = expirationInterval;
-        }
-
-        /**
-         * Record a value.
-         *
-         * @param signal Signal to record.
-         *
-         * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
-         * away from the first sample stored, {@code null} otherwise.
-         */
-        public TintedValue append(DataSample<? extends TintedValue> signal) {
-
-            if (timestamp == null) {
-                timestamp = signal.timestamp;
-            }
-
-            var age = signal.timestamp - timestamp;
-
-            if ( age < expirationInterval) {
-
-                count++;
-                valueAccumulator += signal.sample.value;
-                tintAccumulator += signal.sample.tint;
-                emphasizeAccumulator += signal.sample.emphasize ? 1 : 0;
-
-                return null;
-            }
-
-            logger.debug("RingBuffer: flushing at {}", () -> Interval.toTimeInterval(age));
-
-            var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
-
-            count = 1;
-            valueAccumulator = signal.sample.value;
-            tintAccumulator = signal.sample.tint;
-            emphasizeAccumulator = 0;
-            timestamp = signal.timestamp;
-
-            return result;
         }
     }
 }
