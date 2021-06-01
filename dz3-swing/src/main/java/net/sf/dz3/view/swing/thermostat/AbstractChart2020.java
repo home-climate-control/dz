@@ -25,10 +25,7 @@ import java.util.TreeMap;
 /**
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
- *
- * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
-@SuppressWarnings("squid:S110")
 public abstract class AbstractChart2020 extends AbstractChart {
 
     private static final long serialVersionUID = -8584582539155161184L;
@@ -220,7 +217,7 @@ public abstract class AbstractChart2020 extends AbstractChart {
 
     private void paintTimeGrid(Graphics2D g2d, Dimension boundary, Insets insets, long now, double xScale, long xOffset) {
 
-        BasicStroke originalStroke = (BasicStroke) g2d.getStroke();
+        var originalStroke = (BasicStroke) g2d.getStroke();
 
         g2d.setPaint(gridColor);
 
@@ -254,7 +251,7 @@ public abstract class AbstractChart2020 extends AbstractChart {
 
         // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
-        BasicStroke originalStroke = (BasicStroke) g2d.getStroke();
+        var originalStroke = (BasicStroke) g2d.getStroke();
 
         g2d.setPaint(gridColor);
 
@@ -270,7 +267,7 @@ public abstract class AbstractChart2020 extends AbstractChart {
 
         g2d.setStroke(originalStroke);
 
-        double gridY = yOffset * yScale + insets.top;
+        var gridY = yOffset * yScale + insets.top;
 
         Line2D gridLine = new Line2D.Double(
                 insets.left,
@@ -284,7 +281,7 @@ public abstract class AbstractChart2020 extends AbstractChart {
 
         g2d.setStroke(gridStroke);
 
-        double halfWidth = (boundary.width - insets.right - 1) / 2d;
+        var halfWidth = (boundary.width - insets.right - 1) / 2d;
 
         for (var valueOffset = SPACING_VALUE; valueOffset < dataMax + PADDING; valueOffset += SPACING_VALUE) {
 
@@ -418,7 +415,7 @@ public abstract class AbstractChart2020 extends AbstractChart {
     private float[] resolve(Color color) {
 
         var rgb = color.getRGB();
-        int offset = 0;
+        var offset = 0;
 
         for (; offset < rgb2hsb.length && rgb2hsb[offset] != null; offset++) {
 
@@ -523,13 +520,11 @@ public abstract class AbstractChart2020 extends AbstractChart {
                 var tv = entry.getValue();
 
                 if (dataMax == null || tv.value > dataMax) {
-
                     dataMax = tv.value;
                     minmaxTime = timestamp;
                 }
 
                 if (dataMin == null || tv.value < dataMin) {
-
                     dataMin = tv.value;
                     minmaxTime = timestamp;
                 }

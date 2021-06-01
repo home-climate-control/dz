@@ -48,7 +48,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
     /**
      * Clock used.
      */
-    private final Clock clock;
+    private final transient Clock clock;
 
     /**
      * Chart length, in milliseconds.
@@ -103,7 +103,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
     /**
      * Timestamp on {@link #dataMin} or {@link #dataMax}, whichever is younger.
      *
-     * @see #adjustVerticalLimits(double)
+     * @see #adjustVerticalLimits(long, double, double)
      */
     private Long minmaxTime = null;
 
@@ -121,7 +121,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
     protected static final Color SETPOINT_COLOR = Color.YELLOW;
 
-    public AbstractChart2009(Clock clock, long chartLengthMillis) {
+    protected AbstractChart2009(Clock clock, long chartLengthMillis) {
 
         if (chartLengthMillis < 1000 * 10) {
             throw new IllegalArgumentException("Unreasonably short chart length " + chartLengthMillis + "ms");
@@ -140,30 +140,28 @@ public abstract class AbstractChart2009 extends AbstractChart {
         // Draw background
         super.paintComponent(g);
 
-        Graphics2D g2d = (Graphics2D) g;
-        Dimension boundary = getSize();
-        Insets insets = getInsets();
+        var g2d = (Graphics2D) g;
+        var boundary = getSize();
+        var insets = getInsets();
 
         paintBackground(g2d, boundary, insets);
 
-        long now = clock.instant().toEpochMilli();
-        double xScale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
-        long xOffset = now - chartLengthMillis;
+        var now = clock.instant().toEpochMilli();
+        var xScale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
+        var xOffset = now - chartLengthMillis;
 
         paintTimeGrid(g2d, boundary, insets, now, xScale, xOffset);
 
-        // VT: FIXME: Ugly hack.
         checkWidth(boundary);
 
         if (!isDataAvailable()) {
             return;
         }
 
-        double yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
-        double yOffset = dataMax + PADDING;
+        var yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
+        var yOffset = dataMax + PADDING;
 
         paintValueGrid(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
-
         paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
         logger.info("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
@@ -171,19 +169,8 @@ public abstract class AbstractChart2009 extends AbstractChart {
 
     protected abstract void checkWidth(Dimension boundary);
 
-    @SuppressWarnings("squid:S1126")
     protected final boolean isDataAvailable() {
-
-        // VT: NOTE: squid:S1126 - following this rule will hurt readability, so no.
-
-        if (channel2dsValue.isEmpty() || dataMax == null || dataMin == null) {
-
-            // No data consumed yet
-            return false;
-        }
-
-        return true;
-
+        return !channel2dsValue.isEmpty() && dataMax != null && dataMin != null;
     }
 
     @SuppressWarnings("squid:S107")
@@ -195,11 +182,10 @@ public abstract class AbstractChart2009 extends AbstractChart {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        for (Iterator<Entry<String, DataSet<TintedValue>>> iv = channel2dsValue.entrySet().iterator(); iv.hasNext(); ) {
+        for (Entry<String, DataSet<TintedValue>> entry : channel2dsValue.entrySet()) {
 
             // VT: FIXME: Implement depth ordering
 
-            Entry<String, DataSet<TintedValue>> entry = iv.next();
             String channel = entry.getKey();
             DataSet<TintedValue> dsValues = entry.getValue();
             DataSet<Double> dsSetpoints = channel2dsSetpoint.get(channel);
@@ -221,7 +207,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
 
         g2d.setPaint(getBackground());
 
-        Rectangle2D.Double background = new Rectangle2D.Double(
+        var background = new Rectangle2D.Double(
                 insets.left, insets.top,
                 (double)boundary.width - insets.right - insets.left,
                 (double)boundary.height - insets.bottom - insets.top);
@@ -231,13 +217,13 @@ public abstract class AbstractChart2009 extends AbstractChart {
 
     private void paintTimeGrid(Graphics2D g2d, Dimension boundary, Insets insets, long now, double xScale, long xOffset) {
 
-        BasicStroke originalStroke = (BasicStroke) g2d.getStroke();
+        var originalStroke = (BasicStroke) g2d.getStroke();
 
         g2d.setPaint(gridColor);
 
-        float[] gridDash = { 2, 2 };
+        var gridDash = new float[] { 2, 2 };
 
-        BasicStroke gridStroke = new BasicStroke(
+        var gridStroke = new BasicStroke(
                 originalStroke.getLineWidth(), originalStroke.getEndCap(),
                 originalStroke.getLineJoin(),
                 originalStroke.getMiterLimit(), gridDash,
@@ -265,13 +251,13 @@ public abstract class AbstractChart2009 extends AbstractChart {
 
         // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
-        BasicStroke originalStroke = (BasicStroke) g2d.getStroke();
+        var originalStroke = (BasicStroke) g2d.getStroke();
 
         g2d.setPaint(gridColor);
 
-        float[] gridDash = { 2, 2 };
+        var gridDash = new float[] { 2, 2 };
 
-        BasicStroke gridStroke = new BasicStroke(
+        var gridStroke = new BasicStroke(
                 originalStroke.getLineWidth(), originalStroke.getEndCap(),
                 originalStroke.getLineJoin(),
                 originalStroke.getMiterLimit(), gridDash,
@@ -281,7 +267,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
 
         g2d.setStroke(originalStroke);
 
-        double gridY = yOffset * yScale + insets.top;
+        var gridY = yOffset * yScale + insets.top;
 
         Line2D gridLine = new Line2D.Double(
                 insets.left,
@@ -295,10 +281,9 @@ public abstract class AbstractChart2009 extends AbstractChart {
 
         g2d.setStroke(gridStroke);
 
-        double valueOffset = 0;
-        double halfWidth = (boundary.width - insets.right - 1) / 2d;
+        var halfWidth = (boundary.width - insets.right - 1) / 2d;
 
-        for (valueOffset = SPACING_VALUE; valueOffset < dataMax + PADDING; valueOffset += SPACING_VALUE) {
+        for (var valueOffset = SPACING_VALUE; valueOffset < dataMax + PADDING; valueOffset += SPACING_VALUE) {
 
             gridY = (yOffset - valueOffset) * yScale + insets.top;
 
@@ -315,7 +300,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
                     false);
         }
 
-        for (valueOffset = -SPACING_VALUE; valueOffset > dataMin - PADDING; valueOffset -= SPACING_VALUE) {
+        for (var valueOffset = -SPACING_VALUE; valueOffset > dataMin - PADDING; valueOffset -= SPACING_VALUE) {
 
             gridY = (yOffset - valueOffset) * yScale + insets.top;
 
@@ -350,7 +335,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
 
         // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
-        GradientPaint gp = new GradientPaint(
+        var gp = new GradientPaint(
                 (int) x0, (int) y0, startColor,
                 (int) x1, (int) y1, endColor);
         Line2D line = new Line2D.Double(x0, y0, x1, y1);
@@ -360,7 +345,7 @@ public abstract class AbstractChart2009 extends AbstractChart {
         g2d.draw(line);
     }
 
-    private static Color[] signalCache = new Color[256];
+    private static final Color[] signalCache = new Color[256];
 
     /**
      * Convert signal from -1 to +1 to color from low color to high color.
@@ -368,7 +353,8 @@ public abstract class AbstractChart2009 extends AbstractChart {
      * @param signal Signal to convert to color.
      * @param low Color corresponding to -1 signal value.
      * @param high Color corresponding to +1 signal value.
-     * @return
+     *
+     * @return Color resolved from the incoming signal.
      */
     protected final Color signal2color(double signal, Color low, Color high) {
 
@@ -412,12 +398,12 @@ public abstract class AbstractChart2009 extends AbstractChart {
     }
 
     /**
-     * Cache medium for {@link #resolve()}.
+     * Cache medium for {@link #resolve(Color)}.
      *
      * According to "worse is better" rule, there's no error checking against
      * the array size - too expensive. In all likelihood, this won't grow beyond 2 entries.
      */
-    private static RGB2HSB[] rgb2hsb = new RGB2HSB[16];
+    private static final RGB2HSB[] rgb2hsb = new RGB2HSB[16];
 
     /**
      * Resolve a possibly cached {@link Color#RGBtoHSB(int, int, int, float[])} result,
@@ -428,8 +414,8 @@ public abstract class AbstractChart2009 extends AbstractChart {
      */
     private float[] resolve(Color color) {
 
-        int rgb = color.getRGB();
-        int offset = 0;
+        var rgb = color.getRGB();
+        var offset = 0;
 
         for (; offset < rgb2hsb.length && rgb2hsb[offset] != null; offset++) {
 
@@ -479,17 +465,13 @@ public abstract class AbstractChart2009 extends AbstractChart {
      * @see #dataMax
      * @see #dataMin
      */
-    @SuppressWarnings("squid:S2629")
     protected final void adjustVerticalLimits(long timestamp, double value, double setpoint) {
 
         if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * MINMAX_OVERHEAD)) {
 
-            // VT: NOTE: squid:S2629 - give me a break, this will happen once in more than three hours
-
-            logger.info("minmax too old ({}), recalculating", Interval.toTimeInterval(timestamp - minmaxTime));
+            logger.info("minmax too old ({}), recalculating", () -> Interval.toTimeInterval(timestamp - minmaxTime));
 
             // Total recalculation is required
-
             recalculateVerticalLimits();
         }
 
@@ -497,13 +479,11 @@ public abstract class AbstractChart2009 extends AbstractChart {
         // but we probably do want to know about that, so let's just make a note and ignore it for the moment
 
         if (dataMax == null || value > dataMax) {
-
             dataMax = value;
             minmaxTime = timestamp;
         }
 
         if (dataMin == null || value < dataMin) {
-
             dataMin = value;
             minmaxTime = timestamp;
         }
@@ -511,13 +491,11 @@ public abstract class AbstractChart2009 extends AbstractChart {
         // By this time, dataMin and dataMax are no longer nulls
 
         if (setpoint > dataMax) {
-
             dataMax = setpoint;
             minmaxTime = timestamp;
         }
 
         if (setpoint < dataMin) {
-
             dataMin = setpoint;
             minmaxTime = timestamp;
         }
@@ -526,32 +504,27 @@ public abstract class AbstractChart2009 extends AbstractChart {
     /**
      * Calculate {@link #dataMin} and {@link #dataMax} based on all values available in {@link #channel2dsValue}.
      */
-    @SuppressWarnings("squid:S2629")
     private synchronized void recalculateVerticalLimits() {
 
-        long startTime = clock.instant().toEpochMilli();
+        var startTime = clock.instant().toEpochMilli();
 
         dataMin = null;
         dataMax = null;
 
-        for (Iterator<DataSet<TintedValue>> i = channel2dsValue.values().iterator(); i.hasNext(); ) {
-
-            DataSet<TintedValue> ds = i.next();
+        for (DataSet<TintedValue> ds : channel2dsValue.values()) {
 
             for (Iterator<Entry<Long, TintedValue>> i2 = ds.entryIterator(); i2.hasNext(); ) {
 
-                Entry<Long, TintedValue> entry = i2.next();
-                Long timestamp = entry.getKey();
-                TintedValue tv = entry.getValue();
+                var entry = i2.next();
+                var timestamp = entry.getKey();
+                var tv = entry.getValue();
 
                 if (dataMax == null || tv.value > dataMax) {
-
                     dataMax = tv.value;
                     minmaxTime = timestamp;
                 }
 
                 if (dataMin == null || tv.value < dataMin) {
-
                     dataMin = tv.value;
                     minmaxTime = timestamp;
                 }
@@ -559,9 +532,6 @@ public abstract class AbstractChart2009 extends AbstractChart {
         }
 
         logger.info("Recalculated in {}ms", (clock.instant().toEpochMilli() - startTime));
-
-        // VT: NOTE: squid:S2629 - give me a break, this will happen once in more than three hours
-
-        logger.info("New minmaxTime set to + {}", Interval.toTimeInterval(clock.instant().toEpochMilli() - minmaxTime));
+        logger.info("New minmaxTime set to + {}", () -> Interval.toTimeInterval(clock.instant().toEpochMilli() - minmaxTime));
     }
 }
