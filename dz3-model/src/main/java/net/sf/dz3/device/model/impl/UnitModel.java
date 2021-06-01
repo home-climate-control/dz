@@ -5,22 +5,19 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.logger.LogAware;
 import com.homeclimatecontrol.jukebox.util.Interval;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.util.digest.MessageDigestCache;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 /**
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
  */
-public class UnitModel implements Unit {
-
-    private final Logger logger = LogManager.getLogger();
+public class UnitModel extends LogAware implements Unit {
 
     /**
      * The unit name.

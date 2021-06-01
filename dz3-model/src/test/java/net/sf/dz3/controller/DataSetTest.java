@@ -13,8 +13,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class DataSetTest {
 
     @Test
-    void nonexistentValue() {
-
+    public void testNonexistentValue() {
+        
         DataSet<Double> ds = new DataSet<>(100);
 
         assertThatExceptionOfType(NoSuchElementException.class)
@@ -26,53 +26,54 @@ class DataSetTest {
     }
 
     @Test
-    void strict() {
-
+    public void testStrict() {
+        
         DataSet<Double> ds = new DataSet<>(100, true);
-
+        
         // Record values in order
-
-        ds.append(100, 0d);
-        ds.append(101, 0d);
-
+        
+        ds.record(100, 0d);
+        ds.record(101, 0d);
+        
         // We're fine so far
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
                     // This should blow up - this timestamp is out of order
-                    ds.append(99, 0d);
+                    ds.record(99, 0d);
                 })
                 .withMessage("Data element out of sequence: last key is 101, key being added is 99");
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
                     // This also should blow up - this timestamp is already present
-                    ds.append(101, 0d);
+                    ds.record(101, 0d);
                 })
                 .withMessage("Data element out of sequence: last key is 101, key being added is 101");
     }
 
     @Test
-    void expire() {
-
+    public void testExpire() {
+        
         DataSet<Double> ds = new DataSet<Double>(100);
-
-        ds.append(0, 0d);
-        ds.append(100, 0d);
+        
+        ds.record(0, 0d);
+        ds.record(100, 0d);
 
         assertThat(ds.iterator().next()).isZero();
         assertThat(ds.size()).isEqualTo(2);
 
         {
+            
             // This value won't cause expiration
-            ds.append(100, 0d);
+            ds.record(100, 0d);
             assertThat(ds.iterator().next()).isZero();
             assertThat(ds.size()).isEqualTo(2);
         }
 
         {
             // This value *will* cause expiration
-            ds.append(101, 0d);
+            ds.record(101, 0d);
             assertThat(ds.iterator().next()).isEqualTo(100);
             assertThat(ds.size()).isEqualTo(2);
         }
@@ -80,36 +81,36 @@ class DataSetTest {
 
 
     @Test
-    void performance10000000_100() {
-
+    public void testPerformance10000000_100() {
+        
         // This test completes roughly in 1.5s on the development system (with TreeSet based DataSet)
         // This test completes roughly in 850ms on the development system (with LinkedHashMap based DataSet)
         testPerformance(10000000, 100);
     }
 
     @Test
-    void performance10000000_10000() {
+    public void testPerformance10000000_10000() {
 
         // This test completes roughly in 2.5s on the development system (with TreeSet based DataSet)
         // This test completes roughly in 850ms on the development system (with LinkedHashMap based DataSet)
         testPerformance(10000000, 10000);
     }
-
+    
     private void testPerformance(long entryCount, long expirationInterval) {
-
+        
         DataSet<Double> ds = new DataSet<Double>(expirationInterval);
         long timestamp = 0;
         Random rg = new Random();
-
+        
         Marker m = new Marker("testPerformance(" + entryCount + ", " + expirationInterval + ")");
 
         for (int count = 0; count < entryCount; count++) {
-
+            
             timestamp += rg.nextInt(10);
-
-            ds.append(timestamp, rg.nextDouble());
+            
+            ds.record(timestamp, rg.nextDouble());
         }
-
+        
         m.close();
     }
 }

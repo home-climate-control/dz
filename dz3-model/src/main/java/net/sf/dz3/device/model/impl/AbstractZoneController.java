@@ -4,13 +4,12 @@ import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.homeclimatecontrol.jukebox.logger.LogAware;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ThermostatStatus;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.util.digest.MessageDigestCache;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.util.Collection;
@@ -27,11 +26,9 @@ import java.util.TreeSet;
  * Implements the behavior common for all the zone controller, and provides
  * the template methods for the rest.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
-public abstract class AbstractZoneController implements ZoneController {
-
-    protected final Logger logger = LogManager.getLogger();
+public abstract class AbstractZoneController extends LogAware implements ZoneController {
 
     /**
      * Zone controller name.

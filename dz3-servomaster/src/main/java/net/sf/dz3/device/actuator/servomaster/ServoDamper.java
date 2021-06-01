@@ -1,22 +1,23 @@
 package net.sf.dz3.device.actuator.servomaster;
 
+import java.io.IOException;
+
+import org.apache.logging.log4j.ThreadContext;
+
+import net.sf.dz3.device.actuator.impl.AbstractDamper;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import com.homeclimatecontrol.jukebox.sem.ACT;
 import com.homeclimatecontrol.jukebox.service.Messenger;
-import net.sf.dz3.device.actuator.impl.AbstractDamper;
 import net.sf.servomaster.device.model.Servo;
 import net.sf.servomaster.device.model.transform.LimitTransformer;
 import net.sf.servomaster.device.model.transform.LinearTransformer;
 import net.sf.servomaster.device.model.transform.Reverser;
 import net.sf.servomaster.device.model.transition.CrawlTransitionController;
-import org.apache.logging.log4j.ThreadContext;
-
-import java.io.IOException;
 
 /**
  * Damper controlled by a RC Servo.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class ServoDamper extends AbstractDamper {
 
@@ -27,43 +28,46 @@ public class ServoDamper extends AbstractDamper {
 
     /**
      * Create an instance with no reversing and no range or limit calibration.
-     *
+     * 
      * @param name Human readable name.
      * @param servo Servo instance to use.
      */
     public ServoDamper(String name, Servo servo) {
+        
         this(name, servo, false, null, null);
     }
-
+    
     /**
      * Create an instance with range calibration only.
-     *
+     * 
      * @param name Human readable name.
      * @param servo Servo instance to use.
      * @param reverse {@code true} if the servo movement should be reversed.
      * @param rangeCalibration Range calibration object.
      */
     public ServoDamper(String name, Servo servo, boolean reverse, RangeCalibration rangeCalibration) {
+    
         this(name, servo, reverse, rangeCalibration, null);
     }
-
+    
     /**
      * Create an instance with limit calibration only.
-     *
+     * 
      * @param name Human readable name.
      * @param servo Servo instance to use.
      * @param reverse {@code true} if the servo movement should be reversed.
      * @param limitCalibration Limit calibration object.
      */
     public ServoDamper(String name, Servo servo, boolean reverse, LimitCalibration limitCalibration) {
+
         this(name, servo, reverse, null, limitCalibration);
     }
-
+    
     /**
      * Create an instance.
-     *
+     * 
      * Only one of {@code rangeCalibration} and {@code limitCalibration} can be not null at the same time.
-     *
+     * 
      * @param name Human readable name.
      * @param servo Servo instance to use.
      * @param reverse {@code true} if the servo movement should be reversed.
@@ -76,13 +80,13 @@ public class ServoDamper extends AbstractDamper {
             boolean reverse,
             RangeCalibration rangeCalibration,
             LimitCalibration limitCalibration) {
-
+        
         super(name);
 
         ThreadContext.push("ServoDamper()");
-
+        
         try {
-
+            
             if (servo == null ) {
                 throw new IllegalArgumentException("servo can't be null");
             }
@@ -91,19 +95,19 @@ public class ServoDamper extends AbstractDamper {
                 throw new IllegalArgumentException("Range and limit calibration are mutually exclusive - must specify only one");
             }
 
-            logger.info("reverse: {}", reverse);
-            logger.info("range: {}", rangeCalibration);
-            logger.info("limit: {}", limitCalibration);
+            logger.info("reverse: " + reverse);
+            logger.info("range: " + rangeCalibration);
+            logger.info("limit: " + limitCalibration);
 
             if (rangeCalibration != null) {
-
+                
                 servo.getMeta().setProperty("servo/range/min", Integer.toString(rangeCalibration.min));
                 servo.getMeta().setProperty("servo/range/max", Integer.toString(rangeCalibration.max));
             }
 
             // Until it is actually done in configuration, let's just install a crawl controller
             // But only if it is specifically requested (see dz-runner script)
-
+            
             if (System.getProperty(getClass().getName() + ".crawl") != null) {
 
                 logger.info("Will be crawling");
@@ -111,7 +115,7 @@ public class ServoDamper extends AbstractDamper {
             }
 
             if (limitCalibration != null) {
-
+                
                 servo = new LimitTransformer(servo, limitCalibration.min, limitCalibration.max);
             }
 
@@ -121,7 +125,7 @@ public class ServoDamper extends AbstractDamper {
             }
 
             // VT: NOTE: This may not always be the case, there will be
-            // contraptions with angle range other than 0..180. This
+            // contraptions with angle range other than 0..180. This   
             // will have to be configurable. On the other hand, nobody
             // complained in five years, so it should be fine as is.
 
@@ -138,16 +142,18 @@ public class ServoDamper extends AbstractDamper {
     public void moveDamper(double throttle) throws IOException {
 
         ThreadContext.push("moveDamper");
-
+        
         try {
 
             if (Double.compare(servo.getPosition(), throttle) != 0) {
-                logger.debug("{}: {}", servo.getName(), throttle);
+
+                logger.debug(servo.getName() + ": " + throttle);
             }
 
             servo.setPosition(throttle);
 
         } finally {
+
             ThreadContext.pop();
         }
     }
@@ -167,14 +173,14 @@ public class ServoDamper extends AbstractDamper {
         // abstraction layer (there may be other damper implementations that
         // don't use Servomaster), whereas the latter is native for DZ.
 
-        logger.info("{}: parking at {}", servo.getName(), getParkPosition());
+        logger.info(servo.getName() + ": parking at " + getParkPosition());
 
         return new ParkingAssistant().start();
     }
 
     @Override
     public JmxDescriptor getJmxDescriptor() {
-
+        
         return new JmxDescriptor(
                 "dz",
                 "Servo based damper",
@@ -191,7 +197,6 @@ public class ServoDamper extends AbstractDamper {
         /**
          * Move the {@link ServoDamper#servo} and wait until it gets there.
          */
-        @SuppressWarnings("squid:S1181")
         @Override
         protected final Object execute() throws Throwable {
 
@@ -199,22 +204,14 @@ public class ServoDamper extends AbstractDamper {
 
             try {
 
-                var done = servo.setPosition(getParkPosition());
+                servo.setPosition(getParkPosition()).get();
 
-                if (done == null) {
-                    // Happens with mocks, better make note of it
-                    throw new IllegalStateException("done == null for " + servo.getName());
-                }
-
-                done.get();
-
-                logger.info("{}: parked at {}", servo.getName(), getParkPosition());
+                logger.info(servo.getName() + ": parked at " + getParkPosition());
 
             } catch (Throwable t) {
 
-                // squid:S1181: No.
-                logger.error("{}: failed to park at {}", servo.getName(), getParkPosition(), t);
-
+                logger.error(servo.getName() + ": failed to park at " + getParkPosition(), t);
+                
             } finally {
                 ThreadContext.pop();
             }

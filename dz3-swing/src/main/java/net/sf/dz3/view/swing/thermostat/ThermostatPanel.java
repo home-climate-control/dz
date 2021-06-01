@@ -36,7 +36,6 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.text.DecimalFormat;
-import java.time.Clock;
 import java.util.Locale;
 
 /**
@@ -46,7 +45,7 @@ import java.util.Locale;
  * but gets event notifications from {@link ZonePanel} instead.
  * This is done in order not to fiddle with focus changes.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class ThermostatPanel extends JPanel implements KeyListener {
 
@@ -83,7 +82,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     private final JLabel periodLabel = new JLabel("", SwingConstants.LEFT);
 
     // 3 hours
-    private final AbstractChart chart = new Chart2020(Clock.systemUTC(), 1000L * 60 * 60 * 3);
+    private final AbstractChart chart = new FasterChart(1000 * 60 * 60 * 3);
 
     private static final String NO_PERIOD = "(no period is active)";
 

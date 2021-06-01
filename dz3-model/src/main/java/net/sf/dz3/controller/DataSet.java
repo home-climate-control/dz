@@ -10,14 +10,14 @@ import java.util.NoSuchElementException;
  *
  * VT: FIXME: Implement variable expiration time.
  *
- * @author Copyright &copy; <a href="mailto:vt@homaclimatecontrol.com"> Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
  */
 public class DataSet<T> {
 
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private final LinkedHashMap<Long, T> samples = new LinkedHashMap<>();
+    private LinkedHashMap<Long, T> dataSet = new LinkedHashMap<Long, T>();
 
     /**
      * The expiration interval. Values older than the last key by this many
@@ -26,9 +26,9 @@ public class DataSet<T> {
     private long expirationInterval;
 
     /**
-     * Strictness. If this is set to true, the {@link #append} will not
-     * accept values for the time less than already recorded, and {@link #append
-     * } will throw {@code IllegalArgumentException}.
+     * Strictness. If this is set to true, the {@link #record record()} will not
+     * accept values for the time less than already recorded, and {@link #record
+     * record()} will throw {@code IllegalArgumentException}.
      * <p>
      * This is not necessarily a good thing.
      */
@@ -38,11 +38,6 @@ public class DataSet<T> {
      * Last known timestamp. {@code null} if none recorded yet.
      */
     private Long lastTimestamp;
-
-    /**
-     * Last known value. {@code null} if none recorded yet.
-     */
-    private T lastValue;
 
     /**
      * Create the instance allowing out-of-order updates.
@@ -95,66 +90,52 @@ public class DataSet<T> {
      * @param millis Absolute time, milliseconds.
      * @param value The sample value.
      */
-    public final synchronized void append(final long millis, final T value) {
-        append(millis, value, false);
-    }
-
-    /**
-     * Record the sample.
-     *
-     * @param millis Absolute time, milliseconds.
-     * @param value The sample value.
-     * @param merge if {@code false}, record the value in any case. If {@code true}, record only
-     * if it is different from the last one recorded.
-     */
-    public final synchronized void append(final long millis, final T value, boolean merge) {
+    public final synchronized void record(final long millis, final T value) {
 
         // We don't care if there was a value associated with the given key
         // before, so we return nothing.
 
-        if (strict && lastTimestamp != null && lastTimestamp >= millis) {
+        if (strict) {
+
+            if (lastTimestamp != null && lastTimestamp >= millis)
 
                 throw new IllegalArgumentException("Data element out of sequence: last key is " + lastTimestamp
                         + ", key being added is " + millis);
         }
 
-        if (lastValue != null && merge && lastValue.equals(value)) {
-
-            // Will replace it with the same value and new timestamp right below. Slower on
-            // the way in, faster on the way out.
-
-            samples.remove(lastTimestamp);
-        }
-
-        samples.put(millis, value);
-        lastValue = value;
         lastTimestamp = millis;
 
+        dataSet.put(Long.valueOf(millis), value);
+
         expire();
+
+        // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
     }
 
     /**
      * Expire all the data elements older than the last by {@link
      * #expirationInterval expiration interval}.
      */
-    private void expire() {
+    private final void expire() {
 
         try {
 
-            Long expireBefore = lastTimestamp - expirationInterval;
+            Long expireBefore = Long.valueOf(lastTimestamp.longValue() - expirationInterval);
 
-            for (Iterator<Long> i = samples.keySet().iterator(); i.hasNext();) {
+            for (Iterator<Long> i = dataSet.keySet().iterator(); i.hasNext();) {
 
                 Long found = i.next();
 
                 if (found < expireBefore) {
+
+                    // System.err.println("Expired: " + found + ", left: " +
+                    // dataSet.size());
 
                     i.remove();
 
                 } else {
 
                     // We're done, all other keys will be younger
-
                     return;
                 }
 
@@ -171,22 +152,22 @@ public class DataSet<T> {
      */
     public final Iterator<Long> iterator() {
 
-        return samples.keySet().iterator();
+        return dataSet.keySet().iterator();
     }
 
     public final Iterator<Map.Entry<Long, T>> entryIterator() {
 
-      return samples.entrySet().iterator();
+      return dataSet.entrySet().iterator();
     }
 
     /**
      * Get the data set size.
      *
-     * @return {@link #samples dataSet} size.
+     * @return {@link #dataSet dataSet} size.
      */
     public final long size() {
 
-        return samples.size();
+        return dataSet.size();
     }
 
     /**
@@ -201,7 +182,7 @@ public class DataSet<T> {
      */
     public final T get(final long time) {
 
-        var result = samples.get(time);
+        T result = dataSet.get(Long.valueOf(time));
 
         if (result == null) {
 

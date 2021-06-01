@@ -1,30 +1,5 @@
 package net.sf.dz3.device.sensor.impl.onewire;
 
-import com.dalsemi.onewire.OneWireAccessProvider;
-import com.dalsemi.onewire.OneWireException;
-import com.dalsemi.onewire.adapter.DSPortAdapter;
-import com.dalsemi.onewire.adapter.OneWireIOException;
-import com.dalsemi.onewire.container.HumidityContainer;
-import com.dalsemi.onewire.container.OneWireContainer;
-import com.dalsemi.onewire.container.SwitchContainer;
-import com.dalsemi.onewire.container.TemperatureContainer;
-import com.dalsemi.onewire.utils.OWPath;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxAware;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import net.sf.dz3.device.factory.AbstractDeviceFactory;
-import net.sf.dz3.device.factory.DataMap;
-import net.sf.dz3.device.factory.SingleSwitchProxy;
-import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.dz3.device.sensor.DeviceContainer;
-import net.sf.dz3.device.sensor.SensorType;
-import net.sf.dz3.device.sensor.Switch;
-import net.sf.dz3.device.sensor.impl.ContainerMap;
-import net.sf.dz3.device.sensor.impl.StringChannelAddress;
-import net.sf.dz3.instrumentation.Marker;
-import org.apache.logging.log4j.ThreadContext;
-
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
@@ -35,26 +10,51 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.ThreadContext;
+
+import net.sf.dz3.device.factory.AbstractDeviceFactory;
+import net.sf.dz3.device.factory.DataMap;
+import net.sf.dz3.device.factory.SingleSwitchProxy;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import net.sf.dz3.device.sensor.DeviceContainer;
+import net.sf.dz3.device.sensor.SensorType;
+import net.sf.dz3.device.sensor.Switch;
+import net.sf.dz3.device.sensor.impl.ContainerMap;
+import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import net.sf.dz3.instrumentation.Marker;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+
+import com.dalsemi.onewire.OneWireAccessProvider;
+import com.dalsemi.onewire.OneWireException;
+import com.dalsemi.onewire.adapter.DSPortAdapter;
+import com.dalsemi.onewire.adapter.OneWireIOException;
+import com.dalsemi.onewire.container.HumidityContainer;
+import com.dalsemi.onewire.container.OneWireContainer;
+import com.dalsemi.onewire.container.SwitchContainer;
+import com.dalsemi.onewire.container.TemperatureContainer;
+import com.dalsemi.onewire.utils.OWPath;
+
 /**
  * 1-Wire device factory.
- *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * 
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceContainer> implements OneWireNetworkEventListener {
 
-    private static final String DEVICE_DS2409 = "DS2409";
-
     /**
      * Adapter port.
-     *
+     * 
      * This value is injected via constructor. If the port is bad, the device factory
-     * will fail to {@link #start()}.
+     * will fail to {@link #start()}. 
      */
     private final String adapterPort;
 
     /**
      * Adapter speed.
-     *
+     * 
      * This value is injected via constructor. If the value given is bad, it will be
      * defaulted to {@link DSPortAdapter#SPEED_REGULAR}.
      */
@@ -63,11 +63,11 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     /**
      * Mapping from the adapter speed value to speed name.
      */
-    private final Map<Integer, String> speedInt2speedName = new TreeMap<>();
+    private final Map<Integer, String> speedInt2speedName = new TreeMap<Integer, String>();
 
     /**
      * 1-Wire adapter.
-     *
+     * 
      * Initialized in {@link #startup()}.
      */
     private DSPortAdapter adapter = null;
@@ -79,10 +79,10 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * the hardware address, and the value is the device container. Such a
      * complication is required to optimize the access by opening the minimal
      * number of paths and eliminating redundancy.
-     *
+     * 
      * @see AbstractDeviceFactory#address2dcGlobal
      */
-    Map<OWPath, ContainerMap> path2device = new TreeMap<>();
+    Map<OWPath, ContainerMap> path2device = new TreeMap<OWPath, ContainerMap>();
 
     /**
      * The network monitor.
@@ -93,11 +93,11 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * Low-level state map. The key is the device address, the value is last
      * known state obtained using {@code readDevice()}.
      */
-    protected Map<String, byte[]> stateMap = new TreeMap<>();
+    protected Map<String, byte[]> stateMap = new TreeMap<String, byte[]>();
 
     /**
      * Create an instance.
-     *
+     * 
      * @param port Port to use.
      * @param speed Speed to use (choices are "regular", "flex", "overdrive", "hyperdrive".
      */
@@ -113,9 +113,9 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             adapterPort = port;
 
-            logger.info("Port:  {}", adapterPort);
+            logger.info("Port:  " + adapterPort);
 
-            var speedName2speedInt = new TreeMap<String, Integer>();
+            Map<String, Integer> speedName2speedInt = new TreeMap<String, Integer>();
 
             speedName2speedInt.put("overdrive", DSPortAdapter.SPEED_OVERDRIVE);
             speedName2speedInt.put("hyperdrive", DSPortAdapter.SPEED_HYPERDRIVE);
@@ -127,15 +127,15 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             speedInt2speedName.put(DSPortAdapter.SPEED_FLEX, "flex");
             speedInt2speedName.put(DSPortAdapter.SPEED_REGULAR, "regular");
 
-            var speedValue = speedName2speedInt.get(speed);
+            Integer speedValue = speedName2speedInt.get(speed);
 
             if (speedValue == null) {
-                logger.warn("Unknown speed '{}', defaulted to regular", speed);
+                logger.warn("Unknown speed '" + speed + ", defaulted to regular");
             }
 
             adapterSpeed = speedValue == null ? DSPortAdapter.SPEED_REGULAR : speedValue;
 
-            logger.info("Speed: {}", speedInt2speedName.get(adapterSpeed));
+            logger.info("Speed: " + speedInt2speedName.get(adapterSpeed));
 
         } finally {
             ThreadContext.pop();
@@ -148,19 +148,19 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         // Short poll interval is OK - if the device isn't present, no big deal,
         // when it becomes available, the TemperatureProxy will take care of that anyway
-        var proxy = new OwapiSensorProxy(address, 1000, type, getMonitor());
-
+        SensorProxy proxy = new OwapiSensorProxy(address, 1000, type, getMonitor());
+        
         // If it doesn't start, help us God
         proxy.start();
-
+        
         return proxy;
     }
 
     /**
      * Get an instance of a switch.
-     *
+     * 
      * @param compositeAddress 1-Wire address, followed by a colon, followed by channel number.
-     *
+     * 
      * @return An instance of a {@link Switch single channel switch}, unconditionally. In case when
      * the device with a given address is not present on a bus, no indication will be given
      * until the actual operation (accessor or mutator) is performed, which will result in
@@ -168,34 +168,33 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     @Override
     public synchronized Switch getSwitch(String compositeAddress) {
-
+        
         ThreadContext.push("getSwitch");
-
+        
         try {
-
-            var switchAddress = new StringChannelAddress(compositeAddress);
-
+            
+            StringChannelAddress switchAddress = new StringChannelAddress(compositeAddress);
+            
             // Since there's no one to one correspondence between the 1-Wire device container
             // and the single channel switch object, we have to create a proxy in any case
             // and let it take care of everything
-
-            var proxy = address2proxy.get(switchAddress.hardwareAddress);
-
+            
+            SwitchChannelSplitter proxy = address2proxy.get(switchAddress.hardwareAddress);
+            
             if (proxy == null) {
-
+                
                 proxy = new SwitchChannelSplitter();
-
+                
                 address2proxy.put(switchAddress.hardwareAddress, proxy);
             }
-
+            
             return proxy.getSwitch(switchAddress);
-
+            
         } finally {
             ThreadContext.pop();
         }
     }
-
-    @SuppressWarnings("squid:S1181")
+    
     @Override
     protected void startup() throws Throwable {
 
@@ -203,7 +202,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         try {
 
-            var portsAvailable = getPortsAvailable();
+            Set<String> portsAvailable = getPortsAvailable(); 
 
             if (adapter == null) {
 
@@ -240,27 +239,27 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 }
             }
 
-            logger.info("Adapter class: {}", adapter.getClass().getName());
-            logger.info("Adapter port:  {}", adapterPort);
+            logger.info("Adapter class: " + adapter.getClass().getName());
+            logger.info("Adapter port:  " + adapterPort);
 
             // VT: NOTE: It is not necessary to use the lock at this point
             // because the service is not yet started
 
             try {
 
-                logger.info("Setting adapter speed to {}", speedInt2speedName.get(adapterSpeed));
+                logger.info("Setting adapter speed to " + speedInt2speedName.get(adapterSpeed));
                 adapter.setSpeed(adapterSpeed);
 
             } catch (Throwable t) {
 
-                // squid:S1181: No.
                 logger.error("Failed to set adapter speed, cause:", t);
+
             }
 
             monitor = new OneWireNetworkMonitor(adapter, lock);
-
+            
             synchronized (this) {
-
+                
                 // This is necessary to release getMonitor()
                 notifyAll();
             }
@@ -268,7 +267,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             monitor.addListener(this);
             monitor.getSemUp().waitFor();
-
+            
             logger.info("started");
 
         } finally {
@@ -276,41 +275,40 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             ThreadContext.clearStack();
         }
     }
-
+    
     /**
      * Get the network monitor.
-     *
+     * 
      * The reason for existence of this method is to retrieve the monitor instance
      * to register it with JMX. Other than this, you never, ever have to do anything
      * with the network monitor, and this method shouldn't exist at all - except for
      * the memory leak that has to be tracked down and eliminated.
-     *
+     * 
      * @return The 1-Wire network monitor.
      */
     public synchronized OneWireNetworkMonitor getMonitor() {
-
+        
         while (monitor == null) {
-
+            
             logger.info("Waiting for the monitor to become available");
-
+            
             try {
 
                 wait(1000);
-
+                
             } catch (InterruptedException ex) {
-
+                
                 logger.warn("Interrupted, ignored, waiting some more", ex);
             }
         }
-
+        
         return monitor;
     }
 
     /**
      * Find all available ports and assign the adapter for the one we need,
      * if possible.
-     *
-     * @return Set of available port names as strings.
+     * @return
      */
     private Set<String> getPortsAvailable() {
 
@@ -318,20 +316,20 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         try {
 
-            var portsAvailable = new TreeSet<String>();
+            Set<String> portsAvailable = new TreeSet<String>();
 
             for (Enumeration<DSPortAdapter> adapters = OneWireAccessProvider
                     .enumerateAllAdapters(); adapters.hasMoreElements();) {
 
                 DSPortAdapter a = adapters.nextElement();
 
-                logger.debug("Adapter found: {}", a.getAdapterName());
+                logger.debug("Adapter found: " + a.getAdapterName());
 
                 for (Enumeration<String> ports = a.getPortNames(); ports.hasMoreElements();) {
 
                     String portName = ports.nextElement();
 
-                    logger.debug("Port found: {}", portName);
+                    logger.debug("Port found: " + portName);
 
                     if (adapterPort.equals(portName)) {
 
@@ -353,15 +351,15 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
     @Override
     protected void shutdown() throws Throwable {
-
+        
         ThreadContext.push("shutdown");
-
+        
         try {
 
             logger.info("Stopping monitor...");
             monitor.stop().waitFor();
             logger.info("Stopped");
-
+        
         } finally {
             ThreadContext.pop();
             ThreadContext.clearStack();
@@ -373,12 +371,11 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      *
      * @exception Throwable if anything goes wrong.
      */
-    @SuppressWarnings("squid:S1181")
     @Override
     protected final void execute() throws Throwable {
-
+        
         ThreadContext.push("execute");
-
+        
         try {
 
             while (isEnabled()) {
@@ -395,8 +392,9 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
                 } catch (Throwable t) {
 
-                    // squid:S1181: No.
                     logger.error("Poll broken:", t);
+
+                    // dumpMap(path2device, "path2device");
 
                     // Possibly, the cause of this was a network departure.
                     // Let's refresh the device map
@@ -404,7 +402,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                     monitor.rescan().waitFor();
                 }
             }
-
+        
         } finally {
             ThreadContext.pop();
             ThreadContext.clearStack();
@@ -412,13 +410,13 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     }
 
     private void poll() throws InterruptedException, OneWireException {
-
+        
         ThreadContext.push("poll");
-        var m = new Marker("poll");
-
+        Marker m = new Marker("poll");
+        
         try {
 
-            var localDataMap = new DataMap();
+            DataMap localDataMap = new DataMap();
 
             if (path2device.isEmpty()) {
 
@@ -429,24 +427,25 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 return;
             }
 
-            for (OWPath owPath : path2device.keySet()) {
+            for (Iterator<OWPath> i = path2device.keySet().iterator(); i.hasNext();) {
 
                 // The lock gets acquired and released only here
-                processPath(owPath, localDataMap);
-
+                processPath(i.next(), localDataMap);
+                
                 // If someone else wants to work with devices, this point is where they get the lock during te poll
             }
 
             if (path2device.isEmpty()) {
-
-                logger.warn("path2device is empty; do we need to wait?");
+                
+                // VT: FIXME: I'm not sure this is needed at all
+                logger.warn("path2device is empty?");
 
                 Thread.sleep(1000);
             }
 
             localDataMap.transferTo(dataMap);
-            logger.debug("Data map: {}", dataMap);
-
+            logger.debug("Data map: " + dataMap);
+        
         } finally {
 
             m.close();
@@ -454,16 +453,15 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         }
     }
 
-    @SuppressWarnings("squid:S1181")
     private void processPath(OWPath path, DataMap dataMap) throws OneWireException {
-
+        
         ThreadContext.push("processPath");
-        var m = new Marker("processPath");
-
-        logger.debug("Processing {}", path);
+        Marker m = new Marker("processPath");
+        
+        logger.debug("Processing " + path);
 
         lock.writeLock().lock();
-
+        
         try {
 
             m.checkpoint("got lock");
@@ -476,17 +474,17 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             if (address2dcForPath == null || address2dcForPath.isEmpty()) {
 
-                logger.warn("No addresses present for  '{}'", path);
+                logger.warn("No addresses present for  '" + path + "'");
                 return;
             }
 
-            // VT: NOTE: To speed things up, it would make sense to
+            // VT: FIXME: To speed things up, it would make sense to
             // go a level down. Issue a temperature convert command for
             // all the temperature sensors on this branch, then read
             // them all. Don't forget to check if there are any
             // temperature sensors on the branch.
 
-            for (var ai = address2dcForPath.iterator(); ai.hasNext();) {
+            for (Iterator<String> ai = address2dcForPath.iterator(); ai.hasNext();) {
 
                 // To improve the shutdown time, let's check if
                 // we're still enabled, otherwise we might be just
@@ -497,23 +495,22 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                     logger.info("Oops! Not enabled anymore...");
                     return;
                 }
-
-                var address = ai.next();
-                var dcSet = address2dcForPath.get(address);
+                
+                String address = ai.next();
+                Set<DeviceContainer> dcSet = address2dcForPath.get(address);
 
                 processAddress(address, dcSet);
             }
-
+            
         } catch (OneWireException ex) {
-
-            logger.error("Can't process path '{}', 1-Wire exception rethrown", path);
+            
+            logger.error("Can't process path " + path + ", 1-Wire exception rethrown");
             throw ex;
-
+            
         } catch (Throwable t) {
 
-            // squid:S1181: No.
             throw new OneWireException("Can't process path " + path, t);
-
+            
         } finally {
 
             lock.writeLock().unlock();
@@ -523,7 +520,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         }
     }
 
-    @SuppressWarnings({"squid:S1181", "deprecation"})
+    @SuppressWarnings("deprecation")
     private void processAddress(String address, Set<DeviceContainer> dcSet) throws OneWireException {
 
         ThreadContext.push("processAddress");
@@ -532,16 +529,16 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             if (dcSet == null) {
 
-                logger.warn("No devices for {}???", address);
+                logger.warn("No devices for " + address + "???");
                 return;
             }
 
-            logger.debug("processing {}", address);
+            logger.debug("processing " + address);
 
-            for (DeviceContainer deviceContainer : dcSet) {
+            for (Iterator<DeviceContainer> di = dcSet.iterator(); di.hasNext();) {
 
-                OneWireDeviceContainer dc = (OneWireDeviceContainer) deviceContainer;
-                var owc = dc.container;
+                OneWireDeviceContainer dc = (OneWireDeviceContainer) di.next();
+                OneWireContainer owc = dc.container;
 
                 // VT: NOTE: The 1-Wire container is wrapped
                 // into the device container. Therefore, it
@@ -557,11 +554,11 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
                         TemperatureContainer tc = (TemperatureContainer) owc;
 
-                        var temp = getTemperature(tc);
+                        double temp = getTemperature(tc);
 
-                        logger.debug("{}: {}°C", address, temp);
+                        logger.debug(address + ": " + temp + "C");
 
-                        dataMap.put(address, Type.TEMPERATURE, temp);
+                        dataMap.put(address, Type.TEMPERATURE, new Double(temp));
 
                         stateChanged(dc, temp);
 
@@ -572,7 +569,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                         // They are managed automatically when the path is
                         // selected anyway.
 
-                        if (!DEVICE_DS2409.equals(owc.getName())) {
+                        if (!"DS2409".equals(owc.getName())) {
+
                             dataMap.put(address, Type.SWITCH, getState((SwitchContainer) owc));
                         }
 
@@ -586,25 +584,27 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
                         hc.doHumidityConvert(state);
 
+                        // state = hc.readDevice();
+
                         double humidity = hc.getHumidity(state);
 
-                        logger.debug("Humidity: {} (took {}ms to figure out)", humidity, (System.currentTimeMillis() - hstart));
+                        logger.debug("Humidity: " + humidity + " (took "
+                                + (System.currentTimeMillis() - hstart) + "ms to figure out)");
 
-                        dataMap.put(address, Type.HUMIDITY, humidity);
+                        dataMap.put(address, Type.HUMIDITY, new Double(humidity));
 
                         stateChanged(dc, humidity);
                     }
-
+                    
                 } catch (OneWireException ex) {
-
+                    
                     stateChanged(dc, ex);
 
-                    logger.error("Failed to read {}, 1-Wire exception rethrown", address);
+                    logger.error("Failed to read " + address + ", 1-Wire exception rethrown");
                     throw ex;
 
                 } catch (Throwable t) {
 
-                    // squid:S1181: No.
                     stateChanged(dc, t);
 
                     throw new OneWireException("Failed to read " + address + ", cause:", t);
@@ -621,7 +621,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      *
      * @param e Network arrival information.
      */
-    @SuppressWarnings({"squid:S1181", "deprecation"})
+    @SuppressWarnings("deprecation")
     @Override
     public void networkArrival(OneWireNetworkEvent e) {
 
@@ -633,19 +633,21 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         // the device map. If it is, we've screwed up somewhere else...
         // Let's check it.
 
-        var owc = e2.getDeviceContainer();
-        var address = owc.getAddressAsString();
+        OneWireContainer owc = e2.getDeviceContainer();
+        String address = owc.getAddressAsString();
 
         Set<DeviceContainer> dcSet = address2dcGlobal.get(address);
 
         if (dcSet != null) {
 
-            for (DeviceContainer oldContainer : dcSet) {
+            for (Iterator<DeviceContainer> i = dcSet.iterator(); i.hasNext();) {
+
+                DeviceContainer oldContainer = i.next();
 
                 if (oldContainer != null) {
 
-                    logger.warn("Arrival notification for device already present: {}", e);
-                    logger.warn("Duplicate device is: {}", oldContainer);
+                    logger.warn("Arrival notification for device already present: " + e);
+                    logger.warn("Duplicate device is: " + oldContainer);
                 }
             }
         }
@@ -656,7 +658,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         if (owc instanceof TemperatureContainer) {
 
-            for (var retry = 0; retry < 5; retry++) {
+            for (int retry = 0; retry < 5; retry++) {
 
                 try {
 
@@ -665,8 +667,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
                 } catch (Throwable t) {
 
-                    // squid:S1181: No.
-                    logger.warn("Failed to setHiRes on {}, trying again ({})", address, retry);
+                    logger.warn("Failed to setHiRes on " + address + ", trying again (" + retry
+                            + ")");
                 }
             }
 
@@ -687,18 +689,18 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
                     lock.writeLock().lock();
 
-                    var state = sc.readDevice();
+                    byte[] state = sc.readDevice();
 
                     sc.setLatchState(0, ss.state[0], ss.smart, state);
                     sc.setLatchState(1, ss.state[1], ss.smart, state);
 
                     sc.writeDevice(state);
 
-                    logger.warn("Restored state for {}: {}", address, ss);
+                    logger.warn("Restored state for " + address + ": " + ss);
 
                 } catch (OneWireException ex) {
 
-                    logger.error("Failed to restore switch state ({}), cause:", address, ex);
+                    logger.error("Failed to restore switch state (" + address + "), cause:", ex);
 
                 } finally {
 
@@ -718,9 +720,11 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         Set<OneWireDeviceContainer> newDcSet = createContainer(owc);
 
-        for (DeviceContainer dc : newDcSet) {
+        for (Iterator<OneWireDeviceContainer> i = newDcSet.iterator(); i.hasNext();) {
 
-            logger.debug("Created container: {} ({})", dc, dc.getType());
+            DeviceContainer dc = i.next();
+
+            logger.debug("Created container: " + dc + " (" + dc.getType() + ")");
 
             address2dcForPath.add(dc);
             address2dcGlobal.add(dc);
@@ -734,27 +738,31 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * @param tc Temperature container to set the resolution of.
      * @param path Path to reach the container.
      */
-    @SuppressWarnings({"squid:S1181", "deprecation"})
+    @SuppressWarnings("deprecation")
     private void setHiRes(final TemperatureContainer tc, final OWPath path) {
 
         try {
 
             lock.writeLock().lock();
 
+            //String address = ((OneWireContainer) tc).getAddressAsString();
+
             path.open();
 
-            var state = tc.readDevice();
+            byte[] state = tc.readDevice();
 
             if (tc.hasSelectableTemperatureResolution()) {
 
-                var resolution = tc.getTemperatureResolutions();
-                var sb = new StringBuilder();
+                double[] resolution = tc.getTemperatureResolutions();
 
-                for (double v : resolution) {
-                    sb.append(v).append(" ");
+                String s = "";
+
+                for (int idx = 0; idx < resolution.length; idx++) {
+
+                    s += Double.toString(resolution[idx]) + " ";
                 }
 
-                logger.debug("Temperature resolutions available: {}", sb);
+                logger.debug("Temperature resolutions available: " + s);
 
                 tc.setTemperatureResolution(resolution[resolution.length - 1], state);
             }
@@ -765,8 +773,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         } catch (Throwable t) {
 
-            // squid:S1181: No.
-            logger.warn("Failed to set high resolution on {}, cause:", ((OneWireContainer) tc).getAddressAsString(), t);
+            logger.warn("Failed to set high resolution on "
+                    + ((OneWireContainer) tc).getAddressAsString() + ", cause:", t);
 
         } finally {
 
@@ -783,20 +791,22 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     private Set<OneWireDeviceContainer> createContainer(final OneWireContainer owc) {
 
-        var result = new TreeSet<OneWireDeviceContainer>();
+        Set<OneWireDeviceContainer> result = new TreeSet<OneWireDeviceContainer>();
 
         // Let's see what kind of a device we have...
 
         if (owc instanceof HumidityContainer) {
+
             result.add(new OneWireHumidityContainer(owc));
         }
 
         if (owc instanceof TemperatureContainer) {
+
             result.add(new OneWireTemperatureContainer(owc));
         }
 
         // VT: NOTE: This means we can't use DS2409 for actuators, only branches
-        if ((owc instanceof SwitchContainer) && !(DEVICE_DS2409.equals(owc.getName()))) {
+        if ((owc instanceof SwitchContainer) && !("DS2409".equals(owc.getName()))) {
 
             result.add(new OneWireSwitchContainer(this, owc));
         }
@@ -806,14 +816,17 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             // This is too deep down the stack, and we can't afford to throw
             // an exception. Let's create a generic container and let the
             // callers figure the rest out.
-
-            // VT: NOTE: This is a kludge, but it worked since 2000
-            if (DEVICE_DS2409.equals(owc.getName())) {
-                logger.info("Skipping (can only be a coupler) {}, generic container created", owc);
+            
+            // VT: FIXME: This is a kludge, but it worked since 2000
+            if ("DS2409".equals(owc.getName())) {
+                logger.info("Skipping (can only be a coupler) " + owc
+                        + ", generic container created");
             } else {
-                logger.info("createContainer(): don't know how to handle {}, generic container created", owc);
-            }
 
+                logger.info("createContainer(): don't know how to handle "
+                        + owc + ", generic container created");
+            }
+            
             result.add(new OneWireDeviceContainer(owc));
         }
 
@@ -828,36 +841,37 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
     @Override
     public void networkDeparture(OneWireNetworkEvent e) {
 
-        ThreadContext.push("networkDeparture/event");
+        ThreadContext.push("networkDeparture");
 
         try {
 
             // We know it's actually a different class...
 
-            var e2 = (OwapiNetworkEvent) e;
+            OwapiNetworkEvent e2 = (OwapiNetworkEvent) e;
 
             // The only valid element in the event is the address
 
             Set<DeviceContainer> oldContainers = address2dcGlobal.remove(e.address);
 
             if (oldContainers == null) {
-                logger.warn("Departure notification for device that is not present: {}", e.address);
+
+                logger.warn("Departure notification for device that is not present: " + e.address);
             }
 
             // If the path is known, we don't have to iterate through all of
             // them
 
-            var removed = false;
+            boolean removed = false;
 
             if (e2.path != null) {
 
-                logger.debug("Departure on known path: {}", e2.path);
+                logger.debug("Departure on known path: " + e2.path);
 
                 ContainerMap address2dcForPath = path2device.get(e2.path);
 
                 if (address2dcForPath == null) {
 
-                    logger.warn("networkDeparture({}): No devices for path {}", e, e2.path);
+                    logger.warn("networkDeparture(" + e + "): No devices for path " + e2.path);
 
                     // dumpMap(path2device, "path2device");
 
@@ -870,7 +884,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
                 if (address2dcForPath != null && address2dcForPath.isEmpty()) {
 
-                    logger.info("Empty path {}, removed", e2.path);
+                    logger.info("Empty path " + e2.path + ", removed");
 
                     path2device.remove(e2.path);
                 }
@@ -886,7 +900,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
                 // The device wasn't found???
 
-                logger.warn("Got the departure notification before arrival notification for {}", e.address);
+                logger.warn("Got the departure notification before arrival notification for "
+                        + e.address);
             }
 
         } finally {
@@ -903,9 +918,9 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * @return true if device has been successfully unmapped, false otherwise.
      */
     private boolean networkDeparture(final ContainerMap address2dcForPath, final String address) {
-
-        ThreadContext.push("networkDeparture/device");
-
+        
+        ThreadContext.push("networkDeparture");
+        
         try {
 
             if (address2dcForPath == null) {
@@ -930,8 +945,10 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             Set<DeviceContainer> removed = address2dcForPath.remove(address);
 
-            for (DeviceContainer container : removed) {
-                logger.debug("Removed: {} (#{})", container, Integer.toHexString(container.hashCode()));
+            for (Iterator<DeviceContainer> i = removed.iterator(); i.hasNext(); ) {
+
+                DeviceContainer container = i.next();
+                logger.debug("Removed: " + container + " (#" + Integer.toHexString(container.hashCode()) + ")");
             }
 
             // dumpMap(address2dcForPath, "address2dcForPath after");
@@ -942,7 +959,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             stateMap.remove(address);
 
             return true;
-
+        
         } finally {
             ThreadContext.pop();
         }
@@ -956,7 +973,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     private boolean networkDeparture(final String address) {
 
-        var removed = false;
+        boolean removed = false;
 
         logger.info("Departure on unknown path");
 
@@ -967,7 +984,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             if (address2dcForPath == null) {
 
-                logger.warn("networkDeparture({}): No devices for path {}", address, path);
+                logger.warn("networkDeparture(" + address + "): No devices for path " + path);
 
                 // dumpMap(path2device, "path2device");
 
@@ -986,7 +1003,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 // There are no more devices on this path, so there's no
                 // need to open it at all
 
-                logger.info("Path doesn't contain any devices, removed: {}", path);
+                logger.info("Path doesn't contain any devices, removed: " + path);
                 pi.remove();
             }
 
@@ -1001,8 +1018,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
     @Override
     public void networkFault(OneWireNetworkEvent e, String message) {
-
-        // VT: NOTE: This is pretty bad, most probably a 1-Wire network short
+        
+        // VT: FIXME: This is pretty bad, most probably a 1-Wire network short
         // circuit. But this is rare enough to be worrying about it at this stage.
 
         throw new UnsupportedOperationException("Not Implemented: handling '" + message + "', event: " + e);
@@ -1018,61 +1035,61 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * @throws OneWireIOException If there was a problem with 1-Wire subsystem.
      */
     @SuppressWarnings("deprecation")
-    final double getTemperature(final TemperatureContainer tc) throws OneWireException {
-
+    final double getTemperature(final TemperatureContainer tc) throws OneWireException, OneWireIOException {
+        
         ThreadContext.push("getTemperature");
-        var m = new Marker("getTemperature");
-
+        Marker m = new Marker("getTemperature");
+        
         try {
 
             // get the current resolution and other settings of the device
-
-            var address = ((OneWireContainer) tc).getAddressAsString();
+    
+            String address = ((OneWireContainer) tc).getAddressAsString();
             double lastTemp;
-
-            // VT: NOTE: What if the state is not available yet?
+    
+            // VT: FIXME: What if the state is not available yet?
             // Theoretically, it should be 'cause setHiRes should have been
             // called, but this has to be verified
-
+    
             byte[] state = stateMap.get(address);
-
+    
             if (state == null) {
-
+    
                 logger.warn("device state is not available yet, possibly setHiRes failed");
-
+    
                 state = tc.readDevice();
             }
-
+    
             m.checkpoint("readDevice/0");
-
+    
             // perform a temperature conversion
-
+    
             tc.doTemperatureConvert(state);
-
+    
             m.checkpoint("doTemperatureConvert");
-
+    
             // read the result of the conversion
-
+    
             state = tc.readDevice();
-
+    
             m.checkpoint("readDevice/1");
-
+    
             // extract the result out of state
             lastTemp = tc.getTemperature(state);
-
+    
             if (lastTemp == 85.0) {
-
+    
                 // Known bug, ignore
-
+    
                 throw new IllegalStateException("Temp read is 85C, ignored");
             }
-
+    
             stateMap.put(address, state);
-
+    
             return lastTemp;
-
+            
         } finally {
-
+            
             m.close();
             ThreadContext.pop();
         }
@@ -1091,8 +1108,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         // We don't have to get the lock here, because we're in the lock
         // protected context already
 
-        var ss = new SwitchState();
-        var state = sc.readDevice();
+        SwitchState ss = new SwitchState();
+        byte[] state = sc.readDevice();
 
         ss.smart = sc.hasSmartOn();
         ss.state[0] = sc.getLatchState(0, state);
@@ -1113,7 +1130,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         try {
 
-            logger.debug("{}: {}", dc, value);
+            logger.debug(dc + ": " + value);
 
             ((AbstractSensorContainer) dc).stateChanged(value, null);
 
@@ -1139,9 +1156,9 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             try {
 
                 ((AbstractSensorContainer) dc).stateChanged(null, t);
-
+                
             } catch (ClassCastException ex) {
-
+                
                 logger.error("Oops... not a sensor", t);
             }
 
@@ -1159,12 +1176,13 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      */
     public final OWPath getDevicePath(final String address) {
 
-        for (var pd : path2device.entrySet()) {
+        for (Iterator<OWPath> i = path2device.keySet().iterator(); i.hasNext();) {
 
-            var path = pd.getKey();
-            var address2dcForPath = pd.getValue();
+            OWPath path = i.next();
+            ContainerMap address2dcForPath = path2device.get(path);
 
             if (address2dcForPath.containsKey(address)) {
+
                 return path;
             }
         }
@@ -1184,11 +1202,11 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 adapterPort,
                 "1-Wire Device Factory at " + speedInt2speedName.get(adapterSpeed) + " speed on " + adapterPort);
     }
-
+    
     /**
      * Volatile switch state representation.
      */
-    protected static class SwitchState {
+    protected class SwitchState {
 
         /**
          * True if the switch supports smart operation.
@@ -1196,7 +1214,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         boolean smart = false;
 
         /**
-         * Switch state. VT: NOTE: Extend this for cases like DS2408 (where the number of channels is not 2).
+         * Switch state. VT: FIXME: Extend this for cases like DS2408 (where the
+         * number of channels is not 2).
          */
         boolean[] state = { false, false };
 
@@ -1206,34 +1225,32 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         @Override
         public final String toString() {
 
-            var sb = new StringBuilder("[");
-            sb.append((smart ? "smart" : "dumb"));
+            String result = "[" + (smart ? "smart" : "dumb");
 
-            sb.append("][");
+            result += "][";
 
-            for (var idx = 0; idx < state.length; idx++) {
+            for (int idx = 0; idx < state.length; idx++) {
 
                 if (idx != 0) {
 
-                    sb.append(",");
+                    result += ",";
                 }
 
-                sb.append(state[idx]);
+                result += state[idx];
             }
 
-            sb.append("]");
+            result += "]";
 
-            return sb.toString();
+            return result;
         }
     }
-
-    @SuppressWarnings("squid:S110")
+    
     private class OwapiSensorProxy extends SensorProxy implements DataSink<Double>, JmxAware, OneWireNetworkEventListener {
 
         public OwapiSensorProxy(String address, int pollIntervalMillis, SensorType type, OneWireNetworkMonitor monitor) {
 
             super(address, pollIntervalMillis, type);
-
+            
             monitor.addListener(this);
         }
 
@@ -1252,34 +1269,43 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         @Override
         public void networkArrival(OneWireNetworkEvent e) {
-            // Nothing to do here, the arrival will be handled asynchronously by getSensorSignal() shortly
+            
+            ThreadContext.push("networkArrival");
+            
+            try {
+                
+                // Nothing to do here, the arrival will be handled asynchronously by getSensorSignal() shortly
+                
+            } finally {
+                ThreadContext.pop();
+            }
         }
 
         @Override
         public void networkDeparture(OneWireNetworkEvent e) {
 
             ThreadContext.push("networkDeparture");
-
+            
             try {
-
+                
                 if (container == null) {
-
+                    
                     // We've already been eliminated in this round, nothing to do
                     return;
                 }
-
+                
                 if (e.address.equals(container.getAddress())) {
-
-                    logger.debug("Signal: {}", e);
-
-                    consume(new DataSample<>(
+                    
+                    logger.debug("Signal: " + e);
+                    
+                    consume(new DataSample<Double>(
                             System.currentTimeMillis(), type + getAddress(), type + getAddress(),
                             null, new OneWireIOException("Departed")));
 
-                    logger.debug("Discarded container: #{}", () -> Integer.toHexString(container.hashCode()));
+                    logger.debug("Discarded container: #" + Integer.toHexString(container.hashCode()));
                     container = null;
                 }
-
+                
             } finally {
                 ThreadContext.pop();
             }
@@ -1287,14 +1313,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         @Override
         public void networkFault(OneWireNetworkEvent e, String message) {
-
+            
             ThreadContext.push("networkFault");
-
+            
             try {
-
+                
                 // This is an event pertinent to everyone
-
-                consume(new DataSample<>(
+                
+                consume(new DataSample<Double>(
                         System.currentTimeMillis(), type + getAddress(), type + getAddress(),
                         null, new OneWireIOException(message)));
 
@@ -1303,28 +1329,29 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
             }
         }
     }
-
-    private static class OwapiSingleSwitchProxy extends SingleSwitchProxy<OneWireSwitchContainer> {
-
+    
+    private class OwapiSingleSwitchProxy extends SingleSwitchProxy<OneWireSwitchContainer> {
+        
         public OwapiSingleSwitchProxy(ContainerMap address2dcGlobal, StringChannelAddress address) {
+            
             super(address2dcGlobal, address);
         }
 
         @Override
         public synchronized boolean getState() throws IOException {
-
+            
             ThreadContext.push("getState");
-
+            
             try {
-
+                
                 OneWireSwitchContainer sc = getContainer(address.hardwareAddress);
-
+                
                 if (sc == null) {
                     throw new IOException("No container found for " + address + ", assuming not present");
                 }
-
+                
                 return sc.read(Integer.parseInt(address.channel));
-
+                
             } finally {
                 ThreadContext.pop();
             }
@@ -1334,17 +1361,17 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         public synchronized void setState(boolean state) throws IOException {
 
             ThreadContext.push("setState");
-
+            
             try {
-
+                
                 OneWireSwitchContainer sc = getContainer(address.hardwareAddress);
-
+                
                 if (sc == null) {
                     throw new IOException("No container found for " + address + ", assuming not present");
                 }
-
+                
                 sc.write(Integer.parseInt(address.channel), state);
-
+                
             } finally {
                 ThreadContext.pop();
             }
@@ -1363,6 +1390,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
     @Override
     protected Switch createSingleSwitchProxy(ContainerMap address2dcGlobal, StringChannelAddress switchAddress) {
+        
       return new OwapiSingleSwitchProxy(address2dcGlobal, switchAddress);
     }
 }

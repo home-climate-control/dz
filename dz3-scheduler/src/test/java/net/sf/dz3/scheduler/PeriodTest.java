@@ -10,12 +10,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class PeriodTest {
-
+    
     private static final long TWO_FIFTEEN = 2 * 1000 * 60 * 60 + 15 * 1000 * 60;
     private static final long FOURTEEN_FIFTEEN = 14 * 1000 * 60 * 60 + 15 * 1000 * 60;
 
     @Test
-    void testNullName() {
+    public void testNullName() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new Period(null, "02:15", "02:20", "       "))
@@ -23,7 +23,7 @@ class PeriodTest {
     }
 
     @Test
-    void testEmptyName() {
+    public void testEmptyName() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new Period("", "02:15", "02:20", "       "))
@@ -31,7 +31,7 @@ class PeriodTest {
     }
 
     @Test
-    void testNullDays() {
+    public void testNullDays() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new Period("period", "02:15", "02:20", null))
@@ -39,7 +39,7 @@ class PeriodTest {
     }
 
     @Test
-    void testNot7() {
+    public void testNot7() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new Period("period", "02:15", "02:20", ""))
@@ -47,8 +47,8 @@ class PeriodTest {
     }
 
     @Test
-    void testTwoFifteen() {
-
+    public void testTwoFifteen() {
+        
         Period p = new Period("period", "02:15", "02:20", "       ");
 
         // Wrong time
@@ -56,12 +56,12 @@ class PeriodTest {
         // Wrong days
         assertThat(p.days).isEqualTo((byte) 0x00);
         // Wrong string representation
-        assertThat(p.toString()).hasToString("period (02:15 to 02:20 on .......)");
+        assertThat(p.toString()).isEqualTo("period (02:15 to 02:20 on .......)");
     }
 
     @Test
-    void testFourteenFifteen() {
-
+    public void testFourteenFifteen() {
+        
         Period p = new Period("period", "14:15", "14:20", "       ");
 
         // Wrong time
@@ -69,11 +69,11 @@ class PeriodTest {
         // Wrong days
         assertThat(p.days).isEqualTo((byte) 0x00);
         // Wrong string representation
-        assertThat(p.toString()).hasToString("period (14:15 to 14:20 on .......)");
+        assertThat(p.toString()).isEqualTo("period (14:15 to 14:20 on .......)");
     }
 
     @Test
-    void testDaysTooShort() {
+    public void testDaysTooShort() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
@@ -93,7 +93,7 @@ class PeriodTest {
     }
 
     @Test
-    void testDaysTooLong() {
+    public void testDaysTooLong() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
@@ -113,8 +113,8 @@ class PeriodTest {
     }
 
     @Test
-    void testDaysMWTS() {
-
+    public void testDaysMWTS() {
+        
         Period p = new Period("period", "0:15", "0:20", "M WT  S");
 
         // Wrong time
@@ -125,8 +125,8 @@ class PeriodTest {
     }
 
     @Test
-    void testDaysMTSS() {
-
+    public void testDaysMTSS() {
+        
         Period p = new Period("period", "0:15","0:20",  "MT   SS");
 
         // Wrong time
@@ -137,8 +137,8 @@ class PeriodTest {
     }
 
     @Test
-    void testDaysMTWTFSS() {
-
+    public void testDaysMTWTFSS() {
+        
         Period p = new Period("period", "0:15","0:20",  ".......");
 
         // Wrong time
@@ -149,8 +149,8 @@ class PeriodTest {
     }
 
     @Test
-    void testTimeAM() {
-
+    public void testTimeAM() {
+        
         Period p = new Period("period", "2:15 AM","02:20 AM",  ".......");
 
         // Wrong time
@@ -161,8 +161,8 @@ class PeriodTest {
     }
 
     @Test
-    void testTimePM() {
-
+    public void testTimePM() {
+        
         Period p = new Period("period", "2:15 PM", "02:20 PM", ".......");
 
         // Wrong time
@@ -173,8 +173,8 @@ class PeriodTest {
     }
 
     @Test
-    void testTimeMilitary() {
-
+    public void testTimeMilitary() {
+        
         Period p = new Period("period", "1415", "1420", ".......");
 
         // Wrong time
@@ -185,7 +185,7 @@ class PeriodTest {
     }
 
     @Test
-    void testBadTime() {
+    public void testBadTime() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
@@ -205,8 +205,8 @@ class PeriodTest {
     }
 
     @Test
-    void testCompareTo() {
-
+    public void testCompareTo() {
+        
         Period p1 = new Period("period 1", "1415", "1420", ".......");
         Period p2 = new Period("period 2", "1416", "1421", ".......");
         int result = p1.compareTo(p2);
@@ -214,7 +214,7 @@ class PeriodTest {
         assertThat(result).isEqualTo(-1000 * 60);
 
         SortedSet<Period> set = new TreeSet<>();
-
+        
         set.add(p2);
         set.add(p1);
 
@@ -223,8 +223,8 @@ class PeriodTest {
     }
 
     @Test
-    void testCompareToSameStart() {
-
+    public void testCompareToSameStart() {
+        
         Period p1 = new Period("period 1", "1415", "1420", ".......");
         Period p2 = new Period("period 2", "1415", "1425", ".......");
         int result = p1.compareTo(p2);
@@ -232,7 +232,7 @@ class PeriodTest {
         assertThat(result).isEqualTo(300000);
 
         SortedSet<Period> set = new TreeSet<>();
-
+        
         set.add(p2);
         set.add(p1);
 
@@ -241,7 +241,7 @@ class PeriodTest {
     }
 
     @Test
-    void testDayOffset() {
+    public void testDayOffset() {
 
         assertThat(sunday2monday(1)).as("MO").isEqualTo(0);
         assertThat(sunday2monday(2)).as("TU").isEqualTo(1);
@@ -251,15 +251,15 @@ class PeriodTest {
         assertThat(sunday2monday(6)).as("SA").isEqualTo(5);
         assertThat(sunday2monday(0)).as("SU").isEqualTo(6);
     }
-
+    
     private int sunday2monday(int sunday) {
-
+        
         return (sunday + 6) % 7;
     }
 
     @Test
-    void testIncludesDayMo() {
-
+    public void testIncludesDayMo() {
+        
         testIncludesDay(new DateTime().withDate(2010, 1, 18), "M      ");
         testIncludesDay(new DateTime().withDate(2010, 1, 19), " T     ");
         testIncludesDay(new DateTime().withDate(2010, 1, 20), "  W    ");
@@ -267,20 +267,22 @@ class PeriodTest {
         testIncludesDay(new DateTime().withDate(2010, 1, 22), "    F  ");
         testIncludesDay(new DateTime().withDate(2010, 1, 23), "     S ");
         testIncludesDay(new DateTime().withDate(2010, 1, 24), "      S");
+        
     }
 
+    @Test
     private void testIncludesDay(DateTime d, String days) {
-
+        
         Period p = new Period("period", "1415", "1420", days);
 
         assertThat(p.includesDay(d)).as("Wrong inclusion for " + d).isTrue();
     }
 
     @Test
-    void testToString() {
-
+    public void testToString() {
+        
         Period p = new Period("period", "1415", "1420", ".......");
 
-        assertThat(p.toString()).hasToString("period (14:15 to 14:20 on MTWTFSS)");
+        assertThat(p.toString()).isEqualTo("period (14:15 to 14:20 on MTWTFSS)");
     }
 }

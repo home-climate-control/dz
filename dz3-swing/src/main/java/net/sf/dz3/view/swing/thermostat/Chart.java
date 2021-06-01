@@ -1,34 +1,30 @@
 package net.sf.dz3.view.swing.thermostat;
 
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import net.sf.dz3.controller.DataSet;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
-import java.time.Clock;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import net.sf.dz3.controller.DataSet;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+
 /**
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
- * @deprecated Use {@link Chart2020} instead. Retained for reference and benchmarking.
- *
- * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @deprecated Use {@link FasterChart} instead.
  */
-@SuppressWarnings("squid:S110")
-@Deprecated(forRemoval = false)
-public class Chart2009 extends AbstractChart {
+@Deprecated
+public class Chart extends AbstractChart {
 
     private static final long serialVersionUID = -8138341010404232436L;
 
-    public Chart2009(Clock clock, long chartLengthMillis) {
+    public Chart(long chartLengthMillis) {
 
-        super(clock, chartLengthMillis);
+        super(chartLengthMillis);
     }
 
     @Override
@@ -46,7 +42,7 @@ public class Chart2009 extends AbstractChart {
             channel2dsValue.put(channel, ds);
         }
 
-        ds.append(signal.timestamp, signal.sample);
+        ds.record(signal.timestamp, signal.sample);
         adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
         repaint();
@@ -183,7 +179,7 @@ public class Chart2009 extends AbstractChart {
 
                 overflow.put(timestamp, value);
                 Long last = buffer.lastKey();
-                target.append(last, spaceOut(buffer));
+                target.record(last, spaceOut(buffer));
 
                 continue;
             }

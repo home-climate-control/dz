@@ -1,11 +1,11 @@
 package net.sf.dz3.device.sensor.impl;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import java.io.IOException;
+import java.util.Random;
+
 import org.apache.logging.log4j.ThreadContext;
 
-import java.io.IOException;
-import java.security.SecureRandom;
-import java.util.Random;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 
 /**
  * Null switch.
@@ -16,10 +16,10 @@ import java.util.Random;
  */
 public class NullSwitch extends AbstractSwitch {
 
-    private static final Random rg = new SecureRandom();
+    private static final Random rg = new Random();
 
-    private final long minDelayMillis;
-    private final int maxDelayMillis;
+    private final long minDelay;
+    private final int maxDelay;
     private final Object semaphore;
 
     /**
@@ -35,14 +35,14 @@ public class NullSwitch extends AbstractSwitch {
      * Create an instance with delay.
      *
      * @param address Address to use.
-     * @param minDelayMillis Minimim switch deley, milliseconds.
-     * @param maxDelayMillis Max delay. Total delay is calculated as {@code minDelay + rg.nextInt(maxDelay)}.
+     * @param minDelay Minimim switch deley, milliseconds.
+     * @param maxDelay Max delay. Total delay is calculated as {@code minDelay + rg.nextInt(maxDelay)}.
      */
-    public NullSwitch(String address, long minDelayMillis, int maxDelayMillis, Object semaphore) {
+    public NullSwitch(String address, long minDelay, int maxDelay, Object semaphore) {
         super(address, false);
 
-        this.minDelayMillis = minDelayMillis;
-        this.maxDelayMillis = maxDelayMillis;
+        this.minDelay = minDelay;
+        this.maxDelay = maxDelay;
         this.semaphore = semaphore;
     }
 
@@ -73,39 +73,33 @@ public class NullSwitch extends AbstractSwitch {
         }
     }
 
-    @SuppressWarnings({"squid::S2273","squid::S2274"})
     private void delay() {
 
-        if (minDelayMillis == 0 && maxDelayMillis == 0) {
+        if (minDelay == 0 && maxDelay == 0) {
             return;
         }
 
         try {
 
-            long delay = minDelayMillis + rg.nextInt(maxDelayMillis);
+            long delay = minDelay + rg.nextInt(maxDelay);
 
             if (semaphore != null) {
 
                 // Simulate the lock on a common resource
                 synchronized (semaphore) {
-                    // squid::S2274: Works as designed.
-                    wait(delay);
+                    Thread.sleep(delay);
                 }
 
             } else {
 
                 // No lock, just sleep
-                synchronized (this) {
-                    // squid:S2274: Works as designed.
-                    wait(delay);
-                }
+                Thread.sleep(delay);
             }
 
             logger.info("slept {}ms", delay);
 
         } catch (InterruptedException ex) {
             // Oh well,no delay.
-            Thread.currentThread().interrupt();
         }
     }
 }

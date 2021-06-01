@@ -1,17 +1,19 @@
 package net.sf.dz3.runtime;
 
 import net.sf.dz3.instrumentation.Marker;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
 
 /**
  * Entry point into DZ Core.
- *
+ * 
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
 public class Container {
@@ -19,40 +21,38 @@ public class Container {
     /**
      * Logger to use.
      */
-    private static final Logger logger = LogManager.getLogger(Container.class);
+    private final static Logger logger = LogManager.getLogger(Container.class);
 
     /**
      * Name of the configuration file embedded into the jar file.
      */
     public static final String CF_EMBEDDED = "spring-config.xml";
-
+    
     /**
      * Name of the file this class expects to find the configuration in.
-     *
+     * 
      * Must be on the root of the classpath.
      */
     public static final String CF_PI = "raspberry-pi.xml";
-
+    
     /**
-     * Run the application.
-     * @param args Configuration location.
+     * @param args None expected.
      */
     public static void main(String[] args) {
-
+        
         new Container().run(args);
     }
 
     /**
      * Run the system.
      */
-    @SuppressWarnings({"squid::S2189", "squid:S1181"})
     public void run(String[] args) {
 
         ThreadContext.push("run");
 
         try {
 
-            var configFound = false;
+            boolean configFound = false;
 
             if (args.length == 0) {
 
@@ -73,26 +73,15 @@ public class Container {
             }
 
             logger.info("Sleeping until killed");
-
-            // squid:S2189: Works as designed.
-            synchronized (this) {
-                while (true) {
-                    wait(10000);
-                    if (Thread.interrupted()) {
-                        logger.info("Interrupted, terminating");
-                        break;
-                    }
-                }
+            
+            while (true) {
+                Thread.sleep(10000);
             }
 
         } catch (Throwable t) {
-
-            // squid:S1181: No.
             logger.fatal("Unexpected exception: ", t);
-            Thread.currentThread().interrupt();
-
         } finally {
-
+            
             logger.fatal("Shutting down");
             ThreadContext.pop();
         }
@@ -100,26 +89,27 @@ public class Container {
 
     /**
      * Load the configuration.
-     *
+     * 
      * @param source Configuration source.
-     *
+     * 
      * @see #CF_PI
      */
     private boolean loadConfiguration(String source) {
 
         ThreadContext.push("loadConfiguration(" + source + ")");
-        var m = new Marker("loadConfiguration(" + source + ")");
+        Marker m = new Marker("loadConfiguration(" + source + ")");
 
         try {
 
             // Classpath loading is much less likely, let's try this first
             if (loadFromPath(source)) {
                 return true;
-            }
+            };
 
             return loadFromClasspath(source);
 
         } finally {
+
             m.close();
             ThreadContext.pop();
         }
@@ -146,7 +136,7 @@ public class Container {
 
         } catch (BeanDefinitionStoreException ex) {
 
-            logger.warn("Failed to load {}, reason: {}", source, ex.getMessage());
+            logger.warn(String.format("Failed to load %s, reason: %s", source, ex.getMessage()));
             return false;
         }
     }
@@ -161,7 +151,7 @@ public class Container {
 
         } catch (BeanDefinitionStoreException ex) {
 
-            logger.warn("Failed to load {}, reason: {}", source, ex.getMessage());
+            logger.warn(String.format("Failed to load %s, reason: %s", source, ex.getMessage()));
             return false;
         }
     }
