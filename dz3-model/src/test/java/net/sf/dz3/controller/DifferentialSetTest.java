@@ -1,13 +1,13 @@
 package net.sf.dz3.controller;
 
 import net.sf.dz3.controller.pid.DifferentialSet;
-import net.sf.dz3.controller.pid.LegacyDifferentialSet;
 import net.sf.dz3.controller.pid.NaiveDifferentialSet;
 import net.sf.dz3.controller.pid.SlidingDifferentialSet;
 import net.sf.dz3.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -16,6 +16,7 @@ import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /**
  * @author <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
@@ -25,8 +26,8 @@ class DifferentialSetTest {
     private final Logger logger = LogManager.getLogger(getClass());
 
     private final Random rg = new Random();
-    private Semaphore startGate = new Semaphore(3);
-    private Semaphore stopGate = new Semaphore(3);
+    private final Semaphore startGate = new Semaphore(3);
+    private final Semaphore stopGate = new Semaphore(3);
 
     private static final long INTEGRATION_INTERVAL = 10000L;
     private static final int COUNT = 100000;
@@ -37,15 +38,14 @@ class DifferentialSetTest {
      *
      * This test doesn't test the implementation correctness.
      */
-    public void testAll() throws InterruptedException {
+    @Test
+    void all() throws InterruptedException {
 
         startGate.acquire(3);
 
-        Thread t1 = new Thread(new Legacy(INTEGRATION_INTERVAL));
         Thread t2 = new Thread(new Naive(INTEGRATION_INTERVAL));
         Thread t3 = new Thread(new Sliding(INTEGRATION_INTERVAL));
 
-        t1.start();
         t2.start();
         t3.start();
 
@@ -60,7 +60,7 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results, without triggering expiration.
      */
-    public void testSameNoExpiration() {
+    void testSameNoExpiration() {
 
         int count = 100;
 
@@ -73,7 +73,7 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results, triggering expiration.
      */
-    public void DISABLED_testSameWithExpiration() {
+    void DISABLED_testSameWithExpiration() {
 
         int count = 10000;
 
@@ -86,7 +86,7 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results.
      */
-    public void testSame(int limit, long expirationInterval) {
+    void testSame(int limit, long expirationInterval) {
 
         ThreadContext.push("testSame/D(" + limit + ", " + expirationInterval + ")");
 
@@ -97,7 +97,6 @@ class DifferentialSetTest {
 
         try {
 
-            DifferentialSet dataSet2000 = new LegacyDifferentialSet(expirationInterval);
             DifferentialSet dataSet2015 = new NaiveDifferentialSet(expirationInterval);
             DifferentialSet dataSetFast = new SlidingDifferentialSet(expirationInterval);
 
@@ -108,12 +107,10 @@ class DifferentialSetTest {
                 timestamp += Math.abs(rg.nextInt(TICK)) + 1;
                 double value = rg.nextDouble();
 
-                dataSet2000.append(timestamp, value);
                 dataSet2015.append(timestamp, value);
                 dataSetFast.append(timestamp, value);
 
-                assertThat(dataSet2015.getDifferential()).as("2000/2015").isEqualTo(dataSet2000.getDifferential());
-                assertThat(dataSetFast.getDifferential()).as("2015/slide").isEqualTo(dataSet2015.getDifferential());
+                assertThat(dataSetFast.getDifferential()).as("2015/slide").isEqualTo(dataSet2015.getDifferential(), within(0.0001));
 
                 lastGoodTimestamp = timestamp;
             }
@@ -133,7 +130,8 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results, step by step, with NO more than one record ever expired.
      */
-    public void testSameSingleExpiration80() {
+    @Test
+    void sameSingleExpiration80() {
 
         List<Long> timestamps = new LinkedList<Long>();
 
@@ -151,7 +149,8 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results, step by step, with NO more than one record ever expired.
      */
-    public void testSameSingleExpiration50() {
+    @Test
+    void sameSingleExpiration50() {
 
         List<Long> timestamps = new LinkedList<Long>();
 
@@ -169,7 +168,8 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results, step by step, with MORE than one record ever expired.
      */
-    public void testSameMultipleExpiration() {
+    @Test
+    void sameMultipleExpiration() {
 
         List<Long> timestamps = new LinkedList<Long>();
 
@@ -189,7 +189,8 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results, step by step, with MORE than one record ever expired.
      */
-    public void testSameFirstExpiration() {
+    @Test
+    void sameFirstExpiration() {
 
         List<Long> timestamps = new LinkedList<Long>();
 
@@ -205,13 +206,12 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results.
      */
-    public void testSameSteps(String marker, long expirationInterval, List<Long> timestamps) {
+    void testSameSteps(String marker, long expirationInterval, List<Long> timestamps) {
 
         ThreadContext.push("testSameSteps/D-" + marker);
 
         try {
 
-            DifferentialSet dataSet2000 = new LegacyDifferentialSet(expirationInterval);
             DifferentialSet dataSet2015 = new NaiveDifferentialSet(expirationInterval);
             DifferentialSet dataSetFast = new SlidingDifferentialSet(expirationInterval);
 
@@ -227,19 +227,16 @@ class DifferentialSetTest {
                     timestamp += i.next();
                     double value = rg.nextDouble();
 
-                    dataSet2000.append(timestamp, value);
                     dataSet2015.append(timestamp, value);
                     dataSetFast.append(timestamp, value);
 
-                    double i2000 = dataSet2000.getDifferential();
                     double i2015 = dataSet2015.getDifferential();
                     double iFast = dataSetFast.getDifferential();
 
-                    logger.info("timestamp/value/expiration: " + timestamp + "/" + value + "/" + expirationInterval);
-                    logger.debug("old/new/fast: " + i2000 + " " + i2015 + " " + iFast);
+                    logger.info("timestamp/value/expiration: {}/{}/{}", timestamp,value,expirationInterval);
+                    logger.debug("new/fast: {}/{}",i2015, iFast);
 
-                    assertThat(i2015).as("2000/2015").isEqualTo(i2000);
-                    assertThat(iFast).as("2015/slide").isEqualTo(i2015);
+                    assertThat(iFast).as("2015/slide").isEqualTo(i2015, within(0.0001));
 
                 } finally {
                     ThreadContext.pop();
@@ -306,23 +303,6 @@ class DifferentialSetTest {
         @Override
         protected DifferentialSet createSet(long expirationInterval) {
             return new NaiveDifferentialSet(expirationInterval);
-        }
-
-        @Override
-        protected void sample(DifferentialSet dataSet) {
-            dataSet.getDifferential();
-        }
-    }
-
-    private class Legacy extends Runner {
-
-        Legacy(long expirationInterval) throws InterruptedException {
-            super(expirationInterval);
-        }
-
-        @Override
-        protected DifferentialSet createSet(long expirationInterval) {
-            return new LegacyDifferentialSet(expirationInterval);
         }
 
         @Override

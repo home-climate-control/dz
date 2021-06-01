@@ -1,7 +1,6 @@
 package net.sf.dz3.controller;
 
 import net.sf.dz3.controller.pid.IntegralSet;
-import net.sf.dz3.controller.pid.LegacyIntegralSet;
 import net.sf.dz3.controller.pid.NaiveIntegralSet;
 import net.sf.dz3.controller.pid.SlidingIntegralSet;
 import net.sf.dz3.instrumentation.Marker;
@@ -10,13 +9,13 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.within;
 
 /**
@@ -27,8 +26,8 @@ class IntegralSetTest {
     private final Logger logger = LogManager.getLogger(getClass());
 
     private final Random rg = new Random();
-    private Semaphore startGate = new Semaphore(3);
-    private Semaphore stopGate = new Semaphore(3);
+    private final Semaphore startGate = new Semaphore(3);
+    private final Semaphore stopGate = new Semaphore(3);
 
     private static final long INTEGRATION_INTERVAL = 10000L;
     private static final int COUNT = 1000000;
@@ -40,31 +39,31 @@ class IntegralSetTest {
      * This test doesn't test the implementation correctness.
      */
     @Test
-    public void testAll() throws InterruptedException {
+    void all() throws InterruptedException {
 
-        startGate.acquire(3);
+        assertThatCode(() -> {
+            startGate.acquire(3);
 
-        Thread t1 = new Thread(new Legacy(INTEGRATION_INTERVAL));
-        Thread t2 = new Thread(new Naive(INTEGRATION_INTERVAL));
-        Thread t3 = new Thread(new Sliding(INTEGRATION_INTERVAL));
+            Thread t2 = new Thread(new Naive(INTEGRATION_INTERVAL));
+            Thread t3 = new Thread(new Sliding(INTEGRATION_INTERVAL));
 
-        t1.start();
-        t2.start();
-        t3.start();
+            t2.start();
+            t3.start();
 
-        startGate.release(3);
-        logger.info("unleashed");
+            startGate.release(3);
+            logger.info("unleashed");
 
-        stopGate.acquire(3);
+            stopGate.acquire(3);
 
-        logger.info("done");
+            logger.info("done");
+        }).doesNotThrowAnyException();
     }
 
     /**
      * Make sure the slow and fast implementation yield the same results, without triggering expiration.
      */
     @Test
-    public void testSameNoExpiration() {
+    void sameNoExpiration() {
 
         int count = 100;
 
@@ -78,7 +77,7 @@ class IntegralSetTest {
      * Make sure the slow and fast implementation yield the same results, triggering expiration.
      */
     @Test
-    public void testSameWithExpiration() {
+    void sameWithExpiration() {
 
         int count = 10000;
 
@@ -102,7 +101,6 @@ class IntegralSetTest {
 
         try {
 
-            IntegralSet dataSet2000 = new LegacyIntegralSet(expirationInterval);
             IntegralSet dataSet2015 = new NaiveIntegralSet(expirationInterval);
             IntegralSet dataSetFast = new SlidingIntegralSet(expirationInterval);
 
@@ -113,11 +111,9 @@ class IntegralSetTest {
                 timestamp += Math.abs(rg.nextInt(TICK)) + 1;
                 double value = rg.nextDouble();
 
-                dataSet2000.append(timestamp, value);
                 dataSet2015.append(timestamp, value);
                 dataSetFast.append(timestamp, value);
 
-                assertThat(dataSet2015.getIntegral()).as("2000/2015").isEqualTo(dataSet2000.getIntegral(), within(0.0001));
                 assertThat(dataSetFast.getIntegral()).as("2015/slide").isEqualTo(dataSet2015.getIntegral(), within(0.0001));
 
                 lastGoodTimestamp = timestamp;
@@ -139,7 +135,7 @@ class IntegralSetTest {
      * Make sure the slow and fast implementation yield the same results, step by step, with NO more than one record ever expired.
      */
     @Test
-    public void testSameSingleExpiration80() {
+    void sameSingleExpiration80() {
 
         List<Long> timestamps = new LinkedList<Long>();
 
@@ -158,7 +154,7 @@ class IntegralSetTest {
      * Make sure the slow and fast implementation yield the same results, step by step, with NO more than one record ever expired.
      */
     @Test
-    public void testSameSingleExpiration50() {
+    void sameSingleExpiration50() {
 
         List<Long> timestamps = new LinkedList<Long>();
 
@@ -177,7 +173,7 @@ class IntegralSetTest {
      * Make sure the slow and fast implementation yield the same results, step by step, with MORE than one record ever expired.
      */
     @Test
-    public void testSameMultipleExpiration() {
+    void sameMultipleExpiration() {
 
         List<Long> timestamps = new LinkedList<Long>();
 
@@ -198,7 +194,7 @@ class IntegralSetTest {
      * Make sure the slow and fast implementation yield the same results, step by step, with MORE than one record ever expired.
      */
     @Test
-    public void testSameFirstExpiration() {
+    void sameFirstExpiration() {
 
         List<Long> timestamps = new LinkedList<Long>();
 
@@ -220,30 +216,26 @@ class IntegralSetTest {
 
         try {
 
-            IntegralSet dataSet2000 = new LegacyIntegralSet(expirationInterval);
             IntegralSet dataSet2015 = new NaiveIntegralSet(expirationInterval);
             IntegralSet dataSetFast = new SlidingIntegralSet(expirationInterval);
 
             long timestamp = 0;
 
-            for (Iterator<Long> i = timestamps.iterator(); i.hasNext(); ) {
+            for (Long delta : timestamps) {
 
-                timestamp += i.next();
+                timestamp += delta;
                 double value = rg.nextDouble();
 
-                dataSet2000.append(timestamp, value);
                 dataSet2015.append(timestamp, value);
                 dataSetFast.append(timestamp, value);
 
-                logger.info("timestamp/expiration: " + timestamp + "/" + expirationInterval);
+                logger.info("timestamp/expiration: {}/{}",timestamp, expirationInterval);
 
-                double i2000 = dataSet2000.getIntegral();
                 double i2015 = dataSet2015.getIntegral();
                 double iFast = dataSetFast.getIntegral();
 
-                logger.debug("old/new/fast: " + i2000 + " " + i2015 + " " + iFast);
+                logger.debug("new/fast: {}/{}", i2015, + iFast);
 
-                assertThat(i2015).as("2000/2015").isEqualTo(i2000, within(0.0001));
                 assertThat(iFast).as("2015/slide").isEqualTo(i2015, within(0.0001));
             }
 
@@ -308,23 +300,6 @@ class IntegralSetTest {
         @Override
         protected IntegralSet createSet(long expirationInterval) {
             return new NaiveIntegralSet(expirationInterval);
-        }
-
-        @Override
-        protected void sample(IntegralSet dataSet) {
-            dataSet.getIntegral();
-        }
-    }
-
-    private class Legacy extends Runner {
-
-        Legacy(long expirationInterval) throws InterruptedException {
-            super(expirationInterval);
-        }
-
-        @Override
-        protected IntegralSet createSet(long expirationInterval) {
-            return new LegacyIntegralSet(expirationInterval);
         }
 
         @Override
