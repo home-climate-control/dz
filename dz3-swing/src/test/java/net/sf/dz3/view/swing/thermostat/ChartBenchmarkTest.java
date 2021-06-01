@@ -103,30 +103,6 @@ class ChartBenchmarkTest {
     }
 
     @Test
-    void benchmark2016() throws IOException {
-
-        assertThatCode(() -> {
-            benchmark("2016", series1, new Chart2016(testClock, chartLengthMillis), false);
-        }).doesNotThrowAnyException();
-    }
-
-    @Test
-    void benchmark2016s() throws IOException {
-
-        assertThatCode(() -> {
-            benchmark("2016s", series1, new Chart2016(testClock, chartLengthMillis), true);
-        }).doesNotThrowAnyException();
-    }
-
-    @Test
-    void benchmark2016gap() throws IOException {
-
-        assertThatCode(() -> {
-            benchmark("2016gap", series2, new Chart2016(testClock, chartLengthMillis), true);
-        }).doesNotThrowAnyException();
-    }
-
-    @Test
     void benchmark2020() throws IOException {
 
         assertThatCode(() -> {
