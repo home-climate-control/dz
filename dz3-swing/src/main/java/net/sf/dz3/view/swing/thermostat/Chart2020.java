@@ -38,7 +38,7 @@ public class Chart2020 extends AbstractChart {
      * @see #globalWidth
      * @see #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)
      */
-    private int width = 0;
+    private int localWidth = 0;
 
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
@@ -57,7 +57,6 @@ public class Chart2020 extends AbstractChart {
         String channel = signal.sourceName;
 
         if (append(channel, signal)) {
-
             repaint();
         }
     }
@@ -76,47 +75,43 @@ public class Chart2020 extends AbstractChart {
 
         synchronized (AbstractChart.class) {
 
-            if (width != globalWidth) {
+            if (localWidth != globalWidth) {
 
                 // Chart size changed, need to adjust the buffer
+                localWidth = globalWidth;
 
-                width = globalWidth;
+                var step = chartLengthMillis / localWidth;
 
-                long step = chartLengthMillis / width;
-
-                logger.info("new width {}, {}ms per pixel", width, step);
+                logger.info("new width {}, {}ms per pixel", localWidth, step);
 
                 // We lose one sample this way, might want to improve it later, for now, no big deal
-
                 channel2avg.put(channel, new Averager(step));
 
                 return true;
             }
         }
 
-        if (width == 0) {
+        if (localWidth == 0) {
 
             // There's nothing we can do before the width is set.
             // It's not even worth it to record the value.
 
-            // Please repaint.
             logger.info("please repaint");
             return true;
         }
 
-        Averager avg = channel2avg.get(channel);
-        TintedValue tv = avg.append(signal);
+        var averager = channel2avg.get(channel);
+        var tintedValue = averager.append(signal);
 
-        if (tv == null) {
-
+        if (tintedValue == null) {
             // The average is still being calculated, nothing to do
             return false;
         }
 
-        DataSet<TintedValue> dsValues = channel2dsValue.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
-        DataSet<Double> dsSetpoints = channel2dsSetpoint.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
+        var dsValues = channel2dsValue.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
+        var dsSetpoints = channel2dsSetpoint.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
 
-        dsValues.append(signal.timestamp, tv, true);
+        dsValues.append(signal.timestamp, tintedValue, true);
         dsSetpoints.append(signal.timestamp, signal.sample.setpoint, true);
 
         return true;
@@ -135,12 +130,11 @@ public class Chart2020 extends AbstractChart {
 
                 globalWidth = boundary.width;
 
-                long step = chartLengthMillis / globalWidth;
+                var step = chartLengthMillis / globalWidth;
 
                 logger.info("ms per pixel: {}", step);
             }
         }
-
     }
 
     @Override
@@ -149,7 +143,6 @@ public class Chart2020 extends AbstractChart {
             String channel, DataSet<TintedValue> dsValues, DataSet<Double> dsSetpoints) {
 
         // Setpoint history is rendered over the value history
-
         paintValues(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, channel, dsValues);
         paintSetpoints(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, channel, dsSetpoints);
     }
@@ -181,13 +174,11 @@ public class Chart2020 extends AbstractChart {
 
                     // It's dead, all right
                     // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
-
                     var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
 
                     // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
                     // Even though this is a memory allocation, it won't affect performance since [hopefully]
                     // there'll be just a few dead drops
-
                     var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
 
                     drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
@@ -209,9 +200,9 @@ public class Chart2020 extends AbstractChart {
 
             // There's a gap on the right, let's fill it
 
-            double x0 = (timeTrailer - xOffset) * xScale + insets.left;
-            double x1 = (now - xOffset) * xScale + insets.left;
-            double y = (yOffset - trailer.value) * yScale + insets.top;
+            var x0 = (timeTrailer - xOffset) * xScale + insets.left;
+            var x1 = (now - xOffset) * xScale + insets.left;
+            var y = (yOffset - trailer.value) * yScale + insets.top;
 
             var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
             var endColor = getBackground();
@@ -231,21 +222,19 @@ public class Chart2020 extends AbstractChart {
 
         for (Iterator<Entry<Long, Double>> di = ds.entryIterator(); di.hasNext();) {
 
-            Entry<Long, Double> entry = di.next();
-            long timeNow = entry.getKey();
-            Double cursor = entry.getValue();
+            var entry = di.next();
+            var timeNow = entry.getKey();
+            var cursor = entry.getValue();
 
             double x0;
             double x1;
             double y = (yOffset - cursor) * yScale + insets.top;
 
             if (timeTrailer == null) {
-
                 x0 = insets.left;
                 x1 = (timeNow - xOffset) * xScale + insets.left;
 
             } else {
-
                 x0 = (timeTrailer - xOffset) * xScale + insets.left;
                 x1 = (timeNow - xOffset) * xScale + insets.left;
             }
