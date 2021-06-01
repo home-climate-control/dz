@@ -32,22 +32,22 @@ class DataSetTest {
 
         // Record values in order
 
-        ds.record(100, 0d);
-        ds.record(101, 0d);
+        ds.append(100, 0d);
+        ds.append(101, 0d);
 
         // We're fine so far
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
                     // This should blow up - this timestamp is out of order
-                    ds.record(99, 0d);
+                    ds.append(99, 0d);
                 })
                 .withMessage("Data element out of sequence: last key is 101, key being added is 99");
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
                     // This also should blow up - this timestamp is already present
-                    ds.record(101, 0d);
+                    ds.append(101, 0d);
                 })
                 .withMessage("Data element out of sequence: last key is 101, key being added is 101");
     }
@@ -57,22 +57,22 @@ class DataSetTest {
 
         DataSet<Double> ds = new DataSet<Double>(100);
 
-        ds.record(0, 0d);
-        ds.record(100, 0d);
+        ds.append(0, 0d);
+        ds.append(100, 0d);
 
         assertThat(ds.iterator().next()).isZero();
         assertThat(ds.size()).isEqualTo(2);
 
         {
             // This value won't cause expiration
-            ds.record(100, 0d);
+            ds.append(100, 0d);
             assertThat(ds.iterator().next()).isZero();
             assertThat(ds.size()).isEqualTo(2);
         }
 
         {
             // This value *will* cause expiration
-            ds.record(101, 0d);
+            ds.append(101, 0d);
             assertThat(ds.iterator().next()).isEqualTo(100);
             assertThat(ds.size()).isEqualTo(2);
         }
@@ -107,7 +107,7 @@ class DataSetTest {
 
             timestamp += rg.nextInt(10);
 
-            ds.record(timestamp, rg.nextDouble());
+            ds.append(timestamp, rg.nextDouble());
         }
 
         m.close();

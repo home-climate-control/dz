@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 /**
  * Data set supporting the integration calculation.
  * <p>
- * The {@link DataSet#record record()} method from {@link DataSet DataSet} class
+ * The {@link DataSet#append} method from {@link DataSet DataSet} class
  * is used, however, make sure you record the right values. If this class is
  * used for the {@link PID_Controller}, it must be fed with controller error,
  * and anti-windup action must be programmed outside of this class.
@@ -54,7 +54,7 @@ public class SlidingIntegralSet implements IntegralSet {
      * @param value The sample value.
      */
     @Override
-    public synchronized void record(final long millis, final Double value) {
+    public synchronized void append(final long millis, final Double value) {
 
         if (value == null) {
             throw new IllegalArgumentException("null value mustn't propagate here");

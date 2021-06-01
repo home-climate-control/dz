@@ -57,7 +57,7 @@ public class Chart2020 extends AbstractChart2020 {
 
         String channel = signal.sourceName;
 
-        if (record(channel, signal)) {
+        if (append(channel, signal)) {
 
             repaint();
         }
@@ -71,7 +71,7 @@ public class Chart2020 extends AbstractChart2020 {
      *
      * @return {@code true} if the component needs to be repainted.
      */
-    private boolean record(String channel, DataSample<TintedValueAndSetpoint> signal) {
+    private boolean append(String channel, DataSample<TintedValueAndSetpoint> signal) {
 
         adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
@@ -106,7 +106,7 @@ public class Chart2020 extends AbstractChart2020 {
         }
 
         Averager avg = channel2avg.get(channel);
-        TintedValue tv = avg.record(signal);
+        TintedValue tv = avg.append(signal);
 
         if (tv == null) {
 
@@ -117,8 +117,8 @@ public class Chart2020 extends AbstractChart2020 {
         DataSet<TintedValue> dsValues = channel2dsValue.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
         DataSet<Double> dsSetpoints = channel2dsSetpoint.computeIfAbsent(channel, v -> new DataSet<>(chartLengthMillis));
 
-        dsValues.record(signal.timestamp, tv, true);
-        dsSetpoints.record(signal.timestamp, signal.sample.setpoint, true);
+        dsValues.append(signal.timestamp, tv, true);
+        dsSetpoints.append(signal.timestamp, signal.sample.setpoint, true);
 
         return true;
     }
@@ -290,7 +290,7 @@ public class Chart2020 extends AbstractChart2020 {
          * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
          * away from the first sample stored, {@code null} otherwise.
          */
-        public TintedValue record(DataSample<? extends TintedValue> signal) {
+        public TintedValue append(DataSample<? extends TintedValue> signal) {
 
             if (timestamp == null) {
                 timestamp = signal.timestamp;

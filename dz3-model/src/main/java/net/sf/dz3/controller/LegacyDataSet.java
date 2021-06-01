@@ -12,9 +12,9 @@ import java.util.TreeMap;
  * VT: FIXME: Implement variable expiration time.
  *
  * This is the old implementation, written in 2000 with little regard to performance.
- * 
+ *
  * @see DatSet
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public class LegacyDataSet<T> {
@@ -31,9 +31,9 @@ public class LegacyDataSet<T> {
     private long expirationInterval;
 
     /**
-     * Strictness. If this is set to true, the {@link #record record()} will not
-     * accept values for the time less than already recorded, and {@link #record
-     * record()} will throw {@codeIllegalArgumentException}.
+     * Strictness. If this is set to true, the {@link #append} will not
+     * accept values for the time less than already recorded, and {@link #append}
+     * will throw {@code IllegalArgumentException}.
      * <p>
      * This is not necessarily a good thing.
      */
@@ -43,7 +43,7 @@ public class LegacyDataSet<T> {
      * Create the instance.
      *
      * @param expirationInterval How many milliseconds to keep the data.
-     * 
+     *
      * @exception IllegalArgumentException if the expiration interval is
      * non-positive (<= 0). Be careful with the short intervals, it's going to
      * be your fault, not mine.
@@ -85,7 +85,7 @@ public class LegacyDataSet<T> {
      * @param millis Absolute time, milliseconds.
      * @param value The sample value.
      */
-    public final synchronized void record(final long millis, final T value) {
+    public final synchronized void append(final long millis, final T value) {
 
         // We don't care if there was a value associated with the given key
         // before, so we return nothing.
@@ -175,7 +175,7 @@ public class LegacyDataSet<T> {
      * @param time Time to look up the data for. Must be exact, otherwise,
      * exception will be thrown.
      * @return Value recorded at the given time.
-     * 
+     *
      * @exception NoSuchElementException if the value for the given time is not
      * in the set.
      */

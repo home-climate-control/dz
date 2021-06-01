@@ -9,13 +9,13 @@ import java.util.NoSuchElementException;
 /**
  * Data set supporting the integration calculation.
  * <p>
- * The {@link DataSet#record record()} method from {@link DataSet DataSet} class
+ * The {@link DataSet#append()} method from {@link DataSet DataSet} class
  * is used, however, make sure you record the right values. If this class is
  * used for the {@link PID_Controller}, it must be fed with controller error,
  * and anti-windup action must be programmed outside of this class.
- * 
+ *
  * This is the old implementation, written in 2000 with little regard to performance.
- * 
+ *
  * @see IntegralSet
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-20012
@@ -41,6 +41,7 @@ public class LegacyIntegralSet extends LegacyDataSet<Double> implements Integral
    *
    * @return An integral value.
    */
+    @Override
     public final synchronized double getIntegral() {
 
         double result = 0;

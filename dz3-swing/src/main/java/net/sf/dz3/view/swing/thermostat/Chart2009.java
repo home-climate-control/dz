@@ -46,7 +46,7 @@ public class Chart2009 extends AbstractChart2009 {
             channel2dsValue.put(channel, ds);
         }
 
-        ds.record(signal.timestamp, signal.sample);
+        ds.append(signal.timestamp, signal.sample);
         adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
         repaint();
@@ -183,7 +183,7 @@ public class Chart2009 extends AbstractChart2009 {
 
                 overflow.put(timestamp, value);
                 Long last = buffer.lastKey();
-                target.record(last, spaceOut(buffer));
+                target.append(last, spaceOut(buffer));
 
                 continue;
             }

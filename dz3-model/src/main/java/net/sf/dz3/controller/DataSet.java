@@ -17,7 +17,7 @@ public class DataSet<T> {
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private final LinkedHashMap<Long, T> dataSet = new LinkedHashMap<>();
+    private final LinkedHashMap<Long, T> samples = new LinkedHashMap<>();
 
     /**
      * The expiration interval. Values older than the last key by this many
@@ -26,9 +26,9 @@ public class DataSet<T> {
     private long expirationInterval;
 
     /**
-     * Strictness. If this is set to true, the {@link #record record()} will not
-     * accept values for the time less than already recorded, and {@link #record
-     * record()} will throw {@code IllegalArgumentException}.
+     * Strictness. If this is set to true, the {@link #append} will not
+     * accept values for the time less than already recorded, and {@link #append
+     * } will throw {@code IllegalArgumentException}.
      * <p>
      * This is not necessarily a good thing.
      */
@@ -95,8 +95,8 @@ public class DataSet<T> {
      * @param millis Absolute time, milliseconds.
      * @param value The sample value.
      */
-    public final synchronized void record(final long millis, final T value) {
-        record(millis, value, false);
+    public final synchronized void append(final long millis, final T value) {
+        append(millis, value, false);
     }
 
     /**
@@ -107,7 +107,7 @@ public class DataSet<T> {
      * @param merge if {@code false}, record the value in any case. If {@code true}, record only
      * if it is different from the last one recorded.
      */
-    public final synchronized void record(final long millis, final T value, boolean merge) {
+    public final synchronized void append(final long millis, final T value, boolean merge) {
 
         // We don't care if there was a value associated with the given key
         // before, so we return nothing.
@@ -123,10 +123,10 @@ public class DataSet<T> {
             // Will replace it with the same value and new timestamp right below. Slower on
             // the way in, faster on the way out.
 
-            dataSet.remove(lastTimestamp);
+            samples.remove(lastTimestamp);
         }
 
-        dataSet.put(millis, value);
+        samples.put(millis, value);
         lastValue = value;
         lastTimestamp = millis;
 
@@ -143,7 +143,7 @@ public class DataSet<T> {
 
             Long expireBefore = lastTimestamp - expirationInterval;
 
-            for (Iterator<Long> i = dataSet.keySet().iterator(); i.hasNext();) {
+            for (Iterator<Long> i = samples.keySet().iterator(); i.hasNext();) {
 
                 Long found = i.next();
 
@@ -171,22 +171,22 @@ public class DataSet<T> {
      */
     public final Iterator<Long> iterator() {
 
-        return dataSet.keySet().iterator();
+        return samples.keySet().iterator();
     }
 
     public final Iterator<Map.Entry<Long, T>> entryIterator() {
 
-      return dataSet.entrySet().iterator();
+      return samples.entrySet().iterator();
     }
 
     /**
      * Get the data set size.
      *
-     * @return {@link #dataSet dataSet} size.
+     * @return {@link #samples dataSet} size.
      */
     public final long size() {
 
-        return dataSet.size();
+        return samples.size();
     }
 
     /**
@@ -201,7 +201,7 @@ public class DataSet<T> {
      */
     public final T get(final long time) {
 
-        var result = dataSet.get(time);
+        var result = samples.get(time);
 
         if (result == null) {
 

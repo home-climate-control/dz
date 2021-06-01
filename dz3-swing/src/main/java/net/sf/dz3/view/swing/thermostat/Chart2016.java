@@ -56,7 +56,7 @@ public class Chart2016 extends AbstractChart2009 {
 
         String channel = signal.sourceName;
 
-        if (record(channel, signal)) {
+        if (append(channel, signal)) {
 
             repaint();
         }
@@ -70,7 +70,7 @@ public class Chart2016 extends AbstractChart2009 {
      *
      * @return {@code true} if the component needs to be repainted.
      */
-    private boolean record(String channel, DataSample<TintedValueAndSetpoint> signal) {
+    private boolean append(String channel, DataSample<TintedValueAndSetpoint> signal) {
 
         adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
@@ -105,7 +105,7 @@ public class Chart2016 extends AbstractChart2009 {
         }
 
         Averager avg = channel2avg.get(channel);
-        TintedValue tv = avg.record(signal);
+        TintedValue tv = avg.append(signal);
 
         if (tv == null) {
 
@@ -127,8 +127,8 @@ public class Chart2016 extends AbstractChart2009 {
             channel2dsSetpoint.put(channel, dsSetpoints);
         }
 
-        dsValues.record(signal.timestamp, tv);
-        dsSetpoints.record(signal.timestamp, signal.sample.setpoint);
+        dsValues.append(signal.timestamp, tv);
+        dsSetpoints.append(signal.timestamp, signal.sample.setpoint);
 
         return true;
     }
@@ -313,7 +313,7 @@ public class Chart2016 extends AbstractChart2009 {
          * away from the first sample stored, {@code null} otherwise.
          */
         @SuppressWarnings("squid:S2629")
-        public TintedValue record(DataSample<? extends TintedValue> signal) {
+        public TintedValue append(DataSample<? extends TintedValue> signal) {
 
             if (timestamp == null) {
                 timestamp = signal.timestamp;
