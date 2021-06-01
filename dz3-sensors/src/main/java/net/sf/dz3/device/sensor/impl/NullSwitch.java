@@ -95,8 +95,10 @@ public class NullSwitch extends AbstractSwitch {
             } else {
 
                 // No lock, just sleep
-                // squid::S2274: Works as designed.
-                wait(delay);
+                synchronized (this) {
+                    // squid:S2274: Works as designed.
+                    wait(delay);
+                }
             }
 
             logger.info("slept {}ms", delay);
