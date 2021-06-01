@@ -22,7 +22,7 @@ import java.util.TreeMap;
  */
 @SuppressWarnings("squid:S110")
 @Deprecated
-public class Chart2009 extends AbstractChart2009 {
+public class Chart2009 extends AbstractChart {
 
     private static final long serialVersionUID = -8138341010404232436L;
 

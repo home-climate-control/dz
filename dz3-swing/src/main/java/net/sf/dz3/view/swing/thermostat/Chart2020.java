@@ -20,7 +20,7 @@ import java.util.Map.Entry;
  * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
 @SuppressWarnings("squid:S110")
-public class Chart2020 extends AbstractChart2020 {
+public class Chart2020 extends AbstractChart {
 
     private static final long serialVersionUID = 8739949924865459025L;
 
