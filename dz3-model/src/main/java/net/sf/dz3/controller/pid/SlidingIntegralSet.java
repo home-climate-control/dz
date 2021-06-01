@@ -24,7 +24,7 @@ public class SlidingIntegralSet implements IntegralSet {
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private LinkedHashMap<Long, Double> dataSet = new LinkedHashMap<Long, Double>();
+    private final LinkedHashMap<Long, Double> samples = new LinkedHashMap<>();
 
     private final long integrationTime;
 
@@ -80,13 +80,11 @@ public class SlidingIntegralSet implements IntegralSet {
         lastTimestamp = millis;
         lastValue = value;
 
-        dataSet.put(Long.valueOf(millis), diff);
+        samples.put(millis, diff);
 
         lastIntegral += diff;
 
         expire();
-
-        // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
     }
 
     /**
@@ -95,11 +93,11 @@ public class SlidingIntegralSet implements IntegralSet {
      */
     private void expire() {
 
-        Long expireBefore = Long.valueOf(lastTimestamp.longValue() - integrationTime);
+        var expireBefore = lastTimestamp - integrationTime;
 
         Entry<Long, Double> trailer = null;
 
-        for (Iterator<Entry<Long, Double>> i = dataSet.entrySet().iterator(); i.hasNext(); ) {
+        for (Iterator<Entry<Long, Double>> i = samples.entrySet().iterator(); i.hasNext(); ) {
 
             Entry<Long, Double> entry = trailer != null ? trailer : i.next();
 

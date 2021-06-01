@@ -13,7 +13,7 @@ import java.util.TreeMap;
  *
  * This is the old implementation, written in 2000 with little regard to performance.
  *
- * @see DatSet
+ * @see DataSet
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
@@ -22,7 +22,7 @@ public class LegacyDataSet<T> {
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private SortedMap<Long, T> dataSet = new TreeMap<Long, T>();
+    private final SortedMap<Long, T> samples = new TreeMap<>();
 
     /**
      * The expiration interval. Values older than the last key by this many
@@ -64,8 +64,7 @@ public class LegacyDataSet<T> {
      *
      * @param strict If set to true, out-of-order updates will not be accepted.
      */
-    public synchronized final void setStrict(final boolean strict) {
-
+    public final synchronized void setStrict(final boolean strict) {
         this.strict = strict;
     }
 
@@ -75,7 +74,6 @@ public class LegacyDataSet<T> {
      * @return Expiration interval, milliseconds.
      */
     public final long getExpirationInterval() {
-
         return expirationInterval;
     }
 
@@ -94,9 +92,9 @@ public class LegacyDataSet<T> {
 
             try {
 
-                Long lastKey = dataSet.lastKey();
+                Long lastKey = samples.lastKey();
 
-                if (lastKey.longValue() >= millis) {
+                if (lastKey >= millis) {
 
                     throw new IllegalArgumentException("Data element out of sequence: last key is " + lastKey
                             + ", key being added is " + millis);
@@ -109,39 +107,31 @@ public class LegacyDataSet<T> {
             }
         }
 
-        dataSet.put(Long.valueOf(millis), value);
+        samples.put(millis, value);
 
         expire();
-
-        // System.err.println("DataSet@" + hashCode() + ": " + dataSet.size());
     }
 
     /**
      * Expire all the data elements older than the last by {@link
      * #expirationInterval expiration interval}.
      */
-    private final void expire() {
+    private void expire() {
 
         try {
 
-            Long lastKey = dataSet.lastKey();
-            Long expireBefore = Long.valueOf(lastKey.longValue() - expirationInterval);
+            var lastKey = samples.lastKey();
+            var expireBefore = lastKey - expirationInterval;
 
-            SortedMap<Long, T> expireMap = dataSet.headMap(expireBefore);
+            SortedMap<Long, T> expireMap = samples.headMap(expireBefore);
 
             for (Iterator<Long> i = expireMap.keySet().iterator(); i.hasNext();) {
 
-                //Long found =
-
                 i.next();
                 i.remove();
-
-                // System.err.println("Expired: " + found + ", left: " +
-                // dataSet.size());
             }
 
         } catch (NoSuchElementException nseex) {
-
             // We're fine, the map is empty
         }
     }
@@ -151,22 +141,22 @@ public class LegacyDataSet<T> {
      */
     public final Iterator<Long> iterator() {
 
-        return dataSet.keySet().iterator();
+        return samples.keySet().iterator();
     }
 
     protected final Iterator<Map.Entry<Long, T>> entryIterator() {
 
-      return dataSet.entrySet().iterator();
+      return samples.entrySet().iterator();
     }
 
     /**
      * Get the data set size.
      *
-     * @return {@link #dataSet dataSet} size.
+     * @return {@link #samples dataSet} size.
      */
     public final long size() {
 
-        return dataSet.size();
+        return samples.size();
     }
 
     /**
@@ -181,7 +171,7 @@ public class LegacyDataSet<T> {
      */
     public final T get(final long time) {
 
-        T result = dataSet.get(Long.valueOf(time));
+        var result = samples.get(time);
 
         if (result == null) {
 

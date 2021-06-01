@@ -46,8 +46,6 @@ public class LegacyIntegralSet extends LegacyDataSet<Double> implements Integral
 
         double result = 0;
 
-        //long startTime = System.currentTimeMillis();
-
         try {
 
             // The following line will throw the NoSuchElementException if

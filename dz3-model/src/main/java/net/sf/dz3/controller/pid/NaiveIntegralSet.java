@@ -44,8 +44,6 @@ public class NaiveIntegralSet extends DataSet<Double> implements IntegralSet {
 
         double result = 0;
 
-        //long startTime = System.currentTimeMillis();
-
         try {
 
             // The following line will throw the NoSuchElementException if

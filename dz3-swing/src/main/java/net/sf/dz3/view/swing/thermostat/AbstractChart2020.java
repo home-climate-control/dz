@@ -143,15 +143,15 @@ public abstract class AbstractChart2020 extends AbstractChart {
         // Draw background
         super.paintComponent(g);
 
-        Graphics2D g2d = (Graphics2D) g;
-        Dimension boundary = getSize();
-        Insets insets = getInsets();
+        var g2d = (Graphics2D) g;
+        var boundary = getSize();
+        var insets = getInsets();
 
         paintBackground(g2d, boundary, insets);
 
-        long now = clock.instant().toEpochMilli();
-        double xScale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
-        long xOffset = now - chartLengthMillis;
+        var now = clock.instant().toEpochMilli();
+        var xScale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
+        var xOffset = now - chartLengthMillis;
 
         paintTimeGrid(g2d, boundary, insets, now, xScale, xOffset);
 
@@ -161,11 +161,10 @@ public abstract class AbstractChart2020 extends AbstractChart {
             return;
         }
 
-        double yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
-        double yOffset = dataMax + PADDING;
+        var yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
+        var yOffset = dataMax + PADDING;
 
         paintValueGrid(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
-
         paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
         logger.info("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
@@ -173,19 +172,8 @@ public abstract class AbstractChart2020 extends AbstractChart {
 
     protected abstract void checkWidth(Dimension boundary);
 
-    @SuppressWarnings("squid:S1126")
     protected final boolean isDataAvailable() {
-
-        // VT: NOTE: squid:S1126 - following this rule will hurt readability, so no.
-
-        if (channel2dsValue.isEmpty() || dataMax == null || dataMin == null) {
-
-            // No data consumed yet
-            return false;
-        }
-
-        return true;
-
+        return !channel2dsValue.isEmpty() && dataMax != null && dataMin != null;
     }
 
     @SuppressWarnings("squid:S107")
@@ -236,7 +224,7 @@ public abstract class AbstractChart2020 extends AbstractChart {
 
         g2d.setPaint(gridColor);
 
-        float[] gridDash = { 2, 2 };
+        var gridDash = new float[] { 2, 2 };
 
         var gridStroke = new BasicStroke(
                 originalStroke.getLineWidth(), originalStroke.getEndCap(),
@@ -270,7 +258,7 @@ public abstract class AbstractChart2020 extends AbstractChart {
 
         g2d.setPaint(gridColor);
 
-        float[] gridDash = { 2, 2 };
+        var gridDash = new float[] { 2, 2 };
 
         var gridStroke = new BasicStroke(
                 originalStroke.getLineWidth(), originalStroke.getEndCap(),
@@ -487,7 +475,6 @@ public abstract class AbstractChart2020 extends AbstractChart {
             logger.info("minmax too old ({}), recalculating", () -> Interval.toTimeInterval(timestamp - minmaxTime));
 
             // Total recalculation is required
-
             recalculateVerticalLimits();
         }
 
@@ -495,13 +482,11 @@ public abstract class AbstractChart2020 extends AbstractChart {
         // but we probably do want to know about that, so let's just make a note and ignore it for the moment
 
         if (dataMax == null || value > dataMax) {
-
             dataMax = value;
             minmaxTime = timestamp;
         }
 
         if (dataMin == null || value < dataMin) {
-
             dataMin = value;
             minmaxTime = timestamp;
         }
@@ -509,13 +494,11 @@ public abstract class AbstractChart2020 extends AbstractChart {
         // By this time, dataMin and dataMax are no longer nulls
 
         if (setpoint > dataMax) {
-
             dataMax = setpoint;
             minmaxTime = timestamp;
         }
 
         if (setpoint < dataMin) {
-
             dataMin = setpoint;
             minmaxTime = timestamp;
         }
@@ -526,7 +509,7 @@ public abstract class AbstractChart2020 extends AbstractChart {
      */
     private synchronized void recalculateVerticalLimits() {
 
-        long startTime = clock.instant().toEpochMilli();
+        var startTime = clock.instant().toEpochMilli();
 
         dataMin = null;
         dataMax = null;
@@ -535,9 +518,9 @@ public abstract class AbstractChart2020 extends AbstractChart {
 
             for (Iterator<Entry<Long, TintedValue>> i2 = ds.entryIterator(); i2.hasNext(); ) {
 
-                Entry<Long, TintedValue> entry = i2.next();
-                Long timestamp = entry.getKey();
-                TintedValue tv = entry.getValue();
+                var entry = i2.next();
+                var timestamp = entry.getKey();
+                var tv = entry.getValue();
 
                 if (dataMax == null || tv.value > dataMax) {
 
