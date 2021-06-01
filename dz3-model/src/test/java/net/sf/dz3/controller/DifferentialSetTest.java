@@ -7,6 +7,7 @@ import net.sf.dz3.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -16,6 +17,7 @@ import java.util.Random;
 import java.util.concurrent.Semaphore;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.within;
 
 /**
@@ -41,26 +43,29 @@ class DifferentialSetTest {
     @Test
     void all() throws InterruptedException {
 
-        startGate.acquire(3);
+        assertThatCode(() -> {
+            startGate.acquire(3);
 
-        Thread t2 = new Thread(new Naive(INTEGRATION_INTERVAL));
-        Thread t3 = new Thread(new Sliding(INTEGRATION_INTERVAL));
+            Thread t2 = new Thread(new Naive(INTEGRATION_INTERVAL));
+            Thread t3 = new Thread(new Sliding(INTEGRATION_INTERVAL));
 
-        t2.start();
-        t3.start();
+            t2.start();
+            t3.start();
 
-        startGate.release(3);
-        logger.info("unleashed");
+            startGate.release(3);
+            logger.info("unleashed");
 
-        stopGate.acquire(3);
+            stopGate.acquire(3);
 
-        logger.info("done");
+            logger.info("done");
+        }).doesNotThrowAnyException();
     }
 
     /**
      * Make sure the slow and fast implementation yield the same results, without triggering expiration.
      */
-    void testSameNoExpiration() {
+    @Test
+    void SameNoExpiration() {
 
         int count = 100;
 
@@ -73,7 +78,9 @@ class DifferentialSetTest {
     /**
      * Make sure the slow and fast implementation yield the same results, triggering expiration.
      */
-    void DISABLED_testSameWithExpiration() {
+    @Test
+    @Disabled("why, again?")
+    void sameWithExpiration() {
 
         int count = 10000;
 
