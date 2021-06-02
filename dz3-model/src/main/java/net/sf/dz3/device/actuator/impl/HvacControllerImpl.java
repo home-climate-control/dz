@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +56,6 @@ public class HvacControllerImpl implements HvacController, JmxAware {
      */
     private DataSample<HvacSignal> state;
 
-    private final BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<>();
     private final ThreadPoolExecutor executor;
 
     /**
@@ -99,7 +97,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
         this.hvacDriver = hvacDriver;
 
-        executor = new ThreadPoolExecutor(1, 1, 60, TimeUnit.SECONDS, commandQueue);
+        executor = new ThreadPoolExecutor(1, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
 
         // Shut it off in case it was left on by a dead process
         setMode(mode);

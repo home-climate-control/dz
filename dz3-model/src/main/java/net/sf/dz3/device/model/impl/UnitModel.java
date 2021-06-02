@@ -32,7 +32,7 @@ public class UnitModel implements Unit {
      */
     private final String signature;
 
-    private DataBroadcaster<UnitSignal> dataBroadcaster = new DataBroadcaster<UnitSignal>();
+    private final DataBroadcaster<UnitSignal> dataBroadcaster = new DataBroadcaster<>();
 
     /**
      * Last known state.
@@ -58,7 +58,6 @@ public class UnitModel implements Unit {
      * @param name Unit name.
      */
     public UnitModel(String name) {
-
         this(name, null, 0);
     }
 
@@ -69,7 +68,6 @@ public class UnitModel implements Unit {
      * @param zoneController Zone controller to listen to.
      */
     public UnitModel(String name, ZoneController zoneController) {
-
         this(name, zoneController, 0);
     }
 
@@ -100,7 +98,6 @@ public class UnitModel implements Unit {
     public String getName() {
 
         if ( name == null ) {
-
             throw new IllegalStateException("Not Initialized");
         }
 
@@ -110,23 +107,16 @@ public class UnitModel implements Unit {
     @Override
     public int compareTo(Unit other) {
 
-	if (other == null) {
-	    throw new IllegalArgumentException("other can't be null");
-	}
+        if (other == null) {
+            throw new IllegalArgumentException("other can't be null");
+        }
 
-	return getName().compareTo(other.getName());
+        return getName().compareTo(other.getName());
     }
 
     @Override
     public String toString() {
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Unit(").append(name).append(", ");
-        sb.append(state == null ? "<not initialized>" : getSignal());
-        sb.append(")");
-
-        return sb.toString();
+        return "Unit(" + name + ", " + (state == null ? "<not initialized>" : getSignal()) + ")";
     }
 
     public UnitSignal getSignal() {
@@ -141,7 +131,7 @@ public class UnitModel implements Unit {
 
     @JmxAttribute(description="Running")
     public boolean getRunning() {
-        return state != null ? state.sample.running : false;
+        return state != null && state.sample.running;
     }
 
     @JmxAttribute(description="Uptime as string")
@@ -171,28 +161,27 @@ public class UnitModel implements Unit {
 
             check(signal);
 
-            logger.debug("demand (old, new): (" + (state == null ? Double.NaN : state.sample.demand) + ", " + signal.sample + ")");
+            logger.debug("demand (old, new): ({}, {})",(state == null ? Double.NaN : state.sample.demand), signal.sample);
 
             // VT: FIXME: uptime
 
             if (signal.sample > 0 && !isRunning()) {
-
                 logger.info("Turning ON");
                 setRunning(true, signal.timestamp);
 
             } else if (signal.sample == 0 && isRunning()) {
-
                 logger.info("Turning OFF");
                 setRunning(false, signal.timestamp);
 
             } else {
-
                 logger.debug("no change");
             }
 
         } finally {
 
-            setDemand(signal.sample, signal.timestamp);
+            if (signal != null) {
+                setDemand(signal.sample, signal.timestamp);
+            }
             ThreadContext.pop();
         }
     }
@@ -213,13 +202,11 @@ public class UnitModel implements Unit {
             }
 
             if (signal.isError()) {
-
                 logger.error("Should not have propagated all the way here", signal.error);
                 throw new IllegalArgumentException("Error signal should have been handled by zone controller");
             }
 
             if (signal.sample < 0.0) {
-
                 throw new IllegalArgumentException("Signal must be non-negative, received " + signal.sample);
             }
 
@@ -229,7 +216,7 @@ public class UnitModel implements Unit {
     }
 
     public final boolean isRunning() {
-        return state == null ? false : state.sample.running;
+        return state != null && state.sample.running;
     }
 
     /**
@@ -242,7 +229,6 @@ public class UnitModel implements Unit {
         try {
 
             if (state == null) {
-
                 logger.warn("state is null, invoked from constructor?");
                 return;
             }
@@ -256,13 +242,11 @@ public class UnitModel implements Unit {
 
     @Override
     public void addConsumer(DataSink<UnitSignal> consumer) {
-
         dataBroadcaster.addConsumer(consumer);
     }
 
     @Override
     public void removeConsumer(DataSink<UnitSignal> consumer) {
-
         dataBroadcaster.removeConsumer(consumer);
     }
 
@@ -278,7 +262,7 @@ public class UnitModel implements Unit {
 
         long uptime = updateUptime(running, timestamp);
 
-        state = new DataSample<UnitSignal>(timestamp,
+        state = new DataSample<>(timestamp,
                 name,
                 signature,
                 new UnitSignal(state == null ? 0.0 : state.sample.demand, running, uptime), null);
@@ -290,10 +274,10 @@ public class UnitModel implements Unit {
 
         long uptime = updateUptime(demand > 0, timestamp);
 
-        state = new DataSample<UnitSignal>(timestamp,
+        state = new DataSample<>(timestamp,
                 name,
                 signature,
-                new UnitSignal(demand, state == null ? false : state.sample.running, uptime), null);
+                new UnitSignal(demand, state != null && state.sample.running, uptime), null);
 
         stateChanged();
     }
