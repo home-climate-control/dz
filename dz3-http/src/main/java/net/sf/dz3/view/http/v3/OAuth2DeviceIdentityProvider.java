@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.Map;
 
@@ -33,6 +34,9 @@ public class OAuth2DeviceIdentityProvider {
     private static final String OAUTH_SCOPE = "scope";
 
     private final Logger logger = LogManager.getLogger(getClass());
+
+    private final Gson gson = new Gson();
+    private final Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
 
     private final HttpClient httpClient = HttpClientFactory.createClient();
 
@@ -162,34 +166,19 @@ public class OAuth2DeviceIdentityProvider {
 
             post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            HttpResponse rsp = httpClient.execute(post);
-            int rc = rsp.getStatusLine().getStatusCode();
+            var rsp = httpClient.execute(post);
 
             // Step 2
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-2-handle-the-authorization-server-response
 
-            logger.debug("RC={}", + rc);
-
-            if (rc != 200) {
-
-                logger.error("HTTP rc={}, text follows:", rc);
-                logger.error(EntityUtils.toString(rsp.getEntity())); // NOSONAR Too much hassle for such a simple thing
-
-                throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
-            }
-
-            var responseJson = EntityUtils.toString(rsp.getEntity());
-            var gson = new Gson();
-            var mapType  = new TypeToken<Map<String,String>>(){}.getType();
-            Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
-
-            logger.debug("response: {}", responseMap);
-
-            String verificationUrl = responseMap.get("verification_url");
-            String userCode =  responseMap.get("user_code");
+            var responseMap = getResponseMap(rsp);
+            var verificationUrl = responseMap.get("verification_url");
+            var userCode =  responseMap.get("user_code");
             var interval = Integer.parseInt(responseMap.get("interval"));
 
             // VT: FIXME: The loop will break after "expires_in"
+
+            String responseJson;
 
             while (true) {
 
@@ -204,7 +193,7 @@ public class OAuth2DeviceIdentityProvider {
                 logger.warn("Please go to {}", verificationUrl);
                 logger.warn("and enter this code: {}", userCode);
 
-                Thread.sleep(interval * 1000);
+                Thread.sleep(interval * 1000L);
 
                 {
                     // Step 4
@@ -224,7 +213,7 @@ public class OAuth2DeviceIdentityProvider {
                     post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
                     rsp = httpClient.execute(post);
-                    rc = rsp.getStatusLine().getStatusCode();
+                    var rc = rsp.getStatusLine().getStatusCode();
                     var responseBody = EntityUtils.toString(rsp.getEntity());
 
                     logger.debug("RC={}", rc);
@@ -247,11 +236,10 @@ public class OAuth2DeviceIdentityProvider {
                         }
                     }
 
-                    responseJson = responseBody;
-
-                    logger.debug("response: {}", responseJson);
+                    logger.debug("response: {}", responseBody);
 
                     if (rc == 200) {
+                        responseJson = responseBody;
                         break;
                     }
                 }
@@ -297,6 +285,38 @@ public class OAuth2DeviceIdentityProvider {
     }
 
     /**
+     * Check the HTTP response and throw an exception (after logging the response) if it is not 200.
+     *
+     * @param rsp Response to check.
+     *
+     * @return Response map.
+     *
+     * @throws IOException if there's an I/O problem.
+     * @throws IllegalStateException if the response is not 200.
+     */
+    private Map<String, String> getResponseMap(HttpResponse rsp) throws IOException {
+
+        var rc = rsp.getStatusLine().getStatusCode();
+
+        logger.debug("RC={}", + rc);
+
+        if (rc != 200) {
+
+            logger.error("HTTP rc={}, text follows:", rc);
+            logger.error(EntityUtils.toString(rsp.getEntity())); // NOSONAR Too much hassle for such a simple thing
+
+            throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
+        }
+
+        var responseJson = EntityUtils.toString(rsp.getEntity());
+        Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
+
+        logger.debug("response: {}", responseMap);
+
+        return responseMap;
+    }
+
+    /**
      * @return {@code access_token}.
      */
     private String refresh(HttpClient httpClient, String clientId, String clientSecret, String refreshToken) throws IOException {
@@ -315,25 +335,8 @@ public class OAuth2DeviceIdentityProvider {
             var post = new HttpPost(builder.toString());
             post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            HttpResponse rsp = httpClient.execute(post);
-            int rc = rsp.getStatusLine().getStatusCode();
-
-            logger.debug("RC={}", rc);
-
-            if (rc != 200) {
-
-                logger.error("HTTP rc={}, text follows:", rc);
-                logger.error(EntityUtils.toString(rsp.getEntity()));  // NOSONAR Too much hassle for such a simple thing
-
-                throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
-            }
-
-            var responseJson = EntityUtils.toString(rsp.getEntity());
-            var gson = new Gson();
-            var mapType  = new TypeToken<Map<String,String>>(){}.getType();
-            Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
-
-            logger.debug("response: {}", responseMap);
+            var rsp = httpClient.execute(post);
+            var responseMap = getResponseMap(rsp);
 
             return responseMap.get("access_token");
 
@@ -365,27 +368,9 @@ public class OAuth2DeviceIdentityProvider {
             post.setHeader("Content-Type", "application/x-www-form-urlencoded");
             post.setHeader("Authorization", "Bearer " + accessToken);
 
-            HttpResponse rsp = httpClient.execute(post);
-            int rc = rsp.getStatusLine().getStatusCode();
-
-            logger.debug("RC={}", rc);
-
-            if (rc != 200) {
-
-                logger.error("HTTP rc={}, text follows:", rc);
-                logger.error(EntityUtils.toString(rsp.getEntity())); // NOSONAR Too much hassle for such a simple thing
-
-                throw new IllegalStateException("OAuth 2.0 for TV and Limited-Input Device Applications: couldn't finish the sequence");
-            }
-
-            var responseJson = EntityUtils.toString(rsp.getEntity());
-
-            logger.debug("response: {}", responseJson);
-
-            var gson = new Gson();
-            var mapType  = new TypeToken<Map<String,String>>(){}.getType();
-            Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
-            String email = responseMap.get("email");
+            var rsp = httpClient.execute(post);
+            var responseMap = getResponseMap(rsp);
+            var email = responseMap.get("email");
 
             if (email == null || "".equals(email)) {
                 throw new IllegalStateException("null or empty email, shouldn't have ended up here");
