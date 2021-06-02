@@ -509,7 +509,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             DataSample<Double> pv = source.getController().getProcessVariable();
             ThermostatSignal sample = signal == null ? null : signal.sample;
 
-            String displayTemperature;
+            final String displayTemperature;
 
             if (pv == null) {
 
@@ -526,13 +526,10 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 // The right way to deal with this would be to use SI units everywhere except
                 // final display.
 
-                var currentTemperature = pv.sample;
-                var currentSetpoint = source.getSetpoint();
+                var currentTemperature = getDisplayValue(pv.sample);
+                var currentSetpoint = getDisplayValue(source.getSetpoint());
 
-                currentTemperature = getDisplayValue(currentTemperature);
-                currentSetpoint = getDisplayValue(currentSetpoint);
-
-                displayTemperature = (sample == null) ? UNDEFINED : (sample.demand.isError() ? UNDEFINED : String.format(Locale.getDefault(), "%.1f", currentTemperature));
+                displayTemperature = (sample == null || sample.demand.isError()) ? UNDEFINED : String.format(Locale.getDefault(), "%.1f", currentTemperature);
 
                 var tint = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample.calling, currentSetpoint);
                 chart.consume(new DataSample<>(pidListener.signal.timestamp, "temp", "temp", tint, null));
