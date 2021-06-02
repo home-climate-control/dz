@@ -45,13 +45,6 @@ import java.util.Locale;
  */
 public class ThermostatPanel extends JPanel implements KeyListener {
 
-    /**
-     * Setpoint change upon a keypress.
-     *
-     * VT: FIXME: This must be made configurable.
-     */
-    public static final double SETPOINT_DELTA = 0.1d;
-
     private static final long serialVersionUID = 3420150515187693627L;
     private static final DecimalFormat numberFormat = new DecimalFormat("#0.0;-#0.0");
 
@@ -98,6 +91,12 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     private Font setpointFont;
 
     private boolean needFahrenheit;
+
+    /**
+     * Setpoint change upon a keypress.
+     *
+     */
+    private double setpointDelta = 0.1d;
 
     public ThermostatPanel(ThermostatModel source, ScreenDescriptor screenDescriptor, Scheduler scheduler, TemperatureUnit defaultUnit) {
 
@@ -384,7 +383,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                     var controller = source.getController();
                     var setpoint = getDisplayValue(controller.getSetpoint());
 
-                    setpoint += SETPOINT_DELTA;
+                    setpoint += setpointDelta;
                     setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
                     if (setpoint <= ThermostatModel.SETPOINT_MAX) {
@@ -412,7 +411,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                     var controller = source.getController();
                     var setpoint = getDisplayValue(controller.getSetpoint());
 
-                    setpoint -= SETPOINT_DELTA;
+                    setpoint -= setpointDelta;
                     setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
                     if (setpoint >= ThermostatModel.SETPOINT_MIN) {
@@ -704,4 +703,11 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         return needFahrenheit ? (value - 32) * (5d / 9d) : value;
     }
 
+    public double getSetpointDelta() {
+        return setpointDelta;
+    }
+
+    public void setSetpointDelta(double setpointDelta) {
+        this.setpointDelta = setpointDelta;
+    }
 }
