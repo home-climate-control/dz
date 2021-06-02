@@ -2,16 +2,13 @@ package net.sf.dz3.view.swing.thermostat;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import net.sf.dz3.controller.ProcessController;
 import net.sf.dz3.controller.ProcessControllerStatus;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.PidControllerStatus;
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneState;
-import net.sf.dz3.device.model.ZoneStatus;
 import net.sf.dz3.device.model.impl.ThermostatModel;
-import net.sf.dz3.scheduler.Period;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.dz3.view.swing.ScreenDescriptor;
@@ -24,9 +21,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.border.TitledBorder;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -131,8 +126,8 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         setpointLabel.setFont(setpointFont);
         setpointLabel.setToolTipText("Setpoint (Up/Down to change)");
 
-        GridBagLayout layout = new GridBagLayout();
-        GridBagConstraints cs = new GridBagConstraints();
+        var layout = new GridBagLayout();
+        var cs = new GridBagConstraints();
 
         this.setLayout(layout);
 
@@ -150,7 +145,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             cs.weightx = 1;
             cs.weighty = 0;
 
-            JPanel controls = createControls();
+            var controls = createControls();
 
             layout.setConstraints(controls, cs);
             this.add(controls);
@@ -166,15 +161,15 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             this.add(chart);
 
             chart.setPreferredSize(getPreferredSize());
-            Color bg = ColorScheme.offMap.background;
-            Color chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
+            var bg = ColorScheme.offMap.background;
+            var chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
             chart.setBackground(chartBg);
         }
 
         // Really dirty, but really quick
 
-        TitledBorder template = BorderFactory.createTitledBorder(source.getName());
-        TitledBorder border = BorderFactory.createTitledBorder(
+        var template = BorderFactory.createTitledBorder(source.getName());
+        var border = BorderFactory.createTitledBorder(
                 getBorder(),
                 source.getName(),
                 template.getTitleJustification(),
@@ -188,13 +183,13 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     @SuppressWarnings("squid:S1199")
     private JPanel createControls() {
 
-        JPanel controls = new JPanel();
+        var controls = new JPanel();
 
         controls.setBackground(ColorScheme.offMap.background);
         controls.setOpaque(false);
 
-        GridBagLayout layout = new GridBagLayout();
-        GridBagConstraints cs = new GridBagConstraints();
+        var layout = new GridBagLayout();
+        var cs = new GridBagConstraints();
 
         controls.setLayout(layout);
 
@@ -285,7 +280,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
         try {
 
-            logger.info(e.toString());
+            logger.info("{}", e::toString);
 
             switch (e.getKeyChar()) {
 
@@ -386,14 +381,13 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                         break;
                     }
 
-                    ProcessController controller = source.getController();
-                    double setpoint = getDisplayValue(controller.getSetpoint());
+                    var controller = source.getController();
+                    var setpoint = getDisplayValue(controller.getSetpoint());
 
                     setpoint += SETPOINT_DELTA;
                     setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
                     if (setpoint <= ThermostatModel.SETPOINT_MAX) {
-
                         controller.setSetpoint(setpoint);
                     } else {
                         logger.warn("Setpoint change to {} denied, over high limit of {}", setpoint, ThermostatModel.SETPOINT_MAX);
@@ -415,14 +409,13 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                         break;
                     }
 
-                    ProcessController controller = source.getController();
-                    double setpoint = getDisplayValue(controller.getSetpoint());
+                    var controller = source.getController();
+                    var setpoint = getDisplayValue(controller.getSetpoint());
 
                     setpoint -= SETPOINT_DELTA;
                     setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
                     if (setpoint >= ThermostatModel.SETPOINT_MIN) {
-
                         controller.setSetpoint(setpoint);
                     } else {
                         logger.warn("Setpoint change to {} denied, under low limit of {}", setpoint, ThermostatModel.SETPOINT_MIN);
@@ -448,13 +441,11 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-
         // No special handling
     }
 
     @Override
     public void keyTyped(KeyEvent e) {
-
         // No special handling
     }
 
@@ -465,33 +456,29 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         try {
 
             if (scheduler == null) {
-
                 logger.warn("No scheduler was provided, ignored");
                 return;
             }
 
-            Period p = scheduler.getCurrentPeriod(source);
-            ZoneStatus status = scheduler.getCurrentStatus(source);
+            var period = scheduler.getCurrentPeriod(source);
+            var status = scheduler.getCurrentStatus(source);
 
-            if (p == null) {
-
+            if (period == null) {
                 logger.info("No period is active, ignored");
                 return;
             }
 
             if (status == null) {
-
-                logger.error("Period is resolved as {}, but no status???", p);
+                logger.error("Period is resolved as {}, but no status???", period);
                 return;
             }
 
             if (status.equals(source.getStatus())) {
-
                 logger.info("Already at period settings");
                 return;
             }
 
-            logger.info("Activating period: {}", p);
+            logger.info("Activating period: {}", period);
             source.set(status);
 
         } finally {
@@ -500,13 +487,11 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     }
 
     public synchronized void refresh() {
-
         thermostatListener.refresh();
         pidListener.refresh();
     }
 
     private HvacMode getMode() {
-
         return ((AbstractPidController) source.getController()).getP() > 0 ? HvacMode.COOLING : HvacMode.HEATING;
     }
 
@@ -516,9 +501,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
         @Override
         public void consume(DataSample<ThermostatSignal> signal) {
-
             this.signal = signal;
-
             refresh();
         }
 
@@ -544,20 +527,20 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 // The right way to deal with this would be to use SI units everywhere except
                 // final display.
 
-                double currentTemperature = pv.sample;
-                double currentSetpoint = source.getSetpoint();
+                var currentTemperature = pv.sample;
+                var currentSetpoint = source.getSetpoint();
 
                 currentTemperature = getDisplayValue(currentTemperature);
                 currentSetpoint = getDisplayValue(currentSetpoint);
 
                 displayTemperature = (sample == null) ? UNDEFINED : (sample.demand.isError() ? UNDEFINED : String.format(Locale.getDefault(), "%.1f", currentTemperature));
 
-                TintedValueAndSetpoint v = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample.calling, currentSetpoint);
-                chart.consume(new DataSample<TintedValueAndSetpoint>(pidListener.signal.timestamp, "temp", "temp", v, null));
+                var tint = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample.calling, currentSetpoint);
+                chart.consume(new DataSample<>(pidListener.signal.timestamp, "temp", "temp", tint, null));
             }
 
-            Color fg = ColorScheme.getScheme(getMode()).setpoint;
-            Font font = needFahrenheit  && displayTemperature.length() > 4 ? currentFontF : currentFontC;
+            var fg = ColorScheme.getScheme(getMode()).setpoint;
+            var font = needFahrenheit  && displayTemperature.length() > 4 ? currentFontF : currentFontC;
 
             currentLabel.setFont(font);
             currentLabel.setText(displayTemperature);
@@ -578,26 +561,23 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         public void renderPeriod() {
 
             if (scheduler == null) {
-
                 periodLabel.setText(NO_PERIOD);
                 return;
             }
 
-            Period p = scheduler.getCurrentPeriod(source);
+            var period = scheduler.getCurrentPeriod(source);
 
-            if (p == null) {
-
+            if (period == null) {
                 periodLabel.setText(NO_PERIOD);
                 return;
             }
 
-            StringBuilder sb = new StringBuilder();
-
-            ZoneStatus status = scheduler.getCurrentStatus(source);
+            var sb = new StringBuilder();
+            var status = scheduler.getCurrentStatus(source);
 
             if (status == null) {
 
-                logger.warn("Period is resolved as {}, but no status???", p);
+                logger.warn("Period is resolved as {}, but no status???", period);
 
             } else {
 
@@ -607,7 +587,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 }
             }
 
-            sb.append(p.name);
+            sb.append(period.name);
 
             periodLabel.setText(sb.toString());
         }
@@ -620,7 +600,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         @Override
         public void consume(DataSample<ProcessControllerStatus> signal) {
 
-            PidControllerStatus sample = (PidControllerStatus) signal.sample;
+            var sample = (PidControllerStatus) signal.sample;
 
             this.signal = new DataSample<>(signal.timestamp, signal.sourceName, signal.signature, sample, signal.error);
 
@@ -637,14 +617,12 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
             } else {
 
-                double setpoint = this.signal.sample.setpoint;
-
-                setpoint = getDisplayValue(setpoint);
+                var setpoint = getDisplayValue(this.signal.sample.setpoint);
 
                 label = source.isOn() ? String.format(Locale.getDefault(), "%.1f\u00b0", setpoint) : "OFF";
             }
 
-            Color fg = ColorScheme.getScheme(getMode()).setpoint;
+            var fg = ColorScheme.getScheme(getMode()).setpoint;
 
             setpointLabel.setText(label);
             setpointLabel.setForeground(fg);
@@ -652,7 +630,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             // The signal path is such that this code will always be executed right before ThermostatListener#refresh
             // which also calls repaint(), hence this call is redundant.
 
-            // repaint();
+            // repaint(); // NOSONAR Retained for documentation purposes
         }
     }
 
@@ -662,27 +640,24 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         super.paintComponent(g);
 
         if (pidListener.signal == null || thermostatListener.signal == null) {
-
+            // Nothing to do yet
             return;
         }
 
-        Graphics2D g2d = (Graphics2D) g;
-        Dimension d = getSize();
+        var g2d = (Graphics2D) g;
+        var d = getSize();
 
-        Double signal = thermostatListener.signal.sample.demand.sample;
-        HvacMode mode = getMode();
-        ZoneState state = thermostatListener.signal == null ? null : (thermostatListener.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY);
+        var signal = thermostatListener.signal.sample.demand.sample;
+        var mode = getMode();
+        var state = thermostatListener.signal == null ? null : (thermostatListener.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY);
 
         if ( thermostatListener.signal == null || thermostatListener.signal.sample.demand.isError()) {
-
             state = ZoneState.ERROR;
-
         } else if (!thermostatListener.signal.sample.enabled) {
-
             state = ZoneState.OFF;
         }
 
-        Rectangle boundary = new Rectangle(0, 0, d.width, d.height);
+        var boundary = new Rectangle(0, 0, d.width, d.height);
 
         switch (state) {
 
@@ -705,16 +680,6 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         this.currentFontC = screenDescriptor.fontCurrentTemperatureC;
         this.currentFontF = screenDescriptor.fontCurrentTemperatureF;
         this.setpointFont = screenDescriptor.fontSetpoint;
-    }
-
-    @Override
-    public Dimension getPreferredSize() {
-
-        Dimension d = super.getPreferredSize();
-
-        //		logger.debug("PREFERRED SIZE: " + d);
-
-        return d;
     }
 
     /**
