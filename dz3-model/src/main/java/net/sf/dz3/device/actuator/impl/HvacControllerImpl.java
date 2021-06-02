@@ -50,14 +50,14 @@ public class HvacControllerImpl implements HvacController, JmxAware {
      */
     private final HvacDriver hvacDriver;
 
-    private DataBroadcaster<HvacSignal> dataBroadcaster = new DataBroadcaster<HvacSignal>();
+    private final DataBroadcaster<HvacSignal> dataBroadcaster = new DataBroadcaster<>();
 
     /**
      * Last known state.
      */
     private DataSample<HvacSignal> state;
 
-    private final BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<Runnable>();
+    private final BlockingQueue<Runnable> commandQueue = new LinkedBlockingQueue<>();
     private final ThreadPoolExecutor executor;
 
     /**
@@ -122,16 +122,16 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
         if ("off".equalsIgnoreCase(mode)) {
 
-            this.state = new DataSample<HvacSignal>(name, signature, new HvacSignal(HvacMode.OFF, 0.0, false, 0), null);
+            this.state = new DataSample<>(name, signature, new HvacSignal(HvacMode.OFF, 0.0, false, 0), null);
 
         } else if ("cooling".equalsIgnoreCase(mode)) {
 
-            this.state = new DataSample<HvacSignal>(name, signature, new HvacSignal(HvacMode.COOLING, 0.0, false, 0), null);
+            this.state = new DataSample<>(name, signature, new HvacSignal(HvacMode.COOLING, 0.0, false, 0), null);
             hardwareChangeMode(HvacMode.OFF, HvacMode.COOLING);
 
         } else if ("heating".equalsIgnoreCase(mode)) {
 
-            this.state = new DataSample<HvacSignal>(name, signature, new HvacSignal(HvacMode.HEATING, 0.0, false, 0), null);
+            this.state = new DataSample<>(name, signature, new HvacSignal(HvacMode.HEATING, 0.0, false, 0), null);
             hardwareChangeMode(HvacMode.OFF, HvacMode.HEATING);
 
         } else {
@@ -158,10 +158,10 @@ public class HvacControllerImpl implements HvacController, JmxAware {
                 return;
             }
 
-            logger.info("Changing mode from " + this.state.sample.mode + " to " + mode);
+            logger.info("Changing mode from {} to {}", this.state.sample.mode, mode);
             hardwareChangeMode(this.state.sample.mode, mode);
 
-            state = new DataSample<HvacSignal>(System.currentTimeMillis(),
+            state = new DataSample<>(System.currentTimeMillis(),
                     name,
                     signature,
                     new HvacSignal(mode, state.sample.demand, state.sample.running, state.sample.uptime), null);
@@ -184,7 +184,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
     private synchronized void setRunning(boolean running, long timestamp) {
 
         // VT: FIXME: uptime
-        state = new DataSample<HvacSignal>(timestamp,
+        state = new DataSample<>(timestamp,
                 name,
                 signature,
                 new HvacSignal(state.sample.mode, state.sample.demand, running, 0), null);
@@ -196,7 +196,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
     private synchronized void setDemand(double demand, long timestamp) {
 
         // VT: FIXME: uptime
-        state = new DataSample<HvacSignal>(timestamp,
+        state = new DataSample<>(timestamp,
                 name,
                 signature,
                 new HvacSignal(state.sample.mode, demand, state.sample.running, 0), null);
@@ -215,7 +215,6 @@ public class HvacControllerImpl implements HvacController, JmxAware {
      * @param modeTo Mode to change to.
      */
     private void hardwareChangeMode(HvacMode modeFrom, HvacMode modeTo) {
-
         executor.execute(new CommandChangeMode(hvacDriver, modeTo));
     }
 
@@ -228,7 +227,6 @@ public class HvacControllerImpl implements HvacController, JmxAware {
      * @param running {@code true} to start, {@code false} to stop.
      */
     private void hardwareSetRunning(boolean running) {
-
         executor.execute(new CommandSetRunning(hvacDriver, running));
     }
 
@@ -248,7 +246,6 @@ public class HvacControllerImpl implements HvacController, JmxAware {
     public final String getName() {
 
         if ( name == null ) {
-
             throw new IllegalStateException("Not Initialized");
         }
 
@@ -269,7 +266,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
             check(signal);
 
-            logger.debug("demand (old, new): (" + state.sample.demand + ", " + signal.sample + ")");
+            logger.debug("demand (old, new): ({}, {})", state.sample.demand, signal.sample);
 
             if (state.sample.mode.equals(HvacMode.OFF)) {
 
@@ -290,13 +287,15 @@ public class HvacControllerImpl implements HvacController, JmxAware {
                 setRunning(false, signal.timestamp);
 
             } else {
-
                 logger.debug("no change");
             }
 
         } finally {
 
-            setDemand(signal.sample.demand, signal.timestamp);
+            if (signal != null) {
+                setDemand(signal.sample.demand, signal.timestamp);
+            }
+
             ThreadContext.pop();
         }
     }
@@ -317,7 +316,6 @@ public class HvacControllerImpl implements HvacController, JmxAware {
             }
 
             if (signal.isError()) {
-
                 logger.error("Should not have propagated all the way here", signal.error);
                 throw new IllegalArgumentException("Error signal should have been handled by zone controller");
             }
@@ -331,31 +329,26 @@ public class HvacControllerImpl implements HvacController, JmxAware {
      * Broadcast the state change.
      */
     private void stateChanged() {
-
         dataBroadcaster.broadcast(state);
     }
 
     @Override
     public final void addConsumer(DataSink<HvacSignal> consumer) {
-
         dataBroadcaster.addConsumer(consumer);
     }
 
     @Override
     public final void removeConsumer(DataSink<HvacSignal> consumer) {
-
         dataBroadcaster.removeConsumer(consumer);
     }
 
     @Override
     public final int compareTo(HvacController o) {
-
         return getName().compareTo(o.getName());
     }
 
     @JmxAttribute(description="Last Known Signal")
     public final HvacSignal getSignal() {
-
         return state.sample;
     }
 
@@ -365,14 +358,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
     @Override
     public String toString() {
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("AbstractHvacDriver(").append(name).append(", ");
-        sb.append(getSignal());
-        sb.append(")");
-
-        return sb.toString();
+        return "AbstractHvacDriver(" + name + ", " + getSignal() + ")";
     }
 
     @Override
@@ -396,14 +382,14 @@ public class HvacControllerImpl implements HvacController, JmxAware {
         @Override
         public final void run() {
 
-            int retry = 0;
+            var retry = 0;
             while (true) {
 
                 ThreadContext.push("run" + (retry > 0 ? "#retry-" + retry : ""));
 
                 try {
 
-                    logger.debug("Running " + toString());
+                    logger.debug("Running {}", this::toString);
 
                     execute();
 
@@ -412,7 +398,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
                 } catch (Throwable t) {
 
-                    logger.fatal("Failed to execute " + getClass().getSimpleName(), t);
+                    logger.fatal("Failed to execute {}", getClass().getSimpleName(), t);
 
                     // We're going to retry this till the end of time, because
                     // hardware operations are critical
@@ -424,7 +410,6 @@ public class HvacControllerImpl implements HvacController, JmxAware {
                         Thread.sleep(1000);
 
                     } catch (InterruptedException ex) {
-
                         logger.error("Interrupted, ignored", ex);
                     }
 
@@ -450,13 +435,11 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
         @Override
         protected void execute() throws IOException {
-
             target.setMode(mode);
         }
 
         @Override
         public String toString() {
-
             return "setMode(" + mode + ")";
         }
     }
@@ -474,7 +457,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
         @Override
         protected void execute() throws IOException {
 
-            // VT: FIXME: Simplified
+            // VT: NOTE: Simplified for a single speed non-variable speed unit logic
 
             target.setStage(running ? 1 : 0);
             target.setFanSpeed(running ? 1.0 : 0.0);
@@ -482,7 +465,6 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
         @Override
         public String toString() {
-
             return "setRunning(" + running + ")";
         }
     }
@@ -499,13 +481,11 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
         @Override
         protected void execute() throws IOException {
-
-            logger.debug("ignored: setDemand(" + demand + ")");
+            logger.debug("ignored: setDemand({})", demand);
         }
 
         @Override
         public String toString() {
-
             return "setDemand(" + demand + ")";
         }
     }
