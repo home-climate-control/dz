@@ -18,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIOException;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 
 class FileUsageCounterTest {
 
@@ -50,17 +51,9 @@ class FileUsageCounterTest {
     @Test
     void nullTarget() {
 
-        File f = createNonexistentDirect();
-
-        try {
-
-            assertThatIllegalArgumentException()
-                    .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), null, f))
-                    .withMessage("null target doesn't make sense");
-
-        } finally {
-            assertThat(f.delete()).isTrue();
-        }
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new FileUsageCounter("name", new TimeBasedUsage(), null, mock(File.class)))
+                .withMessage("null target doesn't make sense");
     }
 
     /**
