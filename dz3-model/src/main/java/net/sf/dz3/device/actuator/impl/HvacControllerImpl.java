@@ -97,7 +97,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
         this.hvacDriver = hvacDriver;
 
-        executor = new ThreadPoolExecutor(1, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+        executor = new ThreadPoolExecutor(1, 1, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
         // Shut it off in case it was left on by a dead process
         setMode(mode);
