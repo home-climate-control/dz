@@ -39,6 +39,7 @@ class FileUsageCounterTest {
                 .withMessage("counter can't be null");
     }
 
+    @Test
     void nullStorage() {
 
         assertThatIllegalArgumentException()
@@ -47,7 +48,7 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void nullTarget() throws IOException {
+    void nullTarget() {
 
         File f = createNonexistentDirect();
 
@@ -58,7 +59,7 @@ class FileUsageCounterTest {
                     .withMessage("null target doesn't make sense");
 
         } finally {
-            f.delete();
+            assertThat(f.delete()).isTrue();
         }
     }
 
@@ -66,7 +67,7 @@ class FileUsageCounterTest {
      * Make sure {@link FileUsageCounter#reset()} works.
      */
     @Test
-    public void testReset() throws IOException, InterruptedException {
+    void testReset() throws IOException, InterruptedException {
 
         ThreadContext.push("testReset");
 
@@ -76,12 +77,12 @@ class FileUsageCounterTest {
             FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
             long delay = 100;
 
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
-            Thread.sleep(delay);
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
-            counter.consume(new DataSample<Double>("source", "signature", null, new Error()));
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
+            Thread.sleep(delay); // NOSONAR Unnecessary complication
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
+            counter.consume(new DataSample<>("source", "signature", null, new Error()));
 
-            logger.debug("Consumed: " + counter.getUsageAbsolute());
+            logger.debug("Consumed: {}", counter.getUsageAbsolute());
 
             // Can't really assert much, the timer is too inexact
 
@@ -98,7 +99,7 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void testConsumeNull() throws IOException {
+    void consumeNull() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
@@ -112,9 +113,9 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void testExisting() throws IOException, InterruptedException {
+    void existing() throws IOException, InterruptedException { // NOSONAR Failure will be obvious
 
-        ThreadContext.push("testExisting");
+        ThreadContext.push("existing");
 
         try {
 
@@ -132,31 +133,30 @@ class FileUsageCounterTest {
 
             FileUsageCounter counter = new FileUsageCounter("name", new TimeBasedUsage(), createTarget(), f);
 
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
-            Thread.sleep(25);
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
+            Thread.sleep(25); // NOSONAR Unnecessary complication
 
             // This will cause a debug message
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
 
             logger.debug("Consumed: " + counter.getUsageRelative());
 
-            Thread.sleep(25);
+            Thread.sleep(25); // NOSONAR Unnecessary complication
 
             // This will cause an info message
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
 
-            Thread.sleep(30);
+            Thread.sleep(30); // NOSONAR Unnecessary complication
 
             // This will cause a warning message
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
 
-            Thread.sleep(30);
+            Thread.sleep(30); // NOSONAR Unnecessary complication
 
             // This *will* cause an alert (error message)
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
 
             logger.debug("Consumed: " + counter.getUsageRelative());
-
 
         } finally {
             ThreadContext.pop();
@@ -164,7 +164,7 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void testNoThreshold() throws IOException {
+    void noThreshold() throws IOException {
 
         File f = File.createTempFile("counter", "");
 
@@ -176,7 +176,7 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void testNoCurrent() throws IOException {
+    void noCurrent() throws IOException {
 
         File f = File.createTempFile("counter", "");
 
@@ -194,7 +194,7 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void testBadLine() throws IOException {
+    void badLine() throws IOException {
 
         File f = File.createTempFile("counter", "");
 
@@ -215,7 +215,7 @@ class FileUsageCounterTest {
      * Make sure directory can't be specified as persistent storage.
      */
     @Test
-    public void testDirectory() throws IOException {
+    void directory() {
 
         String tmp = System.getProperty("java.io.tmpdir");
         File dir = new File(tmp);
@@ -226,7 +226,7 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void testNotRegularFile() throws IOException {
+    void notRegularFile() {
 
         // Will not work on Windows, but who cares :)
 
@@ -238,7 +238,7 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void testNotWritable() throws IOException {
+    void notWritable() {
 
         // Will not work on Windows, but who cares :)
         // ...and if *this test fails, you're really doing it wrong
@@ -254,7 +254,7 @@ class FileUsageCounterTest {
      * Make sure that the persistent storage file that doesn't exist is created.
      */
     @Test
-    public void testNonExistentDirect() throws IOException {
+    void nonExistentDirect() throws IOException {
 
         File f = createNonexistentDirect();
         FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
@@ -263,7 +263,7 @@ class FileUsageCounterTest {
         counter.save();
         assertThat(f).exists();
 
-        f.delete();
+        assertThat(f.delete()).isTrue();
         assertThat(f).doesNotExist();
     }
 
@@ -283,7 +283,7 @@ class FileUsageCounterTest {
     }
 
     @Test
-    public void testNonExistentFileIndirect() throws IOException {
+    void nonExistentFileIndirect() throws IOException {
 
         File f = createNonexistentIndirect();
         FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), f);
@@ -295,8 +295,8 @@ class FileUsageCounterTest {
 
         assertThat(f).exists();
 
-        f.delete();
-        f.getParentFile().delete();
+        assertThat(f.delete()).isTrue();
+        assertThat(f.getParentFile().delete()).isTrue();
 
         assertThat(f).doesNotExist();
         assertThat(f.getParentFile()).doesNotExist();
@@ -321,7 +321,7 @@ class FileUsageCounterTest {
 
     private DataSource<Double> createTarget() {
 
-        return new DataSource<Double>() {
+        return new DataSource<>() {
 
             @Override
             public void addConsumer(DataSink<Double> arg0) {
@@ -338,10 +338,10 @@ class FileUsageCounterTest {
     /**
      * Make sure backup file gets created.
      *
-     * @see https://github.com/home-climate-control/dz/issues/102
+     * @see <a href="https://github.com/home-climate-control/dz/issues/102">#102</a>
      */
     @Test
-    public void testBackup() throws IOException, InterruptedException {
+    void backup() throws IOException {
 
         ThreadContext.push("testReset");
 
@@ -358,12 +358,12 @@ class FileUsageCounterTest {
 
             FileUsageCounter counter = new FileUsageCounter("test", new TimeBasedUsage(), createTarget(), counterFile);
 
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
 
             assertThat(counterFile).exists();
             assertThat(backupFile).doesNotExist();
 
-            counter.consume(new DataSample<Double>("source", "signature", 1d, null));
+            counter.consume(new DataSample<>("source", "signature", 1d, null));
 
             assertThat(counterFile).exists();
             assertThat(backupFile).exists();

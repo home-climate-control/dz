@@ -16,10 +16,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * and this one is that the other one tests {@link FileUsageCounter} itself, and this one tests integration with
  * {@link Unit} (or, rather, {@link UnitSignalSplitter).
  */
-public class FileUsageCounterTest {
+class FileUsageCounterTest {
 
     @Test
-    public void testConsume() throws IOException, InterruptedException {
+    void testConsume() throws IOException, InterruptedException {
 
         UnitSignalSplitter uss = new UnitSignalSplitter();
         FileUsageCounter c = new FileUsageCounter("Usage test", new TimeBasedUsage(), uss, getTempName());
@@ -29,22 +29,22 @@ public class FileUsageCounterTest {
         // This sample will just prime the counter, but not add to it
         uss.consume(new DataSample<>("test-unit", "signature", sample, null));
         assertThat(c.getUsageAbsolute()).isZero();
-        
-        Thread.sleep(delay);
-        
+
+        Thread.sleep(delay); // NOSONAR Unnecessary complication
+
         // This one will add approximately delay milliseconds to it
         uss.consume(new DataSample<>("test-unit", "signature", sample, null));
-        
+
         assertThat(c.getUsageAbsolute()).isGreaterThanOrEqualTo(delay);
     }
-    
+
     private File getTempName() throws IOException {
-        
+
         File result = File.createTempFile("usage-", ".counter", new File(System.getProperty("java.io.tmpdir")));
-        
+
         // Need to delete it because all we need is a name. Clash risk is non-existent
-        result.delete();
-        
+        assertThat(result.delete()).isTrue();
+
         return result;
     }
 }
