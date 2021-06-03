@@ -8,23 +8,24 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 /**
  * Set of test cases for {@link StringChannelAddress}.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */
 class SwitchAddressTest {
 
     @Test
-    public void good() {
+    void good() {
 
-        new StringChannelAddress("1300000000E6B51F:1");
+        assertThatCode(() -> new StringChannelAddress("1300000000E6B51F:1")).doesNotThrowAnyException();
     }
 
     @Test
-    public void noChannel() {
+    void noChannel() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new StringChannelAddress("1300000000E6B51F"))
@@ -32,7 +33,7 @@ class SwitchAddressTest {
     }
 
     @Test
-    public void notDecimal() {
+    void notDecimal() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new IntegerChannelAddress("1300000000E6B51F:0x0f"))
@@ -40,7 +41,7 @@ class SwitchAddressTest {
     }
 
     @Test
-    public void tooManyParts() {
+    void tooManyParts() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new StringChannelAddress("1300000000E6B51F:1:2"))
@@ -48,7 +49,7 @@ class SwitchAddressTest {
     }
 
     @Test
-    public void negativeChannel() {
+    void negativeChannel() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new IntegerChannelAddress("1300000000E6B51F:-1"))
@@ -56,14 +57,14 @@ class SwitchAddressTest {
     }
 
     @Test
-    public void comparable() {
+    void comparable() {
 
         StringChannelAddress s0 = new StringChannelAddress("1300000000E6B51F:0");
         StringChannelAddress s1 = new StringChannelAddress("1300000000E6B51F:1");
 
-        assertThat(s1.compareTo(s0)).isGreaterThan(0);
+        assertThat(s1).isGreaterThan(s0);
 
-        Set<StringChannelAddress> set = new TreeSet<StringChannelAddress>();
+        Set<StringChannelAddress> set = new TreeSet<>();
 
         set.add(s0);
         set.add(s1);
