@@ -370,72 +370,76 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 case KeyEvent.VK_KP_UP:
                 case KeyEvent.VK_UP:
 
-                {
-
-                    // If the zone is off, the setpoint is not displayed, hence we won't accept changes to avoid
-                    // unpleasant surprises later
-
-                    if (!source.isOn()) {
-                        logger.info("{} zone is off, not changing setpoint", source.getName());
-                        break;
-                    }
-
-                    var controller = source.getController();
-                    var setpoint = getDisplayValue(controller.getSetpoint());
-
-                    setpoint += setpointDelta;
-                    setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
-
-                    if (setpoint <= ThermostatModel.SETPOINT_MAX) {
-                        controller.setSetpoint(setpoint);
-                    } else {
-                        logger.warn("Setpoint change to {} denied, over high limit of {}", setpoint, ThermostatModel.SETPOINT_MAX);
-                    }
-                }
-
-                refresh();
+                raiseSetpoint();
                 break;
 
                 case KeyEvent.VK_KP_DOWN:
                 case KeyEvent.VK_DOWN:
 
-                {
-                    // If the zone is off, the setpoint is not displayed, hence we won't accept changes to avoid
-                    // unpleasant surprises later
-
-                    if (!source.isOn()) {
-                        logger.info("{} zone is off, not changing setpoint", source.getName());
-                        break;
-                    }
-
-                    var controller = source.getController();
-                    var setpoint = getDisplayValue(controller.getSetpoint());
-
-                    setpoint -= setpointDelta;
-                    setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
-
-                    if (setpoint >= ThermostatModel.SETPOINT_MIN) {
-                        controller.setSetpoint(setpoint);
-                    } else {
-                        logger.warn("Setpoint change to {} denied, under low limit of {}", setpoint, ThermostatModel.SETPOINT_MIN);
-                    }
-                }
-
-                refresh();
+                lowerSetpoint();
                 break;
 
                 default:
-
                     // Do nothing
                 }
-            default:
+                break;
 
+            default:
                 // Do nothing
             }
 
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    private void raiseSetpoint() {
+
+        // If the zone is off, the setpoint is not displayed, hence we won't accept changes to avoid
+        // unpleasant surprises later
+
+        if (!source.isOn()) {
+            logger.info("{} zone is off, not changing setpoint", source.getName());
+            return;
+        }
+
+        var controller = source.getController();
+        var setpoint = getDisplayValue(controller.getSetpoint());
+
+        setpoint += setpointDelta;
+        setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
+
+        if (setpoint <= ThermostatModel.SETPOINT_MAX) {
+            controller.setSetpoint(setpoint);
+        } else {
+            logger.warn("Setpoint change to {} denied, over high limit of {}", setpoint, ThermostatModel.SETPOINT_MAX);
+        }
+        refresh();
+    }
+
+    private void lowerSetpoint() {
+
+        // If the zone is off, the setpoint is not displayed, hence we won't accept changes to avoid
+        // unpleasant surprises later
+
+        if (!source.isOn()) {
+            logger.info("{} zone is off, not changing setpoint", source.getName());
+            return;
+        }
+
+        var controller = source.getController();
+        var setpoint = getDisplayValue(controller.getSetpoint());
+
+        setpoint -= setpointDelta;
+        setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
+
+        if (setpoint >= ThermostatModel.SETPOINT_MIN) {
+            controller.setSetpoint(setpoint);
+        } else {
+            logger.warn("Setpoint change to {} denied, under low limit of {}", setpoint, ThermostatModel.SETPOINT_MIN);
+        }
+
+        refresh();
     }
 
     @Override
