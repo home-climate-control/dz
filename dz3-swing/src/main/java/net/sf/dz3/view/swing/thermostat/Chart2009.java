@@ -19,8 +19,9 @@ import java.util.TreeMap;
  * @deprecated Use {@link Chart2020} instead. Retained for reference and benchmarking.
  *
  * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
+ * VT: NOTE: squid:S1133 - retained for documentation purposes
  */
-@SuppressWarnings("squid:S110")
+@SuppressWarnings({"squid:S110", "squid:S1133"})
 @Deprecated(forRemoval = false)
 public class Chart2009 extends AbstractChart {
 

@@ -143,30 +143,31 @@ public class Chart2020 extends AbstractChart {
             String channel, DataSet<TintedValue> dsValues, DataSet<Double> dsSetpoints) {
 
         // Setpoint history is rendered over the value history
-        paintValues(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, channel, dsValues);
-        paintSetpoints(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, channel, dsSetpoints);
+        paintValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues);
+        paintSetpoints(g2d, insets, xScale, xOffset, yScale, yOffset, dsSetpoints);
     }
 
-    private void paintValues(Graphics2D g2d, Dimension boundary, Insets insets,
-            long now, double xScale, long xOffset, double yScale, double yOffset,
-            String channel, DataSet<TintedValue> ds) {
+    @SuppressWarnings("squid:S107")
+    private void paintValues(Graphics2D g2d, Insets insets,
+                             long now, double xScale, long xOffset, double yScale, double yOffset,
+                             DataSet<TintedValue> ds) {
 
         Long timeTrailer = null;
         TintedValue trailer = null;
 
         for (Iterator<Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext();) {
 
-            Entry<Long, TintedValue> entry = di.next();
-            long timeNow = entry.getKey();
-            TintedValue cursor = entry.getValue();
+            var entry = di.next();
+            var timeNow = entry.getKey();
+            var cursor = entry.getValue();
 
             if (timeTrailer != null) {
 
-                double x0 = (timeTrailer - xOffset) * xScale + insets.left;
-                double y0 = (yOffset - trailer.value) * yScale + insets.top;
+                var x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                var y0 = (yOffset - trailer.value) * yScale + insets.top;
 
-                double x1 = (timeNow - xOffset) * xScale + insets.left;
-                double y1 = (yOffset - cursor.value) * yScale + insets.top;
+                var x1 = (timeNow - xOffset) * xScale + insets.left;
+                var y1 = (yOffset - cursor.value) * yScale + insets.top;
 
                 // Decide whether the line is alive or dead
 
@@ -211,12 +212,12 @@ public class Chart2020 extends AbstractChart {
         }
     }
 
-    private void paintSetpoints(Graphics2D g2d, Dimension boundary, Insets insets,
-            long now, double xScale, long xOffset, double yScale, double yOffset,
-            String channel, DataSet<Double> ds) {
+    private void paintSetpoints(Graphics2D g2d, Insets insets,
+                                double xScale, long xOffset, double yScale, double yOffset,
+                                DataSet<Double> ds) {
 
         var startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
-        var endColor = SETPOINT_COLOR;
+        var endColor = SETPOINT_COLOR; // NOSONAR Retained for clarity
 
         Long timeTrailer = null;
 
@@ -228,7 +229,7 @@ public class Chart2020 extends AbstractChart {
 
             double x0;
             double x1;
-            double y = (yOffset - cursor) * yScale + insets.top;
+            var y = (yOffset - cursor) * yScale + insets.top;
 
             if (timeTrailer == null) {
                 x0 = insets.left;
