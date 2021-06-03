@@ -1,0 +1,7 @@
+dependencies {
+
+    implementation project(':jukebox:jukebox-datastream')
+
+    implementation project(':dz3-connector')
+    implementation project(':dz3-scheduler')
+}
