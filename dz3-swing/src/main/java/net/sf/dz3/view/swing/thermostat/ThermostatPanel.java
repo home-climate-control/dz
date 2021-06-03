@@ -535,7 +535,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
                 displayTemperature = (sample == null || sample.demand.isError()) ? UNDEFINED : String.format(Locale.getDefault(), "%.1f", currentTemperature);
 
-                var tint = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample.calling, currentSetpoint);
+                var tint = new TintedValueAndSetpoint(currentTemperature, source.getControlSignal() * 2, sample != null && sample.calling, currentSetpoint);
                 chart.consume(new DataSample<>(pidListener.signal.timestamp, "temp", "temp", tint, null));
             }
 
@@ -649,14 +649,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
 
         var signal = thermostatListener.signal.sample.demand.sample;
         var mode = getMode();
-        var state = thermostatListener.signal == null ? null : (thermostatListener.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY);
-
-        if ( thermostatListener.signal == null || thermostatListener.signal.sample.demand.isError()) {
-            state = ZoneState.ERROR;
-        } else if (!thermostatListener.signal.sample.enabled) {
-            state = ZoneState.OFF;
-        }
-
+        var state = resolveState(thermostatListener);
         var boundary = new Rectangle(0, 0, d.width, d.height);
 
         switch (state) {
@@ -673,6 +666,19 @@ public class ThermostatPanel extends JPanel implements KeyListener {
             BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
             break;
         }
+    }
+
+    private ZoneState resolveState(ThermostatListener source) {
+
+        if ( source.signal == null || source.signal.sample.demand.isError()) {
+            return ZoneState.ERROR;
+        }
+
+        if (!source.signal.sample.enabled) {
+            return ZoneState.OFF;
+        }
+
+        return source.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY;
     }
 
     public void setFontSize(ScreenDescriptor screenDescriptor) {
