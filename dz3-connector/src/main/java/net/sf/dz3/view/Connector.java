@@ -8,14 +8,13 @@ import org.apache.logging.log4j.ThreadContext;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 /**
  * Base class for implementing the V in MVC.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public abstract class Connector<T> implements JmxAware {
 
@@ -39,12 +38,12 @@ public abstract class Connector<T> implements JmxAware {
      */
     private final Map<Object, T> componentMap = new HashMap<>();
 
-    public Connector(Set<Object> initSet) {
+    protected Connector(Set<Object> initSet) {
 
         this(initSet, null);
     }
 
-    public Connector(Set<Object> initSet, Set<ConnectorFactory<T>> factorySet) {
+    protected  Connector(Set<Object> initSet, Set<ConnectorFactory<T>> factorySet) {
 
         ThreadContext.push("Connector()");
 
@@ -60,9 +59,7 @@ public abstract class Connector<T> implements JmxAware {
                 return;
             }
 
-            for (Iterator<ConnectorFactory<T>> i = factorySet.iterator(); i.hasNext(); ) {
-
-                ConnectorFactory<T> factory = i.next();
+            for (ConnectorFactory<T> factory : factorySet) {
 
                 logger.info("Using custom factory {} for {}",
                         factory.getClass().getName(),
@@ -77,7 +74,6 @@ public abstract class Connector<T> implements JmxAware {
     }
 
     public final void register(Class<?> componentClass, ConnectorFactory<T> connector) {
-
         factoryMap.put(componentClass, connector);
     }
 
@@ -91,9 +87,8 @@ public abstract class Connector<T> implements JmxAware {
 
         try {
 
-            for (Iterator<Object> i = initSet.iterator(); i.hasNext(); ) {
+            for (Object initObject : initSet) {
 
-                Object initObject = i.next();
                 Class<?> initClass = initObject.getClass();
                 ConnectorFactory<T> factory = factoryMap.get(initClass);
 
@@ -101,41 +96,34 @@ public abstract class Connector<T> implements JmxAware {
 
                     logger.info("No direct mapping for {}, searching parents", initClass.getName());
 
-                    for (Iterator<Class<?>> i2 = factoryMap.keySet().iterator(); i2.hasNext(); ) {
+                    for (Map.Entry<Class<?>, ConnectorFactory<T>> class2factory : factoryMap.entrySet()) {
 
-                        Class<?> c = i2.next();
-
-                        if (c.isAssignableFrom(initClass)) {
-
-                            factory = factoryMap.get(c);
-
-                            logger.info("Subsitute: {} isA {}", initClass.getName(), c.getName());
+                        if (class2factory.getKey().isAssignableFrom(initClass)) {
+                            factory = class2factory.getValue();
+                            logger.info("Substitute: {} isA {}", initClass.getName(), class2factory.getKey().getName());
                         }
                     }
                 }
 
                 if (factory == null) {
-
                     logger.error("Don't know how to handle {}: {}", initClass.getName(), initObject);
                     continue;
-
                 }
 
                 try {
 
-                    T c = factory.createComponent(initObject,context);
+                    var component = factory.createComponent(initObject, context);
 
-                    logger.info("Created {}  for {}", c, initObject);
-                    componentMap.put(initObject, c);
+                    logger.info("Created {}  for {}", component, initObject);
+                    componentMap.put(initObject, component);
 
-                } catch (Throwable t) {
+                } catch (Throwable t) { // NOSONAR Consequences have been considered
                     // Not a fatal condition, there are other components
-                    logger.error("Failed to create a component for " + initObject + ", moving on", t);
+                    logger.error("Failed to create a component for {}, moving on", initObject, t);
                 }
             }
 
             if (componentMap.isEmpty()) {
-
                 // Not fatal either
                 logger.warn("componentMap is empty, did you specify any arguments in the constructor?");
             }
@@ -156,16 +144,14 @@ public abstract class Connector<T> implements JmxAware {
     protected abstract Map<String, Object> createContext();
 
     protected Set<Object> getInitSet() {
-
         return Collections.unmodifiableSet(initSet);
     }
 
     /**
      * @deprecated Need to replace by a lookup method.
      */
-    @Deprecated
+    @Deprecated(forRemoval = true)
     protected final Map<Object, T> getComponentMap() {
-
         return Collections.unmodifiableMap(componentMap);
     }
 
@@ -179,13 +165,11 @@ public abstract class Connector<T> implements JmxAware {
         try {
 
             if (!componentMap.isEmpty()) {
-
                 // Last deactivate() wasn't clean, this is a problem
                 throw new IllegalStateException("componentMap is not empty: " + componentMap);
             }
 
             createComponentMap(createContext());
-
             activate2();
 
         } finally {
@@ -203,7 +187,6 @@ public abstract class Connector<T> implements JmxAware {
         try {
 
             deactivate2();
-
             componentMap.clear();
 
         } finally {
