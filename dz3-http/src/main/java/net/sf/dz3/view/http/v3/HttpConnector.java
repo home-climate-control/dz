@@ -209,7 +209,6 @@ public class HttpConnector extends Connector<JsonRenderer>{
                 logger.error("Buffer exchange failed", t);
 
             } finally {
-
                 m.close();
                 ThreadContext.pop();
             }
