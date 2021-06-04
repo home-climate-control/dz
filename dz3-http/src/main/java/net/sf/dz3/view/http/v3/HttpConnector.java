@@ -124,7 +124,7 @@ public class HttpConnector extends Connector<JsonRenderer>{
     @Override
     public JmxDescriptor getJmxDescriptor() {
 
-        int port = serverContextRoot.getPort();
+        var port = serverContextRoot.getPort();
 
         return new JmxDescriptor(
                 "dz",
@@ -165,13 +165,13 @@ public class HttpConnector extends Connector<JsonRenderer>{
         protected final void exchange(List<ZoneSnapshot> buffer) {
 
             ThreadContext.push("exchange");
-            Marker m = new Marker("exchange");
+            var m = new Marker("exchange");
 
             try {
 
                 logger.debug("sending {} items: {}", buffer.size(), buffer);
 
-                String encoded = gson.toJson(buffer);
+                var encoded = gson.toJson(buffer);
 
                 logger.debug("JSON ({} bytes): {}", encoded.length(), encoded);
 
@@ -230,8 +230,8 @@ public class HttpConnector extends Connector<JsonRenderer>{
 
                 var provider = new OAuth2DeviceIdentityProvider();
 
-                File base = getSecretsDir();
-                String identity = provider.getIdentity(
+                var base = getSecretsDir();
+                var identity = provider.getIdentity(
                         new File(base, "client-id"),
                         new File(base, "client-secret"),
                         new File(base, "token"),
@@ -297,7 +297,7 @@ public class HttpConnector extends Connector<JsonRenderer>{
                         continue;
                     }
 
-                    ThermostatModel ts = (ThermostatModel) target;
+                    var ts = (ThermostatModel) target;
 
                     if (ts.getName().equals(command.name)) {
 
