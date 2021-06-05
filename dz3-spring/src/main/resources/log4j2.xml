@@ -12,7 +12,7 @@
             name="DebugAppender"
             fileName="debug.log"
             filePattern="debug.log.%d{yyyy-MM-dd}">
-            <PatternLayout pattern="%d{HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
@@ -25,7 +25,7 @@
             name="WarnAppender"
             fileName="dz.log"
             filePattern="dz.log.%d{yyyy-MM-dd}">
-            <PatternLayout pattern="%d{HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n"/>
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
