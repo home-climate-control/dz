@@ -1,5 +1,8 @@
 dependencies {
 
+    implementation 'org.springframework:spring-context:5.3.7'
+    implementation 'org.springframework:spring-webflux:5.3.7'
+
     implementation project(':jukebox:jukebox-datastream')
 
     implementation project(':dz3-connector')
