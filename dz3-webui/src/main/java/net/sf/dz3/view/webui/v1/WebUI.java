@@ -2,11 +2,14 @@ package net.sf.dz3.view.webui.v1;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.config.EnableWebFlux;
+import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
+import reactor.netty.DisposableServer;
+import reactor.netty.http.server.HttpServer;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,7 +22,6 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 @Component
-@EnableWebFlux
 public class WebUI {
 
     protected final Logger logger = LogManager.getLogger();
@@ -39,6 +41,20 @@ public class WebUI {
         logger.info("init set: {}", initSet);
     }
 
+    public void activate() {
+
+        var httpHandler = RouterFunctions.toHttpHandler(new RoutingConfiguration().monoRouterFunction(this));
+        var adapter = new ReactorHttpHandlerAdapter(httpHandler);
+
+        new Thread(() -> {
+            var server = HttpServer.create().host("localhost").port(port);
+            DisposableServer disposableServer = server.handle(adapter).bind().block();
+            disposableServer.onDispose().block();
+        }).start();
+
+        logger.info("started");
+    }
+
     /**
      * Response handler for the {@code /} HTTP request.
      *
@@ -51,7 +67,8 @@ public class WebUI {
         // VT: NOTE: This is temporary; currently the system is merely a composition of zones,
         // but it's actually more than that.
 
-        return getZones(rq);
+        return ok().bodyValue("Oh, hai");
+//        return getZones(rq);
     }
 
     /**
