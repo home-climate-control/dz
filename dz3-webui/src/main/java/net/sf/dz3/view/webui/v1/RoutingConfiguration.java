@@ -21,12 +21,12 @@ public class RoutingConfiguration {
     public RouterFunction<ServerResponse> monoRouterFunction(WebUI webUI) {
         return route(
                 GET("/").and(ACCEPT_JSON), webUI::getDashboard).andRoute(
+                GET("/sensors").and(ACCEPT_JSON), webUI::getSensors).andRoute(
+                GET("/sensor/{sensor}").and(ACCEPT_JSON), webUI::getSensor).andRoute(
                 GET("/zones").and(ACCEPT_JSON), webUI::getZones).andRoute(
                 GET("/{zone}").and(ACCEPT_JSON), webUI::getZone).andRoute(
                 GET("/{thermostat}").and(ACCEPT_JSON), webUI::getThermostat).andRoute(
                 POST("/{thermostat}").and(ACCEPT_JSON), webUI::setThermostat).andRoute(
-                GET("/sensors").and(ACCEPT_JSON), webUI::getSensors).andRoute(
-                GET("/sensor/{sensor}").and(ACCEPT_JSON), webUI::getSensor).andRoute(
                 GET("/units").and(ACCEPT_JSON), webUI::getUnits).andRoute(
                 GET("/unit/{unit}").and(ACCEPT_JSON), webUI::getUnit).andRoute(
                 POST("/unit/{unit}").and(ACCEPT_JSON), webUI::setUnit);
