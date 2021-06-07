@@ -123,17 +123,25 @@ public class UnitModel implements Unit {
         return state.sample;
     }
 
+    @Override
     @JmxAttribute(description="Demand")
     public double getDemand() {
         return state != null ? state.sample.demand : 0;
     }
 
-
+    @Override
     @JmxAttribute(description="Running")
-    public boolean getRunning() {
+    public final boolean isRunning() {
         return state != null && state.sample.running;
     }
 
+    @Override
+    @JmxAttribute(description="Uptime as string")
+    public long getUptime() {
+        return lastStarted == null ? 0 : System.currentTimeMillis() - lastStarted;
+    }
+
+    @Override
     @JmxAttribute(description="Uptime as string")
     public String getUptimeAsString() {
 
@@ -213,10 +221,6 @@ public class UnitModel implements Unit {
         } finally {
             ThreadContext.pop();
         }
-    }
-
-    public final boolean isRunning() {
-        return state != null && state.sample.running;
     }
 
     /**

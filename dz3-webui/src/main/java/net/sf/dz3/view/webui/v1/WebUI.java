@@ -1,5 +1,7 @@
 package net.sf.dz3.view.webui.v1;
 
+import net.sf.dz3.device.model.Unit;
+import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -151,7 +153,12 @@ public class WebUI {
      * @return Set of unit representations.
      */
     public Mono<ServerResponse> getUnits(ServerRequest rq) {
-        return ok().render("units");
+
+        var units = Flux.fromIterable(initSet)
+                .filter(Unit.class::isInstance)
+                .map(u -> ((Unit) u).getSignal());
+
+        return ok().contentType(MediaType.APPLICATION_JSON).body(units, UnitSignal .class);
     }
 
     /**
