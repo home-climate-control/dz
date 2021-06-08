@@ -119,6 +119,7 @@ public class UnitModel implements Unit {
         return "Unit(" + name + ", " + (state == null ? "<not initialized>" : getSignal()) + ")";
     }
 
+    @Override
     public UnitSignal getSignal() {
         return state.sample;
     }
@@ -130,7 +131,7 @@ public class UnitModel implements Unit {
 
 
     @JmxAttribute(description="Running")
-    public boolean getRunning() {
+    public final boolean isRunning() {
         return state != null && state.sample.running;
     }
 
@@ -213,10 +214,6 @@ public class UnitModel implements Unit {
         } finally {
             ThreadContext.pop();
         }
-    }
-
-    public final boolean isRunning() {
-        return state != null && state.sample.running;
     }
 
     /**

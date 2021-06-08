@@ -2,6 +2,7 @@ package net.sf.dz3.device.actuator.impl;
 
 import net.sf.dz3.device.actuator.HvacDriver;
 import net.sf.dz3.device.model.HvacMode;
+import net.sf.dz3.device.model.impl.HvacDriverSignal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -133,5 +134,10 @@ public abstract class AbstractHvacDriver implements HvacDriver {
             this.stage = stage;
             this.speed = speed;
         }
+    }
+
+    @Override
+    public HvacDriverSignal getSignal() {
+        return new HvacDriverSignal(getMode(), getStage(), getFanSpeed());
     }
 }
