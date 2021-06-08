@@ -1,6 +1,6 @@
 package net.sf.dz3.view.webui.v1;
 
-import net.sf.dz3.device.model.Unit;
+import net.sf.dz3.device.actuator.HvacController;
 import net.sf.dz3.device.model.UnitSignal;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.LogManager;
@@ -155,8 +155,8 @@ public class WebUI {
     public Mono<ServerResponse> getUnits(ServerRequest rq) {
 
         var units = Flux.fromIterable(initSet)
-                .filter(Unit.class::isInstance)
-                .map(u -> ((Unit) u).getSignal());
+                .filter(HvacController.class::isInstance)
+                .map(c -> ((HvacController) c).getSignal());
 
         return ok().contentType(MediaType.APPLICATION_JSON).body(units, UnitSignal .class);
     }

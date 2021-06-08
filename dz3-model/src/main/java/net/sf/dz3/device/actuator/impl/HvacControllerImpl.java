@@ -345,6 +345,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
         return getName().compareTo(o.getName());
     }
 
+    @Override
     @JmxAttribute(description="Last Known Signal")
     public final HvacSignal getSignal() {
         return state.sample;
