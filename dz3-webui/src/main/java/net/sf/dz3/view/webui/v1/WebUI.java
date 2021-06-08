@@ -1,7 +1,10 @@
 package net.sf.dz3.view.webui.v1;
 
 import net.sf.dz3.device.actuator.HvacController;
+import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.device.model.ThermostatStatus;
 import net.sf.dz3.device.model.UnitSignal;
+import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,7 +84,14 @@ public class WebUI {
      * @return Set of zone representations.
      */
     public Mono<ServerResponse> getZones(ServerRequest rq) {
-        return ok().render("zones");
+
+        // VT: NOTE: This uses *Status, not *Signal.
+
+        var zones = Flux.fromIterable(initSet)
+                .filter(Thermostat.class::isInstance)
+                .map(z -> ((ThermostatModel) z).getStatus());
+
+        return ok().contentType(MediaType.APPLICATION_JSON).body(zones, ThermostatStatus.class);
     }
 
     /**
@@ -92,7 +102,19 @@ public class WebUI {
      * @return Individual zone representation.
      */
     public Mono<ServerResponse> getZone(ServerRequest rq) {
-        return ok().render("zone");
+
+        String zone = rq.pathVariable("zone");
+        logger.info("/zone/{}", zone);
+
+        // VT: NOTE: This uses *Status, not *Signal.
+
+        var zones = Flux.fromIterable(initSet)
+                .filter(Thermostat.class::isInstance)
+                .filter(s -> ((Thermostat) s).getName().equals(zone))
+                .map(z -> ((ThermostatModel) z).getStatus());
+
+        // Returning empty JSON is simpler on both receiving and sending side than a 404
+        return ok().contentType(MediaType.APPLICATION_JSON).body(zones, ThermostatStatus.class);
     }
 
     /**
