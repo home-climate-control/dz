@@ -13,6 +13,7 @@ import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.HvacSignal;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
+import net.sf.dz3.device.model.impl.HvacExtendedSignal;
 import net.sf.dz3.util.digest.MessageDigestCache;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -351,6 +352,13 @@ public class HvacControllerImpl implements HvacController, JmxAware {
         return state.sample;
     }
 
+    @JmxAttribute(description="Last Known Extended Signal")
+    @Override
+    public HvacExtendedSignal getExtendedSignal() {
+        return new HvacExtendedSignal(name, signature, getSignal(), hvacDriver.getSignal());
+    }
+
+    @JmxAttribute(description = "true if the unit is running")
     public final boolean isRunning() {
         return state.sample.running;
     }

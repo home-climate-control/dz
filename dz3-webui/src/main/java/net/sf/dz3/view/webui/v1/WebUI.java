@@ -156,7 +156,7 @@ public class WebUI {
 
         var units = Flux.fromIterable(initSet)
                 .filter(HvacController.class::isInstance)
-                .map(c -> ((HvacController) c).getSignal());
+                .map(c -> ((HvacController) c).getExtendedSignal());
 
         return ok().contentType(MediaType.APPLICATION_JSON).body(units, UnitSignal .class);
     }

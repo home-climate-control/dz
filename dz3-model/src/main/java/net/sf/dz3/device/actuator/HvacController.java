@@ -7,6 +7,7 @@ import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.HvacSignal;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.UnitSignal;
+import net.sf.dz3.device.model.impl.HvacExtendedSignal;
 
 /**
  * Whereas {@link Unit} is a control logic abstraction, the class implementing this interface
@@ -42,4 +43,12 @@ public interface HvacController extends DataSink<UnitSignal>, DataSource<HvacSig
      */
     @JmxAttribute(description = "Controller signal")
     HvacSignal getSignal();
+
+    /**
+     * Get current controller extended signal.
+     *
+     * @return Current controller extended signal.
+     */
+    @JmxAttribute(description = "Extended controller signal")
+    HvacExtendedSignal getExtendedSignal();
 }
