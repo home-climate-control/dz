@@ -13,7 +13,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
  *
  * This abstraction is not {@link HvacMode} aware, it can only support one mode - either heating, or cooling.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface Unit extends DataSource<UnitSignal>, DataSink<Double>, Comparable<Unit>, JmxAware {
 
@@ -50,31 +50,4 @@ public interface Unit extends DataSource<UnitSignal>, DataSink<Double>, Comparab
      */
     @JmxAttribute(description = "Unit signal")
     UnitSignal getSignal();
-
-    /**
-     * Obtain unit's current demand.
-     *
-     * @return Current demand.
-     */
-    @JmxAttribute(description="Demand")
-    double getDemand();
-
-    /**
-     * Find out whether the unit is currently running.
-     *
-     * @return {@code true} if the unit is currently running.
-     */
-    @JmxAttribute(description="Running")
-    boolean isRunning();
-
-    @JmxAttribute(description = "Uptime in milliseconds")
-    long getUptime();
-
-    /**
-     * Get unit's current uptime in a human readable form.
-     *
-     * @return Human readable current uptime, or "off" if the unit is currently off.
-     */
-    @JmxAttribute(description="Uptime as string")
-    String getUptimeAsString();
 }
