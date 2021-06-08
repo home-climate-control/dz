@@ -3,14 +3,16 @@ package net.sf.dz3.device.model.impl;
 import net.sf.dz3.device.model.ThermostatStatus;
 
 public class ThermostatStatusImpl extends ZoneStatusImpl implements ThermostatStatus {
-    
+
     private static final long serialVersionUID = -2031584478506738431L;
-    
+
+    public final String name;
     public final double controlSignal;
     public final boolean hold;
     public final boolean error;
-    
+
     ThermostatStatusImpl(
+            String name,
             double setpoint,
             double controlSignal,
             int dumpPriority,
@@ -18,12 +20,18 @@ public class ThermostatStatusImpl extends ZoneStatusImpl implements ThermostatSt
             boolean hold,
             boolean voting,
             boolean error) {
-        
+
         super(setpoint, dumpPriority, enabled, voting);
-        
+
+        this.name = name;
         this.controlSignal = controlSignal;
         this.hold = hold;
         this.error = error;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override

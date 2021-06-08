@@ -3,10 +3,18 @@ package net.sf.dz3.device.model;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface ThermostatStatus extends ZoneStatus {
-    
+
+    /**
+     * Get the zone name.
+     *
+     * @return Zone name.
+     */
+    @JmxAttribute(description = "Zone name")
+    String getName();
+
     /**
      * Is this thermostat requested to hold the temperature regardless of
      * the scheduled changes.
@@ -32,10 +40,10 @@ public interface ThermostatStatus extends ZoneStatus {
      */
     @JmxAttribute(description = "Control signal value")
     double getControlSignal();
-    
+
     /**
      * Check whether the sensor for this thermostat is faulty.
-     *  
+     *
      * @return {@code true} if the last reported sensor signal is {@link DataSample#error an error}.
      */
     @JmxAttribute(description = "Whether the sensor for this thermostat is faulty")
