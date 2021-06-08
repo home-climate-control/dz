@@ -178,7 +178,17 @@ public class WebUI {
      * @return Individual unit representation.
      */
     public Mono<ServerResponse> getUnit(ServerRequest rq) {
-        return ok().render("unit");
+
+        String name = rq.pathVariable("unit");
+        logger.info("/unit/{}", name);
+
+        var unit = Flux.fromIterable(initSet)
+                .filter(HvacController.class::isInstance)
+                .filter(s -> ((HvacController) s).getName().equals(name))
+                .map(c -> ((HvacController) c).getExtendedSignal());
+
+        // Returning empty JSON is simpler on both receiving and sending side than a 404
+        return ok().contentType(MediaType.APPLICATION_JSON).body(unit, UnitSignal .class);
     }
 
     /**
