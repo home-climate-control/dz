@@ -50,7 +50,7 @@ public class WebUI {
         var adapter = new ReactorHttpHandlerAdapter(httpHandler);
 
         new Thread(() -> {
-            var server = HttpServer.create().host("localhost").port(port);
+            var server = HttpServer.create().host("0.0.0.0").port(port);
             DisposableServer disposableServer = server.handle(adapter).bind().block();
             disposableServer.onDispose().block();
         }).start();
