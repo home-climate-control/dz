@@ -71,7 +71,6 @@ public class WebUI {
         // but it's actually more than that.
 
         return ok().bodyValue("Oh, hai");
-//        return getZones(rq);
     }
 
     /**
