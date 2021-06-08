@@ -96,25 +96,14 @@ public class WebUI {
     }
 
     /**
-     * Response handler for individual thermostat request.
-     *
-     * @param rq Request object.
-     *
-     * @return Individual thermostat representation
-     */
-    public Mono<ServerResponse> getThermostat(ServerRequest rq) {
-        return ok().render("thermostat");
-    }
-
-    /**
-     * Response handler for setting individual thermostat state.
+     * Response handler for setting individual zone state.
      *
      * @param rq Request object.
      *
      * @return Command response.
      */
-    public Mono<ServerResponse> setThermostat(ServerRequest rq) {
-        return ok().render("thermostat");
+    public Mono<ServerResponse> setZone(ServerRequest rq) {
+        return ok().render("zone");
     }
 
     /**
