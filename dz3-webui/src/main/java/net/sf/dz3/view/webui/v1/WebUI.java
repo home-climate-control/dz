@@ -141,7 +141,17 @@ public class WebUI {
      * @return Individual sensor representation.
      */
     public Mono<ServerResponse> getSensor(ServerRequest rq) {
-        return ok().render("sensor");
+
+        String address = rq.pathVariable("sensor");
+        logger.info("/sensor/{}", address);
+
+        var sensor = Flux.fromIterable(initSet)
+                .filter(AnalogSensor.class::isInstance)
+                .filter(s -> ((AnalogSensor) s).getAddress().equals(address))
+                .map(s -> new AnalogSensorSnapshot((AnalogSensor) s));
+
+        // Returning empty JSON is simpler on both receiving and sending side than a 404
+        return ok().contentType(MediaType.APPLICATION_JSON).body(sensor, AnalogSensor.class);
     }
 
     /**
