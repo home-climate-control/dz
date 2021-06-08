@@ -69,11 +69,7 @@ public class WebUI {
      * @return Whole system representation.
      */
     public Mono<ServerResponse> getDashboard(ServerRequest rq) {
-
-        // VT: NOTE: This is temporary; currently the system is merely a composition of zones,
-        // but it's actually more than that.
-
-        return ok().bodyValue("Oh, hai");
+        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
     }
 
     /**
@@ -125,7 +121,7 @@ public class WebUI {
      * @return Command response.
      */
     public Mono<ServerResponse> setZone(ServerRequest rq) {
-        return ok().render("zone");
+        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
     }
 
     /**
@@ -210,6 +206,6 @@ public class WebUI {
      * @return Command response.
      */
     public Mono<ServerResponse> setUnit(ServerRequest rq) {
-        return ok().render("unit");
+        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
     }
 }
