@@ -1,21 +1,18 @@
 package net.sf.dz3.view.influxdb.v1;
 
-import java.io.IOException;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.AbstractLogger;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 import org.apache.logging.log4j.ThreadContext;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
-import org.influxdb.dto.Point.Builder;
 import org.influxdb.dto.Query;
 
-import com.homeclimatecontrol.jukebox.datastream.logger.impl.AbstractLogger;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Simple InfluxDB logger.
@@ -23,11 +20,10 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
  * This class serves the same purpose that {@link InfluxDbConnector} finally
  * will, but the functionality is straightforward and limited.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2019
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
-    private final String dbName = "dz";
     private final String instance;
     private final String dbURL;
     private final String username;
@@ -35,7 +31,7 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
     private InfluxDB db;
     private final Queue<DataSample<E>> queue = new LinkedBlockingQueue<>();
-    private final int QUEUE_MAX = 1024;
+    private static final int QUEUE_MAX = 1024;
 
     /**
      * Create an unauthenticated instance.
@@ -90,7 +86,7 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
                 queue.add(value);
 
             } else {
-                logger.error("QUEUE_MAX=" + QUEUE_MAX + " exceeded, skipping sample: " + value);
+                logger.error("QUEUE_MAX={} exceeded, skipping sample: {}", QUEUE_MAX, value);
             }
 
             synchronized (this) {
@@ -99,13 +95,13 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
                 // but the instance is ready to accept samples
 
                 if (db == null) {
-                    logger.warn("no connection yet, " + queue.size() + " sample[s] deferred");
+                    logger.warn("no connection yet, {} sample[s] deferred", queue.size());
                     return;
                 }
             }
 
             // It is possible for more than one thread to call consume() a the same time
-            // VT: FIXME: It would probably be better to use an ExecutorService for this
+            // VT: NOTE: It would probably be better to use an ExecutorService for this
 
             synchronized (this) {
 
@@ -115,7 +111,7 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
                         DataSample<E> sample = queue.peek();
 
-                        Builder b = Point.measurement("sensor")
+                        Point.Builder b = Point.measurement("sensor")
                                 .time(sample.timestamp, TimeUnit.MILLISECONDS)
                                 .tag("instance", instance)
                                 .tag("source", sample.sourceName)
@@ -133,11 +129,10 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
                         queue.remove();
 
-                    } catch (Throwable t) {
+                    } catch (Throwable t) { // NOSONAR Consequences have been considered
 
                         // The item we couldn't write is still in the queue
-
-                        logger.warn("can't write sample, deferring remaining " + queue.size() + " samples for now", t);
+                        logger.warn("can't write sample, deferring remaining {} samples for now", queue.size(), t);
                         break;
                     }
                 }
@@ -151,7 +146,7 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
     }
 
     @Override
-    protected void createChannel(String name, String signature, long timestamp) throws IOException {
+    protected void createChannel(String name, String signature, long timestamp) {
         // This means nothing for this implementation, other than no more incessant complaining
         signature2name.put(signature, name);
     }
@@ -166,6 +161,7 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
             connect();
 
             db.enableBatch();
+            var dbName = "dz";
             db.query(new Query("CREATE DATABASE " + dbName));
             db.setDatabase(dbName);
 
@@ -179,14 +175,14 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
      */
     private void connect() {
 
-        InfluxDB db;
+        InfluxDB db; // NOSONAR Yes, this is intentional
 
         // This section will not block synchronized calls
 
         if (username == null || "".equals(username) || password == null || "".equals(password)) {
             logger.warn("one of (username, password) is null or missing, connecting unauthenticated - THIS IS A BAD IDEA");
             logger.warn("see https://docs.influxdata.com/influxdb/v1.7/administration/authentication_and_authorization/");
-            logger.warn("(username, password) = (" + username + ", " + password + ")");
+            logger.warn("(username, password) = ({}, {})", username, password);
 
             db = InfluxDBFactory.connect(dbURL);
 
@@ -195,7 +191,6 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
         }
 
         // This section is short and won't delay other synchronized calls much
-
         synchronized (this) {
             this.db = db;
         }

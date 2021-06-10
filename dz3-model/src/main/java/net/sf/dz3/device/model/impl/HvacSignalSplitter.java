@@ -16,11 +16,11 @@ import org.apache.logging.log4j.ThreadContext;
  * Add this object as a listener to the unit, and add the data logger as a listener to this object,
  * to record the data stream.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
 public class HvacSignalSplitter implements DataSink<HvacSignal>, DataSource<Double> {
 
-    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
 
     /**
      * Create an instance not attached to anything.
@@ -47,25 +47,25 @@ public class HvacSignalSplitter implements DataSink<HvacSignal>, DataSource<Doub
 
             {
                 // Current operating mode
-                String sourceName = signal.sourceName + ".mode";
-                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
-                DataSample<Double> mode = new DataSample<Double>(signal.timestamp, sourceName, signature, (double)signal.sample.mode.mode, null);
+                var sourceName = signal.sourceName + ".mode";
+                var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+                var mode = new DataSample<>(signal.timestamp, sourceName, signature, (double)signal.sample.mode.mode, null);
                 dataBroadcaster.broadcast(mode);
             }
 
             {
                 // Whether the unit is currently running
-                String sourceName = signal.sourceName + ".running";
-                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
-                DataSample<Double> running = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.running ? 1.0 : 0.0, null);
+                var sourceName = signal.sourceName + ".running";
+                var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+                var running = new DataSample<>(signal.timestamp, sourceName, signature, signal.sample.running ? 1.0 : 0.0, null);
                 dataBroadcaster.broadcast(running);
             }
 
             {
                 // The demand sent to the HVAC hardware driver
-                String sourceName = signal.sourceName + ".demand";
-                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
-                DataSample<Double> running = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.demand, null);
+                var sourceName = signal.sourceName + ".demand";
+                var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+                var running = new DataSample<>(signal.timestamp, sourceName, signature, signal.sample.demand, null);
                 dataBroadcaster.broadcast(running);
             }
 
