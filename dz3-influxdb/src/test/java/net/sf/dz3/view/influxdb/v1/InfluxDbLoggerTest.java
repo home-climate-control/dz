@@ -9,39 +9,35 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.fail;
 
-/**
- * VT: FIXME: Get smarter about running non-unit tests - pipeline will suffer from things like this
- */
 @Disabled("Enable if you have InfluxDB running on localhost (or elsewhere, see the source)")
-public class InfluxDbLoggerTest {
+class InfluxDbLoggerTest {
 
     @Test
-    public void testLogger() throws InterruptedException {
+    void testLogger() throws InterruptedException {
 
         ThreadContext.push("testLogger");
 
         try {
-            
-            String instance = "dz3.test";
 
-            Set<DataSource<Integer>> producers = new HashSet<>();
-            DataBroadcaster<Integer> b = new DataBroadcaster<>();
+            var instance = "dz3.test.v1";
 
-            producers.add(b);
+            var producers = new HashSet<DataSource<Integer>>();
+            var broadcaster = new DataBroadcaster<Integer>();
+
+            producers.add(broadcaster);
 
             InfluxDbLogger<Integer> l = new InfluxDbLogger<>(producers, instance, "http://127.0.0.1:8086", null, null);
-            
+
             try {
 
                 if (!l.start().waitFor()) {
                     fail("InfluxDbLogger failed to start, see the logs for the cause");
                 }
-                
-                b.broadcast(new DataSample<Integer>("test-source", "test-signature", new Random().nextInt(), null));
+
+                broadcaster.broadcast(new DataSample<Integer>("test-source", "test-signature", new Random().nextInt(), null));
             } finally {
                 l.stop();
             }

@@ -3,6 +3,7 @@ package net.sf.dz3.view.influxdb.v1;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.AbstractLogger;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import net.sf.dz3.view.influxdb.common.Config;
 import org.apache.logging.log4j.ThreadContext;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -24,10 +25,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
-    private final String instance;
-    private final String dbURL;
-    private final String username;
-    private final String password;
+    private final Config config;
 
     private InfluxDB db;
     private final Queue<DataSample<E>> queue = new LinkedBlockingQueue<>();
@@ -67,10 +65,7 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
             String password) {
         super(producers);
 
-        this.instance = instance;
-        this.dbURL = dbURL;
-        this.username = username;
-        this.password = password;
+        config = new Config(instance, dbURL, username, password);
     }
 
     @Override
@@ -113,7 +108,7 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
                         Point.Builder b = Point.measurement("sensor")
                                 .time(sample.timestamp, TimeUnit.MILLISECONDS)
-                                .tag("instance", instance)
+                                .tag("instance", config.instance)
                                 .tag("source", sample.sourceName)
                                 .tag("signature", sample.signature);
 
@@ -179,15 +174,15 @@ public class InfluxDbLogger<E extends Number> extends AbstractLogger<E> {
 
         // This section will not block synchronized calls
 
-        if (username == null || "".equals(username) || password == null || "".equals(password)) {
+        if (config.username == null || "".equals(config.username) || config.password == null || "".equals(config.password)) {
             logger.warn("one of (username, password) is null or missing, connecting unauthenticated - THIS IS A BAD IDEA");
             logger.warn("see https://docs.influxdata.com/influxdb/v1.7/administration/authentication_and_authorization/");
-            logger.warn("(username, password) = ({}, {})", username, password);
+            logger.warn("(username, password) = ({}, {})", config.username, config.password);
 
-            db = InfluxDBFactory.connect(dbURL);
+            db = InfluxDBFactory.connect(config.dbURL);
 
         } else {
-            db = InfluxDBFactory.connect(dbURL, username, password);
+            db = InfluxDBFactory.connect(config.dbURL, config.username, config.password);
         }
 
         // This section is short and won't delay other synchronized calls much
