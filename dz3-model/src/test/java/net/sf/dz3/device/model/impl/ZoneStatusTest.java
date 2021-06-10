@@ -13,7 +13,7 @@ class ZoneStatusTest {
     private final Random rg = new Random();
 
     @Test
-    public void testSetpointNaN() {
+    void testSetpointNaN() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new ZoneStatusImpl(Double.NaN, 0, true, true))
@@ -21,7 +21,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testSetpointPositiveInfinity() {
+    void testSetpointPositiveInfinity() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new ZoneStatusImpl(Double.POSITIVE_INFINITY, 0, true, true))
@@ -29,7 +29,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testSetpointNegativeInfinity() {
+    void testSetpointNegativeInfinity() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new ZoneStatusImpl(Double.NEGATIVE_INFINITY, 0, true, true))
@@ -37,7 +37,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testNegativeDumpPriority() {
+    void testNegativeDumpPriority() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new ZoneStatusImpl(0, -1, true, true))
@@ -45,14 +45,14 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testEqualsNull() {
+    void testEqualsNull() {
 
         assertThat(new ZoneStatusImpl(0, 0, true, true).equals(null))
                 .as("null comparison")
                 .isFalse();
     }
 
-    public void testEqualsAlien() {
+    void testEqualsAlien() {
 
         ZoneStatus zs = new ZoneStatusImpl(0, 0, true, true);
 
@@ -60,16 +60,16 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testEqualsThermostatStatus() {
+    void testEqualsThermostatStatus() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
-        ZoneStatus b = new ThermostatStatusImpl(0, 0, 0, true, true, true, false);
+        ZoneStatus b = new ThermostatStatusImpl("zone",0, 0, 0, true, true, true, false);
 
         assertThat(a.equals(b)).as("heterogenous comparison").isTrue();
     }
 
     @Test
-    public void testEqualsSame() {
+    void testEqualsSame() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 0, true, true);
@@ -78,7 +78,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testDifferentSetpoint() {
+    void testDifferentSetpoint() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(1, 0, true, true);
@@ -87,7 +87,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testDifferentDump() {
+    void testDifferentDump() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 1, true, true);
@@ -96,7 +96,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testDifferentEnabled() {
+    void testDifferentEnabled() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 0, false, true);
@@ -105,7 +105,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testDifferentVoting() {
+    void testDifferentVoting() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 0, true, false);
@@ -114,7 +114,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testHashCodeEquals() {
+    void testHashCodeEquals() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(0, 0, true, true);
@@ -123,7 +123,7 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testHashCodeDiffers() {
+    void testHashCodeDiffers() {
 
         ZoneStatus a = new ZoneStatusImpl(0, 0, true, true);
         ZoneStatus b = new ZoneStatusImpl(1, 0, true, true);
@@ -132,22 +132,22 @@ class ZoneStatusTest {
     }
 
     @Test
-    public void testToString0011() {
+    void testToString0011() {
         assertThat(new ZoneStatusImpl(0, 0, true, true).toString()).as("string representation").isEqualTo("setpoint=0.0, enabled, voting");
     }
 
     @Test
-    public void testToString0111() {
+    void testToString0111() {
         assertThat(new ZoneStatusImpl(0, 1, true, true).toString()).as("string representation").isEqualTo("setpoint=0.0, enabled, voting, dump priority=1");
     }
 
     @Test
-    public void testToString0101() {
+    void testToString0101() {
         assertThat(new ZoneStatusImpl(0, 1, false, true).toString()).as("string representation").isEqualTo("setpoint=0.0, disabled, voting, dump priority=1");
     }
 
     @Test
-    public void testToString0110() {
+    void testToString0110() {
         assertThat(new ZoneStatusImpl(0, 1, true, false).toString()).as("string representation").isEqualTo("setpoint=0.0, enabled, not voting, dump priority=1");
     }
 }

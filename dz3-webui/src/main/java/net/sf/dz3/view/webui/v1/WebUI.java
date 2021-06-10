@@ -1,7 +1,10 @@
 package net.sf.dz3.view.webui.v1;
 
 import net.sf.dz3.device.actuator.HvacController;
+import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.device.model.ThermostatStatus;
 import net.sf.dz3.device.model.UnitSignal;
+import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +53,7 @@ public class WebUI {
         var adapter = new ReactorHttpHandlerAdapter(httpHandler);
 
         new Thread(() -> {
-            var server = HttpServer.create().host("localhost").port(port);
+            var server = HttpServer.create().host("0.0.0.0").port(port);
             DisposableServer disposableServer = server.handle(adapter).bind().block();
             disposableServer.onDispose().block();
         }).start();
@@ -66,12 +69,7 @@ public class WebUI {
      * @return Whole system representation.
      */
     public Mono<ServerResponse> getDashboard(ServerRequest rq) {
-
-        // VT: NOTE: This is temporary; currently the system is merely a composition of zones,
-        // but it's actually more than that.
-
-        return ok().bodyValue("Oh, hai");
-//        return getZones(rq);
+        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
     }
 
     /**
@@ -82,7 +80,14 @@ public class WebUI {
      * @return Set of zone representations.
      */
     public Mono<ServerResponse> getZones(ServerRequest rq) {
-        return ok().render("zones");
+
+        // VT: NOTE: This uses *Status, not *Signal.
+
+        var zones = Flux.fromIterable(initSet)
+                .filter(Thermostat.class::isInstance)
+                .map(z -> ((ThermostatModel) z).getStatus());
+
+        return ok().contentType(MediaType.APPLICATION_JSON).body(zones, ThermostatStatus.class);
     }
 
     /**
@@ -93,29 +98,30 @@ public class WebUI {
      * @return Individual zone representation.
      */
     public Mono<ServerResponse> getZone(ServerRequest rq) {
-        return ok().render("zone");
+
+        String zone = rq.pathVariable("zone");
+        logger.info("/zone/{}", zone);
+
+        // VT: NOTE: This uses *Status, not *Signal.
+
+        var zones = Flux.fromIterable(initSet)
+                .filter(Thermostat.class::isInstance)
+                .filter(s -> ((Thermostat) s).getName().equals(zone))
+                .map(z -> ((ThermostatModel) z).getStatus());
+
+        // Returning empty JSON is simpler on both receiving and sending side than a 404
+        return ok().contentType(MediaType.APPLICATION_JSON).body(zones, ThermostatStatus.class);
     }
 
     /**
-     * Response handler for individual thermostat request.
-     *
-     * @param rq Request object.
-     *
-     * @return Individual thermostat representation
-     */
-    public Mono<ServerResponse> getThermostat(ServerRequest rq) {
-        return ok().render("thermostat");
-    }
-
-    /**
-     * Response handler for setting individual thermostat state.
+     * Response handler for setting individual zone state.
      *
      * @param rq Request object.
      *
      * @return Command response.
      */
-    public Mono<ServerResponse> setThermostat(ServerRequest rq) {
-        return ok().render("thermostat");
+    public Mono<ServerResponse> setZone(ServerRequest rq) {
+        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
     }
 
     /**
@@ -142,7 +148,17 @@ public class WebUI {
      * @return Individual sensor representation.
      */
     public Mono<ServerResponse> getSensor(ServerRequest rq) {
-        return ok().render("sensor");
+
+        String address = rq.pathVariable("sensor");
+        logger.info("/sensor/{}", address);
+
+        var sensor = Flux.fromIterable(initSet)
+                .filter(AnalogSensor.class::isInstance)
+                .filter(s -> ((AnalogSensor) s).getAddress().equals(address))
+                .map(s -> new AnalogSensorSnapshot((AnalogSensor) s));
+
+        // Returning empty JSON is simpler on both receiving and sending side than a 404
+        return ok().contentType(MediaType.APPLICATION_JSON).body(sensor, AnalogSensor.class);
     }
 
     /**
@@ -169,7 +185,17 @@ public class WebUI {
      * @return Individual unit representation.
      */
     public Mono<ServerResponse> getUnit(ServerRequest rq) {
-        return ok().render("unit");
+
+        String name = rq.pathVariable("unit");
+        logger.info("/unit/{}", name);
+
+        var unit = Flux.fromIterable(initSet)
+                .filter(HvacController.class::isInstance)
+                .filter(s -> ((HvacController) s).getName().equals(name))
+                .map(c -> ((HvacController) c).getExtendedSignal());
+
+        // Returning empty JSON is simpler on both receiving and sending side than a 404
+        return ok().contentType(MediaType.APPLICATION_JSON).body(unit, UnitSignal .class);
     }
 
     /**
@@ -180,6 +206,6 @@ public class WebUI {
      * @return Command response.
      */
     public Mono<ServerResponse> setUnit(ServerRequest rq) {
-        return ok().render("unit");
+        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
     }
 }
