@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
 import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -57,6 +58,11 @@ public class InfluxDbLogger implements Subscriber<DataSample<Number>> {
         } else {
             db = InfluxDBFactory.connect(config.dbURL, config.username, config.password);
         }
+
+        db.enableBatch();
+        var dbName = "dz";
+        db.query(new Query("CREATE DATABASE " + dbName));
+        db.setDatabase(dbName);
     }
 
     @Override
