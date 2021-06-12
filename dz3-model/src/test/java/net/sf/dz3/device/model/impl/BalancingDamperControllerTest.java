@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class BalancingDamperControllerTest {
 
@@ -23,30 +24,34 @@ class BalancingDamperControllerTest {
      * out of acceptable range.
      */
     @Test
-    public void testBoundaries() {
+    void testBoundaries() {
 
-        Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
-        Thermostat ts2 = new ThermostatModel("ts2", new NullSensor("address2", 0), new SimplePidController(20, 1, 0, 0, 0));
+        assertThatCode(() -> {
 
-        Damper d1 = new DummyDamper("d1");
-        Damper d2 = new DummyDamper("d2");
+            Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
+            Thermostat ts2 = new ThermostatModel("ts2", new NullSensor("address2", 0), new SimplePidController(20, 1, 0, 0, 0));
 
-        BalancingDamperController damperController = new BalancingDamperController();
+            Damper d1 = new DummyDamper("d1");
+            Damper d2 = new DummyDamper("d2");
 
-        damperController.put(ts1, d1);
-        damperController.put(ts2, d2);
+            BalancingDamperController damperController = new BalancingDamperController();
 
-        long timestamp = 0;
+            damperController.put(ts1, d1);
+            damperController.put(ts2, d2);
 
-        damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts1", "ts1", 50.0, null)));
-        damperController.stateChanged(ts2, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts2", "ts2", -50.0, null)));
+            long timestamp = 0;
+
+            damperController.stateChanged(ts1, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts1", "ts1", 50.0, null)));
+            damperController.stateChanged(ts2, new ThermostatSignal(true, false, true, true, new DataSample<Double>(timestamp, "ts2", "ts2", -50.0, null)));
+
+        }).doesNotThrowAnyException();
     }
 
     /**
      * Make sure that zero demand from all thermostats doesn't cause NaN sent to dampers.
      */
     @Test
-    public void testNaN() {
+    void testNaN() {
 
         Thermostat ts1 = new ThermostatModel("ts1", new NullSensor("address1", 0), new SimplePidController(20, 1, 0, 0, 0));
 

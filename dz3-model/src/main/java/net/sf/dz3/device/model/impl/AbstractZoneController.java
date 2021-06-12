@@ -48,17 +48,17 @@ public abstract class AbstractZoneController implements ZoneController {
     /**
      * Mapping from thermostat name to thermostat instance - needed to support the {@link #dataBrodacaster}.
      */
-    private final Map<String, Thermostat> name2ts = new TreeMap<String, Thermostat>();
+    private final Map<String, Thermostat> name2ts = new TreeMap<>();
 
     /**
      * All thermostats that are unhappy, including ones that are not {@link ThermostatStatus#isVoting() voting}.
      */
-    protected final Map<Thermostat, ThermostatSignal> unhappy = new TreeMap<Thermostat, ThermostatSignal>();
+    protected final Map<Thermostat, ThermostatSignal> unhappy = new TreeMap<>();
 
     /**
      * Thermostats that are both unhappy and {@link ThermostatStatus#isVoting() voting}.
      */
-    protected final Map<Thermostat, ThermostatSignal> unhappyVoting = new TreeMap<Thermostat, ThermostatSignal>();
+    protected final Map<Thermostat, ThermostatSignal> unhappyVoting = new TreeMap<>();
 
     /**
      * Mapping from the thermostat to its current failure condition.
@@ -66,14 +66,14 @@ public abstract class AbstractZoneController implements ZoneController {
      * As soon as a valid signal arrives from the thermostat, its entry is
      * removed from this map.
      */
-    protected Map<Thermostat, ThermostatSignal> failed = new TreeMap<Thermostat, ThermostatSignal>();
+    protected Map<Thermostat, ThermostatSignal> failed = new TreeMap<>();
 
     /**
      * Last known signal map.
      */
-    protected final Map<Thermostat, ThermostatSignal> lastKnownSignal = new TreeMap<Thermostat, ThermostatSignal>();
+    protected final Map<Thermostat, ThermostatSignal> lastKnownSignal = new TreeMap<>();
 
-    private final DataBroadcaster<Double> dataBrodacaster = new DataBroadcaster<Double>();
+    private final DataBroadcaster<Double> dataBrodacaster = new DataBroadcaster<>();
 
     /**
      * Zone controller output signal, computed in {@link #stateChanged(Thermostat, ThermostatSignal)}.
@@ -85,8 +85,7 @@ public abstract class AbstractZoneController implements ZoneController {
      *
      * @param name Zone controller name.
      */
-    public AbstractZoneController(String name) {
-
+    protected AbstractZoneController(String name) {
         this(name, null);
     }
 
@@ -96,22 +95,20 @@ public abstract class AbstractZoneController implements ZoneController {
      * @param name Zone controller name.
      * @param sources Thermostats to use as signal sources.
      */
-    public AbstractZoneController(String name, Set<Thermostat> sources) {
-
+    protected AbstractZoneController(String name, Set<Thermostat> sources) {
 
         this.name = name;
         signature = MessageDigestCache.getMD5(name).substring(0, 19);
 
-        signal = new DataSample<Double>(System.currentTimeMillis(), name, signature, 0d, null);
+        signal = new DataSample<>(System.currentTimeMillis(), name, signature, 0d, null);
 
         if (sources != null) {
 
-            for (Iterator<Thermostat> i = sources.iterator(); i.hasNext(); ) {
+            for (Thermostat source : sources) {
 
-                Thermostat source = i.next();
                 source.addConsumer(this);
 
-                logger.info("Consumer: " + source.getName() + ": " + source);
+                logger.info("Consumer: {}: {}", source.getName(), source);
                 name2ts.put(source.getName(), source);
             }
         }
@@ -120,7 +117,9 @@ public abstract class AbstractZoneController implements ZoneController {
     @Override
     public void consume(DataSample<ThermostatSignal> signal) {
 
-        assert(signal != null);
+        if ((signal == null)) {
+            throw new IllegalArgumentException("signal can't be null");
+        }
 
         Thermostat source = name2ts.get(signal.sourceName);
 
@@ -141,15 +140,12 @@ public abstract class AbstractZoneController implements ZoneController {
 
                 // DataSample.toString() is expensive,and DataSample is a component of ThermostatSignal
 
-                logger.trace("Source: " + source);
-                logger.trace("Signal: " + pv);
+                logger.trace("Source: {}", source);
+                logger.trace("Signal: {}", pv);
             }
 
-            if (lastKnownSignal.get(source) == null) {
-
-                // Let's pretend the signal didn't change, this should trigger the downflow correctly
-                lastKnownSignal.put(source, pv);
-            }
+            // Let's pretend the signal didn't change, this should trigger the downflow correctly
+            lastKnownSignal.putIfAbsent(source, pv);
 
             checkError(source, pv);
             boolean needBump = checkUnhappy(source, pv);
@@ -175,13 +171,13 @@ public abstract class AbstractZoneController implements ZoneController {
      */
     private void raise(Thermostat source) {
 
-        Set<Thermostat> tsSet = new TreeSet<Thermostat>(lastKnownSignal.keySet());
+        var tsSet = new TreeSet<>(lastKnownSignal.keySet());
 
         // It's already calling, no need to raise() it
         tsSet.remove(source);
 
-        for (Iterator<Thermostat> i = tsSet.iterator(); i.hasNext(); ) {
-            i.next().raise();
+        for (Thermostat thermostat : tsSet) {
+            thermostat.raise();
         }
     }
 
@@ -196,19 +192,19 @@ public abstract class AbstractZoneController implements ZoneController {
             unhappy.remove(source);
             unhappyVoting.remove(source);
 
-            if (!failed.containsKey(source)) {
+            if (!failed.containsKey(source)) { // NOSONAR Need the log message
 
                 // This is a fresh failure
-                logger.error("FIXME: process the error:" + signal);
+                logger.error("FIXME: process the error: {}", signal);
                 failed.put(source, signal);
             }
 
         } else {
 
-            if (failed.containsKey(source)) {
+            if (failed.containsKey(source)) { // NOSONAR Need the log message
 
                 // Failure has cleared
-                logger.info("Cleared failure condition for " + source);
+                logger.info("Cleared failure condition for {}", source);
                 failed.remove(source);
             }
         }
@@ -259,8 +255,7 @@ public abstract class AbstractZoneController implements ZoneController {
                     if (calling == 0) {
 
                         // Yep, that's the first voting thermostat
-
-                        logger.info("This HVAC run was initiated by " + source.getName());
+                        logger.info("This HVAC run was initiated by {}", source.getName());
 
                         return true;
                     }
@@ -283,12 +278,9 @@ public abstract class AbstractZoneController implements ZoneController {
      */
     private int countCalling(Collection<ThermostatSignal> signalSet) {
 
-        int count = 0;
+        var count = 0;
 
-        for (Iterator<ThermostatSignal> i = signalSet.iterator(); i.hasNext(); ) {
-
-            ThermostatSignal signal = i.next();
-
+        for (ThermostatSignal signal : signalSet) {
             count += signal.calling ? 1 : 0;
         }
 
@@ -310,24 +302,19 @@ public abstract class AbstractZoneController implements ZoneController {
         try {
 
             if (Double.compare(signal.sample, 0d) == 0 && !needBump) {
-
                 // Nobody's calling yet, demand is irrelevant
-                return new DataSample<Double>(timestamp, name, signature, 0d, null);
+                return new DataSample<>(timestamp, name, signature, 0d, null);
             }
 
             double demandVoting = 0;
 
             // Calculate demand for voting zones only for now
 
-            for (Iterator<Entry<Thermostat, ThermostatSignal>> i = unhappyVoting.entrySet().iterator(); i.hasNext();) {
-
-                Entry<Thermostat, ThermostatSignal> entry = i.next();
-                ThermostatSignal signal = entry.getValue();
-
-                demandVoting += signal.demand.sample;
+            for (var entry : unhappyVoting.entrySet()) {
+                demandVoting += entry.getValue().demand.sample;
             }
 
-            logger.debug("Voting demand: " + demandVoting);
+            logger.debug("Voting demand: {}", demandVoting);
 
             // Let's see what non-voting zones say
 
@@ -341,20 +328,20 @@ public abstract class AbstractZoneController implements ZoneController {
                 demandTotal += signal.demand.sample;
             }
 
-            logger.debug("Total demand: " + demandVoting);
+            logger.debug("Total demand: {}", demandVoting);
 
             // Bigger demand value wins
             // Just make sure voting and non-voting demand point in the same direction
 
             if (demandVoting * demandTotal >= 0 && Math.abs(demandTotal) > Math.abs(demandVoting)) {
 
-                logger.debug("Final demand: " + demandTotal);
-                return new DataSample<Double>(timestamp, name, signature, demandTotal, null);
+                logger.debug("Final demand: {}", demandTotal);
+                return new DataSample<>(timestamp, name, signature, demandTotal, null);
 
             } else {
 
-                logger.debug("Final demand: " + demandVoting);
-                return new DataSample<Double>(timestamp, name, signature, demandVoting, null);
+                logger.debug("Final demand: {}", demandVoting);
+                return new DataSample<>(timestamp, name, signature, demandVoting, null);
             }
 
         } finally {
@@ -363,14 +350,13 @@ public abstract class AbstractZoneController implements ZoneController {
     }
 
     private void stateChanged() {
-
         dataBrodacaster.broadcast(signal);
     }
 
     @Override
     public String toString() {
 
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
         sb.append("<");
         renderString(sb);
