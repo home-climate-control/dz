@@ -4,14 +4,14 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.utils.OWPath;
-
-import net.sf.dz3.instrumentation.Marker;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import com.homeclimatecontrol.jukebox.sem.EventSemaphore;
 import com.homeclimatecontrol.jukebox.sem.SemaphoreTimeoutException;
 import com.homeclimatecontrol.jukebox.service.ActiveService;
 import com.homeclimatecontrol.jukebox.util.CollectionSynchronizer;
+import net.sf.dz3.instrumentation.Marker;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.apache.logging.log4j.ThreadContext;
 
 /**
  * 1-Wire&reg; network monitor.
@@ -132,9 +130,9 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     @Override
     protected void execute() throws Throwable {
-        
+
         ThreadContext.push("execute");
-        
+
         try {
 
             while (isEnabled()) {
@@ -163,6 +161,10 @@ public class OneWireNetworkMonitor extends ActiveService {
                     }
 
                 } catch (Throwable t) {
+
+                    if (t instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
 
                     String message = t.getMessage();
 
@@ -201,7 +203,7 @@ public class OneWireNetworkMonitor extends ActiveService {
                     }
                 }
             }
-        
+
         } finally {
             ThreadContext.pop();
             ThreadContext.clearStack();
@@ -213,7 +215,7 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     @Override
     protected void shutdown() throws Throwable {
-        
+
         logger.info("stopped");
     }
 
@@ -226,13 +228,13 @@ public class OneWireNetworkMonitor extends ActiveService {
      * @throws Throwable if anything goes wrong.
      */
     private void browse() throws Throwable {
-        
+
         ThreadContext.push("browse");
         Marker m = new Marker("browse");
-        
+
         lock.writeLock().lock();
         m.checkpoint("got lock");
-        
+
         try {
 
             if (forcedRescan) {
@@ -262,10 +264,10 @@ public class OneWireNetworkMonitor extends ActiveService {
                 m2.close();
                 ThreadContext.pop();
             }
-            
+
             ThreadContext.push("handleChanges");
             Marker m3 = new Marker("handleChanges");
-            
+
             try {
 
                 handleDepartures(address2deviceLocal, address2pathLocal);
@@ -275,7 +277,7 @@ public class OneWireNetworkMonitor extends ActiveService {
                 address2path = address2pathLocal;
 
             } finally {
-                
+
                 m3.close();
                 ThreadContext.pop();
             }
@@ -577,7 +579,7 @@ public class OneWireNetworkMonitor extends ActiveService {
                 Integer.toHexString(hashCode()),
                 "1-Wire Network Monitor");
     }
-    
+
     /**
      * @deprecated This method is intended to help finding a memory leak and has no other reason to exist.
      */
@@ -587,7 +589,7 @@ public class OneWireNetworkMonitor extends ActiveService {
     }
     /**
      * Instrumentation method to track down a memory leak.
-     * 
+     *
      * @return Size of {@link #address2device} map.
      * @deprecated This method is intended to help finding a memory leak and has no other reason to exist.
      */
@@ -598,7 +600,7 @@ public class OneWireNetworkMonitor extends ActiveService {
 
     /**
      * Instrumentation method to track down a memory leak.
-     * 
+     *
      * @return Size of {@link #address2path} map.
      * @deprecated This method is intended to help finding a memory leak and has no other reason to exist.
      */

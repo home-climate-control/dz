@@ -214,6 +214,9 @@ public class ServoDamper extends AbstractDamper {
 
                 // squid:S1181: No.
                 logger.error("{}: failed to park at {}", servo.getName(), getParkPosition(), t);
+                if (t instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                }
 
             } finally {
                 ThreadContext.pop();

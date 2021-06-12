@@ -395,6 +395,10 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
                 } catch (Throwable t) {
 
+                    if (t instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
+
                     // squid:S1181: No.
                     logger.error("Poll broken:", t);
 
