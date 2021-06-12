@@ -1,16 +1,7 @@
 package net.sf.dz3.device.sensor.impl.xbee;
 
-import java.io.IOException;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
-
-import org.apache.logging.log4j.ThreadContext;
-
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import com.rapplogic.xbee.api.ApiId;
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
@@ -24,7 +15,6 @@ import com.rapplogic.xbee.api.XBeeTimeoutException;
 import com.rapplogic.xbee.api.zigbee.ZBNodeDiscover;
 import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
 import com.rapplogic.xbee.util.ByteUtils;
-
 import net.sf.dz3.device.factory.AbstractDeviceFactory;
 import net.sf.dz3.device.factory.SingleSwitchProxy;
 import net.sf.dz3.device.sensor.AnalogSensor;
@@ -34,8 +24,16 @@ import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.device.sensor.impl.ContainerMap;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.instrumentation.Marker;
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.IOException;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 
 /**
  * Factory for sensors and actuators implemented with XBee modules.
@@ -287,6 +285,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         } catch (InterruptedException ex) {
 
             logger.error("Huh? Interrupted?", ex);
+            Thread.currentThread().interrupt();
 
         } finally {
 

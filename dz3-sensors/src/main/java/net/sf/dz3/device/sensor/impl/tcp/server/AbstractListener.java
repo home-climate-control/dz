@@ -811,9 +811,9 @@ public abstract class AbstractListener extends PassiveService {
                         // We've probably been stopped
 
                         logger.info("Interrupted");
+                        Thread.currentThread().interrupt();
 
                         if (isEnabled()) {
-
                             stop();
                         }
 

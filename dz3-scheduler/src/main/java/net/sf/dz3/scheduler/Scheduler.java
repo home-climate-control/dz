@@ -163,8 +163,8 @@ public class Scheduler implements Runnable, StoppableService, JmxAware {
                 executorService.awaitTermination(10000, TimeUnit.MILLISECONDS);
 
             } catch (InterruptedException ex) {
-
                 logger.warn("Failed to shut down the scheduler cleanly", ex);
+                Thread.currentThread().interrupt();
             }
 
             logger.info("stopped");

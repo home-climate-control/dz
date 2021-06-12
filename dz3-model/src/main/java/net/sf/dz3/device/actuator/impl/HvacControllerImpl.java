@@ -418,6 +418,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
 
                     } catch (InterruptedException ex) {
                         logger.error("Interrupted, ignored", ex);
+                        Thread.currentThread().interrupt();
                     }
 
                 } finally {
