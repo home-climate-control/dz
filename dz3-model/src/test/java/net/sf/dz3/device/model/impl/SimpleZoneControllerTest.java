@@ -1,11 +1,9 @@
 package net.sf.dz3.device.model.impl;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneController;
-import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.impl.NullSensor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,15 +11,13 @@ import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Set;
 import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
 class SimpleZoneControllerTest {
 
@@ -32,31 +28,30 @@ class SimpleZoneControllerTest {
      * one thermostat using a {@link SimplePidController}.
      */
     @Test
-    public void test1H() throws InterruptedException {
+    void test1H() throws InterruptedException {
 
         ThreadContext.push("test1H");
 
         try {
 
-            long timestamp = 0;
+            var timestamp = 0L;
+            var tempSequence = new LinkedList<DataSample<Double>>();
 
-	    Queue<DataSample<Double>> tempSequence = new LinkedList<DataSample<Double>>();
+            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.0, null));
+            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.5, null));
+            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 21.0, null));
+            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.5, null));
+            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.0, null));
+            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 19.5, null));
+            tempSequence.add(new DataSample<Double>(timestamp,   "source", "signature", 19.0, null));
 
-	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.0, null));
-	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.5, null));
-	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 21.0, null));
-	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.5, null));
-	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.0, null));
-	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 19.5, null));
-	    tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 19.0, null));
-
-            Set<Thermostat> tsSet = new TreeSet<Thermostat>();
-            AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
-            AnalogSensor sensor = new NullSensor("address", 0);
-            Thermostat ts = new ThermostatModel("ts", sensor, controller);
+            var tsSet = new TreeSet<Thermostat>();
+            var controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
+            var sensor = new NullSensor("address", 0);
+            var ts = new ThermostatModel("ts", sensor, controller);
             tsSet.add(ts);
 
-            ZoneController zc = new SimpleZoneController("zc", tsSet);
+            var zc = new SimpleZoneController("zc", tsSet);
 
             logger.info("Zone controller: " + zc);
 
@@ -142,23 +137,23 @@ class SimpleZoneControllerTest {
      * doesn't indicate calling.
      */
     @Test
-    public void testColdStartNotCalling() {
+    void testColdStartNotCalling() {
 
         ThreadContext.push("testColdStart");
 
         try {
 
-            AbstractPidController c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
-            AnalogSensor s1 = new NullSensor("address1", 0);
-            Thermostat t1 = new ThermostatModel("ts1", s1, c1);
+            var c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
+            var s1 = new NullSensor("address1", 0);
+            var t1 = new ThermostatModel("ts1", s1, c1);
 
-            AbstractPidController c2 = new SimplePidController(25.0, 1.0, 0, 0, 0);
-            AnalogSensor s2 = new NullSensor("address2", 0);
-            Thermostat t2 = new ThermostatModel("ts2", s2, c2);
+            var c2 = new SimplePidController(25.0, 1.0, 0, 0, 0);
+            var s2 = new NullSensor("address2", 0);
+            var t2 = new ThermostatModel("ts2", s2, c2);
 
             assertThat(t1.getSignal().calling).isFalse();
 
-            Set<Thermostat> tsSet = new TreeSet<Thermostat>();
+            var tsSet = new TreeSet<Thermostat>();
 
             tsSet.add(t1);
             tsSet.add(t2);
@@ -171,10 +166,9 @@ class SimpleZoneControllerTest {
                 t2.consume(new DataSample<Double>(0, "source", "signature", 20.0, null));
                 assertThat(t2.getSignal().calling).isFalse();
 
-                DataSample<Double> signal = zc.getSignal();
+                var signal = zc.getSignal();
 
                 assertThat(signal).isNotNull();
-
                 assertThat(signal.sample).isEqualTo(0.0);
             }
 
@@ -190,28 +184,28 @@ class SimpleZoneControllerTest {
      * indicates calling.
      */
     @Test
-    public void testColdStartCalling() {
+    void testColdStartCalling() {
 
         ThreadContext.push("testColdStart");
 
         try {
 
-            AbstractPidController c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
-            AnalogSensor s1 = new NullSensor("address1", 0);
-            Thermostat t1 = new ThermostatModel("ts1", s1, c1);
+            var c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
+            var s1 = new NullSensor("address1", 0);
+            var t1 = new ThermostatModel("ts1", s1, c1);
 
-            AbstractPidController c2 = new SimplePidController(25.0, 1.0, 0, 0, 0);
-            AnalogSensor s2 = new NullSensor("address2", 0);
-            Thermostat t2 = new ThermostatModel("ts2", s2, c2);
+            var c2 = new SimplePidController(25.0, 1.0, 0, 0, 0);
+            var s2 = new NullSensor("address2", 0);
+            var t2 = new ThermostatModel("ts2", s2, c2);
 
             assertThat(t1.getSignal().calling).isFalse();
 
-            Set<Thermostat> tsSet = new TreeSet<Thermostat>();
+            var tsSet = new TreeSet<Thermostat>();
 
             tsSet.add(t1);
             tsSet.add(t2);
 
-            ZoneController zc = new SimpleZoneController("zc", tsSet);
+            var zc = new SimpleZoneController("zc", tsSet);
 
             logger.info("Zone controller: " + zc);
 
@@ -219,10 +213,9 @@ class SimpleZoneControllerTest {
                 t2.consume(new DataSample<Double>(0, "source", "signature", 30.0, null));
                 assertThat(t2.getSignal().calling).isTrue();
 
-                DataSample<Double> signal = zc.getSignal();
+                var signal = zc.getSignal();
 
                 assertThat(signal).isNotNull();
-
                 assertThat(signal.sample).isEqualTo(6.0);
             }
 
