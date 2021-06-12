@@ -140,8 +140,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
     }
 
     @Override
-    public final synchronized HvacMode getMode() {
-
+    public final HvacMode getMode() {
         return state.sample.mode;
     }
 
