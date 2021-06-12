@@ -298,8 +298,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 wait(1000);
 
             } catch (InterruptedException ex) {
-
                 logger.warn("Interrupted, ignored, waiting some more", ex);
+                Thread.currentThread().interrupt();
             }
         }
 

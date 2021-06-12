@@ -162,8 +162,8 @@ public class SingleSwitchDevice implements DataSink<Double> {
                         Thread.sleep(1000);
 
                     } catch (InterruptedException ex) {
-
                         logger.error("Interrupted, ignored", ex);
+                        Thread.currentThread().interrupt();
                     }
 
                 } finally {
