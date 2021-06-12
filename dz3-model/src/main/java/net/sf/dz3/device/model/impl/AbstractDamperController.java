@@ -17,7 +17,6 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -33,12 +32,12 @@ public abstract class AbstractDamperController implements DamperController, JmxA
     /**
      * Association from a thermostat to a damper.
      */
-    protected final Map<Thermostat, Damper> ts2damper = new HashMap<Thermostat, Damper>();
+    protected final Map<Thermostat, Damper> ts2damper = new HashMap<>();
 
     /**
      * Association from a thermostat to its last known signal.
      */
-    protected final Map<Thermostat, ThermostatSignal> ts2signal = new TreeMap<Thermostat, ThermostatSignal>();
+    protected final Map<Thermostat, ThermostatSignal> ts2signal = new TreeMap<>();
 
     /**
      * Last known unit signal.
@@ -51,7 +50,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
      * The only purpose is to be accessed via JMX ({@link #getDamperMap()}). Content is not used in any calculations.
      * Value is refreshed in {@link #shuffle(Map)}.
      */
-    private final Map<Damper, Double> lastMap = new HashMap<Damper, Double>();
+    private final Map<Damper, Double> lastMap = new HashMap<>();
 
     /**
      * Thermostat signal consumer.
@@ -61,7 +60,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
     /**
      * Mapping from thermostat name to thermostat instance - needed to support the {@link #tsListener}.
      */
-	private final Map<String, Thermostat> name2ts = new TreeMap<String, Thermostat>();
+	private final Map<String, Thermostat> name2ts = new TreeMap<>();
 
 	/**
      * Stays {@code true} until {@link #powerOff} is called.
@@ -74,7 +73,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
     /**
      * Create an instance with nothing attached.
      */
-    public AbstractDamperController() {
+    protected AbstractDamperController() {
 
     }
 
@@ -84,7 +83,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
      * @param unit Unit to listen to.
      * @param ts2damper Thermostats to listen to and dampers to associate them with.
      */
-    public AbstractDamperController(Unit unit, Map<Thermostat, Damper> ts2damper) {
+    protected AbstractDamperController(Unit unit, Map<Thermostat, Damper> ts2damper) {
 
         if (unit == null) {
             throw new IllegalArgumentException("unit can't be null");
@@ -96,28 +95,26 @@ public abstract class AbstractDamperController implements DamperController, JmxA
 
         unit.addConsumer(this);
 
-        for (Iterator<Thermostat> i = ts2damper.keySet().iterator(); i.hasNext(); ) {
+        for (Map.Entry<Thermostat, Damper> td : ts2damper.entrySet()) {
 
-        	Thermostat ts = i.next();
-            Damper d = ts2damper.get(ts);
+            var ts = td.getKey();
+            var d = td.getValue();
 
             put(ts, d);
 
             ts.addConsumer(tsListener);
 
-			name2ts.put(ts.getName(), ts);
+            name2ts.put(ts.getName(), ts);
         }
     }
 
     @Override
     public synchronized void put(Thermostat ts, Damper damper) {
-
         ts2damper.put(ts, damper);
     }
 
     @Override
     public synchronized void remove(Thermostat ts) {
-
         ts2damper.remove(ts);
     }
 
@@ -134,8 +131,8 @@ public abstract class AbstractDamperController implements DamperController, JmxA
             }
 
             ts2signal.put(source, signal);
-            logger.info("Demand: " + source.getName() + "=" + signal.demand.sample);
-            logger.info("ts2signal.size()=" + ts2signal.size());
+            logger.info("Demand: {}={}", source.getName(), signal.demand.sample);
+            logger.info("ts2signal.size()={}", ts2signal.size());
 
             sync();
 
@@ -158,7 +155,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
                 throw new IllegalArgumentException("signal can't be null");
             }
 
-            logger.info("UnitSignal: " + signal.sample);
+            logger.info("UnitSignal: {}", signal.sample);
 
             if (this.hvacSignal == null) {
 
@@ -178,7 +175,6 @@ public abstract class AbstractDamperController implements DamperController, JmxA
             } else if (!this.hvacSignal.sample.running && signal.sample.running) {
 
                 logger.info("Turning ON");
-
                 sync();
 
             } else if (this.hvacSignal.sample.running && !signal.sample.running) {
@@ -209,19 +205,18 @@ public abstract class AbstractDamperController implements DamperController, JmxA
 
         try {
 
-            logger.info("damperMap.size()=" + damperMap.size());
+            logger.info("damperMap.size()={}", damperMap.size());
 
-            for (Iterator<Damper> i = damperMap.keySet().iterator(); i.hasNext(); ) {
+            for (Map.Entry<Damper, Double> dp : damperMap.entrySet()) {
 
-                Damper d = i.next();
+                var damper = dp.getKey();
+                var position = dp.getValue();
 
                 try {
 
-                    double position = damperMap.get(d);
+                    logger.info("damper position: {}={}", damper.getName(), position);
 
-                    logger.info("damper position: " + d.getName() + "=" + position);
-
-                    d.set(position);
+                    damper.set(position);
 
                 } catch (IOException ex) {
 
@@ -229,7 +224,7 @@ public abstract class AbstractDamperController implements DamperController, JmxA
                     // are controlled by the same controller and it's the controller that is faulty.
                     // Don't want the HVAC to suffocate with all the dampers closed.
 
-                    logger.fatal("Can't set the damper position for " + d, ex);
+                    logger.fatal("Can't set the damper position for {}", damper, ex);
                 }
             }
 
@@ -250,23 +245,22 @@ public abstract class AbstractDamperController implements DamperController, JmxA
     @JmxAttribute(description = "Damper positions")
     public synchronized String[] getDamperMap() {
 
-        String[] result = new String[lastMap.size()];
+        var result = new String[lastMap.size()];
+        var resultMap = new TreeMap<String, Double>();
 
-        Map<String, Double> resultMap = new TreeMap<String, Double>();
+        for (Map.Entry<Damper, Double> dp : lastMap.entrySet()) {
 
-        for (Iterator<Damper> i = lastMap.keySet().iterator(); i.hasNext(); ) {
+            var damper = dp.getKey();
+            Double position = dp.getValue();
 
-            Damper d = i.next();
-            Double position = lastMap.get(d);
-
-            resultMap.put(d.getName(), position);
+            resultMap.put(damper.getName(), position);
         }
 
-        int offset = 0;
-        for (Iterator<String> i = resultMap.keySet().iterator(); i.hasNext(); ) {
+        var offset = 0;
+        for (Map.Entry<String, Double> np : resultMap.entrySet()) {
 
-            String name = i.next();
-            Double position = resultMap.get(name);
+            var name = np.getKey();
+            var position = np.getValue();
 
             result[offset++] = name + "=" + position;
         }
@@ -360,9 +354,11 @@ public abstract class AbstractDamperController implements DamperController, JmxA
 		@Override
 		public void consume(DataSample<ThermostatSignal> signal) {
 
-			assert(signal != null);
+            if ((signal == null)) {
+                throw new IllegalArgumentException("signal can't be null");
+            }
 
-			Thermostat source = name2ts.get(signal.sourceName);
+			var source = name2ts.get(signal.sourceName);
 
 			if (source == null) {
 				throw new IllegalArgumentException("Don't know anything about '" + signal.sourceName + "'");
