@@ -14,7 +14,8 @@ Home Climate Control, a.k.a. DZ
 
 ## Psst!
 
-Dallas Semiconductor 1-Wire API that was integrated into DZ codebase some 20 years ago, survived, was hardened and optimized, is now a separate project again, here: [https://github.com/home-climate-control/owapi-reborn/](https://github.com/home-climate-control/owapi-reborn/)
+* There's a fresh new driver for the [Pimoroni Automation HAT](https://learn.pimoroni.com/tutorial/sandyj/getting-started-with-automation-hat-and-phat) that is about to become integrated with DZ, here: https://github.com/home-climate-control/automation-hat-driver. This is the most compact HVAC relay solution so far.
+* Dallas Semiconductor 1-Wire API that was integrated into DZ codebase some 20 years ago, survived, was hardened and optimized, is now a separate project again, here: [https://github.com/home-climate-control/owapi-reborn/](https://github.com/home-climate-control/owapi-reborn/)
 
 # Pardon Our Dust...
 
