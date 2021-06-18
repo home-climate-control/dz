@@ -26,12 +26,19 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
     /**
      * Create an instance with some switches possibly reverse.
      *
-     * @param hatWrapper Automation HAT wrapper instance. Might not be needed later.
      * @param reverseMode {@code true} if the "off" mode position corresponds to logical one.
      * @param reverseRunning {@code true} if the "off" running position corresponds to logical one.
      * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
      */
     public HvacDriverHeatpumpHAT(
+            boolean reverseMode,
+            boolean reverseRunning,
+            boolean reverseFan) throws IOException {
+
+        this(AutomationHatWrapper.getInstance(), reverseMode, reverseRunning, reverseFan);
+    }
+
+    private HvacDriverHeatpumpHAT(
             AutomationHatWrapper hatWrapper,
             boolean reverseMode,
             boolean reverseRunning,
