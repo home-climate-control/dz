@@ -12,7 +12,9 @@ import java.util.List;
 
 /**
  * Wrapper to convert independent abstractions of {@link com.homeclimatecontrol.autohat.AutomationHAT}
- * into ones acceptable for DZ.
+ * into ones acceptable for DZ, and make them available at a proper point in DZ entities' lifecycle.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class AutomationHatWrapper {
 

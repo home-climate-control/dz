@@ -1,5 +1,6 @@
 package net.sf.dz4.device.actuator.pi.autohat;
 
+import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.device.actuator.impl.HvacDriverHeatpump;
 
@@ -7,6 +8,9 @@ import java.io.IOException;
 
 /**
  * Single stage heatpump driver based on Pimoroni Automation HAT.
+ *
+ * In addition to flipping relays, this implementation will use the {@code Power} and {@code Comms} lights
+ * to indicate the fan and condenser status, respectively. {@code Warn} light is not used by this implementation.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -48,5 +52,31 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
                 "Single Stage Heatpump Driver (energize to heat)",
                 Integer.toHexString(hashCode()),
                 "Controls single stage heat pump connected to Pimoroni Automation HAT");
+    }
+
+    /**
+     * Do what the superclass does, and flip the {@code Comms} (blue) light on when on.
+     *
+     * @param stage Stage to set.
+     *
+     * @throws IOException If there was a problem communicating with hardware.
+     */
+    @Override
+    protected synchronized void doSetStage(int stage) throws IOException {
+        super.doSetStage(stage);
+        PimoroniAutomationHAT.getInstance().status().comms().write(stage > 0);
+    }
+
+    /**
+     * Do what the superclass does, and flip the {@code Power} (green) light on when on.
+     *
+     * @param speed Fan speed to set.
+     *
+     * @throws IOException If there was a problem communicating with hardware.
+     */
+    @Override
+    protected synchronized void doSetFanSpeed(double speed) throws IOException {
+        super.doSetFanSpeed(speed);
+        PimoroniAutomationHAT.getInstance().status().power().write(speed > 0);
     }
 }
