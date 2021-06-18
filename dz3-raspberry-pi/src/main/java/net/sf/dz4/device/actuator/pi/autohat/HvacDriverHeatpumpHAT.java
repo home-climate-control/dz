@@ -35,8 +35,8 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
 
         super(
                 hatWrapper.relay().get(0), reverseMode,
-                hatWrapper.relay().get(0), reverseRunning,
-                hatWrapper.relay().get(0), reverseFan
+                hatWrapper.relay().get(1), reverseRunning,
+                hatWrapper.relay().get(2), reverseFan
         );
     }
 
