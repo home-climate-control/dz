@@ -117,7 +117,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
      *
      * @param mode Mode to set, as a string.
      */
-    private void setMode(String mode) {
+    private synchronized void setMode(String mode) {
 
         if ("off".equalsIgnoreCase(mode)) {
 
@@ -140,7 +140,8 @@ public class HvacControllerImpl implements HvacController, JmxAware {
     }
 
     @Override
-    public final HvacMode getMode() {
+    public final synchronized HvacMode getMode() {
+
         return state.sample.mode;
     }
 
