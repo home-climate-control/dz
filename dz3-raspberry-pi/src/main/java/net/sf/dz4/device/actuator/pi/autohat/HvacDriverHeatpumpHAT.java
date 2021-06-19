@@ -26,6 +26,9 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
     /**
      * Create an instance with some switches possibly reverse.
      *
+     * You probably don't want to use this constructor, since the HAT offers both NO and NC contacts, it would be
+     * better to just use the other pair.
+     *
      * @param reverseMode {@code true} if the "off" mode position corresponds to logical one.
      * @param reverseRunning {@code true} if the "off" running position corresponds to logical one.
      * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
