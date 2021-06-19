@@ -91,7 +91,7 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
             throw new IllegalArgumentException("intensity value should be in 0..1 range (" + relayLightsIntensity + " given)");
         }
 
-        for (int offset = 0; offset < 3; offset++) {
+        for (var offset = 0; offset < 3; offset++) {
             var r = PimoroniAutomationHAT.getInstance().relay().get(offset);
             r.light().get(0).intensity().write(relayLightsIntensity);
             r.light().get(1).intensity().write(relayLightsIntensity);
