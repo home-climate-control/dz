@@ -82,7 +82,7 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
     }
 
     @JmxAttribute(description = "Relay lights intensity. 1.0 is VERY bright.")
-    public double getRelayLightIntensity() {
+    public double getRelayLightsIntensity() {
         return relayLightsIntensity;
     }
 
@@ -101,7 +101,7 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
     }
 
     @JmxAttribute(description = "Status lights intensity. 1.0 is VERY bright.")
-    public double getStatusLightIntensity() {
+    public double getStatusLightsIntensity() {
         return statusLightsIntensity;
     }
 
