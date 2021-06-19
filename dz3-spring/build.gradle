@@ -9,7 +9,7 @@ application {
 
 dependencies {
 
-    implementation 'org.springframework:spring:2.5.6'
+    implementation 'org.springframework:spring-context:5.3.7'
     implementation project(':dz3-model')
 
     // Enable the Swing console
@@ -30,6 +30,12 @@ dependencies {
     // Enable remote control over HTTP
     runtimeOnly project(':dz3-http')
 
+    // Enable remote control via WebUI
+    runtimeOnly project(':dz3-webui')
+
     // Enable Google Calendar integration
     runtimeOnly project(':dz3-scheduler-gcal-v3')
+
+    // Enable Raspberrry Pi specific hardware integration
+    runtimeOnly project(':dz3-raspberry-pi')
 }

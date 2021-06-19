@@ -298,8 +298,8 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 wait(1000);
 
             } catch (InterruptedException ex) {
-
                 logger.warn("Interrupted, ignored, waiting some more", ex);
+                Thread.currentThread().interrupt();
             }
         }
 
@@ -394,6 +394,10 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                     logger.debug("Arrival/departure during poll, ignored", ex);
 
                 } catch (Throwable t) {
+
+                    if (t instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
 
                     // squid:S1181: No.
                     logger.error("Poll broken:", t);

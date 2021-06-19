@@ -17,7 +17,7 @@ public class HvacUnit extends AmbientTemperatureAware {
     /**
      * This unit's output, in watts.
      *
-     * @see http://en.wikipedia.org/wiki/Watt
+     * @see <a href="http://en.wikipedia.org/wiki/Watt">Watt</a>
      */
     private double capacity;
 
@@ -101,12 +101,12 @@ public class HvacUnit extends AmbientTemperatureAware {
      *
      * @return Energy produced, in joules.
      *
-     * @see http://en.wikipedia.org/wiki/Joule
+     * @see <a href="http://en.wikipedia.org/wiki/Joule">Joule</a>
      */
     double produce(double internalTemperature, long millis) {
 
-        double internal = getProduction() * (millis / 1000);
-        double leak = getAmbientLeak(internalTemperature, heatTolerance) * (millis / 1000);
+        double internal = getProduction() * (millis / 1000d);
+        double leak = getAmbientLeak(internalTemperature, heatTolerance) * (millis / 1000d);
 
         return  internal + leak;
     }

@@ -139,7 +139,7 @@ public class Container {
                 source = "file:" + source;
             }
 
-            AbstractApplicationContext applicationContext = new FileSystemXmlApplicationContext(new String[]{source});
+            AbstractApplicationContext applicationContext = new FileSystemXmlApplicationContext(source);
 
             applicationContext.registerShutdownHook();
             return true;
@@ -154,7 +154,7 @@ public class Container {
     private boolean loadFromClasspath(String source) {
         try {
 
-            AbstractApplicationContext applicationContext = new ClassPathXmlApplicationContext(new String[]{source});
+            AbstractApplicationContext applicationContext = new ClassPathXmlApplicationContext(source);
 
             applicationContext.registerShutdownHook();
             return true;

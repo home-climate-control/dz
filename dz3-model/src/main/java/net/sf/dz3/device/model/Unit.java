@@ -13,7 +13,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
  *
  * This abstraction is not {@link HvacMode} aware, it can only support one mode - either heating, or cooling.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2010
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface Unit extends DataSource<UnitSignal>, DataSink<Double>, Comparable<Unit>, JmxAware {
 
@@ -42,4 +42,12 @@ public interface Unit extends DataSource<UnitSignal>, DataSink<Double>, Comparab
      */
     @Override
     void consume(DataSample<Double> signal);
+
+    /**
+     * Get current unit's signal.
+     *
+     * @return Current unit's signal.
+     */
+    @JmxAttribute(description = "Unit signal")
+    UnitSignal getSignal();
 }

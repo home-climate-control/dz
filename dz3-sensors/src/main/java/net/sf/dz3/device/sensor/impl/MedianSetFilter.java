@@ -1,5 +1,16 @@
 package net.sf.dz3.device.sensor.impl;
 
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.AnalogFilter;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -13,18 +24,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.device.sensor.AnalogFilter;
-import net.sf.dz3.device.sensor.AnalogSensor;
-import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-
 /**
  * A median filter on a set of sources.
  *
@@ -32,7 +31,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * will yield the median of all available last readings from all the sensors in
  * the set.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2012-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2012-2021
  */
 public class MedianSetFilter implements AnalogFilter {
 
@@ -70,7 +69,7 @@ public class MedianSetFilter implements AnalogFilter {
      * @param source Data source set.
      */
     public MedianSetFilter(String address, Set<AnalogSensor> source) {
-        this(address, source, 60 * 1000);
+        this(address, source, 60 * 1000L);
     }
 
     /**

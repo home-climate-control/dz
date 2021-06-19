@@ -1,8 +1,8 @@
 package net.sf.dz3.device.actuator.impl;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.device.actuator.HvacDriver;
 import net.sf.dz3.device.model.HvacMode;
+import net.sf.dz3.device.model.impl.HvacDriverSignal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -23,7 +23,7 @@ public abstract class AbstractHvacDriver implements HvacDriver {
     private HvacState expected;
     private HvacState actual;
 
-    public AbstractHvacDriver() {
+    protected AbstractHvacDriver() {
 
         expected = new HvacState();
         actual = new HvacState();
@@ -51,12 +51,12 @@ public abstract class AbstractHvacDriver implements HvacDriver {
 
         try {
 
-            logger.info("mode=" + mode);
-            expected.mode = mode;
+            logger.info("mode={}", mode);
+            expected = new HvacState(mode, expected.stage, expected.speed);
 
             doSetMode(mode);
 
-            actual.mode = mode;
+            actual = new HvacState(mode, actual.stage, actual.speed);
 
         } finally {
             ThreadContext.pop();
@@ -70,12 +70,12 @@ public abstract class AbstractHvacDriver implements HvacDriver {
 
         try {
 
-            logger.info("stage=" + stage);
-            expected.stage = stage;
+            logger.info("stage={}", stage);
+            expected = new HvacState(expected.mode, stage, expected.speed);
 
             doSetStage(stage);
 
-            actual.stage = stage;
+            actual = new HvacState(actual.mode, stage, actual.speed);
 
         } finally {
             ThreadContext.pop();
@@ -89,12 +89,12 @@ public abstract class AbstractHvacDriver implements HvacDriver {
 
         try {
 
-            logger.info("fanSpeed=" + speed);
-            expected.speed = speed;
+            logger.info("fanSpeed={}", speed);
+            expected = new HvacState(expected.mode, expected.stage, speed);
 
             doSetFanSpeed(speed);
 
-            actual.speed = speed;
+            actual = new HvacState(actual.mode, actual.stage, speed);
 
         } finally {
             ThreadContext.pop();
@@ -107,27 +107,37 @@ public abstract class AbstractHvacDriver implements HvacDriver {
 
     protected abstract void doSetFanSpeed(double speed) throws IOException;
 
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-
-        return new JmxDescriptor(
-                "dz",
-                "Null HVAC Driver",
-                Integer.toHexString(hashCode()),
-                "Pretends to be the actual HVAC driver");
-    }
-
     protected static class HvacState {
 
-        public HvacMode mode;
-        public int stage;
-        public double speed;
+        public final HvacMode mode;
+        public final int stage;
+        public final double speed;
 
         public HvacState() {
-
             mode = HvacMode.OFF;
             stage = 0;
             speed = 0;
         }
+
+        public HvacState(HvacMode mode, int stage, double speed) {
+
+            if (stage < 0) {
+                // Hmm... what if it is much greater than 0? :O
+                throw new IllegalArgumentException("stage can't be negative (" + stage + " provided)");
+            }
+
+            if (speed < 0 || speed > 1) {
+                throw new IllegalArgumentException("speed outside of 0..1 range (" + speed + " provided)");
+            }
+
+            this.mode = mode;
+            this.stage = stage;
+            this.speed = speed;
+        }
+    }
+
+    @Override
+    public HvacDriverSignal getSignal() {
+        return new HvacDriverSignal(getMode(), getStage(), getFanSpeed());
     }
 }

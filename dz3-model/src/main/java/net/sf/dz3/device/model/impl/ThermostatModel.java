@@ -387,7 +387,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
 
     @JmxAttribute(description = "Thermostat status")
     public ThermostatStatus getStatus() {
-        return new ThermostatStatusImpl(getSetpoint(), getControlSignal(), getDumpPriority(), isOn(), isOnHold(), isVoting(), isError());
+        return new ThermostatStatusImpl(getName(), getSetpoint(), getControlSignal(), getDumpPriority(), isOn(), isOnHold(), isVoting(), isError());
     }
 
     private void stateChanged() {

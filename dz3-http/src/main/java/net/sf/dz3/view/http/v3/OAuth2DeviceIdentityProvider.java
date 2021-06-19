@@ -1,5 +1,18 @@
 package net.sf.dz3.view.http.v3;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3.view.http.common.HttpClientFactory;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,29 +23,20 @@ import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import net.sf.dz3.instrumentation.Marker;
-import net.sf.dz3.view.http.common.HttpClientFactory;
-
 /**
- * Stateless {@link https://oauth.net/2/device-flow/ OAuth 2.0 Device Flow} identity provider.
- * 
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * Stateless <a href="https://oauth.net/2/device-flow/"> OAuth 2.0 Device Flow</a> identity provider.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OAuth2DeviceIdentityProvider {
 
+    private static final String OAUTH_CLIENT_ID = "client_id";
+    private static final String OAUTH_SCOPE = "scope";
+
     private final Logger logger = LogManager.getLogger(getClass());
+
+    private final Gson gson = new Gson();
+    private final Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
 
     private final HttpClient httpClient = HttpClientFactory.createClient();
 
@@ -50,7 +54,7 @@ public class OAuth2DeviceIdentityProvider {
     public String getIdentity(String clientId, String clientSecret, File refreshTokenFile, String requesterIdentity) throws IOException, InterruptedException {
 
         ThreadContext.push("getIdentity");
-        Marker m = new Marker("getIdentity");
+        var m = new Marker("getIdentity");
 
         try {
 
@@ -58,22 +62,18 @@ public class OAuth2DeviceIdentityProvider {
             // VT: FIXME: Add sanity checks for clientSecret
             // VT: FIXME: Add sanity checks for refreshTokenFileName
 
-            String refreshToken = getString(refreshTokenFile, "refresh token", true);
+            var refreshToken = getString(refreshTokenFile, "refresh token", true);
             String accessToken;
 
             if (refreshToken == null) {
-
                 accessToken = acquire(httpClient, clientId, clientSecret, refreshTokenFile, requesterIdentity);
-
             } else {
-
                 accessToken = refresh(httpClient, clientId, clientSecret, refreshToken);
             }
 
             return getIdentityByToken(httpClient, accessToken);
 
         } finally {
-
             m.close();
             ThreadContext.pop();
         }
@@ -95,21 +95,20 @@ public class OAuth2DeviceIdentityProvider {
 
         try {
 
-            logger.debug("target: " + target);
+            logger.debug("target: {}", target);
 
             // Create the directory if it doesn't exist
-            File dir = target.getParentFile();
+            var dir = target.getParentFile();
 
             if (!dir.exists()) {
-                if (!dir.mkdirs()) {
+                if (!dir.mkdirs()) { // NOSONAR readability
                     throw new IOException("couldn't create " + dir);
                 }
             }
 
-            PrintWriter pw = new PrintWriter(new FileWriter(target));
-
-            pw.println(token);
-            pw.close();
+            try ( var pw = new PrintWriter(new FileWriter(target))) {
+                pw.println(token);
+            }
 
         } finally {
             ThreadContext.pop();
@@ -131,17 +130,12 @@ public class OAuth2DeviceIdentityProvider {
      */
     private String getString(File source, String title, boolean allowMissing) throws IOException {
 
-        if (!source.exists()) {
-
-            if (allowMissing) {
-
-                logger.warn(source + " doesn't exist, assuming no " + title);
-                return null;
-            }
+        if (!source.exists() && allowMissing) {
+            logger.warn("{} doesn't exist, assuming no {}", source, title);
+            return null;
         }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(source))) {
-
+        try (var br = new BufferedReader(new FileReader(source))) {
             return br.readLine();
         }
     }
@@ -163,43 +157,28 @@ public class OAuth2DeviceIdentityProvider {
             // Step 1
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-1-request-device-and-user-codes
 
-            URIBuilder builder = new URIBuilder("https://accounts.google.com/o/oauth2/device/code");
+            var builder = new URIBuilder("https://accounts.google.com/o/oauth2/device/code");
 
-            builder.addParameter("client_id", clientId);
-            builder.addParameter("scope", "email");
+            builder.addParameter(OAUTH_CLIENT_ID, clientId);
+            builder.addParameter(OAUTH_SCOPE, "email");
 
-            HttpPost post = new HttpPost(builder.toString());
+            var post = new HttpPost(builder.toString());
 
             post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            HttpResponse rsp = httpClient.execute(post);
-            int rc = rsp.getStatusLine().getStatusCode();
+            var rsp = httpClient.execute(post);
 
             // Step 2
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-2-handle-the-authorization-server-response
 
-            logger.debug("RC=" + rc);
-
-            if (rc != 200) {
-
-                logger.error("HTTP rc=" + rc + ", text follows:");
-                logger.error(EntityUtils.toString(rsp.getEntity()));
-
-                throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
-            }
-
-            String responseJson = EntityUtils.toString(rsp.getEntity());
-            Gson gson = new Gson();
-            Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
-            Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
-
-            logger.debug("response: " + responseMap);
-
-            String verificationUrl = responseMap.get("verification_url");
-            String userCode =  responseMap.get("user_code");
-            int interval = Integer.parseInt(responseMap.get("interval").toString());
+            var responseMap = getResponseMap(rsp);
+            var verificationUrl = responseMap.get("verification_url");
+            var userCode =  responseMap.get("user_code");
+            var interval = Integer.parseInt(responseMap.get("interval"));
 
             // VT: FIXME: The loop will break after "expires_in"
+
+            String responseJson;
 
             while (true) {
 
@@ -210,11 +189,11 @@ public class OAuth2DeviceIdentityProvider {
 
                 // VT: NOTE: Let's set the level to "warn" so it stands out
 
-                logger.warn("OAuth 2.0 login to " + requesterIdentity + ": action required" );
-                logger.warn("Please go to " + verificationUrl);
-                logger.warn("and enter this code: " + userCode);
+                logger.warn("OAuth 2.0 login to {}: action required", requesterIdentity );
+                logger.warn("Please go to {}", verificationUrl);
+                logger.warn("and enter this code: {}", userCode);
 
-                Thread.sleep(interval * 1000);
+                Thread.sleep(interval * 1000L);
 
                 {
                     // Step 4
@@ -225,7 +204,7 @@ public class OAuth2DeviceIdentityProvider {
 
                     builder = new URIBuilder("https://www.googleapis.com/oauth2/v4/token");
 
-                    builder.addParameter("client_id", clientId);
+                    builder.addParameter(OAUTH_CLIENT_ID, clientId);
                     builder.addParameter("client_secret", clientSecret);
                     builder.addParameter("code", responseMap.get("device_code"));
                     builder.addParameter("grant_type", "http://oauth.net/grant_type/device/1.0");
@@ -234,34 +213,33 @@ public class OAuth2DeviceIdentityProvider {
                     post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
                     rsp = httpClient.execute(post);
-                    rc = rsp.getStatusLine().getStatusCode();
-                    String responseBody = EntityUtils.toString(rsp.getEntity());
+                    var rc = rsp.getStatusLine().getStatusCode();
+                    var responseBody = EntityUtils.toString(rsp.getEntity());
 
-                    logger.debug("RC=" + rc);
+                    logger.debug("RC={}", rc);
 
                     if (rc != 200) {
 
                         if (rc == 428) {
 
-                            logger.info("waiting for user response, will retry in " + interval + " seconds");
+                            logger.info("waiting for user response, will retry in {} seconds", interval);
 
                         } else {
 
                             // VT: NOTE: These are not really expected, but let's hope that the user
                             // figures out what to with them
 
-                            logger.error("Unexpected: HTTP rc=" + rc + ", text follows:");
+                            logger.error("Unexpected: HTTP rc={}, text follows:", rc);
                             logger.error(responseBody);
 
-                            logger.warn("will retry in " + interval + " seconds");
+                            logger.warn("will retry in {} seconds", interval);
                         }
                     }
 
-                    responseJson = responseBody;
-
-                    logger.debug("response: " + responseJson);
+                    logger.debug("response: {}", responseBody);
 
                     if (rc == 200) {
+                        responseJson = responseBody;
                         break;
                     }
                 }
@@ -307,6 +285,38 @@ public class OAuth2DeviceIdentityProvider {
     }
 
     /**
+     * Check the HTTP response and throw an exception (after logging the response) if it is not 200.
+     *
+     * @param rsp Response to check.
+     *
+     * @return Response map.
+     *
+     * @throws IOException if there's an I/O problem.
+     * @throws IllegalStateException if the response is not 200.
+     */
+    private Map<String, String> getResponseMap(HttpResponse rsp) throws IOException {
+
+        var rc = rsp.getStatusLine().getStatusCode();
+
+        logger.debug("RC={}", + rc);
+
+        if (rc != 200) {
+
+            logger.error("HTTP rc={}, text follows:", rc);
+            logger.error(EntityUtils.toString(rsp.getEntity())); // NOSONAR Too much hassle for such a simple thing
+
+            throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
+        }
+
+        var responseJson = EntityUtils.toString(rsp.getEntity());
+        Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
+
+        logger.debug("response: {}", responseMap);
+
+        return responseMap;
+    }
+
+    /**
      * @return {@code access_token}.
      */
     private String refresh(HttpClient httpClient, String clientId, String clientSecret, String refreshToken) throws IOException {
@@ -315,35 +325,18 @@ public class OAuth2DeviceIdentityProvider {
 
         try {
 
-            URIBuilder builder = new URIBuilder("https://www.googleapis.com/oauth2/v4/token");
+            var builder = new URIBuilder("https://www.googleapis.com/oauth2/v4/token");
 
-            builder.addParameter("client_id", clientId);
+            builder.addParameter(OAUTH_CLIENT_ID, clientId);
             builder.addParameter("client_secret", clientSecret);
             builder.addParameter("refresh_token", refreshToken);
             builder.addParameter("grant_type", "refresh_token");
 
-            HttpPost post = new HttpPost(builder.toString());
+            var post = new HttpPost(builder.toString());
             post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            HttpResponse rsp = httpClient.execute(post);
-            int rc = rsp.getStatusLine().getStatusCode();
-
-            logger.debug("RC=" + rc);
-
-            if (rc != 200) {
-
-                logger.error("HTTP rc=" + rc + ", text follows:");
-                logger.error(EntityUtils.toString(rsp.getEntity()));
-
-                throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
-            }
-
-            String responseJson = EntityUtils.toString(rsp.getEntity());
-            Gson gson = new Gson();
-            Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
-            Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
-
-            logger.debug("response: " + responseMap);
+            var rsp = httpClient.execute(post);
+            var responseMap = getResponseMap(rsp);
 
             return responseMap.get("access_token");
 
@@ -370,32 +363,14 @@ public class OAuth2DeviceIdentityProvider {
 
         try {
 
-            HttpPost post = new HttpPost("https://www.googleapis.com/oauth2/v3/userinfo");
+            var post = new HttpPost("https://www.googleapis.com/oauth2/v3/userinfo");
 
             post.setHeader("Content-Type", "application/x-www-form-urlencoded");
             post.setHeader("Authorization", "Bearer " + accessToken);
 
-            HttpResponse rsp = httpClient.execute(post);
-            int rc = rsp.getStatusLine().getStatusCode();
-
-            logger.debug("RC=" + rc);
-
-            if (rc != 200) {
-
-                logger.error("HTTP rc=" + rc + ", text follows:");
-                logger.error(EntityUtils.toString(rsp.getEntity()));
-
-                throw new IllegalStateException("OAuth 2.0 for TV and Limited-Input Device Applications: couldn't finish the sequence");
-            }
-
-            String responseJson = EntityUtils.toString(rsp.getEntity());
-
-            logger.debug("response: " + responseJson);
-
-            Gson gson = new Gson();
-            Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
-            Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
-            String email = responseMap.get("email");
+            var rsp = httpClient.execute(post);
+            var responseMap = getResponseMap(rsp);
+            var email = responseMap.get("email");
 
             if (email == null || "".equals(email)) {
                 throw new IllegalStateException("null or empty email, shouldn't have ended up here");
