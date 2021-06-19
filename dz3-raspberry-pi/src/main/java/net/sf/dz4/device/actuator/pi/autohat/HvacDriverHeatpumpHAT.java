@@ -1,6 +1,7 @@
 package net.sf.dz4.device.actuator.pi.autohat;
 
 import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
+import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.device.actuator.impl.HvacDriverHeatpump;
 
@@ -15,6 +16,19 @@ import java.io.IOException;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
+
+    /**
+     * Default relay light intensity (approximately {@code 0x11}).
+     *
+     * These lights are small and are next to each other, making them brighter will not make them
+     * more visible.
+     */
+    private double relayLightsIntensity = 0.066;
+
+    /**
+     * Default status light intensity (approximately {@code 0x22}).
+     */
+    private double statusLightsIntensity = 0.13;
 
     /**
      * Create an instance with all straight switches.
@@ -45,13 +59,16 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
             AutomationHatWrapper hatWrapper,
             boolean reverseMode,
             boolean reverseRunning,
-            boolean reverseFan) {
+            boolean reverseFan) throws IOException {
 
         super(
                 hatWrapper.relay().get(0), reverseMode,
                 hatWrapper.relay().get(1), reverseRunning,
                 hatWrapper.relay().get(2), reverseFan
         );
+
+        setRelayLightsIntensity(relayLightsIntensity);
+        setStatusLightsIntensity(statusLightsIntensity);
     }
 
     @Override
@@ -62,6 +79,44 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
                 "Single Stage Heatpump Driver (energize to heat)",
                 Integer.toHexString(hashCode()),
                 "Controls single stage heat pump connected to Pimoroni Automation HAT");
+    }
+
+    @JmxAttribute(description = "Relay lights intensity. 1.0 is VERY bright.")
+    public double getRelayLightIntensity() {
+        return relayLightsIntensity;
+    }
+
+    public void setRelayLightsIntensity(double relayLightsIntensity) throws IOException {
+        if (relayLightsIntensity < 0 || relayLightsIntensity > 1) {
+            throw new IllegalArgumentException("intensity value should be in 0..1 range (" + relayLightsIntensity + " given)");
+        }
+
+        for (int offset = 0; offset < 3; offset++) {
+            var r = PimoroniAutomationHAT.getInstance().relay().get(offset);
+            r.light().get(0).intensity().write(relayLightsIntensity);
+            r.light().get(1).intensity().write(relayLightsIntensity);
+        }
+
+        this.relayLightsIntensity = relayLightsIntensity;
+    }
+
+    @JmxAttribute(description = "Status lights intensity. 1.0 is VERY bright.")
+    public double getStatusLightIntensity() {
+        return statusLightsIntensity;
+    }
+
+    public void setStatusLightsIntensity(double statusLightsIntensity) throws IOException {
+        if (statusLightsIntensity < 0 || statusLightsIntensity > 1) {
+            throw new IllegalArgumentException("intensity value should be in 0..1 range (" + statusLightsIntensity + " given)");
+        }
+
+        var hat = PimoroniAutomationHAT.getInstance();
+
+        // We just control Power and Comms, but not Warn - that's somebody else's business
+        hat.status().power().intensity().write(statusLightsIntensity);
+        hat.status().comms().intensity().write(statusLightsIntensity);
+
+        this.statusLightsIntensity = statusLightsIntensity;
     }
 
     /**
