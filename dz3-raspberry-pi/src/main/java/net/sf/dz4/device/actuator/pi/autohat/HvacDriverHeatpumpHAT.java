@@ -144,4 +144,14 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
         super.doSetFanSpeed(speed);
         PimoroniAutomationHAT.getInstance().status().power().write(speed > 0);
     }
+
+    @Override
+    public synchronized void powerOff() {
+        super.powerOff();
+        try {
+            PimoroniAutomationHAT.getInstance().close();
+        } catch (Exception ex) {
+            logger.fatal("HAT failure at shutdown, nothing we can do", ex);
+        }
+    }
 }
