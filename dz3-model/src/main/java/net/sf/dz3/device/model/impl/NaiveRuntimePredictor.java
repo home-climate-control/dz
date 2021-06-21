@@ -123,7 +123,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
                 signal.timestamp,
                 signal.sourceName,
                 signal.signature,
-                new UnitRuntimePredictionSignal(signal.sample, left, arrival),
+                new UnitRuntimePredictionSignal(signal.sample, k, left, arrival),
                 null);
     }
 
@@ -137,7 +137,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
                 signal.timestamp,
                 signal.sourceName,
                 signal.signature,
-                new UnitRuntimePredictionSignal(signal.sample, null, null),
+                new UnitRuntimePredictionSignal(signal.sample, 0, null, null),
                 null);
     }
 
