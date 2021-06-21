@@ -1,0 +1,221 @@
+package net.sf.dz3.device.model.impl;
+
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
+import net.sf.dz3.device.model.UnitSignal;
+import org.junit.jupiter.api.Test;
+
+import java.time.Clock;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
+
+class NaiveRuntimePredictorTest {
+
+    @Test
+    void nullSignal() {
+
+        assertThatIllegalArgumentException().isThrownBy(() -> {
+            new NaiveRuntimePredictor().consume(null);
+        });
+    }
+
+    @Test
+    void errorSignal() {
+
+        assertThatIllegalStateException().isThrownBy(() -> {
+            new NaiveRuntimePredictor().consume(
+                    new DataSample<UnitSignal>(Clock.systemUTC().millis(),
+                    "unit", "signature",
+                    null, new Error("oops")));
+        });
+    }
+
+    @Test
+    void unknownIdle() {
+
+        var p = new NaiveRuntimePredictor();
+        var sink = new Sink();
+        p.addConsumer(sink);
+        var now = Clock.systemUTC().instant();
+
+        var signal1 = new DataSample<UnitSignal>(now.toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(1d, false, 0L), null);
+        var signal2 = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(1d, false, 0L), null);
+
+        p.consume(signal1);
+        p.consume(signal2);
+
+        assertThat(sink.consumed).hasSize(2);
+        assertThat(sink.consumed.get(0).sample.left).isNull();
+        assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.left).isNull();
+        assertThat(sink.consumed.get(1).sample.arrival).isNull();
+
+        p.removeConsumer(sink);
+    }
+
+    @Test
+    void unknownDone() {
+
+        var p = new NaiveRuntimePredictor();
+        var sink = new Sink();
+        p.addConsumer(sink);
+        var now = Clock.systemUTC().instant();
+        var initialDemand = 1d;
+
+        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(initialDemand, true, 0L), null);
+        var signal2min = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(initialDemand * 1.2, false, 0), null);
+
+        p.consume(signalJustStarted);
+        p.consume(signal2min);
+
+        assertThat(sink.consumed).hasSize(2);
+        assertThat(sink.consumed.get(0).sample.left).isNull();
+        assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.left).isNull();
+        assertThat(sink.consumed.get(1).sample.arrival).isNull();
+
+        p.removeConsumer(sink);
+    }
+
+    @Test
+    void unknownTooShort() {
+
+        var p = new NaiveRuntimePredictor();
+        var sink = new Sink();
+        p.addConsumer(sink);
+        var now = Clock.systemUTC().instant();
+        var initialDemand = 1d;
+
+        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(initialDemand, true, 0L), null);
+        var signal30sec = new DataSample<UnitSignal>(now.plus(30, ChronoUnit.SECONDS).toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(initialDemand * 1.2, true, Duration.of(30, ChronoUnit.SECONDS).toMillis()), null);
+
+        p.consume(signalJustStarted);
+        p.consume(signal30sec);
+
+        assertThat(sink.consumed).hasSize(2);
+        assertThat(sink.consumed.get(0).sample.left).isNull();
+        assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.left).isNull();
+        assertThat(sink.consumed.get(1).sample.arrival).isNull();
+
+        p.removeConsumer(sink);
+    }
+
+    @Test
+    void simple() {
+
+        var p = new NaiveRuntimePredictor();
+        var sink = new Sink();
+        p.addConsumer(sink);
+        var now = Clock.systemUTC().instant();
+        var initialDemand = 1d;
+
+        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(initialDemand, true, 0L), null);
+        var signal2min = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(initialDemand / 2, true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
+
+        p.consume(signalJustStarted);
+        p.consume(signal2min);
+
+        assertThat(sink.consumed).hasSize(2);
+        assertThat(sink.consumed.get(0).sample.left).isNull();
+        assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.left).isEqualTo(Duration.of(2, ChronoUnit.MINUTES));
+
+        p.removeConsumer(sink);
+    }
+
+    @Test
+    void demandGrewWithinFirstMinute() {
+
+        var p = new NaiveRuntimePredictor();
+        var sink = new Sink();
+        p.addConsumer(sink);
+        var now = Clock.systemUTC().instant();
+
+        var demand = new double[] {1d, 2d, 1d};
+
+        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(demand[0], true, 0L), null);
+        var signal30sec = new DataSample<UnitSignal>(now.plus(30, ChronoUnit.SECONDS).toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(demand[1], true, Duration.of(30, ChronoUnit.SECONDS).toMillis()), null);
+        var signal2min = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(demand[2], true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
+
+        p.consume(signalJustStarted);
+        p.consume(signal30sec);
+        p.consume(signal2min);
+
+        assertThat(sink.consumed).hasSize(3);
+        assertThat(sink.consumed.get(0).sample.left).isNull();
+        assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.left).isNull();
+        assertThat(sink.consumed.get(1).sample.arrival).isNull();
+        assertThat(sink.consumed.get(2).sample.left).isEqualTo(Duration.of(2, ChronoUnit.MINUTES));
+
+        p.removeConsumer(sink);
+    }
+
+    @Test
+    void insufficient() {
+
+        var p = new NaiveRuntimePredictor();
+        var sink = new Sink();
+        p.addConsumer(sink);
+        var now = Clock.systemUTC().instant();
+        var initialDemand = 1d;
+
+        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(initialDemand, true, 0L), null);
+        var signal2min = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                "unit", "signature",
+                new UnitSignal(initialDemand * 1.2, true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
+
+        p.consume(signalJustStarted);
+        p.consume(signal2min);
+
+        assertThat(sink.consumed).hasSize(2);
+        assertThat(sink.consumed.get(0).sample.left).isNull();
+        assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.left).isNull();
+        assertThat(sink.consumed.get(1).sample.arrival).isNull();
+
+        p.removeConsumer(sink);
+    }
+
+    private class Sink implements DataSink<UnitRuntimePredictionSignal> {
+
+        public final List<DataSample<UnitRuntimePredictionSignal>> consumed = new ArrayList<>();
+
+        @Override
+        public void consume(DataSample<UnitRuntimePredictionSignal> signal) {
+            consumed.add(signal);
+        }
+    }
+}

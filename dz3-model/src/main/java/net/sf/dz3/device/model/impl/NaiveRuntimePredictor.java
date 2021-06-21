@@ -116,7 +116,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
         }
 
         var k = (startDemand - signal.sample.demand) / runningFor.toMillis();
-        var left = Duration.of((long)(signal.sample.demand * k), ChronoUnit.MILLIS);
+        var left = Duration.of((long)(signal.sample.demand / k), ChronoUnit.MILLIS);
         var arrival = now.plus(left);
 
         return new DataSample<>(
