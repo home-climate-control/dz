@@ -39,6 +39,12 @@ public class NaiveRuntimePredictorSignalSplitter implements DataSink<UnitRuntime
     }
 
     private void broadcastLeft(DataSample<UnitRuntimePredictionSignal> signal) {
+
+        if (signal.sample.left == null) {
+            // Nothing to report
+            return;
+        }
+
         var sourceName = signal.sourceName + ".left";
         var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
         var left = new DataSample<Double>(signal.timestamp, sourceName, signature, (double)signal.sample.left.toMillis(), null);
