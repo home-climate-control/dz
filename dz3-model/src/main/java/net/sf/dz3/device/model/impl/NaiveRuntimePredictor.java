@@ -83,14 +83,14 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
         if (!signal.sample.running) {
 
             // Didn't run before, doesn't run now.
-            return unknown(signal);
+            return unknown(signal, 0);
         }
 
         start = Instant.ofEpochMilli(signal.timestamp);
         startDemand = signal.sample.demand;
 
         // We can't produce accurate estimate until some time has passed
-        return unknown(signal);
+        return unknown(signal, 0);
     }
 
     private DataSample<UnitRuntimePredictionSignal> consumeRunning(DataSample<HvacSignal> signal) {
@@ -107,7 +107,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
 
             // ... and we have no idea when the next run is going to end.
 
-            return unknown(signal);
+            return unknown(signal, 0);
         }
 
         if (runningFor.compareTo(Duration.of(1, ChronoUnit.MINUTES)) < 0) {
@@ -118,20 +118,21 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
 
             startDemand = Math.max(signal.sample.demand, startDemand);
 
-            return unknown(signal);
+            return unknown(signal, 0);
         }
 
         // VT: FIXME: Use a simplified version of MedianFilter here, the noise is quite bad
+
+        var k = (startDemand - signal.sample.demand) / runningFor.toMillis();
 
         if (Double.compare(startDemand, signal.sample.demand) <= 0) {
 
             // Not good at all. Save from noise, this is a good indication that the unit is not keeping up with demand.
 
             logger.info("negative delta from {}, likely not keeping up with demand", signal.sample);
-            return unknown(signal);
+            return unknown(signal, k);
         }
 
-        var k = (startDemand - signal.sample.demand) / runningFor.toMillis();
         var left = Duration.of((long)(signal.sample.demand / k), ChronoUnit.MILLIS);
         var arrival = now.plus(left);
 
@@ -145,15 +146,19 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
 
     /**
      * Produce an "unknown" sample.
+     *
+     * @param signal Incoming signal to use as a template.
+     * @param k K value to pass down - it will be useful in analytics and alerting.
+     *
      * @return A sample indicating that the prediction cannot be made.
      */
-    private DataSample<UnitRuntimePredictionSignal> unknown(DataSample<HvacSignal> signal) {
+    private DataSample<UnitRuntimePredictionSignal> unknown(DataSample<HvacSignal> signal, double k) {
 
         return new DataSample<>(
                 signal.timestamp,
                 signal.sourceName,
                 signal.signature,
-                new UnitRuntimePredictionSignal(signal.sample, 0, null, null),
+                new UnitRuntimePredictionSignal(signal.sample, k, null, null),
                 null);
     }
 
