@@ -84,17 +84,14 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
 
         if (!signal.sample.running) {
 
-            // Easy case, we've arrived
+            // Easy case, we've arrived.
 
             start = null;
             startDemand = 0d;
 
-            return new DataSample<>(
-                    signal.timestamp,
-                    signal.sourceName,
-                    signal.signature,
-                    new UnitRuntimePredictionSignal(signal.sample, Duration.of(0, ChronoUnit.SECONDS), now),
-                    null);
+            // ... and we have no idea when the next run is going to end.
+
+            return unknown(signal);
         }
 
         if (runningFor.compareTo(Duration.of(1, ChronoUnit.MINUTES)) < 0) {
