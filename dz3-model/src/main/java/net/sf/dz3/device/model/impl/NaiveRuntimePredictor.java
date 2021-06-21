@@ -3,9 +3,9 @@ package net.sf.dz3.device.model.impl;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import net.sf.dz3.device.model.HvacSignal;
 import net.sf.dz3.device.model.RuntimePredictor;
 import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
-import net.sf.dz3.device.model.UnitSignal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,7 +27,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
     private final DataBroadcaster<UnitRuntimePredictionSignal> broadcaster = new DataBroadcaster<>();
 
     /**
-     * The moment when the unit started, according to the change of {@link UnitSignal#running}.
+     * The moment when the unit started, according to the change of {@link HvacSignal#running}.
      * If the unit is not currently running or never been observed running, {@code null}.
      */
     private Instant start;
@@ -45,7 +45,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
      * @param signal Sample to consume.
      */
     @Override
-    public void consume(DataSample<UnitSignal> signal) {
+    public void consume(DataSample<HvacSignal> signal) {
 
         if (signal == null) {
             throw new IllegalArgumentException("signal can't be null");
@@ -62,7 +62,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
         }
     }
 
-    private DataSample<UnitRuntimePredictionSignal> consumeIdle(DataSample<UnitSignal> signal) {
+    private DataSample<UnitRuntimePredictionSignal> consumeIdle(DataSample<HvacSignal> signal) {
 
         if (!signal.sample.running) {
 
@@ -77,7 +77,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
         return unknown(signal);
     }
 
-    private DataSample<UnitRuntimePredictionSignal> consumeRunning(DataSample<UnitSignal> signal) {
+    private DataSample<UnitRuntimePredictionSignal> consumeRunning(DataSample<HvacSignal> signal) {
 
         var now = Instant.ofEpochMilli(signal.timestamp);
         var runningFor = Duration.of(signal.sample.uptime, ChronoUnit.MILLIS);
@@ -131,7 +131,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
      * Produce an "unknown" sample.
      * @return A sample indicating that the prediction cannot be made.
      */
-    private DataSample<UnitRuntimePredictionSignal> unknown(DataSample<UnitSignal> signal) {
+    private DataSample<UnitRuntimePredictionSignal> unknown(DataSample<HvacSignal> signal) {
 
         return new DataSample<>(
                 signal.timestamp,

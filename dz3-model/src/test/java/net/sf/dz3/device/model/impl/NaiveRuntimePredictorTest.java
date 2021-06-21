@@ -2,8 +2,9 @@ package net.sf.dz3.device.model.impl;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import net.sf.dz3.device.model.HvacMode;
+import net.sf.dz3.device.model.HvacSignal;
 import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
-import net.sf.dz3.device.model.UnitSignal;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
@@ -31,7 +32,7 @@ class NaiveRuntimePredictorTest {
 
         assertThatIllegalStateException().isThrownBy(() -> {
             new NaiveRuntimePredictor().consume(
-                    new DataSample<UnitSignal>(Clock.systemUTC().millis(),
+                    new DataSample<HvacSignal>(Clock.systemUTC().millis(),
                     "unit", "signature",
                     null, new Error("oops")));
         });
@@ -45,12 +46,12 @@ class NaiveRuntimePredictorTest {
         p.addConsumer(sink);
         var now = Clock.systemUTC().instant();
 
-        var signal1 = new DataSample<UnitSignal>(now.toEpochMilli(),
+        var signal1 = new DataSample<>(now.toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(1d, false, 0L), null);
-        var signal2 = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                new HvacSignal(HvacMode.COOLING, 1d, false, 0L), null);
+        var signal2 = new DataSample<>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(1d, false, 0L), null);
+                new HvacSignal(HvacMode.COOLING, 1d, false, 0L), null);
 
         p.consume(signal1);
         p.consume(signal2);
@@ -73,12 +74,12 @@ class NaiveRuntimePredictorTest {
         var now = Clock.systemUTC().instant();
         var initialDemand = 1d;
 
-        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+        var signalJustStarted = new DataSample<>(now.toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(initialDemand, true, 0L), null);
-        var signal2min = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                new HvacSignal(HvacMode.COOLING, initialDemand, true, 0L), null);
+        var signal2min = new DataSample<>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(initialDemand * 1.2, false, 0), null);
+                new HvacSignal(HvacMode.COOLING, initialDemand * 1.2, false, 0), null);
 
         p.consume(signalJustStarted);
         p.consume(signal2min);
@@ -101,12 +102,12 @@ class NaiveRuntimePredictorTest {
         var now = Clock.systemUTC().instant();
         var initialDemand = 1d;
 
-        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+        var signalJustStarted = new DataSample<>(now.toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(initialDemand, true, 0L), null);
-        var signal30sec = new DataSample<UnitSignal>(now.plus(30, ChronoUnit.SECONDS).toEpochMilli(),
+                new HvacSignal(HvacMode.COOLING, initialDemand, true, 0L), null);
+        var signal30sec = new DataSample<>(now.plus(30, ChronoUnit.SECONDS).toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(initialDemand * 1.2, true, Duration.of(30, ChronoUnit.SECONDS).toMillis()), null);
+                new HvacSignal(HvacMode.COOLING, initialDemand * 1.2, true, Duration.of(30, ChronoUnit.SECONDS).toMillis()), null);
 
         p.consume(signalJustStarted);
         p.consume(signal30sec);
@@ -129,12 +130,12 @@ class NaiveRuntimePredictorTest {
         var now = Clock.systemUTC().instant();
         var initialDemand = 1d;
 
-        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+        var signalJustStarted = new DataSample<>(now.toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(initialDemand, true, 0L), null);
-        var signal2min = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                new HvacSignal(HvacMode.COOLING, initialDemand, true, 0L), null);
+        var signal2min = new DataSample<>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(initialDemand / 2, true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
+                new HvacSignal(HvacMode.COOLING, initialDemand / 2, true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
 
         p.consume(signalJustStarted);
         p.consume(signal2min);
@@ -157,15 +158,15 @@ class NaiveRuntimePredictorTest {
 
         var demand = new double[] {1d, 2d, 1d};
 
-        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+        var signalJustStarted = new DataSample<>(now.toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(demand[0], true, 0L), null);
-        var signal30sec = new DataSample<UnitSignal>(now.plus(30, ChronoUnit.SECONDS).toEpochMilli(),
+                new HvacSignal(HvacMode.COOLING, demand[0], true, 0L), null);
+        var signal30sec = new DataSample<>(now.plus(30, ChronoUnit.SECONDS).toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(demand[1], true, Duration.of(30, ChronoUnit.SECONDS).toMillis()), null);
-        var signal2min = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                new HvacSignal(HvacMode.COOLING, demand[1], true, Duration.of(30, ChronoUnit.SECONDS).toMillis()), null);
+        var signal2min = new DataSample<>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(demand[2], true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
+                new HvacSignal(HvacMode.COOLING, demand[2], true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
 
         p.consume(signalJustStarted);
         p.consume(signal30sec);
@@ -190,12 +191,12 @@ class NaiveRuntimePredictorTest {
         var now = Clock.systemUTC().instant();
         var initialDemand = 1d;
 
-        var signalJustStarted = new DataSample<UnitSignal>(now.toEpochMilli(),
+        var signalJustStarted = new DataSample<>(now.toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(initialDemand, true, 0L), null);
-        var signal2min = new DataSample<UnitSignal>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
+                new HvacSignal(HvacMode.COOLING, initialDemand, true, 0L), null);
+        var signal2min = new DataSample<>(now.plus(2, ChronoUnit.MINUTES).toEpochMilli(),
                 "unit", "signature",
-                new UnitSignal(initialDemand * 1.2, true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
+                new HvacSignal(HvacMode.COOLING, initialDemand * 1.2, true, Duration.of(2, ChronoUnit.MINUTES).toMillis()), null);
 
         p.consume(signalJustStarted);
         p.consume(signal2min);

@@ -3,7 +3,7 @@ package net.sf.dz3.device.model;
 import java.time.Duration;
 import java.time.Instant;
 
-public class UnitRuntimePredictionSignal extends UnitSignal {
+public class UnitRuntimePredictionSignal extends HvacSignal {
 
     /**
      * How much time is left until the unit is expected to satisfy the demand.
@@ -20,9 +20,9 @@ public class UnitRuntimePredictionSignal extends UnitSignal {
     public final Instant arrival;
 
     public UnitRuntimePredictionSignal(
-            UnitSignal unitSignal,
+            HvacSignal hvacSignal,
             Duration left, Instant arrival) {
-        super(unitSignal.demand, unitSignal.running, unitSignal.uptime);
+        super(hvacSignal.mode, hvacSignal.demand, hvacSignal.running, hvacSignal.uptime);
 
         this.left = left;
         this.arrival = arrival;
