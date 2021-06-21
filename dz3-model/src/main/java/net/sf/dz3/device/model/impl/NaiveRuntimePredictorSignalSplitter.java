@@ -10,9 +10,23 @@ import net.sf.dz3.util.digest.MessageDigestCache;
 public class NaiveRuntimePredictorSignalSplitter implements DataSink<UnitRuntimePredictionSignal>, DataSource<Double> {
     private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
 
+    /**
+     * Create an instance not attached to anything.
+     */
+    public NaiveRuntimePredictorSignalSplitter() {
+    }
+
+    /**
+     * Create an instance attached to a data source.
+     *
+     * @param source Data source to listen to.
+     */
+    public NaiveRuntimePredictorSignalSplitter(DataSource<UnitRuntimePredictionSignal> source) {
+        source.addConsumer(this);
+    }
+
     @Override
     public void consume(DataSample<UnitRuntimePredictionSignal> signal) {
-
         broadcastK(signal);
         broadcastLeft(signal);
     }

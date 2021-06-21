@@ -3,6 +3,7 @@ package net.sf.dz3.device.model.impl;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 import net.sf.dz3.device.model.HvacSignal;
 import net.sf.dz3.device.model.RuntimePredictor;
 import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
@@ -38,6 +39,21 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
      * @see #consumeRunning(DataSample)
      */
     private double startDemand;
+
+    /**
+     * Create an instance not attached to anything.
+     */
+    public NaiveRuntimePredictor() {
+    }
+
+    /**
+     * Create an instance attached to a data source.
+     *
+     * @param source Data source to listen to.
+     */
+    public NaiveRuntimePredictor(DataSource<HvacSignal> source) {
+        source.addConsumer(this);
+    }
 
     /**
      * Consume the signal and broadcast the computed result.
