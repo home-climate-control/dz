@@ -72,10 +72,17 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
         }
 
         if (start == null) {
-            broadcaster.broadcast(consumeIdle(signal));
+            broadcaster.broadcast(log(consumeIdle(signal)));
         } else {
-            broadcaster.broadcast(consumeRunning(signal));
+            broadcaster.broadcast(log(consumeRunning(signal)));
         }
+    }
+
+    private DataSample<UnitRuntimePredictionSignal> log(DataSample<UnitRuntimePredictionSignal> signal) {
+        LogManager.getLogger().debug(
+                "signal: k={}, left={}, arrival={}, plus={}",
+                signal.sample.k, signal.sample.left, signal.sample.arrival, signal.sample.plus);
+        return signal;
     }
 
     private DataSample<UnitRuntimePredictionSignal> consumeIdle(DataSample<HvacSignal> signal) {
@@ -83,14 +90,16 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
         if (!signal.sample.running) {
 
             // Didn't run before, doesn't run now.
-            return unknown(signal, 0);
+            return unknown(signal, 0, false);
         }
 
         start = Instant.ofEpochMilli(signal.timestamp);
         startDemand = signal.sample.demand;
 
+        logger.info("started runtime, demand={}", startDemand);
+
         // We can't produce accurate estimate until some time has passed
-        return unknown(signal, 0);
+        return unknown(signal, 0, false);
     }
 
     private DataSample<UnitRuntimePredictionSignal> consumeRunning(DataSample<HvacSignal> signal) {
@@ -107,8 +116,11 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
 
             // ... and we have no idea when the next run is going to end.
 
-            return unknown(signal, 0);
+            return unknown(signal, 0, false);
         }
+
+        logger.info("uptime={}", signal.sample.uptime);
+        logger.info("runningFor={}", runningFor);
 
         if (runningFor.compareTo(Duration.of(1, ChronoUnit.MINUTES)) < 0) {
 
@@ -116,9 +128,11 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
             // a "hot blow" for cooling mode and "cold blow" for heating mode, this moves the demand the wrong way.
             // However, the starting demand itself can be calculated.
 
+            var oldDemand = startDemand;
             startDemand = Math.max(signal.sample.demand, startDemand);
+            logger.info("adjusted startDemand from {} to {}", oldDemand, startDemand);
 
-            return unknown(signal, 0);
+            return unknown(signal, 0, false);
         }
 
         // VT: FIXME: Use a simplified version of MedianFilter here, the noise is quite bad
@@ -130,17 +144,30 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
             // Not good at all. Save from noise, this is a good indication that the unit is not keeping up with demand.
 
             logger.info("negative delta from {}, likely not keeping up with demand", signal.sample);
-            return unknown(signal, k);
+            return unknown(signal, k, true);
         }
 
         var left = Duration.of((long)(signal.sample.demand / k), ChronoUnit.MILLIS);
         var arrival = now.plus(left);
 
+        logger.info("calculated: dD={}, uptime={}, k={}, left={}, arrival={}",
+                startDemand - signal.sample.demand, runningFor.toMillis(),
+                k, left, arrival);
+
+        final var threeHours = Duration.of(3, ChronoUnit.HOURS);
+        boolean plus = left.compareTo(threeHours) > 0;
+
+        if (plus) {
+            // That's preposterous. Nobody will care for exact time beyond that, and charts will be screwed up.
+            left = threeHours;
+            arrival = now.plus(threeHours);
+        }
+
         return new DataSample<>(
                 signal.timestamp,
                 signal.sourceName,
                 signal.signature,
-                new UnitRuntimePredictionSignal(signal.sample, k, left, arrival),
+                new UnitRuntimePredictionSignal(signal.sample, k, left, arrival, plus),
                 null);
     }
 
@@ -149,16 +176,17 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
      *
      * @param signal Incoming signal to use as a template.
      * @param k K value to pass down - it will be useful in analytics and alerting.
+     * @param plus {@link UnitRuntimePredictionSignal#plus} value to pass.
      *
      * @return A sample indicating that the prediction cannot be made.
      */
-    private DataSample<UnitRuntimePredictionSignal> unknown(DataSample<HvacSignal> signal, double k) {
+    private DataSample<UnitRuntimePredictionSignal> unknown(DataSample<HvacSignal> signal, double k, boolean plus) {
 
         return new DataSample<>(
                 signal.timestamp,
                 signal.sourceName,
                 signal.signature,
-                new UnitRuntimePredictionSignal(signal.sample, k, null, null),
+                new UnitRuntimePredictionSignal(signal.sample, k, null, null, plus),
                 null);
     }
 

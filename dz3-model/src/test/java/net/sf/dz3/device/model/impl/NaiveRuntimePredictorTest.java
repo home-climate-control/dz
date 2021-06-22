@@ -59,8 +59,10 @@ class NaiveRuntimePredictorTest {
         assertThat(sink.consumed).hasSize(2);
         assertThat(sink.consumed.get(0).sample.left).isNull();
         assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(0).sample.plus).isFalse();
         assertThat(sink.consumed.get(1).sample.left).isNull();
         assertThat(sink.consumed.get(1).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.plus).isFalse();
 
         p.removeConsumer(sink);
     }
@@ -87,8 +89,10 @@ class NaiveRuntimePredictorTest {
         assertThat(sink.consumed).hasSize(2);
         assertThat(sink.consumed.get(0).sample.left).isNull();
         assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(0).sample.plus).isFalse();
         assertThat(sink.consumed.get(1).sample.left).isNull();
         assertThat(sink.consumed.get(1).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.plus).isFalse();
 
         p.removeConsumer(sink);
     }
@@ -115,8 +119,10 @@ class NaiveRuntimePredictorTest {
         assertThat(sink.consumed).hasSize(2);
         assertThat(sink.consumed.get(0).sample.left).isNull();
         assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(0).sample.plus).isFalse();
         assertThat(sink.consumed.get(1).sample.left).isNull();
         assertThat(sink.consumed.get(1).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.plus).isFalse();
 
         p.removeConsumer(sink);
     }
@@ -143,7 +149,9 @@ class NaiveRuntimePredictorTest {
         assertThat(sink.consumed).hasSize(2);
         assertThat(sink.consumed.get(0).sample.left).isNull();
         assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(0).sample.plus).isFalse();
         assertThat(sink.consumed.get(1).sample.left).isEqualTo(Duration.of(2, ChronoUnit.MINUTES));
+        assertThat(sink.consumed.get(1).sample.plus).isFalse();
 
         p.removeConsumer(sink);
     }
@@ -175,9 +183,12 @@ class NaiveRuntimePredictorTest {
         assertThat(sink.consumed).hasSize(3);
         assertThat(sink.consumed.get(0).sample.left).isNull();
         assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(0).sample.plus).isFalse();
         assertThat(sink.consumed.get(1).sample.left).isNull();
         assertThat(sink.consumed.get(1).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.plus).isFalse();
         assertThat(sink.consumed.get(2).sample.left).isEqualTo(Duration.of(2, ChronoUnit.MINUTES));
+        assertThat(sink.consumed.get(2).sample.plus).isFalse();
 
         p.removeConsumer(sink);
     }
@@ -204,8 +215,10 @@ class NaiveRuntimePredictorTest {
         assertThat(sink.consumed).hasSize(2);
         assertThat(sink.consumed.get(0).sample.left).isNull();
         assertThat(sink.consumed.get(0).sample.arrival).isNull();
+        assertThat(sink.consumed.get(0).sample.plus).isFalse();
         assertThat(sink.consumed.get(1).sample.left).isNull();
         assertThat(sink.consumed.get(1).sample.arrival).isNull();
+        assertThat(sink.consumed.get(1).sample.plus).isTrue();
 
         p.removeConsumer(sink);
     }

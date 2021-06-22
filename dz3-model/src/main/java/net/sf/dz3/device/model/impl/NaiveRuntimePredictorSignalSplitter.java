@@ -29,6 +29,7 @@ public class NaiveRuntimePredictorSignalSplitter implements DataSink<UnitRuntime
     public void consume(DataSample<UnitRuntimePredictionSignal> signal) {
         broadcastK(signal);
         broadcastLeft(signal);
+        broadcastPlus(signal);
     }
 
     private void broadcastK(DataSample<UnitRuntimePredictionSignal> signal) {
@@ -49,6 +50,13 @@ public class NaiveRuntimePredictorSignalSplitter implements DataSink<UnitRuntime
         var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
         var left = new DataSample<Double>(signal.timestamp, sourceName, signature, (double)signal.sample.left.toMillis(), null);
         dataBroadcaster.broadcast(left);
+    }
+
+    private void broadcastPlus(DataSample<UnitRuntimePredictionSignal> signal) {
+        var sourceName = signal.sourceName + ".plus";
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var plus = new DataSample<Double>(signal.timestamp, sourceName, signature, (double) (signal.sample.plus ? 1 : 0), null);
+        dataBroadcaster.broadcast(plus);
     }
 
     @Override

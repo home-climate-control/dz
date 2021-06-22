@@ -23,7 +23,7 @@ class NaiveRuntimePredictorSignalSplitterTest {
                     "signature",
                     new UnitRuntimePredictionSignal(
                             new HvacSignal(HvacMode.COOLING, 0, false, 0),
-                            0, null, null),
+                            0, null, null, false),
                     null);
 
             new NaiveRuntimePredictorSignalSplitter().consume(unknown);

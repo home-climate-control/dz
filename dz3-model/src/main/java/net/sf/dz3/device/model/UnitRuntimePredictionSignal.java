@@ -24,14 +24,21 @@ public class UnitRuntimePredictionSignal extends HvacSignal {
      */
     public final Instant arrival;
 
+    /**
+     * Value of {@code true} indicates that the time left and arrival time are maxed out.
+     */
+    public final boolean plus;
+
     public UnitRuntimePredictionSignal(
             HvacSignal hvacSignal,
             double k,
-            Duration left, Instant arrival) {
+            Duration left, Instant arrival,
+            boolean plus) {
         super(hvacSignal.mode, hvacSignal.demand, hvacSignal.running, hvacSignal.uptime);
 
         this.k = k;
         this.left = left;
         this.arrival = arrival;
+        this.plus = plus;
     }
 }
