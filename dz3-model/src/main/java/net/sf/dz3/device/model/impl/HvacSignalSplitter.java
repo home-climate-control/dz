@@ -62,6 +62,14 @@ public class HvacSignalSplitter implements DataSink<HvacSignal>, DataSource<Doub
             }
 
             {
+                // For how long the unit is currently running
+                String sourceName = signal.sourceName + ".uptime";
+                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+                DataSample<Double> running = new DataSample<Double>(signal.timestamp, sourceName, signature, (double) signal.sample.uptime, null);
+                dataBroadcaster.broadcast(running);
+            }
+
+            {
                 // The demand sent to the HVAC hardware driver
                 String sourceName = signal.sourceName + ".demand";
                 String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
