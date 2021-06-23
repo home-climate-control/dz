@@ -37,12 +37,12 @@ import java.util.Locale;
  * Thermostat panel.
  *
  * Even though it implements {@link KeyListener}, it never request focus,
- * but gets event notifications from {@link ZonePanel} instead.
+ * but gets event notifications from {@link EntitySelectorPanel} instead.
  * This is done in order not to fiddle with focus changes.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ThermostatPanel extends AbstractPanel implements KeyListener {
+public class ThermostatPanel extends EntityPanel implements KeyListener {
 
     private static final long serialVersionUID = 3420150515187693627L;
     private static final DecimalFormat numberFormat = new DecimalFormat("#0.0;-#0.0");

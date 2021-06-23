@@ -21,7 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- * Condensed zone status indicator. {@link ZonePanel} displays these for all zones in a bar on top.
+ * Condensed entity status indicator. {@link EntitySelectorPanel} displays these for all entities in a bar on top.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */

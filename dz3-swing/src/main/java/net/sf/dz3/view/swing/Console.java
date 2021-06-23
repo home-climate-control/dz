@@ -12,8 +12,8 @@ import net.sf.dz3.device.sensor.TemperatureSensor;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
+import net.sf.dz3.view.swing.thermostat.EntitySelectorPanel;
 import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
-import net.sf.dz3.view.swing.thermostat.ZonePanel;
 import net.sf.dz3.view.swing.unit.UnitFactory;
 import org.apache.logging.log4j.ThreadContext;
 
@@ -66,7 +66,7 @@ public class Console extends Connector<JComponent> {
      */
     private JFrame mainFrame;
 
-    private ZonePanel zonePanel;
+    private EntitySelectorPanel entitySelectorPanel;
 
     /**
      * The scheduler, or {@code null} if one wasn't found.
@@ -197,7 +197,7 @@ public class Console extends Connector<JComponent> {
 
             display.setLayout(layout);
 
-            zonePanel = new ZonePanel(getComponentMap());
+            entitySelectorPanel = new EntitySelectorPanel(getComponentMap());
 
             cs.fill = GridBagConstraints.BOTH;
             cs.gridx = 0;
@@ -207,12 +207,12 @@ public class Console extends Connector<JComponent> {
             cs.weightx = 1;
             cs.weighty = 1;
 
-            layout.setConstraints(zonePanel, cs);
-            display.add(zonePanel);
+            layout.setConstraints(entitySelectorPanel, cs);
+            display.add(entitySelectorPanel);
 
             display.setFocusable(true);
             display.addKeyListener(new ResizeKeyListener());
-            display.addKeyListener(zonePanel);
+            display.addKeyListener(entitySelectorPanel);
 
         } finally {
             ThreadContext.pop();
@@ -390,7 +390,7 @@ public class Console extends Connector<JComponent> {
                         screenDescriptor.displaySize.width,
                         screenDescriptor.displaySize.height);
 
-                zonePanel.setSize(screenDescriptor);
+                entitySelectorPanel.setSize(screenDescriptor);
                 mainFrame.setSize(screenDescriptor.displaySize);
                 mainFrame.invalidate();
 

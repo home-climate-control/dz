@@ -20,40 +20,37 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * Panel that contains all {@link ThermostatPanel} instances (and all {@code SensorPanel} instances
- * in a {@link CardLayout}, and an indicator bar that displays abbreviated status for all zones.
+ * Panel that contains all {@link EntityPanel} instances in a {@link CardLayout}, and an indicator bar
+ * that displays abbreviated status for all entities.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-@SuppressWarnings("squid:S1700")
-public class ZonePanel extends JPanel implements KeyListener {
+public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     private static final long serialVersionUID = 6400746493551083129L;
 
     private final transient Logger logger = LogManager.getLogger(getClass());
 
-    private int currentZoneOffset = 0;
-    private final transient Zone[] zones;
+    private int currentEntityOffset = 0;
+    private final transient Entity[] entities;
 
     /**
-     * Panel to display bars for all zones.
+     * Panel to display bars for all entities.
      */
-    private final JPanel zoneBar = new JPanel();
+    private final JPanel selectorBar = new JPanel();
 
     /**
-     * Panel to display {@link ThermostatPanel} instances.
-     *
-     * VT: NOTE: squid:S1700 - the name reflects the semantics exactly.
+     * Panel to display {@link EntityPanel} instances.
      */
-    private final JPanel zonePanel = new JPanel();
+    private final JPanel selectorPanel = new JPanel();
 
     /**
-     * Layout to control which zone is showing.
+     * Layout to control which entity is showing.
      */
     private final CardLayout cardLayout = new CardLayout();
 
     @SuppressWarnings("squid:S1199")
-    public ZonePanel(Map<Object, JComponent> componentMap) {
+    public EntitySelectorPanel(Map<Object, JComponent> componentMap) {
 
         var layout = new GridBagLayout();
         var cs = new GridBagConstraints();
@@ -64,7 +61,7 @@ public class ZonePanel extends JPanel implements KeyListener {
         // blocks are for readability
 
         {
-            // Zone bar spans all the horizontal space available (as many cells as there are zones),
+            // Entity bar spans all the horizontal space available (as many cells as there are entities),
             // but the height is limited
 
             cs.fill = GridBagConstraints.HORIZONTAL;
@@ -75,12 +72,12 @@ public class ZonePanel extends JPanel implements KeyListener {
             cs.weightx = 1;
             cs.weighty = 0;
 
-            layout.setConstraints(zoneBar, cs);
-            this.add(zoneBar);
+            layout.setConstraints(selectorBar, cs);
+            this.add(selectorBar);
         }
 
         {
-            // Zone panel is right below the zone bar
+            // Entity panel is right below the entity bar
 
             cs.gridy++;
 
@@ -90,8 +87,8 @@ public class ZonePanel extends JPanel implements KeyListener {
             cs.gridheight = GridBagConstraints.REMAINDER;
             cs.weighty = 1;
 
-            layout.setConstraints(zonePanel, cs);
-            this.add(zonePanel);
+            layout.setConstraints(selectorPanel, cs);
+            this.add(selectorPanel);
         }
 
         SortedMap<Thermostat, JComponent> thermostatMap = new TreeMap<>();
@@ -110,42 +107,41 @@ public class ZonePanel extends JPanel implements KeyListener {
             }
         }
 
-        zones = new Zone[thermostatMap.size()];
+        entities = new Entity[thermostatMap.size()];
 
-        zoneBar.setLayout(new GridLayout(1, thermostatMap.size()));
-        zonePanel.setLayout(cardLayout);
+        selectorBar.setLayout(new GridLayout(1, thermostatMap.size()));
+        selectorPanel.setLayout(cardLayout);
 
         var offset = 0;
         for (Thermostat ts : thermostatMap.keySet()) {
 
             var panel = componentMap.get(ts);
             var cell = new ZoneCell(ts);
+            var entity = new Entity(cell, (ThermostatPanel) panel);
 
-            var zone = new Zone(cell, (ThermostatPanel) panel);
+            selectorBar.add(cell);
+            selectorPanel.add(panel, "" + offset);
 
-            zoneBar.add(cell);
-            zonePanel.add(panel, "" + offset);
-
-            zones[offset++] = zone;
+            entities[offset++] = entity;
         }
 
-        setCurrentZone(0);
+        setCurrentEntity(0);
     }
 
-    private static class Zone {
+    private static class Entity {
 
-        public final ZoneCell zoneCell;
-        public final ThermostatPanel thermostatPanel;
+        public final ZoneCell entityCell;
+        public final EntityPanel entityPanel;
 
-        public Zone(ZoneCell zoneCell, ThermostatPanel thermostatPanel) {
+        public Entity(ZoneCell entityCell, EntityPanel entityPanel) {
 
-            this.zoneCell = zoneCell;
-            this.thermostatPanel = thermostatPanel;
+            this.entityCell = entityCell;
+            this.entityPanel = entityPanel;
         }
     }
 
     /**
-     * Handle arrow right and left (change zone).
+     * Handle arrow right and left (change entity).
      */
     @Override
     @SuppressWarnings("squid:S1199")
@@ -169,9 +165,9 @@ public class ZonePanel extends JPanel implements KeyListener {
 
                 // Toggle between Celsius and Fahrenheit
 
-                // This must work for all zones
-                for (Zone zone : zones) {
-                    zone.thermostatPanel.keyPressed(e);
+                // This must work for all entities
+                for (Entity entity : entities) {
+                    entity.entityPanel.keyPressed(e);
                 }
 
                 break;
@@ -209,7 +205,7 @@ public class ZonePanel extends JPanel implements KeyListener {
 
                 // Change dump priority
 
-                zones[currentZoneOffset].thermostatPanel.keyPressed(e);
+                entities[currentEntityOffset].entityPanel.keyPressed(e);
                 break;
 
             case KeyEvent.CHAR_UNDEFINED:
@@ -219,14 +215,14 @@ public class ZonePanel extends JPanel implements KeyListener {
                 case KeyEvent.VK_KP_LEFT:
                 case KeyEvent.VK_LEFT:
 
-                    // Cycle displayed zone to the left
+                    // Cycle displayed entity to the left
 
                     {
-                        int zoneOffset = currentZoneOffset - 1;
+                        int entityOffset = currentEntityOffset - 1;
 
-                        zoneOffset = zoneOffset < 0 ? zones.length - 1 : zoneOffset;
+                        entityOffset = entityOffset < 0 ? entities.length - 1 : entityOffset;
 
-                        setCurrentZone(zoneOffset);
+                        setCurrentEntity(entityOffset);
                     }
 
                     break;
@@ -234,14 +230,14 @@ public class ZonePanel extends JPanel implements KeyListener {
                 case KeyEvent.VK_KP_RIGHT:
                 case KeyEvent.VK_RIGHT:
 
-                    // Cycle displayed zone to the right
+                    // Cycle displayed entity to the right
 
                     {
-                        int zoneOffset = currentZoneOffset + 1;
+                        int entityOffset = currentEntityOffset + 1;
 
-                        zoneOffset = zoneOffset >= zones.length ? 0 : zoneOffset;
+                        entityOffset = entityOffset >= entities.length ? 0 : entityOffset;
 
-                        setCurrentZone(zoneOffset);
+                        setCurrentEntity(entityOffset);
                     }
 
                     break;
@@ -249,14 +245,14 @@ public class ZonePanel extends JPanel implements KeyListener {
                 case KeyEvent.VK_KP_UP:
                 case KeyEvent.VK_UP:
 
-                    // Raise setpoint for currently selected zone
+                    // Raise setpoint for currently selected zone (if it is a zone)
 
                 case KeyEvent.VK_KP_DOWN:
                 case KeyEvent.VK_DOWN:
 
-                    // Lower setpoint for currently selected zone
+                    // Lower setpoint for currently selected zone (if it is a zone)
 
-                    zones[currentZoneOffset].thermostatPanel.keyPressed(e);
+                    entities[currentEntityOffset].entityPanel.keyPressed(e);
 
                     break;
 
@@ -286,25 +282,25 @@ public class ZonePanel extends JPanel implements KeyListener {
     }
 
     /**
-     * Change the currently displayed zone to the one with the given offset.
+     * Change the currently displayed entity to the one with the given offset.
      *
-     * @param zoneOffset Offset of the zone to display.
+     * @param entityOffset Offset of the zone to display.
      */
-    private void setCurrentZone(int zoneOffset) {
+    private void setCurrentEntity(int entityOffset) {
 
-        zones[currentZoneOffset].zoneCell.setSelected(false);
-        zones[zoneOffset].zoneCell.setSelected(true);
+        entities[currentEntityOffset].entityCell.setSelected(false);
+        entities[entityOffset].entityCell.setSelected(true);
 
-        cardLayout.show(zonePanel, "" + zoneOffset);
+        cardLayout.show(selectorPanel, "" + entityOffset);
 
-        currentZoneOffset = zoneOffset;
+        currentEntityOffset = entityOffset;
     }
 
     public synchronized void setSize(ScreenDescriptor screenDescriptor) {
 
-        for (Zone zone : zones) {
-            ThermostatPanel tp = zone.thermostatPanel;
-            tp.setFontSize(screenDescriptor);
+        for (Entity entity : entities) {
+            EntityPanel ep = entity.entityPanel;
+            ep.setFontSize(screenDescriptor);
         }
     }
 }

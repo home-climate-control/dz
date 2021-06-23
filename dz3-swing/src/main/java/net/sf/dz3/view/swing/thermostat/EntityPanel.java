@@ -1,14 +1,24 @@
 package net.sf.dz3.view.swing.thermostat;
 
 import net.sf.dz3.view.swing.ColorScheme;
+import net.sf.dz3.view.swing.ScreenDescriptor;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.KeyListener;
 
-public abstract class AbstractPanel extends JPanel {
+/**
+ * Superclass for everything that shows up on the Console.
+ *
+ * Everything that does will have two parts: the top will contain information and controls,
+ * the bottom will contain the visualization.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ */
+public abstract class EntityPanel extends JPanel implements KeyListener {
 
     protected abstract JPanel createControls();
 
@@ -70,4 +80,6 @@ public abstract class AbstractPanel extends JPanel {
 
         this.setBorder(border);
     }
+
+    public abstract void setFontSize(ScreenDescriptor screenDescriptor);
 }

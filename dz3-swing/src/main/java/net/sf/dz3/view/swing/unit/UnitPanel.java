@@ -5,7 +5,8 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.device.model.RuntimePredictor;
 import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
 import net.sf.dz3.view.swing.ColorScheme;
-import net.sf.dz3.view.swing.thermostat.AbstractPanel;
+import net.sf.dz3.view.swing.ScreenDescriptor;
+import net.sf.dz3.view.swing.thermostat.EntityPanel;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -14,8 +15,9 @@ import javax.swing.border.TitledBorder;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.KeyEvent;
 
-public class UnitPanel extends AbstractPanel {
+public class UnitPanel extends EntityPanel {
 
     private static final String UNDEFINED = "--";
 
@@ -80,6 +82,26 @@ public class UnitPanel extends AbstractPanel {
         }
 
         return controls;
+    }
+
+    @Override
+    public void setFontSize(ScreenDescriptor screenDescriptor) {
+        // No special handling yet
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        // No special handling
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        // No special handling yet
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        // No special handling
     }
 
     private class Listener  implements DataSink<UnitRuntimePredictionSignal> {
