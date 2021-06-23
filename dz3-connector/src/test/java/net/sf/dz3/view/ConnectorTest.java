@@ -11,18 +11,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConnectorTest {
 
     @Test
-    public void testNullInitSet() {
-
+    void testNullInitSet() {
         assertThat(new TestConnector(null)).isNotNull();
     }
 
     @Test
-    public void testNullFactorySet() {
-
+    void testNullFactorySet() {
         assertThat(new TestConnector(null, null)).isNotNull();
     }
 
-    private class TestConnector extends Connector<String> {
+    private static class TestConnector extends Connector<String> {
 
         public TestConnector(Set<Object> initSet) {
             super(initSet);

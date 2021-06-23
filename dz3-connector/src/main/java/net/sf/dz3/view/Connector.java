@@ -8,6 +8,7 @@ import org.apache.logging.log4j.ThreadContext;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,10 +37,9 @@ public abstract class Connector<T> implements JmxAware {
     /**
      * Mapping from the object in {@link #initSet} to the component that represents it.
      */
-    private final Map<Object, T> componentMap = new HashMap<>();
+    private final Map<Object, T> componentMap = new LinkedHashMap<>();
 
     protected Connector(Set<Object> initSet) {
-
         this(initSet, null);
     }
 
@@ -50,12 +50,10 @@ public abstract class Connector<T> implements JmxAware {
         try {
 
             if (initSet != null) {
-
                 this.initSet.addAll(initSet);
             }
 
             if (factorySet == null) {
-
                 return;
             }
 
@@ -81,11 +79,13 @@ public abstract class Connector<T> implements JmxAware {
      * Keep invoking factories from {@link #factoryMap} on objects from {@link #initSet}
      * until they're all accounted for, and put them into {@link #componentMap}.
      */
-    private void createComponentMap(Map<String, Object> context) {
+    private Map<Object, T> createComponentMap(Map<String, Object> context) {
 
         ThreadContext.push("createComponentMap");
 
         try {
+
+            Map<Object, T> result = new LinkedHashMap<>();
 
             for (Object initObject : initSet) {
 
@@ -115,7 +115,7 @@ public abstract class Connector<T> implements JmxAware {
                     var component = factory.createComponent(initObject, context);
 
                     logger.info("Created {}  for {}", component, initObject);
-                    componentMap.put(initObject, component);
+                    result.put(initObject, component);
 
                 } catch (Throwable t) { // NOSONAR Consequences have been considered
                     // Not a fatal condition, there are other components
@@ -123,10 +123,12 @@ public abstract class Connector<T> implements JmxAware {
                 }
             }
 
-            if (componentMap.isEmpty()) {
+            if (result.isEmpty()) {
                 // Not fatal either
                 logger.warn("componentMap is empty, did you specify any arguments in the constructor?");
             }
+
+            return result;
 
         } finally {
             ThreadContext.pop();
@@ -147,10 +149,6 @@ public abstract class Connector<T> implements JmxAware {
         return Collections.unmodifiableSet(initSet);
     }
 
-    /**
-     * @deprecated Need to replace by a lookup method.
-     */
-    @Deprecated(forRemoval = true)
     protected final Map<Object, T> getComponentMap() {
         return Collections.unmodifiableMap(componentMap);
     }
@@ -169,7 +167,7 @@ public abstract class Connector<T> implements JmxAware {
                 throw new IllegalStateException("componentMap is not empty: " + componentMap);
             }
 
-            createComponentMap(createContext());
+            componentMap.putAll(createComponentMap(createContext()));
             activate2();
 
         } finally {
