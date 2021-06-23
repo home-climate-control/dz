@@ -1,17 +1,7 @@
 package net.sf.dz3.view.swing.thermostat;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-
-import javax.swing.JPanel;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.Thermostat;
@@ -19,19 +9,27 @@ import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneState;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.view.swing.ColorScheme;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import javax.swing.JPanel;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 /**
  * Condensed zone status indicator. {@link ZonePanel} displays these for all zones in a bar on top.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
 
     private static final long serialVersionUID = 4736300051405383448L;
 
-    private final Logger logger = LogManager.getLogger(getClass());
+    private final transient Logger logger = LogManager.getLogger(getClass());
 
     /**
      * How many pixels are there between zone cells.
@@ -55,7 +53,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
     private boolean selected = false;
 
     private DataSample<ThermostatSignal> signal;
-    private final Thermostat source;
+    private final transient Thermostat source;
 
     public ZoneCell(Thermostat ts) {
 
@@ -74,9 +72,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
         try {
 
             this.signal = signal;
-
             logger.trace(signal);
-
             repaint();
 
         } finally {
@@ -90,9 +86,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
      * @param selected {@code true} if this cell is selected.
      */
     public void setSelected(boolean selected) {
-
         this.selected = selected;
-
         repaint();
     }
 
@@ -102,17 +96,17 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
         // Draw background
         super.paintComponent(g);
 
-        Graphics2D g2d = (Graphics2D) g;
-        Dimension d = getSize();
+        var g2d = (Graphics2D) g;
+        var d = getSize();
 
         // Background should be set, or edges will bleed white
 
         g2d.setColor(ColorScheme.getScheme(getMode()).background);
         g2d.fillRect(0, 0, d.width, d.height);
 
-        Double signal = this.signal == null ? null : this.signal.sample.demand.sample;
-        HvacMode mode = getMode();
-        ZoneState state = this.signal == null ? ZoneState.ERROR : (this.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY);
+        var signal = this.signal == null ? null : this.signal.sample.demand.sample;
+        var mode = getMode();
+        var state = this.signal == null ? ZoneState.ERROR : (this.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY); // NOSONAR Simple enough
 
         if ( this.signal == null || this.signal.sample.demand.isError()) {
 
@@ -123,8 +117,8 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
         	state = ZoneState.OFF;
         }
 
-        Rectangle upper = new Rectangle(1, 0, d.width - 2, d.height - ZONE_PANEL_GAP - INDICATOR_HEIGHT - INDICATOR_GAP);
-        Rectangle indicator = new Rectangle(
+        var upper = new Rectangle(1, 0, d.width - 2, d.height - ZONE_PANEL_GAP - INDICATOR_HEIGHT - INDICATOR_GAP);
+        var indicator = new Rectangle(
         		1, d.height - ZONE_PANEL_GAP - INDICATOR_HEIGHT,
         		d.width - 2, INDICATOR_HEIGHT);
 
@@ -154,16 +148,9 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
 
     private void paintBorder(HvacMode mode, Graphics2D g2d, Rectangle boundary) {
 
-        Color borderColor = ColorScheme.getScheme(mode).setpoint;
+        var borderColor = ColorScheme.getScheme(mode).setpoint;
 
-        if (selected) {
-
-        	borderColor = borderColor.brighter().brighter();
-
-        } else {
-
-        	borderColor = borderColor.darker().darker();
-        }
+        borderColor = selected ? borderColor.brighter().brighter() : borderColor.darker().darker();
 
         g2d.setColor(borderColor);
         g2d.drawRect(1, 0, boundary.width - 2, boundary.height - 1);
@@ -200,7 +187,6 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
     }
 
     private HvacMode getMode() {
-
     	return ((AbstractPidController) ((ThermostatModel) source).getController()).getP() > 0 ? HvacMode.COOLING : HvacMode.HEATING;
     }
 }

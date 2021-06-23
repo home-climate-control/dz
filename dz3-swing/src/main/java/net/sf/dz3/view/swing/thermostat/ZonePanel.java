@@ -14,17 +14,16 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 /**
- * AbstractPanel that contains all {@link ThermostatPanel} instances (and all {@code SensorPanel} instances
+ * Panel that contains all {@link ThermostatPanel} instances (and all {@code SensorPanel} instances
  * in a {@link CardLayout}, and an indicator bar that displays abbreviated status for all zones.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 @SuppressWarnings("squid:S1700")
 public class ZonePanel extends JPanel implements KeyListener {
@@ -37,12 +36,12 @@ public class ZonePanel extends JPanel implements KeyListener {
     private final transient Zone[] zones;
 
     /**
-     * AbstractPanel to display bars for all zones.
+     * Panel to display bars for all zones.
      */
     private final JPanel zoneBar = new JPanel();
 
     /**
-     * AbstractPanel to display {@link ThermostatPanel} instances.
+     * Panel to display {@link ThermostatPanel} instances.
      *
      * VT: NOTE: squid:S1700 - the name reflects the semantics exactly.
      */
@@ -56,8 +55,8 @@ public class ZonePanel extends JPanel implements KeyListener {
     @SuppressWarnings("squid:S1199")
     public ZonePanel(Map<Object, JComponent> componentMap) {
 
-        GridBagLayout layout = new GridBagLayout();
-        GridBagConstraints cs = new GridBagConstraints();
+        var layout = new GridBagLayout();
+        var cs = new GridBagConstraints();
 
         this.setLayout(layout);
 
@@ -95,19 +94,19 @@ public class ZonePanel extends JPanel implements KeyListener {
             this.add(zonePanel);
         }
 
-        SortedMap<Thermostat, JComponent> thermostatMap = new TreeMap<Thermostat, JComponent>();
+        SortedMap<Thermostat, JComponent> thermostatMap = new TreeMap<>();
 
-        for (Iterator<Entry<Object, JComponent>> i = componentMap.entrySet().iterator(); i.hasNext(); ) {
+        for (Entry<Object, JComponent> entry : componentMap.entrySet()) {
 
-            Entry<Object, JComponent> entry = i.next();
             Object dataSource = entry.getKey();
             JComponent panel = entry.getValue();
 
             // VT: FIXME: Extend this to all sensors
 
             if (dataSource instanceof Thermostat) {
-
-                thermostatMap.put((Thermostat)dataSource, panel);
+                thermostatMap.put((Thermostat) dataSource, panel);
+            } else {
+                logger.warn("don't know how to handle {}", dataSource.getClass());
             }
         }
 
@@ -116,14 +115,13 @@ public class ZonePanel extends JPanel implements KeyListener {
         zoneBar.setLayout(new GridLayout(1, thermostatMap.size()));
         zonePanel.setLayout(cardLayout);
 
-        int offset = 0;
-        for (Iterator<Thermostat> i = thermostatMap.keySet().iterator(); i.hasNext(); ) {
+        var offset = 0;
+        for (Thermostat ts : thermostatMap.keySet()) {
 
-            Thermostat ts = i.next();
-            JComponent panel = componentMap.get(ts);
-            ZoneCell cell = new ZoneCell(ts);
+            var panel = componentMap.get(ts);
+            var cell = new ZoneCell(ts);
 
-            Zone zone = new Zone(cell, (ThermostatPanel) panel);
+            var zone = new Zone(cell, (ThermostatPanel) panel);
 
             zoneBar.add(cell);
             zonePanel.add(panel, "" + offset);
@@ -160,7 +158,7 @@ public class ZonePanel extends JPanel implements KeyListener {
 
         try {
 
-            logger.info(e.toString());
+            logger.info("{}", e::toString);
 
             switch (e.getKeyChar()) {
 
@@ -172,9 +170,8 @@ public class ZonePanel extends JPanel implements KeyListener {
                 // Toggle between Celsius and Fahrenheit
 
                 // This must work for all zones
-                for (int offset = 0; offset < zones.length; offset++) {
-
-                    zones[offset].thermostatPanel.keyPressed(e);
+                for (Zone zone : zones) {
+                    zone.thermostatPanel.keyPressed(e);
                 }
 
                 break;
@@ -280,13 +277,11 @@ public class ZonePanel extends JPanel implements KeyListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-
         // No special handling
     }
 
     @Override
     public void keyTyped(KeyEvent e) {
-
         // No special handling
     }
 
@@ -307,10 +302,8 @@ public class ZonePanel extends JPanel implements KeyListener {
 
     public synchronized void setSize(ScreenDescriptor screenDescriptor) {
 
-        for (int offset = 0; offset < zones.length; offset++) {
-
-            ThermostatPanel tp = zones[offset].thermostatPanel;
-
+        for (Zone zone : zones) {
+            ThermostatPanel tp = zone.thermostatPanel;
             tp.setFontSize(screenDescriptor);
         }
     }
