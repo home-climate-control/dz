@@ -20,7 +20,6 @@ import org.apache.logging.log4j.ThreadContext;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -28,7 +27,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -81,7 +79,7 @@ public class Console extends Connector<JComponent> {
      * This one will produce an empty console panel.
      */
     public Console() {
-        this(new HashSet<Object>(), "C");
+        this(new HashSet<>(), "C");
     }
 
     /**
@@ -128,21 +126,8 @@ public class Console extends Connector<JComponent> {
      * @param unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
      */
     public Console(Set<Object> initSet, Set<ConnectorFactory<JComponent>> factorySet, String unit) {
-
         super(initSet, factorySet);
         this.defaultUnit = TemperatureUnit.resolve(unit);
-    }
-
-
-    /**
-     * Show the console.
-     *
-     * @deprecated Use {@link Connector#activate()} instead.
-     */
-    @Deprecated
-    public synchronized void show() {
-        logger.warn("use 'init-method=\"activate\"' instead of 'init-method=\"show\"'");
-        activate();
     }
 
     @Override
@@ -174,12 +159,9 @@ public class Console extends Connector<JComponent> {
 
         try {
 
-            for (Iterator<Object> i = getInitSet().iterator(); i.hasNext(); ) {
-
-                Object initObject = i.next();
+            for (Object initObject : getInitSet()) {
 
                 if (initObject instanceof Scheduler) {
-
                     this.scheduler = (Scheduler) initObject;
                     logger.debug("found");
                     return;
@@ -206,12 +188,12 @@ public class Console extends Connector<JComponent> {
             mainFrame = new JFrame("DIY Zoning Console");
             mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-            Container display = mainFrame.getContentPane();
+            var display = mainFrame.getContentPane();
 
             display.setBackground(ColorScheme.offMap.background);
 
-            GridBagLayout layout = new GridBagLayout();
-            GridBagConstraints cs = new GridBagConstraints();
+            var layout = new GridBagLayout();
+            var cs = new GridBagConstraints();
 
             display.setLayout(layout);
 
@@ -299,23 +281,23 @@ public class Console extends Connector<JComponent> {
 
     private static final String FONT_NAME = "Lucida Bright";
 
-    private final Font font20 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 20);
-    private final Font font24 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 24);
+    private final Font font20 = new Font(FONT_NAME, Font.PLAIN, 20);
+    private final Font font24 = new Font(FONT_NAME, Font.PLAIN, 24);
     @SuppressWarnings("unused")
-    private final Font font30 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 30);
-    private final Font font36 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 36);
+    private final Font font30 = new Font(FONT_NAME, Font.PLAIN, 30);
+    private final Font font36 = new Font(FONT_NAME, Font.PLAIN, 36);
     @SuppressWarnings("unused")
-    private final Font fontBold36 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 36);
-    private final Font fontBold48 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 48);
-    private final Font fontBold72 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 72);
-    private final Font fontBold96 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 96);
-    private final Font fontBold120 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 120);
-    private final Font fontBold144 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 144);
+    private final Font fontBold36 = new Font(FONT_NAME, Font.PLAIN, 36);
+    private final Font fontBold48 = new Font(FONT_NAME, Font.PLAIN, 48);
+    private final Font fontBold72 = new Font(FONT_NAME, Font.PLAIN, 72);
+    private final Font fontBold96 = new Font(FONT_NAME, Font.PLAIN, 96);
+    private final Font fontBold120 = new Font(FONT_NAME, Font.PLAIN, 120);
+    private final Font fontBold144 = new Font(FONT_NAME, Font.PLAIN, 144);
 
     /**
      * Possible screen sizes.
      */
-    private ScreenDescriptor[] screenSizes = {
+    private final ScreenDescriptor[] screenSizes = {
             new ScreenDescriptor("QVGA", new Dimension(240, 320), fontBold72, fontBold48, font20),
             new ScreenDescriptor("WQVGA", new Dimension(240, 400), fontBold72, fontBold48, font20),
             new ScreenDescriptor("FWQVGA", new Dimension(240, 432), fontBold72, fontBold48, font20),
