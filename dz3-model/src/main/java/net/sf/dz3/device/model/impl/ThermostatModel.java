@@ -75,8 +75,6 @@ public class ThermostatModel implements Thermostat, ThermostatController {
 
     /**
      * The current signal.
-     *
-     * @see #stateChanged(AnalogSensor, DataSample<Double>)
      */
     private DataSample<Double> lastKnownSignal;
 
@@ -175,34 +173,31 @@ public class ThermostatModel implements Thermostat, ThermostatController {
      * @param saturationLimit Process controller saturation limit.
      */
     public ThermostatModel(String name, AnalogSensor sensor, double setpoint, double P, double I, double D, double saturationLimit) {
-
         this(name, sensor, new SimplePidController(setpoint, P, I, D, saturationLimit));
     }
 
     @Override
     public String getName() {
-
-	return name;
+        return name;
     }
 
     @Override
     public void setVoting(boolean voting) {
 
-	logger.info("setVoting: " + voting);
-	this.voting = voting;
-	stateChanged();
+        logger.info("setVoting: {}", voting);
+        this.voting = voting;
+        stateChanged();
     }
 
     @Override
     public boolean isVoting() {
-
-	return voting;
+        return voting;
     }
 
     @Override
     public void setOnHold(boolean hold) {
 
-	logger.info("setOnHold: " + hold);
+	logger.info("setOnHold: {}", hold);
 	this.hold = hold;
 	stateChanged();
     }
@@ -216,7 +211,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
     @Override
     public void setOn(boolean enabled) {
 
-	logger.info("setOn: " + enabled);
+	logger.info("setOn: {}", enabled);
 
 	this.tsEnabled = enabled;
 	stateChanged();
@@ -248,14 +243,13 @@ public class ThermostatModel implements Thermostat, ThermostatController {
         // let them specify this explicitly instead of wondering how the hell
         // did the zones became dump zones without being asked to.
 
-//	if (!isOn()) {
-//
-//	    // Override. If the zone is shut off, it can be used as a dump zone.
-//
-//	    return 1;
-//	}
+        //	if (!isOn()) { // NOSONAR Doc comment
+        //
+        //	    // Override. If the zone is shut off, it can be used as a dump zone.
+        //	    return 1;
+        //	}
 
-	return dumpPriority;
+        return dumpPriority;
     }
 
     @Override
@@ -277,7 +271,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
 
             if (sample.isError()) {
 
-                logger.warn("Sensor failure: " + sample);
+                logger.warn("Sensor failure: {}", sample);
 
                 // Can't recalculate the control signal in this case,
                 // but need to notify the zone controller.
@@ -300,7 +294,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
 
             signalRenderer.compute(controlSignal);
 
-            logger.debug("status: " + this);
+            logger.debug("status: {}", this);
             stateChanged();
 
         } finally {
@@ -311,35 +305,30 @@ public class ThermostatModel implements Thermostat, ThermostatController {
     /**
      * Get the adjusted {@link #controlSignal control signal} value.
      *
-     * @return If {@link #tsEnabled tsEnabled}, the value of the
-     *         {@link #controlSignal control signal}, otherwise 0.
+     * @return If {@link #tsEnabled tsEnabled}, the value of the {@link #controlSignal control signal}, otherwise 0.
      */
     @Override
     public double getControlSignal() {
-
-	return tsEnabled ? (controlSignal == null ? 0 : controlSignal.sample) : 0;
+        return tsEnabled ? (controlSignal == null ? 0 : controlSignal.sample) : 0; // NOSONAR Simple enough
     }
 
     public ProcessController getController() {
-
-	return controller;
+        return controller;
     }
 
     public AnalogSensor getSensor() {
-
         return sensor;
     }
 
     @Override
     public void raise() {
-
         // Bump it up for good
-        signalRenderer.consume(new DataSample<Double>("internal", signature, HYSTERESIS * 2, null));
+        signalRenderer.consume(new DataSample<>("internal", signature, HYSTERESIS * 2, null));
     }
 
     @Override
     public double getSetpoint() {
-	return controller.getSetpoint();
+        return controller.getSetpoint();
     }
 
     @Override
@@ -354,8 +343,8 @@ public class ThermostatModel implements Thermostat, ThermostatController {
                         + SETPOINT_MIN + "..." + SETPOINT_MAX + ")");
             }
 
-            logger.debug("Old setpoint: " + getSetpoint());
-            logger.info("New setpoint: " + setpoint);
+            logger.debug("Old setpoint: {}", getSetpoint());
+            logger.info("New setpoint: {}", setpoint);
 
             controller.setSetpoint(setpoint);
 
@@ -367,12 +356,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
 
     @Override
     public String toString() {
-
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Thermostat[").append(getName()).append(", ").append(getStatus()).append("]");
-
-        return sb.toString();
+        return "Thermostat[" + getName() + ", " + getStatus() + "]";
     }
 
     @Override
@@ -382,7 +366,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
             throw new IllegalArgumentException("other can't be null");
         }
 
-        return getName().compareTo(((Thermostat) other).getName());
+        return getName().compareTo(other.getName());
     }
 
     @JmxAttribute(description = "Thermostat status")
@@ -396,7 +380,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
         // VT: NOTE: This will not be an error signal even if the original signal is,
         // the purpose is not control but instrumentation
 
-        DataSample<ThermostatSignal> sample = new DataSample<ThermostatSignal>(signal.demand.timestamp,
+        DataSample<ThermostatSignal> sample = new DataSample<>(signal.demand.timestamp,
                 signal.demand.sourceName, signal.demand.signature, signal, null);
 
         dataBroadcaster.broadcast(sample);
@@ -416,7 +400,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
                     isOnHold(),
                     false,
                     isVoting(),
-                    new DataSample<Double>(controlSignal.timestamp, getName(), signature, 0d, null));
+                    new DataSample<>(controlSignal.timestamp, getName(), signature, 0d, null));
         }
 
         if (lastKnownSignal == null) {
@@ -428,7 +412,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
                     isOnHold(),
                     signalRenderer.getState(),
                     voting,
-                    new DataSample<Double>(System.currentTimeMillis(), getName(), signature, null, new IllegalStateException("No data received yet")));
+                    new DataSample<>(System.currentTimeMillis(), getName(), signature, null, new IllegalStateException("No data received yet")));
         }
 
         if (lastKnownSignal.isError()) {
@@ -438,7 +422,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
                     isOnHold(),
                     signalRenderer.getState(),
                     voting,
-                    new DataSample<Double>(lastKnownSignal.timestamp, getName(), signature, null, lastKnownSignal.error));
+                    new DataSample<>(lastKnownSignal.timestamp, getName(), signature, null, lastKnownSignal.error));
         }
 
         assert(controlSignal != null);
@@ -448,7 +432,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
                 isOnHold(),
                 signalRenderer.getState(),
                 voting,
-                new DataSample<Double>(controlSignal.timestamp, getName(), signature, controlSignal.sample - signalRenderer.getThresholdLow(), null));
+                new DataSample<>(controlSignal.timestamp, getName(), signature, controlSignal.sample - signalRenderer.getThresholdLow(), null));
     }
 
     @Override
@@ -458,20 +442,17 @@ public class ThermostatModel implements Thermostat, ThermostatController {
 
     		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
 
-    		boolean ok = false;
+            var ok = false;
 
-    		for (int offset = 0; offset < trace.length; offset++) {
+            for (StackTraceElement frame : trace) {
 
-    			StackTraceElement frame = trace[offset];
+                if (frame.getClassName().equals("net.sf.dz3.device.model.impl.SimpleZoneController")) {
 
-    			if (frame.getClassName().equals("net.sf.dz3.device.model.impl.SimpleZoneController")) {
-
-    				// It is OK if the zone controller adds itself as a listener from inside the constructor
-
-    				ok = true;
-    				break;
-    			}
-    		}
+                    // It is OK if the zone controller adds itself as a listener from inside the constructor
+                    ok = true;
+                    break;
+                }
+            }
 
     		if (!ok) {
 
@@ -509,8 +490,7 @@ public class ThermostatModel implements Thermostat, ThermostatController {
         try {
 
             if (isOnHold()) {
-
-                logger.info("On hold, set(" + status + ") ignored");
+                logger.info("On hold, set({}) ignored", status);
                 return;
             }
 
