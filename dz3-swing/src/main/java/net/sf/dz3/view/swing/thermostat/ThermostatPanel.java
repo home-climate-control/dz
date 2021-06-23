@@ -17,7 +17,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -43,7 +42,7 @@ import java.util.Locale;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ThermostatPanel extends JPanel implements KeyListener {
+public class ThermostatPanel extends AbstractPanel implements KeyListener {
 
     private static final long serialVersionUID = 3420150515187693627L;
     private static final DecimalFormat numberFormat = new DecimalFormat("#0.0;-#0.0");
@@ -114,10 +113,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         source.getController().addConsumer(pidListener);
     }
 
-    @SuppressWarnings("squid:S1199")
     private void initGraphics() {
-
-        setBackground(ColorScheme.offMap.background);
 
         currentLabel.setFont(currentFontC);
         currentLabel.setToolTipText("Current temperature (Left/Right to change zone)");
@@ -125,62 +121,12 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         setpointLabel.setFont(setpointFont);
         setpointLabel.setToolTipText("Setpoint (Up/Down to change)");
 
-        var layout = new GridBagLayout();
-        var cs = new GridBagConstraints();
-
-        this.setLayout(layout);
-
-        // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
-        // blocks are for readability
-
-        {
-            // Controls take the upper quarter of the display
-
-            cs.fill = GridBagConstraints.HORIZONTAL;
-            cs.gridx = 0;
-            cs.gridy = 0;
-            cs.gridwidth = GridBagConstraints.REMAINDER;
-            cs.gridheight = 1;
-            cs.weightx = 1;
-            cs.weighty = 0;
-
-            var controls = createControls();
-
-            layout.setConstraints(controls, cs);
-            this.add(controls);
-        }
-
-        {
-            cs.gridy++;
-            cs.gridheight = 1;
-            cs.weighty = 1;
-            cs.fill = GridBagConstraints.BOTH;
-
-            layout.setConstraints(chart, cs);
-            this.add(chart);
-
-            chart.setPreferredSize(getPreferredSize());
-            var bg = ColorScheme.offMap.background;
-            var chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
-            chart.setBackground(chartBg);
-        }
-
-        // Really dirty, but really quick
-
-        var template = BorderFactory.createTitledBorder(source.getName());
-        var border = BorderFactory.createTitledBorder(
-                getBorder(),
-                source.getName(),
-                template.getTitleJustification(),
-                template.getTitlePosition(),
-                template.getTitleFont(),
-                Color.WHITE);
-
-        this.setBorder(border);
+        createLayout(source.getName(), chart);
     }
 
+    @Override
     @SuppressWarnings("squid:S1199")
-    private JPanel createControls() {
+    protected JPanel createControls() {
 
         var controls = new JPanel();
 

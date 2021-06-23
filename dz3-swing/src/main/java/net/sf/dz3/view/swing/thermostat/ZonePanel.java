@@ -1,5 +1,13 @@
 package net.sf.dz3.view.swing.thermostat;
 
+import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.view.swing.ScreenDescriptor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -12,18 +20,8 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.device.model.Thermostat;
-import net.sf.dz3.view.swing.ScreenDescriptor;
-
 /**
- * Panel that contains all {@link ThermostatPanel} instances (and all {@code SensorPanel} instances
+ * AbstractPanel that contains all {@link ThermostatPanel} instances (and all {@code SensorPanel} instances
  * in a {@link CardLayout}, and an indicator bar that displays abbreviated status for all zones.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
@@ -39,12 +37,12 @@ public class ZonePanel extends JPanel implements KeyListener {
     private final transient Zone[] zones;
 
     /**
-     * Panel to display bars for all zones.
+     * AbstractPanel to display bars for all zones.
      */
     private final JPanel zoneBar = new JPanel();
 
     /**
-     * Panel to display {@link ThermostatPanel} instances.
+     * AbstractPanel to display {@link ThermostatPanel} instances.
      *
      * VT: NOTE: squid:S1700 - the name reflects the semantics exactly.
      */

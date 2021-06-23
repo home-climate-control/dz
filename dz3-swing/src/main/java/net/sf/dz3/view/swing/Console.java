@@ -3,6 +3,7 @@ package net.sf.dz3.view.swing;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.device.model.DamperController;
+import net.sf.dz3.device.model.RuntimePredictor;
 import net.sf.dz3.device.model.ThermostatController;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.ZoneController;
@@ -13,6 +14,7 @@ import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
 import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
 import net.sf.dz3.view.swing.thermostat.ZonePanel;
+import net.sf.dz3.view.swing.unit.UnitFactory;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.swing.JComponent;
@@ -103,6 +105,7 @@ public class Console extends Connector<JComponent> {
         this.defaultUnit = TemperatureUnit.resolve(unit);
 
         register(ThermostatModel.class, new ThermostatFactory(this.defaultUnit));
+        register(RuntimePredictor.class, new UnitFactory());
     }
 
     /**
