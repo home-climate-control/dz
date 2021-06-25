@@ -8,10 +8,12 @@ import net.sf.dz3.device.model.ThermostatController;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.device.model.impl.ThermostatModel;
+import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.TemperatureSensor;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
+import net.sf.dz3.view.swing.sensor.SensorFactory;
 import net.sf.dz3.view.swing.thermostat.EntitySelectorPanel;
 import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
 import net.sf.dz3.view.swing.unit.UnitFactory;
@@ -102,6 +104,7 @@ public class Console extends Connector<JComponent> {
         super(initSet);
         this.defaultUnit = TemperatureUnit.resolve(unit);
 
+        register(AnalogSensor.class, new SensorFactory());
         register(ThermostatModel.class, new ThermostatFactory(this.defaultUnit));
         register(RuntimePredictor.class, new UnitFactory());
     }

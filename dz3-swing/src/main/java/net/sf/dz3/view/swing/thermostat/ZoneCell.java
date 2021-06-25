@@ -1,7 +1,6 @@
 package net.sf.dz3.view.swing.thermostat;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.Thermostat;
@@ -9,11 +8,9 @@ import net.sf.dz3.device.model.ThermostatSignal;
 import net.sf.dz3.device.model.ZoneState;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.view.swing.ColorScheme;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.sf.dz3.view.swing.EntityCell;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -25,11 +22,10 @@ import java.awt.Rectangle;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
+public class ZoneCell extends EntityCell<ThermostatSignal> {
 
     private static final long serialVersionUID = 4736300051405383448L;
 
-    private final transient Logger logger = LogManager.getLogger(getClass());
 
     /**
      * How many pixels are there between zone cells.
@@ -53,7 +49,7 @@ public class ZoneCell extends JPanel implements DataSink<ThermostatSignal> {
     private boolean selected = false;
 
     private DataSample<ThermostatSignal> signal;
-    private final transient Thermostat source;
+    private final Thermostat source;
 
     public ZoneCell(Thermostat ts) {
 
