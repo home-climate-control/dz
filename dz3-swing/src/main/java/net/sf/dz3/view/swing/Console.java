@@ -224,8 +224,7 @@ public class Console extends Connector<JComponent> {
 
     @Override
     protected void deactivate2() {
-
-        throw new UnsupportedOperationException("Not Implenented");
+        throw new UnsupportedOperationException("Not Implemented");
     }
 
     @JmxAttribute(description = "Is the console currently visible")
@@ -372,14 +371,12 @@ public class Console extends Connector<JComponent> {
 
         @Override
         public void keyReleased(KeyEvent e) {
-
-            // Do nothing
+            // No special handling
         }
 
         @Override
         public void keyTyped(KeyEvent e) {
-
-            // Do nothing
+            // No special handling
         }
 
         private void setScreenSize(ScreenDescriptor screenDescriptor) {
