@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -127,12 +128,13 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
     }
 
     private Collection<CellAndPanel> filter(Map<Object, CellAndPanel> source, Class parent) {
-        return source
+        var subset = source
                 .entrySet()
                 .stream()
                 .filter(kv -> parent.isAssignableFrom(kv.getKey().getClass()))
-                .map(kv -> kv.getValue())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+
+        return new TreeMap(subset).values();
     }
 
     /**
