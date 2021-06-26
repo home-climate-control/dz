@@ -9,6 +9,7 @@ import net.sf.dz3.device.model.ZoneState;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.dz3.view.swing.EntityCell;
+import net.sf.dz3.view.swing.EntitySelectorPanel;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.awt.Color;

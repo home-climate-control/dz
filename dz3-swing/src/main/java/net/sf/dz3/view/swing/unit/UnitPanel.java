@@ -5,8 +5,8 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.device.model.RuntimePredictor;
 import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
 import net.sf.dz3.view.swing.ColorScheme;
+import net.sf.dz3.view.swing.EntityPanel;
 import net.sf.dz3.view.swing.ScreenDescriptor;
-import net.sf.dz3.view.swing.thermostat.EntityPanel;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;

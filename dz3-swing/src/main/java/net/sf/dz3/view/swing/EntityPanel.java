@@ -1,7 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
-
-import net.sf.dz3.view.swing.ColorScheme;
-import net.sf.dz3.view.swing.ScreenDescriptor;
+package net.sf.dz3.view.swing;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;

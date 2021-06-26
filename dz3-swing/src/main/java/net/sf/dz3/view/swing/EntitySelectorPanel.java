@@ -1,7 +1,8 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing;
 
 import net.sf.dz3.device.model.Thermostat;
-import net.sf.dz3.view.swing.ScreenDescriptor;
+import net.sf.dz3.view.swing.thermostat.ThermostatPanel;
+import net.sf.dz3.view.swing.thermostat.ZoneCell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;

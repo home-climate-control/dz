@@ -11,6 +11,8 @@ import net.sf.dz3.device.model.ZoneState;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.swing.ColorScheme;
+import net.sf.dz3.view.swing.EntityPanel;
+import net.sf.dz3.view.swing.EntitySelectorPanel;
 import net.sf.dz3.view.swing.ScreenDescriptor;
 import net.sf.dz3.view.swing.TemperatureUnit;
 import org.apache.logging.log4j.LogManager;
@@ -627,6 +629,7 @@ public class ThermostatPanel extends EntityPanel implements KeyListener {
         return source.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY;
     }
 
+    @Override
     public void setFontSize(ScreenDescriptor screenDescriptor) {
 
         this.currentFontC = screenDescriptor.fontCurrentTemperatureC;
