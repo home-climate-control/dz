@@ -15,6 +15,8 @@ import java.util.Set;
 /**
  * Base class for implementing the V in MVC.
  *
+ * @param <T> Component type to use.
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public abstract class Connector<T> implements JmxAware {

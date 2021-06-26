@@ -8,6 +8,8 @@ import java.util.Map;
 /**
  * Connector factory base.
  *
+ * @param <T> Component type to create.
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public abstract class ConnectorFactory<T> {

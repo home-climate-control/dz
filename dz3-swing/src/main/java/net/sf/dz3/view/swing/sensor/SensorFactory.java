@@ -1,12 +1,12 @@
 package net.sf.dz3.view.swing.sensor;
 
 import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.dz3.view.swing.ComponentFactory;
+import net.sf.dz3.view.swing.CellAndPanel;
+import net.sf.dz3.view.swing.ComponentPairFactory;
 
-import javax.swing.JComponent;
 import java.util.Map;
 
-public class SensorFactory extends ComponentFactory {
+public class SensorFactory extends ComponentPairFactory<SensorCell, SensorPanel> {
 
     @Override
     public Class<?> getSourceClass() {
@@ -14,7 +14,7 @@ public class SensorFactory extends ComponentFactory {
     }
 
     @Override
-    public JComponent createComponent(Object source, Map<String, Object> context) {
-        return new SensorPanel((AnalogSensor) source);
+    public CellAndPanel createComponent(Object source, Map<String, Object> context) {
+        return new CellAndPanel(new SensorCell(), new SensorPanel((AnalogSensor) source));
     }
 }

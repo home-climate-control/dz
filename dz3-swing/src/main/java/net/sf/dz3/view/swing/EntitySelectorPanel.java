@@ -1,13 +1,9 @@
 package net.sf.dz3.view.swing;
 
-import net.sf.dz3.device.model.Thermostat;
-import net.sf.dz3.view.swing.thermostat.ThermostatPanel;
-import net.sf.dz3.view.swing.thermostat.ZoneCell;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
@@ -16,9 +12,6 @@ import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * Panel that contains all {@link EntityPanel} instances in a {@link CardLayout}, and an indicator bar
@@ -33,7 +26,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
     private final transient Logger logger = LogManager.getLogger(getClass());
 
     private int currentEntityOffset = 0;
-    private final transient Entity[] entities;
+    private final transient CellAndPanel[] entities;
 
     /**
      * Panel to display bars for all entities.
@@ -51,7 +44,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
     private final CardLayout cardLayout = new CardLayout();
 
     @SuppressWarnings("squid:S1199")
-    public EntitySelectorPanel(Map<Object, JComponent> componentMap) {
+    public EntitySelectorPanel(Map<Object, CellAndPanel> componentMap) {
 
         var layout = new GridBagLayout();
         var cs = new GridBagConstraints();
@@ -92,53 +85,18 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
             this.add(selectorPanel);
         }
 
-        SortedMap<Thermostat, JComponent> thermostatMap = new TreeMap<>();
+        entities = componentMap.values().toArray(new CellAndPanel[0]);
 
-        for (Entry<Object, JComponent> entry : componentMap.entrySet()) {
-
-            Object dataSource = entry.getKey();
-            JComponent panel = entry.getValue();
-
-            // VT: FIXME: Extend this to all sensors
-
-            if (dataSource instanceof Thermostat) {
-                thermostatMap.put((Thermostat) dataSource, panel);
-            } else {
-                logger.warn("don't know how to handle {}", dataSource.getClass());
-            }
-        }
-
-        entities = new Entity[thermostatMap.size()];
-
-        selectorBar.setLayout(new GridLayout(1, thermostatMap.size()));
+        selectorBar.setLayout(new GridLayout(1, entities.length));
         selectorPanel.setLayout(cardLayout);
 
         var offset = 0;
-        for (Thermostat ts : thermostatMap.keySet()) {
-
-            var panel = componentMap.get(ts);
-            var cell = new ZoneCell(ts);
-            var entity = new Entity(cell, (ThermostatPanel) panel);
-
-            selectorBar.add(cell);
-            selectorPanel.add(panel, "" + offset);
-
-            entities[offset++] = entity;
+        for (var pair : entities) {
+            selectorBar.add(pair.cell);
+            selectorPanel.add(pair.panel, "" + offset++);
         }
 
         setCurrentEntity(0);
-    }
-
-    private static class Entity {
-
-        public final ZoneCell entityCell;
-        public final EntityPanel entityPanel;
-
-        public Entity(ZoneCell entityCell, EntityPanel entityPanel) {
-
-            this.entityCell = entityCell;
-            this.entityPanel = entityPanel;
-        }
     }
 
     /**
@@ -167,8 +125,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 // Toggle between Celsius and Fahrenheit
 
                 // This must work for all entities
-                for (Entity entity : entities) {
-                    entity.entityPanel.keyPressed(e);
+                for (CellAndPanel entity : entities) {
+                    entity.panel.keyPressed(e);
                 }
 
                 break;
@@ -206,7 +164,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
                 // Change dump priority
 
-                entities[currentEntityOffset].entityPanel.keyPressed(e);
+                entities[currentEntityOffset].panel.keyPressed(e);
                 break;
 
             case KeyEvent.CHAR_UNDEFINED:
@@ -253,7 +211,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
                     // Lower setpoint for currently selected zone (if it is a zone)
 
-                    entities[currentEntityOffset].entityPanel.keyPressed(e);
+                    entities[currentEntityOffset].panel.keyPressed(e);
 
                     break;
 
@@ -289,8 +247,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
      */
     private void setCurrentEntity(int entityOffset) {
 
-        entities[currentEntityOffset].entityCell.setSelected(false);
-        entities[entityOffset].entityCell.setSelected(true);
+        entities[currentEntityOffset].cell.setSelected(false);
+        entities[entityOffset].cell.setSelected(true);
 
         cardLayout.show(selectorPanel, "" + entityOffset);
 
@@ -299,9 +257,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     public synchronized void setSize(ScreenDescriptor screenDescriptor) {
 
-        for (Entity entity : entities) {
-            EntityPanel ep = entity.entityPanel;
-            ep.setFontSize(screenDescriptor);
+        for (CellAndPanel entity : entities) {
+            entity.panel.setFontSize(screenDescriptor);
         }
     }
 }

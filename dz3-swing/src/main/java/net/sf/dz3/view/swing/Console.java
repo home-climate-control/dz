@@ -18,7 +18,6 @@ import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
 import net.sf.dz3.view.swing.unit.UnitFactory;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 import java.awt.Dimension;
@@ -55,7 +54,7 @@ import java.util.TreeMap;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Console extends Connector<JComponent> {
+public class Console extends Connector<CellAndPanel> {
 
     private final TemperatureUnit defaultUnit;
 
@@ -113,9 +112,9 @@ public class Console extends Connector<JComponent> {
      * using custom factory set.
      *
      * @param initSet Objects to display.
-     * @param factorySet Set of {@link ComponentFactory} objects to use for component creation.
+     * @param factorySet Set of {@link ComponentPairFactory} objects to use for component creation.
      */
-    public Console(Set<Object> initSet, Set<ConnectorFactory<JComponent>> factorySet) {
+    public Console(Set<Object> initSet, Set<ConnectorFactory<CellAndPanel>> factorySet) {
         this(initSet, factorySet, "C");
     }
 
@@ -124,10 +123,10 @@ public class Console extends Connector<JComponent> {
      * using custom factory set.
      *
      * @param initSet Objects to display.
-     * @param factorySet Set of {@link ComponentFactory} objects to use for component creation.
+     * @param factorySet Set of {@link ComponentPairFactory} objects to use for component creation.
      * @param unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
      */
-    public Console(Set<Object> initSet, Set<ConnectorFactory<JComponent>> factorySet, String unit) {
+    public Console(Set<Object> initSet, Set<ConnectorFactory<CellAndPanel>> factorySet, String unit) {
         super(initSet, factorySet);
         this.defaultUnit = TemperatureUnit.resolve(unit);
     }

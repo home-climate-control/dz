@@ -9,4 +9,9 @@ public class SensorCell extends EntityCell<Double> {
     public void consume(DataSample<Double> signal) {
 
     }
+
+    @Override
+    public void setSelected(boolean selected) {
+
+    }
 }

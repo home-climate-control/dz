@@ -8,4 +8,11 @@ import javax.swing.JPanel;
 
 public abstract class EntityCell<T> extends JPanel implements DataSink<T> {
     protected final transient Logger logger = LogManager.getLogger(getClass());
+
+    /**
+     * Modify the entity cell visuals as either "selected" or "not selected".
+     *
+     * @param selected if {@code true}, then present this cell as "selected".
+     */
+    public abstract void setSelected(boolean selected);
 }

@@ -1,12 +1,12 @@
 package net.sf.dz3.view.swing.unit;
 
 import net.sf.dz3.device.model.RuntimePredictor;
-import net.sf.dz3.view.swing.ComponentFactory;
+import net.sf.dz3.view.swing.CellAndPanel;
+import net.sf.dz3.view.swing.ComponentPairFactory;
 
-import javax.swing.JComponent;
 import java.util.Map;
 
-public class UnitFactory extends ComponentFactory {
+public class UnitFactory extends ComponentPairFactory<UnitCell, UnitPanel> {
 
     @Override
     public Class<?> getSourceClass() {
@@ -14,7 +14,7 @@ public class UnitFactory extends ComponentFactory {
     }
 
     @Override
-    public JComponent createComponent(Object source, Map<String, Object> context) {
-        return new UnitPanel((RuntimePredictor) source);
+    public CellAndPanel createComponent(Object source, Map<String, Object> context) {
+        return new CellAndPanel(new UnitCell((RuntimePredictor) source), new UnitPanel((RuntimePredictor) source));
     }
 }

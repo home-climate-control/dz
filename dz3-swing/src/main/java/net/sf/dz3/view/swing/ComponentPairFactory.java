@@ -1,17 +1,15 @@
 package net.sf.dz3.view.swing;
 
-import java.util.Map;
-
-import javax.swing.JComponent;
-
 import net.sf.dz3.view.ConnectorFactory;
 
+import java.util.Map;
+
 /**
- * Component factory base.
+ * Component pair factory base.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class ComponentFactory extends ConnectorFactory<JComponent> {
+public abstract class ComponentPairFactory<C extends EntityCell, P extends EntityPanel> extends ConnectorFactory<CellAndPanel> {
 
     /**
      * Create a component for the given source object,
@@ -23,7 +21,7 @@ public abstract class ComponentFactory extends ConnectorFactory<JComponent> {
      * @return The component to display the source object.
      */
     @Override
-    public abstract JComponent createComponent(
+    public abstract CellAndPanel createComponent(
             Object source,
             Map<String, Object> context);
 }
