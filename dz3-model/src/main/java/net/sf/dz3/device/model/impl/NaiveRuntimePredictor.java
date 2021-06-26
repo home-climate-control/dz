@@ -21,10 +21,11 @@ import java.time.temporal.ChronoUnit;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
-public class NaiveRuntimePredictor implements RuntimePredictor {
+public class NaiveRuntimePredictor implements RuntimePredictor, Comparable<NaiveRuntimePredictor> {
 
     private final Logger logger = LogManager.getLogger();
 
+    private final String name;
     private final DataBroadcaster<UnitRuntimePredictionSignal> broadcaster = new DataBroadcaster<>();
 
     /**
@@ -41,18 +42,25 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
     private double startDemand;
 
     /**
-     * Create an instance not attached to anything.
+     * Create an instance not attached to anything, with a random name.
      */
     public NaiveRuntimePredictor() {
+        this.name = Integer.toHexString(hashCode());
     }
 
     /**
      * Create an instance attached to a data source.
      *
+     * @param name Human readable name. Will propagate to UI and metrics collectors.
      * @param source Data source to listen to.
      */
-    public NaiveRuntimePredictor(DataSource<HvacSignal> source) {
+    public NaiveRuntimePredictor(String name, DataSource<HvacSignal> source) {
+        this.name = name;
         source.addConsumer(this);
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**
@@ -198,5 +206,10 @@ public class NaiveRuntimePredictor implements RuntimePredictor {
     @Override
     public void removeConsumer(DataSink<UnitRuntimePredictionSignal> consumer) {
         broadcaster.removeConsumer(consumer);
+    }
+
+    @Override
+    public int compareTo(NaiveRuntimePredictor o) {
+        return getName().compareTo((o.getName()));
     }
 }
