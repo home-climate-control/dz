@@ -1,22 +1,20 @@
 package net.sf.dz3.device.sensor.impl.xbee;
 
-import java.io.IOException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import com.rapplogic.xbee.api.AtCommandResponse;
-import com.rapplogic.xbee.api.RemoteAtRequest;
-import com.rapplogic.xbee.api.XBeeAddress64;
-
-import net.sf.dz3.device.sensor.Switch;
-import net.sf.dz3.device.sensor.impl.StringChannelAddress;
-import net.sf.dz3.instrumentation.Marker;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.rapplogic.xbee.api.AtCommandResponse;
+import com.rapplogic.xbee.api.RemoteAtRequest;
+import net.sf.dz3.device.sensor.Addressable;
+import net.sf.dz3.device.sensor.Switch;
+import net.sf.dz3.device.sensor.impl.StringChannelAddress;
+import net.sf.dz3.instrumentation.Marker;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.IOException;
 
 /**
  * XBee switch container.
@@ -26,15 +24,15 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * but support will be soon extended to all XBee pins that can be configured as
  * digital outputs.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */
 public class XBeeSwitch implements Switch {
 
     private final Logger logger = LogManager.getLogger(getClass());
-    protected final DataBroadcaster<Boolean> dataBroadcaster = new DataBroadcaster<Boolean>();
+    protected final DataBroadcaster<Boolean> dataBroadcaster = new DataBroadcaster<>();
 
     private final XBeeDeviceContainer container;
-    private StringChannelAddress address;
+    private final StringChannelAddress address;
 
     /**
      * Create an instance.
@@ -52,15 +50,15 @@ public class XBeeSwitch implements Switch {
     public boolean getState() throws IOException {
 
         ThreadContext.push("read(" + address + ")");
-        Marker m = new Marker("read(" + address + ")");
+        var m = new Marker("read(" + address + ")");
 
         try {
 
-            XBeeAddress64 xbeeAddress = Parser.parse(address.hardwareAddress);
-            String channel = address.channel;
+            var xbeeAddress = Parser.parse(address.hardwareAddress);
+            var channel = address.channel;
 
-            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, channel);
-            AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
+            var request = new RemoteAtRequest(xbeeAddress, channel);
+            var rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
             logger.info("{} response: {}", channel, rsp);
 
@@ -90,7 +88,7 @@ public class XBeeSwitch implements Switch {
                 throw new IOException(channel + " is not configured as switch, state is " + buffer[0]);
             }
 
-        } catch (Throwable t) {
+        } catch (Throwable t) { // NOSONAR Consequences have been considered
 
             throw new IOException("Unable to read " + address, t);
 
@@ -105,26 +103,26 @@ public class XBeeSwitch implements Switch {
     public void setState(boolean state) throws IOException {
 
         ThreadContext.push("write(" + address + ")");
-        Marker m = new Marker("write(" + address + ")");
+        var m = new Marker("write(" + address + ")");
 
         try {
 
-            XBeeAddress64 xbeeAddress = Parser.parse(address.hardwareAddress);
-            String channel = address.channel;
+            var xbeeAddress = Parser.parse(address.hardwareAddress);
+            var channel = address.channel;
 
             int deviceState = state ? 5 : 4;
-            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, channel, new int[] {deviceState});
-            AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
+            var request = new RemoteAtRequest(xbeeAddress, channel, new int[] {deviceState});
+            var rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
             logger.info("{} response: {}", channel, rsp);
-            dataBroadcaster.broadcast(new DataSample<Boolean>(System.currentTimeMillis(), getAddress(), getAddress(), state, null));
+            dataBroadcaster.broadcast(new DataSample<>(System.currentTimeMillis(), getAddress(), getAddress(), state, null));
 
             if (rsp.isError()) {
 
                 throw new IOException(channel + " + query failed, status: " + rsp.getStatus());
             }
 
-        } catch (Throwable t) {
+        } catch (Throwable t) { // NOSONAR Consequences have been considered
 
             throw new IOException("Unable to write " + address, t);
 
@@ -137,7 +135,6 @@ public class XBeeSwitch implements Switch {
 
     @Override
     public String getAddress() {
-
         return address.toString();
     }
 
@@ -160,5 +157,11 @@ public class XBeeSwitch implements Switch {
                 getClass().getSimpleName(),
                 Integer.toHexString(hashCode()) + "#" + getAddress().replace(":", "@"),
                 "XBee switch");
+    }
+
+    @Override
+    public int compareTo(Addressable o) {
+        // Can't afford to collide with the wrapper
+        return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
     }
 }
