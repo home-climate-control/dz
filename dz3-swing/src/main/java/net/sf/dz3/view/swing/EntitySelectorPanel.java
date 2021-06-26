@@ -1,5 +1,8 @@
 package net.sf.dz3.view.swing;
 
+import net.sf.dz3.device.model.RuntimePredictor;
+import net.sf.dz3.device.model.Thermostat;
+import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -11,7 +14,11 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Panel that contains all {@link EntityPanel} instances in a {@link CardLayout}, and an indicator bar
@@ -85,7 +92,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
             this.add(selectorPanel);
         }
 
-        entities = componentMap.values().toArray(new CellAndPanel[0]);
+        entities = sort(componentMap).toArray(new CellAndPanel[0]);
 
         selectorBar.setLayout(new GridLayout(1, entities.length));
         selectorPanel.setLayout(cardLayout);
@@ -97,6 +104,35 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         }
 
         setCurrentEntity(0);
+    }
+
+    /**
+     * Sort the values so that they come out in this order: first thermostats, then sensors, then units.
+     *
+     * @param source Map from data sources to cell and panel pairs.
+     *
+     * @return Only cell and panel pairs in desired display order.
+     */
+    private Collection<CellAndPanel> sort(Map<Object, CellAndPanel> source) {
+
+        var result = new ArrayList<CellAndPanel>();
+
+        // VT: FIXME: Not quite there yet. Still need to sort individual groups. Next commit.
+
+        for ( var c : List.of(Thermostat.class, AnalogSensor.class, RuntimePredictor.class)) {
+            result.addAll(filter(source, c));
+        }
+
+        return result;
+    }
+
+    private Collection<CellAndPanel> filter(Map<Object, CellAndPanel> source, Class parent) {
+        return source
+                .entrySet()
+                .stream()
+                .filter(kv -> parent.isAssignableFrom(kv.getKey().getClass()))
+                .map(kv -> kv.getValue())
+                .collect(Collectors.toSet());
     }
 
     /**
