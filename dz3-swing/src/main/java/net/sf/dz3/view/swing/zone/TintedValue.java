@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 /**
  * Intended to hold a data sample for the {@link AbstractChart variable color chart}.

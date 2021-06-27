@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.controller.pid.AbstractPidController;
@@ -82,6 +82,7 @@ public class ZoneCell extends EntityCell<ThermostatSignal> {
      *
      * @param selected {@code true} if this cell is selected.
      */
+    @Override
     public void setSelected(boolean selected) {
         this.selected = selected;
         repaint();

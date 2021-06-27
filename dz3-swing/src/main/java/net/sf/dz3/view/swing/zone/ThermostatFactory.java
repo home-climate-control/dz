@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.scheduler.Scheduler;
@@ -40,7 +40,7 @@ public class ThermostatFactory extends ComponentPairFactory {
         try {
 
             var cell = new ZoneCell((ThermostatModel) source);
-            var panel = new ThermostatPanel(
+            var panel = new ZonePanel(
                     (ThermostatModel) source,
                     (ScreenDescriptor) context.get("screen descriptor"),
                     (Scheduler) context.get("scheduler"),

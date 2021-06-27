@@ -14,8 +14,8 @@ import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
 import net.sf.dz3.view.swing.sensor.SensorFactory;
-import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
 import net.sf.dz3.view.swing.unit.UnitFactory;
+import net.sf.dz3.view.swing.zone.ThermostatFactory;
 import org.apache.logging.log4j.ThreadContext;
 
 import javax.swing.JFrame;

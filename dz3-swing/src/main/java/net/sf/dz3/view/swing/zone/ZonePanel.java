@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
@@ -36,7 +36,7 @@ import java.time.Clock;
 import java.util.Locale;
 
 /**
- * Thermostat panel.
+ * Zone panel.
  *
  * Even though it implements {@link KeyListener}, it never request focus,
  * but gets event notifications from {@link EntitySelectorPanel} instead.
@@ -44,7 +44,7 @@ import java.util.Locale;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ThermostatPanel extends EntityPanel implements KeyListener {
+public class ZonePanel extends EntityPanel implements KeyListener {
 
     private static final long serialVersionUID = 3420150515187693627L;
     private static final DecimalFormat numberFormat = new DecimalFormat("#0.0;-#0.0");
@@ -99,7 +99,7 @@ public class ThermostatPanel extends EntityPanel implements KeyListener {
      */
     private double setpointDelta = 0.1d;
 
-    public ThermostatPanel(ThermostatModel source, ScreenDescriptor screenDescriptor, Scheduler scheduler, TemperatureUnit defaultUnit) {
+    public ZonePanel(ThermostatModel source, ScreenDescriptor screenDescriptor, Scheduler scheduler, TemperatureUnit defaultUnit) {
 
         this.source = source;
         this.scheduler = scheduler;

@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
