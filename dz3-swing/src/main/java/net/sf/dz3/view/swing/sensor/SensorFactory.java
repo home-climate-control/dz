@@ -15,6 +15,6 @@ public class SensorFactory extends ComponentPairFactory {
 
     @Override
     public CellAndPanel createComponent(Object source, Map<String, Object> context) {
-        return new CellAndPanel(new SensorCell(), new SensorPanel((AnalogSensor) source));
+        return new CellAndPanel(new SensorCell((AnalogSensor) source), new SensorPanel((AnalogSensor) source));
     }
 }

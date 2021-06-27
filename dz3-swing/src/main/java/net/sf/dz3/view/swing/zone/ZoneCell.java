@@ -1,6 +1,5 @@
 package net.sf.dz3.view.swing.zone;
 
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.Thermostat;
@@ -10,7 +9,6 @@ import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.dz3.view.swing.EntityCell;
 import net.sf.dz3.view.swing.EntitySelectorPanel;
-import org.apache.logging.log4j.ThreadContext;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -27,65 +25,16 @@ public class ZoneCell extends EntityCell<ThermostatSignal> {
 
     private static final long serialVersionUID = 4736300051405383448L;
 
-
     /**
      * How many pixels are there between zone cells.
      */
     private static final int HORIZONTAL_PADDING = 1;
 
-    /**
-     * How many pixels are there between the zone panel and zone cell bottom.
-     */
-    private static final int ZONE_PANEL_GAP = 4;
-
-    /**
-     * How many pixels are there between the indicator and zone cell.
-     */
-    private static final int INDICATOR_GAP = 2;
-    /**
-     * How many pixels the zone status indicator takes.
-     */
-    private static final int INDICATOR_HEIGHT = 10;
-
-    private boolean selected = false;
-
-    private DataSample<ThermostatSignal> signal;
-    private final Thermostat source;
-
     public ZoneCell(Thermostat ts) {
-
-        this.source = ts;
-        ts.addConsumer(this);
+        super(ts);
 
         setPreferredSize(new Dimension(20, 70));
         setToolTipText(ts.getName());
-    }
-
-    @Override
-    public void consume(DataSample<ThermostatSignal> signal) {
-
-        ThreadContext.push("consume@" + Integer.toHexString(hashCode()));
-
-        try {
-
-            this.signal = signal;
-            logger.trace(signal);
-            repaint();
-
-        } finally {
-            ThreadContext.pop();
-        }
-    }
-
-    /**
-     * Change the appearance depending on whether this cell is selected.
-     *
-     * @param selected {@code true} if this cell is selected.
-     */
-    @Override
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-        repaint();
     }
 
     @Override
@@ -102,27 +51,24 @@ public class ZoneCell extends EntityCell<ThermostatSignal> {
         g2d.setColor(ColorScheme.getScheme(getMode()).background);
         g2d.fillRect(0, 0, d.width, d.height);
 
-        var signal = this.signal == null ? null : this.signal.sample.demand.sample;
+        var signal = this.lastKnownSignal == null ? null : this.lastKnownSignal.sample.demand.sample;
         var mode = getMode();
-        var state = this.signal == null ? ZoneState.ERROR : (this.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY); // NOSONAR Simple enough
+        var state = this.lastKnownSignal == null ? ZoneState.ERROR : (this.lastKnownSignal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY); // NOSONAR Simple enough
 
-        if ( this.signal == null || this.signal.sample.demand.isError()) {
-
+        if ( this.lastKnownSignal == null || this.lastKnownSignal.sample.demand.isError()) {
         	state = ZoneState.ERROR;
-
-        } else if (!this.signal.sample.enabled) {
-
+        } else if (!this.lastKnownSignal.sample.enabled) {
         	state = ZoneState.OFF;
         }
 
-        var upper = new Rectangle(1, 0, d.width - 2, d.height - ZONE_PANEL_GAP - INDICATOR_HEIGHT - INDICATOR_GAP);
-        var indicator = new Rectangle(
-        		1, d.height - ZONE_PANEL_GAP - INDICATOR_HEIGHT,
-        		d.width - 2, INDICATOR_HEIGHT);
+        var statusBox = new Rectangle(1, 0, d.width - 2, d.height - PANEL_GAP - INDICATOR_HEIGHT - INDICATOR_GAP);
+        var indicatorBox = new Rectangle(
+                1, d.height - PANEL_GAP - INDICATOR_HEIGHT,
+                d.width - 2, INDICATOR_HEIGHT);
 
-        paintGradient(state, mode, signal, g2d, upper);
-        paintBorder(mode, g2d, upper);
-        paintIndicator(state, mode, g2d, indicator);
+        paintGradient(state, mode, signal, g2d, statusBox);
+        paintBorder(mode, g2d, statusBox);
+        paintIndicator(state, mode, g2d, indicatorBox);
 	}
 
     private void paintGradient(ZoneState state, HvacMode mode, Double signal, Graphics2D g2d, Rectangle boundary) {
@@ -141,46 +87,39 @@ public class ZoneCell extends EntityCell<ThermostatSignal> {
     		BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
     		break;
         }
-
     }
 
     private void paintBorder(HvacMode mode, Graphics2D g2d, Rectangle boundary) {
-
-        var borderColor = ColorScheme.getScheme(mode).setpoint;
-
-        borderColor = selected ? borderColor.brighter().brighter() : borderColor.darker().darker();
-
-        g2d.setColor(borderColor);
-        g2d.drawRect(1, 0, boundary.width - 2, boundary.height - 1);
+        super.paintBorder(ColorScheme.getScheme(mode).setpoint, g2d, boundary);
     }
 
     private void paintIndicator(ZoneState state, HvacMode mode, Graphics2D g2d, Rectangle boundary) {
 
-    	Color bgColor;
+        Color bgColor;
 
-    	switch (state) {
+        switch (state) {
 
-    	case HAPPY:
+            case HAPPY:
 
-    		bgColor = ColorScheme.getScheme(mode).green;
-    		break;
+                bgColor = ColorScheme.getScheme(mode).green;
+                break;
 
-    	case ERROR:
+            case ERROR:
 
-    		bgColor = ColorScheme.getScheme(mode).error;
-    		break;
+                bgColor = ColorScheme.getScheme(mode).error;
+                break;
 
-    	case OFF:
+            case OFF:
 
-    		bgColor = ColorScheme.getScheme(mode).off;
-    		break;
+                bgColor = ColorScheme.getScheme(mode).off;
+                break;
 
-    	default:
+            default:
 
-    		bgColor = ColorScheme.getScheme(mode).bottom;
-    	}
+                bgColor = ColorScheme.getScheme(mode).bottom;
+        }
 
-    	g2d.setPaint(bgColor);
+        g2d.setPaint(bgColor);
         g2d.fillRect(boundary.x, boundary.y, boundary.width, boundary.height);
     }
 
