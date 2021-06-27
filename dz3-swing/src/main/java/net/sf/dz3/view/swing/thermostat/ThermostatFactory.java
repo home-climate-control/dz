@@ -15,7 +15,7 @@ import java.util.Map;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
-public class ThermostatFactory extends ComponentPairFactory<ZoneCell, ThermostatPanel> {
+public class ThermostatFactory extends ComponentPairFactory {
 
     private final TemperatureUnit defaultUnit;
 

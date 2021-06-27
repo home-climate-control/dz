@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class ComponentPairFactory<C extends EntityCell, P extends EntityPanel> extends ConnectorFactory<CellAndPanel> {
+public abstract class ComponentPairFactory extends ConnectorFactory<CellAndPanel> {
 
     /**
      * Create a component for the given source object,

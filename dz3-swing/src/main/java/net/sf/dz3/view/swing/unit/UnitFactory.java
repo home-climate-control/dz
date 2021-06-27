@@ -6,7 +6,7 @@ import net.sf.dz3.view.swing.ComponentPairFactory;
 
 import java.util.Map;
 
-public class UnitFactory extends ComponentPairFactory<UnitCell, UnitPanel> {
+public class UnitFactory extends ComponentPairFactory {
 
     @Override
     public Class<?> getSourceClass() {
