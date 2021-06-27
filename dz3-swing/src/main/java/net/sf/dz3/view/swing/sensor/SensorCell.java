@@ -12,6 +12,7 @@ public class SensorCell extends EntityCell<Double> {
 
     public SensorCell(AnalogSensor source) {
         super(source);
+        setToolTipText(source.getAddress());
     }
 
     @Override
@@ -25,6 +26,7 @@ public class SensorCell extends EntityCell<Double> {
 
         // Background should be set, or edges will bleed white
 
+        // VT: NOTE: See the note at ColorScheme#background
         g2d.setColor(ColorScheme.offMap.background);
 
         g2d.fillRect(0, 0, d.width, d.height);

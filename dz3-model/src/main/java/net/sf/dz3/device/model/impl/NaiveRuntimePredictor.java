@@ -59,6 +59,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor, Comparable<Naive
         source.addConsumer(this);
     }
 
+    @Override
     public String getName() {
         return name;
     }

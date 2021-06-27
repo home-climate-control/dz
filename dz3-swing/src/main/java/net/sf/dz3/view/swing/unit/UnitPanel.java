@@ -11,7 +11,6 @@ import net.sf.dz3.view.swing.ScreenDescriptor;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.border.TitledBorder;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -34,12 +33,16 @@ public class UnitPanel extends EntityPanel {
 
     private final Listener listener = new Listener();
 
+    private final transient RuntimePredictor source;
+
     /**
      * Create an instance.
      *
      * @param source Data source.
      */
     public UnitPanel(RuntimePredictor source) {
+
+        this.source = source;
 
         initGraphics();
         source.addConsumer(unitChart);
@@ -49,7 +52,7 @@ public class UnitPanel extends EntityPanel {
     private void initGraphics() {
         // VT: NOTE: Introducing the name is not the priority at the moment - let's steal it from the signal
         // when it comes
-        createLayout("--", unitChart);
+        createLayout(source.getName(), unitChart);
     }
 
     @Override
@@ -108,7 +111,6 @@ public class UnitPanel extends EntityPanel {
 
         @Override
         public void consume(DataSample<UnitRuntimePredictionSignal> signal) {
-            ((TitledBorder) getBorder()).setTitle(signal.sourceName);
             unitChart.consume(signal);
         }
     }
