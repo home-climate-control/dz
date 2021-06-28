@@ -12,7 +12,6 @@ import net.sf.dz3.view.swing.EntitySelectorPanel;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
@@ -25,11 +24,6 @@ public class ZoneCell extends EntityCell<ThermostatSignal> {
 
     private static final long serialVersionUID = 4736300051405383448L;
 
-    /**
-     * How many pixels are there between zone cells.
-     */
-    private static final int HORIZONTAL_PADDING = 1;
-
     public ZoneCell(Thermostat ts) {
         super(ts);
 
@@ -38,38 +32,43 @@ public class ZoneCell extends EntityCell<ThermostatSignal> {
     }
 
     @Override
-    public synchronized void paintComponent(Graphics g) {
+    protected void paintContent(Graphics2D g2d, Rectangle boundary) {
+        paintGradient(
+                getState(),
+                getMode(),
+                lastKnownSignal == null ? null : lastKnownSignal.sample.demand.sample,
+                g2d, boundary);
+    }
 
-        // Draw background
-        super.paintComponent(g);
+    @Override
+    protected Color getBorderColor() {
+        return ColorScheme.getScheme(getMode()).setpoint;
+    }
 
-        var g2d = (Graphics2D) g;
-        var d = getSize();
+    @Override
+    protected Color getIndicatorColor() {
 
-        // Background should be set, or edges will bleed white
-
-        g2d.setColor(ColorScheme.getScheme(getMode()).background);
-        g2d.fillRect(0, 0, d.width, d.height);
-
-        var signal = this.lastKnownSignal == null ? null : this.lastKnownSignal.sample.demand.sample;
         var mode = getMode();
-        var state = this.lastKnownSignal == null ? ZoneState.ERROR : (this.lastKnownSignal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY); // NOSONAR Simple enough
 
-        if ( this.lastKnownSignal == null || this.lastKnownSignal.sample.demand.isError()) {
-        	state = ZoneState.ERROR;
-        } else if (!this.lastKnownSignal.sample.enabled) {
-        	state = ZoneState.OFF;
+        switch (getState()) {
+
+            case HAPPY:
+
+                return ColorScheme.getScheme(mode).green;
+
+            case ERROR:
+
+                return ColorScheme.getScheme(mode).error;
+
+            case OFF:
+
+                return ColorScheme.getScheme(mode).off;
+
+            default:
+
+                return ColorScheme.getScheme(mode).bottom;
         }
-
-        var statusBox = new Rectangle(1, 0, d.width - 2, d.height - PANEL_GAP - INDICATOR_HEIGHT - INDICATOR_GAP);
-        var indicatorBox = new Rectangle(
-                1, d.height - PANEL_GAP - INDICATOR_HEIGHT,
-                d.width - 2, INDICATOR_HEIGHT);
-
-        paintGradient(state, mode, signal, g2d, statusBox);
-        paintBorder(mode, g2d, statusBox);
-        paintIndicator(state, mode, g2d, indicatorBox);
-	}
+    }
 
     private void paintGradient(ZoneState state, HvacMode mode, Double signal, Graphics2D g2d, Rectangle boundary) {
 
@@ -89,41 +88,20 @@ public class ZoneCell extends EntityCell<ThermostatSignal> {
         }
     }
 
-    private void paintBorder(HvacMode mode, Graphics2D g2d, Rectangle boundary) {
-        super.paintBorder(ColorScheme.getScheme(mode).setpoint, g2d, boundary);
-    }
-
-    private void paintIndicator(ZoneState state, HvacMode mode, Graphics2D g2d, Rectangle boundary) {
-
-        Color bgColor;
-
-        switch (state) {
-
-            case HAPPY:
-
-                bgColor = ColorScheme.getScheme(mode).green;
-                break;
-
-            case ERROR:
-
-                bgColor = ColorScheme.getScheme(mode).error;
-                break;
-
-            case OFF:
-
-                bgColor = ColorScheme.getScheme(mode).off;
-                break;
-
-            default:
-
-                bgColor = ColorScheme.getScheme(mode).bottom;
-        }
-
-        g2d.setPaint(bgColor);
-        g2d.fillRect(boundary.x, boundary.y, boundary.width, boundary.height);
-    }
-
     private HvacMode getMode() {
     	return ((AbstractPidController) ((ThermostatModel) source).getController()).getP() > 0 ? HvacMode.COOLING : HvacMode.HEATING;
+    }
+
+    private ZoneState getState() {
+
+        if (lastKnownSignal == null || lastKnownSignal.isError() || lastKnownSignal.sample.demand.isError()) {
+            return ZoneState.ERROR;
+        }
+
+        if (!lastKnownSignal.sample.enabled) {
+            return ZoneState.OFF;
+        }
+
+        return lastKnownSignal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY;
     }
 }
