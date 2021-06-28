@@ -128,9 +128,6 @@ public class NaiveRuntimePredictor implements RuntimePredictor, Comparable<Naive
             return unknown(signal, 0, false);
         }
 
-        logger.info("uptime={}", signal.sample.uptime);
-        logger.info("runningFor={}", runningFor);
-
         if (runningFor.compareTo(Duration.of(1, ChronoUnit.MINUTES)) < 0) {
 
             // Can't reliably determine the estimate within the first minute - there is almost inevitably
@@ -159,7 +156,7 @@ public class NaiveRuntimePredictor implements RuntimePredictor, Comparable<Naive
         var left = Duration.of((long)(signal.sample.demand / k), ChronoUnit.MILLIS);
         var arrival = now.plus(left);
 
-        logger.info("calculated: dD={}, uptime={}, k={}, left={}, arrival={}",
+        logger.trace("calculated: dD={}, uptime={}, k={}, left={}, arrival={}",
                 startDemand - signal.sample.demand, runningFor.toMillis(),
                 k, left, arrival);
 
