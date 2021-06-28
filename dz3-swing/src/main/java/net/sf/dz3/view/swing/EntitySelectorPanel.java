@@ -37,11 +37,6 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
     private final transient CellAndPanel[] entities;
 
     /**
-     * Panel to display bars for all entities.
-     */
-    private final JPanel selectorBar = new JPanel();
-
-    /**
      * Panel to display {@link EntityPanel} instances.
      */
     private final JPanel selectorPanel = new JPanel();
@@ -61,6 +56,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
         // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
         // blocks are for readability
+
+        var selectorBar = new JPanel();
 
         {
             // Entity bar spans all the horizontal space available (as many cells as there are entities),
@@ -118,8 +115,6 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
         var result = new ArrayList<CellAndPanel>();
 
-        // VT: FIXME: Not quite there yet. Still need to sort individual groups. Next commit.
-
         for ( var c : List.of(Thermostat.class, AnalogSensor.class, RuntimePredictor.class)) {
             result.addAll(filter(source, c));
         }
@@ -127,14 +122,14 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         return result;
     }
 
-    private Collection<CellAndPanel> filter(Map<Object, CellAndPanel> source, Class parent) {
+    private Collection<CellAndPanel> filter(Map<Object, CellAndPanel> source, Class<?> parent) {
         var subset = source
                 .entrySet()
                 .stream()
                 .filter(kv -> parent.isAssignableFrom(kv.getKey().getClass()))
-                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        return new TreeMap(subset).values();
+        return new TreeMap<>(subset).values();
     }
 
     /**
