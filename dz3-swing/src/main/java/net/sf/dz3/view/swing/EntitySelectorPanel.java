@@ -252,6 +252,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
                     // Do nothing
                 }
+                break;
 
                 default:
 

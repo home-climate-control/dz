@@ -17,8 +17,6 @@ import java.awt.event.KeyListener;
  */
 public abstract class EntityPanel extends JPanel implements KeyListener {
 
-    protected abstract JPanel createControls();
-
     @SuppressWarnings("squid:S1199")
     protected final void createLayout(String name, JPanel chart) {
 
@@ -77,6 +75,29 @@ public abstract class EntityPanel extends JPanel implements KeyListener {
 
         this.setBorder(border);
     }
+
+    private JPanel createControls() {
+
+        var controls = new JPanel();
+
+        controls.setBackground(ColorScheme.offMap.background);
+        controls.setOpaque(false);
+
+        var layout = new GridBagLayout();
+        var cs = new GridBagConstraints();
+
+        controls.setLayout(layout);
+
+        cs.gridx = 0;
+        cs.gridy = 0;
+
+        createControls(controls, layout, cs);
+
+        return controls;
+    }
+
+    protected abstract void createControls(JPanel controls, GridBagLayout layout, GridBagConstraints cs);
+
 
     public abstract void setFontSize(ScreenDescriptor screenDescriptor);
 }

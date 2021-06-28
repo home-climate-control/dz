@@ -128,17 +128,7 @@ public class ZonePanel extends EntityPanel implements KeyListener {
 
     @Override
     @SuppressWarnings("squid:S1199")
-    protected JPanel createControls() {
-
-        var controls = new JPanel();
-
-        controls.setBackground(ColorScheme.offMap.background);
-        controls.setOpaque(false);
-
-        var layout = new GridBagLayout();
-        var cs = new GridBagConstraints();
-
-        controls.setLayout(layout);
+    protected void createControls(JPanel controls, GridBagLayout layout, GridBagConstraints cs) {
 
         // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
         // blocks are for readability
@@ -146,8 +136,6 @@ public class ZonePanel extends EntityPanel implements KeyListener {
         {
             // Period label is on top left
 
-            cs.gridx = 0;
-            cs.gridy = 0;
             cs.gridwidth = 2;
             cs.fill = GridBagConstraints.HORIZONTAL;
 
@@ -216,8 +204,6 @@ public class ZonePanel extends EntityPanel implements KeyListener {
                 controls.add(votingLabel);
             }
         }
-
-        return controls;
     }
 
     @Override

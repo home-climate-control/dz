@@ -4,7 +4,6 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.device.model.RuntimePredictor;
 import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
-import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.dz3.view.swing.EntityPanel;
 import net.sf.dz3.view.swing.ScreenDescriptor;
 
@@ -15,6 +14,9 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
+import java.text.DecimalFormat;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 public class UnitPanel extends EntityPanel {
 
@@ -31,8 +33,6 @@ public class UnitPanel extends EntityPanel {
 
     private final UnitChart unitChart = new UnitChart();
 
-    private final Listener listener = new Listener();
-
     private final transient RuntimePredictor source;
 
     /**
@@ -40,56 +40,110 @@ public class UnitPanel extends EntityPanel {
      *
      * @param source Data source.
      */
-    public UnitPanel(RuntimePredictor source) {
+    public UnitPanel(RuntimePredictor source, ScreenDescriptor screenDescriptor) {
 
         this.source = source;
 
+        setFontSize(screenDescriptor);
         initGraphics();
         source.addConsumer(unitChart);
+        source.addConsumer(new Listener());
     }
 
     @SuppressWarnings("squid:S1199")
     private void initGraphics() {
-        // VT: NOTE: Introducing the name is not the priority at the moment - let's steal it from the signal
-        // when it comes
         createLayout(source.getName(), unitChart);
     }
 
     @Override
     @SuppressWarnings("squid:S1199")
-    protected JPanel createControls() {
-
-        var controls = new JPanel();
-
-        controls.setBackground(ColorScheme.offMap.background);
-        controls.setOpaque(false);
-
-        var layout = new GridBagLayout();
-        var cs = new GridBagConstraints();
-
-        controls.setLayout(layout);
+    protected void createControls(JPanel controls, GridBagLayout layout, GridBagConstraints cs) {
 
         // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
         // blocks are for readability
 
+        // Demand
         {
-            cs.gridx = 0;
-            cs.gridy = 0;
             cs.gridwidth = 2;
             cs.fill = GridBagConstraints.HORIZONTAL;
+            cs.weightx = 1;
+            cs.weighty = 0;
 
             layout.setConstraints(demandLabel, cs);
             controls.add(demandLabel);
 
             demandLabel.setForeground(Color.GRAY);
         }
+        {
+            cs.gridx++;
+            cs.gridwidth = 1;
 
-        return controls;
+            layout.setConstraints(currentDemandLabel, cs);
+            controls.add(currentDemandLabel);
+
+            currentDemandLabel.setForeground(Color.GRAY);
+        }
+
+        // Running for
+        {
+            cs.gridx = 0;
+            cs.gridy++;
+            cs.gridwidth = 2;
+
+            layout.setConstraints(runningForLabel, cs);
+            controls.add(runningForLabel);
+
+            runningForLabel.setForeground(Color.GRAY);
+        }
+        {
+            cs.gridx++;
+            cs.gridwidth = 1;
+            cs.weightx = 1;
+            cs.weighty = 0;
+
+            layout.setConstraints(currentRunningForLabel, cs);
+            controls.add(currentRunningForLabel);
+
+            currentRunningForLabel.setForeground(Color.GRAY);
+        }
+
+        // ETA
+        {
+            cs.gridx = 0;
+            cs.gridy++;
+            cs.gridwidth = 2;
+
+            layout.setConstraints(leftLabel, cs);
+            controls.add(leftLabel);
+
+            leftLabel.setForeground(Color.GRAY);
+
+            leftLabel.setForeground(Color.GRAY);
+        }
+        {
+            cs.gridx++;
+            cs.gridwidth = 1;
+            cs.weightx = 1;
+            cs.weighty = 0;
+
+            layout.setConstraints(currentLeftLabel, cs);
+            controls.add(currentLeftLabel);
+
+            currentLeftLabel.setForeground(Color.GRAY);
+        }
     }
 
     @Override
     public void setFontSize(ScreenDescriptor screenDescriptor) {
-        // No special handling yet
+
+        demandLabel.setFont(screenDescriptor.fontSetpoint);
+        currentDemandLabel.setFont(screenDescriptor.fontSetpoint);
+
+        runningForLabel.setFont(screenDescriptor.fontSetpoint);
+        currentRunningForLabel.setFont(screenDescriptor.fontSetpoint);
+
+        leftLabel.setFont(screenDescriptor.fontSetpoint);
+        currentLeftLabel.setFont(screenDescriptor.fontSetpoint);
     }
 
     @Override
@@ -107,11 +161,59 @@ public class UnitPanel extends EntityPanel {
         // No special handling
     }
 
-    private class Listener  implements DataSink<UnitRuntimePredictionSignal> {
+    private class Listener implements DataSink<UnitRuntimePredictionSignal> {
 
         @Override
         public void consume(DataSample<UnitRuntimePredictionSignal> signal) {
             unitChart.consume(signal);
+            displayDemand(signal);
+            displayRunningFor(signal);
+            displayLeft(signal);
+        }
+
+        private void displayDemand(DataSample<UnitRuntimePredictionSignal> signal) {
+
+            var format = new DecimalFormat("#.###");
+            format.setMinimumFractionDigits(1);
+
+            if (signal.isError()) {
+                currentDemandLabel.setText(UNDEFINED);
+            } else {
+                currentDemandLabel.setText(format.format(signal.sample.demand));
+            }
+        }
+
+        private void displayRunningFor(DataSample<UnitRuntimePredictionSignal> signal) {
+            if (signal.isError() || signal.sample.uptime == 0) {
+                currentRunningForLabel.setText(UNDEFINED);
+            } else {
+                currentRunningForLabel.setText(format(Duration.of(signal.sample.uptime, ChronoUnit.MILLIS), false));
+            }
+        }
+
+        private void displayLeft(DataSample<UnitRuntimePredictionSignal> signal) {
+            if (signal.isError() || signal.sample.left == null) {
+                currentLeftLabel.setText(UNDEFINED);
+            } else {
+                currentLeftLabel.setText(format(signal.sample.left, signal.sample.plus));
+            }
+        }
+
+        private String format(Duration d, boolean plus) {
+
+            if (d == null) {
+                return UNDEFINED;
+            }
+
+            var seconds = d.getSeconds();
+            var hours = seconds / 3600;
+            var minutes = (seconds % 3600) / 60;
+            seconds = seconds % 60;
+
+            return (hours > 0 ? (hours + ":") : "")
+                    + String.format("%02d", minutes) + ":"
+                    + String.format("%02d", seconds)
+                    + (plus ? "+" : "");
         }
     }
 }
