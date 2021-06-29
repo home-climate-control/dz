@@ -23,6 +23,10 @@ public class ColorScheme {
     public final Color sensorNormal;
     public final Color sensorStale;
     public final Color sensorError;
+    public final Color unitLabel;
+    public final Color unitNormal;
+    public final Color unitWarning;
+    public final Color unitCritical;
 
     /**
      * Background color.
@@ -67,7 +71,11 @@ public class ColorScheme {
             Color background,
             Color sensorNormal,
             Color sensorStale,
-            Color sensorError) {
+            Color sensorError,
+            Color unitLabel,
+            Color unitNormal,
+            Color unitWarning,
+            Color unitCritical) {
 
         // VT: NOTE: squid:S107 - sorry, dudes, this is unavoidable here.
 
@@ -84,6 +92,10 @@ public class ColorScheme {
         this.sensorNormal = sensorNormal;
         this.sensorStale = sensorStale;
         this.sensorError = sensorError;
+        this.unitLabel = unitLabel;
+        this.unitNormal = unitNormal;
+        this.unitWarning = unitWarning;
+        this.unitCritical = unitCritical;
     }
 
     public static final ColorScheme coolingMap = new ColorScheme(
@@ -99,7 +111,11 @@ public class ColorScheme {
             Color.BLACK,
             Color.GREEN.darker(),
             Color.YELLOW,
-            Color.RED.darker());
+            Color.RED.darker(),
+            Color.GRAY,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.ORANGE);
 
     public static final ColorScheme heatingMap = new ColorScheme(
             new Color(240, 70, 10),  // F0460A ORANGE-RED
@@ -114,7 +130,11 @@ public class ColorScheme {
             Color.BLACK,
             Color.GREEN.darker(),
             Color.YELLOW,
-            Color.RED.darker());
+            Color.RED.darker(),
+            Color.GRAY,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.ORANGE);
 
     public static final ColorScheme offMap = new ColorScheme(
             Color.GRAY,
@@ -129,5 +149,9 @@ public class ColorScheme {
             Color.BLACK,
             Color.GREEN.darker(),
             Color.YELLOW,
-            Color.RED.darker());
+            Color.RED.darker(),
+            Color.GRAY,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.ORANGE);
 }

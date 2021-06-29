@@ -4,6 +4,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.device.model.RuntimePredictor;
 import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
+import net.sf.dz3.view.swing.ColorScheme;
 import net.sf.dz3.view.swing.EntityPanel;
 import net.sf.dz3.view.swing.ScreenDescriptor;
 
@@ -72,7 +73,7 @@ public class UnitPanel extends EntityPanel {
             layout.setConstraints(demandLabel, cs);
             controls.add(demandLabel);
 
-            demandLabel.setForeground(Color.GRAY);
+            demandLabel.setForeground(ColorScheme.offMap.unitLabel);
         }
         {
             cs.gridx++;
@@ -81,7 +82,7 @@ public class UnitPanel extends EntityPanel {
             layout.setConstraints(currentDemandLabel, cs);
             controls.add(currentDemandLabel);
 
-            currentDemandLabel.setForeground(Color.GRAY);
+            currentDemandLabel.setForeground(ColorScheme.offMap.unitLabel);
         }
 
         // Running for
@@ -93,7 +94,7 @@ public class UnitPanel extends EntityPanel {
             layout.setConstraints(runningForLabel, cs);
             controls.add(runningForLabel);
 
-            runningForLabel.setForeground(Color.GRAY);
+            runningForLabel.setForeground(ColorScheme.offMap.unitLabel);
         }
         {
             cs.gridx++;
@@ -104,7 +105,7 @@ public class UnitPanel extends EntityPanel {
             layout.setConstraints(currentRunningForLabel, cs);
             controls.add(currentRunningForLabel);
 
-            currentRunningForLabel.setForeground(Color.GRAY);
+            currentRunningForLabel.setForeground(ColorScheme.offMap.unitLabel);
         }
 
         // ETA
@@ -116,9 +117,7 @@ public class UnitPanel extends EntityPanel {
             layout.setConstraints(leftLabel, cs);
             controls.add(leftLabel);
 
-            leftLabel.setForeground(Color.GRAY);
-
-            leftLabel.setForeground(Color.GRAY);
+            leftLabel.setForeground(ColorScheme.offMap.unitLabel);
         }
         {
             cs.gridx++;
@@ -129,7 +128,7 @@ public class UnitPanel extends EntityPanel {
             layout.setConstraints(currentLeftLabel, cs);
             controls.add(currentLeftLabel);
 
-            currentLeftLabel.setForeground(Color.GRAY);
+            currentLeftLabel.setForeground(ColorScheme.offMap.unitLabel);
         }
     }
 
@@ -189,6 +188,8 @@ public class UnitPanel extends EntityPanel {
             } else {
                 currentRunningForLabel.setText(format(Duration.of(signal.sample.uptime, ChronoUnit.MILLIS), false));
             }
+
+            currentRunningForLabel.setForeground(getColor(Duration.of(signal.sample.uptime, ChronoUnit.MILLIS)));
         }
 
         private void displayLeft(DataSample<UnitRuntimePredictionSignal> signal) {
@@ -197,6 +198,7 @@ public class UnitPanel extends EntityPanel {
             } else {
                 currentLeftLabel.setText(format(signal.sample.left, signal.sample.plus));
             }
+            currentLeftLabel.setForeground(getColor(signal.sample.left));
         }
 
         private String format(Duration d, boolean plus) {
@@ -214,6 +216,31 @@ public class UnitPanel extends EntityPanel {
                     + String.format("%02d", minutes) + ":"
                     + String.format("%02d", seconds)
                     + (plus ? "+" : "");
+        }
+
+        private Color getColor(Duration d) {
+
+            if (d == null) {
+                return ColorScheme.offMap.unitLabel;
+            }
+
+            if (d.toMillis() == 0 ) {
+                return ColorScheme.offMap.unitLabel;
+            }
+
+            if (d.compareTo(Duration.of(120, ChronoUnit.MINUTES)) > 0 ) {
+                return ColorScheme.offMap.error.brighter();
+            }
+
+            if (d.compareTo(Duration.of(60, ChronoUnit.MINUTES)) > 0 ) {
+                return ColorScheme.offMap.unitCritical;
+            }
+
+            if (d.compareTo(Duration.of(30, ChronoUnit.MINUTES)) > 0 ) {
+                return ColorScheme.offMap.unitWarning;
+            }
+
+            return ColorScheme.offMap.unitNormal;
         }
     }
 }
