@@ -207,14 +207,13 @@ public class UnitPanel extends EntityPanel {
                 return UNDEFINED;
             }
 
-            var seconds = d.getSeconds();
+            // Bottom out at 1 minute - it's weird to see zero here
+            var seconds = Math.max(d.getSeconds(), 60);
             var hours = seconds / 3600;
             var minutes = (seconds % 3600) / 60;
-            seconds = seconds % 60;
 
-            return (hours > 0 ? (hours + ":") : "")
-                    + String.format("%02d", minutes) + ":"
-                    + String.format("%02d", seconds)
+            return (hours > 0 ? (hours + " hr ") : "")
+                    + String.format("%2d min", minutes)
                     + (plus ? "+" : "");
         }
 
