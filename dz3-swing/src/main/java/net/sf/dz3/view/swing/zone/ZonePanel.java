@@ -72,7 +72,7 @@ public class ZonePanel extends EntityPanel implements KeyListener {
     private final JLabel periodLabel = new JLabel("", SwingConstants.LEFT);
 
     // 3 hours
-    private final AbstractChart chart = new Chart2020(Clock.systemUTC(), 1000L * 60 * 60 * 3);
+    private final AbstractZoneChart chart = new ZoneChart2020(Clock.systemUTC(), 1000L * 60 * 60 * 3);
 
     private static final String NO_PERIOD = "(no period is active)";
 

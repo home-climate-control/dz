@@ -19,7 +19,7 @@ import java.util.Map.Entry;
  * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  */
 @SuppressWarnings("squid:S110")
-public class Chart2020 extends AbstractChart {
+public class ZoneChart2020 extends AbstractZoneChart {
 
     private static final long serialVersionUID = 8739949924865459025L;
 
@@ -42,7 +42,7 @@ public class Chart2020 extends AbstractChart {
 
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
-    public Chart2020(Clock clock, long chartLengthMillis) {
+    public ZoneChart2020(Clock clock, long chartLengthMillis) {
 
         super(clock, chartLengthMillis);
     }
@@ -73,7 +73,7 @@ public class Chart2020 extends AbstractChart {
 
         adjustVerticalLimits(signal.timestamp, signal.sample.value, signal.sample.setpoint);
 
-        synchronized (AbstractChart.class) {
+        synchronized (AbstractZoneChart.class) {
 
             if (localWidth != globalWidth) {
 
@@ -122,7 +122,7 @@ public class Chart2020 extends AbstractChart {
 
         // Chart size *can* change during runtime - see +/- Console#ResizeKeyListener.
 
-        synchronized (AbstractChart.class) {
+        synchronized (AbstractZoneChart.class) {
 
             if (globalWidth != boundary.width) {
 

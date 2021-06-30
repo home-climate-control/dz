@@ -98,7 +98,7 @@ class ChartBenchmarkTest {
     void benchmark2009() throws IOException {
 
         assertThatCode(() -> {
-            benchmark("2009", series1, new Chart2009(testClock, chartLengthMillis), false);
+            benchmark("2009", series1, new ZoneChart2009(testClock, chartLengthMillis), false);
         }).doesNotThrowAnyException();
     }
 
@@ -106,7 +106,7 @@ class ChartBenchmarkTest {
     void benchmark2020() throws IOException {
 
         assertThatCode(() -> {
-            benchmark("2020", series1, new Chart2020(testClock, chartLengthMillis), false);
+            benchmark("2020", series1, new ZoneChart2020(testClock, chartLengthMillis), false);
         }).doesNotThrowAnyException();
     }
 
@@ -114,7 +114,7 @@ class ChartBenchmarkTest {
     void benchmark2020s() throws IOException {
 
         assertThatCode(() -> {
-            benchmark("2020s", series1, new Chart2020(testClock, chartLengthMillis), true);
+            benchmark("2020s", series1, new ZoneChart2020(testClock, chartLengthMillis), true);
         }).doesNotThrowAnyException();
     }
 
@@ -122,11 +122,11 @@ class ChartBenchmarkTest {
     void benchmark2020gap() throws IOException {
 
         assertThatCode(() -> {
-            benchmark("2020gap", series2, new Chart2020(testClock, chartLengthMillis), true);
+            benchmark("2020gap", series2, new ZoneChart2020(testClock, chartLengthMillis), true);
         }).doesNotThrowAnyException();
     }
 
-    private void benchmark(String marker, Map<Long, Double> source, AbstractChart target, boolean changeSetpoint) throws IOException {
+    private void benchmark(String marker, Map<Long, Double> source, AbstractZoneChart target, boolean changeSetpoint) throws IOException {
         ThreadContext.push(marker);
         Marker m = new Marker(marker);
 

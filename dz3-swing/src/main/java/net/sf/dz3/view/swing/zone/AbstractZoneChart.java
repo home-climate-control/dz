@@ -29,7 +29,7 @@ import java.util.TreeMap;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractChart extends JPanel implements DataSink<TintedValueAndSetpoint> {
+public abstract class AbstractZoneChart extends JPanel implements DataSink<TintedValueAndSetpoint> {
 
     private static final long serialVersionUID = -1982511776928137384L;
 
@@ -124,7 +124,7 @@ public abstract class AbstractChart extends JPanel implements DataSink<TintedVal
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
     protected static final Color SETPOINT_COLOR = Color.YELLOW;
 
-    protected AbstractChart(Clock clock, long chartLengthMillis) {
+    protected AbstractZoneChart(Clock clock, long chartLengthMillis) {
 
         if (chartLengthMillis < 1000 * 10) {
             throw new IllegalArgumentException("Unreasonably short chart length " + chartLengthMillis + "ms");
