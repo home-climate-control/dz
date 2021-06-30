@@ -8,11 +8,12 @@ import javax.swing.JPanel;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
+import java.time.Clock;
 
 public class SensorPanel extends EntityPanel {
 
     private final transient AnalogSensor source;
-    private final SensorChart sensorChart = new SensorChart();
+    private final SensorChart sensorChart = new SensorChart(Clock.systemUTC(), 1000L * 60 * 60 * 3);
 
     public SensorPanel(AnalogSensor source, ScreenDescriptor screenDescriptor) {
 

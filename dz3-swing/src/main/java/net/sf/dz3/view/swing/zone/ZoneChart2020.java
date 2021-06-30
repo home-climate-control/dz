@@ -2,6 +2,7 @@ package net.sf.dz3.view.swing.zone;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.controller.DataSet;
+import net.sf.dz3.view.swing.AbstractChart;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -24,18 +25,9 @@ public class ZoneChart2020 extends AbstractZoneChart {
     private static final long serialVersionUID = 8739949924865459025L;
 
     /**
-     * Chart width in pixels for all the charts. Undefined until the first time
-     * {@link #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)}
-     * for any instance of this class is called.
-     *
-     * Making it static is ugly, but gets the job done - the screen size will not change.
-     */
-    private static int globalWidth = 0;
-
-    /**
      * Chart width of this instance.
      *
-     * @see #globalWidth
+     * @see AbstractChart#getGlobalWidth()
      * @see #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)
      */
     private int localWidth = 0;
@@ -43,7 +35,6 @@ public class ZoneChart2020 extends AbstractZoneChart {
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 
     public ZoneChart2020(Clock clock, long chartLengthMillis) {
-
         super(clock, chartLengthMillis);
     }
 
@@ -75,10 +66,10 @@ public class ZoneChart2020 extends AbstractZoneChart {
 
         synchronized (AbstractZoneChart.class) {
 
-            if (localWidth != globalWidth) {
+            if (localWidth != getGlobalWidth()) {
 
                 // Chart size changed, need to adjust the buffer
-                localWidth = globalWidth;
+                localWidth = getGlobalWidth();
 
                 var step = chartLengthMillis / localWidth;
 
@@ -115,26 +106,6 @@ public class ZoneChart2020 extends AbstractZoneChart {
         dsSetpoints.append(signal.timestamp, signal.sample.setpoint, true);
 
         return true;
-    }
-
-    @Override
-    protected void checkWidth(Dimension boundary) {
-
-        // Chart size *can* change during runtime - see +/- Console#ResizeKeyListener.
-
-        synchronized (AbstractZoneChart.class) {
-
-            if (globalWidth != boundary.width) {
-
-                logger.info("width changed from {} to {}", globalWidth, boundary.width);
-
-                globalWidth = boundary.width;
-
-                var step = chartLengthMillis / globalWidth;
-
-                logger.info("ms per pixel: {}", step);
-            }
-        }
     }
 
     @Override
