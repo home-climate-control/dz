@@ -1,11 +1,11 @@
 package net.sf.dz3.controller.pid;
 
-import net.sf.dz3.controller.ProcessControllerStatus;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import net.sf.dz3.controller.ProcessControllerStatus;
 
 /**
- * 
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class PidControllerStatus extends ProcessControllerStatus {
 
@@ -26,7 +26,7 @@ public class PidControllerStatus extends ProcessControllerStatus {
 
     /**
      * Create an instance.
-     * 
+     *
      * @param setpoint Current setpoint.
      * @param error Current error value.
      * @param signal Current signal value.
@@ -45,13 +45,12 @@ public class PidControllerStatus extends ProcessControllerStatus {
 
     /**
      * Get a string representation of a PID controller status.
-     * 
+     *
      * @return A string representation of a status put together by a superclass,
      * followed by slash delimited P, I, D values.
      */
     @Override
     public final String toString() {
-
-        return super.toString() + "/" + p + "/" + i + "/" + d;
+        return super.toString() + ",p=" + p + ",i=" + i + ",d=" + d;
     }
 }

@@ -1,6 +1,7 @@
 package net.sf.dz3.controller;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.PID_Controller;
 import net.sf.dz3.controller.pid.PidControllerStatus;
@@ -10,13 +11,15 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.within;
 
 class PID_ControllerTest {
@@ -24,11 +27,13 @@ class PID_ControllerTest {
     private final Logger logger = LogManager.getLogger(getClass());
     private final Random rg = new Random();
 
-    public void testPSimple() {
+    @Test
+    void testPSimple() {
         testP(new SimplePidController(0, 1, 0, 0, 0));
     }
 
-    public void testPStateful() {
+    @Test
+    void testPStateful() {
         testP(new PID_Controller(0.0, 1, 0.0, 1, 0.0, 1, 0));
     }
 
@@ -42,25 +47,25 @@ class PID_ControllerTest {
         try {
 
             // Feel free to push this north of 5000000
-            long COUNT = 10000;
-            long start = System.currentTimeMillis();
+            var COUNT = 10000L;
+            var start = System.currentTimeMillis();
 
-            for (int count = 0; count < COUNT; count++) {
+            for (var count = 0; count < COUNT; count++) {
 
-                double value = rg.nextDouble();
+                var value = rg.nextDouble();
                 // Time is relevant, timestamp can't be the same or go back in time
-                DataSample<Double> pv = new DataSample<Double>(count, "source", "signature", value, null);
-                DataSample<Double> signal = pc.compute(pv);
+                var pv = new DataSample<>(count, "source", "signature", value, null);
+                var signal = pc.compute(pv);
 
                 assertThat(signal.sample).isEqualTo(value);
             }
 
-            long now = System.currentTimeMillis();
+            var now = System.currentTimeMillis();
 
-            double rqPerSec = (double) (COUNT * 1000L) / (double) (now - start);
+            var rqPerSec = (double) (COUNT * 1000L) / (double) (now - start);
 
-            logger.info((now - start) + "ms");
-            logger.info(rqPerSec + " requests per second");
+            logger.info("{}ms", now - start);
+            logger.info("{} requests per second", rqPerSec);
 
         } finally {
             ThreadContext.pop();
@@ -72,45 +77,42 @@ class PID_ControllerTest {
      * is identical.
      */
     @Test
-    public void testReconcile() {
+    void testReconcile() {
 
         ThreadContext.push("testReconcile");
 
         try {
 
-            double P = 1;
-            double I = 0.01;
-            long Ispan = 1000;
-            int divider = 10;
-            long start = System.currentTimeMillis();
-            long timestamp = start;
-            double delta = 0.1;
+            var P = 1d;
+            var I = 0.01;
+            var Ispan = 1000L;
+            var divider = 10;
+            var start = System.currentTimeMillis();
+            var timestamp = start;
+            var delta = 0.1;
 
-            List<DataSample<Double>> data = new ArrayList<DataSample<Double>>();
+            var data = new ArrayList<DataSample<Double>>();
 
             // Make sure the test timespan doesn't go beyond Ispan,
             // stateful behavior is different then
-            for (int count = 0; count < divider - 1; count++) {
+            for (var count = 0; count < divider - 1; count++) {
 
-                data.add(new DataSample<Double>(timestamp, "source", "signature", delta, null));
+                data.add(new DataSample<>(timestamp, "source", "signature", delta, null));
                 timestamp += Ispan / divider;
             }
 
-            ProcessController pcStateless = new SimplePidController(0, P, I, 0, 0);
-            ProcessController pcStateful = new PID_Controller(0.0, P, I, Ispan, 0.0, 1, 0);
+            var pcStateless = new SimplePidController(0, P, I, 0, 0);
+            var pcStateful = new PID_Controller(0.0, P, I, Ispan, 0.0, 1, 0);
 
-            for (Iterator<DataSample<Double>> i = data.iterator(); i.hasNext(); ) {
+            for (var pv : data) {
 
-                DataSample<Double> pv = i.next();
-                DataSample<Double> signalStateless = pcStateless.compute(pv);
-                DataSample<Double> signalStateful = pcStateful.compute(pv);
+                var signalStateless = pcStateless.compute(pv);
+                var signalStateful = pcStateful.compute(pv);
 
-                long offset = signalStateless.timestamp - start;
-                logger.debug("signal: " + signalStateless.sample + "/" + signalStateful.sample + "@" + offset);
+                var offset = signalStateless.timestamp - start;
+                logger.debug("signal: {}/{}@{}", signalStateless.sample, signalStateful.sample, offset);
 
-                if (offset > Ispan) {
-                    fail("offset beyond Ispan: " + offset);
-                }
+                assertThat(offset).isLessThanOrEqualTo(Ispan);
 
                 assertThat(signalStateful.timestamp).isEqualTo(signalStateless.timestamp);
                 assertThat(signalStateful.sample).isEqualTo(signalStateless.sample);
@@ -127,42 +129,40 @@ class PID_ControllerTest {
      * Test the integral component.
      */
     @Test
-    public void testI() {
+    void testI() {
 
         ThreadContext.push("testI");
 
         try {
 
-            double P = 1;
-            double I = 0.01;
-            long Ispan = 1000;
-            int divider = 10;
-            long start = System.currentTimeMillis();
-            long timestamp = start;
-            double delta = 0.1;
-            double limit = I * Ispan * delta + delta;
+            var P = 1d;
+            var I = 0.01;
+            var Ispan = 1000L;
+            var divider = 10;
+            var start = System.currentTimeMillis();
+            var timestamp = start;
+            var delta = 0.1;
+            var limit = I * Ispan * delta + delta;
 
-            List<DataSample<Double>> data = new ArrayList<DataSample<Double>>();
+            var data = new ArrayList<DataSample<Double>>();
 
-            for (int count = 0; count < divider * 2; count++) {
-                data.add(new DataSample<Double>(timestamp, "source", "signature", delta, null));
+            for (var count = 0; count < divider * 2; count++) {
+                data.add(new DataSample<>(timestamp, "source", "signature", delta, null));
                 timestamp += Ispan / divider;
             }
 
             ProcessController pc = new PID_Controller(0.0, P, I, Ispan, 0.0, 1, 0);
 
-            for (Iterator<DataSample<Double>> i = data.iterator(); i.hasNext(); ) {
-
-                logger.debug("sample: " + i.next());
+            for (var datum : data) {
+                logger.debug("sample: {}", datum);
             }
 
-            for (Iterator<DataSample<Double>> i = data.iterator(); i.hasNext(); ) {
+            for (var pv : data) {
 
-                DataSample<Double> pv = i.next();
-                DataSample<Double> signal = pc.compute(pv);
+                var signal = pc.compute(pv);
 
-                long offset = signal.timestamp - start;
-                logger.debug("signal: " + signal + " @" + offset);
+                var offset = signal.timestamp - start;
+                logger.debug("signal: {}@{}", signal, offset);
 
                 if (offset < Ispan) {
                     assertThat(signal.sample).isEqualTo(I * offset * delta + delta, within(0.00001));
@@ -180,16 +180,16 @@ class PID_ControllerTest {
      * Estimate how bad the performance of the integral set is, in real life.
      */
     @Test
-    public void testIrateSimple() {
+    void testIrateSimple() {
 
-        double P = 1;
-        double I = 0.0001;
-        long Ispan = 15 * 60 * 1000;
-        int deltaT = 300;
-        long start = System.currentTimeMillis();
-        long COUNT = (Ispan / deltaT) * 2;
+        var P = 1d;
+        var I = 0.0001;
+        var Ispan = 15 * 60 * 1000L;
+        var deltaT = 300;
+        var start = System.currentTimeMillis();
+        var COUNT = (Ispan / deltaT) * 2L;
 
-        ProcessController pc = new SimplePidController(0.0, P, I, 0, 0);
+        var pc = new SimplePidController(0.0, P, I, 0, 0);
         testIrate(pc, start, deltaT, COUNT);
     }
 
@@ -197,35 +197,35 @@ class PID_ControllerTest {
      * Estimate how bad the performance of the integral set is, in real life.
      */
     @Test
-    public void testIrateStateful() {
+    void testIrateStateful() {
 
-        double P = 1;
-        double I = 0.0001;
-        long Ispan = 15 * 60 * 1000;
-        int deltaT = 300;
-        long start = System.currentTimeMillis();
-        long COUNT = (Ispan / deltaT) * 2;
+        var P = 1d;
+        var I = 0.0001;
+        var Ispan = 15 * 60 * 1000;
+        var deltaT = 300;
+        var start = System.currentTimeMillis();
+        var COUNT = (Ispan / deltaT) * 2L;
 
-        ProcessController pc = new PID_Controller(0.0, P, I, Ispan, 0.0, 1, 0);
+        var pc = new PID_Controller(0.0, P, I, Ispan, 0.0, 1, 0);
         testIrate(pc, start, deltaT, COUNT);
     }
 
     /**
      * Estimate how bad the performance of the integral set is, in real life.
      */
-    public void testIrate(ProcessController pc, long start, int deltaT, long COUNT) {
+    void testIrate(ProcessController pc, long start, int deltaT, long COUNT) {
 
         ThreadContext.push("testIrate/" + pc.getClass().getName());
 
         try {
 
-            long timestamp = start;
+            var timestamp = start;
 
-            logger.info("Count: " + COUNT);
+            logger.info("Count: {}", COUNT);
 
-            for (int count = 0; count < COUNT; count++) {
+            for (var count = 0; count < COUNT; count++) {
 
-                DataSample<Double> pv = new DataSample<Double>(
+                var pv = new DataSample<>(
                         timestamp,
                         "source",
                         "signature",
@@ -236,8 +236,8 @@ class PID_ControllerTest {
                 timestamp += rg.nextInt(deltaT) + 1;
             }
 
-            long now = System.currentTimeMillis();
-            double rqPerSec = (double) (COUNT * 1000L) / (double) (now - start);
+            var now = System.currentTimeMillis();
+            var rqPerSec = (double) (COUNT * 1000L) / (double) (now - start);
 
             logger.info((now - start) + "ms");
             logger.info(rqPerSec + " requests per second");
@@ -251,46 +251,46 @@ class PID_ControllerTest {
      * Test the derivative component.
      */
     @Test
-    public void testD() {
+    void testD() {
 
         ThreadContext.push("testD");
 
         try {
 
-            double P = 1;
-            double D = 1000;
-            long Dspan = 1000;
-            int divider = 10;
-            long start = System.currentTimeMillis();
-            long timestamp = start;
+            var P = 1d;
+            var D = 1000d;
+            var Dspan = 1000L;
+            var divider = 10;
+            var start = System.currentTimeMillis();
+            var timestamp = start;
 
-            List<DataSample<Double>> data = new ArrayList<DataSample<Double>>();
+            var data = new ArrayList<DataSample<Double>>();
 
-            for (int count = 0; count < divider * 2; count++) {
-                data.add(new DataSample<Double>(
+            for (var count = 0; count < divider * 2; count++) {
+                data.add(new DataSample<>(
                         timestamp,
                         "source",
                         "signature",
-                        timestamp == start ? 0.0 : 1.0,
+                        timestamp == start ? 0.0 : P,
                         null));
                 timestamp += Dspan / divider;
             }
 
-            ProcessController pc = new PID_Controller(0.0, P, 0, 1, D, Dspan, 0);
+            var pc = new PID_Controller(0.0, P, 0, 1, D, Dspan, 0);
 
-            for (Iterator<DataSample<Double>> i = data.iterator(); i.hasNext(); ) {
-
-                logger.debug("sample: " + i.next());
+            for (var datum : data) {
+                logger.debug("sample: {}", datum);
             }
 
-            for (Iterator<DataSample<Double>> i = data.iterator(); i.hasNext(); ) {
+            for (DataSample<Double> pv : data) {
 
-                DataSample<Double> pv = i.next();
-                DataSample<Double> signal = pc.compute(pv);
-
-                long offset = signal.timestamp - start;
-                logger.debug("signal: " + signal + " @" + offset);
+                var signal = pc.compute(pv);
+                var offset = signal.timestamp - start;
+                logger.debug("signal: {}@{}", signal, offset);
             }
+
+            // VT: NOTE: Very vague condition, need improvement
+            assertThat(data.get(data.size() - 1).sample).isEqualTo(P);
 
         } finally {
             ThreadContext.pop();
@@ -298,29 +298,27 @@ class PID_ControllerTest {
     }
 
     @Test
-    public void testSimplePidControllerID() {
-
+    void testSimplePidControllerID() {
         testPidControllerID(new SimplePidController(20, 1, 0, 0, 0), "simple");
     }
 
     @Test
-    public void testTimedPidControllerID() {
-
+    void testTimedPidControllerID() {
         testPidControllerID(new PID_Controller(20, 1.0, 0.0, 1000, 0.0, 1000, 0), "timed");
     }
 
     private void testPidControllerID(AbstractPidController controller, String ndc) {
 
-        ThreadContext.push("testSimplePidControllerID");
+        ThreadContext.push("testSimplePidControllerID/" + ndc);
 
         try {
 
-            for (long timestamp = 0; timestamp < 100; timestamp++) {
+            for (var timestamp = 0; timestamp < 100; timestamp++) {
 
-                DataSample<Double> pv = new DataSample<Double>(timestamp, "source", "sig", 21.0 + rg.nextInt(10), null);
+                var pv = new DataSample<>(timestamp, "source", "sig", 21.0 + rg.nextInt(10), null);
                 controller.compute(pv);
 
-                PidControllerStatus signal = (PidControllerStatus) controller.getStatus();
+                var signal = (PidControllerStatus) controller.getStatus();
                 logger.info(signal);
 
                 assertThat(signal.i).isEqualTo(0.0, within(0.000000000000001));
@@ -333,29 +331,27 @@ class PID_ControllerTest {
     }
 
     @Test
-    public void testSaturationSimple() {
-
+    void testSaturationSimple() {
         testSaturationNull(new SimplePidController(20, 1, 1, 0, 3), "simple");
     }
 
     @Test
-    public void testSaturationNullTimed() {
-
+    void testSaturationNullTimed() {
         testSaturationNull(new PID_Controller(20, 1.0, 1, 1000, 0.0, 1000, 3), "timed");
     }
 
-    public void testSaturationNull(AbstractPidController controller, String ndc) {
+    void testSaturationNull(AbstractPidController controller, String ndc) {
 
-        ThreadContext.push("testSimplePidControllerID");
+        ThreadContext.push("testSimplePidControllerID/" + ndc);
 
         try {
 
-            for (long timestamp = 0; timestamp < 100; timestamp++) {
+            for (var timestamp = 0; timestamp < 100; timestamp++) {
 
-                DataSample<Double> pv = new DataSample<Double>(timestamp, "source", "sig", 21.0, null);
+                var pv = new DataSample<>(timestamp, "source", "sig", 21.0, null);
                 controller.compute(pv);
 
-                PidControllerStatus signal = (PidControllerStatus) controller.getStatus();
+                var signal = (PidControllerStatus) controller.getStatus();
                 logger.info(signal);
 
                 assertThat(signal.d).isEqualTo(0.0, within(0.000000000000001));
@@ -363,6 +359,84 @@ class PID_ControllerTest {
 
         } finally {
             ThreadContext.pop();
+        }
+    }
+
+    /**
+     * @see <a href="https://github.com/home-climate-control/dz/issues/155">issue #155</a>
+     */
+    @Test
+    void sensorBlackoutSimplePidController() {
+
+        // Actual arguments from the real configuration
+        var setpoint = 24d;
+        var P = 0.7;
+        var I = 0.000002;
+        var D = 0d;
+        var saturationLimit = 3;
+
+        sensorBlackout(new SimplePidController(setpoint, P, I, D, saturationLimit), "simple", saturationLimit);
+    }
+
+    /**
+     * @see <a href="https://github.com/home-climate-control/dz/issues/155">issue #155</a>
+     */
+    @Test
+    void sensorBlackoutPID_Controller() {
+
+        // Actual arguments from the real configuration
+        var setpoint = 24d;
+        var P = 0.7;
+        var I = 0.000002;
+        var D = 0d;
+        var saturationLimit = 3;
+        var span = Duration.of(3, ChronoUnit.HOURS).toMillis();
+
+        sensorBlackout(new PID_Controller(setpoint, P, I, span, D, span, saturationLimit), "full", saturationLimit);
+    }
+
+    void sensorBlackout(AbstractPidController pidController, String marker, int saturationLimit) {
+
+        var pidLogger = new PidLogger(marker);
+        pidController.addConsumer(pidLogger);
+
+        var source = "source";
+        var signature = "signature";
+        var start = Clock.systemUTC().instant();
+        var minute = new AtomicInteger(0);
+        var increment = 60;
+        var gap = 120;
+        var sampleStream = List.of(
+                new DataSample<>(start.toEpochMilli(), source, signature, 25d, null),
+                new DataSample<>(start.plus(minute.addAndGet(increment), ChronoUnit.SECONDS).toEpochMilli(), source, signature, 25d, null),
+                new DataSample<>(start.plus(minute.addAndGet(increment), ChronoUnit.SECONDS).toEpochMilli(), source, signature, 25d, null),
+                new DataSample<>(start.plus(minute.addAndGet(increment), ChronoUnit.SECONDS).toEpochMilli(), source, signature, 25d, null),
+                new DataSample<>(start.plus(minute.addAndGet(increment), ChronoUnit.SECONDS).toEpochMilli(), source, signature, 25d, null),
+                // BLACKOUT
+                new DataSample<>(start.plus(minute.addAndGet(gap), ChronoUnit.MINUTES).toEpochMilli(), source, signature, 25d, null)
+        );
+
+        for (var sample : sampleStream) {
+            pidController.consume(sample);
+        }
+
+        assertThat(pidLogger.samples).hasSize(6);
+        assertThat(((PidControllerStatus) pidLogger.samples.get(5).sample).i).isLessThanOrEqualTo(saturationLimit);
+    }
+
+    private class PidLogger implements DataSink<ProcessControllerStatus> {
+
+        private final String marker;
+        public final List<DataSample<ProcessControllerStatus>> samples = new ArrayList<>();
+
+        public PidLogger(String marker) {
+            this.marker = marker;
+        }
+
+        @Override
+        public void consume(DataSample<ProcessControllerStatus> signal) {
+            logger.info("{} sample: {}", marker, signal);
+            samples.add(signal);
         }
     }
 }
