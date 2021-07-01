@@ -1,6 +1,7 @@
 package net.sf.dz3.controller;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.PID_Controller;
 import net.sf.dz3.controller.pid.PidControllerStatus;
@@ -10,8 +11,13 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -353,6 +359,84 @@ class PID_ControllerTest {
 
         } finally {
             ThreadContext.pop();
+        }
+    }
+
+    /**
+     * @see <a href="https://github.com/home-climate-control/dz/issues/155">issue #155</a>
+     */
+    @Test
+    void sensorBlackoutSimplePidController() {
+
+        // Actual arguments from the real configuration
+        var setpoint = 24d;
+        var P = 0.7;
+        var I = 0.000002;
+        var D = 0d;
+        var saturationLimit = 3;
+
+        sensorBlackout(new SimplePidController(setpoint, P, I, D, saturationLimit), "simple", saturationLimit);
+    }
+
+    /**
+     * @see <a href="https://github.com/home-climate-control/dz/issues/155">issue #155</a>
+     */
+    @Test
+    void sensorBlackoutPID_Controller() {
+
+        // Actual arguments from the real configuration
+        var setpoint = 24d;
+        var P = 0.7;
+        var I = 0.000002;
+        var D = 0d;
+        var saturationLimit = 3;
+        var span = Duration.of(3, ChronoUnit.HOURS).toMillis();
+
+        sensorBlackout(new PID_Controller(setpoint, P, I, span, D, span, saturationLimit), "full", saturationLimit);
+    }
+
+    void sensorBlackout(AbstractPidController pidController, String marker, int saturationLimit) {
+
+        var pidLogger = new PidLogger(marker);
+        pidController.addConsumer(pidLogger);
+
+        var source = "source";
+        var signature = "signature";
+        var start = Clock.systemUTC().instant();
+        var minute = new AtomicInteger(0);
+        var increment = 60;
+        var gap = 120;
+        var sampleStream = List.of(
+                new DataSample<>(start.toEpochMilli(), source, signature, 25d, null),
+                new DataSample<>(start.plus(minute.addAndGet(increment), ChronoUnit.SECONDS).toEpochMilli(), source, signature, 25d, null),
+                new DataSample<>(start.plus(minute.addAndGet(increment), ChronoUnit.SECONDS).toEpochMilli(), source, signature, 25d, null),
+                new DataSample<>(start.plus(minute.addAndGet(increment), ChronoUnit.SECONDS).toEpochMilli(), source, signature, 25d, null),
+                new DataSample<>(start.plus(minute.addAndGet(increment), ChronoUnit.SECONDS).toEpochMilli(), source, signature, 25d, null),
+                // BLACKOUT
+                new DataSample<>(start.plus(minute.addAndGet(gap), ChronoUnit.MINUTES).toEpochMilli(), source, signature, 25d, null)
+        );
+
+        for (var sample : sampleStream) {
+            pidController.consume(sample);
+        }
+
+        assertThat(pidLogger.samples).hasSize(6);
+        assertThat(((PidControllerStatus) pidLogger.samples.get(5).sample).i).isLessThanOrEqualTo(saturationLimit);
+    }
+
+    private class PidLogger implements DataSink<ProcessControllerStatus> {
+
+        private final String marker;
+        public final List<DataSample<ProcessControllerStatus>> samples = new ArrayList<>();
+
+        public PidLogger(String marker) {
+            this.marker = marker;
+        }
+
+        @Override
+        public void consume(DataSample<ProcessControllerStatus> signal) {
+            logger.info("{} sample: {}", marker, signal);
+            samples.add(signal);
         }
     }
 }
