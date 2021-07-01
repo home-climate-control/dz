@@ -4,7 +4,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 
 /**
  * Simple stateless PID controller implementation.
- * 
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009
  */
 public class SimplePidController extends AbstractPidController {
@@ -18,9 +18,9 @@ public class SimplePidController extends AbstractPidController {
      * Last known error - need to calculate the D component.
      */
     private double lastError = 0;
-    
+
     public SimplePidController(String jmxName, double setpoint, double P, double I, double D, double saturationLimit) {
-	super(jmxName, setpoint, P, I, D, saturationLimit);
+        super(jmxName, setpoint, P, I, D, saturationLimit);
     }
 
     public SimplePidController(double setpoint, double P, double I, double D, double saturationLimit) {
@@ -58,9 +58,8 @@ public class SimplePidController extends AbstractPidController {
 
     @Override
     protected void setpointChanged() {
-        
+
         if (needResetOnSetpointChange()) {
-            
             integral = 0;
         }
     }

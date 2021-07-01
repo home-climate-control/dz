@@ -67,7 +67,6 @@ public class PID_Controller extends AbstractPidController implements PidControll
     protected double getIntegral(DataSample<Double> lastKnownSignal, DataSample<Double>  pv, double error) {
 
         integralSet.append(getProcessVariable().timestamp, error);
-
         return integralSet.getIntegral();
     }
 
@@ -75,13 +74,11 @@ public class PID_Controller extends AbstractPidController implements PidControll
     protected double getDerivative(DataSample<Double> lastKnownSignal, DataSample<Double>  pv, double error) {
 
         differentialSet.append(getProcessVariable().timestamp, error);
-
         return differentialSet.getDifferential();
     }
 
     @Override
     protected void setpointChanged() {
-
         // Do absolutely nothing
     }
 }
