@@ -69,33 +69,29 @@ public abstract class AbstractPidController extends AbstractProcessController im
      */
     private double lastD = 0;
 
-    public AbstractPidController(String jmxName, final double setpoint, final double P, final double I, final double D, double saturationLimit) {
+    protected AbstractPidController(String jmxName, final double setpoint, final double P, final double I, final double D, double saturationLimit) {
 
         super(setpoint);
 
-	if ("".equals(jmxName)) {
-	    throw new IllegalArgumentException("jmxName can't be null or empty");
-	}
+        if ("".equals(jmxName)) {
+            throw new IllegalArgumentException("jmxName can't be null or empty");
+        }
 
-	if (jmxName == null) {
-
-	    this.jmxName = Integer.toHexString(hashCode());
-
-	} else {
-
-	    this.jmxName = jmxName;
-	}
+        if (jmxName == null) {
+            this.jmxName = Integer.toHexString(hashCode());
+        } else {
+            this.jmxName = jmxName;
+        }
 
         setP(P);
         setI(I);
         setD(D);
         setLimit(saturationLimit);
 
-	check();
+        check();
     }
 
-    public AbstractPidController(final double setpoint, final double P, final double I, final double D, double saturationLimit) {
-
+    protected AbstractPidController(final double setpoint, final double P, final double I, final double D, double saturationLimit) {
         this(null, setpoint, P, I, D, saturationLimit);
     }
 
@@ -120,21 +116,20 @@ public abstract class AbstractPidController extends AbstractProcessController im
     public void setP(double P) {
 
 	this.P = P;
-	statusChanged();
+        statusChanged();
     }
 
     @Override
     public void setI(double I) {
 
 	this.I = I;
-	statusChanged();
+        statusChanged();
     }
 
     @Override
     public void setD(double D) {
-
-	this.D = D;
-	statusChanged();
+        this.D = D;
+        statusChanged();
     }
 
     @Override
@@ -150,17 +145,17 @@ public abstract class AbstractPidController extends AbstractProcessController im
 
     @JmxAttribute(description = "Proportional weight")
     public final double getP() {
-	return P;
+        return P;
     }
 
     @JmxAttribute(description = "Integral weight")
     public final double getI() {
-	return I;
+        return I;
     }
 
     @JmxAttribute(description = "Derivative weight")
     public final double getD() {
-	return D;
+        return D;
     }
 
     @JmxAttribute(description = "Integral component saturation limit")
@@ -176,34 +171,39 @@ public abstract class AbstractPidController extends AbstractProcessController im
         try {
 
             // This is guaranteed to be not null (see call stack)
-            DataSample<Double> pv = getProcessVariable();
+            var pv = getProcessVariable();
 
             // This will only be non-null upon second invocation
-            DataSample<Double> lastKnownSignal = getLastKnownSignal();
+            var lastKnownSignal = getLastKnownSignal();
 
-            double error = getError();
-            double p = error * getP();
+            var error = getError();
+            var p = error * getP();
             lastP = p;
-            double signal = p;
+            var signal = p;
 
             if (saturationLimit == 0) {
-                double integral = getIntegral(lastKnownSignal, pv, error);
+                var integral = getIntegral(lastKnownSignal, pv, error);
                 lastI = integral * getI();
                 signal += lastI;
 
             } else {
 
                 if (lastKnownSignal != null && Math.abs(lastKnownSignal.sample) < saturationLimit) {
+
                     // Integral value will only be updated if the output
                     // is not saturated
-                    double integral = getIntegral(lastKnownSignal, pv, error);
-                    lastI = integral * getI();
+                    var integral = getIntegral(lastKnownSignal, pv, error);
+
+                    // And only if the integral itself is not saturated either
+                    if (Math.abs(integral) < saturationLimit) {
+                        lastI = integral * getI();
+                    }
                 }
 
                 signal += lastI;
             }
 
-            double derivative = getDerivative(lastKnownSignal, pv, error);
+            var derivative = getDerivative(lastKnownSignal, pv, error);
 
             // One cause of this is setSetpoint(), which causes values
             // to be computed in a rapid succession, with chance of delta T being zero
@@ -223,14 +223,13 @@ public abstract class AbstractPidController extends AbstractProcessController im
             // VT: NOTE: Aha, one such case is right above. Need to see if this ever happens again.
 
             if (Double.compare(signal, Double.NaN) == 0) {
-
                 throw new IllegalStateException("signal is NaN, components: " + getStatus());
             }
 
-            String sourceName = pv.sourceName + ".pc";
-            String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+            var sourceName = pv.sourceName + ".pc";
+            var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
 
-            return new DataSample<Double>(pv.timestamp, sourceName, signature, signal, null);
+            return new DataSample<>(pv.timestamp, sourceName, signature, signal, null);
 
         } finally {
             ThreadContext.pop();
@@ -244,7 +243,6 @@ public abstract class AbstractPidController extends AbstractProcessController im
 
     @Override
     public final ProcessControllerStatus getStatus() {
-
         return new PidControllerStatus(getSetpoint(), getError(), getLastKnownSignal(), lastP, lastI, lastD);
     }
 
@@ -262,7 +260,6 @@ public abstract class AbstractPidController extends AbstractProcessController im
 
     @JmxAttribute(description = "Accumulated integral component")
     public final double getIntegral() {
-
         return lastI;
     }
 
@@ -270,18 +267,15 @@ public abstract class AbstractPidController extends AbstractProcessController im
      * @return {@link #resetOnSetpointChange}.
      */
     protected final boolean needResetOnSetpointChange() {
-
         return resetOnSetpointChange;
     }
 
     @JmxAttribute(description = "Whether to reset the accumulated integral component upon setpoint change")
     public boolean getResetOnSetpointChange() {
-
         return resetOnSetpointChange;
     }
 
     public void setResetOnSetpointChange(boolean reset) {
-
         this.resetOnSetpointChange = reset;
     }
 }

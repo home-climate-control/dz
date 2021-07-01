@@ -22,7 +22,7 @@ public abstract class AbstractProcessController implements ProcessController {
     /**
      * Process controller signal broadcaster.
      */
-    private final DataBroadcaster<ProcessControllerStatus> dataBroadcaster = new DataBroadcaster<ProcessControllerStatus>();
+    private final DataBroadcaster<ProcessControllerStatus> dataBroadcaster = new DataBroadcaster<>();
 
     /**
      * The process setpoint.
@@ -44,9 +44,8 @@ public abstract class AbstractProcessController implements ProcessController {
      *
      * @param setpoint Initial setpoint.
      */
-    public AbstractProcessController(double setpoint) {
-
-	this.setpoint = setpoint;
+    protected AbstractProcessController(double setpoint) {
+        this.setpoint = setpoint;
     }
 
     /**
@@ -56,7 +55,6 @@ public abstract class AbstractProcessController implements ProcessController {
      * available.
      */
     protected final DataSample<Double> getLastKnownSignal() {
-
         return lastKnownSignal;
     }
 
@@ -75,11 +73,10 @@ public abstract class AbstractProcessController implements ProcessController {
      * Perform any actions necessary for the controller to handle the setpoint change
      * (other than actually changing the setpoint).
      */
-    abstract protected void setpointChanged();
+    protected abstract void setpointChanged();
 
     @Override
     public final double getSetpoint() {
-
         return setpoint;
     }
 
@@ -90,18 +87,16 @@ public abstract class AbstractProcessController implements ProcessController {
      */
     @Override
     public final DataSample<Double> getProcessVariable() {
-
         return pv;
     }
 
     @Override
     public final synchronized double getError() {
 
-	if (pv == null) {
-
-	    // No sample, no error
-	    return 0;
-	}
+        if (pv == null) {
+            // No sample, no error
+            return 0;
+        }
 
         return pv.sample - setpoint;
     }
@@ -109,24 +104,24 @@ public abstract class AbstractProcessController implements ProcessController {
     @Override
     public final synchronized DataSample<Double> compute(DataSample<Double> pv) {
 
-	if (pv == null) {
-	    throw new IllegalArgumentException("pv can't be null");
-	}
+        if (pv == null) {
+            throw new IllegalArgumentException("pv can't be null");
+        }
 
-	if (pv.isError()) {
-	    throw new IllegalArgumentException("pv can't be an error");
-	}
+        if (pv.isError()) {
+            throw new IllegalArgumentException("pv can't be an error");
+        }
 
-	if (lastKnownSignal != null) {
-	    long then = lastKnownSignal.timestamp;
-	    long now = pv.timestamp;
-	    long diff = now - then;
+        if (lastKnownSignal != null) {
+            long then = lastKnownSignal.timestamp;
+            long now = pv.timestamp;
+            long diff = now - then;
 
-	    if (diff <= 0) {
-		throw new IllegalArgumentException("Can't go back in time: last sample was @"
-			+ then + ", this is @" + now + ", " + diff + "ms difference");
-	    }
-	}
+            if (diff <= 0) {
+                throw new IllegalArgumentException("Can't go back in time: last sample was @"
+                        + then + ", this is @" + now + ", " + diff + "ms difference");
+            }
+        }
 
         this.pv = pv;
 
@@ -135,7 +130,6 @@ public abstract class AbstractProcessController implements ProcessController {
 
     @Override
     public void consume(DataSample<Double> sample) {
-
         compute(sample);
     }
 
@@ -147,7 +141,7 @@ public abstract class AbstractProcessController implements ProcessController {
      */
     private DataSample<Double> wrapCompute() {
 
-	ThreadContext.push("wrapCompute");
+        ThreadContext.push("wrapCompute");
 
         try {
 
@@ -183,10 +177,9 @@ public abstract class AbstractProcessController implements ProcessController {
     /**
      * Send a notification to the {@link #dataBroadcaster} listeners about the status change.
      */
-    protected synchronized final void statusChanged() {
+    protected final synchronized void statusChanged() {
 
         if (lastKnownSignal == null) {
-
             // It is happening at instantiation
             return;
         }
@@ -196,10 +189,10 @@ public abstract class AbstractProcessController implements ProcessController {
 	// VT: NOTE: This will not be an error signal even if the original signal is,
         // the purpose is not control but instrumentation
 
-        String sourceName = lastKnownSignal.sourceName + "." + getShortName();
-        String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var sourceName = lastKnownSignal.sourceName + "." + getShortName();
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
 
-        DataSample<ProcessControllerStatus> sample = new DataSample<ProcessControllerStatus>(lastKnownSignal.timestamp,
+        var sample = new DataSample<ProcessControllerStatus>(lastKnownSignal.timestamp,
                 sourceName, signature, status, null);
 
         dataBroadcaster.broadcast(sample);
@@ -210,7 +203,7 @@ public abstract class AbstractProcessController implements ProcessController {
      * the actual source signal.
      *
      */
-    abstract protected String getShortName();
+    protected abstract String getShortName();
 
     /**
      * Get the extended process controller status. This implementation is
@@ -232,7 +225,7 @@ public abstract class AbstractProcessController implements ProcessController {
     @Override
     public String toString() {
 
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
 
         sb.append(getShortName()).append("(").append(getStatus()).append(")");
 
