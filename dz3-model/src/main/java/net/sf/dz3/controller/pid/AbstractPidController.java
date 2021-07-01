@@ -189,10 +189,15 @@ public abstract class AbstractPidController extends AbstractProcessController im
             } else {
 
                 if (lastKnownSignal != null && Math.abs(lastKnownSignal.sample) < saturationLimit) {
+
                     // Integral value will only be updated if the output
                     // is not saturated
                     var integral = getIntegral(lastKnownSignal, pv, error);
-                    lastI = integral * getI();
+
+                    // And only if the integral itself is not saturated either
+                    if (Math.abs(integral) < saturationLimit) {
+                        lastI = integral * getI();
+                    }
                 }
 
                 signal += lastI;
