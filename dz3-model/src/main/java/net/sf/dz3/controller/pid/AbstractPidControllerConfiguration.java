@@ -1,37 +1,18 @@
 package net.sf.dz3.controller.pid;
 
-import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
-
 /**
- * @author <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2005-2009
+ * @author <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2005-2021
  */
 public interface AbstractPidControllerConfiguration {
 
-    @ConfigurableProperty(
-	    propertyName = "P",
-	    description = "Proportional component",
-	    defaultValue = "0"
-		)
-    public abstract void setP(double p);
+    void setP(double p);
+    void setI(double i);
+	void setD(double d);
 
-    @ConfigurableProperty(
-            propertyName = "I.weight",
-	    description = "Integral component weight",
-	    defaultValue = "0"
-		)
-    public abstract void setI(double i);
-
-    @ConfigurableProperty(
-            propertyName = "I.limit",
-	    description = "Integral component saturation limit",
-	    defaultValue = "0"
-		)
-    public abstract void setLimit(double saturationLimit);
-
-    @ConfigurableProperty(
-            propertyName = "D.weight",
-	    description = "Derivative component weight",
-	    defaultValue = "0"
-		)
-    public abstract void setD(double d);
+	/**
+	 * Set the controller saturation limit.
+	 *
+	 * @param saturationLimit Saturation limit to set.
+	 */
+    void setLimit(double saturationLimit);
 }
