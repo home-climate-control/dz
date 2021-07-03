@@ -207,14 +207,13 @@ public class UnitPanel extends EntityPanel {
                 return UNDEFINED;
             }
 
-            // Bottom out at 1 minute - it's weird to see zero here
-            var seconds = Math.max(d.getSeconds(), 60);
+            var seconds = d.getSeconds();
             var hours = seconds / 3600;
             var minutes = (seconds % 3600) / 60;
 
-            return (hours > 0 ? (hours + " hr ") : "")
-                    + String.format("%2d min", minutes)
-                    + (plus ? "+" : "");
+            return (hours > 0 ? (hours + " hr ") : "") +
+                    (minutes > 0 ? String.format("%2d min", minutes) : "<1 min")+
+                    (plus ? "+" : "");
         }
 
         private Color getColor(Duration d) {
