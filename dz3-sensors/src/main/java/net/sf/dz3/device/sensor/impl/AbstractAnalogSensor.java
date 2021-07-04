@@ -1,6 +1,5 @@
 package net.sf.dz3.device.sensor.impl;
 
-import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
@@ -74,7 +73,6 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
         return pollIntervalMillis;
     }
 
-    @ConfigurableProperty(propertyName = "pollIntervalMillis", description = "Poll interval, milliseconds")
     public final void setPollInterval(long pollIntervalMillis) {
 
         if (pollIntervalMillis < 0) {

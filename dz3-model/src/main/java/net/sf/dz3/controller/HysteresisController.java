@@ -1,9 +1,8 @@
 package net.sf.dz3.controller;
 
-import net.sf.dz3.util.digest.MessageDigestCache;
-import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import net.sf.dz3.util.digest.MessageDigestCache;
 
 /**
  * A hysteresis controller.
@@ -20,7 +19,7 @@ public class HysteresisController extends AbstractProcessController {
      * {@link #getSetpoint()} + {@code thresholdHigh} is the upper tipping point.
      */
     private double thresholdHigh;
-    
+
     /**
      * {@link #getSetpoint()} - {@code thresholdLow} is the lower tipping point.
      */
@@ -33,7 +32,7 @@ public class HysteresisController extends AbstractProcessController {
 
     /**
      * Create an instance with default hysteresis value.
-     * 
+     *
      * @param setpoint Initial setpoint.
      */
     public HysteresisController(double setpoint) {
@@ -43,7 +42,7 @@ public class HysteresisController extends AbstractProcessController {
 
     /**
      * Create an instance.
-     * 
+     *
      * @param setpoint Initial setpoint.
      * @param hysteresis Initial hysteresis.
      */
@@ -51,35 +50,30 @@ public class HysteresisController extends AbstractProcessController {
 
 	this(setpoint, -hysteresis, hysteresis);
     }
-    
+
     /**
-     * 
+     *
      * @param setpoint Initial setpoint.
      * @param thresholdLow Lower tipping point.
      * @param thresholdHigh Upper tipping point.
      */
     public HysteresisController(double setpoint, double thresholdLow, double thresholdHigh) {
-	
+
 	super(setpoint);
-	
+
 	setLow(thresholdLow);
 	setHigh(thresholdHigh);
     }
-    
+
     /**
      * Set {@link #thresholdLow}.
-     * 
+     *
      * @param thresholdLow Desired low threshold.
-     * 
-     * @exception IllegalArguentException if the value is non-negative.
+     *
+     * @exception IllegalArgumentException if the value is non-negative.
      */
-    @ConfigurableProperty(
-	    	defaultValue = "-1",
-	        propertyName = "threshold.low",
-	        description = "Desired low threshold"
-	    )
     private void setLow(double thresholdLow) {
-	
+
 	if (thresholdLow >= 0) {
 	    throw new IllegalArgumentException("Low threshold must be negative (value given is " + thresholdLow + ")");
 	}
@@ -89,18 +83,13 @@ public class HysteresisController extends AbstractProcessController {
 
     /**
      * Set {@link #thresholdHigh}.
-     * 
+     *
      * @param thresholdHigh Desired high threshold.
-     * 
-     * @exception IllegalArguentException if the value is non-positive.
+     *
+     * @exception IllegalArgumentException if the value is non-positive.
      */
-    @ConfigurableProperty(
-	    	defaultValue = "1",
-	        propertyName = "threshold.high",
-	        description = "Desired high threshold"
-	    )
     private void setHigh(double thresholdHigh) {
-	
+
 	if (thresholdHigh <= 0) {
 	    throw new IllegalArgumentException("High threshold must be positive(value given is " + thresholdHigh + ")");
 	}
@@ -128,16 +117,16 @@ public class HysteresisController extends AbstractProcessController {
     public final synchronized DataSample<Double> compute() {
 
 	DataSample<Double> pv = getProcessVariable();
-	
+
 	if (pv == null || pv.isError()) {
-	    
+
 	    // Don't have to do a thing, nothing happened yet, nothing good at least
 	    return null;
-	    
+
 	} else {
 
 	    double setpoint = getSetpoint();
-	    
+
 	    if (state) {
 
 		if (pv.sample - thresholdLow <= setpoint) {
@@ -159,13 +148,13 @@ public class HysteresisController extends AbstractProcessController {
 
         return new DataSample<Double>(pv.timestamp, sourceName, signature,state ? 1.0 : -1.0, null);
     }
-    
+
     /**
      * @return Controller {@link #state}.
      */
     @JmxAttribute(description = "state")
     public boolean getState() {
-	
+
 	return state;
     }
 
@@ -176,15 +165,15 @@ public class HysteresisController extends AbstractProcessController {
 
     @Override
     public ProcessControllerStatus getStatus() {
-	
-	ProcessControllerStatus superStatus = super.getStatus(); 
+
+	ProcessControllerStatus superStatus = super.getStatus();
 
         return new HysteresisControllerStatus(superStatus, state);
     }
 
     @Override
     protected void setpointChanged() {
-        
+
         // Do absolutely nothing.
     }
 }
