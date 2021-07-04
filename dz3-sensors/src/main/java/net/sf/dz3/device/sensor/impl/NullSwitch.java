@@ -1,6 +1,7 @@
 package net.sf.dz3.device.sensor.impl;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.Addressable;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
@@ -12,7 +13,7 @@ import java.util.Random;
  *
  * Does absolutely nothing other than reflecting itself in the log and via JMX.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */
 public class NullSwitch extends AbstractSwitch {
 
@@ -107,5 +108,11 @@ public class NullSwitch extends AbstractSwitch {
             // Oh well,no delay.
             Thread.currentThread().interrupt();
         }
+    }
+
+    @Override
+    public int compareTo(Addressable o) {
+        // Can't afford to collide with the wrapper
+        return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
     }
 }

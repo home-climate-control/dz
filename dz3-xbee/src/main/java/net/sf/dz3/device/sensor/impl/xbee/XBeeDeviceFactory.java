@@ -17,6 +17,7 @@ import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
 import com.rapplogic.xbee.util.ByteUtils;
 import net.sf.dz3.device.factory.AbstractDeviceFactory;
 import net.sf.dz3.device.factory.SingleSwitchProxy;
+import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.DeviceContainer;
 import net.sf.dz3.device.sensor.SensorType;
@@ -605,6 +606,12 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                     getClass().getSimpleName(),
                     Integer.toHexString(hashCode()) + "#" + getAddress(),
                     "XBee single switch proxy");
+        }
+
+        @Override
+        public int compareTo(Addressable o) {
+            // Can't afford to collide with the wrapper
+            return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
         }
     }
 

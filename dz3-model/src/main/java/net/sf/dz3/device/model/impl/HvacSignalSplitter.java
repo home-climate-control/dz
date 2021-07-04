@@ -20,7 +20,7 @@ import org.apache.logging.log4j.ThreadContext;
  */
 public class HvacSignalSplitter implements DataSink<HvacSignal>, DataSource<Double> {
 
-    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<Double>();
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
 
     /**
      * Create an instance not attached to anything.
@@ -45,33 +45,46 @@ public class HvacSignalSplitter implements DataSink<HvacSignal>, DataSource<Doub
 
         try {
 
-            {
-                // Current operating mode
-                String sourceName = signal.sourceName + ".mode";
-                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
-                DataSample<Double> mode = new DataSample<Double>(signal.timestamp, sourceName, signature, (double)signal.sample.mode.mode, null);
-                dataBroadcaster.broadcast(mode);
-            }
-
-            {
-                // Whether the unit is currently running
-                String sourceName = signal.sourceName + ".running";
-                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
-                DataSample<Double> running = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.running ? 1.0 : 0.0, null);
-                dataBroadcaster.broadcast(running);
-            }
-
-            {
-                // The demand sent to the HVAC hardware driver
-                String sourceName = signal.sourceName + ".demand";
-                String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
-                DataSample<Double> running = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.demand, null);
-                dataBroadcaster.broadcast(running);
-            }
+            broadcastMode(signal);
+            broadcastRunning(signal);
+            broadcastUptime(signal);
+            broadcastDemand(signal);
 
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    private void broadcastMode(DataSample<HvacSignal> signal) {
+        // Current operating mode
+        var sourceName = signal.sourceName + ".mode";
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var mode = new DataSample<>(signal.timestamp, sourceName, signature, (double)signal.sample.mode.mode, null);
+        dataBroadcaster.broadcast(mode);
+    }
+
+    private void broadcastRunning(DataSample<HvacSignal> signal) {
+        // Whether the unit is currently running
+        var sourceName = signal.sourceName + ".running";
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var running = new DataSample<>(signal.timestamp, sourceName, signature, signal.sample.running ? 1.0 : 0.0, null);
+        dataBroadcaster.broadcast(running);
+    }
+
+    private void broadcastUptime(DataSample<HvacSignal> signal) {
+        // For how long the unit is currently running
+        var sourceName = signal.sourceName + ".uptime";
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var running = new DataSample<>(signal.timestamp, sourceName, signature, (double) signal.sample.uptime, null);
+        dataBroadcaster.broadcast(running);
+    }
+
+    private void broadcastDemand(DataSample<HvacSignal> signal) {
+        // The demand sent to the HVAC hardware driver
+        var sourceName = signal.sourceName + ".demand";
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var running = new DataSample<>(signal.timestamp, sourceName, signature, signal.sample.demand, null);
+        dataBroadcaster.broadcast(running);
     }
 
     @Override

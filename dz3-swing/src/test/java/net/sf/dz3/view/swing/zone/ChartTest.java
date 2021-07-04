@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

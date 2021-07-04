@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.model.impl.ThermostatModel;
@@ -26,7 +26,7 @@ class ThermostatPanelTest {
         assertThatCode(() -> {
 
             var tm = new ThermostatModel("model", mock(AnalogSensor.class), new SimplePidController(1, 1, 1, 1, 1));
-            var tp = new ThermostatPanel(tm, new ScreenDescriptor("", new Dimension(0, 0), null, null, null), null, TemperatureUnit.CELSIUS);
+            var tp = new ZonePanel(tm, new ScreenDescriptor("", new Dimension(0, 0), null, null, null), null, TemperatureUnit.CELSIUS);
 
             tp.keyPressed(new KeyEvent(tp, 0, 0, 0, 0, 's', 0));
 
@@ -43,7 +43,7 @@ class ThermostatPanelTest {
 
             var tm = new ThermostatModel("model", mock(AnalogSensor.class), new SimplePidController(1, 1, 1, 1, 1));
             var scheduler = mock(Scheduler.class);
-            var tp = new ThermostatPanel(tm, new ScreenDescriptor("", new Dimension(0, 0), null, null, null), scheduler, TemperatureUnit.CELSIUS);
+            var tp = new ZonePanel(tm, new ScreenDescriptor("", new Dimension(0, 0), null, null, null), scheduler, TemperatureUnit.CELSIUS);
 
             doReturn(null).when(scheduler).getCurrentPeriod(tm);
             tp.keyPressed(new KeyEvent(tp, 0, 0, 0, 0, 's', 0));

@@ -1,0 +1,71 @@
+package net.sf.dz3.device.model.impl;
+
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import net.sf.dz3.device.model.UnitRuntimePredictionSignal;
+import net.sf.dz3.util.digest.MessageDigestCache;
+
+public class NaiveRuntimePredictorSignalSplitter implements DataSink<UnitRuntimePredictionSignal>, DataSource<Double> {
+    private final DataBroadcaster<Double> dataBroadcaster = new DataBroadcaster<>();
+
+    /**
+     * Create an instance not attached to anything.
+     */
+    public NaiveRuntimePredictorSignalSplitter() {
+    }
+
+    /**
+     * Create an instance attached to a data source.
+     *
+     * @param source Data source to listen to.
+     */
+    public NaiveRuntimePredictorSignalSplitter(DataSource<UnitRuntimePredictionSignal> source) {
+        source.addConsumer(this);
+    }
+
+    @Override
+    public void consume(DataSample<UnitRuntimePredictionSignal> signal) {
+        broadcastK(signal);
+        broadcastLeft(signal);
+        broadcastPlus(signal);
+    }
+
+    private void broadcastK(DataSample<UnitRuntimePredictionSignal> signal) {
+        var sourceName = signal.sourceName + ".k";
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var k = new DataSample<Double>(signal.timestamp, sourceName, signature, signal.sample.k, null);
+        dataBroadcaster.broadcast(k);
+    }
+
+    private void broadcastLeft(DataSample<UnitRuntimePredictionSignal> signal) {
+
+        if (signal.sample.left == null) {
+            // Nothing to report
+            return;
+        }
+
+        var sourceName = signal.sourceName + ".left";
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var left = new DataSample<Double>(signal.timestamp, sourceName, signature, (double)signal.sample.left.toMillis(), null);
+        dataBroadcaster.broadcast(left);
+    }
+
+    private void broadcastPlus(DataSample<UnitRuntimePredictionSignal> signal) {
+        var sourceName = signal.sourceName + ".plus";
+        var signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
+        var plus = new DataSample<Double>(signal.timestamp, sourceName, signature, (double) (signal.sample.plus ? 1 : 0), null);
+        dataBroadcaster.broadcast(plus);
+    }
+
+    @Override
+    public void addConsumer(DataSink<Double> consumer) {
+        dataBroadcaster.addConsumer(consumer);
+    }
+
+    @Override
+    public void removeConsumer(DataSink<Double> consumer) {
+        dataBroadcaster.removeConsumer(consumer);
+    }
+}

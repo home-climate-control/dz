@@ -4,10 +4,10 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * An object that has an address.
- *  
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2009
  */
-public interface Addressable {
+public interface Addressable extends Comparable<Addressable> {
 
     /**
      * Get the sensor hardware address.

@@ -1,16 +1,15 @@
 package net.sf.dz3.view.swing;
 
+import net.sf.dz3.device.model.HvacMode;
+import org.apache.logging.log4j.LogManager;
+
 import java.awt.Color;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.apache.logging.log4j.LogManager;
-
-import net.sf.dz3.device.model.HvacMode;
-
 public class ColorScheme {
 
-    private static Map<HvacMode, ColorScheme> colorMap = new TreeMap<>();
+    private static final Map<HvacMode, ColorScheme> colorMap = new TreeMap<>();
 
     public final Color bottom;
     public final Color top;
@@ -21,6 +20,13 @@ public class ColorScheme {
     public final Color green;
     public final Color noticeDefault;
     public final Color noticeActive;
+    public final Color sensorNormal;
+    public final Color sensorStale;
+    public final Color sensorError;
+    public final Color unitLabel;
+    public final Color unitNormal;
+    public final Color unitWarning;
+    public final Color unitCritical;
 
     /**
      * Background color.
@@ -53,16 +59,23 @@ public class ColorScheme {
 
     @SuppressWarnings("squid:S107")
     private ColorScheme(
-    		Color bottom,
-    		Color top,
-    		Color setpoint,
-    		Color setpointChanging,
-    		Color error,
-    		Color off,
-    		Color green,
-    		Color noticeDefault,
-    		Color noticeActive,
-    		Color background) {
+            Color bottom,
+            Color top,
+            Color setpoint,
+            Color setpointChanging,
+            Color error,
+            Color off,
+            Color green,
+            Color noticeDefault,
+            Color noticeActive,
+            Color background,
+            Color sensorNormal,
+            Color sensorStale,
+            Color sensorError,
+            Color unitLabel,
+            Color unitNormal,
+            Color unitWarning,
+            Color unitCritical) {
 
         // VT: NOTE: squid:S107 - sorry, dudes, this is unavoidable here.
 
@@ -76,6 +89,13 @@ public class ColorScheme {
         this.noticeDefault = noticeDefault;
         this.noticeActive = noticeActive;
         this.background = background;
+        this.sensorNormal = sensorNormal;
+        this.sensorStale = sensorStale;
+        this.sensorError = sensorError;
+        this.unitLabel = unitLabel;
+        this.unitNormal = unitNormal;
+        this.unitWarning = unitWarning;
+        this.unitCritical = unitCritical;
     }
 
     public static final ColorScheme coolingMap = new ColorScheme(
@@ -88,7 +108,14 @@ public class ColorScheme {
             Color.GREEN,
             new Color(0x55, 0x55, 0x55), // DARK GRAY
             Color.YELLOW,
-            Color.BLACK);
+            Color.BLACK,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.RED.darker(),
+            Color.GRAY,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.ORANGE);
 
     public static final ColorScheme heatingMap = new ColorScheme(
             new Color(240, 70, 10),  // F0460A ORANGE-RED
@@ -100,7 +127,14 @@ public class ColorScheme {
             Color.GREEN,
             new Color(0x55, 0x55, 0x55), // DARK GRAY
             Color.YELLOW,
-            Color.BLACK);
+            Color.BLACK,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.RED.darker(),
+            Color.GRAY,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.ORANGE);
 
     public static final ColorScheme offMap = new ColorScheme(
             Color.GRAY,
@@ -112,5 +146,12 @@ public class ColorScheme {
             Color.GREEN,
             new Color(0x55, 0x55, 0x55), // DARK GRAY
             Color.YELLOW,
-            Color.BLACK);
+            Color.BLACK,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.RED.darker(),
+            Color.GRAY,
+            Color.GREEN.darker(),
+            Color.YELLOW,
+            Color.ORANGE);
 }

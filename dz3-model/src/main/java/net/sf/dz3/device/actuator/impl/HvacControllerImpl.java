@@ -180,25 +180,23 @@ public class HvacControllerImpl implements HvacController, JmxAware {
      *
      * @param running Desired running mode.
      */
-    private synchronized void setRunning(boolean running, long timestamp) {
+    private synchronized void setRunning(boolean running, long timestamp, long uptime) {
 
-        // VT: FIXME: uptime
         state = new DataSample<>(timestamp,
                 name,
                 signature,
-                new HvacSignal(state.sample.mode, state.sample.demand, running, 0), null);
+                new HvacSignal(state.sample.mode, state.sample.demand, running, uptime), null);
 
         hardwareSetRunning(running);
         stateChanged();
     }
 
-    private synchronized void setDemand(double demand, long timestamp) {
+    private synchronized void setDemand(double demand, long timestamp, long uptime) {
 
-        // VT: FIXME: uptime
         state = new DataSample<>(timestamp,
                 name,
                 signature,
-                new HvacSignal(state.sample.mode, demand, state.sample.running, 0), null);
+                new HvacSignal(state.sample.mode, demand, state.sample.running, uptime), null);
 
         hardwareSetDemand(demand);
         stateChanged();
@@ -278,12 +276,12 @@ public class HvacControllerImpl implements HvacController, JmxAware {
             if (signal.sample.demand > 0 && !isRunning()) {
 
                 logger.info("Turning ON");
-                setRunning(true, signal.timestamp);
+                setRunning(true, signal.timestamp, signal.sample.uptime);
 
             } else if (signal.sample.demand == 0 && isRunning()) {
 
                 logger.info("Turning OFF");
-                setRunning(false, signal.timestamp);
+                setRunning(false, signal.timestamp, signal.sample.uptime);
 
             } else {
                 logger.debug("no change");
@@ -292,7 +290,7 @@ public class HvacControllerImpl implements HvacController, JmxAware {
         } finally {
 
             if (signal != null) {
-                setDemand(signal.sample.demand, signal.timestamp);
+                setDemand(signal.sample.demand, signal.timestamp, signal.sample.uptime);
             }
 
             ThreadContext.pop();
