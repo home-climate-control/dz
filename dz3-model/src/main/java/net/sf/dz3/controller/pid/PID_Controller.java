@@ -33,9 +33,9 @@ public class PID_Controller extends AbstractPidController implements PidControll
      * Zero means no anti-windup will be provided.
      */
     public PID_Controller(final double setpoint, final double P, final double I, final long Ispan, final double D, final long Dspan,
-            final double saturationLimit) {
+                          final double saturationLimit) {
 
-	super(setpoint, P, I, D, saturationLimit);
+        super(setpoint, P, I, D, saturationLimit);
 
         this.integralSet = new SlidingIntegralSet(Ispan);
         this.differentialSet = new NaiveDifferentialSet(Dspan);
@@ -45,22 +45,22 @@ public class PID_Controller extends AbstractPidController implements PidControll
     @JmxAttribute(description = "Proportional component time span")
     public void setIspan(long iSpan) {
 
-      // VT: FIXME: This will reset the existing set and screw things up
-      if (getI() != 0) {
-          integralSet = new SlidingIntegralSet(iSpan);
-      }
-      statusChanged();
+        // VT: FIXME: This will reset the existing set and screw things up
+        if (getI() != 0) {
+            integralSet = new SlidingIntegralSet(iSpan);
+        }
+        statusChanged();
     }
 
     @Override
     @JmxAttribute(description = "Derivative component time span")
     public void setDspan(long dSpan) {
 
-      // VT: FIXME: This will reset the existing set and screw things up
-      if (getD() != 0) {
-          differentialSet = new NaiveDifferentialSet(dSpan);
-      }
-      statusChanged();
+        // VT: FIXME: This will reset the existing set and screw things up
+        if (getD() != 0) {
+            differentialSet = new NaiveDifferentialSet(dSpan);
+        }
+        statusChanged();
     }
 
     @Override
