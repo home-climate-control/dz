@@ -1,7 +1,6 @@
 package net.sf.dz3.controller.pid;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 
 /**
  * Classical PID - Proportional, Integral, Derivative controller.
@@ -13,12 +12,12 @@ public class PID_Controller extends AbstractPidController implements PidControll
     /**
      * Integral data set.
      */
-    private IntegralSet integralSet;
+    private SlidingIntegralSet integralSet;
 
     /**
      * Differential data set.
      */
-    private DifferentialSet differentialSet;
+    private SlidingDifferentialSet differentialSet;
 
     /**
      * Create the configured instance.
@@ -38,11 +37,15 @@ public class PID_Controller extends AbstractPidController implements PidControll
 	super(setpoint, P, I, D, saturationLimit);
 
         this.integralSet = new SlidingIntegralSet(Ispan);
-        this.differentialSet = new NaiveDifferentialSet(Dspan);
+        this.differentialSet = new SlidingDifferentialSet(Dspan);
     }
 
     @Override
-    @JmxAttribute(description = "Proportional component time span")
+    public long getIspan() {
+        return integralSet.getSpan();
+    }
+
+    @Override
     public void setIspan(long iSpan) {
 
       // VT: FIXME: This will reset the existing set and screw things up
@@ -53,12 +56,16 @@ public class PID_Controller extends AbstractPidController implements PidControll
     }
 
     @Override
-    @JmxAttribute(description = "Derivative component time span")
+    public long getDspan() {
+        return differentialSet.getSpan();
+    }
+
+    @Override
     public void setDspan(long dSpan) {
 
       // VT: FIXME: This will reset the existing set and screw things up
       if (getD() != 0) {
-          differentialSet = new NaiveDifferentialSet(dSpan);
+          differentialSet = new SlidingDifferentialSet(dSpan);
       }
       statusChanged();
     }
