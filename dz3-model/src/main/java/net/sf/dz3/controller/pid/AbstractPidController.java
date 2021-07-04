@@ -93,6 +93,7 @@ public abstract class AbstractPidController extends AbstractProcessController im
 
     protected AbstractPidController(final double setpoint, final double P, final double I, final double D, double saturationLimit) {
         this(null, setpoint, P, I, D, saturationLimit);
+        logger.error("Use a named constructor, this object will not be exposed to JMX properly", new IllegalArgumentException());
     }
 
     /**
