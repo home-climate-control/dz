@@ -6,7 +6,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 /**
  * Classical PID - Proportional, Integral, Derivative controller.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class PID_Controller extends AbstractPidController implements PidControllerConfiguration {
 
@@ -20,9 +20,15 @@ public class PID_Controller extends AbstractPidController implements PidControll
      */
     private DifferentialSet differentialSet;
 
+    public PID_Controller(final double setpoint, final double P, final double I, final long Ispan, final double D, final long Dspan,
+                          final double saturationLimit) {
+        this(null, setpoint, P, I, Ispan, D, Dspan, saturationLimit);
+    }
+
     /**
      * Create the configured instance.
      *
+     * @param jmxName The name under which this object will be visible to JMX console.
      * @param P Proportional weight.
      * @param I Integral weight.
      * @param Ispan Integral timespan, milliseconds.
@@ -32,10 +38,10 @@ public class PID_Controller extends AbstractPidController implements PidControll
      * considered saturated if the output absolute value is greater than this.
      * Zero means no anti-windup will be provided.
      */
-    public PID_Controller(final double setpoint, final double P, final double I, final long Ispan, final double D, final long Dspan,
+    public PID_Controller(String jmxName, final double setpoint, final double P, final double I, final long Ispan, final double D, final long Dspan,
                           final double saturationLimit) {
 
-        super(setpoint, P, I, D, saturationLimit);
+        super(jmxName, setpoint, P, I, D, saturationLimit);
 
         this.integralSet = new SlidingIntegralSet(Ispan);
         this.differentialSet = new NaiveDifferentialSet(Dspan);
