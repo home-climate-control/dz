@@ -44,7 +44,7 @@ public class PID_Controller extends AbstractPidController implements PidControll
         super(jmxName, setpoint, P, I, D, saturationLimit);
 
         this.integralSet = new SlidingIntegralSet(Ispan);
-        this.differentialSet = new NaiveDifferentialSet(Dspan);
+        this.differentialSet = new SlidingDifferentialSet(Dspan);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class PID_Controller extends AbstractPidController implements PidControll
 
         // VT: FIXME: This will reset the existing set and screw things up
         if (getD() != 0) {
-            differentialSet = new NaiveDifferentialSet(dSpan);
+            differentialSet = new SlidingDifferentialSet(dSpan);
         }
         statusChanged();
     }
