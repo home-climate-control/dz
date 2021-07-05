@@ -2,6 +2,7 @@ package net.sf.dz3.controller;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxWrapper;
 import net.sf.dz3.controller.pid.AbstractPidController;
 import net.sf.dz3.controller.pid.PID_Controller;
 import net.sf.dz3.controller.pid.PidControllerStatus;
@@ -11,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
 
+import java.lang.management.ManagementFactory;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -438,5 +440,23 @@ class PID_ControllerTest {
             logger.info("{} sample: {}", marker, signal);
             samples.add(signal);
         }
+    }
+
+    @Test
+    void testJmxSimple() {
+
+        var mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        var beanCount = mBeanServer.getMBeanCount();
+        new JmxWrapper().register(new SimplePidController(0, 1, 0, 0, 0));
+        assertThat(mBeanServer.getMBeanCount()).isEqualTo(beanCount + 1);
+    }
+
+    @Test
+    void testJmxFull() {
+
+        var mBeanServer = ManagementFactory.getPlatformMBeanServer();
+        var beanCount = mBeanServer.getMBeanCount();
+        new JmxWrapper().register(new PID_Controller(0.0, 1, 0.0, 1, 0.0, 1, 0));
+        assertThat(mBeanServer.getMBeanCount()).isEqualTo(beanCount + 1);
     }
 }
