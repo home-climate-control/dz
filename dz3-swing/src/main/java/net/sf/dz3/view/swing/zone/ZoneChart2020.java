@@ -2,7 +2,6 @@ package net.sf.dz3.view.swing.zone;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.controller.DataSet;
-import net.sf.dz3.view.swing.AbstractChart;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -23,14 +22,6 @@ import java.util.Map.Entry;
 public class ZoneChart2020 extends AbstractZoneChart {
 
     private static final long serialVersionUID = 8739949924865459025L;
-
-    /**
-     * Chart width of this instance.
-     *
-     * @see AbstractChart#getGlobalWidth()
-     * @see #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)
-     */
-    private int localWidth = 0;
 
     private final transient Map<String, Averager> channel2avg = new HashMap<>();
 

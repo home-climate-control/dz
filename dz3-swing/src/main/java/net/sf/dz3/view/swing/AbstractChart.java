@@ -114,6 +114,14 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
      */
     private static int globalWidth = 0;
 
+    /**
+     * Chart width of this instance.
+     *
+     * @see AbstractChart#getGlobalWidth()
+     * @see #paintCharts(Graphics2D, Dimension, Insets, long, double, long, double, double)
+     */
+    protected int localWidth = 0;
+
     protected AbstractChart(Clock clock, long chartLengthMillis) {
 
         if (chartLengthMillis < 1000 * 10) {
@@ -313,6 +321,11 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
      * @see #dataMin
      */
     protected final void adjustVerticalLimits(long timestamp, double value, double setpoint) {
+        adjustVerticalLimits(timestamp, value);
+        adjustVerticalLimitsExt(timestamp, setpoint);
+    }
+
+    protected final void adjustVerticalLimits(long timestamp, double value) {
 
         if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * MINMAX_OVERHEAD)) {
 
@@ -338,16 +351,19 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
             dataMin = value;
             minmaxTime = timestamp;
         }
+    }
 
-        // By this time, dataMin and dataMax are no longer nulls
+    protected final void adjustVerticalLimitsExt(long timestamp, double value) {
 
-        if (setpoint > dataMax) {
-            dataMax = setpoint;
+        // By this time, dataMin and dataMax are no longer nulls - see the call stack
+
+        if (value > dataMax) {
+            dataMax = value;
             minmaxTime = timestamp;
         }
 
-        if (setpoint < dataMin) {
-            dataMin = setpoint;
+        if (value < dataMin) {
+            dataMin = value;
             minmaxTime = timestamp;
         }
     }
