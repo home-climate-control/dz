@@ -31,6 +31,6 @@ public class SensorCell extends EntityCell<Double> {
 
     @Override
     protected Color getIndicatorColor() {
-        return isError() ? ColorScheme.offMap.sensorError.darker() : ColorScheme.offMap.sensorNormal.brighter();
+        return isError() ? ColorScheme.offMap.sensorError.darker() : ColorScheme.offMap.sensorNormal.darker();
     }
 }
