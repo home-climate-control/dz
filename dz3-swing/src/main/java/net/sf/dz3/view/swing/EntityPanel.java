@@ -17,6 +17,8 @@ import java.awt.event.KeyListener;
  */
 public abstract class EntityPanel extends JPanel implements KeyListener {
 
+    protected static final String UNDEFINED = "--";
+
     @SuppressWarnings("squid:S1199")
     protected final void createLayout(String name, JPanel chart) {
 

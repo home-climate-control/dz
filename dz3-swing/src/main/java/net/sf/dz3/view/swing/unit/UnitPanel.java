@@ -21,8 +21,6 @@ import java.time.temporal.ChronoUnit;
 
 public class UnitPanel extends EntityPanel {
 
-    private static final String UNDEFINED = "--";
-
     private final JLabel demandLabel = new JLabel("Demand", SwingConstants.LEFT);
     private final JLabel currentDemandLabel = new JLabel(UNDEFINED, SwingConstants.RIGHT);
 
@@ -164,7 +162,6 @@ public class UnitPanel extends EntityPanel {
 
         @Override
         public void consume(DataSample<UnitRuntimePredictionSignal> signal) {
-            unitChart.consume(signal);
             displayDemand(signal);
             displayRunningFor(signal);
             displayLeft(signal);
