@@ -39,6 +39,6 @@ public class UnitCell extends EntityCell<UnitRuntimePredictionSignal> {
         }
 
         var mode = lastKnownSignal.sample.mode;
-        return lastKnownSignal.sample.running ? ColorScheme.getScheme(mode).setpoint : ColorScheme.getScheme(mode).green;
+        return lastKnownSignal.sample.running ? ColorScheme.getScheme(mode).setpoint : ColorScheme.getScheme(mode).setpoint.darker().darker();
     }
 }
