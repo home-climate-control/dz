@@ -16,6 +16,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
@@ -30,7 +31,7 @@ public class UnitPanel extends EntityPanel {
     private final JLabel leftLabel = new JLabel("Time left", SwingConstants.LEFT);
     private final JLabel currentLeftLabel = new JLabel(UNDEFINED, SwingConstants.RIGHT);
 
-    private final UnitChart unitChart = new UnitChart();
+    private final UnitChart unitChart = new UnitChart(Clock.systemUTC());
 
     private final transient RuntimePredictor source;
 

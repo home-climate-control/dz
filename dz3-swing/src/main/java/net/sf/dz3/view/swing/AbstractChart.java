@@ -24,7 +24,7 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
     protected static final Stroke strokeSingle = new BasicStroke();
     protected static final Stroke strokeDouble = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10.0f, null, 0.0f);
 
-    protected final transient Logger logger = LogManager.getLogger(getClass());
+    protected final transient Logger logger = LogManager.getLogger();
 
     /**
      * Grid color.
@@ -41,7 +41,7 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
     /**
      * Chart length, in milliseconds.
      */
-    protected final long chartLengthMillis;
+    protected long chartLengthMillis;
 
     /**
      * Dead timeout, in milliseconds.

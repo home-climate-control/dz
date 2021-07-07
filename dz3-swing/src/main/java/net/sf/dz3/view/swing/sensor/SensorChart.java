@@ -5,6 +5,7 @@ import com.homeclimatecontrol.jukebox.util.Interval;
 import net.sf.dz3.controller.DataSet;
 import net.sf.dz3.view.swing.AbstractChart;
 import net.sf.dz3.view.swing.ColorScheme;
+import net.sf.dz3.view.swing.DoubleAverager;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -19,7 +20,7 @@ import java.util.Map;
 public class SensorChart extends AbstractChart<Double> {
 
     private final transient DataSet<Double> values = new DataSet<>(chartLengthMillis);
-    private transient Averager averager;
+    private transient DoubleAverager averager;
 
     protected SensorChart(Clock clock, long chartLengthMillis) {
         super(clock, chartLengthMillis);
@@ -52,8 +53,11 @@ public class SensorChart extends AbstractChart<Double> {
 
                 logger.info("new width {}, {}ms per pixel", localWidth, step);
 
-                // We lose one sample this way, might want to improve it later, for now, no big deal
-                averager = new Averager(step);
+                if (averager == null) {
+                    averager = new DoubleAverager(step);
+                } else {
+                    averager.setExpirationInterval(step);
+                }
 
                 return true;
             }
@@ -185,65 +189,6 @@ public class SensorChart extends AbstractChart<Double> {
             var endColor = getBackground();
 
             drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
-        }
-    }
-
-    /**
-     * Averaging tool.
-     */
-    protected class Averager {
-
-        /**
-         * The expiration interval. Values older than the last key by this many
-         * milliseconds are expired.
-         */
-        private final long expirationInterval;
-
-        /**
-         * The timestamp of the oldest recorded sample.
-         */
-        private Long timestamp;
-
-        private int count;
-        private double valueAccumulator = 0;
-
-        public Averager(long expirationInterval) {
-            this.expirationInterval = expirationInterval;
-        }
-
-        /**
-         * Record a value.
-         *
-         * @param signal Signal to record.
-         *
-         * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
-         * away from the first sample stored, {@code null} otherwise.
-         */
-        public Double append(DataSample<? extends Double> signal) {
-
-            if (timestamp == null) {
-                timestamp = signal.timestamp;
-            }
-
-            var age = signal.timestamp - timestamp;
-
-            if ( age < expirationInterval) {
-
-                count++;
-                valueAccumulator += signal.sample;
-
-                return null;
-            }
-
-            logger.debug("RingBuffer: flushing at {}", () -> Interval.toTimeInterval(age));
-
-            var result = valueAccumulator / count;
-
-            count = 1;
-            valueAccumulator = signal.sample;
-            timestamp = signal.timestamp;
-
-            return result;
         }
     }
 }
