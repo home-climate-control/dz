@@ -19,7 +19,7 @@ import java.util.Map;
 public class SensorChart extends AbstractChart<Double> {
 
     private final transient DataSet<Double> values = new DataSet<>(chartLengthMillis);
-    private Averager averager;
+    private transient Averager averager;
 
     protected SensorChart(Clock clock, long chartLengthMillis) {
         super(clock, chartLengthMillis);
