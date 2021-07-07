@@ -13,9 +13,16 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class DataSetTest {
 
     @Test
+    void negativeExpiration() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new DataSet<>(-100))
+                .withMessage("Expiration interval must be positive, value given is -100");
+    }
+
+    @Test
     void nonexistentValue() {
 
-        DataSet<Double> ds = new DataSet<>(100);
+        var ds = new DataSet<>(100);
 
         assertThatExceptionOfType(NoSuchElementException.class)
                 .isThrownBy(() -> {
@@ -28,12 +35,12 @@ class DataSetTest {
     @Test
     void strict() {
 
-        DataSet<Double> ds = new DataSet<>(100, true);
+        var ds = new DataSet<>(100, true);
 
         // Record values in order
 
-        ds.append(100, 0d);
-        ds.append(101, 0d);
+        ds.append(100, 1000d);
+        ds.append(101, 1001d);
 
         // We're fine so far
 
@@ -50,12 +57,19 @@ class DataSetTest {
                     ds.append(101, 0d);
                 })
                 .withMessage("Data element out of sequence: last key is 101, key being added is 101");
+
+        // For a good measure
+        assertThat(ds.get(100)).isEqualTo(1000d);
+        assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> ds.get(5))
+                .withMessage("No value for time 5");
+
     }
 
     @Test
     void expire() {
 
-        DataSet<Double> ds = new DataSet<Double>(100);
+        var ds = new DataSet<Double>(100);
 
         ds.append(0, 0d);
         ds.append(100, 0d);
@@ -76,6 +90,24 @@ class DataSetTest {
             assertThat(ds.iterator().next()).isEqualTo(100);
             assertThat(ds.size()).isEqualTo(2);
         }
+
+        var newExpiration = 200;
+        ds.setExpirationInterval(newExpiration);
+        assertThat(ds.getExpirationInterval()).isEqualTo(newExpiration);
+
+        {
+            // This value must not cause expiration
+            ds.append(150, 0d);
+            assertThat(ds.iterator().next()).isEqualTo(100);
+            assertThat(ds.size()).isEqualTo(3);
+        }
+
+        // This implies expire()
+        ds.setExpirationInterval(5);
+
+        // VT: NOTE: expire() peculiarity; it has no concept of "current time", only of "older than the last".
+        // Hence, 1, not 0.
+        assertThat(ds.size()).isEqualTo(1);
     }
 
 
@@ -97,16 +129,14 @@ class DataSetTest {
 
     private void testPerformance(long entryCount, long expirationInterval) {
 
-        DataSet<Double> ds = new DataSet<Double>(expirationInterval);
-        long timestamp = 0;
-        Random rg = new Random();
+        var ds = new DataSet<Double>(expirationInterval);
+        var timestamp = 0;
+        var rg = new Random();
 
-        Marker m = new Marker("testPerformance(" + entryCount + ", " + expirationInterval + ")");
+        var m = new Marker("testPerformance(" + entryCount + ", " + expirationInterval + ")");
 
         for (int count = 0; count < entryCount; count++) {
-
             timestamp += rg.nextInt(10);
-
             ds.append(timestamp, rg.nextDouble());
         }
 
