@@ -85,6 +85,17 @@ public class UnitChart extends AbstractChart<UnitRuntimePredictionSignal> {
             return true;
         }
 
+        if (signal.sample.uptime == 0) {
+
+            // The unit is off, return to initial state
+
+            values.clear();
+            chartLengthMillis = timeSpanIncrement.toMillis();
+
+            // Small inefficiency: only need to repaint if we just cleared the samples, but oh well
+            return true;
+        }
+
         var value = averager.append(signal.timestamp, signal.sample.demand);
 
         if (value == null) {

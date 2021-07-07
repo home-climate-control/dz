@@ -211,4 +211,8 @@ public class DataSet<T> {
 
         return result;
     }
+
+    public final void clear() {
+        samples.clear();
+    }
 }
