@@ -13,6 +13,8 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.geom.Line2D;
 import java.time.Clock;
+import java.util.Iterator;
+import java.util.Map;
 
 public class SensorChart extends AbstractChart<Double> {
 
@@ -85,7 +87,35 @@ public class SensorChart extends AbstractChart<Double> {
 
     @Override
     protected Limits recalculateVerticalLimits() {
-        return null;
+        var startTime = clock.instant().toEpochMilli();
+
+        Double min = null;
+        Double max = null;
+        Long minmaxTime = null;
+
+        for (Iterator<Map.Entry<Long, Double>> i2 = values.entryIterator(); i2.hasNext(); ) {
+
+            var entry = i2.next();
+            var timestamp = entry.getKey();
+            var value = entry.getValue();
+
+            if (max == null || value > max) {
+                max = value;
+                minmaxTime = timestamp;
+            }
+
+            if (min == null || value < min) {
+                min = value;
+                minmaxTime = timestamp;
+            }
+        }
+
+        var result = new Limits(min, max, minmaxTime);
+
+        logger.info("Recalculated in {}ms", (clock.instant().toEpochMilli() - startTime));
+        logger.info("New minmaxTime set to + {}", () -> Interval.toTimeInterval(clock.instant().toEpochMilli() - result.minmaxTime));
+
+        return result;
     }
 
     @Override
