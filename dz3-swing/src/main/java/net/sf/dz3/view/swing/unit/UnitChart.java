@@ -150,6 +150,9 @@ public class UnitChart extends AbstractChart<UnitRuntimePredictionSignal> {
             }
         }
 
+        // Corner case: no values (we just wiped them out when the HVAC stopped)
+        minmaxTime = minmaxTime == null ? clock.instant().toEpochMilli() : minmaxTime;
+
         var result = new Limits(min, max, minmaxTime);
 
         logger.info("Recalculated in {}ms", (clock.instant().toEpochMilli() - startTime));
