@@ -159,6 +159,34 @@ public class UnitPanel extends EntityPanel {
         // No special handling
     }
 
+    static String format(Duration d, boolean plus) {
+
+        if (d == null) {
+            return UNDEFINED;
+        }
+
+        var seconds = d.getSeconds();
+        var hours = seconds / 3600;
+        var minutes = (seconds % 3600) / 60;
+
+        return (hours > 0 ? (hours + " hr") : "") + renderMinutes(hours, minutes) + (plus ? "+" : "");
+    }
+
+    private static String renderMinutes(long hours, long minutes) {
+
+        // Zero hours, zero minutes
+        if (hours == 0 && minutes == 0) {
+            return "<1 min";
+        }
+
+        // X hours exactly
+        if (hours > 0 && minutes == 0) {
+            return "";
+        }
+
+        return String.format("%s%2d min", hours > 0 ? " " : "", minutes);
+    }
+
     private class Listener implements DataSink<UnitRuntimePredictionSignal> {
 
         @Override
@@ -197,21 +225,6 @@ public class UnitPanel extends EntityPanel {
                 currentLeftLabel.setText(format(signal.sample.left, signal.sample.plus));
             }
             currentLeftLabel.setForeground(getColor(signal.sample.left));
-        }
-
-        private String format(Duration d, boolean plus) {
-
-            if (d == null) {
-                return UNDEFINED;
-            }
-
-            var seconds = d.getSeconds();
-            var hours = seconds / 3600;
-            var minutes = (seconds % 3600) / 60;
-
-            return (hours > 0 ? (hours + " hr ") : "") +
-                    (minutes > 0 ? String.format("%2d min", minutes) : "<1 min")+
-                    (plus ? "+" : "");
         }
 
         private Color getColor(Duration d) {
