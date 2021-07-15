@@ -116,8 +116,8 @@ public class UnitChart extends AbstractChart<UnitRuntimePredictionSignal> {
         if (signal.sample.uptime > chartLengthMillis * 0.8) {
             // Time to extend the chart
             chartLengthMillis = Duration.of(chartLengthMillis, ChronoUnit.MILLIS).plus(timeSpanIncrement).toMillis();
+            values.setExpirationInterval(chartLengthMillis);
         }
-
     }
 
     @Override
