@@ -623,6 +623,11 @@ public class ZonePanel extends EntityPanel implements KeyListener {
         this.setpointFont = screenDescriptor.fontSetpoint;
     }
 
+    @Override
+    protected boolean isBackgroundTransparent() {
+        return true;
+    }
+
     /**
      * Convert SI value into display value depending on whether the display is
      * currently in {@link #needFahrenheit Fahrenheit}.

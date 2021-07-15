@@ -60,7 +60,7 @@ public abstract class EntityPanel extends JPanel implements KeyListener {
 
             chart.setPreferredSize(getPreferredSize());
             var bg = ColorScheme.offMap.background;
-            var chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
+            var chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), isBackgroundTransparent() ? 0x00 : 0xFF);
             chart.setBackground(chartBg);
         }
 
@@ -83,7 +83,7 @@ public abstract class EntityPanel extends JPanel implements KeyListener {
         var controls = new JPanel();
 
         controls.setBackground(ColorScheme.offMap.background);
-        controls.setOpaque(false);
+        controls.setOpaque(!isBackgroundTransparent());
 
         var layout = new GridBagLayout();
         var cs = new GridBagConstraints();
@@ -99,7 +99,13 @@ public abstract class EntityPanel extends JPanel implements KeyListener {
     }
 
     protected abstract void createControls(JPanel controls, GridBagLayout layout, GridBagConstraints cs);
-
-
     public abstract void setFontSize(ScreenDescriptor screenDescriptor);
+
+    /**
+     * VT: FIXME: Temporary solution for not repainting the background on sensor and unit panels.
+     * Will be gone once more important details are taken care of.
+     */
+    protected boolean isBackgroundTransparent() {
+        return false;
+    }
 }
