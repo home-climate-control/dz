@@ -43,6 +43,8 @@
         <Logger name="net.sf.dz3.device.model.impl.SimpleZoneController" level="info" />
         <Logger name="net.sf.dz3.device.sensor" level="info" />
         <Logger name="net.sf.dz3.device.model.HvacSignal" level="error" />
+        <Logger name="net.sf.dz3.view.mqtt.v1.ESPHomeDeviceFactory" level="info" />
+        <Logger name="net.sf.dz3.view.mqtt.v1.MqttDeviceFactory" level="info" />
         <Logger name="net.sf.dz3" level="debug" />
         <Logger name="com.dalsemi" level="info" />
         <Logger name="org.springframework" level="info" />
