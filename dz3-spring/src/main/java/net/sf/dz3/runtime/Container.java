@@ -50,6 +50,9 @@ public class Container {
 
         ThreadContext.push("run");
 
+        // WARN level so that it shows up in a shorter log and is faster to find on a slow box
+        logger.warn("Starting up");
+
         try {
 
             var configFound = false;
