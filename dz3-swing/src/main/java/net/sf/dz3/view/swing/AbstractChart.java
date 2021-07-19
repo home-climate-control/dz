@@ -183,16 +183,7 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
     private void paintTimeGrid(Graphics2D g2d, Dimension boundary, Insets insets, long now, double xScale, long xOffset) {
 
         var originalStroke = (BasicStroke) g2d.getStroke();
-
-        g2d.setPaint(gridColor);
-
-        var gridDash = new float[] { 2, 2 };
-
-        var gridStroke = new BasicStroke(
-                originalStroke.getLineWidth(), originalStroke.getEndCap(),
-                originalStroke.getLineJoin(),
-                originalStroke.getMiterLimit(), gridDash,
-                originalStroke.getDashPhase());
+        var gridStroke = setGridStroke(g2d);
 
         g2d.setStroke(gridStroke);
 
@@ -209,6 +200,21 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
         g2d.setStroke(originalStroke);
     }
 
+    private BasicStroke setGridStroke(Graphics2D g2d) {
+
+        var originalStroke = (BasicStroke) g2d.getStroke();
+
+        g2d.setPaint(gridColor);
+
+        var gridDash = new float[] { 2, 2 };
+
+        return new BasicStroke(
+                originalStroke.getLineWidth(), originalStroke.getEndCap(),
+                originalStroke.getLineJoin(),
+                originalStroke.getMiterLimit(), gridDash,
+                originalStroke.getDashPhase());
+    }
+
     @SuppressWarnings("squid:S107")
     private void paintValueGrid(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
@@ -217,16 +223,7 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
         // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
         var originalStroke = (BasicStroke) g2d.getStroke();
-
-        g2d.setPaint(gridColor);
-
-        var gridDash = new float[] { 2, 2 };
-
-        var gridStroke = new BasicStroke(
-                originalStroke.getLineWidth(), originalStroke.getEndCap(),
-                originalStroke.getLineJoin(),
-                originalStroke.getMiterLimit(), gridDash,
-                originalStroke.getDashPhase());
+        var gridStroke = setGridStroke(g2d);
 
         // The zero line gets painted with the default stroke
 
