@@ -180,20 +180,38 @@ public abstract class AbstractChart<T> extends JPanel implements DataSink<T> {
         g2d.fill(background);
     }
 
+    /**
+     * Decide whether we want the extra marks at 15 minute intervals (normally, no).
+     *
+     * @return {@code true} if 15 minute marks need to be painted.
+     */
+    protected boolean need15MinGrid() {
+        return false;
+    }
+
     private void paintTimeGrid(Graphics2D g2d, Dimension boundary, Insets insets, long now, double xScale, long xOffset) {
+
+        if (need15MinGrid()) {
+            paintTimeGrid(g2d, insets.top + (double)boundary.height / 1.25, (double)boundary.height - insets.bottom - 1, insets, now, xScale, xOffset, SPACING_TIME / 2);
+        }
+
+        paintTimeGrid(g2d, insets.top, (double)boundary.height - insets.bottom - 1, insets, now, xScale, xOffset, SPACING_TIME);
+    }
+
+    private void paintTimeGrid(Graphics2D g2d, double top, double bottom, Insets insets, long now, double xScale, long xOffset, long spacingTime) {
 
         var originalStroke = (BasicStroke) g2d.getStroke();
         var gridStroke = setGridStroke(g2d);
 
         g2d.setStroke(gridStroke);
 
-        for (long timeOffset = now - SPACING_TIME; timeOffset > now - chartLengthMillis; timeOffset -= SPACING_TIME) {
+        for (long timeOffset = now - spacingTime; timeOffset > now - chartLengthMillis; timeOffset -= spacingTime) {
 
             double gridX = (timeOffset - xOffset) * xScale + insets.left;
 
             drawGradientLine(g2d,
-                    gridX, insets.top,
-                    gridX, (double)boundary.height - insets.bottom - 1,
+                    gridX, top,
+                    gridX, bottom,
                     getBackground(), Color.GRAY.darker().darker(), false);
         }
 
