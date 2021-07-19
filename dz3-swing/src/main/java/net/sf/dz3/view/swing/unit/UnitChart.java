@@ -228,4 +228,9 @@ public class UnitChart extends AbstractChart<UnitRuntimePredictionSignal> {
             drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
         }
     }
+
+    @Override
+    protected boolean need15MinGrid() {
+        return true;
+    }
 }
