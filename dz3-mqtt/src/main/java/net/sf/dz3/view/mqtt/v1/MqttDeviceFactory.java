@@ -10,6 +10,7 @@ import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.DeviceFactory2020;
 import net.sf.dz3.device.sensor.Switch;
+import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -81,7 +82,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
             String mqttBrokerHost,
             String mqttRootTopicPub, String mqttRootTopicSub) throws MqttException {
 
-        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub);
+        this(mqttBrokerHost, MqttEndpoint.DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub);
     }
 
     /**
@@ -113,7 +114,7 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub) throws MqttException {
 
-        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub);
+        this(mqttBrokerHost, MqttEndpoint.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub);
     }
 
     /**
@@ -202,8 +203,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
         return new JmxDescriptor(
                 "dz",
                 getClass().getSimpleName(),
-                mqtt.host
-                + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
+                mqtt.endpoint.host
+                + (mqtt.endpoint.port == MqttEndpoint.DEFAULT_PORT ? "" : " port " + mqtt.endpoint.port)
                 + " topic/pub " + mqtt.rootTopicPub
                 + " topic/sub " + mqtt.rootTopicSub,
                 "MqttDeviceFactory v1");
@@ -468,8 +469,8 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
             return new JmxDescriptor(
                     "dz",
                     getClass().getSimpleName(),
-                    mqtt.host
-                    + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
+                    mqtt.endpoint.host
+                    + (mqtt.endpoint.port == MqttEndpoint.DEFAULT_PORT ? "" : " port " + mqtt.endpoint.port)
                     + " topic/pub " + mqtt.rootTopicPub
                     + " topic/sub " + mqtt.rootTopicSub,
                     "sensor " + getAddress());

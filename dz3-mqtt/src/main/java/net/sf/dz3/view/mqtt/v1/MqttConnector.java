@@ -9,6 +9,7 @@ import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
+import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import org.apache.logging.log4j.ThreadContext;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -80,7 +81,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet) throws MqttException {
 
-        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttEndpoint.DEFAULT_PORT, null, null, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -116,7 +117,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             String mqttRootTopicPub, String mqttRootTopicSub,
             Set<Object> initSet) throws MqttException {
 
-        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
+        this(mqttBrokerHost, MqttEndpoint.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, null);
     }
 
     /**
@@ -157,7 +158,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
             Set<Object> initSet,
             Set<ConnectorFactory<JsonRenderer>> factorySet) throws MqttException {
 
-        this(mqttBrokerHost, MqttContext.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, factorySet);
+        this(mqttBrokerHost, MqttEndpoint.DEFAULT_PORT, mqttBrokerUsername, mqttBrokerPassword, mqttRootTopicPub, mqttRootTopicSub, initSet, factorySet);
     }
 
     /**
@@ -242,8 +243,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
         return new JmxDescriptor(
                 "dz",
                 getClass().getSimpleName(),
-                mqtt.host
-                + (mqtt.port == MqttContext.DEFAULT_PORT ? "" : " port " + mqtt.port)
+                mqtt.endpoint.host
+                + (mqtt.endpoint.port == MqttEndpoint.DEFAULT_PORT ? "" : " port " + mqtt.endpoint.port)
                 + " topic/pub " + mqtt.rootTopicPub
                 + " topic/sub " + mqtt.rootTopicSub,
                 "MQTT Connector v1");
@@ -334,7 +335,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
     private void startExchanger() {
 
-        exchanger = new Thread(new UpstreamBlockExchanger(mqtt.host, mqtt.port, mqtt.rootTopicPub, upstreamQueue));
+        exchanger = new Thread(new UpstreamBlockExchanger(mqtt.endpoint.host, mqtt.endpoint.port, mqtt.rootTopicPub, upstreamQueue));
 
         exchanger.start();
     }
@@ -415,7 +416,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             // VT: FIXME: Currently, this code does NOT support reconnects.
             logger.fatal(
-                    "connection to tcp://" + mqtt.host + ":" + mqtt.port +
+                    "connection to tcp://" + mqtt.endpoint.host + ":" + mqtt.endpoint.port +
                     " lost, will not reconnect, MQTT interface is now dead");
         }
 

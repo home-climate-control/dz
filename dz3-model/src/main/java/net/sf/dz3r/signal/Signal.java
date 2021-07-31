@@ -8,12 +8,13 @@ import java.util.Optional;
 /**
  * Base interface for all the signals in the system.
  *
+ * @param <A> Address type.
  * @param <S> Signal source reference type.
  * @param <V> Signal value type.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */
-public class Signal<S extends Addressable, V> {
+public class Signal<A extends Comparable<A>, S extends Addressable<A>, V> {
 
     public enum Status {
         OK,

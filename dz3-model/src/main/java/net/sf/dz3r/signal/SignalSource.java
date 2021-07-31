@@ -6,12 +6,14 @@ import reactor.core.publisher.Flux;
 /**
  * Base interface for all signal sources.
  *
+ * @param <A> Signal address type.
  * @param <S> Signal source reference type.
  * @param <V> Signal value type.
+ * @param <T> Signal source address type.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */
-public interface SignalSource<S extends Addressable, V> extends Addressable {
+public interface SignalSource<A extends Comparable<A>, S extends Addressable<A>, V, T extends Comparable<T>> extends Addressable<T> {
 
     /**
      * Get the signal flux.
@@ -21,5 +23,5 @@ public interface SignalSource<S extends Addressable, V> extends Addressable {
      *
      * @return Signal flux.
      */
-    Flux<Signal<S, V>> getFlux();
+    Flux<Signal<A, S, V>> getFlux();
 }

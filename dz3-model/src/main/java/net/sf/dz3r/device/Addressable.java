@@ -9,7 +9,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com"> Vadim Tkachenko 2000-2021
  */
-public interface Addressable<T> {
+public interface Addressable<T extends Comparable<T>> {
 
     /**
      * @return The address.

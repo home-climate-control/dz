@@ -4,6 +4,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.device.sensor.AnalogSensor;
+import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.ThreadContext;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -74,7 +75,7 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     public void instantiate6args() throws MqttException, Exception {
         try (MqttDeviceFactory unused = new MqttDeviceFactory(
                 "localhost",
-                MqttContext.DEFAULT_PORT,
+                MqttEndpoint.DEFAULT_PORT,
                 null, null,
                 "/dev/null", "/dev/null")) {
             // VT: NOTE: All this just to improve test coverage?

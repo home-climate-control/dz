@@ -1,7 +1,7 @@
 package net.sf.dz3.view.mqtt.v1;
 
-import java.util.UUID;
-
+import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -13,11 +13,9 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
 
-import net.sf.dz3.instrumentation.Marker;
+import java.util.UUID;
 
 public class MqttContext {
-
-    public static final int DEFAULT_PORT = 1883;
 
     /**
      * Tags that may be encountered in JSON payloads.
@@ -47,8 +45,7 @@ public class MqttContext {
      */
     public final String clientId = UUID.randomUUID().toString();
 
-    public final String host;
-    public final int port;
+    public final MqttEndpoint endpoint;
     public final String username;
     public final String password;
 
@@ -88,8 +85,7 @@ public class MqttContext {
             String rootTopicPub, String rootTopicSub,
             MqttCallback callback) throws MqttException {
 
-        this.host = host;
-        this.port = port;
+        this.endpoint = new MqttEndpoint(host, port);
         this.username = username;
         this.password = password;
         this.rootTopicPub = rootTopicPub;
