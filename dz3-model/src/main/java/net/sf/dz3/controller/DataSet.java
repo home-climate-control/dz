@@ -8,8 +8,6 @@ import java.util.NoSuchElementException;
 /**
  * Entity supporting the data sampling.
  *
- * VT: FIXME: Implement variable expiration time.
- *
  * @author Copyright &copy; <a href="mailto:vt@homaclimatecontrol.com"> Vadim Tkachenko</a> 2001-2021
  */
 public class DataSet<T> {
@@ -69,13 +67,7 @@ public class DataSet<T> {
      */
     public DataSet(final long expirationInterval, boolean strict) {
 
-        if (expirationInterval <= 0) {
-
-            throw new IllegalArgumentException("Expiration interval must be positive, value given is "
-                    + expirationInterval);
-        }
-
-        this.expirationInterval = expirationInterval;
+        setExpirationInterval(expirationInterval);
         this.strict = strict;
     }
 
@@ -85,8 +77,23 @@ public class DataSet<T> {
      * @return Expiration interval, milliseconds.
      */
     public final long getExpirationInterval() {
-
         return expirationInterval;
+    }
+
+    public final void setExpirationInterval(long expirationInterval) {
+
+        if (expirationInterval <= 0) {
+            throw new IllegalArgumentException("Expiration interval must be positive, value given is "
+                    + expirationInterval);
+        }
+
+        this.expirationInterval = expirationInterval;
+
+        // It is less wasteful to check this value here than in append()
+
+        if (lastTimestamp != null) {
+            expire();
+        }
     }
 
     /**
@@ -154,14 +161,12 @@ public class DataSet<T> {
                 } else {
 
                     // We're done, all other keys will be younger
-
                     return;
                 }
 
             }
 
         } catch (NoSuchElementException nseex) {
-
             // We're fine, the map is empty
         }
     }
@@ -170,12 +175,10 @@ public class DataSet<T> {
      * @return Iterator on the time values for the data entries.
      */
     public final Iterator<Long> iterator() {
-
         return samples.keySet().iterator();
     }
 
     public final Iterator<Map.Entry<Long, T>> entryIterator() {
-
       return samples.entrySet().iterator();
     }
 
@@ -185,7 +188,6 @@ public class DataSet<T> {
      * @return {@link #samples dataSet} size.
      */
     public final long size() {
-
         return samples.size();
     }
 
@@ -204,10 +206,13 @@ public class DataSet<T> {
         var result = samples.get(time);
 
         if (result == null) {
-
             throw new NoSuchElementException("No value for time " + time);
         }
 
         return result;
+    }
+
+    public final void clear() {
+        samples.clear();
     }
 }

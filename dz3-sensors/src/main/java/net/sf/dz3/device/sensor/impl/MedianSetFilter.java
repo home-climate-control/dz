@@ -5,6 +5,7 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogFilter;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.LogManager;
@@ -275,4 +276,10 @@ public class MedianSetFilter implements AnalogFilter {
                 Integer.toHexString(hashCode()),
                 "Return the median signal from " + lastKnown.keySet());
       }
+
+    @Override
+    public int compareTo(Addressable o) {
+        // Can't afford to collide with the wrapper
+        return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
+    }
 }

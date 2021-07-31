@@ -3,22 +3,23 @@ package net.sf.dz3.view.swing;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.device.model.DamperController;
+import net.sf.dz3.device.model.RuntimePredictor;
 import net.sf.dz3.device.model.ThermostatController;
 import net.sf.dz3.device.model.Unit;
 import net.sf.dz3.device.model.ZoneController;
 import net.sf.dz3.device.model.impl.ThermostatModel;
+import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.TemperatureSensor;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.Connector;
 import net.sf.dz3.view.ConnectorFactory;
-import net.sf.dz3.view.swing.thermostat.ThermostatFactory;
-import net.sf.dz3.view.swing.thermostat.ZonePanel;
+import net.sf.dz3.view.swing.sensor.SensorFactory;
+import net.sf.dz3.view.swing.unit.UnitFactory;
+import net.sf.dz3.view.swing.zone.ThermostatFactory;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -26,7 +27,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -54,7 +54,7 @@ import java.util.TreeMap;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Console extends Connector<JComponent> {
+public class Console extends Connector<CellAndPanel> {
 
     private final TemperatureUnit defaultUnit;
 
@@ -66,7 +66,7 @@ public class Console extends Connector<JComponent> {
      */
     private JFrame mainFrame;
 
-    private ZonePanel zonePanel;
+    private EntitySelectorPanel entitySelectorPanel;
 
     /**
      * The scheduler, or {@code null} if one wasn't found.
@@ -79,7 +79,7 @@ public class Console extends Connector<JComponent> {
      * This one will produce an empty console panel.
      */
     public Console() {
-        this(new HashSet<Object>(), "C");
+        this(new HashSet<>(), "C");
     }
 
     /**
@@ -102,7 +102,9 @@ public class Console extends Connector<JComponent> {
         super(initSet);
         this.defaultUnit = TemperatureUnit.resolve(unit);
 
+        register(AnalogSensor.class, new SensorFactory());
         register(ThermostatModel.class, new ThermostatFactory(this.defaultUnit));
+        register(RuntimePredictor.class, new UnitFactory());
     }
 
     /**
@@ -110,9 +112,9 @@ public class Console extends Connector<JComponent> {
      * using custom factory set.
      *
      * @param initSet Objects to display.
-     * @param factorySet Set of {@link ComponentFactory} objects to use for component creation.
+     * @param factorySet Set of {@link ComponentPairFactory} objects to use for component creation.
      */
-    public Console(Set<Object> initSet, Set<ConnectorFactory<JComponent>> factorySet) {
+    public Console(Set<Object> initSet, Set<ConnectorFactory<CellAndPanel>> factorySet) {
         this(initSet, factorySet, "C");
     }
 
@@ -121,25 +123,12 @@ public class Console extends Connector<JComponent> {
      * using custom factory set.
      *
      * @param initSet Objects to display.
-     * @param factorySet Set of {@link ComponentFactory} objects to use for component creation.
+     * @param factorySet Set of {@link ComponentPairFactory} objects to use for component creation.
      * @param unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
      */
-    public Console(Set<Object> initSet, Set<ConnectorFactory<JComponent>> factorySet, String unit) {
-
+    public Console(Set<Object> initSet, Set<ConnectorFactory<CellAndPanel>> factorySet, String unit) {
         super(initSet, factorySet);
         this.defaultUnit = TemperatureUnit.resolve(unit);
-    }
-
-
-    /**
-     * Show the console.
-     *
-     * @deprecated Use {@link Connector#activate()} instead.
-     */
-    @Deprecated
-    public synchronized void show() {
-        logger.warn("use 'init-method=\"activate\"' instead of 'init-method=\"show\"'");
-        activate();
     }
 
     @Override
@@ -171,12 +160,9 @@ public class Console extends Connector<JComponent> {
 
         try {
 
-            for (Iterator<Object> i = getInitSet().iterator(); i.hasNext(); ) {
-
-                Object initObject = i.next();
+            for (Object initObject : getInitSet()) {
 
                 if (initObject instanceof Scheduler) {
-
                     this.scheduler = (Scheduler) initObject;
                     logger.debug("found");
                     return;
@@ -203,16 +189,16 @@ public class Console extends Connector<JComponent> {
             mainFrame = new JFrame("DIY Zoning Console");
             mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-            Container display = mainFrame.getContentPane();
+            var display = mainFrame.getContentPane();
 
             display.setBackground(ColorScheme.offMap.background);
 
-            GridBagLayout layout = new GridBagLayout();
-            GridBagConstraints cs = new GridBagConstraints();
+            var layout = new GridBagLayout();
+            var cs = new GridBagConstraints();
 
             display.setLayout(layout);
 
-            zonePanel = new ZonePanel(getComponentMap());
+            entitySelectorPanel = new EntitySelectorPanel(getComponentMap());
 
             cs.fill = GridBagConstraints.BOTH;
             cs.gridx = 0;
@@ -222,12 +208,12 @@ public class Console extends Connector<JComponent> {
             cs.weightx = 1;
             cs.weighty = 1;
 
-            layout.setConstraints(zonePanel, cs);
-            display.add(zonePanel);
+            layout.setConstraints(entitySelectorPanel, cs);
+            display.add(entitySelectorPanel);
 
             display.setFocusable(true);
             display.addKeyListener(new ResizeKeyListener());
-            display.addKeyListener(zonePanel);
+            display.addKeyListener(entitySelectorPanel);
 
         } finally {
             ThreadContext.pop();
@@ -236,8 +222,7 @@ public class Console extends Connector<JComponent> {
 
     @Override
     protected void deactivate2() {
-
-        throw new UnsupportedOperationException("Not Implenented");
+        throw new UnsupportedOperationException("Not Implemented");
     }
 
     @JmxAttribute(description = "Is the console currently visible")
@@ -296,23 +281,23 @@ public class Console extends Connector<JComponent> {
 
     private static final String FONT_NAME = "Lucida Bright";
 
-    private final Font font20 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 20);
-    private final Font font24 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 24);
+    private final Font font20 = new Font(FONT_NAME, Font.PLAIN, 20);
+    private final Font font24 = new Font(FONT_NAME, Font.PLAIN, 24);
     @SuppressWarnings("unused")
-    private final Font font30 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 30);
-    private final Font font36 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 36);
+    private final Font font30 = new Font(FONT_NAME, Font.PLAIN, 30);
+    private final Font font36 = new Font(FONT_NAME, Font.PLAIN, 36);
     @SuppressWarnings("unused")
-    private final Font fontBold36 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 36);
-    private final Font fontBold48 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 48);
-    private final Font fontBold72 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 72);
-    private final Font fontBold96 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 96);
-    private final Font fontBold120 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 120);
-    private final Font fontBold144 = new Font(FONT_NAME, Font.ROMAN_BASELINE, 144);
+    private final Font fontBold36 = new Font(FONT_NAME, Font.PLAIN, 36);
+    private final Font fontBold48 = new Font(FONT_NAME, Font.PLAIN, 48);
+    private final Font fontBold72 = new Font(FONT_NAME, Font.PLAIN, 72);
+    private final Font fontBold96 = new Font(FONT_NAME, Font.PLAIN, 96);
+    private final Font fontBold120 = new Font(FONT_NAME, Font.PLAIN, 120);
+    private final Font fontBold144 = new Font(FONT_NAME, Font.PLAIN, 144);
 
     /**
      * Possible screen sizes.
      */
-    private ScreenDescriptor[] screenSizes = {
+    private final ScreenDescriptor[] screenSizes = {
             new ScreenDescriptor("QVGA", new Dimension(240, 320), fontBold72, fontBold48, font20),
             new ScreenDescriptor("WQVGA", new Dimension(240, 400), fontBold72, fontBold48, font20),
             new ScreenDescriptor("FWQVGA", new Dimension(240, 432), fontBold72, fontBold48, font20),
@@ -384,14 +369,12 @@ public class Console extends Connector<JComponent> {
 
         @Override
         public void keyReleased(KeyEvent e) {
-
-            // Do nothing
+            // No special handling
         }
 
         @Override
         public void keyTyped(KeyEvent e) {
-
-            // Do nothing
+            // No special handling
         }
 
         private void setScreenSize(ScreenDescriptor screenDescriptor) {
@@ -405,7 +388,7 @@ public class Console extends Connector<JComponent> {
                         screenDescriptor.displaySize.width,
                         screenDescriptor.displaySize.height);
 
-                zonePanel.setSize(screenDescriptor);
+                entitySelectorPanel.setSize(screenDescriptor);
                 mainFrame.setSize(screenDescriptor.displaySize);
                 mainFrame.invalidate();
 

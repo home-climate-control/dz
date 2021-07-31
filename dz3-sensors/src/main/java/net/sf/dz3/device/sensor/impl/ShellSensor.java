@@ -3,6 +3,7 @@ package net.sf.dz3.device.sensor.impl;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.Addressable;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.BufferedReader;
@@ -207,5 +208,11 @@ public class ShellSensor extends AbstractAnalogSensor {
               getClass().getSimpleName(),
               Integer.toHexString(hashCode()),
               "Execute a shell command, treat stdout as the reading");
+    }
+
+    @Override
+    public int compareTo(Addressable o) {
+        // Can't afford to collide with the wrapper
+        return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
     }
 }

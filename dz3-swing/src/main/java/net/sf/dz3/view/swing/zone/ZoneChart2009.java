@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.controller.DataSet;
@@ -16,18 +16,18 @@ import java.util.TreeMap;
 /**
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
- * @deprecated Use {@link Chart2020} instead. Retained for reference and benchmarking.
+ * @deprecated Use {@link ZoneChart2020} instead. Retained for reference and benchmarking.
  *
  * VT: NOTE: squid:S110 - I don't care, I didn't create those parents, Sun did. I need mine.
  * VT: NOTE: squid:S1133 - retained for documentation purposes
  */
 @SuppressWarnings({"squid:S110", "squid:S1133"})
 @Deprecated(forRemoval = false)
-public class Chart2009 extends AbstractChart {
+public class ZoneChart2009 extends AbstractZoneChart {
 
     private static final long serialVersionUID = -8138341010404232436L;
 
-    public Chart2009(Clock clock, long chartLengthMillis) {
+    public ZoneChart2009(Clock clock, long chartLengthMillis) {
 
         super(clock, chartLengthMillis);
     }

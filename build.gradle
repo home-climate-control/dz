@@ -59,15 +59,15 @@ subprojects {
 
     dependencies {
 
-        implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
-        implementation 'org.apache.logging.log4j:log4j-core:2.11.0'
+        implementation 'org.apache.logging.log4j:log4j-api:2.14.1'
+        implementation 'org.apache.logging.log4j:log4j-core:2.14.1'
 
         implementation 'io.projectreactor:reactor-core:3.4.6'
 
-        testImplementation 'org.mockito:mockito-core:3.10.0'
+        testImplementation 'org.mockito:mockito-core:3.11.2'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
-        testCompile('org.assertj:assertj-core:3.19.0')
+        testImplementation('org.assertj:assertj-core:3.20.2')
         testImplementation 'io.projectreactor:reactor-test:3.4.6'
 
         errorprone 'com.google.errorprone:error_prone_core:2.6.0'

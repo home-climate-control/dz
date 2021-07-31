@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
@@ -11,13 +11,14 @@ import net.sf.dz3.device.model.ZoneState;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3.scheduler.Scheduler;
 import net.sf.dz3.view.swing.ColorScheme;
+import net.sf.dz3.view.swing.EntityPanel;
+import net.sf.dz3.view.swing.EntitySelectorPanel;
 import net.sf.dz3.view.swing.ScreenDescriptor;
 import net.sf.dz3.view.swing.TemperatureUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -35,15 +36,15 @@ import java.time.Clock;
 import java.util.Locale;
 
 /**
- * Thermostat panel.
+ * Zone panel.
  *
  * Even though it implements {@link KeyListener}, it never request focus,
- * but gets event notifications from {@link ZonePanel} instead.
+ * but gets event notifications from {@link EntitySelectorPanel} instead.
  * This is done in order not to fiddle with focus changes.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ThermostatPanel extends JPanel implements KeyListener {
+public class ZonePanel extends EntityPanel implements KeyListener {
 
     private static final long serialVersionUID = 3420150515187693627L;
     private static final DecimalFormat numberFormat = new DecimalFormat("#0.0;-#0.0");
@@ -71,7 +72,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
     private final JLabel periodLabel = new JLabel("", SwingConstants.LEFT);
 
     // 3 hours
-    private final AbstractChart chart = new Chart2020(Clock.systemUTC(), 1000L * 60 * 60 * 3);
+    private final AbstractZoneChart chart = new ZoneChart2020(Clock.systemUTC(), 1000L * 60 * 60 * 3);
 
     private static final String NO_PERIOD = "(no period is active)";
 
@@ -98,7 +99,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
      */
     private double setpointDelta = 0.1d;
 
-    public ThermostatPanel(ThermostatModel source, ScreenDescriptor screenDescriptor, Scheduler scheduler, TemperatureUnit defaultUnit) {
+    public ZonePanel(ThermostatModel source, ScreenDescriptor screenDescriptor, Scheduler scheduler, TemperatureUnit defaultUnit) {
 
         this.source = source;
         this.scheduler = scheduler;
@@ -114,10 +115,7 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         source.getController().addConsumer(pidListener);
     }
 
-    @SuppressWarnings("squid:S1199")
     private void initGraphics() {
-
-        setBackground(ColorScheme.offMap.background);
 
         currentLabel.setFont(currentFontC);
         currentLabel.setToolTipText("Current temperature (Left/Right to change zone)");
@@ -125,72 +123,12 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         setpointLabel.setFont(setpointFont);
         setpointLabel.setToolTipText("Setpoint (Up/Down to change)");
 
-        var layout = new GridBagLayout();
-        var cs = new GridBagConstraints();
-
-        this.setLayout(layout);
-
-        // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
-        // blocks are for readability
-
-        {
-            // Controls take the upper quarter of the display
-
-            cs.fill = GridBagConstraints.HORIZONTAL;
-            cs.gridx = 0;
-            cs.gridy = 0;
-            cs.gridwidth = GridBagConstraints.REMAINDER;
-            cs.gridheight = 1;
-            cs.weightx = 1;
-            cs.weighty = 0;
-
-            var controls = createControls();
-
-            layout.setConstraints(controls, cs);
-            this.add(controls);
-        }
-
-        {
-            cs.gridy++;
-            cs.gridheight = 1;
-            cs.weighty = 1;
-            cs.fill = GridBagConstraints.BOTH;
-
-            layout.setConstraints(chart, cs);
-            this.add(chart);
-
-            chart.setPreferredSize(getPreferredSize());
-            var bg = ColorScheme.offMap.background;
-            var chartBg = new Color(bg.getRed(), bg.getGreen(), bg.getBlue(), 0x00);
-            chart.setBackground(chartBg);
-        }
-
-        // Really dirty, but really quick
-
-        var template = BorderFactory.createTitledBorder(source.getName());
-        var border = BorderFactory.createTitledBorder(
-                getBorder(),
-                source.getName(),
-                template.getTitleJustification(),
-                template.getTitlePosition(),
-                template.getTitleFont(),
-                Color.WHITE);
-
-        this.setBorder(border);
+        createLayout(source.getName(), chart);
     }
 
+    @Override
     @SuppressWarnings("squid:S1199")
-    private JPanel createControls() {
-
-        var controls = new JPanel();
-
-        controls.setBackground(ColorScheme.offMap.background);
-        controls.setOpaque(false);
-
-        var layout = new GridBagLayout();
-        var cs = new GridBagConstraints();
-
-        controls.setLayout(layout);
+    protected void createControls(JPanel controls, GridBagLayout layout, GridBagConstraints cs) {
 
         // VT: NOTE: squid:S1199 - SonarLint is not smart enough to realize that these
         // blocks are for readability
@@ -198,8 +136,6 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         {
             // Period label is on top left
 
-            cs.gridx = 0;
-            cs.gridy = 0;
             cs.gridwidth = 2;
             cs.fill = GridBagConstraints.HORIZONTAL;
 
@@ -268,8 +204,6 @@ public class ThermostatPanel extends JPanel implements KeyListener {
                 controls.add(votingLabel);
             }
         }
-
-        return controls;
     }
 
     @Override
@@ -681,11 +615,17 @@ public class ThermostatPanel extends JPanel implements KeyListener {
         return source.signal.sample.calling ? ZoneState.CALLING : ZoneState.HAPPY;
     }
 
+    @Override
     public void setFontSize(ScreenDescriptor screenDescriptor) {
 
         this.currentFontC = screenDescriptor.fontCurrentTemperatureC;
         this.currentFontF = screenDescriptor.fontCurrentTemperatureF;
         this.setpointFont = screenDescriptor.fontSetpoint;
+    }
+
+    @Override
+    protected boolean isBackgroundTransparent() {
+        return true;
     }
 
     /**

@@ -16,6 +16,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3.device.factory.AbstractDeviceFactory;
 import net.sf.dz3.device.factory.DataMap;
 import net.sf.dz3.device.factory.SingleSwitchProxy;
+import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.DeviceContainer;
 import net.sf.dz3.device.sensor.SensorType;
@@ -1362,6 +1363,12 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                     getClass().getSimpleName(),
                     Integer.toHexString(hashCode()) + "#" + getAddress(),
                     "1-Wire single switch proxy");
+        }
+
+        @Override
+        public int compareTo(Addressable o) {
+            // Can't afford to collide with the wrapper
+            return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
         }
     }
 

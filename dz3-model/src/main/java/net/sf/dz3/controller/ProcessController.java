@@ -1,6 +1,5 @@
 package net.sf.dz3.controller;
 
-import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
@@ -30,10 +29,6 @@ public interface ProcessController extends DataSink<Double>, DataSource<ProcessC
      *
      * @param setpoint Setpoint to set.
      */
-    @ConfigurableProperty(
-        propertyName = "setpoint",
-        description = "Desired Setpoint"
-    )
     void setSetpoint(double setpoint);
 
     /**

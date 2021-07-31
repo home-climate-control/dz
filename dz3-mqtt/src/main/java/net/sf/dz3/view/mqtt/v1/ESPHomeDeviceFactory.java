@@ -1,14 +1,15 @@
 package net.sf.dz3.view.mqtt.v1;
 
-import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.Addressable;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import net.sf.dz3.device.sensor.DeviceFactory2020;
+import net.sf.dz3.device.sensor.Switch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -17,16 +18,14 @@ import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import net.sf.dz3.device.sensor.Addressable;
-import net.sf.dz3.device.sensor.AnalogSensor;
-import net.sf.dz3.device.sensor.DeviceFactory2020;
-import net.sf.dz3.device.sensor.Switch;
-import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
-import com.homeclimatecontrol.jukebox.jmx.JmxAware;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * MQTT device factory capable of working with <a href="https://esphome.io/">ESPHome</a> devices.
@@ -463,6 +462,12 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
         @Override
         public DataSample<Double> getSignal() {
             return getStatus();
+        }
+
+        @Override
+        public int compareTo(Addressable o) {
+            // Can't afford to collide with the wrapper
+            return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
         }
     }
 }

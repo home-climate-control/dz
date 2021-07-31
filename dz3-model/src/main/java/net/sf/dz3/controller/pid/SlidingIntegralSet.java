@@ -17,7 +17,7 @@ import java.util.Map.Entry;
  * Unlike {@link NaiveIntegralSet} (which has the time complexity of {@code O(n)}), this class
  * provides {@code O(1)} time complexity.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2015
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class SlidingIntegralSet implements IntegralSet {
 
@@ -129,5 +129,9 @@ public class SlidingIntegralSet implements IntegralSet {
     @Override
     public final synchronized double getIntegral() {
         return lastIntegral;
+    }
+
+    public long getSpan() {
+        return integrationTime;
     }
 }

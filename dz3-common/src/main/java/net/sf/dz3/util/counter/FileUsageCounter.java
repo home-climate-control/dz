@@ -1,5 +1,8 @@
 package net.sf.dz3.util.counter;
 
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -7,10 +10,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.util.StringTokenizer;
-
-import org.apache.logging.log4j.ThreadContext;
-
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 
 /**
  * Usage counter storing the state into a file.
@@ -150,7 +149,7 @@ public class FileUsageCounter extends TransientUsageCounter {
 
             if (canonical.getParentFile().mkdirs()) {
                 logger.info("Created " + canonical);
-            };
+            }
 
             // Now, careful... https://github.com/home-climate-control/dz/issues/102
 

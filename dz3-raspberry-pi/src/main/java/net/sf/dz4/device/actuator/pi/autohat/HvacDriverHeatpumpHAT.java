@@ -18,17 +18,17 @@ import java.io.IOException;
 public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
 
     /**
-     * Default relay light intensity (approximately {@code 0x11}).
+     * Default relay light intensity (minimum).
      *
      * These lights are small and are next to each other, making them brighter will not make them
      * more visible.
      */
-    private double relayLightsIntensity = 0.066;
+    private byte relayLightsIntensity = 1;
 
     /**
-     * Default status light intensity (approximately {@code 0x22}).
+     * Default status light intensity (minimum).
      */
-    private double statusLightsIntensity = 0.13;
+    private byte statusLightsIntensity = 1;
 
     /**
      * Create an instance with all straight switches.
@@ -86,7 +86,7 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
         return relayLightsIntensity;
     }
 
-    public void setRelayLightsIntensity(double relayLightsIntensity) throws IOException {
+    public void setRelayLightsIntensity(byte relayLightsIntensity) throws IOException {
         if (relayLightsIntensity < 0 || relayLightsIntensity > 1) {
             throw new IllegalArgumentException("intensity value should be in 0..1 range (" + relayLightsIntensity + " given)");
         }
@@ -105,10 +105,7 @@ public class HvacDriverHeatpumpHAT extends HvacDriverHeatpump {
         return statusLightsIntensity;
     }
 
-    public void setStatusLightsIntensity(double statusLightsIntensity) throws IOException {
-        if (statusLightsIntensity < 0 || statusLightsIntensity > 1) {
-            throw new IllegalArgumentException("intensity value should be in 0..1 range (" + statusLightsIntensity + " given)");
-        }
+    public void setStatusLightsIntensity(byte statusLightsIntensity) throws IOException {
 
         var hat = PimoroniAutomationHAT.getInstance();
 

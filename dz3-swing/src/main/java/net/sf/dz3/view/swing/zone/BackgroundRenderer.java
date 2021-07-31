@@ -1,4 +1,4 @@
-package net.sf.dz3.view.swing.thermostat;
+package net.sf.dz3.view.swing.zone;
 
 import net.sf.dz3.device.model.HvacMode;
 import net.sf.dz3.device.model.ZoneState;

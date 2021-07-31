@@ -479,5 +479,11 @@ public class MqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxA
         public DataSample<Double> getSignal() {
             return getStatus();
         }
+
+        @Override
+        public int compareTo(Addressable o) {
+            // Can't afford to collide with the wrapper
+            return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
+        }
     }
 }

@@ -1,11 +1,11 @@
 package net.sf.dz3.device.sensor.impl;
 
-import com.homeclimatecontrol.jukebox.conf.ConfigurableProperty;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.service.ActiveService;
+import net.sf.dz3.device.sensor.Addressable;
 import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.ThreadContext;
 
@@ -16,7 +16,7 @@ import java.io.IOException;
  *
  * Supports common configuration and listener notification features.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public abstract class AbstractAnalogSensor extends ActiveService implements AnalogSensor {
 
@@ -73,7 +73,6 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
         return pollIntervalMillis;
     }
 
-    @ConfigurableProperty(propertyName = "pollIntervalMillis", description = "Poll interval, milliseconds")
     public final void setPollInterval(long pollIntervalMillis) {
 
         if (pollIntervalMillis < 0) {
@@ -161,5 +160,11 @@ public abstract class AbstractAnalogSensor extends ActiveService implements Anal
     @Override
     public void removeConsumer(DataSink<Double> consumer) {
         dataBroadcaster.removeConsumer(consumer);
+    }
+
+    @Override
+    public int compareTo(Addressable o) {
+        // Can't afford to collide with the wrapper
+        return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
     }
 }

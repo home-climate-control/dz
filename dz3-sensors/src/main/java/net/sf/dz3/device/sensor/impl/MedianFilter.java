@@ -1,27 +1,27 @@
 package net.sf.dz3.device.sensor.impl;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-
-import net.sf.dz3.device.sensor.AnalogFilter;
-import net.sf.dz3.device.sensor.AnalogSensor;
 import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import net.sf.dz3.device.sensor.Addressable;
+import net.sf.dz3.device.sensor.AnalogFilter;
+import net.sf.dz3.device.sensor.AnalogSensor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * A median filter.
  *
  * Careful, first ({@link #depth} - 1) samples will get out unfiltered.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2012-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2012-2021
  */
 public class MedianFilter implements AnalogFilter {
 
@@ -168,4 +168,10 @@ public class MedianFilter implements AnalogFilter {
                 Integer.toHexString(hashCode()),
                 "Filter the signal using median filter algorithm with depth " + depth);
       }
+
+    @Override
+    public int compareTo(Addressable o) {
+        // Can't afford to collide with the wrapper
+        return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
+    }
 }
