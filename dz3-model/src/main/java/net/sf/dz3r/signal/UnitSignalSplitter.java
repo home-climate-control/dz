@@ -1,4 +1,4 @@
-package net.sf.dz4.signal;
+package net.sf.dz3r.signal;
 
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.device.model.UnitSignal;
