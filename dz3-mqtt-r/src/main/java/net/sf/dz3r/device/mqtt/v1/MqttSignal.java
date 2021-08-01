@@ -1,7 +1,5 @@
 package net.sf.dz3r.device.mqtt.v1;
 
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
 /**
  * MQTT signal.
  *
@@ -13,9 +11,9 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 public class MqttSignal {
 
     public final String topic;
-    public final MqttMessage message;
+    public final String message;
 
-    public MqttSignal(String topic, MqttMessage message) {
+    public MqttSignal(String topic, String message) {
         this.topic = topic;
         this.message = message;
     }
