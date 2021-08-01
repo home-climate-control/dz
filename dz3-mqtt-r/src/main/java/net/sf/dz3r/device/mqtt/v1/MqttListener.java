@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.mqtt.v1;
 
+import com.hivemq.client.mqtt.datatypes.MqttTopic;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
 import com.hivemq.client.mqtt.mqtt3.exceptions.Mqtt3ConnAckException;
@@ -9,8 +10,10 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Optional;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 /**
  * MQTT stream cold publisher.
@@ -28,7 +31,16 @@ public class MqttListener implements Addressable<MqttEndpoint> {
     private final String username;
     private final String password;
 
+    /**
+     * MQTT client.
+     *
+     * Note that the client is the MQTT v.3 client - this is what {@code mosquitto} supports.
+     * May be upgraded to {@link com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient} when a suitable
+     * broker replacement is found and verified.
+     */
     private final Mqtt3AsyncClient client;
+
+    private final Map<String, Flux<MqttSignal>> topic2flux = new TreeMap<>();
 
     /**
      * Create an unauthenticated instance that will NOT automatically reconnect.
@@ -66,7 +78,7 @@ public class MqttListener implements Addressable<MqttEndpoint> {
         if (username != null && password != null) {
             instance = instance.simpleAuth()
                     .username(username)
-                    .password(Optional.ofNullable(password).orElse("").getBytes(StandardCharsets.UTF_8))
+                    .password(password.getBytes(StandardCharsets.UTF_8))
                     .applySimpleAuth();
         }
 
@@ -88,7 +100,79 @@ public class MqttListener implements Addressable<MqttEndpoint> {
         return address;
     }
 
-    Flux<MqttSignal> getFlux(String topic) {
-        throw new UnsupportedOperationException("Not Implemented");
+    public synchronized Flux<MqttSignal> getFlux(String topic) {
+        return topic2flux.computeIfAbsent(topic, k -> createFlux(topic));
+    }
+
+    private final Map<String, Receiver> topic2receiver = new TreeMap<>();
+
+    private void register(String t, Receiver r) {
+        topic2receiver.put(t, r);
+    }
+
+    private Flux<MqttSignal> createFlux(String topic) {
+
+        logger.info("New subscription topic={}", topic);
+
+        Flux<MqttSignal> result = Flux.create(sink -> {
+            logger.debug("new receiver, topic={}", topic);
+            register(topic, new Receiver() {
+                @Override
+                public void receive(MqttTopic topic, String payload) {
+                    logger.trace("receive: {} {}", topic, payload);
+                    sink.next(new MqttSignal(topic.toString(), payload));
+                }
+            });
+        });
+
+        var ackFuture = client.toAsync()
+                .subscribeWith()
+                .topicFilter(topic + "/#")
+                .callback(p -> {
+
+                    // This will be null until someone calls subscribe() on the flux
+                    var r = topic2receiver.get(topic);
+
+                    if (r == null) {
+
+                        // Persistent messages will be delivered immediately before there's a chance to call
+                        // subscribe() on the flux - we didn't even return it yet
+
+                        // VT: FIXME: Buffer?
+
+                        logger.info("no subscriptions to '{}/#' yet, dropped: {} {}", topic, p.getTopic(), new String(p.getPayloadAsBytes(), StandardCharsets.UTF_8));
+                        return;
+                    }
+
+                    r.receive(p.getTopic(), new String(p.getPayloadAsBytes(), StandardCharsets.UTF_8));
+
+                })
+                .send();
+        logger.info("Subscribing...");
+
+        try {
+
+            var ack = ackFuture.get();
+            logger.info("Subscribed: {}", ack.getReturnCodes());
+
+            topic2flux.put(topic, result);
+
+            return result;
+
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+
+            // Oops. No flux.
+            return Flux.error(ex);
+
+        } catch ( ExecutionException ex) {
+
+            // Oops. No flux.
+            return Flux.error(ex);
+        }
+    }
+
+    private interface Receiver {
+        public void receive(MqttTopic topic, String payload);
     }
 }
