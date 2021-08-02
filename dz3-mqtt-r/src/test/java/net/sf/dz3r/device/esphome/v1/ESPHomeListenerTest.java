@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.mqtt.v1;
+package net.sf.dz3r.device.esphome.v1;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,28 +12,22 @@ import static org.assertj.core.api.Assertions.assertThatCode;
         matches = "safe",
         disabledReason = "Only execute this test if a suitable MQTT broker is available"
 )
-class MqttListenerTest {
+class ESPHomeListenerTest {
 
     private final Logger logger = LogManager.getLogger();
 
     @Test
-    void create() {
-        assertThatCode(() -> {
-            var ml = new MqttListener(new MqttEndpoint("localhost"));
-        }).doesNotThrowAnyException();
-    }
-
-    @Test
-    void subscribe() throws InterruptedException {
+    void sensorFlux() throws InterruptedException {
 
         assertThatCode(() -> {
-            var ml = new MqttListener(new MqttEndpoint("localhost"));
-            var subscription= ml
-                    .getFlux("")
-                    .doOnNext(v -> logger.info("message: {} {}", v.topic, v.message))
+            var l = new ESPHomeListener("localhost", "/esphome");
+
+            var subscription = l.getSensorFlux("dining-room")
+                    .doOnNext(v -> logger.info("message: {}", v))
+                    .take(10)
                     .subscribe();
 
-            Thread.sleep(3_000);
+            Thread.sleep(5_000);
 
             subscription.dispose();
         }).doesNotThrowAnyException();

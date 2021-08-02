@@ -9,12 +9,11 @@ import java.util.Optional;
  * Base interface for all the signals in the system.
  *
  * @param <A> Address type.
- * @param <S> Signal source reference type.
  * @param <V> Signal value type.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */
-public class Signal<A extends Comparable<A>, S extends Addressable<A>, V> {
+public class Signal<A extends Comparable<A>, V> implements Addressable<A> {
 
     public enum Status {
         OK,
@@ -23,7 +22,7 @@ public class Signal<A extends Comparable<A>, S extends Addressable<A>, V> {
     }
 
     public final Instant timestamp;
-    public final S source;
+    public final A address;
     private final V value;
     public final Status status;
     public final Throwable error;
@@ -32,20 +31,20 @@ public class Signal<A extends Comparable<A>, S extends Addressable<A>, V> {
      * Construct a non-error signal.
      *
      * @param timestamp Signal timestamp.
-     * @param source Signal source.
+     * @param address Signal source.
      * @param value Signal value.
      */
-    public Signal(Instant timestamp, S source, V value) {
-        this(timestamp, source, value, Status.OK, null);
+    public Signal(Instant timestamp, A address, V value) {
+        this(timestamp, address, value, Status.OK, null);
     }
 
-    public Signal(Instant timestamp, S source, V value, Status status, Throwable error) {
+    public Signal(Instant timestamp, A address, V value, Status status, Throwable error) {
 
         if (timestamp == null) {
             throw new IllegalArgumentException("timestamp can't be null");
         }
 
-        if (source == null) {
+        if (address == null) {
             throw new IllegalArgumentException("source can't be null");
         }
 
@@ -54,18 +53,24 @@ public class Signal<A extends Comparable<A>, S extends Addressable<A>, V> {
         }
 
         this.timestamp = timestamp;
-        this.source = source;
+        this.address = address;
         this.value = value;
 
         this.status = status;
         this.error = error;
     }
 
-    public S getSource() {
-        return source;
+    @Override
+    public A getAddress() {
+        return address;
     }
 
     public Optional<V> getValue() {
+
+        if (isError()) {
+            throw new IllegalStateException("total failure, this shouldn't be called", error);
+        }
+
         return value == null ? Optional.empty() : Optional.of(value);
     }
 
@@ -80,11 +85,27 @@ public class Signal<A extends Comparable<A>, S extends Addressable<A>, V> {
         return status == Status.OK;
     }
 
+    /**
+     * Find out if the signal source is in error.
+     *
+     * Note that this may return {@code false} even if {@link #isOK()} returns {@code false} - the failure may be
+     * partial and not yet impact the system operation.
+     *
+     * @return {@code true} if the failure is {@link Status#FAILURE_TOTAL}.
+     */
+    public boolean isError() {
+        return status == Status.FAILURE_TOTAL;
+    }
+
     public Status getStatus() {
         return status;
     }
 
     public Throwable getError() {
         return error;
+    }
+
+    public String toString() {
+        return address + "=" + value;
     }
 }
