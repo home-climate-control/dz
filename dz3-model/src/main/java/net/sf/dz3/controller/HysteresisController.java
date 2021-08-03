@@ -37,7 +37,7 @@ public class HysteresisController extends AbstractProcessController {
      */
     public HysteresisController(double setpoint) {
 
-	this(setpoint, -1f, 1f);
+        this(setpoint, -1f, 1f);
     }
 
     /**
@@ -48,7 +48,7 @@ public class HysteresisController extends AbstractProcessController {
      */
     public HysteresisController(double setpoint, double hysteresis) {
 
-	this(setpoint, -hysteresis, hysteresis);
+        this(setpoint, -hysteresis, hysteresis);
     }
 
     /**
@@ -59,10 +59,10 @@ public class HysteresisController extends AbstractProcessController {
      */
     public HysteresisController(double setpoint, double thresholdLow, double thresholdHigh) {
 
-	super(setpoint);
+        super(setpoint);
 
-	setLow(thresholdLow);
-	setHigh(thresholdHigh);
+        setLow(thresholdLow);
+        setHigh(thresholdHigh);
     }
 
     /**
@@ -74,11 +74,11 @@ public class HysteresisController extends AbstractProcessController {
      */
     private void setLow(double thresholdLow) {
 
-	if (thresholdLow >= 0) {
-	    throw new IllegalArgumentException("Low threshold must be negative (value given is " + thresholdLow + ")");
-	}
+        if (thresholdLow >= 0) {
+            throw new IllegalArgumentException("Low threshold must be negative (value given is " + thresholdLow + ")");
+        }
 
-	this.thresholdLow = thresholdLow;
+        this.thresholdLow = thresholdLow;
     }
 
     /**
@@ -90,11 +90,11 @@ public class HysteresisController extends AbstractProcessController {
      */
     private void setHigh(double thresholdHigh) {
 
-	if (thresholdHigh <= 0) {
-	    throw new IllegalArgumentException("High threshold must be positive(value given is " + thresholdHigh + ")");
-	}
+        if (thresholdHigh <= 0) {
+            throw new IllegalArgumentException("High threshold must be positive(value given is " + thresholdHigh + ")");
+        }
 
-	this.thresholdHigh = thresholdHigh;
+        this.thresholdHigh = thresholdHigh;
     }
 
     /**
@@ -102,7 +102,7 @@ public class HysteresisController extends AbstractProcessController {
      */
     @JmxAttribute(description = "threshold.low")
     public double getThresholdLow() {
-	return thresholdLow;
+        return thresholdLow;
     }
 
     /**
@@ -110,38 +110,35 @@ public class HysteresisController extends AbstractProcessController {
      */
     @JmxAttribute(description = "threshold.high")
     public double getThresholdHigh() {
-	return thresholdHigh;
+        return thresholdHigh;
     }
 
     @Override
     public final synchronized DataSample<Double> compute() {
 
-	DataSample<Double> pv = getProcessVariable();
+        DataSample<Double> pv = getProcessVariable();
 
-	if (pv == null || pv.isError()) {
+        if (pv == null || pv.isError()) {
+            // Don't have to do a thing, nothing happened yet, nothing good at least
+            return null;
 
-	    // Don't have to do a thing, nothing happened yet, nothing good at least
-	    return null;
+        } else {
 
-	} else {
+            double setpoint = getSetpoint();
 
-	    double setpoint = getSetpoint();
+            if (state) {
 
-	    if (state) {
+                if (pv.sample - thresholdLow <= setpoint) {
+                    state = false;
+                }
 
-		if (pv.sample - thresholdLow <= setpoint) {
+            } else {
 
-		    state = false;
-		}
-
-	    } else {
-
-		if (pv.sample - thresholdHigh >= setpoint) {
-
-		    state = true;
-		}
-	    }
-	}
+                if (pv.sample - thresholdHigh >= setpoint) {
+                    state = true;
+                }
+            }
+        }
 
         String sourceName = pv.sourceName + ".pc";
         String signature = MessageDigestCache.getMD5(sourceName).substring(0, 19);
@@ -155,7 +152,7 @@ public class HysteresisController extends AbstractProcessController {
     @JmxAttribute(description = "state")
     public boolean getState() {
 
-	return state;
+        return state;
     }
 
     @Override
@@ -166,14 +163,13 @@ public class HysteresisController extends AbstractProcessController {
     @Override
     public ProcessControllerStatus getStatus() {
 
-	ProcessControllerStatus superStatus = super.getStatus();
+        ProcessControllerStatus superStatus = super.getStatus();
 
         return new HysteresisControllerStatus(superStatus, state);
     }
 
     @Override
     protected void setpointChanged() {
-
         // Do absolutely nothing.
     }
 }
