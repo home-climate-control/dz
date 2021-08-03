@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Random;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class HysteresisControllerTest {
 
@@ -17,7 +18,7 @@ class HysteresisControllerTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testController() {
+    void testController() {
 
         long timestamp = 0;
 
@@ -46,7 +47,8 @@ class HysteresisControllerTest {
     /**
      * Make sure that the signal timestamp is the same as input sample timestamp.
      */
-    public void testTimestamp() {
+    @Test
+    void testTimestamp() {
 
         ThreadContext.push("testTimestamp");
 
@@ -70,11 +72,13 @@ class HysteresisControllerTest {
         }
     }
 
-    public void testNullPV() {
+    @Test
+    void testNullPV() {
+        assertThatCode(() -> {
+            HysteresisController pc = new HysteresisController(0);
 
-        HysteresisController pc = new HysteresisController(0);
-
-        // This must not blow up like it did before
-        pc.compute();
+            // This must not blow up like it did before
+            pc.compute();
+        }).doesNotThrowAnyException();
     }
 }
