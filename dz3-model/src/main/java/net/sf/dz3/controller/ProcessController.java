@@ -11,7 +11,7 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
  * <p>
  *
  * The controller is expected to produce an output based on the value of the
- * process variable and measurement time. The exact details are left to the
+ * process variable and event time. The exact details are left to the
  * implementation.
  *
  * <p>
