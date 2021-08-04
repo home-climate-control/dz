@@ -34,7 +34,7 @@ class HysteresisControllerTest {
                 new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), address, 19.5),
                 new Signal<>(timestamp.plus(offset, ChronoUnit.SECONDS), address, 19.0));
 
-        var pc = new HysteresisController<String>(20);
+        var pc = new HysteresisController<String>("h", 20);
 
         Flux<Signal<String, Double>> flux = pc
                 .compute(sequence)
@@ -42,13 +42,13 @@ class HysteresisControllerTest {
 
         StepVerifier
                 .create(flux)
-                .assertNext(s -> assertThat(s.getValue().get()).isEqualTo(-1.0))
-                .assertNext(s -> assertThat(s.getValue().get()).isEqualTo(-1.0))
-                .assertNext(s -> assertThat(s.getValue().get()).isEqualTo(1.0))
-                .assertNext(s -> assertThat(s.getValue().get()).isEqualTo(1.0))
-                .assertNext(s -> assertThat(s.getValue().get()).isEqualTo(1.0))
-                .assertNext(s -> assertThat(s.getValue().get()).isEqualTo(1.0))
-                .assertNext(s -> assertThat(s.getValue().get()).isEqualTo(-1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(-1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(-1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(-1.0))
                 .verifyComplete();
     }
 }

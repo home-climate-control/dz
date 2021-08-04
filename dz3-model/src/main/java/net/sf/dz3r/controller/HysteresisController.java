@@ -1,6 +1,7 @@
 package net.sf.dz3r.controller;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3r.signal.Signal;
 
 /**
@@ -34,32 +35,34 @@ public class HysteresisController<A extends Comparable<A>> extends AbstractProce
     /**
      * Create an instance with default hysteresis value.
      *
+     * @param jmxName This controller's JMX name.
      * @param setpoint Initial setpoint.
      */
-    protected HysteresisController(double setpoint) {
-        this(setpoint, -DEFAULT_HYSTERESIS, DEFAULT_HYSTERESIS);
+    protected HysteresisController(String jmxName, double setpoint) {
+        this(jmxName, setpoint, -DEFAULT_HYSTERESIS, DEFAULT_HYSTERESIS);
     }
 
     /**
-     * Create an instance.
+     * Create an instance with a symmetrical hysteresis loop.
      *
+     * @param jmxName This controller's JMX name.
      * @param setpoint Initial setpoint.
      * @param hysteresis Initial hysteresis.
      */
-    public HysteresisController(double setpoint, double hysteresis) {
-
-        this(setpoint, -hysteresis, hysteresis);
+    public HysteresisController(String jmxName, double setpoint, double hysteresis) {
+        this(jmxName, setpoint, -hysteresis, hysteresis);
     }
 
     /**
      *
+     * @param jmxName This controller's JMX name.
      * @param setpoint Initial setpoint.
      * @param thresholdLow Lower tipping point.
      * @param thresholdHigh Upper tipping point.
      */
-    public HysteresisController(double setpoint, double thresholdLow, double thresholdHigh) {
+    public HysteresisController(String jmxName, double setpoint, double thresholdLow, double thresholdHigh) {
 
-        super(setpoint);
+        super(jmxName, setpoint);
 
         setLow(thresholdLow);
         setHigh(thresholdHigh);
@@ -117,8 +120,8 @@ public class HysteresisController<A extends Comparable<A>> extends AbstractProce
     protected Signal<A, Double> wrapCompute(Signal<A, Double> pv) {
 
         if (pv == null) {
-            // Don't have to do a thing, nothing happened yet, nothing good at least
-            return null;
+            // This should've been handled up the call stack already, but let's be paranoid
+            throw new IllegalArgumentException("pv can't be null");
         }
 
         if (pv.isError()) {
@@ -126,11 +129,11 @@ public class HysteresisController<A extends Comparable<A>> extends AbstractProce
             return pv;
         }
 
-        if (pv.getValue().isEmpty()) {
+        var sample = pv.getValue();
+
+        if (sample == null) {
             throw new IllegalStateException("empty state, not error, can't be: " + pv);
         }
-
-        var sample = pv.getValue().get(); // NOSONAR Sonar bug
 
         if (state) {
 
@@ -146,5 +149,19 @@ public class HysteresisController<A extends Comparable<A>> extends AbstractProce
         }
 
         return new Signal<>(pv.timestamp, pv.address, state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS);
+    }
+
+    @Override
+    protected void configurationChanged() {
+        // Do nothing yet
+    }
+
+    @Override
+    public JmxDescriptor getJmxDescriptor() {
+        return new JmxDescriptor(
+                "dz",
+                "Hysteresis Controller",
+                jmxName,
+                "Emits hysteresis control signal");
     }
 }

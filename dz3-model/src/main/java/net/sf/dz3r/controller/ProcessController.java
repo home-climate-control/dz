@@ -14,7 +14,7 @@ import reactor.core.publisher.Flux;
  * @param <A> Signal address type.
  *
  * @see net.sf.dz3.controller.ProcessController
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2009
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface ProcessController<A extends Comparable<A>> {
 
@@ -47,7 +47,7 @@ public interface ProcessController<A extends Comparable<A>> {
      * @return Current error value.
      */
     @JmxAttribute(description = "Error")
-    Signal<A, Double> getError();
+    double getError();
 
     /**
      * Compute the output signal.
@@ -64,18 +64,18 @@ public interface ProcessController<A extends Comparable<A>> {
     public static class Status<A extends Comparable<A>> {
 
         public final double setpoint;
+        public final double error;
         public final Signal<A, Double> signal;
-        public final Signal<A, Double> error;
 
-        Status(double setpoint, Signal<A, Double> signal, Signal<A, Double> error) {
+        public Status(double setpoint, double error, Signal<A, Double> signal) {
             this.setpoint = setpoint;
-            this.signal = signal;
             this.error = error;
+            this.signal = signal;
         }
 
         @Override
         public String toString() {
-            return "setpoint=" + setpoint + ", signal=" + signal + ", error=" + error;
+            return "setpoint=" + setpoint + ",error=" + error + ",signal=" + signal;
         }
     }
 }

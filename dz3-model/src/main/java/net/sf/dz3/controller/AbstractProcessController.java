@@ -51,8 +51,7 @@ public abstract class AbstractProcessController implements ProcessController {
     /**
      * Get last known signal value.
      *
-     * @return Last known signal value, or <code>null</code> if it is not yet
-     * available.
+     * @return Last known signal value, or {@code null} if it is not yet available.
      */
     protected final DataSample<Double> getLastKnownSignal() {
         return lastKnownSignal;

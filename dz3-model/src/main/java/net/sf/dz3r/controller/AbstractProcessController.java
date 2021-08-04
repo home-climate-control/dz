@@ -1,5 +1,6 @@
 package net.sf.dz3r.controller;
 
+import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,9 +11,11 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractProcessController<A extends Comparable<A>> implements ProcessController<A> {
+public abstract class AbstractProcessController<A extends Comparable<A>> implements ProcessController<A>, JmxAware {
 
     protected final Logger logger = LogManager.getLogger(getClass());
+
+    public final String jmxName;
 
     /**
      * The process setpoint.
@@ -32,9 +35,11 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
     /**
      * Create an instance.
      *
+     * @param jmxName This controller's JMX name.
      * @param setpoint Initial setpoint.
      */
-    protected AbstractProcessController(double setpoint) {
+    protected AbstractProcessController(String jmxName, double setpoint) {
+        this.jmxName = jmxName;
         this.setpoint = setpoint;
     }
 
@@ -43,7 +48,8 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
 
         this.setpoint = setpoint;
 
-        // VT: FIXME: Need to recalculate the status and issue the next computed value
+        // May need to recalculate the status and emit the next computed value
+        configurationChanged();
     }
 
     @Override
@@ -57,8 +63,23 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
     }
 
     @Override
-    public Signal<A, Double> getError() {
-        throw new UnsupportedOperationException("Not Implemented");
+    public final synchronized double getError() {
+
+        if (pv == null) {
+            // No sample, no error
+            return 0;
+        }
+
+        return pv.getValue() - setpoint;
+    }
+
+    /**
+     * Get last known signal value.
+     *
+     * @return Last known signal value, or {@code null} if it is not yet available.
+     */
+    protected final Signal<A, Double> getLastKnownSignal() {
+        return lastKnownSignal;
     }
 
     @Override
@@ -74,6 +95,7 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
 
         if (pv.isError()) {
             // VT: NOTE: Unlike previous incarnation, this one does let the errors through, let the implementation sort it out
+            // it is expected that wrapCompute() knows to do with an error sample.
         }
 
         if (lastKnownSignal != null && lastKnownSignal.timestamp.isAfter(pv.timestamp)) {
@@ -92,6 +114,11 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
 
     @Override
     public Status<A> getStatus() {
-        return new Status<>(setpoint, lastKnownSignal, getError());
+        return new Status<>(setpoint, getError(), lastKnownSignal);
     }
+
+    /**
+     * Acknowledge the configuration change, recalculate and issue control signal if necessary.
+     */
+    protected abstract void configurationChanged();
 }

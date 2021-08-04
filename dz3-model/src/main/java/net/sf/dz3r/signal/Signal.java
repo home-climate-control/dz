@@ -3,7 +3,6 @@ package net.sf.dz3r.signal;
 import net.sf.dz3r.device.Addressable;
 
 import java.time.Instant;
-import java.util.Optional;
 
 /**
  * Base interface for all the signals in the system.
@@ -65,13 +64,13 @@ public class Signal<A extends Comparable<A>, V> implements Addressable<A> {
         return address;
     }
 
-    public Optional<V> getValue() {
+    public V getValue() {
 
         if (isError()) {
             throw new IllegalStateException("total failure, this shouldn't be called", error);
         }
 
-        return value == null ? Optional.empty() : Optional.of(value);
+        return value;
     }
 
     /**
@@ -105,6 +104,7 @@ public class Signal<A extends Comparable<A>, V> implements Addressable<A> {
         return error;
     }
 
+    @Override
     public String toString() {
         return address + "=" + value;
     }
