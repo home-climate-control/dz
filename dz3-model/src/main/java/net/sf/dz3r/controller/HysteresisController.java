@@ -38,7 +38,7 @@ public class HysteresisController extends AbstractProcessController<Double, Doub
      * @param jmxName This controller's JMX name.
      * @param setpoint Initial setpoint.
      */
-    protected HysteresisController(String jmxName, double setpoint) {
+    public HysteresisController(String jmxName, double setpoint) {
         this(jmxName, setpoint, -DEFAULT_HYSTERESIS, DEFAULT_HYSTERESIS);
     }
 
@@ -54,6 +54,7 @@ public class HysteresisController extends AbstractProcessController<Double, Doub
     }
 
     /**
+     * Create an instance with a custom hysteresis loop.
      *
      * @param jmxName This controller's JMX name.
      * @param setpoint Initial setpoint.
@@ -101,6 +102,8 @@ public class HysteresisController extends AbstractProcessController<Double, Doub
     }
 
     /**
+     * Get the low threshold.
+     *
      * @return Current value of low threshold.
      */
     @JmxAttribute(description = "threshold.low")
@@ -109,6 +112,8 @@ public class HysteresisController extends AbstractProcessController<Double, Doub
     }
 
     /**
+     * Get the high threshold.
+     *
      * @return Current value of high threshold.
      */
     @JmxAttribute(description = "threshold.high")

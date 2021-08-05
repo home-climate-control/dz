@@ -2,8 +2,6 @@ package net.sf.dz3r.controller.pid;
 
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.signal.Signal;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -17,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SimplePidControllerTest {
 
-    private final Logger logger = LogManager.getLogger();
     private final Random rg = new Random();
 
     @Test
@@ -25,7 +22,7 @@ class SimplePidControllerTest {
         testP(new SimplePidController("simple", 0, 1, 0, 0, 0));
     }
 
-    private void testP(ProcessController<Double, Double> pc) throws InterruptedException {
+    private void testP(ProcessController<Double, Double> pc) {
 
         ThreadContext.push("testP/" + pc.getClass().getName());
 
@@ -33,7 +30,6 @@ class SimplePidControllerTest {
 
             // Feel free to push this north of 5,000,000
             int COUNT = 5_000;
-            var address = "a";
 
             var sourceSequence = new ArrayList<Double>();
             var signalSequence = new ArrayList<Signal<ProcessController.Status<Double>>>();
@@ -54,7 +50,7 @@ class SimplePidControllerTest {
             var signalFlux = pc.compute(sourceFlux);
 
             signalFlux
-                    .doOnNext(v -> signalSequence.add(v))
+                    .doOnNext(signalSequence::add)
                     .subscribe()
                     .dispose();
 

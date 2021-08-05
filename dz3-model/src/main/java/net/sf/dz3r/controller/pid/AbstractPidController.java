@@ -80,7 +80,7 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
     @Override
     protected Signal<Status<Double>> wrapCompute(Signal<Double> pv) {
         // This will only be non-null upon second invocation
-        var lastKnownSignal = getLastKnownSignal();
+        var lastKnownSignal = getLastOutputSignal();
 
         var error = getError();
         var p = error * getP();

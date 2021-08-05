@@ -20,6 +20,10 @@ public class Range<T extends Comparable<T>> {
         this.max = max;
     }
 
+    public boolean contains(T value) {
+        return min.compareTo(value) <= 0 && max.compareTo(value) >= 0;
+    }
+
     @Override
     public String toString() {
         return min + ".." + max;

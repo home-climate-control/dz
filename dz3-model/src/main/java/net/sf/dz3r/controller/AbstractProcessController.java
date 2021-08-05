@@ -13,7 +13,7 @@ import reactor.core.publisher.Flux;
  */
 public abstract class AbstractProcessController<I, O> implements ProcessController<I, O>, JmxAware {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
+    protected final Logger logger = LogManager.getLogger();
 
     public final String jmxName;
 
@@ -28,9 +28,9 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
     private Signal<I> pv;
 
     /**
-     * Last known signal.
+     * Last output signal.
      */
-    private Signal<Status<O>> lastKnownSignal = null;
+    private Signal<Status<O>> lastOutputSignal = null;
 
     /**
      * Create an instance.
@@ -76,12 +76,12 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
     protected abstract double getError(Signal<I> pv, double setpoint);
 
     /**
-     * Get last known signal value.
+     * Get last output signal value.
      *
-     * @return Last known signal value, or {@code null} if it is not yet available.
+     * @return Last output signal value, or {@code null} if it is not yet available.
      */
-    protected final Signal<Status<O>> getLastKnownSignal() {
-        return lastKnownSignal;
+    protected final Signal<Status<O>> getLastOutputSignal() {
+        return lastOutputSignal;
     }
 
     @Override
@@ -100,16 +100,16 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
             // it is expected that wrapCompute() knows to do with an error sample.
         }
 
-        if (lastKnownSignal != null && lastKnownSignal.timestamp.isAfter(pv.timestamp)) {
+        if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
             throw new IllegalArgumentException("Can't go back in time: last sample was @"
-                    + lastKnownSignal.timestamp + ", this is @" + pv.timestamp
-                    + ", " + (lastKnownSignal.timestamp.toEpochMilli() - pv.timestamp.toEpochMilli()) + "ms difference");
+                    + lastOutputSignal.timestamp + ", this is @" + pv.timestamp
+                    + ", " + (lastOutputSignal.timestamp.toEpochMilli() - pv.timestamp.toEpochMilli()) + "ms difference");
         }
 
         this.pv = pv;
-        this.lastKnownSignal = wrapCompute(pv);
+        this.lastOutputSignal = wrapCompute(pv);
 
-        return lastKnownSignal;
+        return lastOutputSignal;
     }
 
     protected abstract Signal<Status<O>> wrapCompute(Signal<I> pv);
