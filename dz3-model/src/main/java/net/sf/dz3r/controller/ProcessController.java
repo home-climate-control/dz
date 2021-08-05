@@ -11,12 +11,13 @@ import reactor.core.publisher.Flux;
  * process variable and event time. The exact details are left to the
  * implementation.
  *
- * @param <A> Signal address type.
+ * @param <I> Process variable type.
+ * @param <O> Signal type.
  *
  * @see net.sf.dz3.controller.ProcessController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public interface ProcessController<A extends Comparable<A>> {
+public interface ProcessController<I, O> {
 
     /**
      * Set the setpoint.
@@ -39,7 +40,7 @@ public interface ProcessController<A extends Comparable<A>> {
      * @return The process variable.
      */
     @JmxAttribute(description = "Process Variable")
-    Signal<A, Double> getProcessVariable();
+    Signal<I> getProcessVariable();
 
     /**
      * Get the current value of the error.
@@ -56,18 +57,15 @@ public interface ProcessController<A extends Comparable<A>> {
      *
      * @return Output signal flux.
      */
-    Flux<Signal<A, Double>> compute(Flux<Signal<A, Double>> pv);
+    Flux<Signal<Status<O>>> compute(Flux<Signal<I>> pv);
 
-    @JmxAttribute(description = "Status")
-    Status<A> getStatus();
-
-    public static class Status<A extends Comparable<A>> {
+    public static class Status<T> {
 
         public final double setpoint;
-        public final double error;
-        public final Signal<A, Double> signal;
+        public final Double error;
+        public final T signal;
 
-        public Status(double setpoint, double error, Signal<A, Double> signal) {
+        public Status(double setpoint, Double error, T signal) {
             this.setpoint = setpoint;
             this.error = error;
             this.signal = signal;

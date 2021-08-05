@@ -11,7 +11,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractProcessController<A extends Comparable<A>> implements ProcessController<A>, JmxAware {
+public abstract class AbstractProcessController<I, O> implements ProcessController<I, O>, JmxAware {
 
     protected final Logger logger = LogManager.getLogger(getClass());
 
@@ -25,12 +25,12 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
     /**
      * The current process variable value.
      */
-    private Signal<A, Double> pv;
+    private Signal<I> pv;
 
     /**
      * Last known signal.
      */
-    private Signal<A, Double> lastKnownSignal = null;
+    private Signal<Status<O>> lastKnownSignal = null;
 
     /**
      * Create an instance.
@@ -58,7 +58,7 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
     }
 
     @Override
-    public Signal<A, Double> getProcessVariable() {
+    public Signal<I> getProcessVariable() {
         return pv;
     }
 
@@ -70,24 +70,26 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
             return 0;
         }
 
-        return pv.getValue() - setpoint;
+        return getError(pv, setpoint);
     }
+
+    protected abstract double getError(Signal<I> pv, double setpoint);
 
     /**
      * Get last known signal value.
      *
      * @return Last known signal value, or {@code null} if it is not yet available.
      */
-    protected final Signal<A, Double> getLastKnownSignal() {
+    protected final Signal<Status<O>> getLastKnownSignal() {
         return lastKnownSignal;
     }
 
     @Override
-    public final Flux<Signal<A, Double>> compute(Flux<Signal<A, Double>> pv) {
+    public final Flux<Signal<Status<O>>> compute(Flux<Signal<I>> pv) {
         return pv.map(this::doCompute);
     }
 
-    private Signal<A, Double> doCompute(Signal<A, Double> pv) {
+    private Signal<Status<O>> doCompute(Signal<I> pv) {
 
         if (pv == null) {
             throw new IllegalArgumentException("pv can't be null");
@@ -110,12 +112,7 @@ public abstract class AbstractProcessController<A extends Comparable<A>> impleme
         return lastKnownSignal;
     }
 
-    protected abstract Signal<A, Double> wrapCompute(Signal<A, Double> pv);
-
-    @Override
-    public Status<A> getStatus() {
-        return new Status<>(setpoint, getError(), lastKnownSignal);
-    }
+    protected abstract Signal<Status<O>> wrapCompute(Signal<I> pv);
 
     /**
      * Acknowledge the configuration change, recalculate and issue control signal if necessary.

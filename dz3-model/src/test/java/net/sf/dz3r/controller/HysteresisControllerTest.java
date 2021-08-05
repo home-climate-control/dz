@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HysteresisControllerTest {
 
-    private final Logger logger = LogManager.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger();
     private final Random rg = new Random();
 
     @Test
@@ -23,32 +23,30 @@ class HysteresisControllerTest {
 
         Instant timestamp = Instant.now();
         long offset = 0;
-        String address = "address";
 
         var sequence = Flux.just(
-                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), address, 20.0),
-                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), address, 20.5),
-                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), address, 21.0),
-                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), address, 20.5),
-                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), address, 20.0),
-                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), address, 19.5),
-                new Signal<>(timestamp.plus(offset, ChronoUnit.SECONDS), address, 19.0));
+                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0),
+                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5),
+                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 21.0),
+                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5),
+                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0),
+                new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 19.5),
+                new Signal<>(timestamp.plus(offset, ChronoUnit.SECONDS), 19.0));
 
-        var pc = new HysteresisController<String>("h", 20);
+        var pc = new HysteresisController("h", 20);
 
-        Flux<Signal<String, Double>> flux = pc
-                .compute(sequence)
-                .doOnNext(v -> logger.info("message: {}", v));
+        Flux<Signal<ProcessController.Status<Double>>> flux = pc
+                .compute(sequence);
 
         StepVerifier
                 .create(flux)
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(-1.0))
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(-1.0))
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(-1.0))
+                .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(-1.0))
+                .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(-1.0))
+                .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(-1.0))
                 .verifyComplete();
     }
 }

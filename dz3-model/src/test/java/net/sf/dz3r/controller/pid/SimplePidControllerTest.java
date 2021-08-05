@@ -22,10 +22,10 @@ class SimplePidControllerTest {
 
     @Test
     void testPSimple() throws InterruptedException {
-        testP(new SimplePidController<String>("simple", 0, 1, 0, 0, 0));
+        testP(new SimplePidController("simple", 0, 1, 0, 0, 0));
     }
 
-    private void testP(ProcessController<String> pc) throws InterruptedException {
+    private void testP(ProcessController<Double, Double> pc) throws InterruptedException {
 
         ThreadContext.push("testP/" + pc.getClass().getName());
 
@@ -36,10 +36,10 @@ class SimplePidControllerTest {
             var address = "a";
 
             var sourceSequence = new ArrayList<Double>();
-            var signalSequence = new ArrayList<Signal<String, Double>>();
+            var signalSequence = new ArrayList<Signal<ProcessController.Status<Double>>>();
 
             var timestamp = new AtomicLong(Instant.now().toEpochMilli());
-            Flux<Signal<String, Double>> sourceFlux = Flux.generate(
+            Flux<Signal<Double>> sourceFlux = Flux.generate(
                             rg::nextDouble,
                     (state, sink) -> {
                         state = rg.nextDouble();
@@ -47,14 +47,14 @@ class SimplePidControllerTest {
                         sourceSequence.add(state);
                         return state;
                     })
-                    .map(d -> new Signal<String, Double>(
-                            Instant.ofEpochMilli(timestamp.incrementAndGet()), address, (Double)d))
+                    .map(d -> new Signal<>(
+                            Instant.ofEpochMilli(timestamp.incrementAndGet()), (Double)d))
                     .take(COUNT);
 
             var signalFlux = pc.compute(sourceFlux);
 
             signalFlux
-                    .doOnNext(signalSequence::add)
+                    .doOnNext(v -> signalSequence.add(v))
                     .subscribe()
                     .dispose();
 
@@ -63,7 +63,7 @@ class SimplePidControllerTest {
 
             int offset = 0;
             for (var v : sourceSequence) {
-                assertThat(v).isEqualTo(signalSequence.get(offset++).getValue());
+                assertThat(v).isEqualTo(signalSequence.get(offset++).getValue().signal);
             }
 
         } finally {

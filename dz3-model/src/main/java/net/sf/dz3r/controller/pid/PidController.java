@@ -6,12 +6,10 @@ import net.sf.dz3r.controller.ProcessController;
 /**
  * A reactive PID controller abstraction.
  *
- * @param <A> Signal address type.
- *
  * @see net.sf.dz3.controller.ProcessController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public interface PidController<A extends Comparable<A>> extends ProcessController<A> {
+public interface PidController extends ProcessController<Double, Double> {
 
     @JmxAttribute(description = "Proportional weight")
     double getP();
@@ -36,7 +34,7 @@ public interface PidController<A extends Comparable<A>> extends ProcessControlle
      */
     void setLimit(double limit);
 
-    public static class PidStatus<A extends Comparable<A>> extends Status<A> {
+    public static class PidStatus extends Status<Double> {
 
         /**
          * Proportional value.
@@ -61,7 +59,7 @@ public interface PidController<A extends Comparable<A>> extends ProcessControlle
          * @param i Current I value.
          * @param d Current D value.
          */
-        public PidStatus(Status<A> template, double p, double i, double d) {
+        public PidStatus(Status<Double> template, double p, double i, double d) {
 
             super(template.setpoint, template.error, template.signal);
 

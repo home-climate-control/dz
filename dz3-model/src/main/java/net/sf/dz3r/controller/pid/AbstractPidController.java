@@ -10,7 +10,7 @@ import net.sf.dz3r.signal.Signal;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractPidController<A extends Comparable<A>> extends AbstractProcessController<A> implements PidController<A> {
+public abstract class AbstractPidController extends AbstractProcessController<Double, Double> implements PidController {
 
     /**
      * Indicates whether to reset the {@link #getIntegral() accumulated integral component}
@@ -73,7 +73,12 @@ public abstract class AbstractPidController<A extends Comparable<A>> extends Abs
     }
 
     @Override
-    protected Signal<A, Double> wrapCompute(Signal<A, Double> pv) {
+    protected double getError(Signal<Double> pv, double setpoint) {
+        return pv.getValue() - setpoint;
+    }
+
+    @Override
+    protected Signal<Status<Double>> wrapCompute(Signal<Double> pv) {
         // This will only be non-null upon second invocation
         var lastKnownSignal = getLastKnownSignal();
 
@@ -88,7 +93,7 @@ public abstract class AbstractPidController<A extends Comparable<A>> extends Abs
 
         } else {
 
-            if (lastKnownSignal != null && Math.abs(lastKnownSignal.getValue()) < saturationLimit) {
+            if (lastKnownSignal != null && Math.abs(lastKnownSignal.getValue().signal) < saturationLimit) {
 
                 // Integral value will only be updated if the output is not saturated
                 var integral = getIntegral(lastKnownSignal, pv, error);
@@ -129,11 +134,19 @@ public abstract class AbstractPidController<A extends Comparable<A>> extends Abs
         // VT: NOTE: Aha, one such case is right above. Need to see if this ever happens again.
 
         if (Double.compare(signal, Double.NaN) == 0) {
-            throw new IllegalStateException("signal is NaN, components: " + getStatus());
+            // // return new PidControllerStatus(getSetpoint(), getError(), getLastKnownSignal(), lastP, lastI, lastD);
+            throw new IllegalStateException("signal is NaN, components: "
+                    + new PidStatus(
+                    new Status<>(getSetpoint(), error, signal),
+                    lastP, lastI, lastD));
         }
 
-        return new Signal<>(pv.timestamp, pv.address, signal);
+        return new Signal<>(pv.timestamp,
+                new PidStatus(
+                        new Status<>(getSetpoint(), error, signal),
+                        lastP, lastI, lastD));
     }
+
     /**
      * Check if  parameters are fine.
      */
@@ -212,13 +225,9 @@ public abstract class AbstractPidController<A extends Comparable<A>> extends Abs
                 "Emits control signal based on (P, I, D, Limit) values");
     }
 
-    @Override
-    public final PidStatus<A> getStatus() {
-        return new PidStatus<>(super.getStatus(), lastP, lastI, lastD);
-    }
 
-    protected abstract double getIntegral(Signal<A, Double> lastKnownSignal, Signal<A, Double>  pv, double error);
-    protected abstract double getDerivative(Signal<A, Double> lastKnownSignal, Signal<A, Double>  pv, double error);
+    protected abstract double getIntegral(Signal<Status<Double>> lastKnownSignal, Signal<Double>  pv, double error);
+    protected abstract double getDerivative(Signal<Status<Double>> lastKnownSignal, Signal<Double>  pv, double error);
 
     @JmxAttribute(description = "Accumulated integral component")
     public final double getIntegral() {
