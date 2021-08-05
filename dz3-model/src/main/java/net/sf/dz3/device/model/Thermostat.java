@@ -31,16 +31,17 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2012
  */
 public interface Thermostat extends ThermostatStatus,
-	DataSink<Double>,
-	DataSource<ThermostatSignal>,
-	Comparable<Thermostat>,
-	JmxAware {
+        DataSink<Double>,
+        DataSource<ThermostatSignal>,
+        Comparable<Thermostat>,
+        JmxAware {
 
     /**
      * Get the thermostat name.
      *
      * @return Human readable thermostat name.
      */
+    @Override
     @JmxAttribute(description = "Zone name")
     String getName();
 

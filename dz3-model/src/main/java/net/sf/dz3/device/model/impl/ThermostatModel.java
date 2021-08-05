@@ -197,40 +197,38 @@ public class ThermostatModel implements Thermostat, ThermostatController {
     @Override
     public void setOnHold(boolean hold) {
 
-	logger.info("setOnHold: {}", hold);
-	this.hold = hold;
-	stateChanged();
+        logger.info("setOnHold: {}", hold);
+        this.hold = hold;
+        stateChanged();
     }
 
     @Override
     public boolean isOnHold() {
-
-	return hold;
+        return hold;
     }
 
     @Override
     public void setOn(boolean enabled) {
 
-	logger.info("setOn: {}", enabled);
+        logger.info("setOn: {}", enabled);
 
-	this.tsEnabled = enabled;
-	stateChanged();
+        this.tsEnabled = enabled;
+        stateChanged();
     }
 
     @Override
     public boolean isOn() {
-
-	return tsEnabled;
+        return tsEnabled;
     }
 
     @Override
     public boolean isError() {
-	return lastKnownSignal != null && lastKnownSignal.isError();
+        return lastKnownSignal != null && lastKnownSignal.isError();
     }
 
     @Override
     public void setDumpPriority(int dumpPriority) {
-	this.dumpPriority = dumpPriority;
+        this.dumpPriority = dumpPriority;
     }
 
     @Override
@@ -351,7 +349,6 @@ public class ThermostatModel implements Thermostat, ThermostatController {
         } finally {
             ThreadContext.pop();
         }
-
     }
 
     @Override
@@ -438,9 +435,9 @@ public class ThermostatModel implements Thermostat, ThermostatController {
     @Override
     public void addConsumer(DataSink<ThermostatSignal> consumer) {
 
-    	if (consumer instanceof ZoneController) {
+        if (consumer instanceof ZoneController) {
 
-    		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+            StackTraceElement[] trace = Thread.currentThread().getStackTrace();
 
             var ok = false;
 
@@ -454,16 +451,16 @@ public class ThermostatModel implements Thermostat, ThermostatController {
                 }
             }
 
-    		if (!ok) {
+            if (!ok) {
 
-    			// A thermostat must be registered with the zone controller in order for the controller
-    			// to make correct decisions. If a controller is simply added as a consumer, it won't recognize
-    			// this thermostat as a source and will refuse to take the signal from it.
+                // A thermostat must be registered with the zone controller in order for the controller
+                // to make correct decisions. If a controller is simply added as a consumer, it won't recognize
+                // this thermostat as a source and will refuse to take the signal from it.
 
-    			logger.error("ZoneController is being added as a consumer, is this really what you want?",
-    					new IllegalArgumentException("Read source for details"));
-    		}
-    	}
+                logger.error("ZoneController is being added as a consumer, is this really what you want?",
+                        new IllegalArgumentException("Read source for details"));
+            }
+        }
 
         dataBroadcaster.addConsumer(consumer);
     }

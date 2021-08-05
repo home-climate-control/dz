@@ -50,6 +50,6 @@ public interface ThermostatController  {
     void setVoting(boolean voting);
 
     void setDumpPriority(int dumpPriority);
-    
+
     void setSetpoint(double setpoint);
 }
