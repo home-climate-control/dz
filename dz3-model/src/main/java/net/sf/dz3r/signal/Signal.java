@@ -92,6 +92,12 @@ public class Signal<T> {
 
     @Override
     public String toString() {
-        return "@" + timestamp + "=" + value + ", isOK=" + isOK() + ", isError=" + isError();
+        var result = "@" + timestamp + "=" + value + ", isOK=" + isOK() + ", isError=" + isError();
+
+        if (isOK()) {
+            return result;
+        }
+
+        return result + ", error=\"" + error.getMessage() + "\"";
     }
 }

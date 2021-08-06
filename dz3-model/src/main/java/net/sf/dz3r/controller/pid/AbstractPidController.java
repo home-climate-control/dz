@@ -80,7 +80,7 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
     @Override
     protected Signal<Status<Double>> wrapCompute(Signal<Double> pv) {
         // This will only be non-null upon second invocation
-        var lastKnownSignal = getLastOutputSignal();
+        var lastOutputSignal = getLastOutputSignal();
 
         var error = getError();
         var p = error * getP();
@@ -88,15 +88,15 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
         var signal = p;
 
         if (saturationLimit == 0) {
-            var integral = getIntegral(lastKnownSignal, pv, error);
+            var integral = getIntegral(lastOutputSignal, pv, error);
             lastI = integral * getI();
 
         } else {
 
-            if (lastKnownSignal != null && Math.abs(lastKnownSignal.getValue().signal) < saturationLimit) {
+            if (lastOutputSignal != null && Math.abs(lastOutputSignal.getValue().signal) < saturationLimit) {
 
                 // Integral value will only be updated if the output is not saturated
-                var integral = getIntegral(lastKnownSignal, pv, error);
+                var integral = getIntegral(lastOutputSignal, pv, error);
 
                 // And only if the integral itself is not saturated either
                 if (Math.abs(integral * getI()) < saturationLimit) {
@@ -108,13 +108,13 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
             } else {
 
                 // This is necessary for stateful integrators. The error is 0, but other things might change.
-                getIntegral(lastKnownSignal, pv, 0);
+                getIntegral(lastOutputSignal, pv, 0);
             }
         }
 
         signal += lastI;
 
-        var derivative = getDerivative(lastKnownSignal, pv, error);
+        var derivative = getDerivative(lastOutputSignal, pv, error);
 
         // One cause of this is setSetpoint(), which causes values
         // to be computed in a rapid succession, with chance of delta T being zero
@@ -143,7 +143,9 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
         return new Signal<>(pv.timestamp,
                 new PidStatus(
                         new Status<>(getSetpoint(), error, signal),
-                        lastP, lastI, lastD));
+                        lastP, lastI, lastD),
+                pv.status,
+                pv.error);
     }
 
     /**

@@ -96,8 +96,12 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
         }
 
         if (pv.isError()) {
-            // VT: NOTE: Unlike previous incarnation, this one does let the errors through, let the implementation sort it out
-            // it is expected that wrapCompute() knows to do with an error sample.
+
+            // VT: FIXME: Ideally, even the error signal must be passed to wrapCompute() in case it needs to
+            // recalculate the state. In practice, this will have to wait.
+
+            // For now, let's throw them a NaN, they better pay attention.
+            return new Signal<>(pv.timestamp, new Status(setpoint, null, Double.NaN), pv.status, pv.error);
         }
 
         if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
@@ -107,7 +111,7 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
         }
 
         this.pv = pv;
-        this.lastOutputSignal = wrapCompute(pv);
+        lastOutputSignal = wrapCompute(pv);
 
         return lastOutputSignal;
     }

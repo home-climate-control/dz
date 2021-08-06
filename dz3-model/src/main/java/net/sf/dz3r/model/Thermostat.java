@@ -142,16 +142,19 @@ public class Thermostat implements ProcessController<Double, Double>, Addressabl
         // Might want to make this available to outside consumers for instrumentation.
         var stage1 = controller
                 .compute(pv)
-                .doOnNext(e -> logger.debug("controller/{}: {}", name, e));
+                .doOnNext(e -> logger.trace("controller/{}: {}", name, e));
 
-        // Discard things the renderer doesn't understand
-        var stage2 = stage1.map(e -> new Signal<>(e.timestamp, e.getValue().signal));
+        // Discard things the renderer doesn't understand.
+        // Total failure is denoted by NaN by stage 1, it will get through.
+        var stage2 = stage1
+                .map(e -> new Signal<>(e.timestamp, e.getValue().signal, e.status, e.error))
+                .doOnNext(e -> logger.trace("filter/{}: {}", name, e));
 
         // Deliver the signal
         // Might want to expose this as well
         return signalRenderer
                 .compute(stage2)
-                .doOnNext(e -> logger.debug("renderer/{}: {}", name, e));
+                .doOnNext(e -> logger.trace("renderer/{}: {}", name, e));
     }
 
     @Override
