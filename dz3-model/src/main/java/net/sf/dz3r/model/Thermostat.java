@@ -13,19 +13,28 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 /**
- * Climate controlled zone.
+ * Thermostat.
  *
- * Formerly a {@link net.sf.dz3.device.model.Thermostat}.
+ * Unlike the previous incarnation, just calculates the control signal assuming it is on.
+ * The rest will be taken care of elsewhere.
+ *
+ * Also unlike the previous incarnation, the process controller is inside.
+ *
+ * @see net.sf.dz3.device.model.Thermostat
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Zone implements ProcessController<Double, Double>, Addressable<String>, JmxAware {
+public class Thermostat implements ProcessController<Double, Double>, Addressable<String>, JmxAware {
 
     protected final Logger logger = LogManager.getLogger();
 
     private final String name;
     private final Range<Double> setpointRange;
-    private ZoneState state;
+
+    /**
+     * Thermostat setpoint.
+     */
+    private double setpoint;
 
     /**
      * The current process variable value.
@@ -50,27 +59,27 @@ public class Zone implements ProcessController<Double, Double>, Addressable<Stri
     private final HysteresisController signalRenderer;
 
     /**
-     * Create a zone with a default 10C..40C setpoint range and specified PID values.
+     * Create a thermostat with a default 10C..40C setpoint range and specified PID values.
      *
-     * @param name Zone name.
+     * @param name Thermostat name.
      * @param setpoint Initial setpoint.
      */
-    public Zone(String name, double setpoint, double p, double i, double d, double limit) {
+    public Thermostat(String name, double setpoint, double p, double i, double d, double limit) {
         this(name, new Range<>(10d, 40d), setpoint, p, i, d, limit);
     }
 
     /**
-     * Create a zone with a custom setpoint range.
+     * Create a thermostat with a custom setpoint range.
      *
-     * @param name Zone name.
+     * @param name Thermostat name.
+     * @param setpointRange Setpoint range for this thermostat.
      * @param setpoint Initial setpoint.
-     * @param setpointRange Setpoint range for this zone.
      * @param p PID controller proportional weight.
      * @param i PID controller integral weight.
      * @param d PID controller derivative weight.
      * @param limit PID controller saturation limit.
      */
-    public Zone(String name, Range<Double> setpointRange, double setpoint, double p, double i, double d, double limit) {
+    public Thermostat(String name, Range<Double> setpointRange, double setpoint, double p, double i, double d, double limit) {
 
         this.name = name;
         this.setpointRange = setpointRange;
@@ -80,18 +89,13 @@ public class Zone implements ProcessController<Double, Double>, Addressable<Stri
     }
 
     /**
-     * Get the human readable zone name.
+     * Get the human readable thermostat name.
      *
-     * @return Zone name.
+     * @return Thermostat name.
      */
     @Override
     public String getAddress() {
         return name;
-    }
-
-    public void setState(ZoneState state) {
-        this.state = state;
-        configurationChanged();
     }
 
     private void configurationChanged() {
@@ -105,12 +109,14 @@ public class Zone implements ProcessController<Double, Double>, Addressable<Stri
             throw new IllegalArgumentException(setpoint + " is outside of " + setpointRange.min + ".." + setpointRange.max);
         }
 
-        state = new ZoneState(state.enabled, setpoint, state.voting, state.hold, state.dumpPriority);
+        this.setpoint = setpoint;
+
+        configurationChanged();
     }
 
     @Override
     public double getSetpoint() {
-        return state.setpoint;
+        return setpoint;
     }
 
     @Override
@@ -126,7 +132,7 @@ public class Zone implements ProcessController<Double, Double>, Addressable<Stri
             return 0;
         }
 
-        return pv.getValue() - state.setpoint;
+        return pv.getValue() - setpoint;
     }
 
     @Override
@@ -152,8 +158,8 @@ public class Zone implements ProcessController<Double, Double>, Addressable<Stri
     public JmxDescriptor getJmxDescriptor() {
         return new JmxDescriptor(
                 "dz",
-                "Zone",
+                "Thermostat",
                 name,
-                "Climate control zone");
+                "Device to control the setpoint");
     }
 }
