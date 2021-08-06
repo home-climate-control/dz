@@ -20,8 +20,8 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 /**
  * Test cases for {@link ThermostatModel}.
- * 
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2018
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
 class ThermostatTest {
 
@@ -31,7 +31,7 @@ class ThermostatTest {
      * Make sure that the thermostat refuses null data sample.
      */
     @Test
-    public void testNull() {
+    void testNull() {
 
         AnalogSensor sensor = new NullSensor("address", 0);
         AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
@@ -46,7 +46,7 @@ class ThermostatTest {
      * Make sure the surrounding logic doesn't break on the thermostat in initial state.
      */
     @Test
-    public void testInitialSignal() {
+    void testInitialSignal() {
 
         AnalogSensor sensor = new NullSensor("address", 0);
         AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
@@ -62,10 +62,10 @@ class ThermostatTest {
     /**
      * Make sure that the thermostat doesn't choke on an error signal and properly propagates it
      * to the zone controller.
-     * 
+     *
      */
     @Test
-    public void testError() throws InterruptedException {
+    void testError() throws InterruptedException {
 
         AnalogSensor sensor = new NullSensor("address", 0);
         AbstractPidController controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
@@ -115,7 +115,7 @@ class ThermostatTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void testDataSequence() {
+    void testDataSequence() {
 
         ThreadContext.push("testDataSequence");
 
