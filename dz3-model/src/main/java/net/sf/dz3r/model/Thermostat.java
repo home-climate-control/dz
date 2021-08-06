@@ -142,7 +142,7 @@ public class Thermostat implements ProcessController<Double, Double>, Addressabl
         // Might want to make this available to outside consumers for instrumentation.
         var stage1 = controller
                 .compute(pv)
-                .doOnEach(e -> logger.debug("controller/{}: {}", name, e));
+                .doOnNext(e -> logger.debug("controller/{}: {}", name, e));
 
         // Discard things the renderer doesn't understand
         var stage2 = stage1.map(e -> new Signal<>(e.timestamp, e.getValue().signal));
@@ -151,7 +151,7 @@ public class Thermostat implements ProcessController<Double, Double>, Addressabl
         // Might want to expose this as well
         return signalRenderer
                 .compute(stage2)
-                .doOnEach(e -> logger.debug("renderer/{}: {}", name, e));
+                .doOnNext(e -> logger.debug("renderer/{}: {}", name, e));
     }
 
     @Override
