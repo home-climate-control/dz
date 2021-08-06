@@ -134,7 +134,6 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
         // VT: NOTE: Aha, one such case is right above. Need to see if this ever happens again.
 
         if (Double.compare(signal, Double.NaN) == 0) {
-            // // return new PidControllerStatus(getSetpoint(), getError(), getLastKnownSignal(), lastP, lastI, lastD);
             throw new IllegalStateException("signal is NaN, components: "
                     + new PidStatus(
                     new Status<>(getSetpoint(), error, signal),
