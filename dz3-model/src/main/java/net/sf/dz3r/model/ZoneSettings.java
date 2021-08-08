@@ -1,11 +1,11 @@
 package net.sf.dz3r.model;
 
 /**
- * Zone configuration.
+ * Zone settings.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ZoneState {
+public class ZoneSettings {
 
     public final boolean enabled;
     public final double setpoint;
@@ -13,7 +13,7 @@ public class ZoneState {
     public final boolean hold;
     public final int dumpPriority;
 
-    public ZoneState(boolean enabled, double setpoint, boolean voting, boolean hold, int dumpPriority) {
+    public ZoneSettings(boolean enabled, double setpoint, boolean voting, boolean hold, int dumpPriority) {
         this.enabled = enabled;
         this.setpoint = setpoint;
         this.voting = voting;
