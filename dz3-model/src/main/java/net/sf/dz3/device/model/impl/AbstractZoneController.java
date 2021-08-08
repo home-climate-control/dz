@@ -14,9 +14,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -186,7 +184,7 @@ public abstract class AbstractZoneController implements ZoneController {
         if (signal.demand.isError()) {
 
             // Faulty thermostat can't participate in the process,
-            // its zone will be handled"by default" - damper
+            // its zone will be handled "by default" - damper
             // controller will take care of that
 
             unhappy.remove(source);
@@ -234,7 +232,7 @@ public abstract class AbstractZoneController implements ZoneController {
             if (signal.demand.isError()) {
 
                 // Faulty thermostat can't participate in the process,
-                // its zone will be handled"by default" - damper
+                // its zone will be handled "by default" - damper
                 // controller will take care of that
                 //
                 // (This should've been taken care of by checkError(), but
@@ -280,8 +278,8 @@ public abstract class AbstractZoneController implements ZoneController {
 
         var count = 0;
 
-        for (ThermostatSignal signal : signalSet) {
-            count += signal.calling ? 1 : 0;
+        for (var thermostatSignal : signalSet) {
+            count += thermostatSignal.calling ? 1 : 0;
         }
 
         return count;
@@ -320,12 +318,11 @@ public abstract class AbstractZoneController implements ZoneController {
 
             double demandTotal = 0;
 
-            for (Iterator<Entry<Thermostat, ThermostatSignal>> i = unhappy.entrySet().iterator(); i.hasNext();) {
+            for (var entry : unhappy.entrySet()) {
 
-                Entry<Thermostat, ThermostatSignal> entry = i.next();
-                ThermostatSignal signal = entry.getValue();
+                var thermostatSignal = entry.getValue();
 
-                demandTotal += signal.demand.sample;
+                demandTotal += thermostatSignal.demand.sample;
             }
 
             logger.debug("Total demand: {}", demandVoting);
