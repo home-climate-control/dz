@@ -1,7 +1,5 @@
 package net.sf.dz3r.model;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxAware;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.controller.pid.AbstractPidController;
@@ -20,11 +18,16 @@ import reactor.core.publisher.Flux;
  *
  * Also unlike the previous incarnation, the process controller is inside.
  *
+ * But just like the previous incarnation, PID values define the operating mode - positive for cooling, negative
+ * for heating. Whoever is changing the operating mode must also change the thermostat PID controller setting as well.
+ *
+ * VT: FIXME: Provide the means to change the PID controller settings.
+ *
  * @see net.sf.dz3.device.model.Thermostat
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Thermostat implements ProcessController<Double, Double>, Addressable<String>, JmxAware {
+public class Thermostat implements ProcessController<Double, Double>, Addressable<String> {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -59,10 +62,8 @@ public class Thermostat implements ProcessController<Double, Double>, Addressabl
     private final HysteresisController signalRenderer;
 
     /**
-     * Create a thermostat with a default 10C..40C setpoint range and specified PID values.
+     * Create a thermostat with a default 10C..40C setpoint range and specified setpoint and PID values.
      *
-     * @param name Thermostat name.
-     * @param setpoint Initial setpoint.
      */
     public Thermostat(String name, double setpoint, double p, double i, double d, double limit) {
         this(name, new Range<>(10d, 40d), setpoint, p, i, d, limit);
@@ -155,14 +156,5 @@ public class Thermostat implements ProcessController<Double, Double>, Addressabl
         return signalRenderer
                 .compute(stage2)
                 .doOnNext(e -> logger.trace("renderer/{}: {}", name, e));
-    }
-
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-        return new JmxDescriptor(
-                "dz",
-                "Thermostat",
-                name,
-                "Device to control the setpoint");
     }
 }

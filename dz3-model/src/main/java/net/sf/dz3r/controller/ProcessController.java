@@ -55,7 +55,7 @@ public interface ProcessController<I, O> {
      *
      * @param pv Process variable flux.
      *
-     * @return Output signal flux.
+     * @return Output signal flux. The end of this flux indicates the need for the subscriber to shut down.
      */
     Flux<Signal<Status<O>>> compute(Flux<Signal<I>> pv);
 
