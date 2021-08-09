@@ -10,7 +10,7 @@ import net.sf.dz3r.signal.Signal;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractPidController extends AbstractProcessController<Double, Double> implements PidController {
+public abstract class AbstractPidController<P> extends AbstractProcessController<Double, Double, P> implements PidController<P> {
 
     /**
      * Indicates whether to reset the {@link #getIntegral() accumulated integral component}
@@ -73,12 +73,12 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
     }
 
     @Override
-    protected double getError(Signal<Double> pv, double setpoint) {
+    protected double getError(Signal<Double, P> pv, double setpoint) {
         return pv.getValue() - setpoint;
     }
 
     @Override
-    protected Signal<Status<Double>> wrapCompute(Signal<Double> pv) {
+    protected Signal<Status<Double>, P> wrapCompute(Signal<Double, P> pv) {
         // This will only be non-null upon second invocation
         var lastOutputSignal = getLastOutputSignal();
 
@@ -144,6 +144,7 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
                 new PidStatus(
                         new Status<>(getSetpoint(), error, signal),
                         lastP, lastI, lastD),
+                pv.payload,
                 pv.status,
                 pv.error);
     }
@@ -226,9 +227,8 @@ public abstract class AbstractPidController extends AbstractProcessController<Do
                 "Emits control signal based on (P, I, D, Limit) values");
     }
 
-
-    protected abstract double getIntegral(Signal<Status<Double>> lastKnownSignal, Signal<Double>  pv, double error);
-    protected abstract double getDerivative(Signal<Status<Double>> lastKnownSignal, Signal<Double>  pv, double error);
+    protected abstract double getIntegral(Signal<Status<Double>, P> lastKnownSignal, Signal<Double, P>  pv, double error);
+    protected abstract double getDerivative(Signal<Status<Double>, P> lastKnownSignal, Signal<Double, P>  pv, double error);
 
     @JmxAttribute(description = "Accumulated integral component")
     public final double getIntegral() {

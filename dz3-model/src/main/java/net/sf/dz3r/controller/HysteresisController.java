@@ -13,7 +13,7 @@ import net.sf.dz3r.signal.Signal;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class HysteresisController extends AbstractProcessController<Double, Double> {
+public class HysteresisController<P> extends AbstractProcessController<Double, Double, P> {
 
     public static final double DEFAULT_HYSTERESIS = 1;
 
@@ -122,12 +122,12 @@ public class HysteresisController extends AbstractProcessController<Double, Doub
     }
 
     @Override
-    protected double getError(Signal<Double> pv, double setpoint) {
+    protected double getError(Signal<Double, P> pv, double setpoint) {
         return pv.getValue() - setpoint;
     }
 
     @Override
-    protected Signal<Status<Double>> wrapCompute(Signal<Double> pv) {
+    protected Signal<Status<Double>, P> wrapCompute(Signal<Double, P> pv) {
 
         if (pv == null) {
             // This should've been handled up the call stack already, but let's be paranoid
@@ -136,7 +136,7 @@ public class HysteresisController extends AbstractProcessController<Double, Doub
 
         if (pv.isError()) {
             // Nothing good at least; let's pass up the error
-            return new Signal<>(pv.timestamp, new Status(getSetpoint(), null, null), pv.status, pv.getError());
+            return new Signal<>(pv.timestamp, new Status(getSetpoint(), null, null), pv.payload, pv.status, pv.getError());
         }
 
         var sample = pv.getValue(); // NOSONAR false positive
@@ -158,7 +158,7 @@ public class HysteresisController extends AbstractProcessController<Double, Doub
             }
         }
 
-        return new Signal<>(pv.timestamp, new Status(getSetpoint(), getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS));
+        return new Signal<>(pv.timestamp, new Status(getSetpoint(), getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS), pv.payload);
     }
 
     @Override

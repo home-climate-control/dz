@@ -11,7 +11,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractProcessController<I, O> implements ProcessController<I, O>, JmxAware {
+public abstract class AbstractProcessController<I, O, P> implements ProcessController<I, O, P>, JmxAware {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -25,12 +25,12 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
     /**
      * The current process variable value.
      */
-    private Signal<I> pv;
+    private Signal<I, P> pv;
 
     /**
      * Last output signal.
      */
-    private Signal<Status<O>> lastOutputSignal = null;
+    private Signal<Status<O>, P> lastOutputSignal = null;
 
     /**
      * Create an instance.
@@ -58,7 +58,7 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
     }
 
     @Override
-    public Signal<I> getProcessVariable() {
+    public Signal<I, P> getProcessVariable() {
         return pv;
     }
 
@@ -73,23 +73,23 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
         return getError(pv, setpoint);
     }
 
-    protected abstract double getError(Signal<I> pv, double setpoint);
+    protected abstract double getError(Signal<I, P> pv, double setpoint);
 
     /**
      * Get last output signal value.
      *
      * @return Last output signal value, or {@code null} if it is not yet available.
      */
-    protected final Signal<Status<O>> getLastOutputSignal() {
+    protected final Signal<Status<O>, P> getLastOutputSignal() {
         return lastOutputSignal;
     }
 
     @Override
-    public final Flux<Signal<Status<O>>> compute(Flux<Signal<I>> pv) {
+    public final Flux<Signal<Status<O>, P>> compute(Flux<Signal<I, P>> pv) {
         return pv.map(this::doCompute);
     }
 
-    private Signal<Status<O>> doCompute(Signal<I> pv) {
+    private Signal<Status<O>, P> doCompute(Signal<I, P> pv) {
 
         if (pv == null) {
             throw new IllegalArgumentException("pv can't be null");
@@ -101,7 +101,7 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
             // recalculate the state. In practice, this will have to wait.
 
             // For now, let's throw them a NaN, they better pay attention.
-            return new Signal<>(pv.timestamp, new Status(setpoint, null, Double.NaN), pv.status, pv.error);
+            return new Signal<>(pv.timestamp, new Status(setpoint, null, Double.NaN), pv.payload, pv.status, pv.error);
         }
 
         if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
@@ -116,7 +116,7 @@ public abstract class AbstractProcessController<I, O> implements ProcessControll
         return lastOutputSignal;
     }
 
-    protected abstract Signal<Status<O>> wrapCompute(Signal<I> pv);
+    protected abstract Signal<Status<O>, P> wrapCompute(Signal<I, P> pv);
 
     /**
      * Acknowledge the configuration change, recalculate and issue control signal if necessary.

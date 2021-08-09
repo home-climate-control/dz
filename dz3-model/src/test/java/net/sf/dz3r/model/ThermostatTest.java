@@ -39,9 +39,9 @@ class ThermostatTest {
 
         try {
 
-            var s1 = new Signal<>(Instant.now(), 42.0);
-            var s2 = new Signal<>(Instant.now(), -42.0, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
-            var s3 = new Signal<>(Instant.now(), null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
+            var s1 = new Signal<>(Instant.now(), 42.0, null);
+            var s2 = new Signal<>(Instant.now(), -42.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
+            var s3 = new Signal<>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
 
             var in = Flux.just(s1, s2, s3);
 
@@ -81,8 +81,8 @@ class ThermostatTest {
         try {
 
             var ts = new Thermostat("ts", 20.0, 1.0, 0, 0, 0);
-            var signalTotalFailure = new Signal<Double>(Instant.now(), null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
-            var signalPartialFailure = new Signal<Double>(Instant.now(), 42.0, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
+            var signalTotalFailure = new Signal<Double, Double>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
+            var signalPartialFailure = new Signal<Double, Double>(Instant.now(), 42.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
             var in = Flux.just(signalTotalFailure, signalPartialFailure);
 
             var out = ts
@@ -115,8 +115,8 @@ class ThermostatTest {
 
             var ts = new Thermostat("ts", 20.0, 1.0, 0, 0, 0);
 
-            var signalTotalFailure = new Signal<Double>(Instant.now(), null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
-            var signalPartialFailure = new Signal<Double>(Instant.now(), 42.0, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
+            var signalTotalFailure = new Signal<Double, Double>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
+            var signalPartialFailure = new Signal<Double, Double>(Instant.now(), 42.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
 
             // Total failure is reported down the control path - finally, someone will have to notice and take action
             var fluxTotalFailure = Flux.just(signalTotalFailure);
@@ -135,7 +135,7 @@ class ThermostatTest {
         }
     }
 
-    private void assertTotal(Signal<ProcessController.Status<Double>> s) {
+    private void assertTotal(Signal<ProcessController.Status<Double>, Double> s) {
 
         // This is the hysteresis controller setpoint, not PID
         assertThat(s.getValue().setpoint).isZero();
@@ -151,7 +151,7 @@ class ThermostatTest {
         assertThat(s.isError()).isTrue();
     }
 
-    private void assertPartial(Signal<ProcessController.Status<Double>> s) {
+    private void assertPartial(Signal<ProcessController.Status<Double>, Double> s) {
 
         // This is the hysteresis controller setpoint, not PID
         assertThat(s.getValue().setpoint).isZero();

@@ -18,7 +18,7 @@ class HysteresisControllerTest {
         Instant timestamp = Instant.now();
         long offset = 0;
 
-        var sequence = Flux.just(
+        Flux<Signal<Double, Void>> sequence = Flux.just(
                 new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0),
                 new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5),
                 new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 21.0),
@@ -27,9 +27,9 @@ class HysteresisControllerTest {
                 new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 19.5),
                 new Signal<>(timestamp.plus(offset, ChronoUnit.SECONDS), 19.0));
 
-        var pc = new HysteresisController("h", 20);
+        var pc = new HysteresisController<Void>("h", 20);
 
-        Flux<Signal<ProcessController.Status<Double>>> flux = pc
+        Flux<Signal<ProcessController.Status<Double>, Void>> flux = pc
                 .compute(sequence);
 
         StepVerifier

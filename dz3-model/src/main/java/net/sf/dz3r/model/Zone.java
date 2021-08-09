@@ -16,7 +16,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Zone implements ProcessController<Double, ZoneStatus>, Addressable<String>, JmxAware {
+public class Zone implements ProcessController<Double, ZoneStatus, Double>, Addressable<String>, JmxAware {
 
     private final Thermostat ts;
     private ZoneSettings settings;
@@ -37,7 +37,7 @@ public class Zone implements ProcessController<Double, ZoneStatus>, Addressable<
     }
 
     @Override
-    public Signal<Double> getProcessVariable() {
+    public Signal<Double, Double> getProcessVariable() {
         throw new UnsupportedOperationException("Not Implemented");
     }
 
@@ -47,7 +47,7 @@ public class Zone implements ProcessController<Double, ZoneStatus>, Addressable<
     }
 
     @Override
-    public Flux<Signal<Status<ZoneStatus>>> compute(Flux<Signal<Double>> pv) {
+    public Flux<Signal<Status<ZoneStatus>, Double>> compute(Flux<Signal<Double, Double>> pv) {
         throw new UnsupportedOperationException("Not Implemented");
     }
 

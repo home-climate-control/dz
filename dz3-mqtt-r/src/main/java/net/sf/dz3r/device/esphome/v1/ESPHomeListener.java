@@ -41,7 +41,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint> {
         return mqttListener.address;
     }
 
-    public Flux<Signal<Double>> getSensorFlux(String address) {
+    public Flux<Signal<Double, Double>> getSensorFlux(String address) {
         return mqttListener
                 .getFlux(mqttRootTopicSub)
                 .filter(e -> matchSensorAddress(e, address))
@@ -53,7 +53,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint> {
         return signal.topic.endsWith("sensor/" + address + "/state");
     }
 
-    private Signal<Double> mqtt2sensor(MqttSignal mqttSignal) {
+    private Signal<Double, Double> mqtt2sensor(MqttSignal mqttSignal) {
 
         // This is ESPHome, they don't provide timestamps.
         // It is possible to get a stale value if LWT wasn't set up correctly

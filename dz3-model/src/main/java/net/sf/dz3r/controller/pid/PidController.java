@@ -6,10 +6,12 @@ import net.sf.dz3r.controller.ProcessController;
 /**
  * A reactive PID controller abstraction.
  *
+ * @param <P> Signal payload type.
+ *
  * @see net.sf.dz3.controller.ProcessController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public interface PidController extends ProcessController<Double, Double> {
+public interface PidController<P> extends ProcessController<Double, Double, P> {
 
     @JmxAttribute(description = "Proportional weight")
     double getP();

@@ -13,11 +13,12 @@ import reactor.core.publisher.Flux;
  *
  * @param <I> Process variable type.
  * @param <O> Signal type.
+ * @param <P> Signal payload type.
  *
  * @see net.sf.dz3.controller.ProcessController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public interface ProcessController<I, O> {
+public interface ProcessController<I, O, P> {
 
     /**
      * Set the setpoint.
@@ -40,7 +41,7 @@ public interface ProcessController<I, O> {
      * @return The process variable.
      */
     @JmxAttribute(description = "Process Variable")
-    Signal<I> getProcessVariable();
+    Signal<I, P> getProcessVariable();
 
     /**
      * Get the current value of the error.
@@ -57,7 +58,7 @@ public interface ProcessController<I, O> {
      *
      * @return Output signal flux. The end of this flux indicates the need for the subscriber to shut down.
      */
-    Flux<Signal<Status<O>>> compute(Flux<Signal<I>> pv);
+    Flux<Signal<Status<O>, P>> compute(Flux<Signal<I, P>> pv);
 
     public static class Status<T> {
 

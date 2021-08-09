@@ -12,7 +12,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ZoneController implements ProcessController<ZoneStatus, Double> {
+public class ZoneController implements ProcessController<ZoneStatus, Double, Double> {
 
     private static final String MAKES_NO_SENSE = "This operation makes no sense for ZoneController";
 
@@ -27,7 +27,7 @@ public class ZoneController implements ProcessController<ZoneStatus, Double> {
     }
 
     @Override
-    public Signal<ZoneStatus> getProcessVariable() {
+    public Signal<ZoneStatus, Double> getProcessVariable() {
         throw new UnsupportedOperationException(MAKES_NO_SENSE);
     }
 
@@ -37,7 +37,7 @@ public class ZoneController implements ProcessController<ZoneStatus, Double> {
     }
 
     @Override
-    public Flux<Signal<Status<Double>>> compute(Flux<Signal<ZoneStatus>> pv) {
+    public Flux<Signal<Status<Double>, Double>> compute(Flux<Signal<ZoneStatus, Double>> pv) {
         throw new UnsupportedOperationException("Not Implemented");
     }
 }

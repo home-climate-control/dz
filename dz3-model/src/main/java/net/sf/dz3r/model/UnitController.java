@@ -10,5 +10,5 @@ import net.sf.dz3r.signal.HvacCommand;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public interface UnitController extends ProcessController<Double, HvacCommand>, Addressable<String>, JmxAware {
+public interface UnitController extends ProcessController<Double, HvacCommand, Double>, Addressable<String>, JmxAware {
 }

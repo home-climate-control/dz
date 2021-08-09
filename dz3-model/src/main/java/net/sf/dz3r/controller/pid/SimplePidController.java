@@ -7,7 +7,7 @@ import net.sf.dz3r.signal.Signal;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class SimplePidController extends AbstractPidController {
+public class SimplePidController<P> extends AbstractPidController<P> {
 
     /**
      * I component.
@@ -24,7 +24,7 @@ public class SimplePidController extends AbstractPidController {
     }
 
     @Override
-    protected final double getIntegral(Signal<Status<Double>> lastKnownSignal, Signal<Double>  pv, double error) {
+    protected final double getIntegral(Signal<Status<Double>, P> lastKnownSignal, Signal<Double, P>  pv, double error) {
 
         if (lastKnownSignal == null) {
             return integral;
@@ -37,7 +37,7 @@ public class SimplePidController extends AbstractPidController {
     }
 
     @Override
-    protected final double getDerivative(Signal<Status<Double>> lastKnownSignal, Signal<Double>  pv, double error) {
+    protected final double getDerivative(Signal<Status<Double>, P> lastKnownSignal, Signal<Double, P>  pv, double error) {
 
         if (lastKnownSignal == null) {
             return 0;

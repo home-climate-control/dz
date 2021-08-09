@@ -19,10 +19,10 @@ class SimplePidControllerTest {
 
     @Test
     void testPSimple() throws InterruptedException {
-        testP(new SimplePidController("simple", 0, 1, 0, 0, 0));
+        testP(new SimplePidController<>("simple", 0, 1, 0, 0, 0));
     }
 
-    private void testP(ProcessController<Double, Double> pc) {
+    private void testP(ProcessController<Double, Double, Void> pc) {
 
         ThreadContext.push("testP/" + pc.getClass().getName());
 
@@ -32,10 +32,10 @@ class SimplePidControllerTest {
             int COUNT = 5_000;
 
             var sourceSequence = new ArrayList<Double>();
-            var signalSequence = new ArrayList<Signal<ProcessController.Status<Double>>>();
+            var signalSequence = new ArrayList<Signal<ProcessController.Status<Double>, Void>>();
 
             var timestamp = new AtomicLong(Instant.now().toEpochMilli());
-            Flux<Signal<Double>> sourceFlux = Flux.generate(
+            Flux<Signal<Double, Void>> sourceFlux = Flux.generate(
                             rg::nextDouble,
                     (state, sink) -> {
                         state = rg.nextDouble();
@@ -43,7 +43,7 @@ class SimplePidControllerTest {
                         sourceSequence.add(state);
                         return state;
                     })
-                    .map(d -> new Signal<>(
+                    .map(d -> new Signal<Double, Void>(
                             Instant.ofEpochMilli(timestamp.incrementAndGet()), (Double)d))
                     .take(COUNT);
 
