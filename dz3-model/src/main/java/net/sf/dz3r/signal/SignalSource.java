@@ -16,7 +16,7 @@ public interface SignalSource<A extends Comparable<A>, T, P> {
      * Get the signal flux.
      *
      * This flux will only terminate if instructed to do so. Problems with the source will be reflected in
-     * {@link Signal#getStatus() signal status}.
+     * {@link Signal#status signal status}.
      *
      * @return Signal flux.
      */

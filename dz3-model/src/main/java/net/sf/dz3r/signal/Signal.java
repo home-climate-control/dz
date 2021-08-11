@@ -125,10 +125,6 @@ public class Signal<T, P> {
         return status == Status.FAILURE_TOTAL;
     }
 
-    public Status getStatus() {
-        return status;
-    }
-
     public Throwable getError() {
         return error;
     }
