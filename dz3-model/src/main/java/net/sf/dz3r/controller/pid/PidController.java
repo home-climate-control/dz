@@ -36,6 +36,12 @@ public interface PidController<P> extends ProcessController<Double, Double, P> {
      */
     void setLimit(double limit);
 
+    /**
+     * Reflection of the current status of a PID controller.
+     *
+     * Note that though the class carries the P, I, D values, it doesn't reflect the PID controller configuration,
+     * but state.
+     */
     public static class PidStatus extends Status<Double> {
 
         /**
