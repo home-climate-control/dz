@@ -18,7 +18,7 @@ import reactor.core.publisher.Flux;
  * @see net.sf.dz3.controller.ProcessController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public interface ProcessController<I, O, P> {
+public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessController.Status<O>, P> {
 
     /**
      * Set the setpoint.
@@ -58,6 +58,7 @@ public interface ProcessController<I, O, P> {
      *
      * @return Output signal flux. The end of this flux indicates the need for the subscriber to shut down.
      */
+    @Override
     Flux<Signal<Status<O>, P>> compute(Flux<Signal<I, P>> pv);
 
     public static class Status<T> {

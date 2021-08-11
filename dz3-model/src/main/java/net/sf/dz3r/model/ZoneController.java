@@ -1,6 +1,6 @@
 package net.sf.dz3r.model;
 
-import net.sf.dz3r.controller.ProcessController;
+import net.sf.dz3r.controller.SignalProcessor;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.ZoneStatus;
 import reactor.core.publisher.Flux;
@@ -12,32 +12,10 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ZoneController implements ProcessController<ZoneStatus, Double, Double> {
-
-    private static final String MAKES_NO_SENSE = "This operation makes no sense for ZoneController";
+public class ZoneController implements SignalProcessor<ZoneStatus, Double, Double> {
 
     @Override
-    public void setSetpoint(double setpoint) {
-        throw new UnsupportedOperationException(MAKES_NO_SENSE);
-    }
-
-    @Override
-    public double getSetpoint() {
-        throw new UnsupportedOperationException(MAKES_NO_SENSE);
-    }
-
-    @Override
-    public Signal<ZoneStatus, Double> getProcessVariable() {
-        throw new UnsupportedOperationException(MAKES_NO_SENSE);
-    }
-
-    @Override
-    public double getError() {
-        throw new UnsupportedOperationException(MAKES_NO_SENSE);
-    }
-
-    @Override
-    public Flux<Signal<Status<Double>, Double>> compute(Flux<Signal<ZoneStatus, Double>> pv) {
+    public Flux<Signal<Double, Double>> compute(Flux<Signal<ZoneStatus, Double>> in) {
         throw new UnsupportedOperationException("Not Implemented");
     }
 }
