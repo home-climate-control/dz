@@ -1,5 +1,6 @@
 package net.sf.dz3r.signal;
 
+import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.model.ZoneSettings;
 
 /**
@@ -15,7 +16,7 @@ public class ZoneStatus {
 
     public final ZoneSettings settings;
 
-    public ZoneStatus(ZoneSettings settings) {
+    public ZoneStatus(ZoneSettings settings, ProcessController.Status<Double> value, ProcessController.Status<Double> payload) {
         this.settings = settings;
     }
 }

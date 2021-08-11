@@ -29,7 +29,7 @@ import reactor.core.publisher.Flux;
  */
 public class Thermostat implements ProcessController<Double, Double, ProcessController.Status<Double>>, Addressable<String> {
 
-    protected final Logger logger = LogManager.getLogger();
+    private final Logger logger = LogManager.getLogger();
 
     private final String name;
     private final Range<Double> setpointRange;

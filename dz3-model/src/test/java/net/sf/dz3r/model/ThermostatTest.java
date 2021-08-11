@@ -81,9 +81,10 @@ class ThermostatTest {
         try {
 
             var ts = new Thermostat("ts", 20.0, 1.0, 0, 0, 0);
+            var signalOK = new Signal<Double, ProcessController.Status<Double>>(Instant.now(), 42.0);
             var signalTotalFailure = new Signal<Double, ProcessController.Status<Double>>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
             var signalPartialFailure = new Signal<Double, ProcessController.Status<Double>>(Instant.now(), 42.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
-            var in = Flux.just(signalTotalFailure, signalPartialFailure);
+            var in = Flux.just(signalOK, signalTotalFailure, signalPartialFailure);
 
             var out = ts
                     .compute(in)
@@ -93,6 +94,7 @@ class ThermostatTest {
 
             StepVerifier
                     .create(out)
+                    .assertNext(this::assertOK)
                     .assertNext(this::assertTotal)
                     .assertNext(this::assertPartial)
                     .verifyComplete();
@@ -134,6 +136,22 @@ class ThermostatTest {
         }
     }
 
+    private void assertOK(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> s) {
+
+        // This is the hysteresis controller setpoint, not PID
+        assertThat(s.getValue().setpoint).isZero();
+
+        // This [process control] error can't be calculated because the signal doesn't exist
+        assertThat(s.getValue().error).isEqualTo(22d);
+
+        // Hysteresis controller output. Yep, it is calling
+        assertThat(s.getValue().signal).isEqualTo(1d);
+
+        // This signal is totally fine
+        assertThat(s.isOK()).isTrue();
+        assertThat(s.isError()).isFalse();
+    }
+
     private void assertTotal(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> s) {
 
         // This is the hysteresis controller setpoint, not PID
@@ -158,7 +176,7 @@ class ThermostatTest {
         // This [process control] error is common to both of them, the second will just pass it through
         assertThat(s.getValue().error).isEqualTo(22.0);
 
-        // Yep, it is calling
+        // Hysteresis controller output. Yep, it is calling
         assertThat(s.getValue().signal).isEqualTo(1.0);
 
         // Partial [control path] error got masked by the PID controller, it's invisible here - this is expected
