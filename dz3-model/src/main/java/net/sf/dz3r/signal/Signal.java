@@ -131,12 +131,20 @@ public class Signal<T, P> {
 
     @Override
     public String toString() {
-        var result = "@" + timestamp + ", value={" + value + "}, isOK=" + isOK() + ", isError=" + isError() ;
+        var result = "@" + timestamp + ", value={" + value + "}, " + printPayload() + "isOK=" + isOK() + ", isError=" + isError() ;
 
         if (isOK()) {
             return result;
         }
 
         return result + ", error=\"" + error.getMessage() + "\"";
+    }
+
+    private String printPayload() {
+        if (payload == null) {
+            return "";
+        }
+
+        return "payload(" + payload.getClass().getName() + ")={" + payload.toString() + "}, ";
     }
 }

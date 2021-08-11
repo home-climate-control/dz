@@ -27,7 +27,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Thermostat implements ProcessController<Double, Double, Double>, Addressable<String> {
+public class Thermostat implements ProcessController<Double, Double, ProcessController.Status<Double>>, Addressable<String> {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -42,7 +42,7 @@ public class Thermostat implements ProcessController<Double, Double, Double>, Ad
     /**
      * The current process variable value.
      */
-    private Signal<Double, Double> pv;
+    private Signal<Double, Status<Double>> pv;
 
     /**
      * Hysteresis boundaries for the {@link #signalRenderer}.
@@ -54,12 +54,12 @@ public class Thermostat implements ProcessController<Double, Double, Double>, Ad
     /**
      * Controller defining this thermostat's dynamic behavior.
      */
-    private final AbstractPidController<Double> controller;
+    private final AbstractPidController<ProcessController.Status<Double>> controller;
 
     /**
      * Controller defining this thermostat's output signal.
      */
-    private final HysteresisController<Double> signalRenderer;
+    private final HysteresisController<ProcessController.Status<Double>> signalRenderer;
 
     /**
      * Create a thermostat with a default 10C..40C setpoint range and specified setpoint and PID values.
@@ -121,7 +121,7 @@ public class Thermostat implements ProcessController<Double, Double, Double>, Ad
     }
 
     @Override
-    public Signal<Double, Double> getProcessVariable() {
+    public Signal<Double, Status<Double>> getProcessVariable() {
         return pv;
     }
 
@@ -137,7 +137,7 @@ public class Thermostat implements ProcessController<Double, Double, Double>, Ad
     }
 
     @Override
-    public Flux<Signal<Status<Double>, Double>> compute(Flux<Signal<Double, Double>> pv) {
+    public Flux<Signal<Status<Double>, Status<Double>>> compute(Flux<Signal<Double, Status<Double>>> pv) {
 
         // Compute the control signal to feed to the renderer.
         // Might want to make this available to outside consumers for instrumentation.
@@ -150,13 +150,13 @@ public class Thermostat implements ProcessController<Double, Double, Double>, Ad
         // Total failure is denoted by NaN by stage 1, it will get through.
         // The PID controller output value becomes the extra payload to pass to the zone controller to calculate demand.
         var stage2 = stage1
-                .map(e -> new Signal<>(e.timestamp, e.getValue().signal, e.getValue().signal, e.status, e.error))
-                .doOnNext(e -> logger.debug("filter/{}: {}", name, e));
+                .map(e -> new Signal<>(e.timestamp, e.getValue().signal, e.getValue(), e.status, e.error))
+                .doOnNext(e -> logger.trace("filter/{}: {}", name, e));
 
         // Deliver the signal
         // Might want to expose this as well
         return signalRenderer
                 .compute(stage2)
-                .doOnNext(e -> logger.debug("renderer/{}: {}", name, e));
+                .doOnNext(e -> logger.trace("renderer/{}: {}", name, e));
     }
 }
