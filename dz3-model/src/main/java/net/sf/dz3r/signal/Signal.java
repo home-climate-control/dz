@@ -135,7 +135,7 @@ public class Signal<T, P> {
 
     @Override
     public String toString() {
-        var result = "@" + timestamp + "=" + value + ", isOK=" + isOK() + ", isError=" + isError();
+        var result = "@" + timestamp + ", value={" + value + "}, isOK=" + isOK() + ", isError=" + isError() ;
 
         if (isOK()) {
             return result;
