@@ -62,6 +62,8 @@ class SimplePidControllerTest {
                 assertThat(v).isEqualTo(signalSequence.get(offset++).getValue().signal);
             }
 
+            assertThat(signalSequence.get(0).getValue()).isInstanceOf(PidController.PidStatus.class);
+
         } finally {
             ThreadContext.pop();
         }
