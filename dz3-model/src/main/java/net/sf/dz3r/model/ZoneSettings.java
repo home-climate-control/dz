@@ -28,11 +28,26 @@ public class ZoneSettings {
         this(true, setpoint, true, false, 0);
     }
 
+
+    public ZoneSettings(ZoneSettings template, boolean enabled) {
+        this(enabled, template.setpoint, template.voting, template.hold, template.dumpPriority);
+    }
+
     public ZoneSettings(boolean enabled, double setpoint, boolean voting, boolean hold, int dumpPriority) {
         this.enabled = enabled;
         this.setpoint = setpoint;
         this.voting = voting;
         this.hold = hold;
         this.dumpPriority = dumpPriority;
+    }
+
+    @Override
+    public String toString() {
+        return "{enabled=" + enabled
+                + ", setpoint=" + setpoint
+                + ", voting=" + voting
+                + ", hold=" + hold
+                + ", dump=" + dumpPriority
+                + "}";
     }
 }

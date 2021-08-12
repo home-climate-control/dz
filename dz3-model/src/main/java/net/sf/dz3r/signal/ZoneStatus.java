@@ -15,8 +15,23 @@ import net.sf.dz3r.model.ZoneSettings;
 public class ZoneStatus {
 
     public final ZoneSettings settings;
+    public final boolean calling;
+    public final double signal;
 
-    public ZoneStatus(ZoneSettings settings, ProcessController.Status<Double> value, ProcessController.Status<Double> payload) {
+    public ZoneStatus(ZoneSettings settings, boolean calling, double signal) {
         this.settings = settings;
+        this.calling = calling;
+        this.signal = signal;
+    }
+
+    public ZoneStatus(ZoneSettings settings, ProcessController.Status<Double> status, ProcessController.Status<Double> payload) {
+        this.settings = settings;
+        this.calling = Double.compare(status.signal, 1d) == 0;
+        this.signal = payload.signal;
+    }
+
+    @Override
+    public String toString() {
+        return "{settings=" + settings + ", calling=" + calling + ", signal=" + signal + "}";
     }
 }
