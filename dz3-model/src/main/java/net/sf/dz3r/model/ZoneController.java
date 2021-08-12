@@ -12,10 +12,10 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ZoneController implements SignalProcessor<ZoneStatus, Double, Double> {
+public class ZoneController implements SignalProcessor<ZoneStatus, Double, String> {
 
     @Override
-    public Flux<Signal<Double, Double>> compute(Flux<Signal<ZoneStatus, Double>> in) {
+    public Flux<Signal<Double, String>> compute(Flux<Signal<ZoneStatus, String>> in) {
         throw new UnsupportedOperationException("Not Implemented");
     }
 }

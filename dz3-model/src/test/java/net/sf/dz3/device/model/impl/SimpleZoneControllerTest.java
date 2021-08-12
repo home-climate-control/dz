@@ -131,7 +131,7 @@ class SimpleZoneControllerTest {
     }
 
     /**
-     * Test the "Cold Start" bug ({@link http://code.google.com/p/diy-zoning/issues/detail?id=1}.
+     * Test the <a href="https://code.google.com/archive/p/diy-zoning/issues/1">"Cold Start" bug</a>.
      *
      * The zone controller should stay off without exceptions when the first ever signal
      * doesn't indicate calling.
@@ -178,7 +178,7 @@ class SimpleZoneControllerTest {
     }
 
     /**
-     * Test the "Cold Start" bug ({@link http://code.google.com/p/diy-zoning/issues/detail?id=1}.
+     * Test the <a href="https://code.google.com/archive/p/diy-zoning/issues/1">"Cold Start" bug</a>.
      *
      * The zone controller should switch on when the first ever thermostat signal
      * indicates calling.

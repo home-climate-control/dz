@@ -19,7 +19,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Zone implements SignalProcessor<Double, ZoneStatus, Void>, Addressable<String>, JmxAware {
+public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, JmxAware {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -40,7 +40,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, Void>, Addressa
     }
 
     @Override
-    public Flux<Signal<ZoneStatus, Void>> compute(Flux<Signal<Double, Void>> in) {
+    public Flux<Signal<ZoneStatus, String>> compute(Flux<Signal<Double, String>> in) {
 
         // Since the zone doesn't need the payload, but the thermostat does, need to translate the input
         var stage0 = in
@@ -62,12 +62,12 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, Void>, Addressa
                 .doOnNext(e -> logger.trace("isOn/{}: {} {}", getAddress(), settings.enabled ? "enabled" : "DISABLED", e));
     }
 
-    private Signal<ZoneStatus, Void> translate(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> source) {
+    private Signal<ZoneStatus, String> translate(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> source) {
 
         return new Signal<>(
                 source.timestamp,
                 createStatus(settings, source.getValue(), source.payload),
-                null,
+                getAddress(),
                 source.status,
                 source.error
                 );
@@ -77,7 +77,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, Void>, Addressa
         return new ZoneStatus(settings, status, payload);
     }
 
-    private Signal<ZoneStatus, Void> suppressIfNotEnabled(Signal<ZoneStatus, Void> source) {
+    private Signal<ZoneStatus, String> suppressIfNotEnabled(Signal<ZoneStatus, String> source) {
 
         if (settings.enabled) {
             return source;

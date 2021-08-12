@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.time.Instant;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -19,9 +20,9 @@ class ZoneTest {
     @Test
     void enabled() {
 
-        var signalOK = new Signal<Double, Void>(Instant.now(), 30.0);
-        var signalPartialFailure = new Signal<Double, Void>(Instant.now(), 10.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
-        var signalTotalFailure = new Signal<Double, Void>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
+        var signalOK = new Signal<Double, String>(Instant.now(), 30.0);
+        var signalPartialFailure = new Signal<Double, String>(Instant.now(), 10.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
+        var signalTotalFailure = new Signal<Double, String>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
 
         var sequence = Flux.just(
                 signalOK,
@@ -29,7 +30,8 @@ class ZoneTest {
                 signalTotalFailure
         );
 
-        var ts = new Thermostat("ON", 20, 1, 0, 0, 1);
+        var name = UUID.randomUUID().toString();
+        var ts = new Thermostat(name, 20, 1, 0, 0, 1);
         var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
 
         var out = z
@@ -38,7 +40,10 @@ class ZoneTest {
 
         StepVerifier
                 .create(out)
-                .assertNext(s -> assertThat(s.getValue().calling).isTrue())
+                .assertNext(s -> {
+                    assertThat(s.getValue().calling).isTrue();
+                    assertThat(s.payload).isEqualTo(name);
+                })
                 .assertNext(s -> assertThat(s.getValue().calling).isFalse())
                 .assertNext(s -> assertThat(s.getValue().calling).isFalse())
                 .verifyComplete();
@@ -47,9 +52,10 @@ class ZoneTest {
     @Test
     void disabled() {
 
-        var signalOK = new Signal<Double, Void>(Instant.now(), 30.0);
+        var signalOK = new Signal<Double, String>(Instant.now(), 30.0);
         var sequence = Flux.just(signalOK);
-        var ts = new Thermostat("ON", 20, 1, 0, 0, 1);
+        var name = UUID.randomUUID().toString();
+        var ts = new Thermostat(name, 20, 1, 0, 0, 1);
         var settings = new ZoneSettings(ts.getSetpoint());
         var z = new Zone(ts, settings);
 
@@ -57,12 +63,15 @@ class ZoneTest {
 
         var out = z
                 .compute(sequence)
-                .doOnNext(e -> logger.debug("zone/ON: {}", e));
+                .doOnNext(e -> logger.debug("zone/{}}: {}", name, e));
 
         // The thermostat is calling, but the zone has shut it off
         StepVerifier
                 .create(out)
-                .assertNext(s -> assertThat(s.getValue().calling).isFalse())
+                .assertNext(s -> {
+                    assertThat(s.getValue().calling).isFalse();
+                    assertThat(s.payload).isEqualTo(name);
+                })
                 .verifyComplete();
     }
 }
