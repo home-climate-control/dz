@@ -6,6 +6,7 @@ import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.controller.SignalProcessor;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.ThermostatStatus;
 import net.sf.dz3r.signal.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +45,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         // Since the zone doesn't need the payload, but the thermostat does, need to translate the input
         var stage0 = in
-                .map(s -> new Signal<>(s.timestamp, s.getValue(), (ProcessController.Status<Double>) null, s.status, s.error));
+                .map(s -> new Signal<>(s.timestamp, s.getValue(), (Void) null, s.status, s.error));
 
         // Not to disrupt the thermostat control logic, input signal is fed to it
         // regardless of whether the zone is enabled
@@ -54,27 +55,22 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         // Now, need to translate into a form that is easier manipulated
         var stage2 = stage1.map(this::translate)
-                .doOnNext(e -> logger.trace("translated/{}: {}", getAddress(), e));
+                .doOnNext(e -> logger.debug("translated/{}: {}", getAddress(), e));
 
         // Now, dampen the signal if the zone is disabled
         return stage2
                 .map(this::suppressIfNotEnabled)
-                .doOnNext(e -> logger.trace("isOn/{}: {} {}", getAddress(), settings.enabled ? "enabled" : "DISABLED", e));
+                .doOnNext(e -> logger.debug("isOn/{}: {} {}", getAddress(), settings.enabled ? "enabled" : "DISABLED", e));
     }
 
-    private Signal<ZoneStatus, String> translate(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> source) {
+    private Signal<ZoneStatus, String> translate(Signal<ProcessController.Status<ThermostatStatus>, Void> source) {
 
         return new Signal<>(
                 source.timestamp,
-                createStatus(settings, source.getValue(), source.payload),
+                new ZoneStatus(settings, source.getValue().signal),
                 getAddress(),
                 source.status,
-                source.error
-                );
-    }
-
-    private ZoneStatus createStatus(ZoneSettings settings, ProcessController.Status<Double> status, ProcessController.Status<Double> payload) {
-        return new ZoneStatus(settings, status, payload);
+                source.error);
     }
 
     private Signal<ZoneStatus, String> suppressIfNotEnabled(Signal<ZoneStatus, String> source) {
@@ -85,7 +81,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         return new Signal<>(
                 source.timestamp,
-                new ZoneStatus(new ZoneSettings(source.getValue().settings, settings.enabled), false, 0d),
+                new ZoneStatus(new ZoneSettings(source.getValue().settings, false), new ThermostatStatus(0, false)),
                 source.payload,
                 source.status,
                 source.error);

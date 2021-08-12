@@ -6,6 +6,7 @@ import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.ThermostatStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -27,7 +28,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Thermostat implements ProcessController<Double, Double, ProcessController.Status<Double>>, Addressable<String> {
+public class Thermostat implements ProcessController<Double, ThermostatStatus, Void>, Addressable<String> {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -42,7 +43,7 @@ public class Thermostat implements ProcessController<Double, Double, ProcessCont
     /**
      * The current process variable value.
      */
-    private Signal<Double, Status<Double>> pv;
+    private Signal<Double, Void> pv;
 
     /**
      * Hysteresis boundaries for the {@link #signalRenderer}.
@@ -54,12 +55,12 @@ public class Thermostat implements ProcessController<Double, Double, ProcessCont
     /**
      * Controller defining this thermostat's dynamic behavior.
      */
-    private final AbstractPidController<ProcessController.Status<Double>> controller;
+    private final AbstractPidController<Void> controller;
 
     /**
      * Controller defining this thermostat's output signal.
      */
-    private final HysteresisController<ProcessController.Status<Double>> signalRenderer;
+    private final HysteresisController<Status<Double>> signalRenderer;
 
     /**
      * Create a thermostat with a default 10C..40C setpoint range and specified setpoint and PID values.
@@ -84,6 +85,7 @@ public class Thermostat implements ProcessController<Double, Double, ProcessCont
 
         this.name = name;
         this.setpointRange = setpointRange;
+        this.setpoint = setpoint;
 
         controller = new SimplePidController<>("(controller) " + name, setpoint, p, i, d, limit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + name, 0, HYSTERESIS);
@@ -121,7 +123,7 @@ public class Thermostat implements ProcessController<Double, Double, ProcessCont
     }
 
     @Override
-    public Signal<Double, Status<Double>> getProcessVariable() {
+    public Signal<Double, Void> getProcessVariable() {
         return pv;
     }
 
@@ -137,11 +139,10 @@ public class Thermostat implements ProcessController<Double, Double, ProcessCont
     }
 
     @Override
-    public Flux<Signal<Status<Double>, Status<Double>>> compute(Flux<Signal<Double, Status<Double>>> pv) {
+    public Flux<Signal<Status<ThermostatStatus>, Void>> compute(Flux<Signal<Double, Void>> pv) {
 
         // Compute the control signal to feed to the renderer.
         // Might want to make this available to outside consumers for instrumentation.
-        // Extra payload is discarded.
         var stage1 = controller
                 .compute(pv)
                 .doOnNext(e -> logger.trace("controller/{}: {}", name, e));
@@ -150,13 +151,26 @@ public class Thermostat implements ProcessController<Double, Double, ProcessCont
         // Total failure is denoted by NaN by stage 1, it will get through.
         // The PID controller output value becomes the extra payload to pass to the zone controller to calculate demand.
         var stage2 = stage1
-                .map(e -> new Signal<>(e.timestamp, e.getValue().signal, e.getValue(), e.status, e.error))
-                .doOnNext(e -> logger.trace("filter/{}: {}", name, e));
+                .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
 
         // Deliver the signal
         // Might want to expose this as well
         return signalRenderer
                 .compute(stage2)
-                .doOnNext(e -> logger.trace("renderer/{}: {}", name, e));
+                .doOnNext(e -> logger.trace("renderer/{}: {}", name, e))
+                .map(this::mapOutput);
+    }
+
+    private Signal<Status<ThermostatStatus>, Void> mapOutput(Signal<Status<Double>, Status<Double>> source) {
+
+        var demand = source.payload.signal - signalRenderer.getThresholdLow();
+        var calling = Double.compare(source.getValue().signal, 1.0) == 0;
+
+        return new Signal<>(
+                source.timestamp,
+                new Status<>(source.payload.setpoint, source.payload.error, new ThermostatStatus(demand, calling)),
+                null,
+                source.status,
+                source.error);
     }
 }

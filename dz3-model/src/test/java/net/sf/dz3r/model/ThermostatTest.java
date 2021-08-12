@@ -3,6 +3,7 @@ package net.sf.dz3r.model;
 import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.ThermostatStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -74,16 +75,16 @@ class ThermostatTest {
      * to the zone controller.
      */
     @Test
-    void signalPartialFailure() throws InterruptedException {
+    void signalPartialFailure() {
 
         ThreadContext.push("signalPartialFailure");
 
         try {
 
             var ts = new Thermostat("ts", 20.0, 1.0, 0, 0, 0);
-            var signalOK = new Signal<Double, ProcessController.Status<Double>>(Instant.now(), 42.0);
-            var signalTotalFailure = new Signal<Double, ProcessController.Status<Double>>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
-            var signalPartialFailure = new Signal<Double, ProcessController.Status<Double>>(Instant.now(), 42.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
+            var signalOK = new Signal<Double, Void>(Instant.now(), 42.0);
+            var signalTotalFailure = new Signal<Double, Void>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
+            var signalPartialFailure = new Signal<Double, Void>(Instant.now(), 42.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
             var in = Flux.just(signalOK, signalTotalFailure, signalPartialFailure);
 
             var out = ts
@@ -109,7 +110,7 @@ class ThermostatTest {
      * to the zone controller.
      */
     @Test
-    void signalTotalFailure() throws InterruptedException {
+    void signalTotalFailure() {
 
         ThreadContext.push("signalTotalFailure");
 
@@ -117,7 +118,7 @@ class ThermostatTest {
 
             var ts = new Thermostat("ts", 20.0, 1.0, 0, 0, 0);
 
-            var signalTotalFailure = new Signal<Double, ProcessController.Status<Double>>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
+            var signalTotalFailure = new Signal<Double, Void>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
 
             // Total failure is reported down the control path - finally, someone will have to notice and take action
             var fluxTotalFailure = Flux.just(signalTotalFailure);
@@ -136,48 +137,37 @@ class ThermostatTest {
         }
     }
 
-    private void assertOK(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> s) {
+    private void assertOK(Signal<ProcessController.Status<ThermostatStatus>, Void> s) {
 
-        // This is the hysteresis controller setpoint, not PID
-        assertThat(s.getValue().setpoint).isZero();
-
-        // This [process control] error can't be calculated because the signal doesn't exist
-        assertThat(s.getValue().error).isEqualTo(22d);
-
-        // Hysteresis controller output. Yep, it is calling
-        assertThat(s.getValue().signal).isEqualTo(1d);
+        assertThat(s.getValue().setpoint).isEqualTo(20.0);
+        assertThat(s.getValue().error).isEqualTo(22.0);
+        assertThat(s.getValue().signal.calling).isTrue();
 
         // This signal is totally fine
         assertThat(s.isOK()).isTrue();
         assertThat(s.isError()).isFalse();
     }
 
-    private void assertTotal(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> s) {
+    private void assertTotal(Signal<ProcessController.Status<ThermostatStatus>, Void> s) {
 
-        // This is the hysteresis controller setpoint, not PID
-        assertThat(s.getValue().setpoint).isZero();
+        assertThat(s.getValue().setpoint).isEqualTo(20.0);
 
         // This [process control] error can't be calculated because the signal doesn't exist
         assertThat(s.getValue().error).isNull();
 
         // NaN is an indication of a hard error
-        assertThat(s.getValue().signal).isNaN();
+        assertThat(s.getValue().signal.demand).isNaN();
 
         // Total error made it all the way - this is intended
         assertThat(s.isOK()).isFalse();
         assertThat(s.isError()).isTrue();
     }
 
-    private void assertPartial(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> s) {
+    private void assertPartial(Signal<ProcessController.Status<ThermostatStatus>, Void> s) {
 
-        // This is the hysteresis controller setpoint, not PID
-        assertThat(s.getValue().setpoint).isZero();
-
-        // This [process control] error is common to both of them, the second will just pass it through
+        assertThat(s.getValue().setpoint).isEqualTo(20.0);
         assertThat(s.getValue().error).isEqualTo(22.0);
-
-        // Hysteresis controller output. Yep, it is calling
-        assertThat(s.getValue().signal).isEqualTo(1.0);
+        assertThat(s.getValue().signal.calling).isTrue();
 
         // Partial [control path] error got masked by the PID controller, it's invisible here - this is expected
         assertThat(s.isOK()).isTrue();

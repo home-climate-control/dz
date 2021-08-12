@@ -4,10 +4,13 @@ import net.sf.dz3r.signal.Signal;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * See {@code net.sf.dz3.device.model.impl.SimpleZoneControllerTest}
@@ -20,7 +23,7 @@ class ZoneControllerTest {
      * Simplest possible configuration: one thermostat.
      */
     @Test
-    @Disabled("Not implemented yet")
+    @Disabled("Broken, needs more work")
     void test1H() {
 
         var offset = new AtomicInteger();
@@ -41,7 +44,19 @@ class ZoneControllerTest {
         var stage1 = z.compute(sequence);
         var stage2 = zc.compute(stage1).log();
 
-        stage2.subscribe().dispose();
+        StepVerifier
+                .create(stage2)
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(0.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.5))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(2.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.5))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(0.5))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(0.0))
+                .verifyComplete();
+
+//        stage2.subscribe().dispose();
     }
 
     /**

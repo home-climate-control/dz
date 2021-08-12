@@ -1,6 +1,5 @@
 package net.sf.dz3r.signal;
 
-import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.model.ZoneSettings;
 
 /**
@@ -15,23 +14,15 @@ import net.sf.dz3r.model.ZoneSettings;
 public class ZoneStatus {
 
     public final ZoneSettings settings;
-    public final boolean calling;
-    public final double signal;
+    public final ThermostatStatus status;
 
-    public ZoneStatus(ZoneSettings settings, boolean calling, double signal) {
+    public ZoneStatus(ZoneSettings settings, ThermostatStatus status) {
         this.settings = settings;
-        this.calling = calling;
-        this.signal = signal;
-    }
-
-    public ZoneStatus(ZoneSettings settings, ProcessController.Status<Double> status, ProcessController.Status<Double> payload) {
-        this.settings = settings;
-        this.calling = Double.compare(status.signal, 1d) == 0;
-        this.signal = payload.signal;
+        this.status = status;
     }
 
     @Override
     public String toString() {
-        return "{settings=" + settings + ", calling=" + calling + ", signal=" + signal + "}";
+        return "{settings=" + settings + ", status=" + status + "}";
     }
 }

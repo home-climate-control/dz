@@ -20,6 +20,7 @@ class ZoneTest {
     @Test
     void enabled() {
 
+        var setpoint = 20.0;
         var signalOK = new Signal<Double, String>(Instant.now(), 30.0);
         var signalPartialFailure = new Signal<Double, String>(Instant.now(), 10.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
         var signalTotalFailure = new Signal<Double, String>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
@@ -31,7 +32,7 @@ class ZoneTest {
         );
 
         var name = UUID.randomUUID().toString();
-        var ts = new Thermostat(name, 20, 1, 0, 0, 1);
+        var ts = new Thermostat(name, setpoint, 1, 0, 0, 1);
         var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
 
         var out = z
@@ -41,21 +42,23 @@ class ZoneTest {
         StepVerifier
                 .create(out)
                 .assertNext(s -> {
-                    assertThat(s.getValue().calling).isTrue();
+                    assertThat(s.getValue().settings.setpoint).isEqualTo(setpoint);
+                    assertThat(s.getValue().status.calling).isTrue();
                     assertThat(s.payload).isEqualTo(name);
                 })
-                .assertNext(s -> assertThat(s.getValue().calling).isFalse())
-                .assertNext(s -> assertThat(s.getValue().calling).isFalse())
+                .assertNext(s -> assertThat(s.getValue().status.calling).isFalse())
+                .assertNext(s -> assertThat(s.getValue().status.calling).isFalse())
                 .verifyComplete();
     }
 
     @Test
     void disabled() {
 
+        var setpoint = 20.0;
         var signalOK = new Signal<Double, String>(Instant.now(), 30.0);
         var sequence = Flux.just(signalOK);
         var name = UUID.randomUUID().toString();
-        var ts = new Thermostat(name, 20, 1, 0, 0, 1);
+        var ts = new Thermostat(name, setpoint, 1, 0, 0, 1);
         var settings = new ZoneSettings(ts.getSetpoint());
         var z = new Zone(ts, settings);
 
@@ -69,7 +72,8 @@ class ZoneTest {
         StepVerifier
                 .create(out)
                 .assertNext(s -> {
-                    assertThat(s.getValue().calling).isFalse();
+                    assertThat(s.getValue().settings.setpoint).isEqualTo(setpoint);
+                    assertThat(s.getValue().status.calling).isFalse();
                     assertThat(s.payload).isEqualTo(name);
                 })
                 .verifyComplete();
