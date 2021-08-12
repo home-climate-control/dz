@@ -67,7 +67,7 @@ public interface Thermostat extends ThermostatStatus,
      *
      * If it is calling, there must be no change.
      * If it is not calling, but the signal is within the hysteresis loop, status must change to calling.
-     * If if it not calling, and the signal is below the hysteresis loop, there must be no change.
+     * If it is not calling, and the signal is below the hysteresis loop, there must be no change.
      */
     void raise();
 
