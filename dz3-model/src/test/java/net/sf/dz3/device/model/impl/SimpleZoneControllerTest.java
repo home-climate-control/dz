@@ -4,16 +4,18 @@ import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import net.sf.dz3.controller.pid.SimplePidController;
 import net.sf.dz3.device.model.Thermostat;
 import net.sf.dz3.device.model.ZoneController;
-import net.sf.dz3.device.sensor.impl.NullSensor;
+import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 /**
  *
@@ -23,32 +25,156 @@ class SimpleZoneControllerTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
+    private LinkedList<DataSample<Double>> createSequence() {
+
+        var timestamp = 0L;
+        return new LinkedList<>(List.of(
+                new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 21.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.5, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 20.0, null),
+                new DataSample<Double>(timestamp++, "source", "signature", 19.5, null),
+                new DataSample<Double>(timestamp,   "source", "signature", 19.0, null)));
+    }
+
+    /**
+     * Test the P controller from {@link #testOneZone()}.
+     */
+    @Test
+    void testOneP() {
+
+        ThreadContext.push("testOneP");
+
+        try {
+
+            var controller = new SimplePidController("simple20", 20.0, 1.0, 0, 0, 0);
+
+            logger.info("initial status: {}", controller.getStatus());
+
+            var tempSequence = createSequence();
+
+            controller.consume(tempSequence.remove()); // 20.0
+            assertThat(controller.getStatus().signal.sample).isZero();
+
+            controller.consume(tempSequence.remove()); // 20.5
+            assertThat(controller.getStatus().signal.sample).isEqualTo(0.5);
+
+            controller.consume(tempSequence.remove()); // 21.0
+            assertThat(controller.getStatus().signal.sample).isEqualTo(1.0);
+
+            controller.consume(tempSequence.remove()); // 20.5
+            assertThat(controller.getStatus().signal.sample).isEqualTo(0.5);
+
+            controller.consume(tempSequence.remove()); // 20.0
+            assertThat(controller.getStatus().signal.sample).isZero();
+
+            controller.consume(tempSequence.remove()); // 19.5
+            assertThat(controller.getStatus().signal.sample).isEqualTo(-0.5);
+
+            controller.consume(tempSequence.remove()); // 19.0
+            assertThat(controller.getStatus().signal.sample).isEqualTo(-1.0);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    /**
+     * Test the thermostat from {@link #testOneZone()}.
+     */
+    @Test
+    void testOneThermostat() {
+
+        ThreadContext.push("testOneP");
+
+        try {
+
+            var controller = new SimplePidController("simple20", 20.0, 1.0, 0, 0, 0);
+            var ts = new ThermostatModel("ts", mock(AnalogSensor.class), controller);
+
+            logger.info("initial status: {}", controller.getStatus());
+
+            var tempSequence = createSequence();
+
+            // Initially, the thermostat is not calling and controller is off
+            assertThat(ts.getSignal().calling).isFalse();
+
+            {
+                ts.consume(tempSequence.remove()); // 20.0
+
+                // still off
+                assertThat(ts.getSignal().calling).isFalse();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(1.0);
+            }
+            {
+                ts.consume(tempSequence.remove()); // 20.5
+
+                // still off
+                assertThat(ts.getSignal().calling).isFalse();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(1.5);
+            }
+
+            {
+                // On now
+                logger.info("TURNING ON");
+                ts.consume(tempSequence.remove()); // 21.0
+
+                assertThat(ts.getSignal().calling).isTrue();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(2.0);
+            }
+            {
+                ts.consume(tempSequence.remove()); // 20.5
+
+                // still on
+                assertThat(ts.getSignal().calling).isTrue();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(1.5);
+            }
+            {
+                ts.consume(tempSequence.remove()); // 20.0
+
+                // still on
+                assertThat(ts.getSignal().calling).isTrue();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(1.0);
+            }
+            {
+                ts.consume(tempSequence.remove()); // 19.5
+
+                // still on
+                assertThat(ts.getSignal().calling).isTrue();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(0.5);
+            }
+            {
+                // and off again
+                logger.info("TURNING OFF");
+                ts.consume(tempSequence.remove()); // 19.0
+
+
+                assertThat(ts.getSignal().calling).isFalse();
+                assertThat(ts.getSignal().demand.sample).isEqualTo(0.0);
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
     /**
      * Test the simplest possible combination: {@link SimpleZoneController} with
      * one thermostat using a {@link SimplePidController}.
      */
     @Test
-    void test1H() throws InterruptedException {
+    void testOneZone() throws InterruptedException {
 
-        ThreadContext.push("test1H");
+        ThreadContext.push("testOneZone");
 
         try {
 
-            var timestamp = 0L;
-            var tempSequence = new LinkedList<DataSample<Double>>();
-
-            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.0, null));
-            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.5, null));
-            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 21.0, null));
-            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.5, null));
-            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 20.0, null));
-            tempSequence.add(new DataSample<Double>(timestamp++, "source", "signature", 19.5, null));
-            tempSequence.add(new DataSample<Double>(timestamp,   "source", "signature", 19.0, null));
+            var tempSequence = createSequence();
 
             var tsSet = new TreeSet<Thermostat>();
-            var controller = new SimplePidController(20.0, 1.0, 0, 0, 0);
-            var sensor = new NullSensor("address", 0);
-            var ts = new ThermostatModel("ts", sensor, controller);
+            var controller = new SimplePidController("simple20", 20.0, 1.0, 0, 0, 0);
+            var ts = new ThermostatModel("ts", mock(AnalogSensor.class), controller);
             tsSet.add(ts);
 
             var zc = new SimpleZoneController("zc", tsSet);
@@ -59,12 +185,12 @@ class SimpleZoneControllerTest {
             assertThat(ts.getSignal().calling).isFalse();
 
             {
-                // This is a fake - data sample is injected, but it makes no difference
                 ts.consume(tempSequence.remove());
 
                 // still off
                 assertThat(ts.getSignal().calling).isFalse();
                 assertThat(ts.getSignal().demand.sample).isEqualTo(1.0);
+                assertThat(zc.getSignal().sample).isEqualTo(0.0);
             }
             {
                 ts.consume(tempSequence.remove());
@@ -72,6 +198,7 @@ class SimpleZoneControllerTest {
                 // still off
                 assertThat(ts.getSignal().calling).isFalse();
                 assertThat(ts.getSignal().demand.sample).isEqualTo(1.5);
+                assertThat(zc.getSignal().sample).isEqualTo(0.0);
             }
 
             {
@@ -83,7 +210,6 @@ class SimpleZoneControllerTest {
                 assertThat(ts.getSignal().demand.sample).isEqualTo(2.0);
 
                 // Zone controller should've flipped to on, this is the only thermostat
-
                 assertThat(zc.getSignal().sample).isEqualTo(2.0);
             }
             {
@@ -118,7 +244,6 @@ class SimpleZoneControllerTest {
                 logger.info("TURNING OFF");
                 ts.consume(tempSequence.remove());
 
-
                 assertThat(ts.getSignal().calling).isFalse();
                 assertThat(ts.getSignal().demand.sample).isEqualTo(0.0);
 
@@ -143,13 +268,11 @@ class SimpleZoneControllerTest {
 
         try {
 
-            var c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
-            var s1 = new NullSensor("address1", 0);
-            var t1 = new ThermostatModel("ts1", s1, c1);
+            var c1 = new SimplePidController("simple20", 20.0, 1.0, 0, 0, 0);
+            var t1 = new ThermostatModel("ts1", mock(AnalogSensor.class), c1);
 
-            var c2 = new SimplePidController(25.0, 1.0, 0, 0, 0);
-            var s2 = new NullSensor("address2", 0);
-            var t2 = new ThermostatModel("ts2", s2, c2);
+            var c2 = new SimplePidController("simple25", 25.0, 1.0, 0, 0, 0);
+            var t2 = new ThermostatModel("ts2", mock(AnalogSensor.class), c2);
 
             assertThat(t1.getSignal().calling).isFalse();
 
@@ -190,13 +313,11 @@ class SimpleZoneControllerTest {
 
         try {
 
-            var c1 = new SimplePidController(20.0, 1.0, 0, 0, 0);
-            var s1 = new NullSensor("address1", 0);
-            var t1 = new ThermostatModel("ts1", s1, c1);
+            var c1 = new SimplePidController("simple20", 20.0, 1.0, 0, 0, 0);
+            var t1 = new ThermostatModel("ts1", mock(AnalogSensor.class), c1);
 
-            var c2 = new SimplePidController(25.0, 1.0, 0, 0, 0);
-            var s2 = new NullSensor("address2", 0);
-            var t2 = new ThermostatModel("ts2", s2, c2);
+            var c2 = new SimplePidController("simple25", 25.0, 1.0, 0, 0, 0);
+            var t2 = new ThermostatModel("ts2", mock(AnalogSensor.class), c2);
 
             assertThat(t1.getSignal().calling).isFalse();
 
