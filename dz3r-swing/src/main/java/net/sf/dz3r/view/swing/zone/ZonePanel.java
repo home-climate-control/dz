@@ -219,7 +219,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
         try {
 
-            logger.info("{}", e::toString);
+            logger.debug("{}", e::toString);
 
             if (zoneStatus == null) {
                 logger.warn("zoneStatus unset, blowups likely, ignored");
@@ -343,13 +343,13 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         case KeyEvent.VK_KP_UP:
                         case KeyEvent.VK_UP:
 
-                            raiseSetpoint();
+                            raiseSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
                             break;
 
                         case KeyEvent.VK_KP_DOWN:
                         case KeyEvent.VK_DOWN:
 
-                            lowerSetpoint();
+                            lowerSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
                             break;
 
                         default:
@@ -374,13 +374,35 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         logger.warn("refresh(): NOP?");
     }
 
-    private void raiseSetpoint() {
+    private int getSetpointDeltaModifier(boolean shift, boolean ctrl) {
+
+        if (shift && ctrl) {
+            return 100;
+        }
+
+        if (shift) {
+            return 10;
+        }
+
+        if (ctrl) {
+            return 50;
+        }
+
+        return 1;
+    }
+
+    /**
+     * Raise the setpoint.
+     *
+     * @param modifier Multiply the default {@link #setpointDelta} by this number to get the actual delta.
+     */
+    private void raiseSetpoint(int modifier) {
 
         // Must operate in visible values to avoid rounding problems
 
         var setpoint = getDisplayValue(zone.getSettings().setpoint);
 
-        setpoint += setpointDelta;
+        setpoint += setpointDelta * modifier;
         setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
         zone.setSettings(new ZoneSettings(zone.getSettings(), setpoint));
@@ -388,13 +410,18 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         refresh();
     }
 
-    private void lowerSetpoint() {
+    /**
+     * Lower the setpoint.
+     *
+     * @param modifier Multiply the default {@link #setpointDelta} by this number to get the actual delta.
+     */
+    private void lowerSetpoint(int modifier) {
 
         // Must operate in visible values to avoid rounding problems
 
         var setpoint = getDisplayValue(zone.getSettings().setpoint);
 
-        setpoint -= setpointDelta;
+        setpoint -= setpointDelta * modifier;
         setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
         zone.setSettings(new ZoneSettings(zone.getSettings(), setpoint));

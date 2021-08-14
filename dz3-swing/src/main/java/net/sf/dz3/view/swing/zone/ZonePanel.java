@@ -304,13 +304,13 @@ public class ZonePanel extends EntityPanel implements KeyListener {
                 case KeyEvent.VK_KP_UP:
                 case KeyEvent.VK_UP:
 
-                raiseSetpoint();
+                raiseSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
                 break;
 
                 case KeyEvent.VK_KP_DOWN:
                 case KeyEvent.VK_DOWN:
 
-                lowerSetpoint();
+                lowerSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
                 break;
 
                 default:
@@ -327,7 +327,29 @@ public class ZonePanel extends EntityPanel implements KeyListener {
         }
     }
 
-    private void raiseSetpoint() {
+    private int getSetpointDeltaModifier(boolean shift, boolean ctrl) {
+
+        if (shift && ctrl) {
+            return 100;
+        }
+
+        if (shift) {
+            return 10;
+        }
+
+        if (ctrl) {
+            return 50;
+        }
+
+        return 1;
+    }
+
+    /**
+     * Raise the setpoint.
+     *
+     * @param modifier Multiply the default {@link #setpointDelta} by this number to get the actual delta.
+     */
+    private void raiseSetpoint(int modifier) {
 
         // If the zone is off, the setpoint is not displayed, hence we won't accept changes to avoid
         // unpleasant surprises later
@@ -340,7 +362,7 @@ public class ZonePanel extends EntityPanel implements KeyListener {
         var controller = source.getController();
         var setpoint = getDisplayValue(controller.getSetpoint());
 
-        setpoint += setpointDelta;
+        setpoint += setpointDelta * modifier;
         setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
         if (setpoint <= ThermostatModel.SETPOINT_MAX) {
@@ -351,7 +373,12 @@ public class ZonePanel extends EntityPanel implements KeyListener {
         refresh();
     }
 
-    private void lowerSetpoint() {
+    /**
+     * Lower the setpoint.
+     *
+     * @param modifier Multiply the default {@link #setpointDelta} by this number to get the actual delta.
+     */
+    private void lowerSetpoint(int modifier) {
 
         // If the zone is off, the setpoint is not displayed, hence we won't accept changes to avoid
         // unpleasant surprises later
@@ -364,7 +391,7 @@ public class ZonePanel extends EntityPanel implements KeyListener {
         var controller = source.getController();
         var setpoint = getDisplayValue(controller.getSetpoint());
 
-        setpoint -= setpointDelta;
+        setpoint -= setpointDelta * modifier;
         setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
         if (setpoint >= ThermostatModel.SETPOINT_MIN) {
