@@ -305,7 +305,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 // next time sensors are polled or come up with samples. Thermostats will follow
                 // immediately thereafter.
 
-                // VT: FIXME: Other entities (namely, HvacController, HvacDriver, ZoneController, Unit)
+                // VT: FIXME: Other entities (namely, HvacController, HvacDevice, ZoneController, Unit)
                 // will need to be flushed eventually, when/if they will be capable to be independently
                 // controlled without violating DZ abstractions.
 

@@ -72,7 +72,7 @@ public class HvacDriverHeatpump extends AbstractHvacDriver {
     private void check(Switch s, String purpose) {
 
         if (s == null) {
-            throw new IllegalArgumentException(purpose + "Switch can't be null");
+            throw new IllegalArgumentException("'" + purpose + "' switch can't be null");
         }
     }
 
