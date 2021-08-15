@@ -28,7 +28,13 @@ public class SingleStageUnitController extends AbstractUnitController {
      */
     @Override
     public Flux<Signal<HvacCommand, Void>> compute(Flux<Signal<UnitControlSignal, Void>> in) {
-        throw new UnsupportedOperationException("Not Implemented");
+
+        return in
+                .filter(Signal::isOK)
+                .map(s -> {
+                    double value = s.getValue().demand > 0 ? 1 : 0;
+                    return new Signal<>(s.timestamp, new HvacCommand(null, value, value));
+                });
     }
 
     @Override

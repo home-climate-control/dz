@@ -27,4 +27,9 @@ public class UnitControlSignal {
         this.demand = demand;
         this.fanSpeed = fanSpeed;
     }
+
+    @Override
+    public String toString() {
+        return "{demand=" + demand + ", fanSpeed=" + fanSpeed + "}";
+    }
 }

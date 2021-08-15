@@ -1,8 +1,12 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3.device.sensor.Switch;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractHvacDevice implements HvacDevice {
+
+    protected final Logger logger = LogManager.getLogger();
 
     private final String name;
 
