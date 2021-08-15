@@ -2,6 +2,7 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.controller.SignalProcessor;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.UnitControlSignal;
 import net.sf.dz3r.signal.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class ZoneController implements SignalProcessor<ZoneStatus, Double, String> {
+public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSignal, String> {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -35,7 +36,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, Double, Strin
      * @return {@link UnitController#compute(Flux) Unit control} signal. No payload.
      */
     @Override
-    public Flux<Signal<Double, String>> compute(Flux<Signal<ZoneStatus, String>> in) {
+    public Flux<Signal<UnitControlSignal, String>> compute(Flux<Signal<ZoneStatus, String>> in) {
 
         return in
                 .doOnNext(this::capture)
@@ -55,7 +56,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, Double, Strin
      *
      * @return Unit control signal with no payload.
      */
-    private Signal<Double, String> process(Signal<ZoneStatus, String> signal) {
+    private Signal<UnitControlSignal, String> process(Signal<ZoneStatus, String> signal) {
 
         var nonError = zone2status
                 .entrySet()
@@ -82,8 +83,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, Double, Strin
 
         var demand = computeDemand(unhappy, unhappyVoting, needBump);
 
-
-        return new Signal<>(signal.timestamp, demand);
+        return new Signal<>(signal.timestamp, new UnitControlSignal(demand, null));
     }
 
     private double computeDemand(Map<String, Signal<ZoneStatus, String>> unhappy, Map<String, Signal<ZoneStatus, String>> unhappyVoting, boolean needBump) {

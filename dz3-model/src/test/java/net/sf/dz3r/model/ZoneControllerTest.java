@@ -131,13 +131,13 @@ class ZoneControllerTest {
         // DZ-reactive sequence
         StepVerifier
                 .create(stage2)
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(0.0)) // 20.0
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(0.0)) // 20.5
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(2.0)) // 21.0
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.5)) // 20.5
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1.0)) // 20.0
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(0.5)) // 19.5
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(0.0)) // 19.0
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0)) // 20.0
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0)) // 20.5
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(2.0)) // 21.0
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(1.5)) // 20.5
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(1.0)) // 20.0
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.5)) // 19.5
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0)) // 19.0
                 .verifyComplete();
     }
 
@@ -171,8 +171,8 @@ class ZoneControllerTest {
 
         StepVerifier
                 .create(fluxZ)
-                .assertNext(s -> assertThat(s.getValue()).isZero())
-                .assertNext(s -> assertThat(s.getValue()).isZero())
+                .assertNext(s -> assertThat(s.getValue().demand).isZero())
+                .assertNext(s -> assertThat(s.getValue().demand).isZero())
                 .verifyComplete();
     }
 
@@ -206,8 +206,8 @@ class ZoneControllerTest {
 
         StepVerifier
                 .create(fluxZ)
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(17.0))
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(17.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
                 .verifyComplete();
     }
 }
