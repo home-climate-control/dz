@@ -57,8 +57,9 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
         super(name);
 
         this.mode = mode;
-        this.theSwitch = theSwitch;
+        this.requested = new HvacCommand(mode, null, null);
 
+        this.theSwitch = theSwitch;
         check(theSwitch, "main");
     }
 
@@ -88,7 +89,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
                                     logger.debug("State: {}", state);
 
-                                    sink.next(new Signal<>(s.timestamp, new SwitchStatus(command, actual)));
+                                    sink.next(new Signal<>(s.timestamp, new SwitchStatus(SwitchStatus.Kind.REQUESTED, command, actual)));
 
                                     // By this time, the command has been verified to be valid
                                     requested = command;
@@ -96,12 +97,18 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     theSwitch.setState(state);
                                     actual = state;
 
-                                    sink.next(new Signal<>(Instant.now(), new SwitchStatus(command, actual)));
+                                    var complete = new SwitchStatus(SwitchStatus.Kind.ACTUAL, command, actual);
+                                    sink.next(new Signal<>(Instant.now(), complete));
 
                                 } catch (Throwable t) { // NOSONAR Consequences have been considered
-                                    logger.error("Failed to set state", t);
+
+                                    logger.error("Failed to compute " + s, t);
                                     sink.next(new Signal<>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, t));
+
+                                } finally {
+                                    sink.complete();
                                 }
+
                             });
                 });
     }
@@ -111,7 +118,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
         // A valid situation for the whole system which makes no sense for this particular application
 
         if (command.demand == null && command.fanSpeed == null) {
-            logger.warn("mode only command, ignored: " + command);
+            logger.warn("mode only command, ignored: {}", command);
             return true;
         }
 
@@ -130,7 +137,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
     private HvacCommand reconcile(HvacCommand command) {
 
         if (command.mode != null && command.mode != mode) {
-            throw new IllegalArgumentException(mode + " is not supported by this instance");
+            throw new IllegalArgumentException(command.mode.description + " is not supported by this instance");
         }
 
         if (mode != HvacMode.COOLING && command.fanSpeed > 0) {
@@ -139,8 +146,8 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
         var result = new HvacCommand(
                 mode,
-                command.demand == null ? null : command.demand,
-                command.fanSpeed == null ? null : command.fanSpeed
+                command.demand == null ? requested.demand : command.demand,
+                command.fanSpeed == null ? requested.fanSpeed : command.fanSpeed
         );
 
         logger.debug("Requested: {}", result);
@@ -170,17 +177,24 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
     public static class SwitchStatus extends HvacDeviceStatus {
 
+        public enum Kind {
+            REQUESTED,
+            ACTUAL
+        }
+
+        public final Kind kind;
         public final HvacCommand requested;
         public final Boolean actual;
 
-        public SwitchStatus(HvacCommand requested, Boolean actual) {
+        public SwitchStatus(Kind kind, HvacCommand requested, Boolean actual) {
+            this.kind = kind;
             this.requested = requested;
             this.actual = actual;
         }
 
         @Override
         public String toString() {
-            return "{requested=" + requested + ", actual=" + actual + "}";
+            return "{kind=" + kind + ", requested=" + requested + ", actual=" + actual + "}";
         }
     }
 }
