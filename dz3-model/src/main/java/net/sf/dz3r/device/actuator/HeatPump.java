@@ -8,6 +8,7 @@ import net.sf.dz3r.signal.HvacDeviceStatus;
 import net.sf.dz3r.signal.Signal;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -168,7 +169,7 @@ public class HeatPump extends AbstractHvacDevice {
 
             logger.info("Shutting off the condenser");
 
-            var requestedDemand = reconcile(requested, new HvacCommand(null, 0.0, null));
+            var requestedDemand = reconcile(actual, new HvacCommand(null, 0.0, null));
             sink.next(
                     new Signal<>(Instant.now(),
                             new HeatpumpStatus(
@@ -187,7 +188,8 @@ public class HeatPump extends AbstractHvacDevice {
                                     AbstractHvacDeviceStatus.Kind.ACTUAL,
                                     requestedDemand,
                                     actual)));
-            Thread.sleep(MODE_CHANGE_DELAY.toMillis());
+            logger.info("Letting the hardware settle for {}", MODE_CHANGE_DELAY);
+            Mono.delay(MODE_CHANGE_DELAY).block();
 
         } else {
             logger.debug("Condenser is not running, skipping the pause");
@@ -217,21 +219,21 @@ public class HeatPump extends AbstractHvacDevice {
      *
      *
      * @param previous Previous command.
-     * @param command Incoming command.
+     * @param next Incoming command.
      *
      * @return Command that will actually be executed.
      *
      * @throws IllegalArgumentException if the command indicates an unsupported mode, or illegal fan state.
      */
-    private HvacCommand reconcile(HvacCommand previous, HvacCommand command) {
+    private HvacCommand reconcile(HvacCommand previous, HvacCommand next) {
 
         var result = new HvacCommand(
-                command.mode == null? previous.mode : command.mode,
-                command.demand == null ? previous.demand : command.demand,
-                command.fanSpeed == null ? previous.fanSpeed : command.fanSpeed
+                next.mode == null? previous.mode : next.mode,
+                next.demand == null ? previous.demand : next.demand,
+                next.fanSpeed == null ? previous.fanSpeed : next.fanSpeed
         );
 
-        logger.debug("Reconcile: {} => {}", previous, result);
+        logger.debug("Reconcile: {} + {} => {}", previous, next, result);
 
         return result;
     }
