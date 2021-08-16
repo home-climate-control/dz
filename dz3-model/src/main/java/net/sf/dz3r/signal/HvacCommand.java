@@ -19,11 +19,16 @@ public class HvacCommand {
     public final HvacMode mode;
 
 
+    /**
+     * Create an instance.
+     *
+     * An instance with all {@code null} values indicates an initial state.
+     *
+     * @param mode Nullable operating mode.
+     * @param demand Nullable demand.
+     * @param fanSpeed Nullable fan speed.
+     */
     public HvacCommand( HvacMode mode, Double demand, Double fanSpeed) {
-
-        if (mode == null && demand == null && fanSpeed == null) {
-            throw new IllegalArgumentException("null command doesn't make sense");
-        }
 
         this.mode = mode;
         this.demand = demand;

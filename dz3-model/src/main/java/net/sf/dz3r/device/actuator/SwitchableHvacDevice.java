@@ -73,13 +73,13 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
         return in
                 .filter(Signal::isOK)
-                .flatMap(s -> {
+                .flatMap(signal -> {
                     return Flux
                             .create(sink -> {
 
                                 try {
 
-                                    var command = reconcile(s.getValue());
+                                    var command = reconcile(signal.getValue());
 
                                     if (isModeOnly(command)) {
                                         return;
@@ -89,7 +89,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
                                     logger.debug("State: {}", state);
 
-                                    sink.next(new Signal<>(s.timestamp, new SwitchStatus(SwitchStatus.Kind.REQUESTED, command, actual)));
+                                    sink.next(new Signal<>(Instant.now(), new SwitchStatus(SwitchStatus.Kind.REQUESTED, command, actual)));
 
                                     // By this time, the command has been verified to be valid
                                     requested = command;
@@ -102,7 +102,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
                                 } catch (Throwable t) { // NOSONAR Consequences have been considered
 
-                                    logger.error("Failed to compute " + s, t);
+                                    logger.error("Failed to compute {}", signal, t);
                                     sink.next(new Signal<>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, t));
 
                                 } finally {
@@ -175,20 +175,12 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                 "Turns on and off to provide " + mode.description.toLowerCase());
     }
 
-    public static class SwitchStatus extends HvacDeviceStatus {
+    public static class SwitchStatus extends AbstractHvacDeviceStatus {
 
-        public enum Kind {
-            REQUESTED,
-            ACTUAL
-        }
-
-        public final Kind kind;
-        public final HvacCommand requested;
         public final Boolean actual;
 
-        public SwitchStatus(Kind kind, HvacCommand requested, Boolean actual) {
-            this.kind = kind;
-            this.requested = requested;
+        protected SwitchStatus(Kind kind, HvacCommand requested, Boolean actual) {
+            super(kind, requested);
             this.actual = actual;
         }
 

@@ -40,33 +40,39 @@ class SwitchableHvacDeviceTest {
                 .create(result)
                 .assertNext(e -> {
                     // Actual is not yet set
+                    assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).kind).isEqualTo(AbstractHvacDevice.AbstractHvacDeviceStatus.Kind.REQUESTED);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.demand).isEqualTo(0.8);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.fanSpeed).isNull();
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).actual).isNull();
                 })
                 .assertNext(e -> {
+                    assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).kind).isEqualTo(AbstractHvacDevice.AbstractHvacDeviceStatus.Kind.ACTUAL);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.demand).isEqualTo(0.8);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.fanSpeed).isNull();
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).actual).isTrue();
                 })
                 // --
                 .assertNext(e -> {
+                    assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).kind).isEqualTo(AbstractHvacDevice.AbstractHvacDeviceStatus.Kind.REQUESTED);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.demand).isEqualTo(0.5);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.fanSpeed).isNull();
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).actual).isTrue();
                 })
                 .assertNext(e -> {
+                    assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).kind).isEqualTo(AbstractHvacDevice.AbstractHvacDeviceStatus.Kind.ACTUAL);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.demand).isEqualTo(0.5);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.fanSpeed).isNull();
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).actual).isTrue();
                 })
                 // --
                 .assertNext(e -> {
+                    assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).kind).isEqualTo(AbstractHvacDevice.AbstractHvacDeviceStatus.Kind.REQUESTED);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.demand).isEqualTo(0.0);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.fanSpeed).isNull();
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).actual).isTrue();
                 })
                 .assertNext(e -> {
+                    assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).kind).isEqualTo(AbstractHvacDevice.AbstractHvacDeviceStatus.Kind.ACTUAL);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.demand).isEqualTo(0.0);
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).requested.fanSpeed).isNull();
                     assertThat(((SwitchableHvacDevice.SwitchStatus)e.getValue()).actual).isFalse();

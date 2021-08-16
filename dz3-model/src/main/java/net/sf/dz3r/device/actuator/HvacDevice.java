@@ -11,6 +11,11 @@ import reactor.core.publisher.Flux;
 
 import java.util.Set;
 
+/**
+ * HVAC device driver.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ */
 public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatus, Void>, Addressable<String>, JmxAware {
 
     /**
