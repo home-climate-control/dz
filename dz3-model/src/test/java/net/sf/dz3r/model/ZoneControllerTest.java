@@ -167,8 +167,6 @@ class ZoneControllerTest {
         // Note merge(), order is irrelevant, zero demand
         var fluxZ = zc.compute(Flux.merge(flux1, flux2));
 
-        fluxZ.log().subscribe().dispose();
-
         StepVerifier
                 .create(fluxZ)
                 .assertNext(s -> assertThat(s.getValue().demand).isZero())
@@ -202,11 +200,9 @@ class ZoneControllerTest {
         // Note concat(), order is important for StepVerifier
         var fluxZ = zc.compute(Flux.concat(flux1, flux2));
 
-        fluxZ.log().subscribe().dispose();
-
         StepVerifier
                 .create(fluxZ)
-                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
                 .verifyComplete();
     }
