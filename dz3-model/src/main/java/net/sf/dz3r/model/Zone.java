@@ -25,6 +25,10 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     private final Logger logger = LogManager.getLogger();
 
     private final Thermostat ts;
+
+    /**
+     * Zone settings.
+     */
     private ZoneSettings settings;
 
     public Zone(Thermostat ts, ZoneSettings settings) {

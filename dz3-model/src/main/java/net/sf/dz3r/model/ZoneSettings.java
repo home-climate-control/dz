@@ -11,11 +11,11 @@ package net.sf.dz3r.model;
  */
 public class ZoneSettings {
 
-    public final boolean enabled;
-    public final double setpoint;
-    public final boolean voting;
-    public final boolean hold;
-    public final int dumpPriority;
+    public final Boolean enabled;
+    public final Double setpoint;
+    public final Boolean voting;
+    public final Boolean hold;
+    public final Integer dumpPriority;
 
     /**
      * Create an instance from just a setpoint.
@@ -28,12 +28,33 @@ public class ZoneSettings {
         this(true, setpoint, true, false, 0);
     }
 
-
+    /**
+     * Create an instance from a template, and enabled flag.
+     *
+     * @param template Template to copy all settings except {@link #enabled} from.
+     * @param enabled {@link #enabled} flag to set.
+     */
     public ZoneSettings(ZoneSettings template, boolean enabled) {
         this(enabled, template.setpoint, template.voting, template.hold, template.dumpPriority);
     }
 
-    public ZoneSettings(boolean enabled, double setpoint, boolean voting, boolean hold, int dumpPriority) {
+    /**
+     * Merge this instance with an update.
+     *
+     * @param from Adjustment instance. Non-null values take precedence over this object's values.
+     */
+    public ZoneSettings merge(ZoneSettings from) {
+
+        return new ZoneSettings(
+                from.enabled != null ? from.enabled : enabled,
+                from.setpoint != null ? from.setpoint : setpoint,
+                from.voting != null ? from.voting : voting,
+                from.hold != null ? from.hold : hold,
+                from.dumpPriority != null ? from.dumpPriority : dumpPriority);
+    }
+
+    public ZoneSettings(Boolean enabled, Double setpoint, Boolean voting, Boolean hold, Integer dumpPriority) {
+
         this.enabled = enabled;
         this.setpoint = setpoint;
         this.voting = voting;
