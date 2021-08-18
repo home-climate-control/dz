@@ -8,8 +8,11 @@ import net.sf.dz3.device.sensor.AnalogSensor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
@@ -338,6 +341,116 @@ class SimpleZoneControllerTest {
 
                 assertThat(signal).isNotNull();
                 assertThat(signal.sample).isEqualTo(6.0);
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+    /**
+     * Make sure non-voting zones don't start the HVAC.
+     */
+    @Test
+    void nonVoting() {
+
+        ThreadContext.push("nonVoting");
+
+        try {
+
+            var c1 = new SimplePidController("simple20", 20.0, 1.0, 0, 0, 0);
+            var t1 = new ThermostatModel("ts1", mock(AnalogSensor.class), c1);
+            t1.setVoting(false);
+
+            var c2 = new SimplePidController("simple25", 25.0, 1.0, 0, 0, 0);
+            var t2 = new ThermostatModel("ts2", mock(AnalogSensor.class), c2);
+
+            var tsSet = new TreeSet<Thermostat>();
+
+            tsSet.add(t1);
+            tsSet.add(t2);
+
+            var zc = new SimpleZoneController("zc", tsSet);
+
+            logger.info("Zone controller: " + zc);
+
+            var now = Instant.now();
+            var s23 = new DataSample<>(now.toEpochMilli(), "source", "signature", 23.0, null);
+            var s28 = new DataSample<>(now.plus(10, ChronoUnit.SECONDS).toEpochMilli(), "source", "signature", 28.0, null);
+
+            {
+                t1.consume(s23);
+                assertThat(t1.getSignal().calling).isTrue();
+
+                t2.consume(s23);
+                assertThat(t2.getSignal().calling).isFalse();
+
+                var signal = zc.getSignal();
+
+                assertThat(signal).isNotNull();
+                assertThat(signal.sample).isEqualTo(0.0);
+            }
+
+            {
+                t1.consume(s28);
+                assertThat(t1.getSignal().calling).isTrue();
+
+                t2.consume(s28);
+                assertThat(t2.getSignal().calling).isTrue();
+
+                var signal = zc.getSignal();
+
+                assertThat(signal).isNotNull();
+                assertThat(signal.sample).isEqualTo(13.0);
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    /**
+     * Make sure the <a href="https://github.com/home-climate-control/dz/issues/195">last enabled zone's voting status is ignored</a>.
+     */
+    @Test
+    @Disabled("Yep, it's broken; need the fix now.")
+    void lastZoneNonVoting() {
+
+        ThreadContext.push("lastZoneNonVoting");
+
+        try {
+
+            var c1 = new SimplePidController("simple20", 20.0, 1.0, 0, 0, 0);
+            var t1 = new ThermostatModel("ts1", mock(AnalogSensor.class), c1);
+            t1.setVoting(false);
+
+            var c2 = new SimplePidController("simple25", 25.0, 1.0, 0, 0, 0);
+            var t2 = new ThermostatModel("ts2", mock(AnalogSensor.class), c2);
+            t2.setOn(false);
+
+            var tsSet = new TreeSet<Thermostat>();
+
+            tsSet.add(t1);
+            tsSet.add(t2);
+
+            var zc = new SimpleZoneController("zc", tsSet);
+
+            logger.info("Zone controller: " + zc);
+
+            var now = Instant.now();
+            var s23 = new DataSample<>(now.toEpochMilli(), "source", "signature", 23.0, null);
+            var s28 = new DataSample<>(now.plus(10, ChronoUnit.SECONDS).toEpochMilli(), "source", "signature", 28.0, null);
+
+            {
+                t1.consume(s23);
+                assertThat(t1.getSignal().calling).isTrue();
+
+                t2.consume(s23);
+                assertThat(t2.getSignal().calling).isFalse();
+
+                var signal = zc.getSignal();
+
+                assertThat(signal).isNotNull();
+                assertThat(signal.sample).isEqualTo(4.0);
             }
 
         } finally {

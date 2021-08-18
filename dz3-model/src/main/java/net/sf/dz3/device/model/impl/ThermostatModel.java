@@ -21,6 +21,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
+import java.time.Instant;
+
 /**
  * The virtual thermostat implementation.
  *
@@ -392,12 +394,14 @@ public class ThermostatModel implements Thermostat, ThermostatController {
             // but the control logic still keeps working so the moment the thermostat is back on,
             // the rest of the system will kick in  without a jolt
 
+            // Edge case: thermostat is off before the first signal is received
+            var timestamp = controlSignal == null ? Instant.now().toEpochMilli() : controlSignal.timestamp;
             return new ThermostatSignal(
                     false,
                     isOnHold(),
                     false,
                     isVoting(),
-                    new DataSample<>(controlSignal.timestamp, getName(), signature, 0d, null));
+                    new DataSample<>(timestamp, getName(), signature, 0d, null));
         }
 
         if (lastKnownSignal == null) {
