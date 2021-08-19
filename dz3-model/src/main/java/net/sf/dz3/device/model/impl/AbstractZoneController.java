@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * The zone controller abstraction.
@@ -246,7 +247,7 @@ public abstract class AbstractZoneController implements ZoneController {
 
                 unhappy.put(source, signal);
 
-                if (signal.voting) {
+                if (signal.voting || isLastEnabled(source)) {
 
                     unhappyVoting.put(source, signal);
 
@@ -268,6 +269,28 @@ public abstract class AbstractZoneController implements ZoneController {
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    /**
+     * Check if this thermostat is the last enabled thermostat.
+     *
+     * @param ts Thermostat to check.
+     *
+     * @return {@code true} if the given thermostat is the last one enabled.
+     */
+    private boolean isLastEnabled(Thermostat ts) {
+
+        var enabled = name2ts
+                .values()
+                .stream()
+                .filter(t -> t.isOn())
+                .collect(Collectors.toSet());
+
+        if (enabled.size() > 1) {
+            return false;
+        }
+
+        return enabled.iterator().next() == ts;
     }
 
     /**
