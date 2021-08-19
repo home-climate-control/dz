@@ -206,4 +206,110 @@ class ZoneControllerTest {
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
                 .verifyComplete();
     }
+
+    /**
+     * Make sure non-voting zones don't start the HVAC.
+     */
+    @Test
+    void nonVoting() {
+
+        var setpoint1 = 20.0;
+        var setpoint2 = 25.0;
+
+        var s1 = new ZoneSettings(true, setpoint1, false, false, 0);
+        var s2 = new ZoneSettings(true, setpoint1, true, false, 0);
+
+        var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
+        var z1 = new Zone(ts1, s1);
+
+        var ts2 = new Thermostat("ts25", setpoint2, 1, 0, 0, 1);
+        var z2 = new Zone(ts2, s2);
+
+        var zc = new ZoneController();
+
+        // This should bump z2 to calling, but z1 should stay off
+        var sequence = Flux
+                .just(new Signal<Double, String>(Instant.now(), 23.0));
+
+        var flux1 = z1.compute(sequence);
+        var flux2 = z2.compute(sequence);
+
+        // Note concat(), order is important for StepVerifier
+        var fluxZ = zc.compute(Flux.concat(flux1, flux2));
+
+        StepVerifier
+                .create(fluxZ)
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0))
+                .verifyComplete();
+    }
+
+    /**
+     * Make sure the <a href="https://github.com/home-climate-control/dz/issues/195">last enabled zone's voting status is ignored</a>
+     * for the case when it is the last enabled zone of many.
+     */
+    @Test
+    void lastZoneOfManyNonVoting() {
+
+        var setpoint1 = 20.0;
+        var setpoint2 = 25.0;
+
+        // Enabled, but not voting
+        var s1 = new ZoneSettings(true, setpoint1, false, false, 0);
+
+        // Disabled, but voting
+        var s2 = new ZoneSettings(false, setpoint1, true, false, 0);
+
+        var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
+        var z1 = new Zone(ts1, s1);
+
+        var ts2 = new Thermostat("ts25", setpoint2, 1, 0, 0, 1);
+        var z2 = new Zone(ts2, s2);
+
+        var zc = new ZoneController();
+
+        var sequence = Flux
+                .just(new Signal<Double, String>(Instant.now(), 23.0));
+
+        var flux1 = z1.compute(sequence);
+        var flux2 = z2.compute(sequence);
+
+        // Note concat(), order is important for StepVerifier
+        var fluxZ = zc.compute(Flux.concat(flux1, flux2));
+
+        StepVerifier
+                .create(fluxZ)
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(4.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(4.0))
+                .verifyComplete();
+    }
+
+    /**
+     * Make sure the <a href="https://github.com/home-climate-control/dz/issues/195">last enabled zone's voting status is ignored</a>,
+     * for the case when it is the only zone configured for the zone controller.
+     */
+    @Test
+    void onlyZoneNonVoting() {
+
+        var setpoint1 = 20.0;
+
+        // Enabled, but not voting
+        var s1 = new ZoneSettings(true, setpoint1, false, false, 0);
+
+        var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
+        var z1 = new Zone(ts1, s1);
+
+        var zc = new ZoneController();
+
+        var sequence = Flux
+                .just(new Signal<Double, String>(Instant.now(), 23.0));
+
+        var flux1 = z1.compute(sequence);
+        var fluxZ = zc.compute(flux1);
+
+        StepVerifier
+                .create(fluxZ)
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(4.0))
+                .verifyComplete();
+    }
 }
