@@ -179,6 +179,13 @@ public abstract class AbstractZoneController implements ZoneController {
         }
     }
 
+    /**
+     * Remove the thermostat from {@link #unhappy} and {@link #unhappyVoting} if error,
+     * add to {@link #failed} if a fresh failure, remove otherwise, log the actions.
+     *
+     * @param source Thermostat to check the signal for.
+     * @param signal Signal value.
+     */
     private void checkError(Thermostat source, ThermostatSignal signal) {
 
         if (signal.demand.isError()) {
@@ -230,14 +237,7 @@ public abstract class AbstractZoneController implements ZoneController {
             unhappyVoting.remove(source);
 
             if (signal.demand.isError()) {
-
-                // Faulty thermostat can't participate in the process,
-                // its zone will be handled "by default" - damper
-                // controller will take care of that
-                //
-                // (This should've been taken care of by checkError(), but
-                // let's be paranoid)
-                return false;
+                throw new IllegalStateException("this should've been handled by checkError()");
             }
 
             if (signal.calling) {
