@@ -496,4 +496,44 @@ class SimpleZoneControllerTest {
             ThreadContext.pop();
         }
     }
+
+    /**
+     * Make sure disabled thermostats don't start the HVAC unit.
+     */
+    @Test
+    void disabled() {
+
+        ThreadContext.push("disabled");
+
+        try {
+
+            var c1 = new SimplePidController("simple20", 20.0, 1.0, 0, 0, 0);
+            var t1 = new ThermostatModel("ts1", mock(AnalogSensor.class), c1);
+            t1.setOn(false);
+
+            var tsSet = new TreeSet<Thermostat>();
+
+            tsSet.add(t1);
+
+            var zc = new SimpleZoneController("zc", tsSet);
+
+            logger.info("Zone controller: " + zc);
+
+            var now = Instant.now();
+            var s23 = new DataSample<>(now.toEpochMilli(), "source", "signature", 23.0, null);
+
+            {
+                t1.consume(s23);
+                assertThat(t1.getSignal().calling).isFalse();
+
+                var signal = zc.getSignal();
+
+                assertThat(signal).isNotNull();
+                assertThat(signal.sample).isEqualTo(0.0);
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
 }

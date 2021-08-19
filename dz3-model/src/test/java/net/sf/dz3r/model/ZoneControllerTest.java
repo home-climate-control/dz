@@ -312,4 +312,31 @@ class ZoneControllerTest {
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(4.0))
                 .verifyComplete();
     }
+    /**
+     * Make sure disabled thermostats don't start the HVAC unit.
+     */
+    @Test
+    void disabled() {
+
+        var setpoint1 = 20.0;
+
+        // Disabled
+        var s1 = new ZoneSettings(false, setpoint1, true, false, 0);
+
+        var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
+        var z1 = new Zone(ts1, s1);
+
+        var zc = new ZoneController();
+
+        var sequence = Flux
+                .just(new Signal<Double, String>(Instant.now(), 23.0));
+
+        var flux1 = z1.compute(sequence);
+        var fluxZ = zc.compute(flux1);
+
+        StepVerifier
+                .create(fluxZ)
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0))
+                .verifyComplete();
+    }
 }

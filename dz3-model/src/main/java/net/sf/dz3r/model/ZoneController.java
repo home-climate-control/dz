@@ -63,7 +63,10 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .stream()
                 .filter(kv -> !kv.getValue().isError());
 
-        var unhappy = nonError
+        var enabled = nonError
+                .filter(kv -> kv.getValue().getValue().settings.enabled);
+
+        var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().status.calling)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
