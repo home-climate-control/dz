@@ -341,4 +341,20 @@ class ZoneControllerTest {
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0))
                 .verifyComplete();
     }
+
+    /**
+     * Make sure the zone controller handles incoming error signals as expected.
+     */
+    @Test
+    void errorSignal() {
+        // VT: FIXME: Implement this
+    }
+
+    /**
+     * Make sure the zone controller handles alien zone incoming signals as expected.
+     */
+    @Test
+    void alienZone() {
+        // VT: FIXME: Implement this
+    }
 }

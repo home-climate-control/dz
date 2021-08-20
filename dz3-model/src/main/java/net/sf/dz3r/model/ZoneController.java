@@ -59,6 +59,8 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
      */
     private Signal<UnitControlSignal, String> process(Signal<ZoneStatus, String> signal) {
 
+        // VT: FIXME: Handle alien zone signal here (complain, return null, filter it out later)
+
         var nonError = zone2status
                 .entrySet()
                 .stream()
