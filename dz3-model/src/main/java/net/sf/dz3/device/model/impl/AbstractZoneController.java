@@ -281,7 +281,7 @@ public abstract class AbstractZoneController implements ZoneController {
         var enabled = name2ts
                 .values()
                 .stream()
-                .filter(t -> t.isOn())
+                .filter(Thermostat::isOn)
                 .collect(Collectors.toSet());
 
         if (enabled.size() > 1) {
