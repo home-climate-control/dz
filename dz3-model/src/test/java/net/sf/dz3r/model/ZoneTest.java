@@ -62,7 +62,7 @@ class ZoneTest {
         var settings = new ZoneSettings(ts.getSetpoint());
         var z = new Zone(ts, settings);
 
-        z.set(new ZoneSettings(settings, false));
+        z.setSettings(new ZoneSettings(settings, false));
 
         var out = z
                 .compute(sequence)

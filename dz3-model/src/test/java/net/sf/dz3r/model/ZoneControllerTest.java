@@ -2,7 +2,6 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.signal.Signal;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -10,6 +9,7 @@ import reactor.test.StepVerifier;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class ZoneControllerTest {
 
-    private List<Double> source = List.of(
+    private final List<Double> source = List.of(
             20.0,
             20.5,
             21.0,
@@ -124,7 +124,7 @@ class ZoneControllerTest {
 
         var ts = new Thermostat("ts", 20, 1, 0, 0, 1);
         var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
-        var zc = new ZoneController();
+        var zc = new ZoneController(Set.of(z));
 
         var stage1 = z.compute(sequence);
         var stage2 = zc.compute(stage1).log();
@@ -157,7 +157,7 @@ class ZoneControllerTest {
         var ts2 = new Thermostat("ts25", 25, 1, 0, 0, 1);
         var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
 
-        var zc = new ZoneController();
+        var zc = new ZoneController(Set.of(z1, z2));
 
         var sequence = Flux
                 .just(new Signal<Double, String>(Instant.now(), 20.0));
@@ -190,7 +190,7 @@ class ZoneControllerTest {
         var ts2 = new Thermostat("ts25", 25, 1, 0, 0, 1);
         var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
 
-        var zc = new ZoneController();
+        var zc = new ZoneController(Set.of(z1, z2));
 
         var sequence = Flux
                 .just(new Signal<Double, String>(Instant.now(), 30.0));
@@ -212,7 +212,6 @@ class ZoneControllerTest {
      * Make sure non-voting zones don't start the HVAC.
      */
     @Test
-    @Disabled("Needs more work")
     void nonVoting() {
 
         var setpoint1 = 20.0;
@@ -227,7 +226,7 @@ class ZoneControllerTest {
         var ts2 = new Thermostat("ts25", setpoint2, 1, 0, 0, 1);
         var z2 = new Zone(ts2, s2);
 
-        var zc = new ZoneController();
+        var zc = new ZoneController(Set.of(z1, z2));
 
         // This should bump z2 to calling, but z1 should stay off
         var sequence = Flux
@@ -268,7 +267,7 @@ class ZoneControllerTest {
         var ts2 = new Thermostat("ts25", setpoint2, 1, 0, 0, 1);
         var z2 = new Zone(ts2, s2);
 
-        var zc = new ZoneController();
+        var zc = new ZoneController(Set.of(z1, z2));
 
         var sequence = Flux
                 .just(new Signal<Double, String>(Instant.now(), 23.0));
@@ -301,7 +300,7 @@ class ZoneControllerTest {
         var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
         var z1 = new Zone(ts1, s1);
 
-        var zc = new ZoneController();
+        var zc = new ZoneController(Set.of(z1));
 
         var sequence = Flux
                 .just(new Signal<Double, String>(Instant.now(), 23.0));
@@ -328,7 +327,7 @@ class ZoneControllerTest {
         var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
         var z1 = new Zone(ts1, s1);
 
-        var zc = new ZoneController();
+        var zc = new ZoneController(Set.of(z1));
 
         var sequence = Flux
                 .just(new Signal<Double, String>(Instant.now(), 23.0));

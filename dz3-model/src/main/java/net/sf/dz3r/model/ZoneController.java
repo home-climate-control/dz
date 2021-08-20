@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -25,9 +25,24 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
     private final Logger logger = LogManager.getLogger();
 
     /**
-     * Mapping from zone name to latest zone signal.
+     * Mapping from zone name to the zone itself.
+     *
+     * This map is created at instantiation time and never changes.
+     */
+    private final Map<String, Zone> zoneMap;
+
+    /**
+     * Mapping from zone name to the latest zone signal.
      */
     private final Map<String, Signal<ZoneStatus, String>> zone2status = new TreeMap<>();
+
+    public ZoneController(Set<Zone> zones) {
+
+        this.zoneMap = new TreeMap<>(
+                zones
+                .stream()
+                .collect(Collectors.toMap(Zone::getAddress, z -> z)));
+    }
 
     /**
      * Accept zone signals, emit unit control signal.
@@ -44,7 +59,22 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .map(this::process);
     }
 
+    /**
+     * Capture the signal to get an idea about the big picture.
+     *
+     * Signals from zones not in {@link #zoneMap} will be dropped on the floor.
+     *
+     * @param signal Incoming signal.
+     */
     private void capture(Signal<ZoneStatus, String> signal) {
+
+        if (!zoneMap.containsKey(signal.payload)) {
+
+            // Unless this is done, computeDemand() will be off
+            logger.debug("Alien zone '{}', signal dropped: {}", signal.payload, signal);
+            return;
+        }
+
         zone2status.put(signal.payload, signal);
     }
 
@@ -66,23 +96,12 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .stream()
                 .filter(kv -> !kv.getValue().isError());
 
-        // Careful here
-        // https://github.com/home-climate-control/dz/issues/195
-        var votingEnabledCount = new AtomicInteger();
-
         var enabled = nonError
-                .filter(kv -> kv.getValue().getValue().settings.enabled)
-                .peek(kv -> {
-                    if (Boolean.TRUE.equals(kv.getValue().getValue().settings.voting)) {
-                        votingEnabledCount.incrementAndGet();
-                    }
-                });
+                .filter(kv -> kv.getValue().getValue().settings.enabled);
 
         var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().status.calling)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        logger.debug("votingEnabledCount={}", votingEnabledCount);
 
         var unhappyVoting = unhappy
                 .entrySet()
@@ -100,22 +119,43 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", unhappyCount, unhappyVotingCount, needBump, signal);
 
-        // VT: FIXME: raise() is impossible with streaming control model, how to introduce a feedback loop?
+        // VT: FIXME: implement bump() and call it here
 
-        var demand = computeDemand(unhappy, unhappyVoting, votingEnabledCount.intValue() == 0);
+        var demand = computeDemand(unhappy, unhappyVoting);
 
         return new Signal<>(signal.timestamp, new UnitControlSignal(demand, null));
     }
 
+    /**
+     * Find out how many zones are both enabled and voting.
+     *
+     * @return The count.
+     */
+    private long getVotingEnabledCount() {
+
+        // This better be done on a static source - not all values may be available from the stream at startup
+        return zoneMap
+                .values()
+                .stream()
+                .filter(z -> z.getSettings().enabled)
+                .filter(z -> z.getSettings().voting)
+                .count();
+    }
+
     private double computeDemand(
             Map<String, Signal<ZoneStatus, String>> unhappy,
-            Map<String, Signal<ZoneStatus, String>> unhappyVoting,
-            boolean includeNonVoting) {
+            Map<String, Signal<ZoneStatus, String>> unhappyVoting) {
 
         var demandTotal = computeDemand(unhappy);
         var demandVoting = computeDemand(unhappyVoting);
 
-        logger.info("demandVoting={}, includeNonVoting={}", demandVoting, includeNonVoting);
+        // Careful here
+        // https://github.com/home-climate-control/dz/issues/195
+        var votingEnabledCount = getVotingEnabledCount();
+        var includeNonVoting = votingEnabledCount == 0;
+
+
+        logger.debug("demandVoting={}, votingEnabledCount={}, includeNonVoting={}", demandVoting, votingEnabledCount, includeNonVoting);
 
         if (demandVoting == 0.0 && !includeNonVoting) {
             // Nothing to do, moving on

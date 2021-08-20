@@ -33,15 +33,19 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
     public Zone(Thermostat ts, ZoneSettings settings) {
         this.ts = ts;
-        this.settings = settings;
+        setSettings(settings);
     }
 
-    public void set(ZoneSettings settings) {
+    public void setSettings(ZoneSettings settings) {
         if (settings == null) {
             throw new IllegalArgumentException("settings can't be null");
         }
 
         this.settings = settings;
+    }
+
+    public ZoneSettings getSettings() {
+        return settings;
     }
 
     @Override
