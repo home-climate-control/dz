@@ -2,6 +2,7 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.signal.Signal;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -211,6 +212,7 @@ class ZoneControllerTest {
      * Make sure non-voting zones don't start the HVAC.
      */
     @Test
+    @Disabled("Needs more work")
     void nonVoting() {
 
         var setpoint1 = 20.0;

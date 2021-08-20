@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -63,12 +64,23 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .stream()
                 .filter(kv -> !kv.getValue().isError());
 
+        // Careful here
+        // https://github.com/home-climate-control/dz/issues/195
+        var votingEnabledCount = new AtomicInteger();
+
         var enabled = nonError
-                .filter(kv -> kv.getValue().getValue().settings.enabled);
+                .filter(kv -> kv.getValue().getValue().settings.enabled)
+                .peek(kv -> {
+                    if (Boolean.TRUE.equals(kv.getValue().getValue().settings.voting)) {
+                        votingEnabledCount.incrementAndGet();
+                    }
+                });
 
         var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().status.calling)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        logger.debug("votingEnabledCount={}", votingEnabledCount);
 
         var unhappyVoting = unhappy
                 .entrySet()
@@ -76,23 +88,38 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .filter(kv -> kv.getValue().getValue().settings.voting)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
+        var unhappyCount = unhappy.size();
+        var unhappyVotingCount = unhappyVoting.size();
 
-        var needBump = lastKnownCalling == 0 & unhappyVoting.size() > 0;
+        // "Bump" is letting the thermostat know that the unit is starting and they may want to reconsider their
+        // calling status
+        var needBump = lastKnownCalling == 0 && unhappyVoting.size() > 0;
         lastKnownCalling = unhappyVoting.size();
 
-        logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", unhappy.size(), unhappyVoting.size(), needBump, signal);
+        logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", unhappyCount, unhappyVotingCount, needBump, signal);
 
         // VT: FIXME: raise() is impossible with streaming control model, how to introduce a feedback loop?
 
-        var demand = computeDemand(unhappy, unhappyVoting, needBump);
+        var demand = computeDemand(unhappy, unhappyVoting, votingEnabledCount.intValue() == 0);
 
         return new Signal<>(signal.timestamp, new UnitControlSignal(demand, null));
     }
 
-    private double computeDemand(Map<String, Signal<ZoneStatus, String>> unhappy, Map<String, Signal<ZoneStatus, String>> unhappyVoting, boolean needBump) {
+    private double computeDemand(
+            Map<String, Signal<ZoneStatus, String>> unhappy,
+            Map<String, Signal<ZoneStatus, String>> unhappyVoting,
+            boolean includeNonVoting) {
 
         var demandTotal = computeDemand(unhappy);
         var demandVoting = computeDemand(unhappyVoting);
+
+        logger.info("demandVoting={}, includeNonVoting={}", demandVoting, includeNonVoting);
+
+        if (demandVoting == 0.0 && !includeNonVoting) {
+            // Nothing to do, moving on
+            logger.debug("no voting demand, totalDemand=0");
+            return 0;
+        }
 
         double demandFinal;
 
