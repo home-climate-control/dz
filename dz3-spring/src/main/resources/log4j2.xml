@@ -51,6 +51,11 @@
         <Logger name="com.homeclimatecontrol.jukebox.datastream" level="info" />
         <Logger name="com.homeclimatecontrol.jukebox.datastream" level="info" />
 
+        <!-- Reactive classes -->
+
+        <Logger name="net.sf.dz3r.device.esphome" level="debug" />
+        <Logger name="net.sf.dz3r.device.mqtt" level="debug" />
+
         <Root level="INFO">
 
             <AppenderRef ref="ConsoleAppender"/>

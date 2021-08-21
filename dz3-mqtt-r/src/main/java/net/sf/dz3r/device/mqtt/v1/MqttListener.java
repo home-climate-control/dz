@@ -138,9 +138,9 @@ public class MqttListener implements Addressable<MqttEndpoint> {
                         // Persistent messages will be delivered immediately before there's a chance to call
                         // subscribe() on the flux - we didn't even return it yet
 
-                        // VT: FIXME: Buffer?
+                        // VT: FIXME: Buffer the last value received? May want to log this once per runtime, logs of chatter here
 
-                        logger.info("no subscriptions to '{}/#' yet, dropped: {} {}", topic, p.getTopic(), new String(p.getPayloadAsBytes(), StandardCharsets.UTF_8));
+                        logger.debug("no subscriptions to '{}/#' yet, dropped: {} {}", topic, p.getTopic(), new String(p.getPayloadAsBytes(), StandardCharsets.UTF_8));
                         return;
                     }
 
