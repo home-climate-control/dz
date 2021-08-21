@@ -46,7 +46,6 @@ public class ESPHomeListener implements Addressable<MqttEndpoint> {
                 .getFlux(mqttRootTopicSub)
                 .filter(e -> matchSensorAddress(e, address))
                 .map(this::mqtt2sensor);
-
     }
 
     private boolean matchSensorAddress(MqttSignal signal, String address) {
@@ -63,10 +62,6 @@ public class ESPHomeListener implements Addressable<MqttEndpoint> {
         return new Signal<>(
                 timestamp,
                 Double.parseDouble(mqttSignal.message));
-    }
-
-    private String getAddress(String topic) {
-        return parseTopic(topic)[1];
     }
 
     /**
