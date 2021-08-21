@@ -5,6 +5,7 @@ import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -15,7 +16,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ESPHomeListener implements Addressable<MqttEndpoint> {
+public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<String, Double, Void> {
 
     protected final Logger logger = LogManager.getLogger();
     private final Set<String> seenAlienTopic = new HashSet<>();
@@ -41,7 +42,8 @@ public class ESPHomeListener implements Addressable<MqttEndpoint> {
         return mqttListener.address;
     }
 
-    public Flux<Signal<Double, Double>> getSensorFlux(String address) {
+    @Override
+    public Flux<Signal<Double, Void>> getFlux(String address) {
         return mqttListener
                 .getFlux(mqttRootTopicSub)
                 .filter(e -> matchSensorAddress(e, address))
@@ -52,7 +54,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint> {
         return signal.topic.endsWith("sensor/" + address + "/state");
     }
 
-    private Signal<Double, Double> mqtt2sensor(MqttSignal mqttSignal) {
+    private Signal<Double, Void> mqtt2sensor(MqttSignal mqttSignal) {
 
         // This is ESPHome, they don't provide timestamps.
         // It is possible to get a stale value if LWT wasn't set up correctly

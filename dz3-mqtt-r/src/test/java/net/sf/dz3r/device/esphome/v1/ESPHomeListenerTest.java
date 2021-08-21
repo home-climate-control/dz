@@ -22,7 +22,7 @@ class ESPHomeListenerTest {
         assertThatCode(() -> {
             var l = new ESPHomeListener("localhost", "/esphome");
 
-            var subscription = l.getSensorFlux("dining-room")
+            var subscription = l.getFlux("dining-room")
                     .doOnNext(v -> logger.info("message: {}", v))
                     .take(10)
                     .subscribe();

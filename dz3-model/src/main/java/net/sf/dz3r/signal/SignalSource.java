@@ -5,6 +5,7 @@ import reactor.core.publisher.Flux;
 /**
  * Base interface for all signal sources.
  *
+ * @param <A> Address type.
  * @param <T> Signal value type.
  * @param <P> Extra payload type.
  *
@@ -20,5 +21,5 @@ public interface SignalSource<A extends Comparable<A>, T, P> {
      *
      * @return Signal flux.
      */
-    Flux<Signal<T, P>> getFlux();
+    Flux<Signal<T, P>> getFlux(A address);
 }
