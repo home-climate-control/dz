@@ -22,11 +22,6 @@ public class Container {
     private static final Logger logger = LogManager.getLogger(Container.class);
 
     /**
-     * Name of the configuration file embedded into the jar file.
-     */
-    public static final String CF_EMBEDDED = "spring-config.xml";
-
-    /**
      * Name of the file this class expects to find the configuration in.
      *
      * Must be on the root of the classpath.
