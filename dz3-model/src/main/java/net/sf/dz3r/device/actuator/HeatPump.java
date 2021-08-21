@@ -298,4 +298,16 @@ public class HeatPump extends AbstractHvacDevice {
             return "{kind=" + kind + ", requested=" + requested + ", actual=" + actual + "}";
         }
     }
+
+    protected void setMode(boolean state) throws IOException {
+        switchMode.setState(state);
+    }
+
+    protected void setRunning(boolean state) throws IOException {
+        switchRunning.setState(state);
+    }
+
+    protected void setFan(boolean state) throws IOException {
+        switchFan.setState(state);
+    }
 }
