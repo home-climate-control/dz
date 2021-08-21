@@ -26,6 +26,7 @@ dependencies {
 
     // Enable MQTT
     runtimeOnly project(':dz3-mqtt')
+    runtimeOnly project(':dz3-mqtt-r')
 
     // Enable remote control over HTTP
     runtimeOnly project(':dz3-http')
