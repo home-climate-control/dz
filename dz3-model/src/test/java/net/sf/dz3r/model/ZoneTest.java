@@ -36,6 +36,8 @@ class ZoneTest {
 
         set.add(z1);
         set.add(z2);
+
+        assertThat(set).hasSize(2);
     }
 
     @Test
