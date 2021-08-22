@@ -5,6 +5,8 @@ import net.sf.dz3r.signal.HvacCommand;
 import net.sf.dz3r.signal.HvacDeviceStatus;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.UnitControlSignal;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.time.Instant;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class UnitDirector {
+
+    private final Logger logger = LogManager.getLogger();
 
     private final Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux;
 
@@ -51,6 +55,18 @@ public class UnitDirector {
                         Flux.just(new Signal<>(Instant.now(), new HvacCommand(hvacMode, null, null))),
                         unitController.compute(stripZoneName(zoneController.compute(aggregateZoneFlux)))
                 ));
+
+        new Thread(() -> {
+
+            logger.info("Starting the pipeline");
+            var theEnd = hvacDeviceFlux
+                    .doOnNext(s -> logger.debug("HVAC device: {}", s))
+                    .blockLast();
+            logger.info("Complete: {}", theEnd);
+
+        }).start();
+
+        logger.info("Configured");
     }
 
     private Map.Entry<Flux<Signal<Double, String>>, Zone> addZoneName(Map.Entry<Flux<Signal<Double, Void>>, Zone> kv) {
