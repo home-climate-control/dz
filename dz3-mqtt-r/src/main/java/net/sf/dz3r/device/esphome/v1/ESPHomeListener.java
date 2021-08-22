@@ -44,6 +44,9 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
 
     @Override
     public Flux<Signal<Double, Void>> getFlux(String address) {
+
+        logger.info("getFlux: {}", address);
+
         return mqttListener
                 .getFlux(mqttRootTopicSub)
                 .filter(e -> matchSensorAddress(e, address))

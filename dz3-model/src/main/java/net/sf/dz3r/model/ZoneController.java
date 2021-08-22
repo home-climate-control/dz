@@ -42,6 +42,8 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 zones
                 .stream()
                 .collect(Collectors.toMap(Zone::getAddress, z -> z)));
+
+        logger.info("Zones configured: {}", zoneMap.keySet());
     }
 
     /**
@@ -74,6 +76,8 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
             logger.debug("Alien zone '{}', signal dropped: {}", signal.payload, signal);
             return;
         }
+
+        logger.debug("capture: {}", signal);
 
         zone2status.put(signal.payload, signal);
     }
