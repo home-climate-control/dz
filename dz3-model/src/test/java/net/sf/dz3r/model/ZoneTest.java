@@ -8,14 +8,35 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.time.Instant;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class ZoneTest {
 
     private final Logger logger = LogManager.getLogger();
+
+    @Test
+    void comparable() {
+
+        var ts1 = mock(Thermostat.class);
+        var ts2 = mock(Thermostat.class);
+
+        when(ts1.getAddress()).thenReturn("a");
+        when(ts2.getAddress()).thenReturn("b");
+
+        var z1 = new Zone(ts1, mock(ZoneSettings.class));
+        var z2 = new Zone(ts2, mock(ZoneSettings.class));
+
+        var set = new TreeSet<Zone>();
+
+        set.add(z1);
+        set.add(z2);
+    }
 
     @Test
     void enabled() {
