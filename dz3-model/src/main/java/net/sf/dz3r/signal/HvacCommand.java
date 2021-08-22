@@ -28,7 +28,7 @@ public class HvacCommand {
      * @param demand Nullable demand.
      * @param fanSpeed Nullable fan speed.
      */
-    public HvacCommand( HvacMode mode, Double demand, Double fanSpeed) {
+    public HvacCommand(HvacMode mode, Double demand, Double fanSpeed) {
 
         this.mode = mode;
         this.demand = demand;
