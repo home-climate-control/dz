@@ -56,6 +56,8 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
     @Override
     public Flux<Signal<UnitControlSignal, String>> compute(Flux<Signal<ZoneStatus, String>> in) {
 
+        logger.debug("compute()");
+
         return in
                 .doOnNext(this::capture)
                 .map(this::process);

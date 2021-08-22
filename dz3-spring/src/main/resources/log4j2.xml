@@ -53,8 +53,7 @@
 
         <!-- Reactive classes -->
 
-        <Logger name="net.sf.dz3r.device.esphome" level="debug" />
-        <Logger name="net.sf.dz3r.device.mqtt" level="debug" />
+        <Logger name="net.sf.dz3r" level="debug" />
 
         <Root level="INFO">
 

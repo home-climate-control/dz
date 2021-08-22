@@ -51,6 +51,8 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     @Override
     public Flux<Signal<ZoneStatus, String>> compute(Flux<Signal<Double, String>> in) {
 
+        logger.debug("compute()");
+
         // Since the zone doesn't need the payload, but the thermostat does, need to translate the input
         var stage0 = in
                 .map(s -> new Signal<>(s.timestamp, s.getValue(), (Void) null, s.status, s.error));

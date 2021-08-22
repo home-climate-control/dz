@@ -59,8 +59,12 @@ public class NullSwitch extends AbstractSwitch {
 
     @Override
     public synchronized boolean getState() throws IOException {
+
         delay();
-        return super.getState();
+
+        var state = super.getState();
+        logger.info("getState: {}", state);
+        return state;
     }
 
     @Override
@@ -69,6 +73,7 @@ public class NullSwitch extends AbstractSwitch {
         try {
             delay();
             super.setState(state);
+            logger.info("setState: {}", state);
         } finally {
             ThreadContext.pop();
         }

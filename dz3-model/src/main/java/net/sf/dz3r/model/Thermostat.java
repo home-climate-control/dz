@@ -141,6 +141,8 @@ public class Thermostat implements ProcessController<Double, ThermostatStatus, V
     @Override
     public Flux<Signal<Status<ThermostatStatus>, Void>> compute(Flux<Signal<Double, Void>> pv) {
 
+        logger.debug("compute()");
+
         // Compute the control signal to feed to the renderer.
         // Might want to make this available to outside consumers for instrumentation.
         var stage1 = controller

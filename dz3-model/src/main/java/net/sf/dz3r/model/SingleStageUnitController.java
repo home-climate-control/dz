@@ -29,6 +29,8 @@ public class SingleStageUnitController extends AbstractUnitController {
     @Override
     public Flux<Signal<HvacCommand, Void>> compute(Flux<Signal<UnitControlSignal, Void>> in) {
 
+        logger.debug("compute()");
+
         return in
                 .filter(Signal::isOK)
                 .map(s -> {
