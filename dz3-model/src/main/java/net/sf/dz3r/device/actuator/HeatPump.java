@@ -122,6 +122,8 @@ public class HeatPump extends AbstractHvacDevice {
 
         try {
 
+            logger.info("process: {}", signal);
+
             checkInitialMode(signal);
             trySetMode(signal, sink);
             setOthers(signal, sink);
@@ -147,7 +149,7 @@ public class HeatPump extends AbstractHvacDevice {
         }
     }
 
-    private void trySetMode(Signal<HvacCommand, Void> signal, FluxSink<Signal<HvacDeviceStatus, Void>> sink) throws IOException, InterruptedException {
+    private void trySetMode(Signal<HvacCommand, Void> signal, FluxSink<Signal<HvacDeviceStatus, Void>> sink) throws IOException {
 
         var newMode = signal.getValue().mode;
 
@@ -195,23 +197,24 @@ public class HeatPump extends AbstractHvacDevice {
             logger.debug("Condenser is not running, skipping the pause");
         }
 
-        var requestedMode = reconcile(
+        requested = reconcile(
                 actual,
                 new HvacCommand(newMode, null, null));
         sink.next(
                 new Signal<>(Instant.now(),
                         new HeatpumpStatus(
                                 AbstractHvacDeviceStatus.Kind.REQUESTED,
-                                requestedMode,
+                                requested,
                                 actual)));
         switchMode.setState((newMode == HvacMode.HEATING) != reverseMode);
-        actual = reconcile(actual, requestedMode);
+        actual = reconcile(actual, requested);
         sink.next(
                 new Signal<>(Instant.now(),
                         new HeatpumpStatus(
                                 AbstractHvacDeviceStatus.Kind.ACTUAL,
-                                requestedMode,
+                                requested,
                                 actual)));
+        logger.info("Mode changed to: {}", signal.getValue().mode);
     }
 
     /**
