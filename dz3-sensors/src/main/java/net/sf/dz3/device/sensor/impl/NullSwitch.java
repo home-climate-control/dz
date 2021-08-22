@@ -63,7 +63,7 @@ public class NullSwitch extends AbstractSwitch {
         delay();
 
         var state = super.getState();
-        logger.info("getState: {}", state);
+        logger.info("getState: {}={}", getAddress(), state);
         return state;
     }
 
@@ -73,7 +73,7 @@ public class NullSwitch extends AbstractSwitch {
         try {
             delay();
             super.setState(state);
-            logger.info("setState: {}", state);
+            logger.info("setState: {}={}", getAddress(), state);
         } finally {
             ThreadContext.pop();
         }

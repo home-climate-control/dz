@@ -122,7 +122,7 @@ public class HeatPump extends AbstractHvacDevice {
 
         try {
 
-            logger.info("process: {}", signal);
+            logger.debug("process: {}", signal);
 
             checkInitialMode(signal);
             trySetMode(signal, sink);
