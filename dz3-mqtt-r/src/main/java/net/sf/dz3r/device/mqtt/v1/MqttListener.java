@@ -116,12 +116,9 @@ public class MqttListener implements Addressable<MqttEndpoint> {
 
         Flux<MqttSignal> result = Flux.create(sink -> {
             logger.debug("new receiver, topic={}", topic);
-            register(topic, new Receiver() {
-                @Override
-                public void receive(MqttTopic topic, String payload) {
-                    logger.trace("receive: {} {}", topic, payload);
-                    sink.next(new MqttSignal(topic.toString(), payload));
-                }
+            register(topic, (mqttTopic, payload) -> {
+                logger.trace("receive: {} {}", mqttTopic, payload);
+                sink.next(new MqttSignal(mqttTopic.toString(), payload));
             });
         });
 

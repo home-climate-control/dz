@@ -8,8 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -36,14 +36,21 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
      */
     private final Map<String, Signal<ZoneStatus, String>> zone2status = new TreeMap<>();
 
-    public ZoneController(Set<Zone> zones) {
+    public ZoneController(Collection<Zone> zones) {
 
-        this.zoneMap = new TreeMap<>(
-                zones
+        this.zoneMap = zones
                 .stream()
-                .collect(Collectors.toMap(Zone::getAddress, z -> z)));
+                .collect(Collectors.toMap(
+                        Zone::getAddress,
+                        z -> z,
+                        (s, s2) -> s,
+                        TreeMap::new));
 
         logger.info("Zones configured: {}", zoneMap.keySet());
+
+        if (zones.size() > zoneMap.size()) {
+            throw new IllegalArgumentException("Redundant zones? " + zones);
+        }
     }
 
     /**

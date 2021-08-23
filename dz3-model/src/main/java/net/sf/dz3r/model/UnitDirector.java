@@ -5,14 +5,18 @@ import net.sf.dz3r.signal.HvacCommand;
 import net.sf.dz3r.signal.HvacDeviceStatus;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.UnitControlSignal;
+import net.sf.dz3r.signal.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +29,8 @@ public class UnitDirector {
     private final Logger logger = LogManager.getLogger();
 
     private final Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux;
+    private final CountDownLatch sigTerm = new CountDownLatch(1);
+    private final CountDownLatch shutdownComplete = new CountDownLatch(1);
 
     /**
      * Create an instance.
@@ -41,32 +47,51 @@ public class UnitDirector {
             HvacMode hvacMode
     ) {
 
-        var aggregateZoneFlux = Flux.merge(
-                sensorFlux2zone
-                .entrySet()
-                .stream()
-                .map(this::addZoneName)
-                .map(kv -> kv.getValue().compute(kv.getKey()))
-                .collect(Collectors.toSet()));
-
-        var zoneController = new ZoneController(new TreeSet<>(sensorFlux2zone.values()));
+        var aggregateZoneFlux = Flux
+                .merge(extractSensorFluxes(sensorFlux2zone))
+                .checkpoint("aggregate-sensor");
+        var zoneControllerFlux = new ZoneController(sensorFlux2zone.values())
+                .compute(aggregateZoneFlux)
+                .checkpoint("zone-controller")
+                .map(this::stripZoneName);
+        var unitControllerFlux = unitController
+                .compute(zoneControllerFlux)
+                .checkpoint("unit-controller");
         hvacDeviceFlux = hvacDevice.compute(
                 Flux.concat(
                         Flux.just(new Signal<>(Instant.now(), new HvacCommand(hvacMode, null, null))),
-                        unitController.compute(stripZoneName(zoneController.compute(aggregateZoneFlux)))
+                        unitControllerFlux
                 ));
 
-        new Thread(() -> {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            ThreadContext.push("shutdownHook");
+            try {
 
-            logger.info("Starting the pipeline");
-            var theEnd = hvacDeviceFlux
-                    .doOnNext(s -> logger.debug("HVAC device: {}", s))
-                    .blockLast();
-            logger.info("Complete: {}", theEnd);
+                logger.warn("Received termination signal");
+                sigTerm.countDown();
+                logger.warn("Shutting down");
+                try {
+                    shutdownComplete.await();
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    logger.error("Interrupted, can do nothing about it", ex);
+                }
+                logger.info("Shut down.");
 
-        }).start();
+            } finally {
+                ThreadContext.pop();
+            }
+        }));
 
         logger.info("Configured");
+    }
+
+    private Set<Flux<Signal<ZoneStatus, String>>> extractSensorFluxes(Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone) {
+
+        return Flux.fromIterable(sensorFlux2zone.entrySet())
+                .map(this::addZoneName)
+                .map(kv -> kv.getValue().compute(kv.getKey()))
+                .collect(Collectors.toSet()).block();
     }
 
     private Map.Entry<Flux<Signal<Double, String>>, Zone> addZoneName(Map.Entry<Flux<Signal<Double, Void>>, Zone> kv) {
@@ -75,11 +100,43 @@ public class UnitDirector {
                 .map(s -> new Signal<>(s.timestamp, s.getValue(), zoneName, s.status, s.error)), kv.getValue());
     }
 
-    private Flux<Signal<UnitControlSignal, Void>> stripZoneName(Flux<Signal<UnitControlSignal, String>> source) {
-        return source.map(s -> new Signal<>(s.timestamp, s.getValue(), null, s.status, s.error));
+    private Signal<UnitControlSignal, Void> stripZoneName(Signal<UnitControlSignal, String> s) {
+        return new Signal<>(s.timestamp, s.getValue(), null, s.status, s.error);
     }
 
     public final Flux<Signal<HvacDeviceStatus, Void>> getFlux() {
         return hvacDeviceFlux;
+    }
+
+    public void run() {
+        ThreadContext.push("run");
+        try {
+
+            logger.info("Starting the pipeline");
+            var theEnd = hvacDeviceFlux
+                    .publishOn(Schedulers.boundedElastic())
+                    .subscribe(
+                            s -> {
+                                logger.debug("HVAC device: {}", s);
+                            },
+                            error -> {
+                                logger.error("HVAC device error", error);
+                            }
+                    );
+
+            logger.info("Awaiting termination signal");
+            sigTerm.await();
+
+            logger.info("Received termination signal");
+            theEnd.dispose();
+
+            logger.info("Shut down");
+            shutdownComplete.countDown();
+
+        } catch (Throwable t) { // NOSONAR Consequences have been considered
+            logger.fatal("Unexpected exception");
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }
