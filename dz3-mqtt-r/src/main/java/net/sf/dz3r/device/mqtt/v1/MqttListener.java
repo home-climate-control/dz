@@ -100,7 +100,17 @@ public class MqttListener implements Addressable<MqttEndpoint> {
         return address;
     }
 
+    /**
+     * Get an MQTT topic flux.
+     *
+     * @param topic Root topic to get the flux for.
+     *
+     * @return Topic flux. Contains everything in subtopics as well.
+     *
+     * @see #createFlux(String)
+     */
     public synchronized Flux<MqttSignal> getFlux(String topic) {
+        logger.info("getFlux: {}", topic);
         return topic2flux.computeIfAbsent(topic, k -> createFlux(topic));
     }
 
@@ -110,12 +120,21 @@ public class MqttListener implements Addressable<MqttEndpoint> {
         topic2receiver.put(t, r);
     }
 
+    /**
+     * Create an MQTT topic flux.
+     *
+     * @param topic Root topic to create the flux for.
+     *
+     * @return Topic flux. Contains everything in subtopics as well.
+     *
+     * @see #getFlux(String)
+     */
     private Flux<MqttSignal> createFlux(String topic) {
 
-        logger.info("New subscription topic={}", topic);
+        logger.info("createFlux: topic={}", topic);
 
         Flux<MqttSignal> result = Flux.create(sink -> {
-            logger.debug("new receiver, topic={}", topic);
+            logger.debug("New receiver, topic={}", topic);
             register(topic, (mqttTopic, payload) -> {
                 logger.trace("receive: {} {}", mqttTopic, payload);
                 sink.next(new MqttSignal(mqttTopic.toString(), payload));

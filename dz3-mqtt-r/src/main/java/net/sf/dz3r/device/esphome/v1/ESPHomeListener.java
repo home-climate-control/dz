@@ -42,6 +42,13 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
         return mqttListener.address;
     }
 
+    /**
+     * Create an ESPHome sensor flux.
+     *
+     * @param address Sensor address create the flux for.
+     *
+     * @return Sensor data flux.
+     */
     @Override
     public Flux<Signal<Double, Void>> getFlux(String address) {
 
@@ -50,6 +57,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
         return mqttListener
                 .getFlux(mqttRootTopicSub)
                 .filter(e -> matchSensorAddress(e, address))
+                .doOnNext(s -> logger.debug("matched: {} {}", s.topic, s.message))
                 .map(this::mqtt2sensor);
     }
 
