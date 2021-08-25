@@ -133,13 +133,15 @@ public class MqttListener implements Addressable<MqttEndpoint> {
 
         logger.info("createFlux: topic={}", topic);
 
-        Flux<MqttSignal> result = Flux.create(sink -> {
+        Flux<MqttSignal> flux = Flux.create(sink -> {
             logger.debug("New receiver, topic={}", topic);
             register(topic, (mqttTopic, payload) -> {
                 logger.trace("receive: {} {}", mqttTopic, payload);
                 sink.next(new MqttSignal(mqttTopic.toString(), payload));
             });
         });
+
+        var result = flux.publish().autoConnect();
 
         var ackFuture = client.toAsync()
                 .subscribeWith()
