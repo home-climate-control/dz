@@ -126,17 +126,20 @@ public class HeatPumpHAT extends HeatPump {
     protected void setMode(boolean state) throws IOException {
         super.setMode(state);
         PimoroniAutomationHAT.getInstance().status().warn().write(state);
+        logger.debug("mode={}", state);
     }
 
     @Override
     protected void setRunning(boolean state) throws IOException {
         super.setRunning(state);
         PimoroniAutomationHAT.getInstance().status().comms().write(state);
+        logger.debug("running={}", state);
     }
 
     @Override
     protected void setFan(boolean state) throws IOException {
         super.setFan(state);
         PimoroniAutomationHAT.getInstance().status().power().write(state);
+        logger.debug("fan={}", state);
     }
 }

@@ -179,7 +179,7 @@ public class HeatPump extends AbstractHvacDevice {
                                     requestedDemand,
                                     actual)));
 
-            switchRunning.setState(reverseRunning);
+            setRunning(reverseRunning);
 
             // Note, #requested is not set - this is a transition
             actual = reconcile(actual, requestedDemand);
@@ -206,7 +206,7 @@ public class HeatPump extends AbstractHvacDevice {
                                 AbstractHvacDeviceStatus.Kind.REQUESTED,
                                 requested,
                                 actual)));
-        switchMode.setState((newMode == HvacMode.HEATING) != reverseMode);
+        setMode((newMode == HvacMode.HEATING) != reverseMode);
         actual = reconcile(actual, requested);
         sink.next(
                 new Signal<>(Instant.now(),
@@ -263,9 +263,9 @@ public class HeatPump extends AbstractHvacDevice {
                                 AbstractHvacDeviceStatus.Kind.REQUESTED,
                                 requestedOperation,
                                 actual)));
-        switchRunning.setState((requestedOperation.demand > 0) != reverseRunning);
+        setRunning((requestedOperation.demand > 0) != reverseRunning);
         if (requestedOperation.fanSpeed != null) {
-            switchFan.setState((requestedOperation.fanSpeed > 0) != reverseFan);
+            setFan((requestedOperation.fanSpeed > 0) != reverseFan);
         }
         actual = reconcile(actual, requestedOperation);
 
