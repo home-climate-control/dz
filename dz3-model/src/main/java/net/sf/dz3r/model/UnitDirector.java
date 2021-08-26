@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.signal.HvacCommand;
 import net.sf.dz3r.signal.HvacDeviceStatus;
@@ -24,31 +25,42 @@ import java.util.stream.Collectors;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class UnitDirector {
+public class UnitDirector implements Addressable<String> {
 
     private final Logger logger = LogManager.getLogger();
 
+    private final String name;
+
+    private final Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone;
+    private final Flux<Signal<ZoneStatus, String>> aggregateZoneFlux;
     private final Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux;
+
     private final CountDownLatch sigTerm = new CountDownLatch(1);
     private final CountDownLatch shutdownComplete = new CountDownLatch(1);
 
     /**
      * Create an instance.
      *
+     * @param name Instance name.
      * @param sensorFlux2zone Mapping of sensor flux to zone it will feed.
      * @param unitController Unit controller for this set of zones.
      * @param hvacDevice HVAC device that serves this set of zones.
      * @param hvacMode HVAC device mode for this zone. {@link Thermostat} PID signals must have correct polarity for this mode.
      */
     public UnitDirector(
+            String name,
             Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
             UnitController unitController,
             HvacDevice hvacDevice,
             HvacMode hvacMode
     ) {
 
-        var aggregateZoneFlux = Flux
+        this.name = name;
+        this.sensorFlux2zone = sensorFlux2zone;
+
+        aggregateZoneFlux = Flux
                 .merge(extractSensorFluxes(sensorFlux2zone))
+                .publish().autoConnect()
                 .checkpoint("aggregate-sensor");
         var zoneControllerFlux = new ZoneController(sensorFlux2zone.values())
                 .compute(aggregateZoneFlux)
@@ -61,7 +73,7 @@ public class UnitDirector {
                 Flux.concat(
                         Flux.just(new Signal<>(Instant.now(), new HvacCommand(hvacMode, null, null))),
                         unitControllerFlux
-                ));
+                )).publish().autoConnect();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             ThreadContext.push("shutdownHook");
@@ -86,6 +98,11 @@ public class UnitDirector {
         logger.info("Configured");
     }
 
+    @Override
+    public String getAddress() {
+        return name;
+    }
+
     private Set<Flux<Signal<ZoneStatus, String>>> extractSensorFluxes(Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone) {
 
         return Flux.fromIterable(sensorFlux2zone.entrySet())
@@ -108,35 +125,58 @@ public class UnitDirector {
         return hvacDeviceFlux;
     }
 
-    public void run() {
-        ThreadContext.push("run");
-        try {
+    public void start() {
+        new Thread(() -> {
+            ThreadContext.push("run");
+            try {
 
-            logger.info("Starting the pipeline");
-            var theEnd = hvacDeviceFlux
-                    .publishOn(Schedulers.boundedElastic())
-                    .subscribe(
-                            s -> {
-                                logger.debug("HVAC device: {}", s);
-                            },
-                            error -> {
-                                logger.error("HVAC device error", error);
-                            }
-                    );
+                logger.info("Starting the pipeline");
+                var theEnd = hvacDeviceFlux
+                        .publishOn(Schedulers.boundedElastic())
+                        .subscribe(
+                                s -> {
+                                    logger.debug("HVAC device: {}", s);
+                                },
+                                error -> {
+                                    logger.error("HVAC device error", error);
+                                }
+                        );
 
-            logger.info("Awaiting termination signal");
-            sigTerm.await();
+                logger.info("Awaiting termination signal");
+                sigTerm.await();
 
-            logger.info("Received termination signal");
-            theEnd.dispose();
+                logger.info("Received termination signal");
+                theEnd.dispose();
 
-            logger.info("Shut down");
-            shutdownComplete.countDown();
+                logger.info("Shut down");
+                shutdownComplete.countDown();
 
-        } catch (Throwable t) { // NOSONAR Consequences have been considered
-            logger.fatal("Unexpected exception");
-        } finally {
-            ThreadContext.pop();
+            } catch (Throwable t) { // NOSONAR Consequences have been considered
+                logger.fatal("Unexpected exception");
+            } finally {
+                ThreadContext.pop();
+            }
+        }).start();
+    }
+
+    public Feed getFeed() {
+        return new Feed(sensorFlux2zone, aggregateZoneFlux, hvacDeviceFlux);
+    }
+
+    public static class Feed {
+
+        public final Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone;
+        public final Flux<Signal<ZoneStatus, String>> aggregateZoneFlux;
+        public final Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux;
+
+        public Feed(
+                Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
+                Flux<Signal<ZoneStatus, String>> aggregateZoneFlux,
+                Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux) {
+
+            this.sensorFlux2zone = sensorFlux2zone;
+            this.aggregateZoneFlux = aggregateZoneFlux;
+            this.hvacDeviceFlux = hvacDeviceFlux;
         }
     }
 }

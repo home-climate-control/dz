@@ -1,4 +1,4 @@
-package net.sf.dz3.view.webui.v1;
+package net.sf.dz3r.view.webui.v2;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;

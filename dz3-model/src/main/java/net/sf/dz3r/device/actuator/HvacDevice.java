@@ -36,5 +36,5 @@ public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatu
      * @return Execution status.
      */
     @Override
-    public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in);
+    Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in);
 }
