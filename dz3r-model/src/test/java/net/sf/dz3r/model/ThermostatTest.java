@@ -1,6 +1,5 @@
 package net.sf.dz3r.model;
 
-import net.sf.dz3.device.model.impl.ThermostatModel;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.ThermostatStatus;
@@ -20,7 +19,7 @@ import java.util.function.Predicate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Test cases for {@link ThermostatModel}.
+ * Test cases for {@link Thermostat}.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */

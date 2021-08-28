@@ -38,7 +38,10 @@ include 'dz3-raspberry-pi'
 
 // Reactive only modules
 
+include 'dz3r-model'
 include 'dz3r-mqtt'
+include 'dz3r-raspberry-pi'
+include 'dz3r-swing'
 include 'dz3r-webui'
 
 

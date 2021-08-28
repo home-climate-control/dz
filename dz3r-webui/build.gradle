@@ -7,4 +7,6 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3'
 
     implementation project(':dz3-scheduler')
+
+    implementation project(':dz3r-model')
 }
