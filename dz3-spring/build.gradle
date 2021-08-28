@@ -26,13 +26,13 @@ dependencies {
 
     // Enable MQTT
     runtimeOnly project(':dz3-mqtt')
-    runtimeOnly project(':dz3-mqtt-r')
+    runtimeOnly project(':dz3r-mqtt')
 
     // Enable remote control over HTTP
     runtimeOnly project(':dz3-http')
 
     // Enable remote control via WebUI
-    runtimeOnly project(':dz3-webui')
+    runtimeOnly project(':dz3r-webui')
 
     // Enable Google Calendar integration
     runtimeOnly project(':dz3-scheduler-gcal-v3')
