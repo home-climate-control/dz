@@ -9,7 +9,7 @@ application {
 
 dependencies {
 
-    implementation 'org.springframework:spring-context:5.3.7'
+    implementation 'org.springframework:spring-context:5.3.9'
     implementation project(':dz3-model')
 
     // Enable the Swing console
@@ -37,6 +37,6 @@ dependencies {
     // Enable Google Calendar integration
     runtimeOnly project(':dz3-scheduler-gcal-v3')
 
-    // Enable Raspberrry Pi specific hardware integration
+    // Enable Raspberry Pi specific hardware integration
     runtimeOnly project(':dz3-raspberry-pi')
 }
