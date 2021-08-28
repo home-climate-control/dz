@@ -23,7 +23,7 @@ import java.util.TreeMap;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class UnitObserver implements Runnable {
+public class UnitObserver {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -33,15 +33,16 @@ public class UnitObserver implements Runnable {
     private final Map<String, Signal<ZoneStatus, String>> zone2status = new TreeMap<>();
     private Signal<HvacDeviceStatus, Void> unitStatus;
 
+    private final Set<Disposable> terminators = new LinkedHashSet<>();
+
     public UnitObserver(UnitDirector source) {
         this.source = source;
+
+        init();
     }
 
-    @Override
-    public void run() {
-        ThreadContext.push("run");
-
-        Set<Disposable> terminators = new LinkedHashSet<>();
+    private void init() {
+        ThreadContext.push("init");
 
         try {
 

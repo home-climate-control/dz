@@ -253,8 +253,6 @@ public class WebUI {
             logger.info("UnitDirector: {}", source);
             var observer = new UnitObserver(source);
             unit2observer.put(source, observer);
-
-            new Thread(observer).start();
         }
     }
 }
