@@ -1,25 +1,38 @@
 package net.sf.dz3.util.counter;
 
-import java.io.IOException;
-
-import org.apache.logging.log4j.ThreadContext;
-
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSource;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 /**
  * Usage counter proof of concept with no persistent state.
- *  
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
  */
 public class TransientUsageCounter extends AbstractUsageCounter {
 
+    private final Map<Level, Duration> frequencyMap = Map.of(
+            Level.DEBUG, Duration.of(1, ChronoUnit.HOURS),
+            Level.INFO, Duration.of(1, ChronoUnit.HOURS),
+            Level.WARN, Duration.of(10, ChronoUnit.MINUTES),
+            Level.ERROR, Duration.of(1, ChronoUnit.MINUTES)
+    );
+
+    private Instant lastAlertIssued;
+
     /**
      * Create an instance with the default (time based usage) counter strategy and no storage keys.
-     * 
+     *
      * @param name Human readable name for the user interface.
      * @param target What to count.
-     * 
+     *
      * @throws IOException if things go sour.
      */
     public TransientUsageCounter(String name, DataSource<Double> target) throws IOException {
@@ -29,11 +42,11 @@ public class TransientUsageCounter extends AbstractUsageCounter {
 
     /**
      * Create an instance with no storage keys.
-     * 
+     *
      * @param name Human readable name for the user interface.
      * @param counter Counter to use.
      * @param target What to count.
-     * 
+     *
      * @throws IOException if things go sour.
      */
     public TransientUsageCounter(String name, CounterStrategy counter, DataSource<Double> target) throws IOException {
@@ -43,12 +56,12 @@ public class TransientUsageCounter extends AbstractUsageCounter {
 
     /**
      * Create an instance.
-     * 
+     *
      * @param name Human readable name for the user interface.
      * @param counter Counter to use.
      * @param target What to count.
      * @param storageKeys How to store the counter data.
-     * 
+     *
      * @throws IOException if things go sour.
      */
     public TransientUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, Object[] storageKeys) throws IOException {
@@ -58,9 +71,9 @@ public class TransientUsageCounter extends AbstractUsageCounter {
 
     @Override
     protected void alert(long threshold, long current) {
-        
+
         ThreadContext.push("alert@" + Integer.toHexString(hashCode()));
-        
+
         try {
 
             if (threshold == 0) {
@@ -69,19 +82,32 @@ public class TransientUsageCounter extends AbstractUsageCounter {
             }
 
             long percent = (long)(getUsageRelative() * 100);
-            
-            String message = getName() + ": current usage " + percent + "%" + (percent > 100 ? " (OVERDUE)" : "");
-            
+
+            Level level;
+
             if (percent < 50) {
-                logger.debug(message);
+                level = Level.DEBUG;
             } else if (percent < 80) {
-                logger.info(message);
+                level = Level.INFO;
             } else if (percent < 100) {
-                logger.warn(message);
+                level = Level.WARN;
             } else {
-                logger.error(message);
+                level = Level.ERROR;
             }
-        
+
+            var now = Instant.now();
+            var duration = frequencyMap.get(level);
+
+            if (lastAlertIssued != null && Duration.between(lastAlertIssued, now).compareTo(duration) < 0) {
+                // Too fresh, not logging
+                return;
+            }
+
+            String message = getName() + ": current usage " + percent + "%" + (percent > 100 ? " (OVERDUE)" : "");
+
+            logger.log(level, message);
+            lastAlertIssued = now;
+
         } finally {
             ThreadContext.pop();
         }
@@ -103,7 +129,7 @@ public class TransientUsageCounter extends AbstractUsageCounter {
 
             // Do absolutely nothing except logging the current usage
             logger.info("Current usage: " + getUsageAbsolute() + "/" + getThreshold() + "(" + getUsageRelative() + ")");
-        
+
         } finally {
             ThreadContext.pop();
         }
@@ -111,7 +137,7 @@ public class TransientUsageCounter extends AbstractUsageCounter {
 
     @Override
     public JmxDescriptor getJmxDescriptor() {
-        
+
         return new JmxDescriptor(
                 "dz",
                 "Resource Usage Counter",
@@ -121,7 +147,7 @@ public class TransientUsageCounter extends AbstractUsageCounter {
 
     @Override
     protected void doReset() throws IOException {
-        
+
         // Do absolutely nothing
     }
 }
