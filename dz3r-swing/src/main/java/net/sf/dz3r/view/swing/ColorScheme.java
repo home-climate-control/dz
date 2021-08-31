@@ -1,7 +1,6 @@
-package net.sf.dz3.view.swing;
+package net.sf.dz3r.view.swing;
 
-import net.sf.dz3.device.model.HvacMode;
-import org.apache.logging.log4j.LogManager;
+import net.sf.dz3r.model.HvacMode;
 
 import java.awt.Color;
 import java.util.Map;
@@ -41,17 +40,11 @@ public class ColorScheme {
         if (colorMap.isEmpty()) {
 
             colorMap.put(HvacMode.COOLING, coolingMap);
-            colorMap.put(HvacMode.OFF, offMap);
             colorMap.put(HvacMode.HEATING, heatingMap);
         }
 
         if (mode == null) {
-
-            // VT: NOTE: the command was "For old installations". So old, I don't even
-            // remember what's that about.
-
-            LogManager.getLogger(ColorScheme.class).error("mode == null???", new IllegalArgumentException("trace"));
-            mode = HvacMode.HEATING;
+            throw new IllegalArgumentException("mode can't be null");
         }
 
         return colorMap.get(mode);

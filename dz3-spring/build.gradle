@@ -13,7 +13,7 @@ dependencies {
     implementation project(':dz3-model')
 
     // Enable the Swing console
-    runtimeOnly project(':dz3-swing')
+    runtimeOnly project(':dz3r-swing')
 
     // Enable InfluxDB logger
     runtimeOnly project(':dz3-influxdb')
