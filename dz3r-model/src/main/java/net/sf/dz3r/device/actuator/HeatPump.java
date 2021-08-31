@@ -177,9 +177,11 @@ public class HeatPump extends AbstractHvacDevice {
                             new HeatpumpStatus(
                                     HvacDeviceStatus.Kind.REQUESTED,
                                     requestedDemand,
-                                    actual)));
+                                    actual,
+                                    uptime())));
 
             setRunning(reverseRunning);
+            updateUptime(false);
 
             // Note, #requested is not set - this is a transition
             actual = reconcile(actual, requestedDemand);
@@ -189,7 +191,8 @@ public class HeatPump extends AbstractHvacDevice {
                             new HeatpumpStatus(
                                     HvacDeviceStatus.Kind.ACTUAL,
                                     requestedDemand,
-                                    actual)));
+                                    actual,
+                                    uptime())));
             logger.info("Letting the hardware settle for {}", MODE_CHANGE_DELAY);
             Mono.delay(MODE_CHANGE_DELAY).block();
 
@@ -205,7 +208,8 @@ public class HeatPump extends AbstractHvacDevice {
                         new HeatpumpStatus(
                                 HvacDeviceStatus.Kind.REQUESTED,
                                 requested,
-                                actual)));
+                                actual,
+                                uptime())));
         setMode((newMode == HvacMode.HEATING) != reverseMode);
         actual = reconcile(actual, requested);
         sink.next(
@@ -213,7 +217,8 @@ public class HeatPump extends AbstractHvacDevice {
                         new HeatpumpStatus(
                                 HvacDeviceStatus.Kind.ACTUAL,
                                 requested,
-                                actual)));
+                                actual,
+                                uptime())));
         logger.info("Mode changed to: {}", signal.getValue().mode);
     }
 
@@ -262,10 +267,15 @@ public class HeatPump extends AbstractHvacDevice {
                         new HeatpumpStatus(
                                 HvacDeviceStatus.Kind.REQUESTED,
                                 requestedOperation,
-                                actual)));
+                                actual,
+                                uptime())));
+
         setRunning((requestedOperation.demand > 0) != reverseRunning);
+        updateUptime(requestedOperation.demand > 0);
+
         if (requestedOperation.fanSpeed != null) {
             setFan((requestedOperation.fanSpeed > 0) != reverseFan);
+            updateUptime(requestedOperation.fanSpeed > 0);
         }
         actual = reconcile(actual, requestedOperation);
 
@@ -274,7 +284,8 @@ public class HeatPump extends AbstractHvacDevice {
                         new HeatpumpStatus(
                                 HvacDeviceStatus.Kind.ACTUAL,
                                 requestedOperation,
-                                actual)));
+                                actual,
+                                uptime())));
     }
 
     @Override
@@ -291,14 +302,14 @@ public class HeatPump extends AbstractHvacDevice {
 
         public final HvacCommand actual;
 
-        protected HeatpumpStatus(Kind kind, HvacCommand requested, HvacCommand actual) {
-            super(kind, requested);
+        protected HeatpumpStatus(Kind kind, HvacCommand requested, HvacCommand actual, Duration uptime) {
+            super(kind, requested, uptime);
             this.actual = actual;
         }
 
         @Override
         public String toString() {
-            return "{kind=" + kind + ", requested=" + requested + ", actual=" + actual + "}";
+            return "{kind=" + kind + ", requested=" + requested + ", actual=" + actual + ", uptime=" + uptime + "}";
         }
     }
 

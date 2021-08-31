@@ -8,6 +8,7 @@ import net.sf.dz3r.signal.HvacDeviceStatus;
 import net.sf.dz3r.signal.Signal;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
@@ -89,15 +90,16 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
                                     logger.debug("State: {}", state);
 
-                                    sink.next(new Signal<>(Instant.now(), new SwitchStatus(SwitchStatus.Kind.REQUESTED, command, actual)));
+                                    sink.next(new Signal<>(Instant.now(), new SwitchStatus(SwitchStatus.Kind.REQUESTED, command, actual, uptime())));
 
                                     // By this time, the command has been verified to be valid
                                     requested = command;
 
                                     theSwitch.setState(state);
                                     actual = state;
+                                    updateUptime(state);
 
-                                    var complete = new SwitchStatus(SwitchStatus.Kind.ACTUAL, command, actual);
+                                    var complete = new SwitchStatus(SwitchStatus.Kind.ACTUAL, command, actual, uptime());
                                     sink.next(new Signal<>(Instant.now(), complete));
 
                                 } catch (Throwable t) { // NOSONAR Consequences have been considered
@@ -179,14 +181,14 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
         public final Boolean actual;
 
-        protected SwitchStatus(Kind kind, HvacCommand requested, Boolean actual) {
-            super(kind, requested);
+        protected SwitchStatus(Kind kind, HvacCommand requested, Boolean actual, Duration uptime) {
+            super(kind, requested, uptime);
             this.actual = actual;
         }
 
         @Override
         public String toString() {
-            return "{kind=" + kind + ", requested=" + requested + ", actual=" + actual + "}";
+            return "{kind=" + kind + ", requested=" + requested + ", actual=" + actual + ", uptime=" + uptime + "}";
         }
     }
 }
