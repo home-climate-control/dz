@@ -175,7 +175,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                 "Turns on and off to provide " + mode.description.toLowerCase());
     }
 
-    public static class SwitchStatus extends AbstractHvacDeviceStatus {
+    public static class SwitchStatus extends HvacDeviceStatus {
 
         public final Boolean actual;
 

@@ -175,7 +175,7 @@ public class HeatPump extends AbstractHvacDevice {
             sink.next(
                     new Signal<>(Instant.now(),
                             new HeatpumpStatus(
-                                    AbstractHvacDeviceStatus.Kind.REQUESTED,
+                                    HvacDeviceStatus.Kind.REQUESTED,
                                     requestedDemand,
                                     actual)));
 
@@ -187,7 +187,7 @@ public class HeatPump extends AbstractHvacDevice {
             sink.next(
                     new Signal<>(Instant.now(),
                             new HeatpumpStatus(
-                                    AbstractHvacDeviceStatus.Kind.ACTUAL,
+                                    HvacDeviceStatus.Kind.ACTUAL,
                                     requestedDemand,
                                     actual)));
             logger.info("Letting the hardware settle for {}", MODE_CHANGE_DELAY);
@@ -203,7 +203,7 @@ public class HeatPump extends AbstractHvacDevice {
         sink.next(
                 new Signal<>(Instant.now(),
                         new HeatpumpStatus(
-                                AbstractHvacDeviceStatus.Kind.REQUESTED,
+                                HvacDeviceStatus.Kind.REQUESTED,
                                 requested,
                                 actual)));
         setMode((newMode == HvacMode.HEATING) != reverseMode);
@@ -211,7 +211,7 @@ public class HeatPump extends AbstractHvacDevice {
         sink.next(
                 new Signal<>(Instant.now(),
                         new HeatpumpStatus(
-                                AbstractHvacDeviceStatus.Kind.ACTUAL,
+                                HvacDeviceStatus.Kind.ACTUAL,
                                 requested,
                                 actual)));
         logger.info("Mode changed to: {}", signal.getValue().mode);
@@ -260,7 +260,7 @@ public class HeatPump extends AbstractHvacDevice {
         sink.next(
                 new Signal<>(Instant.now(),
                         new HeatpumpStatus(
-                                AbstractHvacDeviceStatus.Kind.REQUESTED,
+                                HvacDeviceStatus.Kind.REQUESTED,
                                 requestedOperation,
                                 actual)));
         setRunning((requestedOperation.demand > 0) != reverseRunning);
@@ -272,7 +272,7 @@ public class HeatPump extends AbstractHvacDevice {
         sink.next(
                 new Signal<>(Instant.now(),
                         new HeatpumpStatus(
-                                AbstractHvacDeviceStatus.Kind.ACTUAL,
+                                HvacDeviceStatus.Kind.ACTUAL,
                                 requestedOperation,
                                 actual)));
     }
@@ -287,7 +287,7 @@ public class HeatPump extends AbstractHvacDevice {
                 "Controls single stage heat pump");
     }
 
-    public static class HeatpumpStatus extends AbstractHvacDeviceStatus {
+    public static class HeatpumpStatus extends HvacDeviceStatus {
 
         public final HvacCommand actual;
 
