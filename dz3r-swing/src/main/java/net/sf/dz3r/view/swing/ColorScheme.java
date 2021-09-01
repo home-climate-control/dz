@@ -44,7 +44,7 @@ public class ColorScheme {
         }
 
         if (mode == null) {
-            throw new IllegalArgumentException("mode can't be null");
+            return offMap;
         }
 
         return colorMap.get(mode);

@@ -1,6 +1,7 @@
 package net.sf.dz3r.view.swing;
 
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -25,6 +26,8 @@ import java.util.Set;
  * Valid object types are:
  *
  * - {@link UnitDirector}
+ * - {@link Signal} flux
+ * - Scheduler
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -117,7 +120,7 @@ public class ReactiveConsole {
 
             display.setLayout(layout);
 
-            entitySelectorPanel = new EntitySelectorPanel();
+            entitySelectorPanel = new EntitySelectorPanel(initSet, screenSizes[screenSizeOffset]);
 
             cs.fill = GridBagConstraints.BOTH;
             cs.gridx = 0;
