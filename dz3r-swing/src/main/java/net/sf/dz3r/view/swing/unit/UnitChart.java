@@ -3,6 +3,9 @@ package net.sf.dz3r.view.swing.unit;
 import net.sf.dz3r.signal.HvacDeviceStatus;
 import net.sf.dz3r.view.swing.AbstractChart;
 
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -19,6 +22,21 @@ public class UnitChart extends AbstractChart<HvacDeviceStatus, Void> {
     private static final Duration timeSpanIncrement = Duration.of(15, ChronoUnit.MINUTES);
 
     protected UnitChart(Clock clock) {
-        super(clock, timeSpanIncrement.toMillis());
+        super(clock, timeSpanIncrement.toMillis(), false);
+    }
+
+    @Override
+    protected boolean isDataAvailable() {
+        return false;
+    }
+
+    @Override
+    protected Limits recalculateVerticalLimits() {
+        return null;
+    }
+
+    @Override
+    protected void paintCharts(Graphics2D g2d, Dimension boundary, Insets insets, long now, double xScale, long xOffset, double yScale, double yOffset) {
+
     }
 }

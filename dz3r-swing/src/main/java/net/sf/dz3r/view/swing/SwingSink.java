@@ -17,7 +17,8 @@ public abstract class SwingSink<T, P> extends JPanel {
         source.subscribe(this::consumeSignal);
     }
 
-    private void consumeSignal(Signal<T,P> signal) {
+    // VT: FIXME: This must be private and driven via Flux only
+    public void consumeSignal(Signal<T,P> signal) {
 
         this.signal = signal;
         logger.info("signal: {}", signal);

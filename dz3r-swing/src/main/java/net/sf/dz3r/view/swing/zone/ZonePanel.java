@@ -24,6 +24,7 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
+import java.time.Clock;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -72,10 +73,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private final Zone zone;
 
-    /**
-     * VT: FIXME: Need the actual chart
-     */
-    private final JPanel chart = new JPanel();
+    private final AbstractZoneChart chart;
 
     /**
      * @see #consumeSignalValue(ZoneStatus)
@@ -95,7 +93,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     public ZonePanel(Zone zone, ScreenDescriptor screenDescriptor, TemperatureUnit defaultUnit) {
         this.zone = zone;
 
-        this.needFahrenheit = defaultUnit == TemperatureUnit.F;
+        needFahrenheit = defaultUnit == TemperatureUnit.F;
+        chart = new ZoneChart2021(Clock.systemUTC(), 1000L * 60 * 60 * 3, needFahrenheit);
 
         setFontSize(screenDescriptor);
 
@@ -496,12 +495,37 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             currentLabel.setText(UNDEFINED);
         } else {
 
-            var displayTemperature = String.format(Locale.getDefault(), "%.1f", getDisplayValue(sensorSignal.getValue()));
-            currentLabel.setText(displayTemperature);
-
-            var font = needFahrenheit  && displayTemperature.length() > 4 ? currentFontF : currentFontC;
-            currentLabel.setFont(font);
+            updateCurrentTemperature();
+            updateChart();
         }
+    }
+
+    private void updateCurrentTemperature() {
+
+        var displayTemperature = String.format(Locale.getDefault(), "%.1f", getDisplayValue(sensorSignal.getValue()));
+        currentLabel.setText(displayTemperature);
+
+        var font = needFahrenheit  && displayTemperature.length() > 4 ? currentFontF : currentFontC;
+        currentLabel.setFont(font);
+    }
+
+    private void updateChart() {
+
+        // Current temperature is guaranteed to be available at this point, but control signal may not be
+
+        if (zoneStatus == null) {
+            logger.warn("zoneStatus null, not updating the chart");
+            return;
+        }
+
+        var tint = new TintedValueAndSetpoint(
+                sensorSignal.getValue(),
+                zoneStatus.status.demand * 2,
+                zoneStatus.status.calling,
+                zoneStatus.settings.setpoint);
+
+        // VT: FIXME: This must be driven via Flux
+        chart.consumeSignal(new Signal<>(getSignal().timestamp, tint));
     }
 
     private HvacMode getMode() {

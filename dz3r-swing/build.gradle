@@ -1,4 +1,5 @@
 dependencies {
 
+    implementation project(':dz3-model')
     implementation project(':dz3r-model')
 }

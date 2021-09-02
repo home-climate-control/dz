@@ -191,6 +191,10 @@ public class DataSet<T> {
         return samples.size();
     }
 
+    public final boolean isEmpty() {
+        return samples.isEmpty();
+    }
+
     /**
      * Get the value recorded at the given time.
      *
