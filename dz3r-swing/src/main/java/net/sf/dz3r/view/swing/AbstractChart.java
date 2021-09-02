@@ -41,4 +41,9 @@ public class AbstractChart<T, P> extends SwingSink<T, P> {
         this.clock = clock;
         this.chartLengthMillis = chartLengthMillis;
     }
+
+    @Override
+    protected void consumeSignalValue(T value) {
+
+    }
 }

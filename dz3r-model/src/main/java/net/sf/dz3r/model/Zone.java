@@ -22,6 +22,14 @@ import reactor.core.publisher.Flux;
  */
 public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, JmxAware {
 
+    public enum State {
+
+        ERROR,
+        OFF,
+        CALLING,
+        HAPPY
+    }
+
     private final Logger logger = LogManager.getLogger();
 
     private final Thermostat ts;
@@ -41,7 +49,11 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
             throw new IllegalArgumentException("settings can't be null");
         }
 
+        ts.setSetpoint(settings.setpoint);
+
         this.settings = settings;
+
+        logger.info("setSettings({}): {}", getAddress(), settings);
     }
 
     public ZoneSettings getSettings() {

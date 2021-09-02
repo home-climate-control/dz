@@ -1,6 +1,7 @@
 package net.sf.dz3r.view.swing.zone;
 
 import net.sf.dz3r.model.HvacMode;
+import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.ZoneStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
@@ -14,6 +15,11 @@ import java.awt.Rectangle;
 
 public class ZoneCell extends EntityCell<ZoneStatus, Void> {
 
+    /**
+     * @see #consumeSignalValue(ZoneStatus)
+     */
+    private ZoneStatus zoneStatus;
+
     private HvacMode hvacMode;
 
     public ZoneCell(String name) {
@@ -23,7 +29,11 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
 
     @Override
     protected void paintContent(Graphics2D g2d, Rectangle boundary) {
-
+        paintGradient(
+                getState(),
+                getMode(),
+                zoneStatus == null ? null : zoneStatus.status.demand,
+                g2d, boundary);
     }
 
     @Override
@@ -34,7 +44,44 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
     @Override
     protected Color getIndicatorColor() {
 
-        return Color.YELLOW;
+        var mode = getMode();
+
+        switch (getState()) {
+
+            case HAPPY:
+
+                return ColorScheme.getScheme(mode).green;
+
+            case ERROR:
+
+                return ColorScheme.getScheme(mode).error;
+
+            case OFF:
+
+                return ColorScheme.getScheme(mode).off;
+
+            default:
+
+                return ColorScheme.getScheme(mode).bottom;
+        }
+    }
+
+    private void paintGradient(Zone.State state, HvacMode mode, Double signal, Graphics2D g2d, Rectangle boundary) {
+
+        switch (state) {
+
+            case CALLING:
+            case ERROR:
+            case OFF:
+
+                BackgroundRenderer.drawBottom(state, mode, signal, g2d, boundary, false);
+                break;
+
+            case HAPPY:
+
+                BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
+                break;
+        }
     }
 
     private HvacMode getMode() {
@@ -42,12 +89,37 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
     }
 
     public void subscribeMode(Flux<Signal<HvacMode, Void>> hvacModeFlux) {
-        hvacModeFlux.subscribe(this::getMode);
+        hvacModeFlux.subscribe(this::consumeMode);
     }
 
-    private void getMode(Signal<HvacMode, Void> hvacModeSignal) {
+    private void consumeMode(Signal<HvacMode, Void> hvacModeSignal) {
         this.hvacMode = hvacModeSignal.getValue();
         logger.info("hvacMode: {}", hvacMode);
         update();
+    }
+
+    private Zone.State getState() {
+
+        var signal = getSignal();
+        if (signal == null || signal.isError() || zoneStatus == null) {
+            return Zone.State.ERROR;
+        }
+
+        if (!zoneStatus.settings.enabled) {
+            return Zone.State.OFF;
+        }
+
+        return zoneStatus.status.calling ? Zone.State.CALLING : Zone.State.HAPPY;
+    }
+
+    @Override
+    protected void consumeSignalValue(ZoneStatus zoneStatus) {
+
+        if (zoneStatus == null) {
+            logger.warn("null zoneStatus update, ignored");
+            return;
+        }
+
+        this.zoneStatus = zoneStatus;
     }
 }

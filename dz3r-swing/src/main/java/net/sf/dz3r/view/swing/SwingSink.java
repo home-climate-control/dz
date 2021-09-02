@@ -7,21 +7,26 @@ import reactor.core.publisher.Flux;
 
 import javax.swing.JPanel;
 
-public class SwingSink<T, P> extends JPanel {
+public abstract class SwingSink<T, P> extends JPanel {
 
     protected final transient Logger logger = LogManager.getLogger();
 
     private transient Signal<T, P> signal;
 
     public final void subscribe(Flux<Signal<T, P>> source) {
-        source.subscribe(this::consume);
+        source.subscribe(this::consumeSignal);
     }
 
-    private void consume(Signal<T,P> signal) {
+    private void consumeSignal(Signal<T,P> signal) {
+
         this.signal = signal;
         logger.info("signal: {}", signal);
+
+        consumeSignalValue(signal.getValue());
         update();
     }
+
+    protected abstract void consumeSignalValue(T value);
 
     /**
      * Update the display and repaint.

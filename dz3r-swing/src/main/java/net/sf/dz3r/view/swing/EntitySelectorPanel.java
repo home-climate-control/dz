@@ -12,6 +12,7 @@ import net.sf.dz3r.view.swing.zone.ZoneCell;
 import net.sf.dz3r.view.swing.zone.ZonePanel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
 import javax.swing.JPanel;
@@ -47,7 +48,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
      *
      * Ugly hack, need to remove it someday.
      */
-    private final ScreenDescriptor initialScreenDescriptor;
+    private final transient ScreenDescriptor initialScreenDescriptor;
 
     public EntitySelectorPanel(Set<Object> initSet, ScreenDescriptor screenDescriptor) {
         this.initialScreenDescriptor = screenDescriptor;
@@ -109,7 +110,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
         var zoneName = zone.getAddress();
         var cell = new ZoneCell(zoneName);
-        var panel = new ZonePanel(zoneName);
+        var panel = new ZonePanel(zone, initialScreenDescriptor, TemperatureUnit.C);
 
         var thisZoneFlux = aggregateZoneFlux
                 .filter(s -> zoneName.equals(s.payload))
@@ -120,7 +121,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         cell.subscribe(thisZoneFlux);
         panel.subscribe(thisZoneFlux);
 
-        // Hack: passing the setpoint through the controller is not to simpler, so inject it
+        // Hack: passing the setpoint through the controller is not so simple, so inject it
         panel.subscribeSensor(sensorFlux);
 
         // Hack: HVAC mode is not usually available to zones (and we'll have to overhaul all this for autochangeover anyway)
@@ -204,17 +205,144 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-        throw new UnsupportedOperationException("Not Implemented");
+        // No special handling
     }
 
+    /**
+     * Handle arrow right and left (change entity).
+     */
     @Override
+    @SuppressWarnings("squid:S1199")
     public void keyPressed(KeyEvent e) {
-        throw new UnsupportedOperationException("Not Implemented");
+
+        // VT: NOTE: squid:S1199 - between this rule, and avoiding extra hassle and
+        // violating consistency, guess what.
+
+        ThreadContext.push("keyPressed");
+
+        try {
+
+            logger.info("{}", e::toString);
+
+            switch (e.getKeyChar()) {
+
+                case 'c':
+                case 'C':
+                case 'f':
+                case 'F':
+
+                    // Toggle between Celsius and Fahrenheit
+
+                    // This must work for all entities
+                    for (var entity : entities) {
+                        entity.panel.keyPressed(e);
+                    }
+
+                    break;
+
+                case 'h':
+                case 'H':
+
+                    // Toggle hold status
+
+                case 'v':
+                case 'V':
+
+                    // Toggle voting status
+
+                case 'o':
+                case 'O':
+
+                    // Toggle off status
+
+                case 's':
+                case 'S':
+
+                    // Go back to schedule
+
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+
+                    // Change dump priority
+
+                    entities.get(currentEntityOffset).panel.keyPressed(e);
+                    break;
+
+                case KeyEvent.CHAR_UNDEFINED:
+
+                    switch (e.getKeyCode()) {
+
+                        case KeyEvent.VK_KP_LEFT:
+                        case KeyEvent.VK_LEFT:
+
+                            // Cycle displayed entity to the left
+
+                        {
+                            int entityOffset = currentEntityOffset - 1;
+
+                            entityOffset = entityOffset < 0 ? entities.size() - 1 : entityOffset;
+
+                            setCurrentEntity(entityOffset);
+                        }
+
+                        break;
+
+                        case KeyEvent.VK_KP_RIGHT:
+                        case KeyEvent.VK_RIGHT:
+
+                            // Cycle displayed entity to the right
+
+                        {
+                            int entityOffset = currentEntityOffset + 1;
+
+                            entityOffset = entityOffset >= entities.size() ? 0 : entityOffset;
+
+                            setCurrentEntity(entityOffset);
+                        }
+
+                        break;
+
+                        case KeyEvent.VK_KP_UP:
+                        case KeyEvent.VK_UP:
+
+                            // Raise setpoint for currently selected zone (if it is a zone)
+
+                        case KeyEvent.VK_KP_DOWN:
+                        case KeyEvent.VK_DOWN:
+
+                            // Lower setpoint for currently selected zone (if it is a zone)
+
+                            entities.get(currentEntityOffset).panel.keyPressed(e);
+
+                            break;
+
+                        default:
+
+                            // Do nothing
+                    }
+                    break;
+
+                default:
+
+                    // Do nothing
+            }
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        throw new UnsupportedOperationException("Not Implemented");
+        // No special handling
     }
 
     /**
@@ -225,7 +353,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
     private void setCurrentEntity(int entityOffset) {
 
         entities.get(currentEntityOffset).cell.setSelected(false);
-        entities.get(currentEntityOffset).cell.setSelected(true);
+        entities.get(entityOffset).cell.setSelected(true);
 
         cardLayout.show(selectorPanel, "" + entityOffset);
 

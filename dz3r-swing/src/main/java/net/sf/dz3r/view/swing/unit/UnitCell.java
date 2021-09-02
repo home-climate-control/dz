@@ -38,4 +38,9 @@ public class UnitCell extends EntityCell<HvacDeviceStatus, Void> {
         var mode = getSignal().getValue().requested.mode;
         return getSignal().getValue().requested.demand > 0 ? ColorScheme.getScheme(mode).setpoint : ColorScheme.getScheme(mode).setpoint.darker().darker();
     }
+
+    @Override
+    protected void consumeSignalValue(HvacDeviceStatus value) {
+        // No special handling
+    }
 }

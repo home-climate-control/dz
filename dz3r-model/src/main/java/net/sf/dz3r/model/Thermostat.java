@@ -114,6 +114,8 @@ public class Thermostat implements ProcessController<Double, ThermostatStatus, V
 
         this.setpoint = setpoint;
 
+        logger.info("setSetpoint({}): {}", name, setpoint);
+
         configurationChanged();
     }
 
