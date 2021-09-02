@@ -29,8 +29,12 @@ class ZoneTest {
         when(ts1.getAddress()).thenReturn("a");
         when(ts2.getAddress()).thenReturn("b");
 
-        var z1 = new Zone(ts1, mock(ZoneSettings.class));
-        var z2 = new Zone(ts2, mock(ZoneSettings.class));
+        // Can't mock ZoneSettings, direct member access
+        var zs1 = new ZoneSettings(20.0);
+        var zs2 = new ZoneSettings(21.0);
+
+        var z1 = new Zone(ts1, zs1);
+        var z2 = new Zone(ts2, zs2);
 
         var set = new TreeSet<Zone>();
 
