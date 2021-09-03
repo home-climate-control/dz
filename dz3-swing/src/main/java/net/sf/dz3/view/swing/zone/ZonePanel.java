@@ -615,17 +615,17 @@ public class ZonePanel extends EntityPanel implements KeyListener {
 
         switch (state) {
 
-        case CALLING:
-        case ERROR:
-        case OFF:
+            case CALLING:
+            case ERROR:
+            case OFF:
 
-            BackgroundRenderer.drawBottom(state, mode, signal, g2d, boundary, true);
-            break;
+                BackgroundRenderer.drawBottom(state, mode, signal, g2d, boundary, true);
+                break;
 
-        case HAPPY:
+            case HAPPY:
 
-            BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
-            break;
+                BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
+                break;
         }
     }
 

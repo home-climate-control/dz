@@ -37,20 +37,14 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
     }
 
     @Override
-    @SuppressWarnings("squid:S107")
     protected final void paintCharts(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
             double xScale, long xOffset, double yScale, double yOffset) {
-
-        // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, dsSetpoints);
     }
 
-    /**
-     * VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
-     */
     @SuppressWarnings("squid:S107")
     protected abstract void paintChart(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,

@@ -7,6 +7,7 @@ import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.ZoneStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
+import net.sf.dz3r.view.swing.EntitySelectorPanel;
 import net.sf.dz3r.view.swing.ScreenDescriptor;
 import net.sf.dz3r.view.swing.TemperatureUnit;
 import org.apache.logging.log4j.ThreadContext;
@@ -23,11 +24,21 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.text.DecimalFormat;
 import java.time.Clock;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * Zone panel.
+ *
+ * Even though it implements {@link KeyListener}, it never request focus,
+ * but gets event notifications from {@link EntitySelectorPanel} instead.
+ * This is done in order not to fiddle with focus changes.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ */
 public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private static final DecimalFormat numberFormat = new DecimalFormat("#0.0;-#0.0");
@@ -42,6 +53,11 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private static final String NO_PERIOD = "(no period is active)";
 
+    /**
+     * Setpoint change upon a keypress.
+     */
+    private static final double SETPOINT_DELTA = 0.1d;
+
     private final JLabel currentLabel = new JLabel(UNDEFINED, SwingConstants.RIGHT);
     private final JLabel setpointLabel = new JLabel(UNDEFINED + "\u00b0", SwingConstants.RIGHT);
     private final JLabel votingLabel = new JLabel(VOTING, SwingConstants.RIGHT);
@@ -55,6 +71,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     /**
      * Font to display the current temperature in Fahrenheit when the temperature is over 100F.
+     *
+     * @see #needFahrenheit
      */
     private Font currentFontF;
 
@@ -65,25 +83,19 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private boolean needFahrenheit;
 
-    /**
-     * Setpoint change upon a keypress.
-     *
-     */
-    private double setpointDelta = 0.1d;
-
-    private final Zone zone;
+    private final transient Zone zone;
 
     private final AbstractZoneChart chart;
 
     /**
      * @see #consumeSignalValue(ZoneStatus)
      */
-    private ZoneStatus zoneStatus;
+    private transient ZoneStatus zoneStatus;
 
     /**
      * @see #consumeSensorSignal(Signal)
      */
-    private Signal<Double, Void> sensorSignal;
+    private transient Signal<Double, Void> sensorSignal;
 
     /**
      * @see #consumeMode(Signal)
@@ -100,7 +112,6 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
         initGraphics();
     }
-
 
     private void initGraphics() {
 
@@ -195,7 +206,6 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     @Override
     public void setFontSize(ScreenDescriptor screenDescriptor) {
-
         this.currentFontC = screenDescriptor.fontCurrentTemperatureC;
         this.currentFontF = screenDescriptor.fontCurrentTemperatureF;
         this.setpointFont = screenDescriptor.fontSetpoint;
@@ -391,41 +401,40 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     }
 
     /**
-     * Raise the setpoint.
+     * Change the setpoint.
      *
-     * @param modifier Multiply the default {@link #setpointDelta} by this number to get the actual delta.
+     * @param delta Amount to change by.
      */
-    private void raiseSetpoint(int modifier) {
+    private void changeSetpoint(double delta) {
 
         // Must operate in visible values to avoid rounding problems
-
         var setpoint = getDisplayValue(zone.getSettings().setpoint);
 
-        setpoint += setpointDelta * modifier;
+        setpoint += delta;
         setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
+        // This may blow up if the zone refuses to take the new setpoint because it is out of range
         zone.setSettings(new ZoneSettings(zone.getSettings(), setpoint));
 
         refresh();
     }
 
     /**
+     * Raise the setpoint.
+     *
+     * @param modifier Multiply the default {@link #SETPOINT_DELTA} by this number to get the actual delta.
+     */
+    private void raiseSetpoint(int modifier) {
+        changeSetpoint(SETPOINT_DELTA * modifier);
+    }
+
+    /**
      * Lower the setpoint.
      *
-     * @param modifier Multiply the default {@link #setpointDelta} by this number to get the actual delta.
+     * @param modifier Multiply the default {@link #SETPOINT_DELTA} by this number to get the actual delta.
      */
     private void lowerSetpoint(int modifier) {
-
-        // Must operate in visible values to avoid rounding problems
-
-        var setpoint = getDisplayValue(zone.getSettings().setpoint);
-
-        setpoint -= setpointDelta * modifier;
-        setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
-
-        zone.setSettings(new ZoneSettings(zone.getSettings(), setpoint));
-
-        refresh();
+        changeSetpoint(-SETPOINT_DELTA * modifier);
     }
 
     @Override
@@ -472,6 +481,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             holdLabel.setText(h ? ON_HOLD : HOLD);
             holdLabel.setForeground(h ? ColorScheme.getScheme(getMode()).noticeActive : ColorScheme.getScheme(getMode()).noticeDefault);
         });
+
+        repaint();
     }
 
     public void subscribeSensor(Flux<Signal<Double, Void>> sensorFlux) {
@@ -498,6 +509,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             updateCurrentTemperature();
             updateChart();
         }
+        repaint();
     }
 
     private void updateCurrentTemperature() {
@@ -536,16 +548,19 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         hvacModeFlux.subscribe(this::consumeMode);
     }
 
-    private void consumeMode(Signal<HvacMode, Void> hvacModeSignal) {
-        this.hvacMode = hvacModeSignal.getValue();
-        logger.info("hvacMode: {}", hvacMode);
-        updateMode();
-    }
-
     /**
      * Selectively update only the UI parts affected by a changed HVAC mode.
      */
-    private void updateMode() {
+    private void consumeMode(Signal<HvacMode, Void> hvacModeSignal) {
+
+        var hvacMode = hvacModeSignal.getValue(); // NOSONAR I know
+
+        if (this.hvacMode == hvacMode) {
+            return;
+        }
+
+        this.hvacMode = hvacMode;
+        logger.debug("hvacMode: {}", hvacMode);
 
         // The way the lifecycle is built, the only updates are the setpoint and current temperature colors,
         // and only from "unknown" to "mode specific".
@@ -575,14 +590,6 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      */
     private double getSIValue(double value) {
         return needFahrenheit ? (value - 32) * (5d / 9d) : value;
-    }
-
-    public double getSetpointDelta() {
-        return setpointDelta;
-    }
-
-    public void setSetpointDelta(double setpointDelta) {
-        this.setpointDelta = setpointDelta;
     }
 
     @Override

@@ -18,7 +18,7 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
     /**
      * @see #consumeSignalValue(ZoneStatus)
      */
-    private ZoneStatus zoneStatus;
+    private transient ZoneStatus zoneStatus;
 
     private HvacMode hvacMode;
 
@@ -93,8 +93,14 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
     }
 
     private void consumeMode(Signal<HvacMode, Void> hvacModeSignal) {
-        this.hvacMode = hvacModeSignal.getValue();
-        logger.info("hvacMode: {}", hvacMode);
+        var hvacMode = hvacModeSignal.getValue(); // NOSONAR I know
+
+        if (this.hvacMode == hvacMode) {
+            return;
+        }
+
+        this.hvacMode = hvacMode;
+        logger.debug("hvacMode: {}", hvacMode);
         update();
     }
 

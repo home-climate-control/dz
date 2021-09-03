@@ -14,6 +14,8 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.time.Clock;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
@@ -49,7 +51,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
      *
      * Default is one minute.
      */
-    protected static final long DEAD_TIMEOUT = 1000L * 60;
+    protected static final Duration DEAD_TIMEOUT = Duration.of(1, ChronoUnit.MINUTES);
 
     /**
      * Horizontal grid spacing.
@@ -57,7 +59,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
      * Vertical grid lines will be painted every <code>timeSpacing</code>
      * milliseconds. Default is 30 minutes.
      */
-    protected static final long SPACING_TIME = 1000L * 60 * 30;
+    protected static final Duration SPACING_TIME = Duration.of(30, ChronoUnit.MINUTES);
 
     /**
      * Vertical grid spacing.
@@ -121,7 +123,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
      *
      * We cheat - the only thing that needs to be changed is the value grid. Quick and easy to repaint.
      *
-     * @see #paintValueGrid(Graphics2D, Dimension, Insets, long, double, long, double, double)
+     * @see #paintValueGrid(Graphics2D, Dimension, Insets, double, long, double, double)
      */
     private boolean needFahrenheit;
 
@@ -181,7 +183,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
         var yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
         var yOffset = dataMax + PADDING;
 
-        paintValueGrid(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
+        paintValueGrid(g2d, boundary, insets, xScale, xOffset, yScale, yOffset);
         paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
         logger.info("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
@@ -211,20 +213,20 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
     private void paintTimeGrid(Graphics2D g2d, Dimension boundary, Insets insets, long now, double xScale, long xOffset) {
 
         if (need15MinGrid()) {
-            paintTimeGrid(g2d, insets.top + (double)boundary.height / 1.25, (double)boundary.height - insets.bottom - 1, insets, now, xScale, xOffset, SPACING_TIME / 2);
+            paintTimeGrid(g2d, insets.top + boundary.height / 1.25, (double)boundary.height - insets.bottom - 1, insets, now, xScale, xOffset, SPACING_TIME.dividedBy(2));
         }
 
         paintTimeGrid(g2d, insets.top, (double)boundary.height - insets.bottom - 1, insets, now, xScale, xOffset, SPACING_TIME);
     }
 
-    private void paintTimeGrid(Graphics2D g2d, double top, double bottom, Insets insets, long now, double xScale, long xOffset, long spacingTime) {
+    private void paintTimeGrid(Graphics2D g2d, double top, double bottom, Insets insets, long now, double xScale, long xOffset, Duration spacingTime) {
 
         var originalStroke = (BasicStroke) g2d.getStroke();
         var gridStroke = setGridStroke(g2d);
 
         g2d.setStroke(gridStroke);
 
-        for (long timeOffset = now - spacingTime; timeOffset > now - chartLengthMillis; timeOffset -= spacingTime) {
+        for (long timeOffset = now - spacingTime.toMillis(); timeOffset > now - chartLengthMillis; timeOffset -= spacingTime.toMillis()) {
 
             double gridX = (timeOffset - xOffset) * xScale + insets.left;
 
@@ -254,7 +256,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
     @SuppressWarnings("squid:S107")
     private void paintValueGrid(
-            Graphics2D g2d, Dimension boundary, Insets insets, long now,
+            Graphics2D g2d, Dimension boundary, Insets insets,
             double xScale, long xOffset, double yScale, double yOffset) {
 
         // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.

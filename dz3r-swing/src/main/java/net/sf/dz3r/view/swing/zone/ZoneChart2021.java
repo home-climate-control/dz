@@ -109,7 +109,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
                 // Decide whether the line is alive or dead
 
-                if (timeNow - timeTrailer > DEAD_TIMEOUT) {
+                if (timeNow - timeTrailer > DEAD_TIMEOUT.toMillis()) {
 
                     // It's dead, all right
                     // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
@@ -135,7 +135,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
             trailer = cursor;
         }
 
-        if (timeTrailer != null && now - timeTrailer > DEAD_TIMEOUT) {
+        if (timeTrailer != null && now - timeTrailer > DEAD_TIMEOUT.toMillis()) {
 
             // There's a gap on the right, let's fill it
 
