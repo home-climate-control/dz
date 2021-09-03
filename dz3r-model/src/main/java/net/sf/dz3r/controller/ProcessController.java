@@ -2,6 +2,7 @@ package net.sf.dz3r.controller;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.SignalProcessor;
 import reactor.core.publisher.Flux;
 
 /**

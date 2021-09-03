@@ -1,9 +1,9 @@
 package net.sf.dz3r.model;
 
-import net.sf.dz3r.controller.SignalProcessor;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.UnitControlSignal;
-import net.sf.dz3r.signal.ZoneStatus;
+import net.sf.dz3r.signal.SignalProcessor;
+import net.sf.dz3r.signal.hvac.UnitControlSignal;
+import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;

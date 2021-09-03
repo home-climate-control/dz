@@ -1,11 +1,13 @@
 package net.sf.dz3r.model;
 
+import net.sf.dz3r.signal.hvac.ZoneStatus;
+
 /**
  * Zone settings.
  *
  * This object defines the desired zone configuration.
  *
- * @see net.sf.dz3r.signal.ZoneStatus
+ * @see ZoneStatus
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */

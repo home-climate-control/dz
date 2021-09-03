@@ -1,4 +1,4 @@
-package net.sf.dz3r.signal;
+package net.sf.dz3r.signal.hvac;
 
 import net.sf.dz3r.model.HvacMode;
 

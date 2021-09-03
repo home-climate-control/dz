@@ -2,7 +2,7 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.ThermostatStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;

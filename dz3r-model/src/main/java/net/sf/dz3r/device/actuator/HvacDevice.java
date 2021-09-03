@@ -1,12 +1,12 @@
 package net.sf.dz3r.device.actuator;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxAware;
-import net.sf.dz3r.controller.SignalProcessor;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.signal.HvacCommand;
-import net.sf.dz3r.signal.HvacDeviceStatus;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.SignalProcessor;
+import net.sf.dz3r.signal.hvac.HvacCommand;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
 import java.util.Set;

@@ -1,9 +1,9 @@
 package net.sf.dz3r.model;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import net.sf.dz3r.signal.HvacCommand;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.UnitControlSignal;
+import net.sf.dz3r.signal.hvac.HvacCommand;
+import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;

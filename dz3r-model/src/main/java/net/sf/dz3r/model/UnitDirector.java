@@ -2,11 +2,11 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.signal.HvacCommand;
-import net.sf.dz3r.signal.HvacDeviceStatus;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.UnitControlSignal;
-import net.sf.dz3r.signal.ZoneStatus;
+import net.sf.dz3r.signal.hvac.HvacCommand;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
+import net.sf.dz3r.signal.hvac.UnitControlSignal;
+import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;

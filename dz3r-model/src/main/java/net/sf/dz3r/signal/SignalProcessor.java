@@ -1,6 +1,5 @@
-package net.sf.dz3r.controller;
+package net.sf.dz3r.signal;
 
-import net.sf.dz3r.signal.Signal;
 import reactor.core.publisher.Flux;
 
 /**

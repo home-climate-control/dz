@@ -1,10 +1,10 @@
 package net.sf.dz3r.model;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxAware;
-import net.sf.dz3r.controller.SignalProcessor;
 import net.sf.dz3r.device.Addressable;
-import net.sf.dz3r.signal.HvacCommand;
-import net.sf.dz3r.signal.UnitControlSignal;
+import net.sf.dz3r.signal.SignalProcessor;
+import net.sf.dz3r.signal.hvac.HvacCommand;
+import net.sf.dz3r.signal.hvac.UnitControlSignal;
 
 /**
  * Accepts signals from {@link ZoneController}, issues signals to HVAC hardware and {@code DamperController}.

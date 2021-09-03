@@ -6,7 +6,7 @@ import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.ThermostatStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;

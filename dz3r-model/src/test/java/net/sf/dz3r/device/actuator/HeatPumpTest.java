@@ -2,9 +2,9 @@ package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3.device.sensor.impl.NullSwitch;
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.signal.HvacCommand;
-import net.sf.dz3r.signal.HvacDeviceStatus;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.HvacCommand;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
