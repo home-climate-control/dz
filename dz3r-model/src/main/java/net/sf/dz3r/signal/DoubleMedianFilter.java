@@ -1,7 +1,5 @@
-package net.sf.dz3r.signal.hvac;
+package net.sf.dz3r.signal;
 
-
-import net.sf.dz3r.signal.MedianFilter;
 
 public class DoubleMedianFilter extends MedianFilter<Double> {
 

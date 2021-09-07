@@ -5,6 +5,7 @@ import reactor.core.publisher.Flux;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
  *
  * If all the signals currently considered are in {@link Signal#isError()} status, the output will produce a
  * {@link Signal.Status#FAILURE_TOTAL} status.
+ *
+ * In both cases, the {@link Signal#error} reported will be the last error arrived.
  *
  * This signal processor does not accept any payload - it doesn't make sense in the context.
  *
@@ -80,25 +83,52 @@ public abstract class MedianFilter<T extends  Comparable<T>> implements SignalPr
     private Signal<T, Void> filter(List<Signal<T, Void>> source, Instant timestamp) {
 
         var sourceSize = source.size();
+        var notOkCount = new AtomicInteger();
+        var errorCount = new AtomicInteger();
+        List<Throwable> errors = new ArrayList<>();
+
+        var values = Flux.fromIterable(source)
+                .doOnNext(s -> {
+
+                    if (!s.isOK()) {
+                        errors.add(s.error);
+                        notOkCount.incrementAndGet();
+                    }
+
+                    if (s.isError()) {
+                        errorCount.incrementAndGet();
+                        errors.add(s.error);
+                    }
+                })
+                .filter(s -> s.getValue() != null)
+                .collect(Collectors.toList())
+                .block();
+
 
         // Some elements may be partial or total errors
-        var errorCount = Flux.fromIterable(source).filter(Signal::isError).count().block();
 
-        if (errorCount == sourceSize) {
+        if (errorCount.intValue() == sourceSize) {
             // All errors, we produce an error - last one will do
             return new Signal<>(
                     timestamp,
                     null, null,
-                    Signal.Status.FAILURE_TOTAL, source.get(source.size() - 1).error);
+                    Signal.Status.FAILURE_TOTAL, errors.get(errors.size() - 1));
         }
 
-        var ok = Flux.fromIterable(source).filter(Signal::isOK).count().block() == sourceSize;
+        if (values.isEmpty()) {
+            // Alas, not all are errors, but there are no usable values
+            return new Signal<>(
+                    timestamp,
+                    null, null,
+                    Signal.Status.FAILURE_TOTAL, errors.get(errors.size() - 1));
+        }
 
-        // Actual depth is less than requested until ramped up
-        var result = Math.min(sourceSize, depth) % 2 == 0 ? filterEven(source) : filterOdd(source);
+        // Actual depth is less than requested until ramped up, or if there are errors
+        var result = Math.min(values.size(), depth) % 2 == 0 ? filterEven(values) : filterOdd(values);
 
-        // VT: FIXME: Error may not be null, but it's not that important now, can be left like this for a while
-        return new Signal<>(timestamp, result, null, ok ? Signal.Status.OK : Signal.Status.FAILURE_PARTIAL, null);
+        return new Signal<>(timestamp, result, null,
+                errors.isEmpty() ? Signal.Status.OK : Signal.Status.FAILURE_PARTIAL,
+                errors.isEmpty() ? null : errors.get(errors.size() - 1));
     }
 
     private T filterEven(List<Signal<T, Void>> source) {

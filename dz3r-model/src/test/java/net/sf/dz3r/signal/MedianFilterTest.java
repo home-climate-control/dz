@@ -1,14 +1,12 @@
 package net.sf.dz3r.signal;
 
-import net.sf.dz3r.signal.hvac.DoubleMedianFilter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.test.StepVerifier;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,7 +18,32 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class MedianFilterTest {
 
-    private final Logger logger = LogManager.getLogger();
+    @Test
+    void testEmpty() {
+
+        Flux<Double> sequence = Flux.empty();
+        List<Double> match = List.of();
+
+        test(3, sequence, match);
+    }
+
+    @Test
+    void test2just1() {
+
+        var sequence = Flux.just(1d);
+        var match = List.of(1d);
+
+        test(2, sequence, match);
+    }
+
+    @Test
+    void test3just1() {
+
+        var sequence = Flux.just(1d);
+        var match = List.of(1d);
+
+        test(3, sequence, match);
+    }
 
     @Test
     void test3() {
@@ -114,24 +137,70 @@ class MedianFilterTest {
 
     private void test(int depth, Flux<Double> sequence, List<Double> expected) {
 
-        ThreadContext.push("test(" + depth + ")");
+        var source = sequence
+                .map(s -> new Signal<>(Instant.now(), s, (Void) null));
+        var out = new DoubleMedianFilter(depth)
+                .compute(source)
+                .map(Signal::getValue);
 
-        try {
+        var result = out.collect(Collectors.toList()).block();
 
-            logger.info("Depth {}, expected {}", depth, expected);
+        assertThat(result).isEqualTo(expected);
+    }
 
-            var source = sequence
-                    .map(s -> new Signal<>(Instant.now(), s, (Void) null));
-            var out = new DoubleMedianFilter(depth)
-                    .compute(source)
-                    .map(Signal::getValue);
+    @Test
+    void someErrors() {
 
-            var result = out.collect(Collectors.toList()).block();
+        var source = Flux.just(
+                new Signal<>(Instant.now(), 2d, (Void)null),
+                new Signal<>(Instant.now(), (Double)null, (Void)null, Signal.Status.FAILURE_TOTAL, new NullPointerException()),
+                new Signal<>(Instant.now(), (Double)null, (Void)null, Signal.Status.FAILURE_TOTAL, new TimeoutException())
+        );
 
-            assertThat(result).isEqualTo(expected);
+        var out = new DoubleMedianFilter(3)
+                .compute(source);
 
-        } finally {
-            ThreadContext.pop();
-        }
+        StepVerifier.create(out)
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(2d))
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isEqualTo(2d);
+                    assertThat(s.isOK()).isFalse();
+                    assertThat(s.isError()).isFalse();
+                    assertThat(s.error).isInstanceOf(NullPointerException.class);
+                })
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isEqualTo(2d);
+                    assertThat(s.isOK()).isFalse();
+                    assertThat(s.isError()).isFalse();
+                    assertThat(s.error).isInstanceOf(TimeoutException.class);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void allErrors() {
+
+        var source = Flux.just(
+                new Signal<>(Instant.now(), (Double)null, (Void)null, Signal.Status.FAILURE_TOTAL, new NullPointerException()),
+                new Signal<>(Instant.now(), (Double)null, (Void)null, Signal.Status.FAILURE_TOTAL, new TimeoutException())
+        );
+
+        var out = new DoubleMedianFilter(2)
+                .compute(source);
+
+        StepVerifier.create(out)
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isNull();
+                    assertThat(s.isOK()).isFalse();
+                    assertThat(s.isError()).isTrue();
+                    assertThat(s.error).isInstanceOf(NullPointerException.class);
+                })
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isNull();
+                    assertThat(s.isOK()).isFalse();
+                    assertThat(s.isError()).isTrue();
+                    assertThat(s.error).isInstanceOf(TimeoutException.class);
+                })
+                .verifyComplete();
     }
 }
