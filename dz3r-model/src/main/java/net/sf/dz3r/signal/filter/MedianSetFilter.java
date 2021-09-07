@@ -1,8 +1,11 @@
 package net.sf.dz3r.signal.filter;
 
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.SignalProcessor;
 import reactor.core.publisher.Flux;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Median set filter.
@@ -16,8 +19,10 @@ import reactor.core.publisher.Flux;
  *
  * If all sources produce error signals, the output signal will produce a {@link Signal.Status#FAILURE_TOTAL} status.
  *
+ * Payload information is discarded along the way.
+ *
  * @param <T> Filtered object type.
- * @param <P> Signal payload type.
+ * @param <P> Signal source identifier.
  *
  * @see MedianFilter
  * @see net.sf.dz3.device.sensor.impl.MedianFilter
@@ -25,10 +30,42 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class MedianSetFilter<T extends  Comparable<T>, P> implements SignalProcessor<T, T, P> {
+public abstract class MedianSetFilter<T extends  Comparable<T>, P> extends AbstractMedianFilter<T, P> {
+
+    private final Map<P, Signal<T, P>> channelMap = new HashMap<>();
+
+    /**
+     * Create an instance with a given depth.
+     *
+     * @param depth A misnomer for this kind of filter - this better be equal to the number of signal sources.
+     */
+    protected MedianSetFilter(int depth) {
+        super(depth);
+    }
 
     @Override
-    public Flux<Signal<T, P>> compute(Flux<Signal<T, P>> in) {
-        throw new UnsupportedOperationException("Not Implemented");
+    protected final Signal<T, P> compute(Signal<T, P> signal) {
+
+        channelMap.put(signal.payload, signal);
+
+        var buffer = Flux.fromIterable(channelMap.values())
+                .sort(this::sortByTimestamp)
+                .collect(Collectors.toList())
+                .block();
+
+        if (buffer.size() < 2) {
+            // Nothing to filter yet
+            return signal;
+        }
+
+        if (buffer.size() > depth) {
+            buffer.remove(0);
+        }
+
+        return filter(buffer, signal.timestamp);
+    }
+
+    private int sortByTimestamp(Signal<T, P> s1, Signal<T, P> s2) {
+        return s1.timestamp.compareTo(s2.timestamp);
     }
 }
