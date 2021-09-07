@@ -1,4 +1,4 @@
-package net.sf.dz3r.signal;
+package net.sf.dz3r.signal.filter;
 
 
 public class DoubleMedianFilter extends MedianFilter<Double> {
