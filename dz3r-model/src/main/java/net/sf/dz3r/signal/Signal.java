@@ -77,8 +77,8 @@ public class Signal<T, P> {
             throw new IllegalArgumentException("timestamp can't be null");
         }
 
-        if (value == null && status == Status.OK) {
-            throw new IllegalArgumentException("null value doesn't make sense for status OK");
+        if (value == null && status != Status.FAILURE_TOTAL) {
+            throw new IllegalArgumentException("null value doesn't make sense for total failure");
         }
 
         if (status != Status.OK && error == null) {
@@ -131,13 +131,15 @@ public class Signal<T, P> {
 
     @Override
     public String toString() {
-        var result = "@" + timestamp + ", value={" + value + "}, " + printPayload() + "isOK=" + isOK() + ", isError=" + isError() ;
+        var result = "@" + timestamp + ", value={" + value + "}, " + printPayload()
+                + "status=" + status
+                + ", isOK=" + isOK() + ", isError=" + isError() ;
 
         if (isOK()) {
             return result;
         }
 
-        return result + ", error=\"" + error.getMessage() + "\"";
+        return result + ", error=" + error.getClass().getName() + "(" + error.getMessage() + ")";
     }
 
     private String printPayload() {
