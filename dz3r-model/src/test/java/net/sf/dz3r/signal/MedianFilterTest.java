@@ -26,7 +26,7 @@ class MedianFilterTest {
     void test3() {
 
         var sequence = Flux.just(1d, 2d, 3d, 4d, 5d);
-        var match = List.of(1d, 2d, 2d, 3d, 4d);
+        var match = List.of(1d, 1.5d, 2d, 3d, 4d);
 
         test(3, sequence, match);
     }
@@ -35,7 +35,7 @@ class MedianFilterTest {
     void test3repeated2() {
 
         var sequence = Flux.just(1d, 2d, 3d, 4d, 4d);
-        var match = List.of(1d, 2d, 2d, 3d, 4d);
+        var match = List.of(1d, 1.5d, 2d, 3d, 4d);
 
         test(3, sequence, match);
     }
@@ -44,7 +44,7 @@ class MedianFilterTest {
     void test3repeated3() {
 
         var sequence = Flux.just(1d, 2d, 3d, 4d, 4d, 4d);
-        var match = List.of(1d, 2d, 2d, 3d, 4d, 4d);
+        var match = List.of(1d, 1.5d, 2d, 3d, 4d, 4d);
 
         test(3, sequence, match);
     }
@@ -53,7 +53,7 @@ class MedianFilterTest {
     void test5() {
 
         var sequence = Flux.just(1d, 2d, 3d, 4d, 5d, 6d, 7d);
-        var match = List.of(1d, 2d, 3d, 4d, 3d, 4d, 5d);
+        var match = List.of(1d, 1.5d, 2d, 2.5d, 3d, 4d, 5d);
 
         test(5, sequence, match);
     }
@@ -62,7 +62,7 @@ class MedianFilterTest {
     void test5repeated2() {
 
         var sequence = Flux.just(1d, 2d, 3d, 4d, 5d, 6d, 7d, 7d);
-        var match = List.of(1d, 2d, 3d, 4d, 3d, 4d, 5d, 6d);
+        var match = List.of(1d, 1.5d, 2d, 2.5d, 3d, 4d, 5d, 6d);
 
         test(5, sequence, match);
     }
@@ -71,7 +71,7 @@ class MedianFilterTest {
     void test5repeated3() {
 
         var sequence = Flux.just(1d, 2d, 3d, 4d, 5d, 6d, 7d, 7d, 7d);
-        var match = List.of(1d, 2d, 3d, 4d, 3d, 4d, 5d, 6d, 7d);
+        var match = List.of(1d, 1.5d, 2d, 2.5d, 3d, 4d, 5d, 6d, 7d);
 
         test(5, sequence, match);
     }
@@ -98,7 +98,7 @@ class MedianFilterTest {
     void test4() {
 
         var sequence = Flux.just(1d, 2d, 3d, 4d, 5d, 6d, 7d);
-        var match = List.of(1d, 2d, 3d, 2.5d, 3.5d, 4.5d, 5.5d);
+        var match = List.of(1d, 1.5d, 2d, 2.5d, 3.5d, 4.5d, 5.5d);
 
         test(4, sequence, match);
     }
@@ -107,7 +107,7 @@ class MedianFilterTest {
     void test4repeated2() {
 
         var sequence = Flux.just(1d, 2d, 3d, 4d, 5d, 6d, 7d, 7d);
-        var match = List.of(1d, 2d, 3d, 2.5d, 3.5d, 4.5d, 5.5d, 6.5d);
+        var match = List.of(1d, 1.5d, 2d, 2.5d, 3.5d, 4.5d, 5.5d, 6.5d);
 
         test(4, sequence, match);
     }

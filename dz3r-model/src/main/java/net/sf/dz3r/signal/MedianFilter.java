@@ -57,7 +57,8 @@ public abstract class MedianFilter<T extends  Comparable<T>> implements SignalPr
 
         buffer.add(signal);
 
-        if (buffer.size() < depth) {
+        if (buffer.size() < 2) {
+            // Nothing to filter yet
             return signal;
         }
 
@@ -78,10 +79,12 @@ public abstract class MedianFilter<T extends  Comparable<T>> implements SignalPr
      */
     private Signal<T, Void> filter(List<Signal<T, Void>> source, Instant timestamp) {
 
+        var sourceSize = source.size();
+
         // Some elements may be partial or total errors
         var errorCount = Flux.fromIterable(source).filter(Signal::isError).count().block();
 
-        if (errorCount == source.size()) {
+        if (errorCount == sourceSize) {
             // All errors, we produce an error - last one will do
             return new Signal<>(
                     timestamp,
@@ -89,9 +92,10 @@ public abstract class MedianFilter<T extends  Comparable<T>> implements SignalPr
                     Signal.Status.FAILURE_TOTAL, source.get(source.size() - 1).error);
         }
 
-        var ok = Flux.fromIterable(source).filter(Signal::isOK).count().block() == source.size();
+        var ok = Flux.fromIterable(source).filter(Signal::isOK).count().block() == sourceSize;
 
-        var result = depth % 2 == 0 ? filterEven(source) : filterOdd(source);
+        // Actual depth is less than requested until ramped up
+        var result = Math.min(sourceSize, depth) % 2 == 0 ? filterEven(source) : filterOdd(source);
 
         // VT: FIXME: Error may not be null, but it's not that important now, can be left like this for a while
         return new Signal<>(timestamp, result, null, ok ? Signal.Status.OK : Signal.Status.FAILURE_PARTIAL, null);
