@@ -38,5 +38,5 @@ dependencies {
     runtimeOnly project(':dz3-scheduler-gcal-v3')
 
     // Enable Raspberry Pi specific hardware integration
-    runtimeOnly project(':dz3-raspberry-pi')
+    runtimeOnly project(':dz3r-raspberry-pi')
 }
