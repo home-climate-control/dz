@@ -16,7 +16,7 @@ dependencies {
     runtimeOnly project(':dz3r-swing')
 
     // Enable InfluxDB logger
-    runtimeOnly project(':dz3-influxdb')
+    runtimeOnly project(':dz3r-influxdb')
 
     // Enable 1-Wire bus
     runtimeOnly project(':dz3-owapi')
