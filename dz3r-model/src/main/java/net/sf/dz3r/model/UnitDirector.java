@@ -10,6 +10,7 @@ import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -29,11 +30,11 @@ public class UnitDirector implements Addressable<String> {
 
     private final Logger logger = LogManager.getLogger();
 
+    private final Subscriber<Signal<Number, Map<String, String>>> metricsCollector;
+
     private final String name;
 
-    private final Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone;
-    private final Flux<Signal<ZoneStatus, String>> aggregateZoneFlux;
-    private final Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux;
+    private final Feed feed;
 
     private final CountDownLatch sigTerm = new CountDownLatch(1);
     private final CountDownLatch shutdownComplete = new CountDownLatch(1);
@@ -41,6 +42,7 @@ public class UnitDirector implements Addressable<String> {
     /**
      * Create an instance.
      *
+     * @param metricsCollector Sink to send all the metrics to.
      * @param name Instance name.
      * @param sensorFlux2zone Mapping of sensor flux to zone it will feed.
      * @param unitController Unit controller for this set of zones.
@@ -48,6 +50,7 @@ public class UnitDirector implements Addressable<String> {
      * @param hvacMode HVAC device mode for this zone. {@link Thermostat} PID signals must have correct polarity for this mode.
      */
     public UnitDirector(
+            Subscriber<Signal<Number, Map<String, String>>> metricsCollector,
             String name,
             Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
             UnitController unitController,
@@ -55,26 +58,36 @@ public class UnitDirector implements Addressable<String> {
             HvacMode hvacMode
     ) {
 
+        this.metricsCollector = metricsCollector;
         this.name = name;
-        this.sensorFlux2zone = sensorFlux2zone;
 
-        aggregateZoneFlux = Flux
+        var aggregateZoneFlux = Flux
                 .merge(extractSensorFluxes(sensorFlux2zone))
                 .publish().autoConnect()
                 .checkpoint("aggregate-sensor");
         var zoneControllerFlux = new ZoneController(sensorFlux2zone.values())
                 .compute(aggregateZoneFlux)
+                .publish().autoConnect()
                 .checkpoint("zone-controller")
                 .map(this::stripZoneName);
         var unitControllerFlux = unitController
                 .compute(zoneControllerFlux)
+                .publish().autoConnect()
                 .checkpoint("unit-controller");
-        hvacDeviceFlux = hvacDevice.compute(
+        var hvacDeviceFlux = hvacDevice.compute(
                 Flux.concat(
                         Flux.just(new Signal<>(Instant.now(), new HvacCommand(hvacMode, null, null))),
                         unitControllerFlux
-                )).publish().autoConnect();
+                )).publish().autoConnect()
+                .checkpoint("hvac-device");
 
+        feed = new Feed(
+                sensorFlux2zone,
+                aggregateZoneFlux,
+                zoneControllerFlux,
+                unitControllerFlux,
+                hvacDeviceFlux
+        );
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             ThreadContext.push("shutdownHook");
             try {
@@ -122,7 +135,7 @@ public class UnitDirector implements Addressable<String> {
     }
 
     public final Flux<Signal<HvacDeviceStatus, Void>> getFlux() {
-        return hvacDeviceFlux;
+        return feed.hvacDeviceFlux;
     }
 
     public void start() {
@@ -131,7 +144,7 @@ public class UnitDirector implements Addressable<String> {
             try {
 
                 logger.info("Starting the pipeline");
-                var theEnd = hvacDeviceFlux
+                var theEnd = feed.hvacDeviceFlux
                         .publishOn(Schedulers.boundedElastic())
                         .subscribe(
                                 s -> {
@@ -160,22 +173,28 @@ public class UnitDirector implements Addressable<String> {
     }
 
     public Feed getFeed() {
-        return new Feed(sensorFlux2zone, aggregateZoneFlux, hvacDeviceFlux);
+        return feed;
     }
 
     public static class Feed {
 
         public final Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone;
         public final Flux<Signal<ZoneStatus, String>> aggregateZoneFlux;
+        public final Flux<Signal<UnitControlSignal, Void>> zoneControllerFlux;
+        public final Flux<Signal<HvacCommand, Void>> unitControllerFlux;
         public final Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux;
 
         public Feed(
                 Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
                 Flux<Signal<ZoneStatus, String>> aggregateZoneFlux,
+                Flux<Signal<UnitControlSignal, Void>> zoneControllerFlux,
+                Flux<Signal<HvacCommand, Void>> unitControllerFlux,
                 Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux) {
 
             this.sensorFlux2zone = sensorFlux2zone;
             this.aggregateZoneFlux = aggregateZoneFlux;
+            this.zoneControllerFlux = zoneControllerFlux;
+            this.unitControllerFlux = unitControllerFlux;
             this.hvacDeviceFlux = hvacDeviceFlux;
         }
     }
