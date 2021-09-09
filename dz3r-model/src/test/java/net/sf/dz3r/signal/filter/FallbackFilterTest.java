@@ -1,5 +1,6 @@
-package net.sf.dz3r.signal;
+package net.sf.dz3r.signal.filter;
 
+import net.sf.dz3r.signal.Signal;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;

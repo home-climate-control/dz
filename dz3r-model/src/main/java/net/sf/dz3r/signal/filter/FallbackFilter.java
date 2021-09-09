@@ -1,5 +1,7 @@
-package net.sf.dz3r.signal;
+package net.sf.dz3r.signal.filter;
 
+import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.SignalProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
