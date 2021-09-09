@@ -1,6 +1,7 @@
 package net.sf.dz3r.view.influxdb.v3;
 
-import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.model.MetricsCollector;
+import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.view.influxdb.common.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,9 +11,10 @@ import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Simple InfluxDB logger.
@@ -21,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class InfluxDbLogger implements Subscriber<Signal<Number, Map<String, String>>> {
+public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
 
     private final Logger logger = LogManager.getLogger();
     private final Config config;
@@ -94,28 +96,12 @@ public class InfluxDbLogger implements Subscriber<Signal<Number, Map<String, Str
     /**
      * Consume the signal and write it to the target database.
      *
-     * @param signal Signal to write to InfluxDB. The value is the measurement, the payload is the tag set.
+     * @param sample Sample to write to InfluxDB.
      */
     @Override
-    public void onNext(Signal<Number, Map<String, String>> signal) {
-
-        Point.Builder b = Point.measurement("sensor")
-                .time(signal.timestamp.toEpochMilli(), TimeUnit.MILLISECONDS)
-                .tag("instance", config.instance);
-
-        for (var kv : signal.payload.entrySet()) {
-            b.tag(kv.getKey(), kv.getValue());
-        }
-
-        if (signal.getValue() != null) {
-            b.addField("sample", signal.getValue());
-        }
-
-        if (signal.error != null) {
-            b.addField("error", signal.error.toString());
-        }
-
-        db.write(b.build());
+    public void onNext(Point sample) {
+        logger.trace("Point: {}", sample);
+        db.write(sample);
     }
 
     @Override
@@ -127,5 +113,29 @@ public class InfluxDbLogger implements Subscriber<Signal<Number, Map<String, Str
     public void onComplete() {
         logger.warn("onComplete()");
         db.close();
+    }
+
+    @Override
+    public void connect(UnitDirector.Feed feed) {
+
+        var zoneSensorFeeds = Flux.merge(
+                Flux.fromIterable(feed.sensorFlux2zone.entrySet())
+                .map(kv -> new ZoneSensorConverter(config.instance, feed.unit, kv.getValue().getAddress()).compute(kv.getKey()))
+                .collect(Collectors.toList())
+                .block());
+
+        var zoneStatusFeed = new ZoneMetricsConverter(config.instance, feed.unit).compute(feed.aggregateZoneFlux);
+        var zoneControllerFeed = new ZoneControllerMetricsConverter(config.instance, feed.unit).compute(feed.zoneControllerFlux);
+        var unitControllerFeed = new UnitControllerMetricsConverter(config.instance, feed.unit).compute(feed.unitControllerFlux);
+        var hvacDeficeFeed = new HvacDeviceMetricsConverter(config.instance, feed.unit).compute(feed.hvacDeviceFlux);
+
+        var all = Flux.merge(
+                zoneSensorFeeds,
+                zoneStatusFeed,
+                zoneControllerFeed,
+                unitControllerFeed,
+                hvacDeficeFeed);
+
+        all.publishOn(Schedulers.boundedElastic()).subscribe(this);
     }
 }
