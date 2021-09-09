@@ -39,9 +39,15 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      */
     private ZoneSettings settings;
 
+    /**
+     * Create an instance.
+     *
+     * @param ts Thermostat to use.
+     * @param settings Zone settings. Thermostat setpoint overrides zone setpoint - this argument is here to configure initial flags.
+     */
     public Zone(Thermostat ts, ZoneSettings settings) {
         this.ts = ts;
-        setSettings(settings);
+        setSettings(new ZoneSettings(settings, ts.getSetpoint()));
     }
 
     public void setSettings(ZoneSettings settings) {
