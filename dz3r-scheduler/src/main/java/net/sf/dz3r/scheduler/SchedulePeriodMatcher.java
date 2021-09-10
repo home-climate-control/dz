@@ -8,7 +8,6 @@ import org.apache.logging.log4j.ThreadContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
-import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -51,6 +50,7 @@ public class SchedulePeriodMatcher {
                 }
             }
 
+            // VT: FIXME: This will produce a NoSuchElementException - and the test case expects it, but this is not what is documented
             return stack.pop();
 
         } finally {
@@ -72,14 +72,13 @@ public class SchedulePeriodMatcher {
 
         try {
 
-            SortedMap<SchedulePeriod, ZoneSettings> result = new TreeMap<>();
+            var result = new TreeMap<SchedulePeriod, ZoneSettings>();
 
-            for (Entry<SchedulePeriod, ZoneSettings> entry : zoneSchedule.entrySet()) {
+            for (var entry : zoneSchedule.entrySet()) {
 
-                SchedulePeriod p = entry.getKey();
+                var p = entry.getKey();
 
                 if (p.includesDay(date)) {
-
                     logger.trace(p);
                     result.put(p, entry.getValue());
                 }

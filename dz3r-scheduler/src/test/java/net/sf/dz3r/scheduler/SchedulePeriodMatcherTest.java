@@ -1,96 +1,108 @@
 package net.sf.dz3r.scheduler;
 
+import net.sf.dz3r.model.ZoneSettings;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.NoSuchElementException;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 /**
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 class SchedulePeriodMatcherTest {
 
-//    @Test
-//    void testNone() {
-//
-//        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
-//        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0).withMinuteOfHour(40);
-//
-//        zoneSchedule.put(new SchedulePeriod("period", "0:15", "0:30", "......."), null);
-//
-//        assertThatExceptionOfType(NoSuchElementException.class)
-//                .isThrownBy(() -> test(zoneSchedule, dt));
-//    }
-//
-//    @Test
-//    void testSimple() {
-//
-//        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
-//
-//        SchedulePeriod p1 = new SchedulePeriod("period", "00:15", "00:30", ".......");
-//        zoneSchedule.put(p1, null);
-//
-//        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
-//
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(20))).isEqualTo(p1);
-//    }
-//
-//    @Test
-//    void testSimple2() {
-//
-//        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
-//
-//        // Let's make sure that hours in SchedulePeriod.includes(long) are also properly converted
-//        SchedulePeriod p1 = new SchedulePeriod("period", "02:15", "02:30", ".......");
-//        zoneSchedule.put(p1, null);
-//
-//        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(2);
-//
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(20))).isEqualTo(p1);
-//    }
-//
-//    @Test
-//    void testLadder() {
-//
-//        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
-//
-//        SchedulePeriod p1 = new SchedulePeriod("period 1", "00:10", "00:30", ".......");
-//        SchedulePeriod p2 = new SchedulePeriod("period 2", "00:20", "00:40", ".......");
-//        SchedulePeriod p3 = new SchedulePeriod("period 3", "00:30", "00:50", ".......");
-//
-//        zoneSchedule.put(p1, null);
-//        zoneSchedule.put(p2, null);
-//        zoneSchedule.put(p3, null);
-//
-//        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
-//
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(15))).isEqualTo(p1);
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(25))).isEqualTo(p2);
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(35))).isEqualTo(p3);
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(45))).isEqualTo(p3);
-//    }
-//
-//    @Test
-//    void testStack() {
-//
-//        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
-//
-//        SchedulePeriod p1 = new SchedulePeriod("period 1", "00:10", "00:50", ".......");
-//        SchedulePeriod p2 = new SchedulePeriod("period 2", "00:15", "00:40", ".......");
-//        SchedulePeriod p3 = new SchedulePeriod("period 3", "00:20", "00:30", ".......");
-//        SchedulePeriod p4 = new SchedulePeriod("period 4", "01:00", "02:00", "       ");
-//
-//        zoneSchedule.put(p1, null);
-//        zoneSchedule.put(p2, null);
-//        zoneSchedule.put(p3, null);
-//        zoneSchedule.put(p4, null);
-//
-//        DateTime dt = new DateTime().withDate(2010, 1, 19).withHourOfDay(0);
-//
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(12))).isEqualTo(p1);
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(18))).isEqualTo(p2);
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(22))).isEqualTo(p3);
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(32))).isEqualTo(p2);
-//        assertThat(test(zoneSchedule, dt.withMinuteOfHour(42))).isEqualTo(p1);
-//    }
-//
-//    private SchedulePeriod test(SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule, DateTime time) {
-//        return new SchedulePeriodMatcher().match(zoneSchedule, time);
-//    }
+    @Test
+    void testNone() {
+
+        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
+        LocalDateTime dt = LocalDateTime.parse("2010-01-19T00:40");
+
+        zoneSchedule.put(new SchedulePeriod("period", "0:15", "0:30", "......."), null);
+
+        assertThatExceptionOfType(NoSuchElementException.class)
+                .isThrownBy(() -> test(zoneSchedule, dt));
+    }
+
+    @Test
+    void testSimple() {
+
+        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
+
+        SchedulePeriod p1 = new SchedulePeriod("period", "00:15", "00:30", ".......");
+        zoneSchedule.put(p1, null);
+
+        LocalDateTime dt = LocalDateTime.parse("2010-01-19T00:00");
+
+        assertThat(test(zoneSchedule, dt.plus(20, ChronoUnit.MINUTES))).isEqualTo(p1);
+    }
+
+    @Test
+    void testSimple2() {
+
+        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
+
+        // Let's make sure that hours in SchedulePeriod.includes(long) are also properly converted
+        SchedulePeriod p1 = new SchedulePeriod("period", "02:15", "02:30", ".......");
+        zoneSchedule.put(p1, null);
+
+        LocalDateTime dt = LocalDateTime.parse("2010-01-19T02:00");
+
+        assertThat(test(zoneSchedule, dt.plus(20, ChronoUnit.MINUTES))).isEqualTo(p1);
+    }
+
+    @Test
+    void testLadder() {
+
+        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
+
+        SchedulePeriod p1 = new SchedulePeriod("period 1", "00:10", "00:30", ".......");
+        SchedulePeriod p2 = new SchedulePeriod("period 2", "00:20", "00:40", ".......");
+        SchedulePeriod p3 = new SchedulePeriod("period 3", "00:30", "00:50", ".......");
+
+        zoneSchedule.put(p1, null);
+        zoneSchedule.put(p2, null);
+        zoneSchedule.put(p3, null);
+
+        LocalDateTime dt = LocalDateTime.parse("2010-01-19T00:00");
+
+        assertThat(test(zoneSchedule, dt.plus(15, ChronoUnit.MINUTES))).isEqualTo(p1);
+        assertThat(test(zoneSchedule, dt.plus(25, ChronoUnit.MINUTES))).isEqualTo(p2);
+        assertThat(test(zoneSchedule, dt.plus(35, ChronoUnit.MINUTES))).isEqualTo(p3);
+        assertThat(test(zoneSchedule, dt.plus(45, ChronoUnit.MINUTES))).isEqualTo(p3);
+    }
+
+    @Test
+    void testStack() {
+
+        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
+
+        SchedulePeriod p1 = new SchedulePeriod("period 1", "00:10", "00:50", ".......");
+        SchedulePeriod p2 = new SchedulePeriod("period 2", "00:15", "00:40", ".......");
+        SchedulePeriod p3 = new SchedulePeriod("period 3", "00:20", "00:30", ".......");
+        SchedulePeriod p4 = new SchedulePeriod("period 4", "01:00", "02:00", "       ");
+
+        zoneSchedule.put(p1, null);
+        zoneSchedule.put(p2, null);
+        zoneSchedule.put(p3, null);
+        zoneSchedule.put(p4, null);
+
+        LocalDateTime dt = LocalDateTime.parse("2010-01-19T00:00");
+
+        assertThat(test(zoneSchedule, dt.plus(12, ChronoUnit.MINUTES))).isEqualTo(p1);
+        assertThat(test(zoneSchedule, dt.plus(18, ChronoUnit.MINUTES))).isEqualTo(p2);
+        assertThat(test(zoneSchedule, dt.plus(22, ChronoUnit.MINUTES))).isEqualTo(p3);
+        assertThat(test(zoneSchedule, dt.plus(32, ChronoUnit.MINUTES))).isEqualTo(p2);
+        assertThat(test(zoneSchedule, dt.plus(42, ChronoUnit.MINUTES))).isEqualTo(p1);
+    }
+
+    private SchedulePeriod test(SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule, LocalDateTime time) {
+        return new SchedulePeriodMatcher().match(zoneSchedule, time);
+    }
 }
