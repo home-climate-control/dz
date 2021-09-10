@@ -216,7 +216,7 @@ class SchedulePeriodTest {
         SchedulePeriod p2 = new SchedulePeriod("period 2", "1416", "1421", ".......");
         int result = p1.compareTo(p2);
 
-        assertThat(result).isEqualTo(-1000 * 60);
+        assertThat(result).isEqualTo(-1);
 
         SortedSet<SchedulePeriod> set = new TreeSet<>();
 
@@ -234,7 +234,7 @@ class SchedulePeriodTest {
         SchedulePeriod p2 = new SchedulePeriod("period 2", "1415", "1425", ".......");
         int result = p1.compareTo(p2);
 
-        assertThat(result).isEqualTo(300000);
+        assertThat(result).isEqualTo(1);
 
         SortedSet<SchedulePeriod> set = new TreeSet<>();
 
