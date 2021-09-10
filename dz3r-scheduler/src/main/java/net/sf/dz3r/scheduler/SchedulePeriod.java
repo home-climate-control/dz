@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +24,8 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
 
     private static final Map<Long, String> AM_PM_LOWERCASE = Map.of(0L, "am", 1L, "pm");
     private static final Map<Long, String> AM_PM_UPPERCASE = Map.of(0L, "AM", 1L, "PM");
+    private static final String H_MM = "h:mm";
+    private static final String HH_MM = "hh:mm";
 
     private static final List<DateTimeFormatter> timeFormats = List.of(
             DateTimeFormatter.ISO_LOCAL_TIME,
@@ -43,54 +44,42 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
                     .appendValue(ChronoField.MINUTE_OF_HOUR, 2)
                     .toFormatter(),
             new DateTimeFormatterBuilder()
-                    .appendPattern("h:mm")
+                    .appendPattern(H_MM)
                     .appendText(ChronoField.AMPM_OF_DAY, AM_PM_LOWERCASE)
                     .toFormatter(),
             new DateTimeFormatterBuilder()
-                    .appendPattern("h:mm")
+                    .appendPattern(H_MM)
                     .appendLiteral(' ')
                     .appendText(ChronoField.AMPM_OF_DAY, AM_PM_LOWERCASE)
                     .toFormatter(),
             new DateTimeFormatterBuilder()
-                    .appendPattern("h:mm")
+                    .appendPattern(H_MM)
                     .appendText(ChronoField.AMPM_OF_DAY, AM_PM_UPPERCASE)
                     .toFormatter(),
             new DateTimeFormatterBuilder()
-                    .appendPattern("h:mm")
+                    .appendPattern(H_MM)
                     .appendLiteral(' ')
                     .appendText(ChronoField.AMPM_OF_DAY, AM_PM_UPPERCASE)
                     .toFormatter(),
             new DateTimeFormatterBuilder()
-                    .appendPattern("hh:mm")
+                    .appendPattern(HH_MM)
                     .appendText(ChronoField.AMPM_OF_DAY, AM_PM_LOWERCASE)
                     .toFormatter(),
             new DateTimeFormatterBuilder()
-                    .appendPattern("hh:mm")
+                    .appendPattern(HH_MM)
                     .appendLiteral(' ')
                     .appendText(ChronoField.AMPM_OF_DAY, AM_PM_LOWERCASE)
                     .toFormatter(),
             new DateTimeFormatterBuilder()
-                    .appendPattern("hh:mm")
+                    .appendPattern(HH_MM)
                     .appendText(ChronoField.AMPM_OF_DAY, AM_PM_UPPERCASE)
                     .toFormatter(),
             new DateTimeFormatterBuilder()
-                    .appendPattern("hh:mm")
+                    .appendPattern(HH_MM)
                     .appendLiteral(' ')
                     .appendText(ChronoField.AMPM_OF_DAY, AM_PM_UPPERCASE)
                     .toFormatter()
     );
-
-    private static final String[] dateFormats = {
-
-        // Formats are hungry, hence most complicated formats have to be at the beginning,
-        // or simpler ones will kick in (for example, "2:15 PM" will be picked up by "HH:mm").
-
-        "yy-MM-dd'T'hh:mm",
-        "KK:mm aa",
-        "hh:mm aa",
-        "HH:mm",
-        "HHmm",
-    };
 
     /**
      * Period name.
@@ -121,21 +110,26 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
      *
      * @param name Period name.
      * @param startTime Start time in any reasonable format.
-     * @param endTime End time in any reasonable format.
+     * @param endTime End time in any reasonable format. Can't be equal to {@code startTime}, but can span across midnight.
      * @param days String consisting of seven characters, any non-space character is treated as a bit set,
      * space is treated as a bit cleared. Recommended characters would be corresponding day names, Monday
-     * in the first position (at offset 0).
+     * in the first position (at offset 0). If the period spans across midnight, the day is matched against the
+     * start time only.
      */
     public SchedulePeriod(String name, String startTime, String endTime, String days) {
 
         if (name == null || "".equals(name)) {
-            throw new IllegalArgumentException("name can't be null or empty");
+            throw new IllegalArgumentException("Name can't be null or empty");
         }
 
         this.name = name;
 
         this.start = parseTime(startTime);
         this.end = parseTime(endTime);
+
+        if (start.equals(end)) {
+            throw new IllegalArgumentException("Start and end time are the same: " + start);
+        }
 
         this.days = parseDays(days);
     }
@@ -190,7 +184,7 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
 
         if (days == null || days.length() != 7) {
 
-            throw new IllegalArgumentException("days argument malformed, see source code for instructions");
+            throw new IllegalArgumentException("Days argument malformed, see source code for instructions");
         }
 
         byte result = 0x00;
@@ -208,6 +202,14 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
         return result;
     }
 
+    public boolean isSameDay() {
+        return end.isAfter(start);
+    }
+
+    public boolean isAcrossMidnight() {
+        return start.isAfter(end);
+    }
+
     /**
      * Check if the given time is within this period.
      *
@@ -216,7 +218,10 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
      * @return {@code true} if this period includes the time.
      */
     public boolean includes(LocalTime t) {
-        return start.isBefore(t) && end.isAfter(t);
+
+        return isSameDay()
+                ? (start.equals(t) || start.isBefore(t)) && end.isAfter(t)
+                : start.equals(t) || t.isAfter(start) || t.isBefore(end);
     }
 
     /**
@@ -253,9 +258,18 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        return o != null && toString().equals(o.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
     public String toString() {
 
-        final var df = new SimpleDateFormat("HH:mm");
         final var daysOfWeek = "MTWTFSS";
 
         var sb = new StringBuilder();

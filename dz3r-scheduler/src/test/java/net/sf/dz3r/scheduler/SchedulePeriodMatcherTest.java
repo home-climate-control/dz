@@ -5,12 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  *
@@ -19,19 +17,18 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class SchedulePeriodMatcherTest {
 
     @Test
-    void testNone() {
+    void none() {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
         LocalDateTime dt = LocalDateTime.parse("2010-01-19T00:40");
 
         zoneSchedule.put(new SchedulePeriod("period", "0:15", "0:30", "......."), null);
 
-        assertThatExceptionOfType(NoSuchElementException.class)
-                .isThrownBy(() -> test(zoneSchedule, dt));
+        assertThat(test(zoneSchedule, dt)).isNull();
     }
 
     @Test
-    void testSimple() {
+    void simple() {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
 
@@ -44,7 +41,7 @@ class SchedulePeriodMatcherTest {
     }
 
     @Test
-    void testSimple2() {
+    void simple2() {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
 
@@ -58,7 +55,7 @@ class SchedulePeriodMatcherTest {
     }
 
     @Test
-    void testLadder() {
+    void ladder() {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
 
@@ -79,7 +76,7 @@ class SchedulePeriodMatcherTest {
     }
 
     @Test
-    void testStack() {
+    void stack() {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
 
@@ -100,6 +97,24 @@ class SchedulePeriodMatcherTest {
         assertThat(test(zoneSchedule, dt.plus(22, ChronoUnit.MINUTES))).isEqualTo(p3);
         assertThat(test(zoneSchedule, dt.plus(32, ChronoUnit.MINUTES))).isEqualTo(p2);
         assertThat(test(zoneSchedule, dt.plus(42, ChronoUnit.MINUTES))).isEqualTo(p1);
+    }
+
+    @Test
+    void acrossMidnight() {
+
+        SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
+        SchedulePeriod p1 = new SchedulePeriod("period 1", "22:00", "02:00", ".......");
+
+        zoneSchedule.put(p1, null);
+
+        LocalDateTime before = LocalDateTime.parse("2010-01-19T21:00"); // no match
+        LocalDateTime inside = LocalDateTime.parse("2010-01-19T23:00"); // match
+        LocalDateTime after = LocalDateTime.parse("2010-01-20T03:00"); // no match
+
+
+        assertThat(test(zoneSchedule, before)).isNull();
+        assertThat(test(zoneSchedule, inside)).isEqualTo(p1);
+        assertThat(test(zoneSchedule, after)).isNull();
     }
 
     private SchedulePeriod test(SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule, LocalDateTime time) {

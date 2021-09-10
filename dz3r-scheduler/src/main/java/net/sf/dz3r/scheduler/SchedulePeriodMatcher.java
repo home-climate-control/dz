@@ -8,6 +8,7 @@ import org.apache.logging.log4j.ThreadContext;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
+import java.util.NoSuchElementException;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -50,8 +51,11 @@ public class SchedulePeriodMatcher {
                 }
             }
 
-            // VT: FIXME: This will produce a NoSuchElementException - and the test case expects it, but this is not what is documented
-            return stack.pop();
+            try {
+                return stack.pop();
+            } catch (NoSuchElementException ex) {
+                return null;
+            }
 
         } finally {
             ThreadContext.pop();

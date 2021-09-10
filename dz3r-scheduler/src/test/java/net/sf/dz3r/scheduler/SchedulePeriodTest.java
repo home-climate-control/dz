@@ -20,39 +20,47 @@ class SchedulePeriodTest {
     private static final LocalTime FOURTEEN_FIFTEEN = LocalTime.parse("14:15");
 
     @Test
-    void testNullName() {
+    void nullName() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new SchedulePeriod(null, "02:15", "02:20", "       "))
-                .withMessage("name can't be null or empty");
+                .withMessage("Name can't be null or empty");
     }
 
     @Test
-    void testEmptyName() {
+    void emptyName() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new SchedulePeriod("", "02:15", "02:20", "       "))
-                .withMessage("name can't be null or empty");
+                .withMessage("Name can't be null or empty");
     }
 
     @Test
-    void testNullDays() {
+    void nullDays() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new SchedulePeriod("period", "02:15", "02:20", null))
-                .withMessage("days argument malformed, see source code for instructions");
+                .withMessage("Days argument malformed, see source code for instructions");
     }
 
     @Test
-    void testNot7() {
+    void zeroLength() {
+
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new SchedulePeriod("period", "02:15", "02:15", null))
+                .withMessage("Start and end time are the same: 02:15");
+    }
+
+    @Test
+    void not7() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new SchedulePeriod("period", "02:15", "02:20", ""))
-                .withMessage("days argument malformed, see source code for instructions");
+                .withMessage("Days argument malformed, see source code for instructions");
     }
 
     @Test
-    void testTwoFifteen() {
+    void twoFifteen() {
 
         SchedulePeriod p = new SchedulePeriod("period", "02:15", "02:20", "       ");
 
@@ -65,7 +73,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testFourteenFifteen() {
+    void fourteenFifteen() {
 
         SchedulePeriod p = new SchedulePeriod("period", "14:15", "14:20", "       ");
 
@@ -78,7 +86,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testDaysTooShort() {
+    void daysTooShort() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
@@ -94,11 +102,11 @@ class SchedulePeriodTest {
                     assertThat(p.days).isEqualTo((byte) 0x00);
 
                 })
-                .withMessage("days argument malformed, see source code for instructions");
+                .withMessage("Days argument malformed, see source code for instructions");
     }
 
     @Test
-    void testDaysTooLong() {
+    void daysTooLong() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
@@ -114,11 +122,11 @@ class SchedulePeriodTest {
                     assertThat(p.days).isEqualTo((byte) 0x00);
 
                 })
-                .withMessage("days argument malformed, see source code for instructions");
+                .withMessage("Days argument malformed, see source code for instructions");
     }
 
     @Test
-    void testDaysMWTS() {
+    void daysMWTS() {
 
         SchedulePeriod p = new SchedulePeriod("period", "0:15", "0:20", "M WT  S");
 
@@ -130,7 +138,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testDaysMTSS() {
+    void daysMTSS() {
 
         SchedulePeriod p = new SchedulePeriod("period", "0:15","0:20",  "MT   SS");
 
@@ -142,7 +150,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testDaysMTWTFSS() {
+    void daysMTWTFSS() {
 
         SchedulePeriod p = new SchedulePeriod("period", "0:15","0:20",  ".......");
 
@@ -154,7 +162,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testTimeAM() {
+    void timeAM() {
 
         SchedulePeriod p = new SchedulePeriod("period", "2:15 AM","02:20 AM",  ".......");
 
@@ -166,7 +174,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testTimePM() {
+    void timePM() {
 
         SchedulePeriod p = new SchedulePeriod("period", "2:15 PM", "02:20 PM", ".......");
 
@@ -178,7 +186,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testTimeMilitary() {
+    void timeMilitary() {
 
         SchedulePeriod p = new SchedulePeriod("period", "1415", "1420", ".......");
 
@@ -190,7 +198,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testBadTime() {
+    void badTime() {
 
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> {
@@ -210,7 +218,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testCompareTo() {
+    void compareTo() {
 
         SchedulePeriod p1 = new SchedulePeriod("period 1", "1415", "1420", ".......");
         SchedulePeriod p2 = new SchedulePeriod("period 2", "1416", "1421", ".......");
@@ -228,7 +236,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testCompareToSameStart() {
+    void compareToSameStart() {
 
         SchedulePeriod p1 = new SchedulePeriod("period 1", "1415", "1420", ".......");
         SchedulePeriod p2 = new SchedulePeriod("period 2", "1415", "1425", ".......");
@@ -246,7 +254,7 @@ class SchedulePeriodTest {
     }
 
     @Test
-    void testDayOffset() {
+    void dayOffset() {
 
         assertThat(sunday2monday(1)).as("MO").isZero();
         assertThat(sunday2monday(2)).as("TU").isEqualTo(1);
@@ -258,23 +266,47 @@ class SchedulePeriodTest {
     }
 
     private int sunday2monday(int sunday) {
-
         return (sunday + 6) % 7;
     }
 
-    @Test
-    void testIncludesDayMo() {
 
-        testIncludesDay(LocalDate.parse("2010-01-18"), "M      ");
-        testIncludesDay(LocalDate.parse("2010-01-19"), " T     ");
-        testIncludesDay(LocalDate.parse("2010-01-20"), "  W    ");
-        testIncludesDay(LocalDate.parse("2010-01-21"), "   T   ");
-        testIncludesDay(LocalDate.parse("2010-01-22"), "    F  ");
-        testIncludesDay(LocalDate.parse("2010-01-23"), "     S ");
-        testIncludesDay(LocalDate.parse("2010-01-24"), "      S");
+    @Test
+    void includesTime() {
+
+        // Same day
+
+        includesTime("02:15", "02:40", "02:20", true);
+        includesTime("02:15", "02:40", "02:15", true); // beginning inclusive
+        includesTime("02:20", "02:30", "02:30", false); // end exclusive
+        includesTime("02:20", "02:30", "02:40", false);
+
+        // Across midnight
+
+        includesTime("22:15", "02:30", "02:20", true);
+        includesTime("22:15", "02:30", "22:15", true); // beginning inclusive
+        includesTime("22:15", "02:30", "02:30", false); // end exclusive
+        includesTime("22:20", "02:30", "22:00", false);
+        includesTime("22:20", "02:30", "02:40", false);
     }
 
-    private void testIncludesDay(LocalDate d, String days) {
+    private void includesTime(String start, String end, String match, boolean expected) {
+        SchedulePeriod p = new SchedulePeriod("period", LocalTime.parse(start).toString(), LocalTime.parse(end).toString(), ".......");
+        assertThat(p.includes(LocalTime.parse(match))).isEqualTo(expected);
+    }
+
+    @Test
+    void includesDayMo() {
+
+        includesDay(LocalDate.parse("2010-01-18"), "M      ");
+        includesDay(LocalDate.parse("2010-01-19"), " T     ");
+        includesDay(LocalDate.parse("2010-01-20"), "  W    ");
+        includesDay(LocalDate.parse("2010-01-21"), "   T   ");
+        includesDay(LocalDate.parse("2010-01-22"), "    F  ");
+        includesDay(LocalDate.parse("2010-01-23"), "     S ");
+        includesDay(LocalDate.parse("2010-01-24"), "      S");
+    }
+
+    private void includesDay(LocalDate d, String days) {
 
         SchedulePeriod p = new SchedulePeriod("period", "1415", "1420", days);
 
