@@ -40,6 +40,7 @@ include 'dz3r-influxdb'
 include 'dz3r-model'
 include 'dz3r-mqtt'
 include 'dz3r-raspberry-pi'
+include 'dz3r-scheduler'
 include 'dz3r-swing'
 include 'dz3r-webui'
 
