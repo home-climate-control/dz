@@ -1,4 +1,4 @@
-package net.sf.dz4.device.actuator.pi.autohat;
+package net.sf.dz3r.device.actuator.pi.autohat;
 
 import com.homeclimatecontrol.autohat.AutomationHAT;
 import com.homeclimatecontrol.autohat.Relay;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Wrapper to convert independent abstractions of {@link com.homeclimatecontrol.autohat.AutomationHAT}
+ * Wrapper to convert independent abstractions of {@link AutomationHAT}
  * into ones acceptable for DZ, and make them available at a proper point in DZ entities' lifecycle.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021

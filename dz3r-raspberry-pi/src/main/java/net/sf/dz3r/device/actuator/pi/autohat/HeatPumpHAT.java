@@ -4,7 +4,6 @@ import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
 import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3r.device.actuator.HeatPump;
-import net.sf.dz4.device.actuator.pi.autohat.AutomationHatWrapper;
 
 import java.io.IOException;
 

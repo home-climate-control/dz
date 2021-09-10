@@ -33,7 +33,6 @@ include 'dz3-spring'
 include 'dz3-swing'
 include 'dz3-xbee'
 include 'automation-hat-driver'
-include 'dz3-raspberry-pi'
 
 // Reactive only modules
 
