@@ -1,9 +1,8 @@
 package net.sf.dz3r.scheduler;
 
-import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
+import reactor.core.publisher.Flux;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.SortedMap;
 
@@ -15,12 +14,9 @@ import java.util.SortedMap;
 public interface ScheduleUpdater {
 
     /**
-     * Update the schedule.
+     * Keep the schedule up to date.
      *
-     * @return New schedule. If there are no matching events found, empty map must be returned.
-     * Must not return {@code null}.
-     *
-     * @throws IOException if things go wrong.
+     * @return Flux of (zone name, schedule period to zone settings mapping) pairs.
      */
-    Map<Zone, SortedMap<SchedulePeriod, ZoneSettings>> update() throws IOException;
+    Flux<Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>>> update();
 }
