@@ -16,13 +16,15 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class SchedulePeriodMatcherTest {
 
+    private final SchedulePeriodFactory schedulePeriodFactory = new SchedulePeriodFactory();
+
     @Test
     void none() {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
         LocalDateTime dt = LocalDateTime.parse("2010-01-19T00:40");
 
-        zoneSchedule.put(new SchedulePeriod("period", "0:15", "0:30", "......."), null);
+        zoneSchedule.put(schedulePeriodFactory.build("period", "0:15", "0:30", "......."), null);
 
         assertThat(test(zoneSchedule, dt)).isNull();
     }
@@ -32,7 +34,7 @@ class SchedulePeriodMatcherTest {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
 
-        SchedulePeriod p1 = new SchedulePeriod("period", "00:15", "00:30", ".......");
+        SchedulePeriod p1 = schedulePeriodFactory.build("period", "00:15", "00:30", ".......");
         zoneSchedule.put(p1, null);
 
         LocalDateTime dt = LocalDateTime.parse("2010-01-19T00:00");
@@ -46,7 +48,7 @@ class SchedulePeriodMatcherTest {
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
 
         // Let's make sure that hours in SchedulePeriod.includes(long) are also properly converted
-        SchedulePeriod p1 = new SchedulePeriod("period", "02:15", "02:30", ".......");
+        SchedulePeriod p1 = schedulePeriodFactory.build("period", "02:15", "02:30", ".......");
         zoneSchedule.put(p1, null);
 
         LocalDateTime dt = LocalDateTime.parse("2010-01-19T02:00");
@@ -59,9 +61,9 @@ class SchedulePeriodMatcherTest {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
 
-        SchedulePeriod p1 = new SchedulePeriod("period 1", "00:10", "00:30", ".......");
-        SchedulePeriod p2 = new SchedulePeriod("period 2", "00:20", "00:40", ".......");
-        SchedulePeriod p3 = new SchedulePeriod("period 3", "00:30", "00:50", ".......");
+        SchedulePeriod p1 = schedulePeriodFactory.build("period 1", "00:10", "00:30", ".......");
+        SchedulePeriod p2 = schedulePeriodFactory.build("period 2", "00:20", "00:40", ".......");
+        SchedulePeriod p3 = schedulePeriodFactory.build("period 3", "00:30", "00:50", ".......");
 
         zoneSchedule.put(p1, null);
         zoneSchedule.put(p2, null);
@@ -80,10 +82,10 @@ class SchedulePeriodMatcherTest {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
 
-        SchedulePeriod p1 = new SchedulePeriod("period 1", "00:10", "00:50", ".......");
-        SchedulePeriod p2 = new SchedulePeriod("period 2", "00:15", "00:40", ".......");
-        SchedulePeriod p3 = new SchedulePeriod("period 3", "00:20", "00:30", ".......");
-        SchedulePeriod p4 = new SchedulePeriod("period 4", "01:00", "02:00", "       ");
+        SchedulePeriod p1 = schedulePeriodFactory.build("period 1", "00:10", "00:50", ".......");
+        SchedulePeriod p2 = schedulePeriodFactory.build("period 2", "00:15", "00:40", ".......");
+        SchedulePeriod p3 = schedulePeriodFactory.build("period 3", "00:20", "00:30", ".......");
+        SchedulePeriod p4 = schedulePeriodFactory.build("period 4", "01:00", "02:00", "       ");
 
         zoneSchedule.put(p1, null);
         zoneSchedule.put(p2, null);
@@ -103,7 +105,7 @@ class SchedulePeriodMatcherTest {
     void acrossMidnight() {
 
         SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule = new TreeMap<>();
-        SchedulePeriod p1 = new SchedulePeriod("period 1", "22:00", "02:00", ".......");
+        SchedulePeriod p1 = schedulePeriodFactory.build("period 1", "22:00", "02:00", ".......");
 
         zoneSchedule.put(p1, null);
 

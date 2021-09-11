@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 class SchedulePeriodTest {
 
     private final Logger logger = LogManager.getLogger();
+    private final SchedulePeriodFactory schedulePeriodFactory = new SchedulePeriodFactory();
 
     private static final LocalTime TWO_FIFTEEN = LocalTime.parse("02:15");
     private static final LocalTime FOURTEEN_FIFTEEN = LocalTime.parse("14:15");
@@ -23,7 +24,7 @@ class SchedulePeriodTest {
     void nullName() {
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new SchedulePeriod(null, "02:15", "02:20", "       "))
+                .isThrownBy(() -> schedulePeriodFactory.build(null, "02:15", "02:20", "       "))
                 .withMessage("Name can't be null or empty");
     }
 
@@ -31,7 +32,7 @@ class SchedulePeriodTest {
     void emptyName() {
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new SchedulePeriod("", "02:15", "02:20", "       "))
+                .isThrownBy(() -> schedulePeriodFactory.build("", "02:15", "02:20", "       "))
                 .withMessage("Name can't be null or empty");
     }
 
@@ -39,7 +40,7 @@ class SchedulePeriodTest {
     void nullDays() {
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new SchedulePeriod("period", "02:15", "02:20", null))
+                .isThrownBy(() -> schedulePeriodFactory.build("period", "02:15", "02:20", null))
                 .withMessage("Days argument malformed, see source code for instructions");
     }
 
@@ -47,7 +48,7 @@ class SchedulePeriodTest {
     void zeroLength() {
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new SchedulePeriod("period", "02:15", "02:15", null))
+                .isThrownBy(() -> schedulePeriodFactory.build("period", "02:15", "02:15", null))
                 .withMessage("Start and end time are the same: 02:15");
     }
 
@@ -55,34 +56,34 @@ class SchedulePeriodTest {
     void not7() {
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new SchedulePeriod("period", "02:15", "02:20", ""))
+                .isThrownBy(() -> schedulePeriodFactory.build("period", "02:15", "02:20", ""))
                 .withMessage("Days argument malformed, see source code for instructions");
     }
 
     @Test
     void twoFifteen() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "02:15", "02:20", "       ");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "02:15", "02:20", "       ");
 
         // Wrong time
         assertThat(p.start).isEqualTo(TWO_FIFTEEN);
         // Wrong days
         assertThat(p.days).isEqualTo((byte) 0x00);
         // Wrong string representation
-        assertThat(p.toString()).hasToString("period (02:15 to 02:20 on .......)");
+        assertThat(p.toString()).hasToString("period (id=" + p.id + " 02:15 to 02:20 on .......)");
     }
 
     @Test
     void fourteenFifteen() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "14:15", "14:20", "       ");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "14:15", "14:20", "       ");
 
         // Wrong time
         assertThat(p.start).isEqualTo(FOURTEEN_FIFTEEN);
         // Wrong days
         assertThat(p.days).isEqualTo((byte) 0x00);
         // Wrong string representation
-        assertThat(p.toString()).hasToString("period (14:15 to 14:20 on .......)");
+        assertThat(p.toString()).hasToString("period (id=" + p.id + " 14:15 to 14:20 on .......)");
     }
 
     @Test
@@ -93,7 +94,7 @@ class SchedulePeriodTest {
 
                     // VT: FIXME: This looks odd; did it work before?
 
-                    SchedulePeriod p = new SchedulePeriod("period", "0:15", "0:20", "      ");
+                    SchedulePeriod p = schedulePeriodFactory.build("period", "0:15", "0:20", "      ");
 
                     // Wrong time
                     assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
@@ -113,7 +114,7 @@ class SchedulePeriodTest {
 
                     // VT: FIXME: This looks odd; did it work before?
 
-                    SchedulePeriod p = new SchedulePeriod("period", "0:15", "0:20", "        ");
+                    SchedulePeriod p = schedulePeriodFactory.build("period", "0:15", "0:20", "        ");
 
                     // Wrong time
                     assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
@@ -128,7 +129,7 @@ class SchedulePeriodTest {
     @Test
     void daysMWTS() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "0:15", "0:20", "M WT  S");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "0:15", "0:20", "M WT  S");
 
         // Wrong time
         assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
@@ -140,7 +141,7 @@ class SchedulePeriodTest {
     @Test
     void daysMTSS() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "0:15","0:20",  "MT   SS");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "0:15","0:20",  "MT   SS");
 
         // Wrong time
         assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
@@ -152,7 +153,7 @@ class SchedulePeriodTest {
     @Test
     void daysMTWTFSS() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "0:15","0:20",  ".......");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "0:15","0:20",  ".......");
 
         // Wrong time
         assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
@@ -164,7 +165,7 @@ class SchedulePeriodTest {
     @Test
     void timeAM() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "2:15 AM","02:20 AM",  ".......");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "2:15 AM","02:20 AM",  ".......");
 
         // Wrong time
         assertThat(p.start).isEqualTo(TWO_FIFTEEN);
@@ -176,7 +177,7 @@ class SchedulePeriodTest {
     @Test
     void timePM() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "2:15 PM", "02:20 PM", ".......");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "2:15 PM", "02:20 PM", ".......");
 
         // Wrong time
         assertThat(p.start).isEqualTo(FOURTEEN_FIFTEEN);
@@ -188,7 +189,7 @@ class SchedulePeriodTest {
     @Test
     void timeMilitary() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "1415", "1420", ".......");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "1415", "1420", ".......");
 
         // Wrong time
         assertThat(p.start).isEqualTo(FOURTEEN_FIFTEEN);
@@ -205,7 +206,7 @@ class SchedulePeriodTest {
 
                     // VT: FIXME: This looks odd; did it work before?
 
-                    SchedulePeriod p = new SchedulePeriod("period", "oops", "oops again", "       ");
+                    SchedulePeriod p = schedulePeriodFactory.build("period", "oops", "oops again", "       ");
 
                     // Wrong time
                     assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
@@ -220,8 +221,8 @@ class SchedulePeriodTest {
     @Test
     void compareTo() {
 
-        SchedulePeriod p1 = new SchedulePeriod("period 1", "1415", "1420", ".......");
-        SchedulePeriod p2 = new SchedulePeriod("period 2", "1416", "1421", ".......");
+        SchedulePeriod p1 = schedulePeriodFactory.build("period 1", "1415", "1420", ".......");
+        SchedulePeriod p2 = schedulePeriodFactory.build("period 2", "1416", "1421", ".......");
         int result = p1.compareTo(p2);
 
         assertThat(result).isEqualTo(-1);
@@ -238,8 +239,8 @@ class SchedulePeriodTest {
     @Test
     void compareToSameStart() {
 
-        SchedulePeriod p1 = new SchedulePeriod("period 1", "1415", "1420", ".......");
-        SchedulePeriod p2 = new SchedulePeriod("period 2", "1415", "1425", ".......");
+        SchedulePeriod p1 = schedulePeriodFactory.build("period 1", "1415", "1420", ".......");
+        SchedulePeriod p2 = schedulePeriodFactory.build("period 2", "1415", "1425", ".......");
         int result = p1.compareTo(p2);
 
         assertThat(result).isEqualTo(1);
@@ -290,7 +291,7 @@ class SchedulePeriodTest {
     }
 
     private void includesTime(String start, String end, String match, boolean expected) {
-        SchedulePeriod p = new SchedulePeriod("period", LocalTime.parse(start).toString(), LocalTime.parse(end).toString(), ".......");
+        SchedulePeriod p = schedulePeriodFactory.build("period", LocalTime.parse(start).toString(), LocalTime.parse(end).toString(), ".......");
         assertThat(p.includes(LocalTime.parse(match))).isEqualTo(expected);
     }
 
@@ -308,7 +309,7 @@ class SchedulePeriodTest {
 
     private void includesDay(LocalDate d, String days) {
 
-        SchedulePeriod p = new SchedulePeriod("period", "1415", "1420", days);
+        SchedulePeriod p = schedulePeriodFactory.build("period", "1415", "1420", days);
 
         assertThat(p.includesDay(d)).as("Wrong inclusion for " + d).isTrue();
     }
@@ -316,8 +317,8 @@ class SchedulePeriodTest {
     @Test
     void testToString() {
 
-        SchedulePeriod p = new SchedulePeriod("period", "1415", "1420", ".......");
+        SchedulePeriod p = schedulePeriodFactory.build("period", "1415", "1420", ".......");
 
-        assertThat(p.toString()).hasToString("period (14:15 to 14:20 on MTWTFSS)");
+        assertThat(p.toString()).hasToString("period (id=" + p.id + " 14:15 to 14:20 on MTWTFSS)");
     }
 }
