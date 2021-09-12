@@ -29,6 +29,7 @@ public class SchedulePeriodFactory {
 
     private static final List<DateTimeFormatter> timeFormats = List.of(
             DateTimeFormatter.ISO_LOCAL_TIME,
+            DateTimeFormatter.ISO_DATE_TIME,
             new DateTimeFormatterBuilder()
                     .appendValue(ChronoField.HOUR_OF_DAY, 1)
                     .appendLiteral(':')
@@ -109,6 +110,23 @@ public class SchedulePeriodFactory {
         var start = parseTime(startTime);
         var end = parseTime(endTime);
 
+        return build(id, name, start, end, days);
+    }
+
+    /**
+     * Create an instance from human readable arguments.
+     *
+     * @param id Period id.
+     * @param name Period name.
+     * @param start Start time.
+     * @param end End time. Can't be equal to {@code startTime}, but can span across midnight.
+     * @param days String consisting of seven characters, any non-space character is treated as a bit set,
+     * space is treated as a bit cleared. Recommended characters would be corresponding day names, Monday
+     * in the first position (at offset 0). If the period spans across midnight, the day is matched against the
+     * start time only.
+     */
+    public SchedulePeriod build(String id, String name, LocalTime start, LocalTime end, String days) {
+
         if (start.equals(end)) {
             throw new IllegalArgumentException("Start and end time are the same: " + start);
         }
@@ -150,7 +168,7 @@ public class SchedulePeriodFactory {
 
             logger.error("Total of {} formats tried", timeFormats.size());
 
-            throw new IllegalArgumentException("Tried all available formats (see the log for details) and failed, giving up");
+            throw new IllegalArgumentException("Tried all available formats to parse '" + time + "' (see the log for details) and failed, giving up");
 
         } finally {
             ThreadContext.pop();

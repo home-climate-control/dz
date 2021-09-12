@@ -83,4 +83,18 @@ public class ZoneSettings {
                 + ", dump=" + dumpPriority
                 + "}";
     }
-}
+
+    @Override
+    public boolean equals(Object o) {
+        return o != null
+                && enabled == ((ZoneSettings) o).enabled
+                && setpoint.equals(((ZoneSettings) o).setpoint)
+                && voting == ((ZoneSettings) o).voting
+                && hold == ((ZoneSettings) o).hold
+                && dumpPriority.equals(((ZoneSettings) o).dumpPriority);
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }}

@@ -8,8 +8,11 @@ import org.junit.jupiter.api.Test;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Disabled("Enable if you have the right credentials")
 class GCalScheduleUpdaterTest {
@@ -25,6 +28,7 @@ class GCalScheduleUpdaterTest {
     void breathe() throws InterruptedException {
 
         var complete = new CountDownLatch(1);
+        var start = new AtomicLong();
 
         var u = new GCalScheduleUpdater(Map.of(
                 "Kitchen", "DZ Schedule: Kitchen",
@@ -33,12 +37,14 @@ class GCalScheduleUpdaterTest {
         ));
 
         u.update()
-                .log()
                 .take(3)
                 .publishOn(Schedulers.boundedElastic())
+                .doOnSubscribe(s -> {
+                    start.set(Instant.now().toEpochMilli());
+                })
                 .doOnComplete(() -> {
-                        logger.info("Completed");
-                        complete.countDown();
+                    logger.info("Completed in {}ms", Duration.between(Instant.ofEpochMilli(start.get()), Instant.now()).toMillis());
+                    complete.countDown();
                 })
                 .subscribe(s -> logger.info("item: {}", s));
 

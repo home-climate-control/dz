@@ -9,17 +9,21 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.DateTime;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.scheduler.SchedulePeriod;
+import net.sf.dz3r.scheduler.SchedulePeriodFactory;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -28,6 +32,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -44,6 +53,12 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
     private static final String LITERAL_APP_NAME = "Home Climate Control-DZ-3.5";
     private static final String STORED_CREDENTIALS = ".dz/calendar";
     private static final String CLIENT_SECRETS = "/client_secrets.json";
+
+    private static final DateTimeFormatter RFC3339DateTimeFormatter = new DateTimeFormatterBuilder()
+            .appendPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
+            .toFormatter();
+    private static final SchedulePeriodFactory schedulePeriodFactory = new SchedulePeriodFactory();
+    private static final SettingsParser settingsParser = new SettingsParser();
 
     private final Map<String, String> name2calendar;
     private final Duration pollInterval;
@@ -87,14 +102,9 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
                 .runOn(Schedulers.boundedElastic())
                 .flatMap(this::getEvents)
 
-                // This is still computationally expensive, but with a different breakdown; regroup
+                // This is still computationally expensive, but with a different breakdown; regroup (inside)
                 .sequential()
-                .parallel()
-                .runOn(Schedulers.boundedElastic())
-                .map(this::convertEvents)
-
-                // No more need to be parallel, things will be trickling out pretty slow from here
-                .sequential();
+                .map(this::convertEvents);
     }
 
     private Map.Entry<Calendar, List<CalendarListEntry>> getCalendars(Long ignore) {
@@ -187,6 +197,20 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
         try {
 
             var events = calendarClient.events().list(calendarId);
+
+            // Let's grab three days of events in case there are events across midnight
+            var now = ZonedDateTime.now();
+            var min = now.minus(1, ChronoUnit.DAYS);
+            var max = now.plus(1, ChronoUnit.DAYS);
+
+            events.setTimeMin(new DateTime(min.format(RFC3339DateTimeFormatter)));
+            events.setTimeMax(new DateTime(max.format(RFC3339DateTimeFormatter)));
+
+            // Unroll recurring events into single and don't return parents; we don't need them
+            events.setSingleEvents(true);
+
+            logger.trace("Calendar API query: {}", events);
+
             var items = events.execute().getItems();
 
             logger.debug("{}: retrieved {} events", calendar.getSummary(), items.size());
@@ -203,11 +227,146 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
 
     private Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> convertEvents(Map.Entry<CalendarListEntry, List<Event>> source) {
 
-        for (var e : source.getValue()) {
-            logger.info("event: {}", e.getSummary());
+        var calendar = source.getKey();
+        var schedule = new TreeMap<SchedulePeriod, ZoneSettings>();
+        var scheduleWrapper = Collections.synchronizedMap(schedule);
+
+        Flux.fromIterable(source.getValue())
+//                .parallel()
+//                .runOn(Schedulers.boundedElastic())
+                .flatMap(this::convertEvent)
+                .subscribe(kv -> scheduleWrapper.put(kv.getKey(), kv.getValue()));
+
+        return new AbstractMap.SimpleEntry<>(calendar.getSummary(), schedule);
+    }
+
+    private Flux<Map.Entry<SchedulePeriod, ZoneSettings>> convertEvent(Event event) {
+        ThreadContext.push("convertEvent");
+        try {
+
+            var period = parsePeriod(event);
+
+            if (period == null) {
+                // There must've been a log message about why
+                return Flux.empty();
+            }
+
+            var settings = settingsParser.parse(event.getSummary().substring(period.name.length() + 1));
+
+            return Flux.just(new AbstractMap.SimpleEntry<>(period, settings));
+
+        } catch (Throwable t) { // NOSONAR Consequences have been considered
+
+            logger.error("Failed to parse event, ignored: " + event, t);
+            return Flux.empty();
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private SchedulePeriod parsePeriod(Event event) {
+        ThreadContext.push("parsePeriod");
+
+        try {
+
+            EventDateTime start = event.getStart();
+            EventDateTime end = event.getEnd();
+            var today = isToday(start);
+            String title = event.getSummary();
+
+            int colonIndex = title.indexOf(':');
+
+            if (colonIndex < 0) {
+                throw new IllegalArgumentException("Can't parse period name out of event title '" + title + "' (must be separated by a colon)");
+            }
+
+            String periodName = title.substring(0, colonIndex).trim();
+
+            logger.trace("name: '{}'", periodName);
+            logger.trace("  {} to {}, today={}", start, end, today);
+
+            if (!today) {
+                return null;
+            }
+
+            if (isDateOnly(start)) {
+
+                logger.debug("All day event: {}/{}, today={}", start, end, today);
+
+                return schedulePeriodFactory.build(event.getId(), periodName, LocalTime.MIN, LocalTime.MAX, parseDays(event));
+            }
+
+            return schedulePeriodFactory.build(event.getId(), periodName, start.getDateTime().toString(), end.getDateTime().toString(), parseDays(event));
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private boolean isToday(EventDateTime eventDateTime) {
+
+        var googleDateTime = eventDateTime.getDateTime();
+
+        if (googleDateTime != null) {
+
+            var dateTime = ZonedDateTime.parse(googleDateTime.toString());
+            var date = dateTime.toLocalDate();
+
+            return date.equals(LocalDate.now());
         }
 
-        // VT: FIXME: Implement this, eh?
-        return new AbstractMap.SimpleEntry<>("oops", new TreeMap<>());
+        return LocalDate.parse(eventDateTime.getDate().toString()).equals(LocalDate.now());
+    }
+
+
+    private String parseDays(Event source) {
+
+        // At this time, setSingleEvents(true) makes recurrence to be always null, so it is just - "today".
+        // Let's just make sure it stays this way.
+
+        var r = source.getRecurrence();
+        if (r != null) {
+            logger.error("Lo and behold, recurrence is not null: {}", r);
+        }
+
+        var today = LocalDate.now().getDayOfWeek().getValue() - 1;
+
+        final var days = "MTWTFSS";
+        var result = new StringBuilder();
+
+        for (var day = 0; day < 7; day++) {
+            result.append(day == today ? days.charAt(today) : " ");
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * @return {@code true} if the object contains just the date, false otherwise.
+     */
+    private boolean isDateOnly(EventDateTime source) {
+
+        ThreadContext.push("isDateOnly");
+
+        try {
+
+            if (source.getDate() != null && source.getDateTime() == null) {
+                return true;
+            }
+
+            if (source.getDate() == null && source.getDateTime() != null) {
+                return false;
+            }
+
+            logger.error("source: {}", source);
+            logger.error("date:   {}", source.getDate());
+            logger.error("time:   {}", source.getDateTime());
+
+            throw new IllegalArgumentException("API must have changed, both Date and DateTime are returned, need to revise the code");
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }

@@ -215,7 +215,7 @@ class SchedulePeriodTest {
                     assertThat(p.days).isEqualTo((byte) 0x00);
 
                 })
-                .withMessage("Tried all available formats (see the log for details) and failed, giving up");
+                .withMessage("Tried all available formats to parse 'oops' (see the log for details) and failed, giving up");
     }
 
     @Test
