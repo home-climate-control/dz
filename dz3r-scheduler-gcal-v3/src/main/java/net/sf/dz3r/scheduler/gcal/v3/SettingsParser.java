@@ -105,22 +105,32 @@ public class SettingsParser {
 
         try {
 
-            var n = numberFormat.parse(setpoint);
-            var value = n.doubleValue();
+            // From the docs:
+            //
+            // Number formats are generally not synchronized.
+            // It is recommended to create separate format instances for each thread.
+            // If multiple threads access a format concurrently, it must be synchronized
+            // externally.
 
-            // Default temperature unit is Celsius, you'll have to explicitly specify
-            // Fahrenheit if you want it
+            synchronized (numberFormat) {
 
-            if (setpoint.contains("f")) {
-                // Need to convert to Celsius
-                logger.debug("Temperature unit is Fahhrenheit");
-                value = ((value - 32) * 5) / 9;
+                var n = numberFormat.parse(setpoint);
+                var value = n.doubleValue();
+
+                // Default temperature unit is Celsius, you'll have to explicitly specify
+                // Fahrenheit if you want it
+
+                if (setpoint.contains("f")) {
+                    // Need to convert to Celsius
+                    logger.debug("Temperature unit is Fahhrenheit");
+                    value = ((value - 32) * 5) / 9;
+                }
+
+                return value;
             }
 
-            return value;
-
-        } catch (ParseException ex) {
-            throw new IllegalArgumentException("Could not parse setpoint out of '" + setpoint + "'");
+        } catch (ParseException|NumberFormatException ex) {
+            throw new IllegalArgumentException("Could not parse setpoint out of '" + setpoint + "'", ex);
         }
     }
 
