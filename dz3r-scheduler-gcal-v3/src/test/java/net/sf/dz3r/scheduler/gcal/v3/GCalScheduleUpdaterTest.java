@@ -11,7 +11,6 @@ import reactor.tools.agent.ReactorDebugAgent;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Disabled("Enable if you have the right credentials")
@@ -27,7 +26,6 @@ class GCalScheduleUpdaterTest {
     @Test
     void breathe() throws InterruptedException {
 
-        var complete = new CountDownLatch(1);
         var start = new AtomicLong();
 
         var u = new GCalScheduleUpdater(Map.of(
@@ -42,14 +40,12 @@ class GCalScheduleUpdaterTest {
                 .doOnSubscribe(s -> {
                     start.set(Instant.now().toEpochMilli());
                 })
+                .doOnNext(s -> logger.info("item: {}", s))
                 .doOnComplete(() -> {
                     logger.info("Completed in {}ms", Duration.between(Instant.ofEpochMilli(start.get()), Instant.now()).toMillis());
-                    complete.countDown();
                 })
-                .subscribe(s -> logger.info("item: {}", s));
+                .blockLast();
 
-        logger.info("Awaiting completion...");
-        complete.await();
         logger.info("Done.");
     }
 }

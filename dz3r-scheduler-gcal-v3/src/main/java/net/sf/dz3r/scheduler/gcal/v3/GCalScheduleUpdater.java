@@ -104,7 +104,8 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
 
                 // This is still computationally expensive, but with a different breakdown; regroup (inside)
                 .sequential()
-                .map(this::convertEvents);
+                .map(this::convertEvents)
+                .map(this::convertZoneName);
     }
 
     private Map.Entry<Calendar, List<CalendarListEntry>> getCalendars(Long ignore) {
@@ -259,12 +260,23 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
 
         } catch (Throwable t) { // NOSONAR Consequences have been considered
 
-            logger.error("Failed to parse event, ignored: " + event, t);
+            logger.error("Failed to parse event, ignored: {}", event, t);
             return Flux.empty();
 
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    private Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> convertZoneName(Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> source) {
+
+        var calendarName = source.getKey();
+        var zoneName = Flux.fromIterable(name2calendar.entrySet())
+                .filter(kv -> kv.getValue().equals(calendarName))
+                .map(Map.Entry::getKey)
+                .blockFirst();
+
+        return new AbstractMap.SimpleEntry<>(zoneName, source.getValue());
     }
 
     private SchedulePeriod parsePeriod(Event event) {
@@ -293,9 +305,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             }
 
             if (isDateOnly(start)) {
-
-                logger.debug("All day event: {}/{}, today={}", start, end, today);
-
+                logger.trace("All day event '{}': {}/{}", periodName, start, end);
                 return schedulePeriodFactory.build(event.getId(), periodName, LocalTime.MIN, LocalTime.MAX, parseDays(event));
             }
 

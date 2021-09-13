@@ -41,7 +41,7 @@ public class SettingsParser {
 
                 String token = st.nextToken().trim();
 
-                logger.debug("Token: '{}'",token);
+                logger.trace("Token: '{}'",token);
 
                 if ("on".equals(token) || "enabled".equals(token)) {
                     enabled = true;
@@ -122,7 +122,7 @@ public class SettingsParser {
 
                 if (setpoint.contains("f")) {
                     // Need to convert to Celsius
-                    logger.debug("Temperature unit is Fahhrenheit");
+                    logger.trace("Temperature unit is Fahhrenheit");
                     value = ((value - 32) * 5) / 9;
                 }
 
