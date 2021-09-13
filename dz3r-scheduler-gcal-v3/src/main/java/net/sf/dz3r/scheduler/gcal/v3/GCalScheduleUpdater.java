@@ -232,10 +232,12 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
         var scheduleWrapper = Collections.synchronizedMap(schedule);
 
         Flux.fromIterable(source.getValue())
-//                .parallel()
-//                .runOn(Schedulers.boundedElastic())
+                .parallel()
+                .runOn(Schedulers.boundedElastic())
                 .flatMap(this::convertEvent)
-                .subscribe(kv -> scheduleWrapper.put(kv.getKey(), kv.getValue()));
+                .doOnNext(kv -> scheduleWrapper.put(kv.getKey(), kv.getValue()))
+                .sequential()
+                .blockLast();
 
         return new AbstractMap.SimpleEntry<>(calendar.getSummary(), schedule);
     }
