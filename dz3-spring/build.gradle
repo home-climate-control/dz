@@ -10,7 +10,7 @@ application {
 dependencies {
 
     implementation 'org.springframework:spring-context:5.3.9'
-    implementation project(':dz3-model')
+    implementation project(':dz3r-director')
 
     // Enable the Swing console
     runtimeOnly project(':dz3r-swing')
