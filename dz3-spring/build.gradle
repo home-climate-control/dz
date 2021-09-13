@@ -35,7 +35,7 @@ dependencies {
     runtimeOnly project(':dz3r-webui')
 
     // Enable Google Calendar integration
-    runtimeOnly project(':dz3-scheduler-gcal-v3')
+    runtimeOnly project(':dz3r-scheduler-gcal-v3')
 
     // Enable Raspberry Pi specific hardware integration
     runtimeOnly project(':dz3r-raspberry-pi')

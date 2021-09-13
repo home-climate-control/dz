@@ -2,6 +2,8 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.HvacDevice;
+import net.sf.dz3r.scheduler.ScheduleUpdater;
+import net.sf.dz3r.scheduler.Scheduler;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
@@ -15,9 +17,11 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Instant;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
@@ -41,6 +45,7 @@ public class UnitDirector implements Addressable<String> {
      * Create an instance.
      *
      * @param metricsCollector Sink to send all the metrics to.
+     * @param scheduleUpdater Schedule updater to listen to event feed from.
      * @param name Instance name.
      * @param sensorFlux2zone Mapping of sensor flux to zone it will feed.
      * @param unitController Unit controller for this set of zones.
@@ -49,6 +54,7 @@ public class UnitDirector implements Addressable<String> {
      */
     public UnitDirector(
             MetricsCollector metricsCollector,
+            ScheduleUpdater scheduleUpdater,
             String name,
             Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
             UnitController unitController,
@@ -61,6 +67,7 @@ public class UnitDirector implements Addressable<String> {
         feed = connectFeeds(sensorFlux2zone, unitController, hvacDevice, hvacMode);
 
         Optional.ofNullable(metricsCollector).ifPresent(c -> c.connect(feed));
+        Optional.ofNullable(scheduleUpdater).ifPresent(u -> connectScheduler(sensorFlux2zone.values(), u));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             ThreadContext.push("shutdownHook");
@@ -120,6 +127,18 @@ public class UnitDirector implements Addressable<String> {
                 unitControllerFlux,
                 hvacDeviceFlux
         );
+    }
+
+    private void connectScheduler(Collection<Zone> zones, ScheduleUpdater scheduleUpdater) {
+
+        var name2zone = new TreeMap<String, Zone>();
+        Flux.fromIterable(zones)
+                .doOnNext(z -> name2zone.put(z.getAddress(), z))
+                .blockLast();
+
+        var scheduler = new Scheduler(name2zone);
+
+        scheduler.connect(scheduleUpdater.update());
     }
 
     @Override

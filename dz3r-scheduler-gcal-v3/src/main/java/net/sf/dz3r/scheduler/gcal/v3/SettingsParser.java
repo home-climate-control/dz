@@ -93,7 +93,7 @@ public class SettingsParser {
                     enabled == null || enabled,
                     setpoint,
                     voting == null || voting,
-                    false,
+                    null,
                     dumpPriority == null ? 0: dumpPriority);
 
         } finally {

@@ -31,11 +31,12 @@ class GCalScheduleUpdaterTest {
         var u = new GCalScheduleUpdater(Map.of(
                 "Kitchen", "DZ Schedule: Kitchen",
                 "Family Room", "DZ Schedule: Family Room",
-                "Theater Room", "DZ Schedule: Theater Room"
+                "Theater Room", "DZ Schedule: Theater Room",
+                "Workshop", "DZ Schedule: Workshop"
         ));
 
         u.update()
-                .take(3)
+                .take(4)
                 .publishOn(Schedulers.boundedElastic())
                 .doOnSubscribe(s -> {
                     start.set(Instant.now().toEpochMilli());

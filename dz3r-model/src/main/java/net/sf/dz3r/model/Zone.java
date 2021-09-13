@@ -57,7 +57,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         ts.setSetpoint(settings.setpoint);
 
-        this.settings = settings;
+        this.settings = this.settings == null ? settings : this.settings.merge(settings);
 
         logger.info("setSettings({}): {}", getAddress(), settings);
     }

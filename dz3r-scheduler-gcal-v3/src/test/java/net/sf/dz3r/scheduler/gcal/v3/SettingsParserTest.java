@@ -29,14 +29,14 @@ class SettingsParserTest {
     };
 
     private final ZoneSettings[] outputs = {
-            new ZoneSettings(true, 18.0, true, false, 0),
-            new ZoneSettings(true, 18.0, true, false, 0),
-            new ZoneSettings(true, 18.0, true, false, 2),
-            new ZoneSettings(true, 18.0, true, false, 2),
-            new ZoneSettings(true, 18.0, true, false, 2),
-            new ZoneSettings(true, 26.666666666666668, false, false, 0),
-            new ZoneSettings(false, 26.666666666666668, false, false, 0),
-            new ZoneSettings(false, 26.666666666666668, false, false, 0),
+            new ZoneSettings(true, 18.0, true, null, 0),
+            new ZoneSettings(true, 18.0, true, null, 0),
+            new ZoneSettings(true, 18.0, true, null, 2),
+            new ZoneSettings(true, 18.0, true, null, 2),
+            new ZoneSettings(true, 18.0, true, null, 2),
+            new ZoneSettings(true, 26.666666666666668, false, null, 0),
+            new ZoneSettings(false, 26.666666666666668, false, null, 0),
+            new ZoneSettings(false, 26.666666666666668, false, null, 0),
     };
 
     @Test
