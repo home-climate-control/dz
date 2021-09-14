@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.influxdb.v3;
 
-import net.sf.dz3r.model.MetricsCollector;
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.view.MetricsCollector;
 import net.sf.dz3r.view.influxdb.common.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

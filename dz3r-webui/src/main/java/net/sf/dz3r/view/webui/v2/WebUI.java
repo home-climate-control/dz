@@ -3,6 +3,7 @@ package net.sf.dz3r.view.webui.v2;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
+import net.sf.dz3r.view.UnitObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;

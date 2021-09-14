@@ -1,4 +1,6 @@
-package net.sf.dz3r.model;
+package net.sf.dz3r.view;
+
+import net.sf.dz3r.model.UnitDirector;
 
 /**
  * A generic metrics collector.

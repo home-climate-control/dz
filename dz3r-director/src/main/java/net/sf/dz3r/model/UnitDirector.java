@@ -9,6 +9,7 @@ import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
+import net.sf.dz3r.view.MetricsCollector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;

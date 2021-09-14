@@ -1,4 +1,4 @@
-package net.sf.dz3r.view.webui.v2;
+package net.sf.dz3r.view;
 
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.signal.Signal;
