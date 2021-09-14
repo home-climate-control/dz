@@ -121,10 +121,10 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         cell.subscribe(thisZoneFlux);
         panel.subscribe(thisZoneFlux);
 
-        // Hack: passing the setpoint through the controller is not so simple, so inject it
+        // Zones and zone controller have no business knowing about the sensor signal, but humans want it; inject it
         panel.subscribeSensor(sensorFlux);
 
-        // Hack: HVAC mode is not usually available to zones (and we'll have to overhaul all this for autochangeover anyway)
+        // Zones and zone controller have no business knowing about HVAC mode; inject it
         cell.subscribeMode(modeFlux);
         panel.subscribeMode(modeFlux);
 

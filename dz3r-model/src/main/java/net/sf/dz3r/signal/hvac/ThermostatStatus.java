@@ -5,6 +5,10 @@ package net.sf.dz3r.signal.hvac;
  *
  * This object defines the actual thermostat status in real time.
  *
+ * A conscious decision was made not to make it carry the current process variable (temperature) -
+ * even though it complicates the signal processing chain (need to pass it elsewhere), it keeps unrelated
+ * entities separate.
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class ThermostatStatus {

@@ -29,7 +29,8 @@ dependencies {
     runtimeOnly project(':dz3r-mqtt')
 
     // Enable remote control over HTTP
-    runtimeOnly project(':dz3-http')
+    runtimeOnly project(':dz3r-http')
+    runtimeOnly project(':dz3r-http-gae')
 
     // Enable remote control via WebUI
     runtimeOnly project(':dz3r-webui')

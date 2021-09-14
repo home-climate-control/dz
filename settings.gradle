@@ -37,6 +37,8 @@ include 'automation-hat-driver'
 // Reactive only modules
 
 include 'dz3r-director'
+include 'dz3r-http'
+include 'dz3r-http-gae'
 include 'dz3r-influxdb'
 include 'dz3r-model'
 include 'dz3r-mqtt'

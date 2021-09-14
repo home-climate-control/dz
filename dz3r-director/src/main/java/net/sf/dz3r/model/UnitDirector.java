@@ -9,6 +9,7 @@ import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
+import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,8 +46,9 @@ public class UnitDirector implements Addressable<String> {
     /**
      * Create an instance.
      *
-     * @param metricsCollector Sink to send all the metrics to.
      * @param scheduleUpdater Schedule updater to listen to event feed from.
+     * @param metricsCollectorSet Set of sinks to send all the metrics to.
+     * @param connectorSet Set of connectors to use.
      * @param name Instance name.
      * @param sensorFlux2zone Mapping of sensor flux to zone it will feed.
      * @param unitController Unit controller for this set of zones.
@@ -54,9 +56,10 @@ public class UnitDirector implements Addressable<String> {
      * @param hvacMode HVAC device mode for this zone. {@link Thermostat} PID signals must have correct polarity for this mode.
      */
     public UnitDirector(
-            MetricsCollector metricsCollector,
-            ScheduleUpdater scheduleUpdater,
             String name,
+            ScheduleUpdater scheduleUpdater,
+            Set<MetricsCollector> metricsCollectorSet,
+            Set<Connector> connectorSet,
             Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
             UnitController unitController,
             HvacDevice hvacDevice,
@@ -67,8 +70,18 @@ public class UnitDirector implements Addressable<String> {
 
         feed = connectFeeds(sensorFlux2zone, unitController, hvacDevice, hvacMode);
 
-        Optional.ofNullable(metricsCollector).ifPresent(c -> c.connect(feed));
         Optional.ofNullable(scheduleUpdater).ifPresent(u -> connectScheduler(sensorFlux2zone.values(), u));
+        Optional.ofNullable(metricsCollectorSet)
+                .ifPresent(collectors -> Flux.fromIterable(collectors)
+                        .doOnNext(c -> c.connect(feed))
+                        .subscribe());
+        Optional.ofNullable(connectorSet)
+                .ifPresent(connectors -> Flux.fromIterable(connectors)
+                        .doOnNext(c -> {
+                            c.connect(feed);
+                            // VT: FIXME: Connect the control input when the API signature is established
+                        })
+                        .subscribe());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             ThreadContext.push("shutdownHook");
