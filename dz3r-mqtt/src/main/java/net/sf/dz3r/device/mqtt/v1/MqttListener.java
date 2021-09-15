@@ -7,7 +7,9 @@ import com.hivemq.client.mqtt.mqtt3.exceptions.Mqtt3ConnAckException;
 import net.sf.dz3r.device.Addressable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -30,6 +32,7 @@ public class MqttListener implements Addressable<MqttEndpoint> {
     public final MqttEndpoint address;
     private final String username;
     private final String password;
+    private final boolean autoReconnect;
 
     /**
      * MQTT client.
@@ -38,7 +41,7 @@ public class MqttListener implements Addressable<MqttEndpoint> {
      * May be upgraded to {@link com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient} when a suitable
      * broker replacement is found and verified.
      */
-    private final Mqtt3AsyncClient client;
+    private Mqtt3AsyncClient client;
 
     private final Map<String, Flux<MqttSignal>> topic2flux = new TreeMap<>();
 
@@ -56,42 +59,61 @@ public class MqttListener implements Addressable<MqttEndpoint> {
         this.address = address;
         this.username = username;
         this.password = password;
+        this.autoReconnect = autoReconnect;
 
         logger.info("Endpoint: {}", address);
 
-        // VT: NOTE: Automatic reconnect is disabled by default, here's why:
-        // https://github.com/hivemq/hivemq-mqtt-client/issues/496
+    }
 
-        var clientPrototype= Mqtt3Client.builder()
-                .identifier("dz-" + UUID.randomUUID())
-                .serverHost(address.host)
-                .serverPort(address.port);
+    private synchronized Mqtt3AsyncClient getClient() {
 
-        if (autoReconnect) {
-            clientPrototype = clientPrototype.automaticReconnectWithDefaultConfig();
+        if (client != null) {
+            return client;
         }
 
-        client = clientPrototype.buildAsync();
-
-        var instance = client.toBlocking().connectWith();
-
-        if (username != null && password != null) {
-            instance = instance.simpleAuth()
-                    .username(username)
-                    .password(password.getBytes(StandardCharsets.UTF_8))
-                    .applySimpleAuth();
-        }
+        ThreadContext.push("getClient");
 
         try {
 
-            logger.info("Connecting to {} (disable reconnect if this gets stuck)", address);
-            var ack = instance.send();
+            // VT: NOTE: Automatic reconnect is disabled by default, here's why:
+            // https://github.com/hivemq/hivemq-mqtt-client/issues/496
 
-            // send() throws an exception upon failure, will this ever be anything other than SUCCESS?
-            logger.info("Connected: {}", ack.getReturnCode());
+            var clientPrototype= Mqtt3Client.builder()
+                    .identifier("dz-" + UUID.randomUUID())
+                    .serverHost(address.host)
+                    .serverPort(address.port);
 
-        } catch (Mqtt3ConnAckException ex) {
-            throw new IllegalStateException("Can't connect to " + address, ex);
+            if (autoReconnect) {
+                clientPrototype = clientPrototype.automaticReconnectWithDefaultConfig();
+            }
+
+            client = clientPrototype.buildAsync();
+
+            var instance = client.toBlocking().connectWith();
+
+            if (username != null && password != null) {
+                instance = instance.simpleAuth()
+                        .username(username)
+                        .password(password.getBytes(StandardCharsets.UTF_8))
+                        .applySimpleAuth();
+            }
+
+            try {
+
+                logger.info("Connecting to {} (disable reconnect if this gets stuck)", address);
+                var ack = instance.send();
+
+                // send() throws an exception upon failure, will this ever be anything other than SUCCESS?
+                logger.info("Connected: {}", ack.getReturnCode());
+
+            } catch (Mqtt3ConnAckException ex) {
+                throw new IllegalStateException("Can't connect to " + address, ex);
+            }
+
+            return client;
+
+        } finally {
+            ThreadContext.pop();
         }
     }
 
@@ -109,9 +131,15 @@ public class MqttListener implements Addressable<MqttEndpoint> {
      *
      * @see #createFlux(String)
      */
-    public synchronized Flux<MqttSignal> getFlux(String topic) {
-        logger.info("getFlux: {}", topic);
-        return topic2flux.computeIfAbsent(topic, k -> createFlux(topic));
+    public Flux<MqttSignal> getFlux(String topic) {
+
+        // Move into a different thread
+        return Flux
+                .just(topic)
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(t -> logger.info("getFlux: {}", t))
+                .map(t -> topic2flux.computeIfAbsent(t, k -> createFlux(t)))
+                .blockFirst();
     }
 
     private final Map<String, Receiver> topic2receiver = new TreeMap<>();
@@ -143,7 +171,7 @@ public class MqttListener implements Addressable<MqttEndpoint> {
 
         var result = flux.publish().autoConnect();
 
-        var ackFuture = client.toAsync()
+        var ackFuture = getClient().toAsync()
                 .subscribeWith()
                 .topicFilter(topic + "/#")
                 .callback(p -> {
