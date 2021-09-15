@@ -65,11 +65,13 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
             String password) {
 
         config = new Config(dbName, instance, dbURL, username, password);
-
-        connect();
     }
 
-    private void connect() {
+    private synchronized void connect() {
+
+        if (db != null) {
+            return;
+        }
 
         if (config.username == null || "".equals(config.username) || config.password == null || "".equals(config.password)) {
             logger.warn("one of (username, password) is null or missing, connecting unauthenticated - THIS IS A BAD IDEA");
@@ -89,6 +91,9 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
 
     @Override
     public void onSubscribe(Subscription s) {
+
+        connect();
+
         // No limit for now. Need to see if buffering is required.
         s.request(Long.MAX_VALUE);
     }
