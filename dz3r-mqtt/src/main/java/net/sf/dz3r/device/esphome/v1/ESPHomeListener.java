@@ -11,15 +11,10 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<String, Double, Void> {
 
     protected final Logger logger = LogManager.getLogger();
-    private final Set<String> seenAlienTopic = new HashSet<>();
 
     private final MqttListener mqttListener;
     private final String mqttRootTopicSub;
@@ -75,54 +70,5 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
         return new Signal<>(
                 timestamp,
                 Double.parseDouble(mqttSignal.message));
-    }
-
-    /**
-     * ESPHome MQTT topic matching pattern.
-     *
-     * It is possible to optimize it to use numbered groups, but is it worth it?
-     */
-    private final Pattern p = Pattern.compile("(?<deviceId>.*)/sensor/(?<sensorName>.*)/state");
-
-    /**
-     * Parse the device ID and the sensor name out of the topic.
-     *
-     * @param source Topic as a string.
-     *
-     * @return An array where the first element is the topic prefix (interpreted as device ID)
-     * and the second is the sensor name.
-     */
-    @java.lang.SuppressWarnings({"squid:S1168"})
-    private String[] parseTopic(String source) {
-
-        // That "not a sensor" debug statement below will drive the disk into the ground, better avoid it if possible
-        if (seenAlienTopic.contains(source)) {
-
-            // Trace is rarely enabled, no big deal
-            logger.trace("seen '{}' already, not matching", source);
-
-            // VT: NOTE: squid:S1168 I'm not going to waste memory to indicate a "skip" condition
-            return null;
-        }
-
-        // The typical ESPHome topic will look like this:
-        //
-        // ${ESPHome-topic-prefix}/sensor/${ESPHome-sensor-name}/state
-
-        Matcher m = p.matcher(source);
-        m.find();
-
-        if (!m.matches()) {
-
-            logger.debug("{}: not a sensor (this message will repeat once per run)", source);
-
-            // We don't want to see this message again
-            seenAlienTopic.add(source);
-
-            // VT: NOTE: squid:S1168 I'm not going to waste memory to indicate a "skip" condition
-            return null;
-        }
-
-        return new String[] { m.group("deviceId"), m.group("sensorName")};
     }
 }
