@@ -78,7 +78,7 @@ public class Signal<T, P> {
         }
 
         if (value == null && status != Status.FAILURE_TOTAL) {
-            throw new IllegalArgumentException("null value doesn't make sense for total failure");
+            throw new IllegalArgumentException("null value doesn't make sense for non-total failure");
         }
 
         if (status != Status.OK && error == null) {
