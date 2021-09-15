@@ -74,6 +74,7 @@ public class UnitDirector implements Addressable<String> {
         Optional.ofNullable(metricsCollectorSet)
                 .ifPresent(collectors -> Flux.fromIterable(collectors)
                         .doOnNext(c -> c.connect(feed))
+                        .subscribeOn(Schedulers.boundedElastic())
                         .subscribe());
         Optional.ofNullable(connectorSet)
                 .ifPresent(connectors -> Flux.fromIterable(connectors)
@@ -81,6 +82,7 @@ public class UnitDirector implements Addressable<String> {
                             c.connect(feed);
                             // VT: FIXME: Connect the control input when the API signature is established
                         })
+                        .subscribeOn(Schedulers.boundedElastic())
                         .subscribe());
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
