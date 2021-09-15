@@ -5,6 +5,8 @@ import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -14,6 +16,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -76,9 +80,14 @@ public class ReactiveConsole {
 
         this.initSet = initSet;
         this.defaultUnit = unit;
+
+        Flux.just(Instant.now())
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(this::start)
+                .subscribe();
     }
 
-    public void start() {
+    private void start(Instant startedAt) {
 
         ThreadContext.push("start");
 
@@ -88,6 +97,8 @@ public class ReactiveConsole {
 
             mainFrame.setSize(screenSizes[screenSizeOffset].displaySize);
             mainFrame.setVisible(true);
+
+            logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
 
         } finally {
             ThreadContext.pop();

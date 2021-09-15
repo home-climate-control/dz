@@ -14,9 +14,12 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -49,24 +52,38 @@ public class WebUI {
         this.initSet.addAll(initSet);
 
         logger.info("init set: {}", initSet);
+
+        Flux.just(Instant.now())
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(this::start)
+                .subscribe();
     }
 
-    public void start() {
+    private void start(Instant startedAt) {
 
-        // Run here instead of the constructor so that the control logic can start working sooner,
-        // besides, if we fail here, it's a UI failure, and it will not disrupt the HVAC system operation.
-        init();
+        ThreadContext.push("start");
 
-        var httpHandler = RouterFunctions.toHttpHandler(new RoutingConfiguration().monoRouterFunction(this));
-        var adapter = new ReactorHttpHandlerAdapter(httpHandler);
+        try {
 
-        new Thread(() -> {
+            // Run here instead of the constructor so that the control logic can start working sooner,
+            // besides, if we fail here, it's a UI failure, and it will not disrupt the HVAC system operation.
+            init();
+
+            var httpHandler = RouterFunctions.toHttpHandler(new RoutingConfiguration().monoRouterFunction(this));
+            var adapter = new ReactorHttpHandlerAdapter(httpHandler);
+
             var server = HttpServer.create().host("0.0.0.0").port(port);
             DisposableServer disposableServer = server.handle(adapter).bind().block();
-            disposableServer.onDispose().block();
-        }).start();
 
-        logger.info("started");
+            logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
+
+            disposableServer.onDispose().block();
+
+            logger.info("done");
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     /**

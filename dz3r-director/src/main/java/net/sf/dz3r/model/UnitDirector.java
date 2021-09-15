@@ -106,6 +106,11 @@ public class UnitDirector implements Addressable<String> {
         }));
 
         logger.info("Configured");
+
+        Flux.just(Instant.now())
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(this::start)
+                .subscribe();
     }
 
     private Feed connectFeeds(
@@ -184,38 +189,37 @@ public class UnitDirector implements Addressable<String> {
         return feed.hvacDeviceFlux;
     }
 
-    public void start() {
-        new Thread(() -> {
-            ThreadContext.push("run");
-            try {
+    private void start(Instant startedAt) {
 
-                logger.info("Starting the pipeline");
-                var theEnd = feed.hvacDeviceFlux
-                        .publishOn(Schedulers.boundedElastic())
-                        .subscribe(
-                                s -> {
-                                    logger.debug("HVAC device: {}", s);
-                                },
-                                error -> {
-                                    logger.error("HVAC device error", error);
-                                }
-                        );
+        ThreadContext.push("run");
+        try {
 
-                logger.info("Awaiting termination signal");
-                sigTerm.await();
+            logger.info("Starting the pipeline");
+            var theEnd = feed.hvacDeviceFlux
+                    .publishOn(Schedulers.boundedElastic())
+                    .subscribe(
+                            s -> {
+                                logger.debug("HVAC device: {}", s);
+                            },
+                            error -> {
+                                logger.error("HVAC device error", error);
+                            }
+                    );
 
-                logger.info("Received termination signal");
-                theEnd.dispose();
+            logger.info("Awaiting termination signal");
+            sigTerm.await();
 
-                logger.info("Shut down");
-                shutdownComplete.countDown();
+            logger.info("Received termination signal");
+            theEnd.dispose();
 
-            } catch (Throwable t) { // NOSONAR Consequences have been considered
-                logger.fatal("Unexpected exception");
-            } finally {
-                ThreadContext.pop();
-            }
-        }).start();
+            logger.info("Shut down");
+            shutdownComplete.countDown();
+
+        } catch (Throwable t) { // NOSONAR Consequences have been considered
+            logger.fatal("Unexpected exception");
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     public Feed getFeed() {
