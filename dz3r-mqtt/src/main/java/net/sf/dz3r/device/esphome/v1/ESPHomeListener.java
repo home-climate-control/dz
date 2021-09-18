@@ -6,15 +6,22 @@ import net.sf.dz3r.device.mqtt.v1.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
+import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.time.Instant;
 
 public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<String, Double, Void> {
 
     protected final Logger logger = LogManager.getLogger();
+
+    /**
+     * How long to wait before reporting a timeout.
+     */
+    private Duration timeout = Duration.ofSeconds(30);
 
     private final MqttListener mqttListener;
     private final String mqttRootTopicSub;
@@ -49,11 +56,12 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
 
         logger.info("getFlux: {}", address);
 
-        return mqttListener
-                .getFlux(mqttRootTopicSub)
-                .filter(e -> matchSensorAddress(e, address))
-                .doOnNext(s -> logger.debug("matched: {} {}", s.topic, s.message))
-                .map(this::mqtt2sensor);
+        return new TimeoutGuard<Double, Void>(timeout)
+                .compute(mqttListener
+                        .getFlux(mqttRootTopicSub)
+                        .filter(e -> matchSensorAddress(e, address))
+                        .doOnNext(s -> logger.debug("matched: {} {}", s.topic, s.message))
+                        .map(this::mqtt2sensor));
     }
 
     private boolean matchSensorAddress(MqttSignal signal, String address) {
