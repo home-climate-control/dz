@@ -48,7 +48,6 @@ class TimeoutGuardTest {
                 // The last window is always empty, so there'll always be an error item before the flux is complete
 
                 .assertNext(s -> {
-                    // First element is always a timeout, why?
                     assertThat(s.getValue()).isNull();
                     assertThat(s.isError()).isTrue();
                     assertThat(s.getError()).isInstanceOf(TimeoutException.class);
@@ -56,11 +55,7 @@ class TimeoutGuardTest {
                 .verifyComplete();
     }
 
-    @Test
-    void timeout() {
-
-        var timeout = Duration.ofMillis(50);
-        var guard = new TimeoutGuard<Integer, Void>(timeout);
+    private Flux<Signal<Integer, Void>> createFlux(Duration timeout, TimeoutGuard<Integer, Void> guard) {
 
         var sequence1 = Flux.just(1, 2, 3);
         var sequence2 = Flux.just(4, 5).delayElements(timeout.plus(Duration.ofMillis(10)));
@@ -84,6 +79,79 @@ class TimeoutGuardTest {
                     logger.log(level, "delay: abs {} rel {} = {}", Duration.between(start, s.timestamp).toMillis(), s.timestamp.toEpochMilli() - last.get(), s);
                     last.set(s.timestamp.toEpochMilli());
                 });
+
+        return guarded;
+    }
+
+    @Test
+    void timeoutSingle() {
+
+        var timeout = Duration.ofMillis(50);
+        var guard = new TimeoutGuard<Integer, Void>(timeout, false);
+        var guarded = createFlux(timeout, guard);
+
+//        guarded.blockLast();
+
+        // VT: NOTE: I'm not sure StepVerifier.withVirtualTime() will work here
+
+        StepVerifier.create(guarded)
+
+                // First batch of three goes with no delay to warm up the flux
+
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(2))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(3))
+
+                // Next two elements are too late and are preceded by timeouts
+
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isNull();
+                    assertThat(s.isError()).isTrue();
+                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
+                })
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(4))
+
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isNull();
+                    assertThat(s.isError()).isTrue();
+                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
+                })
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(5))
+
+                // Next three are just in time
+
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(6))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(7))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(8))
+
+                // But there's a LONG pause before the last two
+                // Non-repeating instance will emit just one error signal
+
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isNull();
+                    assertThat(s.isError()).isTrue();
+                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
+                })
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(9))
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(10))
+
+                // The last window is always empty, so there'll always be an error item before the flux is complete
+
+                .assertNext(s -> {
+                    // First element is always a timeout, why?
+                    assertThat(s.getValue()).isNull();
+                    assertThat(s.isError()).isTrue();
+                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void timeoutRepeating() {
+
+        var timeout = Duration.ofMillis(50);
+        var guard = new TimeoutGuard<Integer, Void>(timeout, true);
+        var guarded = createFlux(timeout, guard);
 
         // VT: NOTE: I'm not sure StepVerifier.withVirtualTime() will work here
 
