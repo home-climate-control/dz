@@ -28,7 +28,6 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -321,16 +320,11 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             var portsAvailable = new TreeSet<String>();
 
-            for (Enumeration<DSPortAdapter> adapters = OneWireAccessProvider
-                    .enumerateAllAdapters(); adapters.hasMoreElements();) {
-
-                DSPortAdapter a = adapters.nextElement();
+            for (DSPortAdapter a : OneWireAccessProvider.getAdapters()) {
 
                 logger.debug("Adapter found: {}", a.getAdapterName());
 
-                for (Enumeration<String> ports = a.getPortNames(); ports.hasMoreElements();) {
-
-                    String portName = ports.nextElement();
+                for (String portName : a.getPortNames()) {
 
                     logger.debug("Port found: {}", portName);
 
