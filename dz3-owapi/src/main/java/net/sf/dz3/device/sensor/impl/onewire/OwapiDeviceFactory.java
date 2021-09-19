@@ -57,14 +57,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * Adapter speed.
      *
      * This value is injected via constructor. If the value given is bad, it will be
-     * defaulted to {@link DSPortAdapter#SPEED_REGULAR}.
+     * defaulted to {@link DSPortAdapter.Speed#REGULAR}.
      */
-    private final int adapterSpeed;
+    private final DSPortAdapter.Speed adapterSpeed;
 
     /**
      * Mapping from the adapter speed value to speed name.
      */
-    private final Map<Integer, String> speedInt2speedName = new TreeMap<>();
+    private final Map<DSPortAdapter.Speed, String> speedInt2speedName = new TreeMap<>();
 
     /**
      * 1-Wire adapter.
@@ -116,17 +116,17 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             logger.info("Port:  {}", adapterPort);
 
-            var speedName2speedInt = new TreeMap<String, Integer>();
+            var speedName2speedInt = new TreeMap<String, DSPortAdapter.Speed>();
 
-            speedName2speedInt.put("overdrive", DSPortAdapter.SPEED_OVERDRIVE);
-            speedName2speedInt.put("hyperdrive", DSPortAdapter.SPEED_HYPERDRIVE);
-            speedName2speedInt.put("flex", DSPortAdapter.SPEED_FLEX);
-            speedName2speedInt.put("regular", DSPortAdapter.SPEED_REGULAR);
+            speedName2speedInt.put("overdrive", DSPortAdapter.Speed.OVERDRIVE);
+            speedName2speedInt.put("hyperdrive", DSPortAdapter.Speed.HYPERDRIVE);
+            speedName2speedInt.put("flex", DSPortAdapter.Speed.FLEX);
+            speedName2speedInt.put("regular", DSPortAdapter.Speed.REGULAR);
 
-            speedInt2speedName.put(DSPortAdapter.SPEED_OVERDRIVE, "overdrive");
-            speedInt2speedName.put(DSPortAdapter.SPEED_HYPERDRIVE, "hyperdrive");
-            speedInt2speedName.put(DSPortAdapter.SPEED_FLEX, "flex");
-            speedInt2speedName.put(DSPortAdapter.SPEED_REGULAR, "regular");
+            speedInt2speedName.put(DSPortAdapter.Speed.OVERDRIVE, "overdrive");
+            speedInt2speedName.put(DSPortAdapter.Speed.HYPERDRIVE, "hyperdrive");
+            speedInt2speedName.put(DSPortAdapter.Speed.FLEX, "flex");
+            speedInt2speedName.put(DSPortAdapter.Speed.REGULAR, "regular");
 
             var speedValue = speedName2speedInt.get(speed);
 
@@ -134,7 +134,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 logger.warn("Unknown speed '{}', defaulted to regular", speed);
             }
 
-            adapterSpeed = speedValue == null ? DSPortAdapter.SPEED_REGULAR : speedValue;
+            adapterSpeed = speedValue == null ? DSPortAdapter.Speed.REGULAR : speedValue;
 
             logger.info("Speed: {}", speedInt2speedName.get(adapterSpeed));
 
@@ -1252,7 +1252,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                     "dz",
                     getClass().getSimpleName(),
                     type.type + getAddress(),
-                    "1-Wire " + type.description + " sensor , adress " + getAddress());
+                    "1-Wire " + type.description + " sensor , address " + getAddress());
         }
 
         @Override
