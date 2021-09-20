@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Usage counter proof of concept with no persistent state.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class TransientUsageCounter extends AbstractUsageCounter {
 
@@ -36,7 +36,6 @@ public class TransientUsageCounter extends AbstractUsageCounter {
      * @throws IOException if things go sour.
      */
     public TransientUsageCounter(String name, DataSource<Double> target) throws IOException {
-
         super(name, target, null);
     }
 
@@ -50,7 +49,6 @@ public class TransientUsageCounter extends AbstractUsageCounter {
      * @throws IOException if things go sour.
      */
     public TransientUsageCounter(String name, CounterStrategy counter, DataSource<Double> target) throws IOException {
-
         super(name, counter, target, null);
     }
 
@@ -65,7 +63,6 @@ public class TransientUsageCounter extends AbstractUsageCounter {
      * @throws IOException if things go sour.
      */
     public TransientUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, Object[] storageKeys) throws IOException {
-
         super(name, counter, target, storageKeys);
     }
 
@@ -126,9 +123,8 @@ public class TransientUsageCounter extends AbstractUsageCounter {
         ThreadContext.push("save@" + Integer.toHexString(hashCode()));
 
         try {
-
             // Do absolutely nothing except logging the current usage
-            logger.info("Current usage: " + getUsageAbsolute() + "/" + getThreshold() + "(" + getUsageRelative() + ")");
+            logger.info("Current usage: {}/{} ({})", getUsageAbsolute(), getThreshold(), getUsageRelative());
 
         } finally {
             ThreadContext.pop();
@@ -147,7 +143,6 @@ public class TransientUsageCounter extends AbstractUsageCounter {
 
     @Override
     protected void doReset() throws IOException {
-
         // Do absolutely nothing
     }
 }

@@ -14,7 +14,7 @@ import java.util.StringTokenizer;
 /**
  * Usage counter storing the state into a file.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class FileUsageCounter extends TransientUsageCounter {
 
@@ -50,11 +50,11 @@ public class FileUsageCounter extends TransientUsageCounter {
                 throw new IllegalArgumentException("persistentStorage can't be null");
             }
 
-            logger.info("Loading " + persistentStorage);
+            logger.info("Loading {}", persistentStorage);
 
             if (!persistentStorage.exists()) {
 
-                logger.warn(persistentStorage + " doesn't exist, will initialize");
+                logger.warn("{} doesn't exist, will initialize", persistentStorage);
                 return new CounterState(0, 0);
             }
 
@@ -85,7 +85,7 @@ public class FileUsageCounter extends TransientUsageCounter {
                     try {
 
                         String key = st.nextToken();
-                        Long value = Long.parseLong(st.nextToken());
+                        var value = Long.parseLong(st.nextToken());
 
                         if (CF_THRESHOLD.equals(key)) {
                             threshold = value;
@@ -95,7 +95,7 @@ public class FileUsageCounter extends TransientUsageCounter {
                             current = value;
                         }
 
-                    } catch (Throwable t) {
+                    } catch (Throwable t) { // NOSONAR Consequences have been considered
                         throw new IllegalArgumentException("Failed to parse line '" + line + "' out of " + persistentStorage.getCanonicalPath() + " (line " + lnr.getLineNumber() + ")");
                     }
                 }
@@ -108,9 +108,9 @@ public class FileUsageCounter extends TransientUsageCounter {
                     throw new IllegalArgumentException("No '" + CF_CURRENT +"=NN' found in " + persistentStorage.getCanonicalPath());
                 }
 
-                CounterState state = new CounterState(threshold.longValue(), current.longValue());
+                CounterState state = new CounterState(threshold, current);
 
-                logger.info("Loaded: " + state);
+                logger.info("Loaded: {}", state);
 
                 return state;
             }
@@ -142,13 +142,13 @@ public class FileUsageCounter extends TransientUsageCounter {
 
         try {
 
-            logger.debug(getUsageRelative() + "/" + getUsageAbsolute());
+            logger.debug("{}/{}", getUsageRelative(), getUsageAbsolute());
 
             File persistentStorage = (File) getStorageKeys()[0];
             File canonical = new File(persistentStorage.getCanonicalPath());
 
             if (canonical.getParentFile().mkdirs()) {
-                logger.info("Created " + canonical);
+                logger.info("Created {}", canonical);
             }
 
             // Now, careful... https://github.com/home-climate-control/dz/issues/102
