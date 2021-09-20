@@ -32,11 +32,12 @@ public class TransientUsageCounter extends AbstractUsageCounter {
      *
      * @param name Human readable name for the user interface.
      * @param target What to count.
+     * @param isTime Whether the countable resource is time.
      *
      * @throws IOException if things go sour.
      */
-    public TransientUsageCounter(String name, DataSource<Double> target) throws IOException {
-        super(name, target, null);
+    public TransientUsageCounter(String name, DataSource<Double> target, boolean isTime) throws IOException {
+        super(name, target, isTime, null);
     }
 
     /**
@@ -45,11 +46,12 @@ public class TransientUsageCounter extends AbstractUsageCounter {
      * @param name Human readable name for the user interface.
      * @param counter Counter to use.
      * @param target What to count.
+     * @param isTime Whether the countable resource is time.
      *
      * @throws IOException if things go sour.
      */
-    public TransientUsageCounter(String name, CounterStrategy counter, DataSource<Double> target) throws IOException {
-        super(name, counter, target, null);
+    public TransientUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, boolean isTime) throws IOException {
+        super(name, counter, target, isTime, null);
     }
 
     /**
@@ -58,12 +60,13 @@ public class TransientUsageCounter extends AbstractUsageCounter {
      * @param name Human readable name for the user interface.
      * @param counter Counter to use.
      * @param target What to count.
+     * @param isTime Whether the countable resource is time.
      * @param storageKeys How to store the counter data.
      *
      * @throws IOException if things go sour.
      */
-    public TransientUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, Object[] storageKeys) throws IOException {
-        super(name, counter, target, storageKeys);
+    public TransientUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, boolean isTime, Object[] storageKeys) throws IOException {
+        super(name, counter, target, isTime, storageKeys);
     }
 
     @Override

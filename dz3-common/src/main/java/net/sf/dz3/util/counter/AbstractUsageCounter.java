@@ -37,6 +37,8 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
      */
     private final CounterStrategy counter;
 
+    private final boolean isTime;
+
     /**
      * The threshold.
      */
@@ -57,13 +59,13 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
      *
      * @param name Human readable name for the user interface.
      * @param target What to count.
+     * @param isTime Whether the countable resource is time.
      * @param storageKeys How to store the counter data.
      *
      * @throws IOException if things go sour.
      */
-    protected AbstractUsageCounter(String name, DataSource<Double> target, Object[] storageKeys) throws IOException {
-
-        this(name, new TimeBasedUsage(System.currentTimeMillis()), target, storageKeys);
+    protected AbstractUsageCounter(String name, DataSource<Double> target, boolean isTime, Object[] storageKeys) throws IOException {
+        this(name, new TimeBasedUsage(System.currentTimeMillis()), target, isTime, storageKeys);
     }
 
     /**
@@ -72,11 +74,12 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
      * @param name Human readable name for the user interface.
      * @param counter Counter to use.
      * @param target What to count.
+     * @param isTime Whether the countable resource is time.
      * @param storageKeys How to store the counter data.
      *
      * @throws IOException if things go sour.
      */
-    protected AbstractUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, Object []storageKeys) throws IOException {
+    protected AbstractUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, boolean isTime, Object []storageKeys) throws IOException {
 
         // Kludge to allow to use logger in subclass methods called from the constructor
         logger = LogManager.getLogger(getClass());
@@ -92,6 +95,7 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
         this.name = name;
         this.signature = MessageDigestCache.getMD5(name).substring(0, 19);
         this.counter = counter;
+        this.isTime = isTime;
         this.storageKeys = storageKeys;
 
         if (storageKeys != null) {
@@ -222,6 +226,11 @@ public abstract class AbstractUsageCounter implements ResourceUsageCounter {
     @Override
     public void removeConsumer(DataSink<Double> consumer) {
         dataBroadcaster.removeConsumer(consumer);
+    }
+
+    @Override
+    public final boolean isTime() {
+        return isTime;
     }
 
     /**

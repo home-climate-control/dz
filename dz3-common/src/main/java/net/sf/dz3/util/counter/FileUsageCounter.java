@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.PrintWriter;
+import java.time.Duration;
 import java.util.StringTokenizer;
 
 /**
@@ -22,7 +23,7 @@ public class FileUsageCounter extends TransientUsageCounter {
     private static final String CF_CURRENT = "current";
 
     /**
-     * Create an instance.
+     * Create an instance that counts time.
      *
      * @param name Human readable name for the user interface.
      * @param counter Counter to use.
@@ -32,7 +33,22 @@ public class FileUsageCounter extends TransientUsageCounter {
      * @throws IOException if things go sour.
      */
     public FileUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, File persistentStorage) throws IOException {
-        super(name, counter, target, new Object [] { persistentStorage });
+        super(name, counter, target, true, new Object [] { persistentStorage });
+    }
+
+    /**
+     * Create an instance.
+     *
+     * @param name Human readable name for the user interface.
+     * @param counter Counter to use.
+     * @param target What to count.
+     * @param isTime Whether the countable resource is time.
+     * @param persistentStorage File to store the counter data into.
+     *
+     * @throws IOException if things go sour.
+     */
+    public FileUsageCounter(String name, CounterStrategy counter, DataSource<Double> target, boolean isTime, File persistentStorage) throws IOException {
+        super(name, counter, target, isTime, new Object [] { persistentStorage });
     }
 
     @Override
@@ -166,6 +182,18 @@ public class FileUsageCounter extends TransientUsageCounter {
             try (PrintWriter pw = new PrintWriter(new FileWriter(temp))) {
 
                 pw.println("# Resource Usage Counter: " + getName());
+
+                pw.println("#");
+                pw.println(String.format("# Relative usage %2.0f%%", getUsageRelative() * 100) + (getUsageRelative() > 1 ? " (OVERDUE)" : ""));
+                pw.println("#");
+
+                if (isTime()) {
+                    pw.println("# " + CF_THRESHOLD + "=" + getHumanReadableTime(getThreshold()));
+                    pw.println("# " + CF_CURRENT + "=" + getHumanReadableTime(getUsageAbsolute()));
+                }
+
+                pw.println("#");
+
                 pw.println(CF_THRESHOLD + "=" + getThreshold());
                 pw.println(CF_CURRENT + "=" + getUsageAbsolute());
             }
@@ -181,5 +209,30 @@ public class FileUsageCounter extends TransientUsageCounter {
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    private String getHumanReadableTime(long value) {
+
+        var millis = Duration.ofMillis(value);
+        var hours = millis.toHours();
+
+        if (hours > 0) {
+            return hours + " hours";
+        }
+
+        var minutes = millis.toMinutes();
+
+        if (minutes > 0) {
+            return minutes + " minutes";
+        }
+
+        var seconds = millis.toSeconds();
+
+        if (seconds > 0) {
+            return seconds + " seconds";
+        }
+
+        // The hell with it
+        return value + " ms";
     }
 }
