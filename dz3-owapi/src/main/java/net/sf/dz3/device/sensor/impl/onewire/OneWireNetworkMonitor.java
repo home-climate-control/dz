@@ -1,5 +1,6 @@
 package net.sf.dz3.device.sensor.impl.onewire;
 
+import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
@@ -13,7 +14,6 @@ import net.sf.dz3.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
@@ -308,16 +308,15 @@ public class OneWireNetworkMonitor extends ActiveService {
 
         var switchList = new LinkedList<OWPath>();
 
-        for (OneWireContainer owc : adapter.getAllDeviceContainers()) {
+        for (var owc : adapter.getAllDeviceContainers()) {
 
             String address = owc.getAddressAsString();
 
             // This device might have been discovered already
-
             if (address2deviceLocal.get(address) != null) {
-
                 continue;
             }
+
             logger.debug("Found: {} {} at {}",owc.getName(), address, path);
 
             address2deviceLocal.put(address, owc);
@@ -379,19 +378,21 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     private void handleArrivals(final Map<String, OneWireContainer> newDeviceMap, final Map<String, OWPath> newPathMap) {
 
-        for (String address : newDeviceMap.keySet()) {
+        for (var kv : newDeviceMap.entrySet()) {
+
+            var address = kv.getKey();
+            var device = kv.getValue();
 
             if (!address2device.containsKey(address)) {
 
-                logger.info("Arrived: {} {} on {}",newDeviceMap.get(address).getName(),address, newPathMap.get(address));
+                logger.info("Arrived: {} {} on {}", device.getName(), address, newPathMap.get(address));
 
-                OneWireNetworkEvent e = new OwapiNetworkEvent(this, adapter, address, newPathMap.get(address));
+                var arrivalEvent = new OwapiNetworkEvent(this, adapter, address, newPathMap.get(address));
 
-                for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                        .copy(listenerSet).iterator(); li.hasNext(); ) {
+                for (var listener : (new CollectionSynchronizer<OneWireNetworkEventListener>()).copy(listenerSet)) {
 
                     try {
-                        li.next().networkArrival(e);
+                        listener.networkArrival(arrivalEvent);
                     } catch (Throwable t) {
                         logger.error("Unexpected exception", t);
                     }
@@ -411,7 +412,7 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     private void handleDepartures(final Map<String, OneWireContainer> newDeviceMap, final Map<String, OWPath> newPathMap) {
 
-        for (String address : address2device.keySet()) {
+        for (var address : address2device.keySet()) {
 
             OWPath oldPath = address2path.get(address);
             OWPath newPath = newPathMap.get(address);
@@ -430,13 +431,12 @@ public class OneWireNetworkMonitor extends ActiveService {
 
                 logger.warn("Departed: {} from {}", address, oldPath);
 
-                OneWireNetworkEvent e = new OwapiNetworkEvent(this, adapter, address, oldPath);
+                var departureEvent = new OwapiNetworkEvent(this, adapter, address, oldPath);
 
-                for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                        .copy(listenerSet).iterator(); li.hasNext(); ) {
+                for (var listener : (new CollectionSynchronizer<OneWireNetworkEventListener>()).copy(listenerSet)) {
 
                     try {
-                        li.next().networkDeparture(e);
+                        listener.networkDeparture(departureEvent);
                     } catch (Throwable t) {
                         logger.error("Unexpected exception", t);
                     }
@@ -453,25 +453,25 @@ public class OneWireNetworkMonitor extends ActiveService {
 
                 logger.info("Moved: {} from {} to {}", address, oldPath, newPath);
 
-                OneWireNetworkEvent e = new OwapiNetworkEvent(this, adapter, address, oldPath);
+                final var departureEvent = new OwapiNetworkEvent(this, adapter, address, oldPath);
 
-                for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                        .copy(listenerSet).iterator(); li.hasNext(); ) {
+                for (var listener : (new CollectionSynchronizer<OneWireNetworkEventListener>())
+                        .copy(listenerSet)) {
 
                     try {
-                        li.next().networkDeparture(e);
+                        listener.networkDeparture(departureEvent);
                     } catch (Throwable t) {
                         logger.error("Unexpected exception", t);
                     }
                 }
 
-                e = new OwapiNetworkEvent(this, adapter, address, newPath);
+                var arrivalEvent = new OwapiNetworkEvent(this, adapter, address, newPath);
 
-                for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                        .copy(listenerSet).iterator(); li.hasNext(); ) {
+                for (var listener : (new CollectionSynchronizer<OneWireNetworkEventListener>())
+                        .copy(listenerSet)) {
 
                     try {
-                        li.next().networkArrival(e);
+                        listener.networkArrival(arrivalEvent);
                     } catch (Throwable t) {
                         logger.error("Unexpected exception", t);
                     }
@@ -485,15 +485,14 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     private void handleShortCircuit() {
 
-        for (String address : address2device.keySet()) {
+        for (var address : address2device.keySet()) {
 
-            OneWireNetworkEvent e = new OwapiNetworkEvent(this, adapter, address, null);
+            var faultEvent = new OwapiNetworkEvent(this, adapter, address, null);
 
-            for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                    .copy(listenerSet).iterator(); li.hasNext(); ) {
+            for (var listener : (new CollectionSynchronizer<OneWireNetworkEventListener>()).copy(listenerSet)) {
 
                 try {
-                    li.next().networkFault(e, "1-Wire network short circuit");
+                    listener.networkFault(faultEvent, "1-Wire network short circuit");
                 } catch (Throwable t) {
                     logger.error("Unexpected exception", t);
                 }
@@ -509,7 +508,6 @@ public class OneWireNetworkMonitor extends ActiveService {
     public void addListener(OneWireNetworkEventListener listener) {
 
         synchronized (listenerSet) {
-
             listenerSet.add(listener);
         }
     }
@@ -522,19 +520,19 @@ public class OneWireNetworkMonitor extends ActiveService {
     public void removeListener(OneWireNetworkEventListener listener) {
 
         synchronized (listenerSet) {
-
             listenerSet.remove(listener);
         }
     }
 
     /**
-     * Close all open device paths. VT: FIXME: This is a shortcut using DS2409
-     * specific hardware commands to close all open paths. Must be modified if a
-     * different adapter is ever used.
+     * Close all open device paths.
      *
-     * @throws Throwable if anything goes wrong.
+     * This is a shortcut using DS2409 specific hardware commands to close all open paths.
+     * Must be modified if a different adapter is ever used.
+     *
+     * @throws OneWireException if anything goes wrong.
      */
-    private void closeAllPaths() throws Throwable {
+    private void closeAllPaths() throws OneWireException {
 
         // DS2409 specific - skip, all lines off
 
