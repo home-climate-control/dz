@@ -28,7 +28,6 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -57,14 +56,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * Adapter speed.
      *
      * This value is injected via constructor. If the value given is bad, it will be
-     * defaulted to {@link DSPortAdapter#SPEED_REGULAR}.
+     * defaulted to {@link DSPortAdapter.Speed#REGULAR}.
      */
-    private final int adapterSpeed;
+    private final DSPortAdapter.Speed adapterSpeed;
 
     /**
      * Mapping from the adapter speed value to speed name.
      */
-    private final Map<Integer, String> speedInt2speedName = new TreeMap<>();
+    private final Map<DSPortAdapter.Speed, String> speed2name = new TreeMap<>();
 
     /**
      * 1-Wire adapter.
@@ -116,27 +115,27 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             logger.info("Port:  {}", adapterPort);
 
-            var speedName2speedInt = new TreeMap<String, Integer>();
+            var name2speed = new TreeMap<String, DSPortAdapter.Speed>();
 
-            speedName2speedInt.put("overdrive", DSPortAdapter.SPEED_OVERDRIVE);
-            speedName2speedInt.put("hyperdrive", DSPortAdapter.SPEED_HYPERDRIVE);
-            speedName2speedInt.put("flex", DSPortAdapter.SPEED_FLEX);
-            speedName2speedInt.put("regular", DSPortAdapter.SPEED_REGULAR);
+            name2speed.put("overdrive", DSPortAdapter.Speed.OVERDRIVE);
+            name2speed.put("hyperdrive", DSPortAdapter.Speed.HYPERDRIVE);
+            name2speed.put("flex", DSPortAdapter.Speed.FLEX);
+            name2speed.put("regular", DSPortAdapter.Speed.REGULAR);
 
-            speedInt2speedName.put(DSPortAdapter.SPEED_OVERDRIVE, "overdrive");
-            speedInt2speedName.put(DSPortAdapter.SPEED_HYPERDRIVE, "hyperdrive");
-            speedInt2speedName.put(DSPortAdapter.SPEED_FLEX, "flex");
-            speedInt2speedName.put(DSPortAdapter.SPEED_REGULAR, "regular");
+            speed2name.put(DSPortAdapter.Speed.OVERDRIVE, "overdrive");
+            speed2name.put(DSPortAdapter.Speed.HYPERDRIVE, "hyperdrive");
+            speed2name.put(DSPortAdapter.Speed.FLEX, "flex");
+            speed2name.put(DSPortAdapter.Speed.REGULAR, "regular");
 
-            var speedValue = speedName2speedInt.get(speed);
+            var speedValue = name2speed.get(speed);
 
             if (speedValue == null) {
                 logger.warn("Unknown speed '{}', defaulted to regular", speed);
             }
 
-            adapterSpeed = speedValue == null ? DSPortAdapter.SPEED_REGULAR : speedValue;
+            adapterSpeed = speedValue == null ? DSPortAdapter.Speed.REGULAR : speedValue;
 
-            logger.info("Speed: {}", speedInt2speedName.get(adapterSpeed));
+            logger.info("Speed: {}", speed2name.get(adapterSpeed));
 
         } finally {
             ThreadContext.pop();
@@ -249,7 +248,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             try {
 
-                logger.info("Setting adapter speed to {}", speedInt2speedName.get(adapterSpeed));
+                logger.info("Setting adapter speed to {}", speed2name.get(adapterSpeed));
                 adapter.setSpeed(adapterSpeed);
 
             } catch (Throwable t) {
@@ -321,16 +320,12 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             var portsAvailable = new TreeSet<String>();
 
-            for (Enumeration<DSPortAdapter> adapters = OneWireAccessProvider
-                    .enumerateAllAdapters(); adapters.hasMoreElements();) {
-
-                DSPortAdapter a = adapters.nextElement();
+            for (DSPortAdapter a : OneWireAccessProvider
+                    .getAdapters()) {
 
                 logger.debug("Adapter found: {}", a.getAdapterName());
 
-                for (Enumeration<String> ports = a.getPortNames(); ports.hasMoreElements();) {
-
-                    String portName = ports.nextElement();
+                for (String portName : a.getPortNames()) {
 
                     logger.debug("Port found: {}", portName);
 
@@ -1187,7 +1182,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 "dz",
                 getClass().getSimpleName(),
                 adapterPort,
-                "1-Wire Device Factory at " + speedInt2speedName.get(adapterSpeed) + " speed on " + adapterPort);
+                "1-Wire Device Factory at " + speed2name.get(adapterSpeed) + " speed on " + adapterPort);
     }
 
     /**

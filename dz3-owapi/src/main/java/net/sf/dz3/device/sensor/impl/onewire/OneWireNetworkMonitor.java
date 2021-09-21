@@ -4,7 +4,6 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.utils.OWPath;
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import com.homeclimatecontrol.jukebox.sem.EventSemaphore;
 import com.homeclimatecontrol.jukebox.sem.SemaphoreTimeoutException;
@@ -13,11 +12,9 @@ import com.homeclimatecontrol.jukebox.util.CollectionSynchronizer;
 import net.sf.dz3.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
 
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -36,37 +33,37 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * Note that DS2409 devices cannot be used as payload switches with this code,
  * only as branch couplers.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2018
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireNetworkMonitor extends ActiveService {
 
     /**
      * Adapter to monitor.
      */
-    private DSPortAdapter adapter;
+    private final DSPortAdapter adapter;
 
     /**
      * Lock to use for mutual exclusive access to the adapter. I hope there'll
      * be a day when the adapter itself will provide this lock...
      */
-    private ReentrantReadWriteLock lock;
+    private final ReentrantReadWriteLock lock;
 
     /**
      * Device map. The key is the address as string, the value is the device
      * container for that address.
      */
-    private Map<String, OneWireContainer> address2device = new TreeMap<String, OneWireContainer>();
+    private Map<String, OneWireContainer> address2device = new TreeMap<>();
 
     /**
      * Path map. The key is the address as string, the value is the path to the
      * device with that address.
      */
-    private Map<String, OWPath> address2path = new TreeMap<String, OWPath>();
+    private Map<String, OWPath> address2path = new TreeMap<>();
 
     /**
      * Listener set.
      */
-    private Set<OneWireNetworkEventListener> listenerSet = new HashSet<OneWireNetworkEventListener>();
+    private final Set<OneWireNetworkEventListener> listenerSet = new HashSet<>();
 
     /**
      * "Force rescan" semaphore.
@@ -78,7 +75,7 @@ public class OneWireNetworkMonitor extends ActiveService {
      *
      * @see #rescanComplete
      */
-    private EventSemaphore rescanNow = new EventSemaphore();
+    private final EventSemaphore rescanNow = new EventSemaphore();
 
     /**
      * "Rescan complete" semaphore.
@@ -87,7 +84,7 @@ public class OneWireNetworkMonitor extends ActiveService {
      * {@link #rescan rescan()} returns this semaphore, for convenience of the
      * callers.
      */
-    private EventSemaphore rescanComplete = new EventSemaphore();
+    private final EventSemaphore rescanComplete = new EventSemaphore();
 
     /**
      * Rescan timeout. Default is 1 minute.
@@ -117,17 +114,11 @@ public class OneWireNetworkMonitor extends ActiveService {
         this.lock = lock;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void startup() throws Throwable {
 
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void execute() throws Throwable {
 
@@ -210,9 +201,6 @@ public class OneWireNetworkMonitor extends ActiveService {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     protected void shutdown() throws Throwable {
 
@@ -243,8 +231,8 @@ public class OneWireNetworkMonitor extends ActiveService {
             }
 
 
-            Map<String, OneWireContainer> address2deviceLocal = new TreeMap<String, OneWireContainer>();
-            Map<String, OWPath> address2pathLocal = new TreeMap<String, OWPath>();
+            var address2deviceLocal = new TreeMap<String, OneWireContainer>();
+            var address2pathLocal = new TreeMap<String, OWPath>();
 
             ThreadContext.push("browseProper");
             Marker m2 = new Marker("browseProper");
@@ -318,11 +306,10 @@ public class OneWireNetworkMonitor extends ActiveService {
 
         path.open();
 
-        List<OWPath> switchList = new LinkedList<OWPath>();
+        var switchList = new LinkedList<OWPath>();
 
-        for (Enumeration<OneWireContainer> e = adapter.getAllDeviceContainers(); e.hasMoreElements();) {
+        for (OneWireContainer owc : adapter.getAllDeviceContainers()) {
 
-            OneWireContainer owc = e.nextElement();
             String address = owc.getAddressAsString();
 
             // This device might have been discovered already
@@ -331,8 +318,7 @@ public class OneWireNetworkMonitor extends ActiveService {
 
                 continue;
             }
-
-            logger.debug("Found: " + owc.getName() + " " + address + " at " + path);
+            logger.debug("Found: {} {} at {}",owc.getName(), address, path);
 
             address2deviceLocal.put(address, owc);
             address2pathLocal.put(address, path);
@@ -353,10 +339,7 @@ public class OneWireNetworkMonitor extends ActiveService {
             }
         }
 
-        for (Iterator<OWPath> i = switchList.iterator(); i.hasNext();) {
-
-            OWPath branchPath = i.next();
-
+        for (OWPath branchPath : switchList) {
             browse(branchPath, address2deviceLocal, address2pathLocal);
         }
     }
@@ -396,19 +379,16 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     private void handleArrivals(final Map<String, OneWireContainer> newDeviceMap, final Map<String, OWPath> newPathMap) {
 
-        for (Iterator<String> i = newDeviceMap.keySet().iterator(); i.hasNext();) {
-
-            String address = i.next();
+        for (String address : newDeviceMap.keySet()) {
 
             if (!address2device.containsKey(address)) {
 
-                logger.info("Arrived: " + newDeviceMap.get(address).getName() + " " + address + " on "
-                        + newPathMap.get(address));
+                logger.info("Arrived: {} {} on {}",newDeviceMap.get(address).getName(),address, newPathMap.get(address));
 
                 OneWireNetworkEvent e = new OwapiNetworkEvent(this, adapter, address, newPathMap.get(address));
 
                 for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                        .copy(listenerSet).iterator(); li.hasNext();) {
+                        .copy(listenerSet).iterator(); li.hasNext(); ) {
 
                     try {
                         li.next().networkArrival(e);
@@ -431,9 +411,7 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     private void handleDepartures(final Map<String, OneWireContainer> newDeviceMap, final Map<String, OWPath> newPathMap) {
 
-        for (Iterator<String> i = address2device.keySet().iterator(); i.hasNext();) {
-
-            String address = i.next();
+        for (String address : address2device.keySet()) {
 
             OWPath oldPath = address2path.get(address);
             OWPath newPath = newPathMap.get(address);
@@ -450,12 +428,12 @@ public class OneWireNetworkMonitor extends ActiveService {
 
                 // The device has departed
 
-                logger.warn("Departed: " + address + " from " + oldPath);
+                logger.warn("Departed: {} from {}", address, oldPath);
 
                 OneWireNetworkEvent e = new OwapiNetworkEvent(this, adapter, address, oldPath);
 
                 for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                        .copy(listenerSet).iterator(); li.hasNext();) {
+                        .copy(listenerSet).iterator(); li.hasNext(); ) {
 
                     try {
                         li.next().networkDeparture(e);
@@ -473,12 +451,12 @@ public class OneWireNetworkMonitor extends ActiveService {
 
                 // The path has changed
 
-                logger.info("Moved: " + address + " from " + oldPath + " to " + newPath);
+                logger.info("Moved: {} from {} to {}", address, oldPath, newPath);
 
                 OneWireNetworkEvent e = new OwapiNetworkEvent(this, adapter, address, oldPath);
 
                 for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                        .copy(listenerSet).iterator(); li.hasNext();) {
+                        .copy(listenerSet).iterator(); li.hasNext(); ) {
 
                     try {
                         li.next().networkDeparture(e);
@@ -490,7 +468,7 @@ public class OneWireNetworkMonitor extends ActiveService {
                 e = new OwapiNetworkEvent(this, adapter, address, newPath);
 
                 for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                        .copy(listenerSet).iterator(); li.hasNext();) {
+                        .copy(listenerSet).iterator(); li.hasNext(); ) {
 
                     try {
                         li.next().networkArrival(e);
@@ -507,13 +485,12 @@ public class OneWireNetworkMonitor extends ActiveService {
      */
     private void handleShortCircuit() {
 
-        for (Iterator<String> i = address2device.keySet().iterator(); i.hasNext();) {
+        for (String address : address2device.keySet()) {
 
-            String address = i.next();
             OneWireNetworkEvent e = new OwapiNetworkEvent(this, adapter, address, null);
 
             for (Iterator<OneWireNetworkEventListener> li = (new CollectionSynchronizer<OneWireNetworkEventListener>())
-                    .copy(listenerSet).iterator(); li.hasNext();) {
+                    .copy(listenerSet).iterator(); li.hasNext(); ) {
 
                 try {
                     li.next().networkFault(e, "1-Wire network short circuit");
@@ -578,34 +555,5 @@ public class OneWireNetworkMonitor extends ActiveService {
                 getClass().getSimpleName(),
                 Integer.toHexString(hashCode()),
                 "1-Wire Network Monitor");
-    }
-
-    /**
-     * @deprecated This method is intended to help finding a memory leak and has no other reason to exist.
-     */
-    @JmxAttribute(description = "listenerSet size")
-    public int getListenerSetSize() {
-        return listenerSet.size();
-    }
-    /**
-     * Instrumentation method to track down a memory leak.
-     *
-     * @return Size of {@link #address2device} map.
-     * @deprecated This method is intended to help finding a memory leak and has no other reason to exist.
-     */
-    @JmxAttribute(description = "address2device size")
-    public synchronized int getAddress2deviceSize() {
-        return address2device.size();
-    }
-
-    /**
-     * Instrumentation method to track down a memory leak.
-     *
-     * @return Size of {@link #address2path} map.
-     * @deprecated This method is intended to help finding a memory leak and has no other reason to exist.
-     */
-    @JmxAttribute(description = "address2path size")
-    public synchronized int getAddress2pathSize() {
-        return address2path.size();
     }
 }
