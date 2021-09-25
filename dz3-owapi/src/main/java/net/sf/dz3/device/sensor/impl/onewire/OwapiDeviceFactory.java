@@ -4,6 +4,7 @@ import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
+import com.dalsemi.onewire.adapter.USerialAdapter;
 import com.dalsemi.onewire.container.HumidityContainer;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.SwitchContainer;
@@ -203,40 +204,41 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         try {
 
-            var portsAvailable = getPortsAvailable();
+            boolean ok;
+            try {
 
-            if (adapter == null) {
+                adapter = new USerialAdapter();
 
-                throw new IllegalArgumentException("Port '" + adapterPort + "' unavailable, valid values: "
-                        + portsAvailable + "\n"
-                        + "Things to check:\n"
-                        + "    http://stackoverflow.com/questions/9628988/ubuntu-rxtx-does-not-recognize-usb-serial-device yet?");
-            }
-
-            if (!adapter.selectPort(adapterPort)) {
-
-                // VT: NOTE: Having succeeded at selecting the port doesn't
-                // necessarily mean that we'll be fine. Serial based adapters
-                // don't seem to be accessed during selectPort(), and it's quite
-                // possible to successfully select a non-existing port.
+                // VT: NOTE: Having succeeded at selecting the port doesn't necessarily mean that we'll be fine.
+                // Serial based adapters don't seem to be accessed during selectPort(), and it's quite
+                // possible to successfully select a port that doesn't correspond to an existing adapter.
                 // Additional test is required to make sure we're OK.
 
-                throw new IllegalArgumentException("Unable to select port '" + adapterPort
-                        + "', make sure it's the right one (available: " + portsAvailable + ")");
+                ok = adapter.selectPort(adapterPort);
+
+            } catch (OneWireException ex) {
+                logger.error("Failed to open port '{}'", adapterPort, ex);
+                ok = false;
+            }
+
+            if (!ok) {
+
+                throw new IllegalArgumentException("Port '" + adapterPort + "' unavailable, valid values: "
+                        + DSPortAdapter.getPortNames() + "\n"
+                        + "Things to check:\n"
+                        + "    http://stackoverflow.com/questions/9628988/ubuntu-rxtx-does-not-recognize-usb-serial-device yet?");
             }
 
             try {
 
                 // Now, *this* should take care of it...
-
                 adapter.reset();
 
             } catch (OneWireIOException ex) {
 
                 if ("Error communicating with adapter".equals(ex.getMessage())) {
-
                     throw new IOException("Port '" + adapterPort
-                            + "' doesn't seem to have adapter connected, check others: " + portsAvailable, ex);
+                            + "' doesn't seem to have adapter connected, check others: " + DSPortAdapter.getPortNames(), ex);
                 }
             }
 
