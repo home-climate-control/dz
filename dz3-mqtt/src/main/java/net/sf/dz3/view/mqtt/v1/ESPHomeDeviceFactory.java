@@ -346,12 +346,16 @@ public class ESPHomeDeviceFactory implements DeviceFactory2020, AutoCloseable, J
 
                 ThreadContext.push("error");
 
-                logger.error("MQTT message caused an exception");
-                logger.error("topic: {}", topic);
-                logger.error("payload: {}", new String(message.getPayload()));
-                logger.error("trace", t);
+                try {
 
-                ThreadContext.pop();
+                    logger.error("MQTT message caused an exception");
+                    logger.error("topic: {}", topic);
+                    logger.error("payload: {}", new String(message.getPayload()));
+                    logger.error("trace", t);
+
+                } finally {
+                    ThreadContext.pop();
+                }
 
             } finally {
                 watchdog.release();
