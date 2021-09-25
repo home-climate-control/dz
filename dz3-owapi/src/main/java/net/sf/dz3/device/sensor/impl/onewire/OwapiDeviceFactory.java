@@ -1,6 +1,5 @@
 package net.sf.dz3.device.sensor.impl.onewire;
 
-import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
@@ -306,47 +305,6 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
         }
 
         return monitor;
-    }
-
-    /**
-     * Find all available ports and assign the adapter for the one we need,
-     * if possible.
-     *
-     * @return Set of available port names as strings.
-     */
-    private Set<String> getPortsAvailable() {
-
-        ThreadContext.push("getPortsAvailable");
-
-        try {
-
-            var portsAvailable = new TreeSet<String>();
-
-            for (DSPortAdapter a : OneWireAccessProvider
-                    .getAdapters()) {
-
-                logger.debug("Adapter found: {}", a.getAdapterName());
-
-                for (String portName : a.getPortNames()) {
-
-                    logger.debug("Port found: {}", portName);
-
-                    if (adapterPort.equals(portName)) {
-
-                        adapter = a;
-
-                        // Let's not break here, to collect all available port
-                        // names
-                    }
-
-                    portsAvailable.add(portName);
-                }
-            }
-
-            return portsAvailable;
-        } finally {
-            ThreadContext.pop();
-        }
     }
 
     @Override
