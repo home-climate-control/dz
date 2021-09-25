@@ -414,15 +414,13 @@ public class MqttConnector extends Connector<JsonRenderer> {
         public void connectionLost(Throwable cause) {
 
             // VT: FIXME: Currently, this code does NOT support reconnects.
-            logger.fatal(
-                    "connection to tcp://" + mqtt.host + ":" + mqtt.port +
-                    " lost, will not reconnect, MQTT interface is now dead");
+            logger.fatal("connection to tcp://{}:{} lost, will not reconnect, MQTT interface is now dead", mqtt.host, mqtt.port);
         }
 
         /**
          * Attempt to parse incoming messages as Home Assistant MQTT event stream.
          *
-         * @see https://www.home-assistant.io/components/mqtt_eventstream/
+         * @see <a href="https://www.home-assistant.io/components/mqtt_eventstream/">https://www.home-assistant.io/components/mqtt_eventstream/</a>
          */
         @Override
         public void messageArrived(String topic, MqttMessage message) throws Exception {
@@ -431,7 +429,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             try {
 
-                logger.debug(topic + " " + message);
+                logger.debug("{} {}", topic, message);
 
                 try (JsonReader reader = Json.createReader(new ByteArrayInputStream(message.getPayload()))) {
 
@@ -457,10 +455,8 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
                     default:
 
-                        logger.warn("don't know how to handle '" + eventType + "' event_type");
-                        logger.warn("event_data is:" + payload.getJsonObject(MqttContext.JsonTag.EVENT_DATA.name));
-
-                        return;
+                        logger.warn("don't know how to handle '{}' event_type", eventType);
+                        logger.warn("event_data is: {}", payload.getJsonObject(MqttContext.JsonTag.EVENT_DATA.name));
                     }
                 }
 
@@ -469,7 +465,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
                 // VT: NOTE: According to the docs, throwing an exception here will shut down the client - can't afford that,
                 // so we'll just complain loudly
 
-                logger.error("MQTT message caused an exception: " + message, t);
+                logger.error("MQTT message caused an exception: {}", message, t);
 
             } finally {
                 ThreadContext.pop();
@@ -487,7 +483,7 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
             try {
 
-                logger.info("data: " + eventData);
+                logger.info("data: {}", eventData);
 
                 // Since this is a control input, let's be paranoid and verify that it contains what we expect
 
@@ -696,7 +692,6 @@ public class MqttConnector extends Connector<JsonRenderer> {
 
         @Override
         public void deliveryComplete(IMqttDeliveryToken token) {
-
             // VT: NOTE: Nothing to do here
         }
     }
