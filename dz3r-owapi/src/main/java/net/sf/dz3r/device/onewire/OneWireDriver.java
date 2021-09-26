@@ -6,6 +6,7 @@ import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
 import java.time.Clock;
@@ -23,36 +24,28 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
     private final Logger logger = LogManager.getLogger();
     private final Clock clock = Clock.systemUTC();
 
-    /**
-     * VT: FIXME: No, this is not a string. Replace with the comm stream.
-     */
-    private final String adapterPort;
-
-    /**
-     * Adapter speed.
-     *
-     * This value is injected via constructor. If the value given is bad, it will be
-     * defaulted to {@link DSPortAdapter.Speed#REGULAR}.
-     */
-    private final DSPortAdapter.Speed adapterSpeed;
-
-    /**
-     * 1-Wire adapter.
-     */
-    private DSPortAdapter adapter = null;
+    private final OneWireEndpoint endpoint;
+    private OneWireNetworkMonitor monitor;
 
     private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
+
+    /**
+     * Create an instance working at default speed.
+     *
+     * @param adapterPort Port to use.
+     */
+    public OneWireDriver(String adapterPort) {
+        this(adapterPort, DSPortAdapter.Speed.REGULAR);
+    }
 
     /**
      * Create an instance.
      *
      * @param adapterPort Port to use.
-     * @param adapterSpeed Speed to use (choices are "regular", "flex", "overdrive", "hyperdrive".
+     * @param adapterSpeed Speed to use (choices are "regular", "flex", "overdrive", "hyperdrive").
      */
     public OneWireDriver(String adapterPort, DSPortAdapter.Speed adapterSpeed) {
-
-        this.adapterPort = adapterPort;
-        this.adapterSpeed = adapterSpeed;
+        this.endpoint = new OneWireEndpoint(adapterPort, adapterSpeed);
     }
 
     /**
@@ -118,8 +111,37 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
      * This flux will only emit an error in case of an unrecoverable problem with the hardware adapter.
      */
     private Flux<Signal<Double, String>> getSensorsFlux() {
+        logger.info("getSensorFlux()");
+        return getOneWireFlux()
+                .flatMap(this::getSensorSignal);
+    }
 
-        // VT: FIXME: Implement the whole thing
-        return Flux.<Signal<Double, String>>empty().publish().autoConnect();
+    private Mono<Signal<Double, String>> getSensorSignal(OneWireNetworkEvent<?> event) {
+        return Mono.empty();
+    }
+
+    private Flux<OneWireNetworkEvent<?>> getOneWireFlux() {
+        logger.info("getOneWireFlux()");
+        return Flux
+                .create(this::connect)
+                .doOnNext(e -> logger.info("1-Wire event: {}", e))
+                .publish()
+                .autoConnect();
+    }
+
+    private FluxSink<OneWireNetworkEvent<?>> sink;
+
+    private void connect(FluxSink<OneWireNetworkEvent<?>> sink) {
+
+        synchronized (this) {
+            if (this.sink != null) {
+                logger.warn("sink already connected");
+                return;
+            }
+
+            this.sink = sink;
+        }
+
+        this.monitor = new OneWireNetworkMonitor(endpoint, sink);
     }
 }
