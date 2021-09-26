@@ -1,8 +1,9 @@
-package net.sf.dz3r.device.onewire;
+package net.sf.dz3r.device.onewire.command;
 
 import com.dalsemi.onewire.adapter.DSPortAdapter;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import org.apache.logging.log4j.ThreadContext;
-import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 /**
  * Command to read the temperatures from all {@link com.dalsemi.onewire.container.TemperatureContainer}
@@ -11,12 +12,16 @@ import reactor.core.publisher.Flux;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireCommandReadTemperatureAll extends OneWireCommand {
+
+    public OneWireCommandReadTemperatureAll(FluxSink<OneWireCommand> commandSink) {
+        super(commandSink);
+    }
+
     @Override
-    public Flux<OneWireNetworkEvent<?>> execute(DSPortAdapter adapter, OneWireCommand command) {
+    protected void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) {
         ThreadContext.push("readTemperatureAll");
         try {
             logger.error("FIXME: readTemperatureAll()");
-            return Flux.empty();
         } finally {
             ThreadContext.pop();
         }

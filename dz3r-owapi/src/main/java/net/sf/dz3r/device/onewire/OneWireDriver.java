@@ -1,6 +1,9 @@
 package net.sf.dz3r.device.onewire;
 
 import com.dalsemi.onewire.adapter.DSPortAdapter;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
@@ -116,22 +119,46 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
                 .flatMap(this::getSensorSignal);
     }
 
-    private Mono<Signal<Double, String>> getSensorSignal(OneWireNetworkEvent<?> event) {
+    private Mono<Signal<Double, String>> getSensorSignal(OneWireNetworkEvent event) {
         return Mono.empty();
     }
 
-    private Flux<OneWireNetworkEvent<?>> getOneWireFlux() {
+    private Flux<OneWireNetworkEvent> getOneWireFlux() {
         logger.info("getOneWireFlux()");
         return Flux
                 .create(this::connect)
                 .doOnNext(e -> logger.info("1-Wire event: {}", e))
+                .doOnNext(this::handleArrival)
+                .doOnNext(this::handleDeparture)
                 .publish()
                 .autoConnect();
     }
 
-    private FluxSink<OneWireNetworkEvent<?>> sink;
+    private void handleArrival(OneWireNetworkEvent event) {
 
-    private void connect(FluxSink<OneWireNetworkEvent<?>> sink) {
+        // VT: FIXME: Reimplement this as a subscriber
+
+        if (!(event instanceof OneWireNetworkArrival)) {
+            return;
+        }
+
+        devicesPresent.add(((OneWireNetworkArrival) event).address);
+    }
+
+    private void handleDeparture(OneWireNetworkEvent event) {
+
+        // VT: FIXME: Reimplement this as a subscriber
+        if (!(event instanceof OneWireNetworkDeparture)) {
+            return;
+        }
+
+        devicesPresent.remove(((OneWireNetworkDeparture) event).address);
+        logger.error("Departure not handled completely: {}", ((OneWireNetworkDeparture) event).address );
+    }
+
+    private FluxSink<OneWireNetworkEvent> sink;
+
+    private void connect(FluxSink<OneWireNetworkEvent> sink) {
 
         synchronized (this) {
             if (this.sink != null) {

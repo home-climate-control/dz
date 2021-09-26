@@ -5,6 +5,12 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.adapter.USerialAdapter;
 import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3r.device.onewire.command.OneWireCommand;
+import net.sf.dz3r.device.onewire.command.OneWireCommandReadTemperatureAll;
+import net.sf.dz3r.device.onewire.command.OneWireCommandRescan;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -15,6 +21,9 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -25,11 +34,11 @@ public class OneWireNetworkMonitor {
 
     private final Logger logger = LogManager.getLogger();
 
-    private final Duration rescanInterval = Duration.ofMinutes(1);
-    private final Duration readTemperatureInterval = Duration.ofSeconds(10);
+    private final Duration rescanInterval = Duration.ofSeconds(30);
+    private final Duration readTemperatureInterval = Duration.ofSeconds(5);
 
     private final OneWireEndpoint endpoint;
-    private final FluxSink<OneWireNetworkEvent<?>> observer;
+    private final FluxSink<OneWireNetworkEvent> observer;
     private FluxSink<OneWireCommand> commandSink;
     private Disposable commandSubscription;
 
@@ -40,7 +49,9 @@ public class OneWireNetworkMonitor {
      */
     private DSPortAdapter adapter = null;
 
-    public OneWireNetworkMonitor(OneWireEndpoint endpoint, FluxSink<OneWireNetworkEvent<?>> observer) {
+    private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
+
+    public OneWireNetworkMonitor(OneWireEndpoint endpoint, FluxSink<OneWireNetworkEvent> observer) {
 
         if (!gate.compareAndSet(false, true)) {
             throw new IllegalStateException("Constructor called more than once, coding error, submit a report with this stack trace");
@@ -52,13 +63,13 @@ public class OneWireNetworkMonitor {
         // Start the rescan immediately
         var rescanFlux = Flux
                 .interval(Duration.ZERO, rescanInterval)
-                .map(l -> new OneWireCommandRescan());
+                .map(l -> new OneWireCommandRescan(commandSink, new TreeSet<>(devicesPresent)));
 
         // Let's read the temperature shortly after the rescan - it will be executed immediately anyway
         // because rescan is likely to take longer
         var readTemperatureFlux = Flux
                 .interval(Duration.ofMillis(100), readTemperatureInterval)
-                .map(l -> new OneWireCommandReadTemperatureAll());
+                .map(l -> new OneWireCommandReadTemperatureAll(commandSink));
 
         var externalCommandFlux = Flux.create(this::connect);
 
@@ -67,7 +78,8 @@ public class OneWireNetworkMonitor {
                 .publishOn(Schedulers.newSingle("1-Wire command"))
                 .doOnNext(c -> logger.info("command: {}", c))
                 .flatMap(this::execute)
-                .doOnNext(this::broadcast)
+                .doOnNext(this::handleOneWireEvent)
+                .doOnNext(this::broadcastOneWireEvent)
                 .subscribe();
     }
 
@@ -75,7 +87,7 @@ public class OneWireNetworkMonitor {
         this.commandSink = commandSink;
     }
 
-    private Flux<OneWireNetworkEvent<?>> execute(OneWireCommand command) {
+    private Flux<OneWireNetworkEvent> execute(OneWireCommand command) {
         ThreadContext.push("execute");
         try {
 
@@ -170,7 +182,23 @@ public class OneWireNetworkMonitor {
         }
     }
 
-    private void broadcast(OneWireNetworkEvent<?> event) {
+    private void handleOneWireEvent(OneWireNetworkEvent event) {
+
+        switch (event.getClass().getSimpleName()) {
+            case "OneWireNetworkArrival":
+                devicesPresent.add(((OneWireNetworkArrival) event).address);
+                logger.info("arrival: acknowledged {}", ((OneWireNetworkArrival) event).address);
+                break;
+            case "OneWireNetworkDeparture":
+                devicesPresent.remove(((OneWireNetworkDeparture) event).address);
+                logger.info("departure: acknowledged {}", ((OneWireNetworkDeparture) event).address);
+                break;
+            default:
+                logger.info("Not handling {} event yet", event);
+        }
+    }
+
+    private void broadcastOneWireEvent(OneWireNetworkEvent event) {
         observer.next(event);
     }
 }
