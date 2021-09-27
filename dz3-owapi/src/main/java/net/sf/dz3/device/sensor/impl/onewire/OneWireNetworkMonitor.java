@@ -4,6 +4,7 @@ import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
+import com.dalsemi.onewire.container.SwitchContainer;
 import com.dalsemi.onewire.utils.OWPath;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import com.homeclimatecontrol.jukebox.sem.EventSemaphore;
@@ -325,13 +326,13 @@ public class OneWireNetworkMonitor extends ActiveService {
 
                 OWPath channel1 = new OWPath(adapter, path);
 
-                channel1.add(owc, 0);
+                channel1.add((SwitchContainer) owc, 0);
 
                 switchList.add(channel1);
 
                 OWPath channel2 = new OWPath(adapter, path);
 
-                channel2.add(owc, 1);
+                channel2.add((SwitchContainer) owc, 1);
 
                 switchList.add(channel2);
             }
