@@ -69,7 +69,7 @@ public class OneWireNetworkMonitor {
         // because rescan is likely to take longer
         var readTemperatureFlux = Flux
                 .interval(Duration.ofMillis(100), readTemperatureInterval)
-                .map(l -> new OneWireCommandReadTemperatureAll(commandSink));
+                .map(l -> new OneWireCommandReadTemperatureAll(commandSink, new TreeSet<>(devicesPresent)));
 
         var externalCommandFlux = Flux.create(this::connect);
 
@@ -194,7 +194,7 @@ public class OneWireNetworkMonitor {
                 logger.info("departure: acknowledged {}", ((OneWireNetworkDeparture) event).address);
                 break;
             default:
-                logger.info("Not handling {} event yet", event);
+                logger.info("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
     }
 

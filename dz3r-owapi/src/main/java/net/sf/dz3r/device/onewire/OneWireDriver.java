@@ -4,6 +4,7 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
@@ -120,7 +121,14 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
     }
 
     private Mono<Signal<Double, String>> getSensorSignal(OneWireNetworkEvent event) {
-        return Mono.empty();
+
+        if (!(event instanceof OneWireNetworkTemperatureSample)) {
+            return Mono.empty();
+        }
+
+        var sample = (OneWireNetworkTemperatureSample) event;
+
+        return Mono.just(new Signal<>(event.timestamp, sample.sample, sample.address));
     }
 
     private Flux<OneWireNetworkEvent> getOneWireFlux() {

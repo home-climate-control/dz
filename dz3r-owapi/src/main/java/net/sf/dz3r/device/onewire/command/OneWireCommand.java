@@ -2,11 +2,14 @@ package net.sf.dz3r.device.onewire.command;
 
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkErrorEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+
+import java.time.Instant;
 
 /**
  * Base class for all 1-Wire commands.
@@ -27,12 +30,16 @@ public abstract class OneWireCommand {
 
     public final Flux<OneWireNetworkEvent> execute(DSPortAdapter adapter, OneWireCommand command) {
         return Flux.create(sink -> {
-            execute(adapter, command, sink);
+            try {
+                execute(adapter, command, sink);
+            } catch (OneWireException ex) {
+                sink.next(new OneWireNetworkErrorEvent<>(Instant.now(), null, null, ex));
+            }
             sink.complete();
         });
     }
 
-    protected abstract void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink);
+    protected abstract void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException;
 
     /**
      * Close all open device paths.

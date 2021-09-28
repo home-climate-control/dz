@@ -7,7 +7,6 @@ import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
-import net.sf.dz3r.device.onewire.event.OneWireNetworkErrorEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.FluxSink;
@@ -31,7 +30,7 @@ public class OneWireCommandRescan extends OneWireCommand {
     }
 
     @Override
-    protected void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) {
+    protected void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException {
         ThreadContext.push("rescan");
         var m = new Marker("rescan");
         try {
@@ -41,8 +40,6 @@ public class OneWireCommandRescan extends OneWireCommand {
 
             rescan(adapter, eventSink, new OWPath(adapter));
 
-        } catch (OneWireException ex) {
-            eventSink.next(new OneWireNetworkErrorEvent<>(Instant.now(), null, null, ex));
         } finally {
             m.close();
             ThreadContext.pop();
