@@ -75,9 +75,15 @@ public class OneWireNetworkMonitor {
 
         commandSubscription = Flux
                 .merge(rescanFlux, readTemperatureFlux, externalCommandFlux)
+
+                // Critical section - can't allow more than one thread to talk to the serial stream
                 .publishOn(Schedulers.newSingle("1-Wire command"))
-                .doOnNext(c -> logger.info("command: {}", c))
+                .doOnNext(c -> logger.debug("1-Wire command: {}", c))
                 .flatMap(this::execute)
+                .doOnNext(e -> logger.debug("1-Wire event: {}", e))
+
+                // Out of critical section - we're not touching hardware anymore
+                .publishOn(Schedulers.boundedElastic())
                 .doOnNext(this::handleOneWireEvent)
                 .doOnNext(this::broadcastOneWireEvent)
                 .subscribe();

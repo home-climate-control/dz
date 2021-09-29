@@ -135,7 +135,6 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
         logger.info("getOneWireFlux()");
         return Flux
                 .create(this::connect)
-                .doOnNext(e -> logger.info("1-Wire event: {}", e))
                 .doOnNext(this::handleArrival)
                 .doOnNext(this::handleDeparture)
                 .publish()
