@@ -12,6 +12,7 @@ import reactor.tools.agent.ReactorDebugAgent;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -37,7 +38,12 @@ class InfluxDbLoggerTest {
     private synchronized InfluxDbLogger getLogger() {
 
         if (dbLogger == null) {
-            dbLogger = new InfluxDbLogger("dz-test", "dz3.test.v3", "http://127.0.0.1:8086", null, null);
+            dbLogger = new InfluxDbLogger(
+                    "dz-test",
+                    "dz3.test.v3",
+                    "http://127.0.0.1:8086",
+                    null, null,
+                    Map.of());
         }
 
         return dbLogger;

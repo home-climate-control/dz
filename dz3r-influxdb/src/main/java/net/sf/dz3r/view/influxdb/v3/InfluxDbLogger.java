@@ -1,6 +1,7 @@
 package net.sf.dz3r.view.influxdb.v3;
 
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.MetricsCollector;
 import net.sf.dz3r.view.influxdb.common.Config;
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +15,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -29,23 +31,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
     private final Config config;
     private InfluxDB db;
 
-    /**
-     * Create an instance with a default {@code "dz"} database name.
-     *
-     * @param instance Unique identifier for an instance this logger represents. This value would usually correspond
-     * to a host a DZ instance runs on.
-     * @param dbURL InfluxDB URL to connect to.
-     * @param username InfluxDB username. Use {@code null} for unauthenticated access}.
-     * @param password InfluxDB password. Use {@code null} for unauthenticated access}.
-     */
-    public InfluxDbLogger(
-            String instance,
-            String dbURL,
-            String username,
-            String password) {
-
-        this("dz", instance, dbURL, username, password);
-    }
+    private final Map<Flux<Signal<Double, Void>>, String> sensorFeed2name;
 
     /**
      * Create an instance.
@@ -62,9 +48,12 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
             String instance,
             String dbURL,
             String username,
-            String password) {
+            String password,
+            Map<Flux<Signal<Double, Void>>, String> sensorFeed2name) {
 
         config = new Config(dbName, instance, dbURL, username, password);
+
+        this.sensorFeed2name = sensorFeed2name;
     }
 
     private synchronized void connect() {
@@ -123,6 +112,12 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
     @Override
     public void connect(UnitDirector.Feed feed) {
 
+        var sensorFeeds = Flux.merge(
+                Flux.fromIterable(sensorFeed2name.entrySet())
+                        .map(kv -> new SensorConverter(config.instance, kv.getValue()).compute(kv.getKey()))
+                        .collect(Collectors.toList())
+                        .block());
+
         var zoneSensorFeeds = Flux.merge(
                 Flux.fromIterable(feed.sensorFlux2zone.entrySet())
                 .map(kv -> new ZoneSensorConverter(config.instance, feed.unit, kv.getValue().getAddress()).compute(kv.getKey()))
@@ -135,6 +130,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
         var hvacDeficeFeed = new HvacDeviceMetricsConverter(config.instance, feed.unit).compute(feed.hvacDeviceFlux);
 
         var all = Flux.merge(
+                sensorFeeds,
                 zoneSensorFeeds,
                 zoneStatusFeed,
                 zoneControllerFeed,
