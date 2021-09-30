@@ -12,6 +12,7 @@ import reactor.core.publisher.FluxSink;
 
 import java.time.Instant;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Command to read the temperatures from all {@link com.dalsemi.onewire.container.TemperatureContainer}
@@ -50,9 +51,13 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
             // VT: FIXME: This can be improved by passing down device containers so it can be immediately determined
             //  which are the temperature containers
 
+            var successCount = new AtomicInteger();
+            var errorCount = new AtomicInteger();
             for (var address : knownDevices) {
-                readTemperature(adapter, address, eventSink);
+                readTemperature(adapter, address, eventSink, successCount, errorCount);
             }
+
+            logger.info("done, successCount={}, errorCount={}", successCount, errorCount);
 
         } finally {
             m.close();
@@ -60,7 +65,7 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
         }
     }
 
-    private void readTemperature(DSPortAdapter adapter, String address, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException {
+    private void readTemperature(DSPortAdapter adapter, String address, FluxSink<OneWireNetworkEvent> eventSink, AtomicInteger successCount, AtomicInteger errorCount) throws OneWireException {
 
         ThreadContext.push("readTemperature");
         try {
@@ -82,10 +87,12 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
                 logger.error("{}: 85°C, ignored", address);
 
                 // Got the reading, but it's bad, no event emitted
+                errorCount.incrementAndGet();
                 return;
             }
 
             eventSink.next(new OneWireNetworkTemperatureSample(Instant.now(), address, sample));
+            successCount.incrementAndGet();
 
         } finally {
             ThreadContext.pop();
