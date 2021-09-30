@@ -7,6 +7,7 @@ import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
+import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -14,6 +15,7 @@ import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
@@ -26,6 +28,11 @@ import java.util.TreeSet;
 public class OneWireDriver implements SignalSource<String, Double, String> {
 
     private final Logger logger = LogManager.getLogger();
+    /**
+     * How long to wait before reporting a timeout.
+     */
+    private Duration timeout = Duration.ofSeconds(30);
+
     private final Clock clock = Clock.systemUTC();
 
     private final OneWireEndpoint endpoint;
@@ -67,10 +74,11 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
     @Override
     public Flux<Signal<Double, String>> getFlux(String address) {
         logger.info("getFlux: {}", address);
-        return Flux.concat(
+        return new TimeoutGuard<Double, String>(timeout)
+                .compute(Flux.concat(
                 checkPresence(address),
                 getSensorsFlux()
-                        .filter(s -> address.equals(s.payload)));
+                        .filter(s -> address.equals(s.payload))));
     }
 
     /**
