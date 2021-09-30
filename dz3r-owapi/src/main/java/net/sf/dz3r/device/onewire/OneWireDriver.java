@@ -29,6 +29,9 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
     private final Clock clock = Clock.systemUTC();
 
     private final OneWireEndpoint endpoint;
+
+    private Flux<OneWireNetworkEvent> oneWireFlux;
+
     private OneWireNetworkMonitor monitor;
 
     private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
@@ -131,14 +134,21 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
         return Mono.just(new Signal<>(event.timestamp, sample.sample, sample.address));
     }
 
-    private Flux<OneWireNetworkEvent> getOneWireFlux() {
+    private synchronized Flux<OneWireNetworkEvent> getOneWireFlux() {
         logger.info("getOneWireFlux()");
-        return Flux
+
+        if (oneWireFlux != null) {
+            return oneWireFlux;
+        }
+
+        oneWireFlux = Flux
                 .create(this::connect)
                 .doOnNext(this::handleArrival)
                 .doOnNext(this::handleDeparture)
                 .publish()
                 .autoConnect();
+
+        return oneWireFlux;
     }
 
     private void handleArrival(OneWireNetworkEvent event) {
@@ -167,13 +177,8 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
 
     private void connect(FluxSink<OneWireNetworkEvent> sink) {
 
-        synchronized (this) {
-            if (this.sink != null) {
-                logger.warn("sink already connected");
-                return;
-            }
-
-            this.sink = sink;
+        if (this.sink != null) {
+            throw new IllegalStateException("Fatal programming error, can't connect() more than once");
         }
 
         this.monitor = new OneWireNetworkMonitor(endpoint, sink);
