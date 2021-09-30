@@ -60,21 +60,21 @@ public class OneWireNetworkMonitor {
         this.endpoint = endpoint;
         this.observer = observer;
 
+        // Connect the command flux first
+        var externalCommandFlux = Flux.create(this::connect);
+
         // Start the rescan immediately
         var rescanFlux = Flux
                 .interval(Duration.ZERO, rescanInterval)
                 .map(l -> new OneWireCommandRescan(commandSink, new TreeSet<>(devicesPresent)));
 
-        // Let's read the temperature shortly after the rescan - it will be executed immediately anyway
-        // because rescan is likely to take longer
+        // rescan will queue an extra read all command upon completion
         var readTemperatureFlux = Flux
-                .interval(Duration.ofMillis(100), readTemperatureInterval)
+                .interval(readTemperatureInterval)
                 .map(l -> new OneWireCommandReadTemperatureAll(commandSink, new TreeSet<>(devicesPresent)));
 
-        var externalCommandFlux = Flux.create(this::connect);
-
         commandSubscription = Flux
-                .merge(rescanFlux, readTemperatureFlux, externalCommandFlux)
+                .merge(externalCommandFlux, rescanFlux, readTemperatureFlux)
 
                 // Critical section - can't allow more than one thread to talk to the serial stream
                 .publishOn(Schedulers.newSingle("1-Wire command"))

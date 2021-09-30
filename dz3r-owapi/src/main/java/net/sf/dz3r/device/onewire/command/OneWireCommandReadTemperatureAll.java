@@ -34,6 +34,9 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
         var m = new Marker("readTemperatureAll");
         try {
 
+            logger.debug("known devices: {} items, addresses follow", knownDevices.size());
+            knownDevices.forEach(a -> logger.debug("address: {}", a));
+
             // Brutal 1-Wire network hack: select all devices at the same time, issue convert command,
             // then read them one by one.
 

@@ -48,6 +48,7 @@ public class OneWireCommandRescan extends OneWireCommand {
 
     private void rescan(DSPortAdapter adapter, FluxSink<OneWireNetworkEvent> eventSink, OWPath path) throws OneWireException {
         ThreadContext.push("rescan(" + path + ")");
+        var m = new Marker("rescan(" + path + ")");
         try {
 
             closeAllPaths(adapter);
@@ -80,7 +81,17 @@ public class OneWireCommandRescan extends OneWireCommand {
                 }
             }
 
+            // If new devices have arrived, it would be a good idea to poll them now
+
+            if (commandSink == null) {
+                logger.debug("commandSink is not connected yet");
+                return;
+            }
+
+            commandSink.next(new OneWireCommandReadTemperatureAll(commandSink, address2device.keySet()));
+
         } finally {
+            m.close();
             ThreadContext.pop();
         }
 
