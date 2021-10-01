@@ -6,14 +6,23 @@ pluginManagement {
     }
 }
 
+// Legacy dependencies - on the way out
+
 include 'jukebox:jukebox-common'
 include 'jukebox:jukebox-datastream'
-include 'jukebox:jukebox-jmx'
 include 'jukebox:jukebox-sem'
 include 'jukebox:jukebox-service'
+
+// External dependencies
+
+include 'automation-hat-driver'
+include 'jukebox:jukebox-jmx'
+include 'owapi-reborn'
 include 'servomaster:servomaster-common'
 include 'xbee-api'
-include 'owapi-reborn'
+
+// Imperative modules - on the way out
+
 include 'dz3-common'
 include 'dz3-model'
 include 'dz3-modelhome'
@@ -23,7 +32,6 @@ include 'dz3-sensors'
 include 'dz3-servomaster'
 include 'dz3-spring'
 include 'dz3-xbee'
-include 'automation-hat-driver'
 
 // Reactive only modules
 
