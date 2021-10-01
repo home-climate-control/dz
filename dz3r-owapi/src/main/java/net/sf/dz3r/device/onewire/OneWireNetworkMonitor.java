@@ -6,6 +6,7 @@ import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.adapter.USerialAdapter;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3r.device.onewire.command.OneWireCommand;
+import net.sf.dz3r.device.onewire.command.OneWireCommandBumpResolution;
 import net.sf.dz3r.device.onewire.command.OneWireCommandReadTemperatureAll;
 import net.sf.dz3r.device.onewire.command.OneWireCommandRescan;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
@@ -27,6 +28,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Watches over 1-Wire network, handles, events, executes commands.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -192,8 +194,10 @@ public class OneWireNetworkMonitor {
 
         switch (event.getClass().getSimpleName()) {
             case "OneWireNetworkArrival":
-                devicesPresent.add(((OneWireNetworkArrival) event).address);
-                logger.info("arrival: acknowledged {}", ((OneWireNetworkArrival) event).address);
+                var address = ((OneWireNetworkArrival) event).address;
+                devicesPresent.add(address);
+                logger.info("arrival: acknowledged {}", address);
+                commandSink.next(new OneWireCommandBumpResolution(commandSink, address));
                 break;
             case "OneWireNetworkDeparture":
                 devicesPresent.remove(((OneWireNetworkDeparture) event).address);
