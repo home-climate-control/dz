@@ -25,7 +25,6 @@ dependencies {
     runtimeOnly project(':dz3-xbee')
 
     // Enable MQTT
-    runtimeOnly project(':dz3-mqtt')
     runtimeOnly project(':dz3r-mqtt')
 
     // Enable remote control over HTTP
