@@ -21,7 +21,7 @@ public abstract class SwingSink<T, P> extends JPanel {
     public void consumeSignal(Signal<T,P> signal) {
 
         this.signal = signal;
-        logger.info("signal: {}", signal);
+        logger.debug("signal: {}", signal);
 
         consumeSignalValue(signal.getValue());
         update();

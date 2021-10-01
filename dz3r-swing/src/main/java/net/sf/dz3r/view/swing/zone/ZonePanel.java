@@ -491,7 +491,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private void consumeSensorSignal(Signal<Double, Void> sensorSignal) {
         this.sensorSignal = sensorSignal;
-        logger.info("sensorSignal: {}", sensorSignal);
+        logger.debug("sensorSignal: {}", sensorSignal);
         updateSensorSignal();
     }
 

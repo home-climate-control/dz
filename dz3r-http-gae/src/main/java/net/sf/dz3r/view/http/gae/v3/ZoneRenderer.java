@@ -97,7 +97,7 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
 
     private void consumeSensorSignal(Signal<Double, String> sensorSignal) {
         this.sensorSignal = sensorSignal;
-        logger.info("sensorSignal: {}", sensorSignal);
+        logger.debug("sensorSignal: {}", sensorSignal);
     }
 
     public void subscribeMode(Flux<Signal<HvacMode, Void>> in) {

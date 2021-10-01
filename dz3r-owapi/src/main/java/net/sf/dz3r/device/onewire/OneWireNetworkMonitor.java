@@ -204,7 +204,7 @@ public class OneWireNetworkMonitor {
                 logger.info("departure: acknowledged {}", ((OneWireNetworkDeparture) event).address);
                 break;
             default:
-                logger.info("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
+                logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
     }
 

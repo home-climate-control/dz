@@ -60,7 +60,7 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
                 readTemperature(adapter, address, eventSink, successCount, errorCount);
             }
 
-            logger.info("done, successCount={}, errorCount={}", successCount, errorCount);
+            logger.debug("done, successCount={}, errorCount={}", successCount, errorCount);
 
         } finally {
             m.close();
@@ -83,7 +83,7 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
             var tc = (TemperatureContainer) owc;
             var sample = tc.getTemperature(tc.readDevice());
 
-            logger.info("{}: {}°C", address, sample);
+            logger.debug("{}: {}°C", address, sample);
 
             if (Double.compare(sample, 85.0) == 0) {
                 // This is actually pretty serious, better pay attention
