@@ -26,7 +26,6 @@ include 'dz3-scheduler'
 include 'dz3-sensors'
 include 'dz3-servomaster'
 include 'dz3-spring'
-include 'dz3-swing'
 include 'dz3-xbee'
 include 'automation-hat-driver'
 
