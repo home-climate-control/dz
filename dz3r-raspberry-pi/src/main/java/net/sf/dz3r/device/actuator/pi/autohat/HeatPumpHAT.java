@@ -141,4 +141,23 @@ public class HeatPumpHAT extends HeatPump {
         PimoroniAutomationHAT.getInstance().status().power().write(state);
         logger.debug("fan={}", state);
     }
+
+    @Override
+    public void close() throws Exception {
+
+        super.close();
+
+        // Now, shut off the lights and don't spook the poor family
+        PimoroniAutomationHAT.getInstance().status().warn().write(false);
+        PimoroniAutomationHAT.getInstance().status().comms().write(false);
+        PimoroniAutomationHAT.getInstance().status().power().write(false);
+
+        for (var offset = 0; offset < 3; offset++) {
+            var r = PimoroniAutomationHAT.getInstance().relay().get(offset);
+            r.light().get(0).write(false);
+            r.light().get(1).write(false);
+        }
+
+        logger.info("HAT: shut off the lights.");
+    }
 }

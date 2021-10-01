@@ -79,4 +79,14 @@ public class SwitchableStackedHvacDevice extends AbstractHvacDevice {
                 getAddress(),
                 "Stack of switchable HVAC devices");
     }
+
+    @Override
+    public void close() throws Exception {
+        logger.warn("Shutting down");
+        for (var s : devices) {
+            logger.warn("close(): shutting down {} ", s);
+            s.close();
+        }
+        logger.info("Shut down.");
+    }
 }

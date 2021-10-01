@@ -16,7 +16,7 @@ import java.util.Set;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatus, Void>, Addressable<String>, JmxAware {
+public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatus, Void>, Addressable<String>, JmxAware, AutoCloseable {
 
     /**
      * Find out which modes this device supports.

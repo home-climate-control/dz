@@ -298,6 +298,17 @@ public class HeatPump extends AbstractHvacDevice {
                 "Controls single stage heat pump");
     }
 
+    @Override
+    public void close() throws Exception {
+
+        logger.warn("Shutting down");
+
+        switchRunning.setState(false);
+        switchFan.setState(false);
+        switchMode.setState(false);
+        logger.info("Shut down.");
+    }
+
     public static class HeatpumpStatus extends HvacDeviceStatus {
 
         public final HvacCommand actual;

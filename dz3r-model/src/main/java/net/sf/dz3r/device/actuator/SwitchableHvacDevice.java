@@ -177,6 +177,14 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                 "Turns on and off to provide " + mode.description.toLowerCase());
     }
 
+    @Override
+    public void close() throws Exception {
+        logger.warn("Shutting down");
+        logger.warn("close(): setting {} to off", theSwitch);
+        theSwitch.setState(false);
+        logger.info("Shut down.");
+    }
+
     public static class SwitchStatus extends HvacDeviceStatus {
 
         public final Boolean actual;
