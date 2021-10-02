@@ -77,7 +77,7 @@ public class WebUI {
 
             logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
 
-            disposableServer.onDispose().block();
+            disposableServer.onDispose().block(); // NOSONAR Acknowledged, ignored
 
             logger.info("done");
 

@@ -95,7 +95,7 @@ public class FallbackFilter<T, P> implements SignalProcessor<T, T, P> {
                 .collect(Collectors.toList())
                 .block();
 
-        if (errors.isEmpty()) {
+        if (errors.isEmpty()) { // NOSONAR false positive
             // We're golden
             return signal;
         }

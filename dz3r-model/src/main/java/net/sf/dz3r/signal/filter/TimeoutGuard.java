@@ -62,7 +62,7 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
                 .collectList()
                 .block();
 
-        if (window.isEmpty()) {
+        if (window.isEmpty()) { // NOSONAR false positive
 
             try {
 

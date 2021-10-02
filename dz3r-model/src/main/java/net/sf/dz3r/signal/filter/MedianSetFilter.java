@@ -53,7 +53,7 @@ public abstract class MedianSetFilter<T extends  Comparable<T>, P> extends Abstr
                 .collect(Collectors.toList())
                 .block();
 
-        if (buffer.size() < 2) {
+        if (buffer.size() < 2) { // NOSONAR false positive
             // Nothing to filter yet
             return signal;
         }

@@ -82,7 +82,7 @@ public abstract class AbstractMedianFilter<T extends  Comparable<T>, P> implemen
                     Signal.Status.FAILURE_TOTAL, errors.get(errors.size() - 1));
         }
 
-        if (values.isEmpty()) {
+        if (values.isEmpty()) { // NOSONAR false positive
             // Alas, not all are errors, but there are no usable values
             return new Signal<>(
                     timestamp,
@@ -116,8 +116,9 @@ public abstract class AbstractMedianFilter<T extends  Comparable<T>, P> implemen
         var sorted = Flux.fromIterable(source)
                 .map(Signal::getValue)
                 .sort()
-                .collect(Collectors.toList()).block();
+                .collect(Collectors.toList())
+                .block();
 
-        return sorted.get((source.size() - 1) / 2);
+        return sorted.get((source.size() - 1) / 2); // NOSONAR false positive
     }
 }
