@@ -18,7 +18,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -42,24 +41,9 @@ public class ReactiveConsole {
     private final Set<Object> initSet;
     private final TemperatureUnit defaultUnit;
 
-    /**
-     * Application main frame.
-     *
-     * Shown in {@link #start()}, destroyed again in {@link #stop()} in a way that allows it
-     * to be completely rebuilt from scratch again.
-     */
     private JFrame mainFrame;
 
     private EntitySelectorPanel entitySelectorPanel;
-
-    /**
-     * Default constructor.
-     *
-     * This one will produce an empty console panel.
-     */
-    public ReactiveConsole() {
-        this(new HashSet<>(), TemperatureUnit.C);
-    }
 
     /**
      * Create an instance and fill it up with objects to display, default temperature unit being Celsius.
@@ -103,10 +87,6 @@ public class ReactiveConsole {
         } finally {
             ThreadContext.pop();
         }
-    }
-
-    public void stop() {
-
     }
 
     /**
