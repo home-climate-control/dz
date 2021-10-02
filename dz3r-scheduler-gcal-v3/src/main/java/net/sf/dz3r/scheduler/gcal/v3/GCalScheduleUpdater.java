@@ -90,7 +90,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
 
         return Flux
                 .interval(Duration.ZERO, pollInterval)
-                .doOnNext(v -> logger.info("heartbeat: {}", v))
+                .doOnNext(v -> logger.debug("heartbeat: {}", v))
                 .map(this::getCalendars)
                 .flatMap(this::filterCalendars)
 
