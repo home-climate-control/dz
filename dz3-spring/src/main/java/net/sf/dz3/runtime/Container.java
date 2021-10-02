@@ -8,6 +8,7 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.FileSystemXmlApplicationContext;
+import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
 /**
@@ -48,6 +49,11 @@ public class Container {
 
         // WARN level so that it shows up in a shorter log and is faster to find on a slow box
         logger.warn("Starting up");
+
+        logger.debug("CPU count reported: {}", Runtime.getRuntime().availableProcessors());
+        logger.debug("reactor-core default pool size: {}", Schedulers.DEFAULT_POOL_SIZE);
+        logger.debug("reactor-core default bounded elastic size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_SIZE);
+        logger.debug("reactor-core default bounded elastic queue size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_QUEUESIZE);
 
         try {
             ReactorDebugAgent.init();
