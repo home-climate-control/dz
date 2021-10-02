@@ -5,6 +5,7 @@ import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.influxdb.dto.Point;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +33,7 @@ public class HvacDeviceMetricsConverter extends MetricsConverter<HvacDeviceStatu
             b.tag("kind", status.kind.toString());
             b.addField("demand", status.requested.demand);
             b.addField("fanSpeed", status.requested.fanSpeed);
+            b.addField("uptimeMillis", Optional.ofNullable(status.uptime).map(Duration::toMillis).orElse(0L));
             Optional.ofNullable(status.requested.mode).ifPresent(m -> b.tag("mode", m.toString()));
         }
 
