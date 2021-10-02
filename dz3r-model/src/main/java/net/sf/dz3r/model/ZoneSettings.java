@@ -86,7 +86,7 @@ public class ZoneSettings {
 
     @Override
     public boolean equals(Object o) {
-        return o != null
+        return o instanceof ZoneSettings
                 && enabled == ((ZoneSettings) o).enabled
                 && setpoint.equals(((ZoneSettings) o).setpoint)
                 && voting == ((ZoneSettings) o).voting
