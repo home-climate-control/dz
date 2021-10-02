@@ -3,10 +3,8 @@ package net.sf.dz3r.device.actuator.pi.autohat;
 import com.homeclimatecontrol.autohat.AutomationHAT;
 import com.homeclimatecontrol.autohat.Relay;
 import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import net.sf.dz3.device.sensor.Addressable;
-import net.sf.dz3.device.sensor.Switch;
+import net.sf.dz3r.device.actuator.AbstractSwitch;
+import net.sf.dz3r.device.actuator.Switch;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,63 +44,35 @@ public class AutomationHatWrapper {
      *
      * @return All the relays as a list.
      */
-    public List<Switch> relay() {
+    public List<Switch<String>> relay() {
         return List.of(
                 switchWrapper(hat.relay().get(0), "R0"),
                 switchWrapper(hat.relay().get(1), "R1"),
                 switchWrapper(hat.relay().get(2), "R2"));
     }
 
-    private Switch switchWrapper(Relay relay, String name) {
+    private Switch<String> switchWrapper(Relay relay, String name) {
         return new RelayWrapper(relay, name);
     }
 
-    private static class RelayWrapper implements Switch {
+    private static class RelayWrapper extends AbstractSwitch<String> {
 
         private final Relay target;
-        private final String name;
 
         public RelayWrapper(Relay target, String name) {
+            super(name);
             this.target = target;
-            this.name = name;
         }
 
         @Override
-        public String getAddress() {
-            return name;
-        }
-
-        @Override
-        public boolean getState() throws IOException {
-
-            // This value will be missing just on startup, unlikely to be a problem
-            return target.read().orElse(false);
-        }
-
-        @Override
-        public void setState(boolean state) throws IOException {
+        protected void setStateSync(boolean state) throws IOException {
             target.write(state);
         }
 
         @Override
-        public void addConsumer(DataSink<Boolean> consumer) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void removeConsumer(DataSink<Boolean> consumer) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JmxDescriptor getJmxDescriptor() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int compareTo(Addressable o) {
-            // Can't afford to collide with the wrapper
-            return (getClass().getName() + getAddress()).compareTo((o.getClass().getName() + o.getAddress()));
+        protected boolean getStateSync() throws IOException {
+            // This value will be missing just on startup, unlikely to be a problem
+            return target.read().orElse(false);
         }
     }
 }

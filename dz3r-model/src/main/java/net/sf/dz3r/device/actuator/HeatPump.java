@@ -1,7 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
@@ -31,9 +30,9 @@ public class HeatPump extends AbstractHvacDevice {
      */
     private static final Duration MODE_CHANGE_DELAY = Duration.ofSeconds(5);
 
-    private final Switch switchMode;
-    private final Switch switchRunning;
-    private final Switch switchFan;
+    private final Switch<?> switchMode;
+    private final Switch<?> switchRunning;
+    private final Switch<?> switchFan;
 
     private final boolean reverseMode;
     private final boolean reverseRunning;
@@ -59,7 +58,7 @@ public class HeatPump extends AbstractHvacDevice {
      * @param switchRunning Switch to pull to turn on the compressor.
      * @param switchFan Switch to pull to turn on the air handler.
      */
-    public HeatPump(String name, Switch switchMode, Switch switchRunning, Switch switchFan) {
+    public HeatPump(String name, Switch<?> switchMode, Switch<?> switchRunning, Switch<?> switchFan) {
         this(name, switchMode, false, switchRunning, false, switchFan, false);
     }
 
@@ -76,9 +75,9 @@ public class HeatPump extends AbstractHvacDevice {
      */
     protected HeatPump(
             String name,
-            Switch switchMode, boolean reverseMode,
-            Switch switchRunning, boolean reverseRunning,
-            Switch switchFan, boolean reverseFan) {
+            Switch<?> switchMode, boolean reverseMode,
+            Switch<?> switchRunning, boolean reverseRunning,
+            Switch<?> switchFan, boolean reverseFan) {
 
         super(name);
 
@@ -303,9 +302,9 @@ public class HeatPump extends AbstractHvacDevice {
 
         logger.warn("Shutting down");
 
-        switchRunning.setState(false);
-        switchFan.setState(false);
-        switchMode.setState(false);
+        switchRunning.setState(false).block();
+        switchFan.setState(false).block();
+        switchMode.setState(false).block();
         logger.info("Shut down.");
     }
 
@@ -325,14 +324,14 @@ public class HeatPump extends AbstractHvacDevice {
     }
 
     protected void setMode(boolean state) throws IOException {
-        switchMode.setState(state);
+        switchMode.setState(state).block();
     }
 
     protected void setRunning(boolean state) throws IOException {
-        switchRunning.setState(state);
+        switchRunning.setState(state).block();
     }
 
     protected void setFan(boolean state) throws IOException {
-        switchFan.setState(state);
+        switchFan.setState(state).block();
     }
 }

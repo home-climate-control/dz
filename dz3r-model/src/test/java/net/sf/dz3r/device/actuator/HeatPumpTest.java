@@ -1,6 +1,5 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3.device.sensor.impl.NullSwitch;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;

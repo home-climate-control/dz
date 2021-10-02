@@ -1,7 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
-import net.sf.dz3.device.sensor.Switch;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
@@ -27,7 +26,7 @@ import java.util.Set;
 public class SwitchableHvacDevice extends AbstractHvacDevice {
 
     private final HvacMode mode;
-    private final Switch theSwitch;
+    private final Switch<?> theSwitch;
 
     /**
      * Requested device state.
@@ -54,7 +53,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
      * @param name Device name.
      * @param mode Supported mode. There can be only one.
      */
-    public SwitchableHvacDevice(String name, HvacMode mode, Switch theSwitch) {
+    public SwitchableHvacDevice(String name, HvacMode mode, Switch<?> theSwitch) {
         super(name);
 
         this.mode = mode;
@@ -95,7 +94,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     // By this time, the command has been verified to be valid
                                     requested = command;
 
-                                    theSwitch.setState(state);
+                                    theSwitch.setState(state).block();
                                     actual = state;
                                     updateUptime(state);
 
@@ -181,7 +180,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
     public void close() throws Exception {
         logger.warn("Shutting down");
         logger.warn("close(): setting {} to off", theSwitch);
-        theSwitch.setState(false);
+        theSwitch.setState(false).block();
         logger.info("Shut down.");
     }
 

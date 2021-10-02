@@ -37,7 +37,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      * @param address Switch address.
      */
     protected AbstractSwitch(A address) {
-        this(address, Schedulers.newSingle("switch:" + address, true));
+        this(address, null);
     }
 
     /**
@@ -53,7 +53,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
         }
 
         this.address = address;
-        this.scheduler = scheduler;
+        this.scheduler = scheduler == null ? Schedulers.newSingle("switch:" + address, true) : scheduler;
     }
 
     @Override
@@ -140,6 +140,10 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
                     }
                 })
                 .subscribeOn(scheduler);
+    }
+
+    protected Scheduler getScheduler() {
+        return scheduler;
     }
 
     protected abstract void setStateSync(boolean state) throws IOException;

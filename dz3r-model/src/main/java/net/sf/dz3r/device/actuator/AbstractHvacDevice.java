@@ -1,6 +1,5 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3.device.sensor.Switch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +31,7 @@ public abstract class AbstractHvacDevice implements HvacDevice {
         return name;
     }
 
-    protected void check(Switch s, String purpose) {
+    protected void check(Switch<?> s, String purpose) {
 
         if (s == null) {
             throw new IllegalArgumentException("'" + purpose + "' switch can't be null");

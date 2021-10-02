@@ -10,6 +10,9 @@ application {
 dependencies {
 
     implementation 'org.springframework:spring-context:5.3.9'
+
+    implementation project(':dz3-sensors')
+
     implementation project(':dz3r-director')
 
     // Enable the Swing console
