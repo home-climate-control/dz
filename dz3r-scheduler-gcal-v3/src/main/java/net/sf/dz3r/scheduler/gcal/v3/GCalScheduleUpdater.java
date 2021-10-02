@@ -132,7 +132,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
                     .execute()
                     .getItems();
 
-            logger.info("Calendar list: {} items", list.size());
+            logger.debug("Calendar list: {} items", list.size());
             return new AbstractMap.SimpleEntry<>(calendarClient, list);
 
         } catch (Throwable t) {// NOSONAR Consequences have been considered
@@ -179,12 +179,12 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             return Flux.fromIterable(source.getValue())
                     .doOnNext(e -> logger.debug("Calendar found: {}", e.getSummary()))
                     .filter(e -> name2calendar.containsValue(e.getSummary()))
-                    .doOnNext(e -> logger.info("Zone schedule found: {}", e.getSummary()))
+                    .doOnNext(e -> logger.debug("Zone schedule found: {}", e.getSummary()))
                     .doOnNext(e -> zoneCount.incrementAndGet())
                     .map(e -> new AbstractMap.SimpleEntry<>(calendarClient, e));
 
         } finally {
-            logger.info("Zone schedule list: {} items", zoneCount.get());
+            logger.debug("Zone schedule list: {} items", zoneCount.get());
         }
     }
 
