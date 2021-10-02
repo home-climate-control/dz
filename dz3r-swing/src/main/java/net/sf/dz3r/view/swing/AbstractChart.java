@@ -186,7 +186,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
         paintValueGrid(g2d, boundary, insets, xScale, xOffset, yScale, yOffset);
         paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
-        logger.info("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
+        logger.debug("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
     }
 
     private void paintBackground(Graphics2D g2d, Dimension boundary, Insets insets) {
