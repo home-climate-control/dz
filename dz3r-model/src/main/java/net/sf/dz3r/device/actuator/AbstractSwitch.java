@@ -62,7 +62,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     }
 
     @Override
-    public synchronized Flux<Signal<State, String>> getFlux() {
+    public final synchronized Flux<Signal<State, String>> getFlux() {
 
         if (stateFlux != null) {
             return stateFlux;
@@ -84,7 +84,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     }
 
     @Override
-    public Mono<Boolean> setState(boolean state) {
+    public final Mono<Boolean> setState(boolean state) {
 
         return Mono.<Boolean>create(sink -> {
                     ThreadContext.push("setState");
@@ -121,7 +121,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     }
 
     @Override
-    public Mono<Boolean> getState() {
+    public final Mono<Boolean> getState() {
         return Mono.<Boolean>create(sink -> {
                     ThreadContext.push("getState");
                     try {
