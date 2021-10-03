@@ -94,9 +94,6 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     // By this time, the command has been verified to be valid
                                     requested = command;
 
-                                    logger.warn("theSwitch: {}", theSwitch);
-                                    logger.warn("state: {}", state);
-
                                     theSwitch.setState(state).block();
                                     actual = state;
                                     updateUptime(state);

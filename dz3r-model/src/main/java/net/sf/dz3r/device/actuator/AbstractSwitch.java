@@ -68,7 +68,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
             return stateFlux;
         }
 
-        logger.debug("Creating state flux for {}", address);
+        logger.debug("Creating stateFlux:{}", address);
 
         stateFlux = Flux
                 .create(this::connect)
