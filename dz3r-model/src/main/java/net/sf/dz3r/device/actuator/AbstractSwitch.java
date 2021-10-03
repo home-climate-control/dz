@@ -41,10 +41,10 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     }
 
     /**
-     * Create an instance with a default scheduler.
+     * Create an instance with a given scheduler.
      *
      * @param address Switch address.
-     * @param scheduler Scheduler to use.
+     * @param scheduler Scheduler to use. {@code null} means using {@link Schedulers#newSingle(String, boolean)}.
      */
     protected AbstractSwitch(A address, Scheduler scheduler) {
 

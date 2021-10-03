@@ -89,10 +89,15 @@ public class NullSwitch extends AbstractSwitch<String> {
 
         if (delayMillis > 0) {
             try {
-                Mono.delay(Duration.ofMillis(delayMillis)).subscribeOn(getScheduler()).block();
+                // This cannot be happening on the main scheduler - it may get blocked under some circumstances.
+                // The point of using a single scheduler by default is to have the *action* single threaded,
+                // and this is a delay, not action, so using a different scheduler is fine
+                Mono.delay(Duration.ofMillis(delayMillis)).subscribeOn(Schedulers.boundedElastic()).block();
             } catch (IllegalStateException ex) {
                 if (ex.getMessage().contains("block()/blockFirst()/blockLast() are blocking, which is not supported in thread")) {
-                    logger.warn("delay() on non-blocking thread, using Thread.sleep() workaround");
+                    logger.warn("delay() on non-blocking thread (name={}, group={}), using Thread.sleep() workaround",
+                            Thread.currentThread().getName(),
+                            Thread.currentThread().getThreadGroup().getName());
                     try {
                         Thread.sleep(delayMillis);
                     } catch (InterruptedException ex2) {

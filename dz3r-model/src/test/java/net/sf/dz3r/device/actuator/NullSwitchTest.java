@@ -6,12 +6,15 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
@@ -91,5 +94,25 @@ class NullSwitchTest {
 
         assertThat(s3.getValue().requested).isFalse();
         assertThat(s3.getValue().actual).isFalse();
+    }
+
+    @Test
+    void passSetStateWithBlockDelaySingleScheduler() {
+
+        assertThatCode(() -> {
+            delay(null);
+        }).doesNotThrowAnyException();
+    }
+
+    @Test
+    void passSetStateWithBlockDelayElasticScheduler() {
+
+        assertThatCode(() -> {
+            delay(Schedulers.newBoundedElastic(1, 10, "e-single"));
+        }).doesNotThrowAnyException();
+    }
+
+    private void delay(Scheduler scheduler) {
+        assertThat(new NullSwitch("D", 10, 50, scheduler).setState(true).block()).isTrue();
     }
 }
