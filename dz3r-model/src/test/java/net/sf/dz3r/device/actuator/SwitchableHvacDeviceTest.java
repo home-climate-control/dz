@@ -4,7 +4,6 @@ import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -129,10 +128,10 @@ class SwitchableHvacDeviceTest {
     }
 
     @Test
-    @Disabled("Temporarily disabled to avoid breaking the build, https://github.com/home-climate-control/dz/issues/209")
     void allowFansForCooling() {
 
-        var d = new SwitchableHvacDevice("d", HvacMode.COOLING, mock(Switch.class));
+        var s = new NullSwitch("a");
+        var d = new SwitchableHvacDevice("d", HvacMode.COOLING, s);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.8, 1.0))
         );
@@ -174,13 +173,11 @@ class SwitchableHvacDeviceTest {
      * Make sure that interleaved cool-fan-cool-fan-etc. command sequence is properly supported.
      */
     @Test
-    @Disabled("Temporarily disabled to avoid breaking the build, https://github.com/home-climate-control/dz/issues/209")
     void interleave() {
 
         var now = Instant.now();
-        var minDelayMillis = 50;
-        var maxDelayMillis = 200;
-        var d = new SwitchableHvacDevice("d", HvacMode.COOLING, mock(Switch.class));
+        var s = new NullSwitch("a");
+        var d = new SwitchableHvacDevice("d", HvacMode.COOLING, s);
 
         var sequence = Flux.just(
                 // First, request cooling
