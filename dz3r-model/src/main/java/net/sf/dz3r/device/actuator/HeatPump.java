@@ -26,9 +26,9 @@ import java.util.Set;
 public class HeatPump extends AbstractHvacDevice {
 
     /**
-     * Delay for mode change (likely needs to be increased)
+     * Default mode change delay.
      */
-    private static final Duration MODE_CHANGE_DELAY = Duration.ofSeconds(5);
+    private static final Duration DEFAULT_MODE_CHANGE_DELAY = Duration.ofSeconds(10);
 
     private final Switch<?> switchMode;
     private final Switch<?> switchRunning;
@@ -37,6 +37,8 @@ public class HeatPump extends AbstractHvacDevice {
     private final boolean reverseMode;
     private final boolean reverseRunning;
     private final boolean reverseFan;
+
+    private final Duration modeChangeDelay;
 
     /**
      * Requested device state.
@@ -78,6 +80,30 @@ public class HeatPump extends AbstractHvacDevice {
             Switch<?> switchMode, boolean reverseMode,
             Switch<?> switchRunning, boolean reverseRunning,
             Switch<?> switchFan, boolean reverseFan) {
+        this(name,
+                switchMode, reverseMode,
+                switchRunning, reverseRunning,
+                switchFan, reverseFan,
+                DEFAULT_MODE_CHANGE_DELAY);
+    }
+
+    /**
+     * Create an instance with some switches possibly reverse, and a given change mode delay.
+     *
+     * @param name JMX name.
+     * @param switchMode Switch to pull to change the operating mode.
+     * @param reverseMode {@code true} if the "off" mode position corresponds to logical one.
+     * @param switchRunning Switch to pull to turn on the compressor.
+     * @param reverseRunning {@code true} if the "off" running position corresponds to logical one.
+     * @param switchFan Switch to pull to turn on the air handler.
+     * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
+     */
+    protected HeatPump(
+            String name,
+            Switch<?> switchMode, boolean reverseMode,
+            Switch<?> switchRunning, boolean reverseRunning,
+            Switch<?> switchFan, boolean reverseFan,
+            Duration changeModeDelay) {
 
         super(name);
 
@@ -92,6 +118,8 @@ public class HeatPump extends AbstractHvacDevice {
         this.reverseMode = reverseMode;
         this.reverseRunning = reverseRunning;
         this.reverseFan = reverseFan;
+
+        this.modeChangeDelay = changeModeDelay;
     }
 
     @Override
@@ -192,8 +220,8 @@ public class HeatPump extends AbstractHvacDevice {
                                     requestedDemand,
                                     actual,
                                     uptime())));
-            logger.info("Letting the hardware settle for {}", MODE_CHANGE_DELAY);
-            Mono.delay(MODE_CHANGE_DELAY).block();
+            logger.warn("Letting the hardware settle for modeChangeDelay={}", modeChangeDelay);
+            Mono.delay(modeChangeDelay).block();
 
         } else {
             logger.debug("Condenser is not running, skipping the pause");

@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 import reactor.tools.agent.ReactorDebugAgent;
 
+import java.time.Duration;
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -134,7 +135,11 @@ class HeatPumpTest {
         var switchRunning = new NullSwitch("running");
         var switchFan = new NullSwitch("fan");
 
-        var d = new HeatPump("hp", switchMode, switchRunning, switchFan);
+        var d = new HeatPump("hp",
+                switchMode, false,
+                switchRunning, false,
+                switchFan, false,
+                Duration.ofMillis(5));
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null)),
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.COOLING, 0.7, null))
