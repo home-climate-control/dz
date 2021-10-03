@@ -1,6 +1,5 @@
 package net.sf.dz3r.view.swing;
 
-import com.homeclimatecontrol.jukebox.util.Interval;
 import net.sf.dz3r.view.swing.zone.AbstractZoneChart;
 
 import java.awt.BasicStroke;
@@ -365,7 +364,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
         if ((minmaxTime != null) && (timestamp - minmaxTime > chartLengthMillis * MINMAX_OVERHEAD)) {
 
-            logger.info("minmax too old ({}), recalculating", () -> Interval.toTimeInterval(timestamp - minmaxTime));
+            logger.info("minmax too old ({}), recalculating", () -> Duration.ofMillis(timestamp - minmaxTime));
 
             // Total recalculation is required
             var limits = recalculateVerticalLimits();

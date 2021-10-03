@@ -1,6 +1,5 @@
 package net.sf.dz3r.view.swing.zone;
 
-import com.homeclimatecontrol.jukebox.util.Interval;
 import net.sf.dz3.controller.DataSet;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.swing.AbstractChart;
@@ -11,6 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.time.Clock;
+import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -193,7 +193,7 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
         var result = new Limits(min, max, minmaxTime);
 
         logger.info("Recalculated in {}ms", (clock.instant().toEpochMilli() - startTime));
-        logger.info("New minmaxTime set to + {}", () -> Interval.toTimeInterval(clock.instant().toEpochMilli() - result.minmaxTime));
+        logger.info("New minmaxTime set to + {}", () -> Duration.ofMillis(clock.instant().toEpochMilli() - result.minmaxTime));
 
         return result;
     }
@@ -251,7 +251,7 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
                 return null;
             }
 
-            logger.debug("RingBuffer: flushing at {}", () -> Interval.toTimeInterval(age));
+            logger.debug("RingBuffer: flushing at {}", () -> Duration.ofMillis((age)));
 
             var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 
