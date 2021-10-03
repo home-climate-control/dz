@@ -96,6 +96,7 @@ public class NullSwitch extends AbstractSwitch<String> {
                     try {
                         Thread.sleep(delayMillis);
                     } catch (InterruptedException ex2) {
+                        Thread.currentThread().interrupt();
                         logger.warn("Interrupted, ignored", ex2);
                     }
                 }
