@@ -2,7 +2,7 @@ package net.sf.dz3r.view.http.gae.v3;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3r.instrumentation.Marker;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;

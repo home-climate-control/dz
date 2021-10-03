@@ -16,7 +16,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.scheduler.SchedulePeriodFactory;

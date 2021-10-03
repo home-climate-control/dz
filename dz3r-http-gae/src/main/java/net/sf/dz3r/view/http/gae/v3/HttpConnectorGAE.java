@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.http.gae.v3;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
