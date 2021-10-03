@@ -40,8 +40,8 @@ class NullSwitchTest {
 
     @Test
     void passSetStateWithBlock() {
-        assertThat(new NullSwitch("true").setState(true).block()).isTrue();
-        assertThat(new NullSwitch("false").setState(false).block()).isFalse();
+        assertThat(new NullSwitch("T").setState(true).block()).isTrue();
+        assertThat(new NullSwitch("F").setState(false).block()).isFalse();
     }
 
     @Test

@@ -72,6 +72,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
 
         stateFlux = Flux
                 .create(this::connect)
+                .doOnSubscribe(s -> logger.debug("stateFlux:{} subscribed", address))
                 .publishOn(Schedulers.boundedElastic())
                 .publish()
                 .autoConnect();
@@ -112,7 +113,10 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     private void reportState(Signal<State, String> signal) {
 
         if (stateSink == null) {
-            logger.warn("stateSink is still null, skipping: {}", signal);
+
+            // Unless something subscribes, this will be flooding the log - enable for troubleshooting
+            // logger.warn("stateSink:{} is still null, skipping: {}", address, signal); // NOSONAR
+
             getFlux();
             return;
         }
