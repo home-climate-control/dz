@@ -4,6 +4,7 @@ import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.Command;
 import com.dalsemi.onewire.container.TemperatureContainer;
+import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
 import net.sf.dz3r.instrumentation.Marker;
@@ -11,7 +12,9 @@ import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.FluxSink;
 
 import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,10 +25,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class OneWireCommandReadTemperatureAll extends OneWireCommand {
     public final Set<String> knownDevices;
+    public final Map<String, OWPath> address2path;
 
-    public OneWireCommandReadTemperatureAll(FluxSink<OneWireCommand> commandSink, Set<String> knownDevices) {
+    public OneWireCommandReadTemperatureAll(FluxSink<OneWireCommand> commandSink, Set<String> knownDevices, Map<String, OWPath> address2path) {
         super(commandSink);
         this.knownDevices = knownDevices;
+        this.address2path = address2path;
     }
 
     @Override
@@ -34,13 +39,41 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
         var m = new Marker("readTemperatureAll");
         try {
 
-            logger.debug("known devices: {} items, addresses follow", knownDevices.size());
-            knownDevices.forEach(a -> logger.debug("address: {}", a));
+            logger.debug("known devices: {}", knownDevices.size());
+            knownDevices.forEach(a -> logger.debug("  {}", a));
+
+            var paths = new TreeSet<>(address2path.values());
+            logger.debug("known paths: {}", paths.size());
+            paths.forEach(p -> logger.debug("  {}", p));
+
+            var successCount = new AtomicInteger();
+            var errorCount = new AtomicInteger();
+
+            for (var path : paths) {
+                execute(adapter, path, successCount, errorCount, eventSink);
+            }
+
+            logger.debug("done, successCount={}, errorCount={}", successCount, errorCount);
+
+        } finally {
+            m.close();
+            ThreadContext.pop();
+        }
+    }
+
+    private void execute(DSPortAdapter adapter, OWPath path, AtomicInteger successCount, AtomicInteger errorCount, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException {
+        ThreadContext.push("readTemperatureAll(" + path + ")");
+        var m = new Marker("readTemperatureAll(" + path + ")");
+        try {
 
             // Brutal 1-Wire network hack: select all devices at the same time, issue convert command,
             // then read them one by one.
 
             adapter.reset();
+
+            closeAllPaths(adapter);
+            path.open();
+
             adapter.putByte(Command.SELECT_ALL.code);
             adapter.putByte(Command.CONVERT_TEMPERATURE.code);
 
@@ -54,14 +87,11 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
             // VT: FIXME: This can be improved by passing down device containers so it can be immediately determined
             //  which are the temperature containers
 
-            var successCount = new AtomicInteger();
-            var errorCount = new AtomicInteger();
             for (var address : knownDevices) {
-                readTemperature(adapter, address, eventSink, successCount, errorCount);
+                if (address2path.get(address).equals(path)) {
+                    readTemperature(adapter, address, eventSink, successCount, errorCount);
+                }
             }
-
-            logger.debug("done, successCount={}, errorCount={}", successCount, errorCount);
-
         } finally {
             m.close();
             ThreadContext.pop();

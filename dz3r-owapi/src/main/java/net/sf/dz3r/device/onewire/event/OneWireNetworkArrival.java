@@ -1,5 +1,7 @@
 package net.sf.dz3r.device.onewire.event;
 
+import com.dalsemi.onewire.utils.OWPath;
+
 import java.time.Instant;
 
 /**
@@ -9,13 +11,17 @@ import java.time.Instant;
  */
 public class OneWireNetworkArrival extends OneWireNetworkTopologyEvent {
 
-    public OneWireNetworkArrival(Instant timestamp, String address) {
+    public final OWPath path;
+
+    public OneWireNetworkArrival(Instant timestamp, String address, OWPath path) {
         super(timestamp, address);
+        this.path = path;
     }
 
     @Override
     public String toString() {
         return "{1-Wire network arrival timestamp=" + timestamp
-                + ", address=" + address + "}";
+                + ", address=" + address
+                + ", path=" + path + "}";
     }
 }

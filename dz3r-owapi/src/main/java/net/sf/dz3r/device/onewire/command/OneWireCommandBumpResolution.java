@@ -3,6 +3,7 @@ package net.sf.dz3r.device.onewire.command;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.TemperatureContainer;
+import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
@@ -11,10 +12,12 @@ import reactor.core.publisher.FluxSink;
 public class OneWireCommandBumpResolution extends OneWireCommand {
 
     public final String address;
+    public final OWPath path;
 
-    public OneWireCommandBumpResolution(FluxSink<OneWireCommand> commandSink, String address) {
+    public OneWireCommandBumpResolution(FluxSink<OneWireCommand> commandSink, String address, OWPath path) {
         super(commandSink);
         this.address = address;
+        this.path = path;
     }
 
     @Override
@@ -24,6 +27,8 @@ public class OneWireCommandBumpResolution extends OneWireCommand {
         try {
 
             var device = adapter.getDeviceContainer(address);
+            closeAllPaths(adapter);
+            path.open();
 
             if (!(device instanceof TemperatureContainer)) {
                 logger.debug("{} ({}): not a temperature container", address, device.getName());

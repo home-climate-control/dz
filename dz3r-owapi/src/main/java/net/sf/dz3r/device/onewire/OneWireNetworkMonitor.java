@@ -4,6 +4,7 @@ import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.adapter.USerialAdapter;
+import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.device.onewire.command.OneWireCommand;
 import net.sf.dz3r.device.onewire.command.OneWireCommandBumpResolution;
 import net.sf.dz3r.device.onewire.command.OneWireCommandReadTemperatureAll;
@@ -24,7 +25,9 @@ import reactor.core.scheduler.Schedulers;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -53,6 +56,7 @@ public class OneWireNetworkMonitor {
     private DSPortAdapter adapter = null;
 
     private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
+    private Map<String, OWPath> address2path = Collections.synchronizedMap(new TreeMap<>());
 
     public OneWireNetworkMonitor(OneWireEndpoint endpoint, FluxSink<OneWireNetworkEvent> observer) {
 
@@ -74,7 +78,7 @@ public class OneWireNetworkMonitor {
         // rescan will queue an extra read all command upon completion
         var readTemperatureFlux = Flux
                 .interval(readTemperatureInterval)
-                .map(l -> new OneWireCommandReadTemperatureAll(commandSink, new TreeSet<>(devicesPresent)));
+                .map(l -> new OneWireCommandReadTemperatureAll(commandSink, new TreeSet<>(devicesPresent), new TreeMap<>(address2path)));
 
         commandSubscription = Flux
                 .merge(externalCommandFlux, rescanFlux, readTemperatureFlux)
@@ -195,26 +199,35 @@ public class OneWireNetworkMonitor {
 
         switch (event.getClass().getSimpleName()) {
             case "OneWireNetworkArrival":
-                var address = ((OneWireNetworkArrival) event).address;
-                devicesPresent.add(address);
-                logger.info("arrival: acknowledged {}", address);
-                commandSink.next(new OneWireCommandBumpResolution(commandSink, address));
+                handleArrival((OneWireNetworkArrival) event);
                 break;
             case "OneWireNetworkDeparture":
-                devicesPresent.remove(((OneWireNetworkDeparture) event).address);
-                logger.info("departure: acknowledged {}", ((OneWireNetworkDeparture) event).address);
+                handleDeparture((OneWireNetworkDeparture) event);
                 break;
             case "OneWireNetworkErrorEvent":
-                handleError(event);
+                handleError((OneWireNetworkErrorEvent<?>) event);
                 break;
             default:
                 logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
     }
 
-    private void handleError(OneWireNetworkEvent event) {
-        OneWireNetworkErrorEvent<?> errorEvent = (OneWireNetworkErrorEvent<?>) event;
-        logger.error("{}", errorEvent, errorEvent.error);
+    private void handleDeparture(OneWireNetworkDeparture event) {
+        devicesPresent.remove(event.address);
+        address2path.remove(event.address);
+        logger.info("departure: acknowledged {}", event.address);
+    }
+
+    private void handleArrival(OneWireNetworkArrival event) {
+        var address = event.address;
+        devicesPresent.add(address);
+        address2path.put(address, event.path);
+        logger.info("arrival: acknowledged {} at {}", address, event.path);
+        commandSink.next(new OneWireCommandBumpResolution(commandSink, address, event.path));
+    }
+
+    private void handleError(OneWireNetworkErrorEvent<?> event) {
+        logger.error("{}", event, event.error);
         logger.warn("Initiating 1-Wire network rescan");
 
         // It would be a good idea to rescan the bus to see what happened - but with a delay to prevent flooding
