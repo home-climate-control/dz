@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.swing.zone;
 
-import net.sf.dz3.controller.DataSet;
+import net.sf.dz3r.common.DataSet;
 import net.sf.dz3r.signal.Signal;
 
 import java.awt.Color;
