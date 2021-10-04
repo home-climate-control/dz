@@ -215,7 +215,7 @@ public class OneWireNetworkMonitor {
     private void handleError(OneWireNetworkEvent event) {
         OneWireNetworkErrorEvent<?> errorEvent = (OneWireNetworkErrorEvent<?>) event;
         logger.error("{}", errorEvent, errorEvent.error);
-        logger.warn("Initiating network rescan");
+        logger.warn("Initiating 1-Wire network rescan");
 
         // It would be a good idea to rescan the bus to see what happened - but with a delay to prevent flooding
         new Thread(() -> {
