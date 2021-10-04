@@ -70,10 +70,7 @@ public class OneWireCommandRescan extends OneWireCommand {
                 address2device.put(address, owc);
                 address2path.put(address, path);
 
-                if (!known.contains(address)) {
-                    logger.warn("Arrived: {}", owc);
-                    eventSink.next(new OneWireNetworkArrival(Instant.now(), address));
-                }
+                checkArrival(known, address, owc, eventSink);
 
                 known.remove(address);
             }
@@ -99,5 +96,12 @@ public class OneWireCommandRescan extends OneWireCommand {
             ThreadContext.pop();
         }
 
+    }
+
+    private void checkArrival(TreeSet<String> known, String address, OneWireContainer owc, FluxSink<OneWireNetworkEvent> eventSink) {
+        if (!known.contains(address)) {
+            logger.warn("Arrived: {}", owc);
+            eventSink.next(new OneWireNetworkArrival(Instant.now(), address));
+        }
     }
 }
