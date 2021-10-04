@@ -26,7 +26,7 @@ public class OneWireCommandBumpResolution extends OneWireCommand {
             var device = adapter.getDeviceContainer(address);
 
             if (!(device instanceof TemperatureContainer)) {
-                logger.warn("{} ({}): not a temperature container", address, device.getName());
+                logger.debug("{} ({}): not a temperature container", address, device.getName());
                 return;
             }
 
@@ -35,7 +35,7 @@ public class OneWireCommandBumpResolution extends OneWireCommand {
             var state = tc.readDevice();
 
             if (!tc.hasSelectableTemperatureResolution()) {
-                logger.warn("{} ({}): doesn't support selectable resolution", address, device.getName());
+                logger.debug("{} ({}): doesn't support selectable resolution", address, device.getName());
                 return;
             }
 
