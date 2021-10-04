@@ -10,6 +10,7 @@ import net.sf.dz3r.device.onewire.command.OneWireCommandReadTemperatureAll;
 import net.sf.dz3r.device.onewire.command.OneWireCommandRescan;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
+import net.sf.dz3r.device.onewire.event.OneWireNetworkErrorEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
@@ -203,9 +204,26 @@ public class OneWireNetworkMonitor {
                 devicesPresent.remove(((OneWireNetworkDeparture) event).address);
                 logger.info("departure: acknowledged {}", ((OneWireNetworkDeparture) event).address);
                 break;
+            case "OneWireNetworkErrorEvent":
+                handleError(event);
+                break;
             default:
                 logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
+    }
+
+    private void handleError(OneWireNetworkEvent event) {
+        OneWireNetworkErrorEvent<?> errorEvent = (OneWireNetworkErrorEvent<?>) event;
+        logger.error("{}", errorEvent, errorEvent.error);
+        logger.warn("Initiating network rescan");
+
+        // It would be a good idea to rescan the bus to see what happened - but with a delay to prevent flooding
+        new Thread(() -> {
+            Flux.just(new OneWireCommandRescan(commandSink, new TreeSet<>(devicesPresent)))
+                    .delaySequence(Duration.ofSeconds(1))
+                    .doOnNext(commandSink::next)
+                    .blockLast();
+        }).start();
     }
 
     private void broadcastOneWireEvent(OneWireNetworkEvent event) {
