@@ -35,10 +35,11 @@ public class OneWireCommandRescan extends OneWireCommand {
         var m = new Marker("rescan");
         try {
 
-            adapter.setSearchAllDevices();
-            adapter.targetAllFamilies();
+            var address2device = new TreeMap<String, OneWireContainer>();
+            var address2path = new TreeMap<String, OWPath>();
+            var known = new TreeSet<>(knownDevices);
 
-            rescan(adapter, eventSink, new OWPath(adapter));
+            rescan(adapter, eventSink, new OWPath(adapter), address2device, address2path, known);
 
         } finally {
             m.close();
@@ -46,18 +47,21 @@ public class OneWireCommandRescan extends OneWireCommand {
         }
     }
 
-    private void rescan(DSPortAdapter adapter, FluxSink<OneWireNetworkEvent> eventSink, OWPath path) throws OneWireException {
+    private void rescan(DSPortAdapter adapter, FluxSink<OneWireNetworkEvent> eventSink,
+                        OWPath path,
+                        TreeMap<String, OneWireContainer> address2device,
+                        TreeMap<String, OWPath> address2path,
+                        TreeSet<String> known) throws OneWireException {
+
         ThreadContext.push("rescan(" + path + ")");
         var m = new Marker("rescan(" + path + ")");
         try {
 
+            adapter.setSearchAllDevices();
+            adapter.targetAllFamilies();
+
             closeAllPaths(adapter);
             path.open();
-
-            var address2device = new TreeMap<String, OneWireContainer>();
-            var address2path = new TreeMap<String, OWPath>();
-            var known = new TreeSet<>(knownDevices);
-
 
             for (var owc : adapter.getAllDeviceContainers()) {
 
