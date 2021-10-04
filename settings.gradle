@@ -30,7 +30,6 @@ include 'dz3-owapi'
 include 'dz3-owfs'
 include 'dz3-sensors'
 include 'dz3-servomaster'
-include 'dz3-spring'
 include 'dz3-xbee'
 
 // Reactive only modules
@@ -47,6 +46,9 @@ include 'dz3r-scheduler'
 include 'dz3r-scheduler-gcal-v3'
 include 'dz3r-swing'
 include 'dz3r-webui'
+
+// One ring to find^Wrun them all
+include 'dz3r-spring'
 
 
 rootProject.name = 'dz3-master'

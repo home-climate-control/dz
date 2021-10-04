@@ -1,6 +1,6 @@
 package net.sf.dz3.runtime;
 
-import net.sf.dz3.instrumentation.Marker;
+import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;

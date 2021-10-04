@@ -11,8 +11,6 @@ dependencies {
 
     implementation 'org.springframework:spring-context:5.3.9'
 
-    implementation project(':dz3-sensors')
-
     implementation project(':dz3r-director')
 
     // Enable the Swing console
@@ -25,7 +23,8 @@ dependencies {
     runtimeOnly project(':dz3r-owapi')
 
     // Enable XBee
-    runtimeOnly project(':dz3-xbee')
+    // ... later
+    // runtimeOnly project(':dz3-xbee')
 
     // Enable MQTT
     runtimeOnly project(':dz3r-mqtt')
