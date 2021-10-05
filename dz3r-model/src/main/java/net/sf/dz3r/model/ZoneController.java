@@ -46,10 +46,16 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                         (s, s2) -> s,
                         TreeMap::new));
 
-        logger.info("Zones configured: {}", zoneMap.keySet());
+        logger.info("Zones configured:");
+        zoneMap.keySet().forEach(z -> logger.info("  {}", z));
 
         if (zones.size() > zoneMap.size()) {
-            throw new IllegalArgumentException("Redundant zones? " + zones);
+
+            logger.error("Discrepancy between zone names and zones");
+            logger.error("Check zone and thermostat configuration values, this is usually a copypaste error");
+            zones.forEach(z -> logger.error("  {}", z));
+
+            throw new IllegalArgumentException("Redundant zones? (see the logs above)");
         }
     }
 

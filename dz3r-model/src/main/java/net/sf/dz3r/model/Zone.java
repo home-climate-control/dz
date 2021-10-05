@@ -133,4 +133,9 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
                 getAddress(),
                 "Controls zone settings, collects sensor samples, and passes them to Zone Controller");
     }
+
+    @Override
+    public String toString() {
+        return "{zone name=" + ts.getAddress() + ", settings={" + settings + "}}";
+    }
 }
