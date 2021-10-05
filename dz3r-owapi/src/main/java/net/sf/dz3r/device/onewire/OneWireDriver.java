@@ -1,15 +1,20 @@
 package net.sf.dz3r.device.onewire;
 
 import com.dalsemi.onewire.adapter.DSPortAdapter;
+import net.sf.dz3r.common.IntegerChannelAddress;
+import net.sf.dz3r.device.actuator.NullSwitch;
+import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
+import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
@@ -19,6 +24,7 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Driver for 1-Wire subsystem using the <a href="https://github.com/home-climate-control/owapi-reborn">owapi-reborn</a> library.
@@ -189,6 +195,108 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
             throw new IllegalStateException("Fatal programming error, can't connect() more than once");
         }
 
+        logger.info("Starting 1-Wire monitor for {}", endpoint);
         this.monitor = new OneWireNetworkMonitor(endpoint, sink);
+    }
+
+    public Switch<String> getSwitch(String address) {
+        logger.info("getSwitch: {}", address);
+
+        checkSwitchAddress(address);
+
+        // With the sensor, we can just dole out a flux and let them wait.
+        // Here, need something similar - nothing may be available at this point, but they still need it
+        // (worse, they might just try to issue commands right away).
+
+        return new SwitchProxy(address);
+    }
+
+    private void checkSwitchAddress(String address) {
+        new IntegerChannelAddress(address);
+        // Syntax is OK if we made it this far, let's proceed
+    }
+
+    public class SwitchProxy implements Switch<String> {
+
+        private final String address;
+
+        private final NullSwitch nullSwitch;
+
+        /**
+         * Monitor acquisition gate.
+         *
+         * Once the monitor is available, we don't need this anymore, so one use disposable semaphore.
+         */
+        private final CountDownLatch gate = new CountDownLatch(1);
+
+        public SwitchProxy(String address) {
+            this.address = address;
+            this.nullSwitch = new NullSwitch(address);
+
+            new Thread(() -> {
+                ThreadContext.push("switchProxy:" + address);
+                var m = new Marker("switchProxy:" + address);
+
+                try {
+
+                    // Need to get the monitor first
+
+                    if (monitor == null) {
+                        logger.debug("No 1-Wire monitor, getting one");
+                        getOneWireFlux().blockFirst();
+                        logger.debug("Obtained the 1-Wire monitor");
+                        gate.countDown();
+                    }
+
+                } finally {
+                    m.close();
+                    ThreadContext.pop();
+                }
+            }).start();
+        }
+
+        @Override
+        public final String getAddress() {
+            return address;
+        }
+
+        @Override
+        public Flux<Signal<State, String>> getFlux() {
+
+            getMonitor("getFlux");
+            return nullSwitch.getFlux();
+        }
+
+        private void getMonitor(String marker) {
+
+            if (gate.getCount() == 0) {
+                return;
+            }
+
+            logger.debug("{}({}): waiting for 1-Wire  monitor to become available", marker, address);
+
+            try {
+                gate.await();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Interrupted while waiting for 1-Wire  monitor for " + address, ex);
+            }
+
+            logger.debug("{}({}): 1-Wire monitor ready", marker, address);
+        }
+
+        @Override
+        public Mono<Boolean> setState(boolean state) {
+
+            getMonitor("setState");
+            return nullSwitch.setState(state);
+        }
+
+        @Override
+        public Mono<Boolean> getState() {
+
+            getMonitor("getState");
+            return nullSwitch.getState();
+        }
     }
 }
