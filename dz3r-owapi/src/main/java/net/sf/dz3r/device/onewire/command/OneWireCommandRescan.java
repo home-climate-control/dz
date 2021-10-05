@@ -66,7 +66,7 @@ public class OneWireCommandRescan extends OneWireCommand {
             adapter.setSearchAllDevices();
             adapter.targetAllFamilies();
 
-            closeAllPaths(adapter);
+            adapter.closeAllPaths();
             path.open();
 
             var branches = new ArrayList<OWPath>();

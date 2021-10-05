@@ -29,7 +29,7 @@ public class OneWireCommandBumpResolution extends OneWireCommand {
         try {
 
             var device = adapter.getDeviceContainer(address);
-            closeAllPaths(adapter);
+            adapter.closeAllPaths();
             path.open();
 
             if (!(device instanceof TemperatureContainer)) {

@@ -71,8 +71,7 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
             // then read them one by one.
 
             adapter.reset();
-
-            closeAllPaths(adapter);
+            adapter.closeAllPaths();
             path.open();
 
             adapter.putByte(Command.SELECT_ALL.code);

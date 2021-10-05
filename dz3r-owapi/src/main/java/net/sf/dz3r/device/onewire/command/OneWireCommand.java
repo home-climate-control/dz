@@ -68,24 +68,6 @@ public abstract class OneWireCommand {
 
     protected abstract void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException;
 
-    /**
-     * Close all open device paths.
-     *
-     * This is a shortcut using DS2409 specific hardware commands to close all open paths.
-     * Must be modified if a different adapter is ever used.
-     *
-     * @throws OneWireException if anything goes wrong.
-     */
-    protected void closeAllPaths(DSPortAdapter adapter) throws OneWireException {
-
-        // DS2409 specific - skip, all lines off
-
-        adapter.reset();
-        adapter.putByte(0x00CC);
-        adapter.putByte(0x0066);
-        adapter.getByte();
-    }
-
     @Override
     public String toString() {
         return "{" + getClass().getSimpleName() + " messageId=" + messageId + "}";
