@@ -54,7 +54,7 @@ public class NullSwitch extends AbstractSwitch<String> {
     @Override
     protected void setStateSync(boolean state) throws IOException {
         long delayMillis = getDelayMillis();
-        logger.info("setState={} delay={}ms", state, delayMillis);
+        logger.info("setState({}):={} delay={}ms", getAddress(), state, delayMillis);
 
         delay(delayMillis);
 
@@ -70,7 +70,7 @@ public class NullSwitch extends AbstractSwitch<String> {
     @Override
     protected boolean getStateSync() throws IOException {
         long delayMillis = getDelayMillis();
-        logger.info("getState={} delay={}ms", state, delayMillis);
+        logger.info("getState({})={} delay={}ms", getAddress(), state, delayMillis);
 
         delay(delayMillis);
 
@@ -95,7 +95,8 @@ public class NullSwitch extends AbstractSwitch<String> {
                 Mono.delay(Duration.ofMillis(delayMillis)).subscribeOn(Schedulers.boundedElastic()).block();
             } catch (IllegalStateException ex) {
                 if (ex.getMessage().contains("block()/blockFirst()/blockLast() are blocking, which is not supported in thread")) {
-                    logger.warn("delay() on non-blocking thread (name={}, group={}), using Thread.sleep() workaround",
+                    logger.warn("{}: delay() on non-blocking thread (name={}, group={}), using Thread.sleep() workaround",
+                            getAddress(),
                             Thread.currentThread().getName(),
                             Thread.currentThread().getThreadGroup().getName());
                     try {
