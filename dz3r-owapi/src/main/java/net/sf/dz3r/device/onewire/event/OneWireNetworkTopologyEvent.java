@@ -1,6 +1,7 @@
 package net.sf.dz3r.device.onewire.event;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Base class for all topology related events on a 1-Wire network.
@@ -14,8 +15,8 @@ public class OneWireNetworkTopologyEvent extends OneWireNetworkEvent {
 
     public final String address;
 
-    public OneWireNetworkTopologyEvent(Instant timestamp, String address) {
-        super(timestamp);
+    public OneWireNetworkTopologyEvent(Instant timestamp, UUID correlationId, String address) {
+        super(timestamp, correlationId);
         this.address = address;
     }
 }

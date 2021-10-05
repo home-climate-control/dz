@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -28,7 +29,7 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
     public final Map<String, OWPath> address2path;
 
     public OneWireCommandReadTemperatureAll(FluxSink<OneWireCommand> commandSink, Set<String> knownDevices, Map<String, OWPath> address2path) {
-        super(commandSink);
+        super(UUID.randomUUID(), commandSink);
         this.knownDevices = knownDevices;
         this.address2path = address2path;
     }

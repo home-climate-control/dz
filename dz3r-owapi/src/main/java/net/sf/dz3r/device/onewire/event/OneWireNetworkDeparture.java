@@ -10,7 +10,7 @@ import java.time.Instant;
 public class OneWireNetworkDeparture extends OneWireNetworkTopologyEvent {
 
     public OneWireNetworkDeparture(Instant timestamp, String address) {
-        super(timestamp, address);
+        super(timestamp, null, address);
     }
 
     @Override

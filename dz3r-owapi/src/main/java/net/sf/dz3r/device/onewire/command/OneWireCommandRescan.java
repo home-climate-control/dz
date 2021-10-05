@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 
 /**
  * Command to rescan the 1-Wire network.
@@ -28,7 +29,7 @@ public class OneWireCommandRescan extends OneWireCommand {
     public final Set<String> knownDevices;
 
     public OneWireCommandRescan(FluxSink<OneWireCommand> commandSink, Set<String> knownDevices) {
-        super(commandSink);
+        super(UUID.randomUUID(), commandSink);
         this.knownDevices = knownDevices;
     }
 

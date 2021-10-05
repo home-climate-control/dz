@@ -16,7 +16,7 @@ public class OneWireNetworkTemperatureSample extends OneWireNetworkDeviceStatusE
     public final double sample;
 
     public OneWireNetworkTemperatureSample(Instant timestamp, String address, double sample) {
-        super(timestamp, address);
+        super(timestamp, null, address);
         this.sample = sample;
     }
 

@@ -14,7 +14,7 @@ public class OneWireNetworkArrival extends OneWireNetworkTopologyEvent {
     public final OWPath path;
 
     public OneWireNetworkArrival(Instant timestamp, String address, OWPath path) {
-        super(timestamp, address);
+        super(timestamp, null, address);
         this.path = path;
     }
 

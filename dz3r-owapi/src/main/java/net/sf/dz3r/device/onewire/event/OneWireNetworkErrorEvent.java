@@ -1,6 +1,7 @@
 package net.sf.dz3r.device.onewire.event;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Base class for all error events that can be emitted by a 1-Wire network.
@@ -25,8 +26,8 @@ public class OneWireNetworkErrorEvent<P> extends OneWireNetworkEvent {
      */
     public final Throwable error;
 
-    public OneWireNetworkErrorEvent(Instant timestamp, Boolean isTransient, Boolean isFatal, Throwable error) {
-        super(timestamp);
+    public OneWireNetworkErrorEvent(Instant timestamp, UUID correlationId, Boolean isTransient, Boolean isFatal, Throwable error) {
+        super(timestamp, correlationId);
 
         if (error == null) {
             throw new IllegalArgumentException("error can't be null");
@@ -40,6 +41,7 @@ public class OneWireNetworkErrorEvent<P> extends OneWireNetworkEvent {
     @Override
     public String toString() {
         return "{1-Wire error timestamp=" + timestamp
+                + ", correlationId=" + correlationId
                 + ", transient=" + isTransient
                 + ", fatal=" + isFatal
                 + ", error=" + error.getClass().getName() + "(" + error.getMessage() + ")}";

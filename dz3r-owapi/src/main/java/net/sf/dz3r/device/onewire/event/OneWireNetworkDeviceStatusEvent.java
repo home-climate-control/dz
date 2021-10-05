@@ -1,6 +1,7 @@
 package net.sf.dz3r.device.onewire.event;
 
 import java.time.Instant;
+import java.util.UUID;
 
 /**
  * Base class for all device status related events on a 1-Wire network.
@@ -13,8 +14,8 @@ public class OneWireNetworkDeviceStatusEvent extends OneWireNetworkEvent {
 
     public final String address;
 
-    public OneWireNetworkDeviceStatusEvent(Instant timestamp, String address) {
-        super(timestamp);
+    public OneWireNetworkDeviceStatusEvent(Instant timestamp, UUID correlationId, String address) {
+        super(timestamp, correlationId);
         this.address = address;
     }
 }
