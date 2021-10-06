@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class OneWireNetworkMonitor {
+public class OneWireNetworkMonitor implements OWPathResolver {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -56,7 +56,7 @@ public class OneWireNetworkMonitor {
     private DSPortAdapter adapter = null;
 
     private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
-    private Map<String, OWPath> address2path = Collections.synchronizedMap(new TreeMap<>());
+    private final Map<String, OWPath> address2path = Collections.synchronizedMap(new TreeMap<>());
 
     public OneWireNetworkMonitor(OneWireEndpoint endpoint, FluxSink<OneWireNetworkEvent> observer) {
 
@@ -241,5 +241,27 @@ public class OneWireNetworkMonitor {
 
     private void broadcastOneWireEvent(OneWireNetworkEvent event) {
         observer.next(event);
+    }
+
+    /**
+     * Get the command sink.
+     *
+     * This method violates the Principle of Least Privilege (outsiders can do things with the sink they really shouldn't),
+     * so let's make a mental note of replacing it with a complicated {@code submit()} that will shield the sink from
+     * malicious (and dumb) programmers.
+     *
+     * @return {@link #commandSink}.
+     */
+    public FluxSink<OneWireCommand> getCommandSink() {
+        if (commandSink == null) {
+            throw new IllegalStateException("commandSink still not initialized");
+        }
+
+        return commandSink;
+    }
+
+    @Override
+    public OWPath getPath(String address) {
+        return address2path.get(address);
     }
 }

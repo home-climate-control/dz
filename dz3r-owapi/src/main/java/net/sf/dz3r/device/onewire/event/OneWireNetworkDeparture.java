@@ -15,7 +15,7 @@ public class OneWireNetworkDeparture extends OneWireNetworkTopologyEvent {
 
     @Override
     public String toString() {
-        return "{1-Wire network departure timestamp=" + timestamp
+        return "{OneWireNetworkDeparture timestamp=" + timestamp
                 + ", address=" + address + "}";
     }
 }

@@ -10,11 +10,11 @@ import java.util.UUID;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2021
  */
-public class OneWireNetworkDeviceStatusEvent extends OneWireNetworkEvent {
+public class OneWireNetworkDeviceStateEvent extends OneWireNetworkEvent {
 
     public final String address;
 
-    public OneWireNetworkDeviceStatusEvent(Instant timestamp, UUID correlationId, String address) {
+    public OneWireNetworkDeviceStateEvent(Instant timestamp, UUID correlationId, String address) {
         super(timestamp, correlationId);
         this.address = address;
     }

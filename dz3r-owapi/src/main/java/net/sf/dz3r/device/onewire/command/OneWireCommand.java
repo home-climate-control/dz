@@ -44,6 +44,8 @@ public abstract class OneWireCommand {
             } catch (OneWireException ex) {
                 var flags = assessErrorFlags(ex);
                 sink.next(new OneWireNetworkErrorEvent<>(Instant.now(), command.messageId, flags.get(0), flags.get(1), ex));
+            } catch (Exception ex) {
+                sink.next(new OneWireNetworkErrorEvent<>(Instant.now(), command.messageId, null, null, ex));
             }
             sink.complete();
         });

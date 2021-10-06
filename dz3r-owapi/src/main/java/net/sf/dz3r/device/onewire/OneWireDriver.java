@@ -1,9 +1,11 @@
 package net.sf.dz3r.device.onewire;
 
 import com.dalsemi.onewire.adapter.DSPortAdapter;
+import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.common.IntegerChannelAddress;
 import net.sf.dz3r.device.actuator.NullSwitch;
 import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.onewire.command.OneWireSetSwitchCommand;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
@@ -22,8 +24,11 @@ import reactor.core.publisher.Mono;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -48,6 +53,7 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
     private OneWireNetworkMonitor monitor;
 
     private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
+    private final Map<String, OWPath> address2path = Collections.synchronizedMap(new TreeMap<>());
 
     /**
      * Create an instance working at default speed.
@@ -173,7 +179,10 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
             return;
         }
 
-        devicesPresent.add(((OneWireNetworkArrival) event).address);
+        var arrivalEvent = (OneWireNetworkArrival) event;
+
+        devicesPresent.add(arrivalEvent.address);
+        address2path.put(arrivalEvent.address, arrivalEvent.path);
     }
 
     private void handleDeparture(OneWireNetworkEvent event) {
@@ -183,7 +192,11 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
             return;
         }
 
-        devicesPresent.remove(((OneWireNetworkDeparture) event).address);
+        var departureEvent = (OneWireNetworkDeparture) event;
+
+        devicesPresent.remove(departureEvent.address);
+        address2path.remove(departureEvent.address);
+
         logger.error("Departure not handled completely: {}", ((OneWireNetworkDeparture) event).address );
     }
 
@@ -225,7 +238,7 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
         /**
          * Monitor acquisition gate.
          *
-         * Once the monitor is available, we don't need this anymore, so one use disposable semaphore.
+         * Once the monitor is available, we don't need this anymore, so we're using a one time use disposable semaphore.
          */
         private final CountDownLatch gate = new CountDownLatch(1);
 
@@ -243,7 +256,10 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
 
                     if (monitor == null) {
                         logger.debug("No 1-Wire monitor, getting one");
+
+                        // This guarantees the monitor availability, but not the device presence
                         getOneWireFlux().blockFirst();
+
                         logger.debug("Obtained the 1-Wire monitor");
                         gate.countDown();
                     }
@@ -260,17 +276,10 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
             return address;
         }
 
-        @Override
-        public Flux<Signal<State, String>> getFlux() {
-
-            getMonitor("getFlux");
-            return nullSwitch.getFlux();
-        }
-
-        private void getMonitor(String marker) {
+        private OneWireNetworkMonitor getMonitor(String marker) {
 
             if (gate.getCount() == 0) {
-                return;
+                return monitor;
             }
 
             logger.debug("{}({}): waiting for 1-Wire  monitor to become available", marker, address);
@@ -283,20 +292,40 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
             }
 
             logger.debug("{}({}): 1-Wire monitor ready", marker, address);
+            return monitor;
+        }
+
+        @Override
+        public Flux<Signal<State, String>> getFlux() {
+
+            getMonitor("getFlux");
+            return nullSwitch.getFlux();
         }
 
         @Override
         public Mono<Boolean> setState(boolean state) {
 
-            getMonitor("setState");
+            var channelAddress = new IntegerChannelAddress(address);
+            var commandSink = getMonitor("setState").getCommandSink();
+            commandSink.next(
+                    new OneWireSetSwitchCommand(
+                            UUID.randomUUID(),
+                            commandSink,
+                            monitor,
+                            address,
+                            address2path.get(channelAddress.hardwareAddress),
+                            state));
+
             return nullSwitch.setState(state);
         }
 
         @Override
         public Mono<Boolean> getState() {
 
-            getMonitor("getState");
-            return nullSwitch.getState();
+            throw new UnsupportedOperationException("Not Implemented");
+
+//            getMonitor("getState");
+//            return nullSwitch.getState();
         }
     }
 }

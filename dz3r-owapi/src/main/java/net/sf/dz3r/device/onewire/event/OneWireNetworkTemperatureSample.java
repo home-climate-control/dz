@@ -11,7 +11,7 @@ import java.time.Instant;
  *
  * @see net.sf.dz3r.device.onewire.command.OneWireCommandReadTemperatureAll
  */
-public class OneWireNetworkTemperatureSample extends OneWireNetworkDeviceStatusEvent {
+public class OneWireNetworkTemperatureSample extends OneWireNetworkDeviceStateEvent {
 
     public final double sample;
 
@@ -22,7 +22,7 @@ public class OneWireNetworkTemperatureSample extends OneWireNetworkDeviceStatusE
 
     @Override
     public String toString() {
-        return "{1-Wire temperature sample timestamp=" + timestamp
+        return "{OneWireNetworkTemperatureSample timestamp=" + timestamp
                 + ", address=" + address
                 + ", sample=" + sample
                 + "°C}";
