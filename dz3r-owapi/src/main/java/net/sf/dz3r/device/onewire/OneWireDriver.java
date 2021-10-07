@@ -9,6 +9,7 @@ import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
+import net.sf.dz3r.device.onewire.event.OneWireSwitchState;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
@@ -362,22 +363,42 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
 
                 var channelAddress = new IntegerChannelAddress(address);
                 var commandSink = getMonitor("setState").getCommandSink();
+                var messageId = UUID.randomUUID();
                 commandSink.next(
                         new OneWireSetSwitchCommand(
-                                UUID.randomUUID(),
+                                messageId,
                                 commandSink,
                                 monitor,
                                 address,
                                 address2path.get(channelAddress.hardwareAddress),
                                 state));
 
-                // VT: FIXME: This should actually return the result of getState() - but that'll be the next step.
-                return Mono.just(state);
+                return expectSwitchState(messageId);
 
             } finally {
                 requested = state;
                 requestedAt = Instant.now();
             }
+        }
+
+        private Mono<Boolean> expectSwitchState(UUID messageId) {
+            return Mono.create(sink -> {
+                try {
+
+                    var state = getOneWireFlux()
+                            .filter(OneWireSwitchState.class::isInstance)
+                            .map(OneWireSwitchState.class::cast)
+                            .filter(s -> s.correlationId.equals(messageId))
+                            .doOnNext(s -> logger.debug("{}", s))
+                            .blockFirst()
+                            .state;
+
+                    sink.success(state);
+
+                } catch (Exception e) {
+                    sink.error(e);
+                }
+            });
         }
 
         @Override

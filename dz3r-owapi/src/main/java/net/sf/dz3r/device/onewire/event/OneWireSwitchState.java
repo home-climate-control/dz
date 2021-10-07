@@ -15,6 +15,7 @@ public class OneWireSwitchState extends OneWireNetworkDeviceStateEvent {
     @Override
     public String toString() {
         return "{OneWireSwitchState timestamp=" + timestamp
+                + ", correlationId=" + correlationId
                 + ", address=" + address
                 + ", state=" + state
                 + "}";
