@@ -3,7 +3,6 @@ package net.sf.dz3r.device.onewire;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.common.IntegerChannelAddress;
-import net.sf.dz3r.device.actuator.NullSwitch;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.onewire.command.OneWireSetSwitchCommand;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
@@ -23,8 +22,10 @@ import reactor.core.publisher.Mono;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -212,16 +213,38 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
         this.monitor = new OneWireNetworkMonitor(endpoint, sink);
     }
 
+    /**
+     * Get the switch with no heartbeat support.
+     *
+     * It is highly recommended to use {@link #getSwitch(String, long)} because of easy 1-Wire bus flooding
+     * with some producers.
+     *
+     * @param address Switch address.
+     * @return The switch.
+     */
     public Switch<String> getSwitch(String address) {
+        return getSwitch(address, 0);
+    }
+
+    /**
+     * Get the switch with given heartbeat.
+     *
+     * @param address Switch address.
+     * @param heartbeatSeconds Number of seconds to wait between sending identical state commands to hardware.
+     *                         30 seconds is a reasonable default.
+     * @return The switch.
+     */
+    public Switch<String> getSwitch(String address, long heartbeatSeconds) {
         logger.info("getSwitch: {}", address);
 
         checkSwitchAddress(address);
+        checkHeartbeat(heartbeatSeconds);
 
         // With the sensor, we can just dole out a flux and let them wait.
         // Here, need something similar - nothing may be available at this point, but they still need it
         // (worse, they might just try to issue commands right away).
 
-        return new SwitchProxy(address);
+        return new SwitchProxy(address, heartbeatSeconds);
     }
 
     private void checkSwitchAddress(String address) {
@@ -229,11 +252,26 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
         // Syntax is OK if we made it this far, let's proceed
     }
 
+    private void checkHeartbeat(long heartbeatSeconds) {
+        if (heartbeatSeconds < 0) {
+            throw new IllegalArgumentException("heartbeatSeconds can't be negative (" + heartbeatSeconds + " given)");
+        }
+    }
+
     public class SwitchProxy implements Switch<String> {
 
         private final String address;
+        private final Duration heartbeat;
 
-        private final NullSwitch nullSwitch;
+        /**
+         * Last requested state; {@code null} if {@link #setState(boolean)} hasn't been called yet.
+         */
+        private Boolean requested;
+
+        /**
+         * Timestamp of last {@link #setState(boolean)}; {@code null} if it hasn't been called yet.
+         */
+        private Instant requestedAt;
 
         /**
          * Monitor acquisition gate.
@@ -242,14 +280,15 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
          */
         private final CountDownLatch gate = new CountDownLatch(1);
 
-        public SwitchProxy(String address) {
+        public SwitchProxy(String address, long heartbeatSeconds) {
             this.address = address;
-            this.nullSwitch = new NullSwitch(address);
+            this.heartbeat = Duration.ofSeconds(heartbeatSeconds);
 
             new Thread(() -> {
                 ThreadContext.push("switchProxy:" + address);
                 var m = new Marker("switchProxy:" + address);
 
+                logger.info("address={}, heartbeat={}", address, heartbeat);
                 try {
 
                     // Need to get the monitor first
@@ -299,33 +338,53 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
         public Flux<Signal<State, String>> getFlux() {
 
             getMonitor("getFlux");
-            return nullSwitch.getFlux();
+            throw new UnsupportedOperationException("Not Implemented");
         }
 
         @Override
         public Mono<Boolean> setState(boolean state) {
 
-            var channelAddress = new IntegerChannelAddress(address);
-            var commandSink = getMonitor("setState").getCommandSink();
-            commandSink.next(
-                    new OneWireSetSwitchCommand(
-                            UUID.randomUUID(),
-                            commandSink,
-                            monitor,
-                            address,
-                            address2path.get(channelAddress.hardwareAddress),
-                            state));
+            try {
 
-            return nullSwitch.setState(state);
+                if (heartbeat.getSeconds() > 0 && requested != null && requested == state) {
+
+                    var skip = Optional
+                            .ofNullable(requestedAt)
+                            .map(at -> Instant.now().isBefore(at.plus(heartbeat)))
+                            .orElse(false);
+
+                    if (skip) {
+                        logger.debug("skipping setState({})={} - {} since last",
+                                address, state, Duration.between(requestedAt, Instant.now()));
+                        return Mono.just(state);
+                    }
+                }
+
+                var channelAddress = new IntegerChannelAddress(address);
+                var commandSink = getMonitor("setState").getCommandSink();
+                commandSink.next(
+                        new OneWireSetSwitchCommand(
+                                UUID.randomUUID(),
+                                commandSink,
+                                monitor,
+                                address,
+                                address2path.get(channelAddress.hardwareAddress),
+                                state));
+
+                // VT: FIXME: This should actually return the result of getState() - but that'll be the next step.
+                return Mono.just(state);
+
+            } finally {
+                requested = state;
+                requestedAt = Instant.now();
+            }
         }
 
         @Override
         public Mono<Boolean> getState() {
 
+            getMonitor("getState");
             throw new UnsupportedOperationException("Not Implemented");
-
-//            getMonitor("getState");
-//            return nullSwitch.getState();
         }
     }
 }
