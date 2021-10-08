@@ -16,6 +16,11 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Base damper controller logic.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ */
 public abstract class AbstractDamperController implements DamperController {
 
     protected final Logger logger = LogManager.getLogger();
@@ -78,6 +83,10 @@ public abstract class AbstractDamperController implements DamperController {
         }
 
         return shuffle(compute(source.getValue()));
+    }
+
+    protected final Damper<?> getDamperFor(String zoneName) {
+        return zone2damper.get(zoneName);
     }
 
     protected abstract Map<Damper<?>, Double> compute(Map<String, Signal<ZoneStatus, String>> source);
