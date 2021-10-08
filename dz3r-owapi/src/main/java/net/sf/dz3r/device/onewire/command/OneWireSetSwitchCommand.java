@@ -70,7 +70,13 @@ public class OneWireSetSwitchCommand extends OneWireSwitchCommand {
 
         logger.warn("null path, extracting from the monitor");
 
-        return pathResolver.getPath(address);
+        var found = pathResolver.getPath(address);
+
+        if (found == null) {
+            throw new IllegalStateException(address + ": no known path, is it present?");
+        }
+
+        return found;
     }
 
     private State writeDevice(Marker m, IntegerChannelAddress channelAddress, SwitchContainer sc, boolean state) throws OneWireException {
