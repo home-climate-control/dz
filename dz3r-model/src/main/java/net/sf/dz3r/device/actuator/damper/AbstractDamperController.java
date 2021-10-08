@@ -8,6 +8,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Schedulers;
@@ -35,6 +36,9 @@ public abstract class AbstractDamperController implements DamperController {
      */
     private final Map<String, Signal<ZoneStatus, String>> zone2status = new TreeMap<>();
 
+    private final Flux<Flux<Signal<Damper<?>, Double>>> outputFlux;
+    private final Disposable outputFluxSubscription;
+
     /**
      * Last known unit status.
      */
@@ -45,19 +49,23 @@ public abstract class AbstractDamperController implements DamperController {
 
     protected AbstractDamperController(Map<Zone, Damper<?>> zone2damper) {
         zone2damper.forEach((key, value) -> this.zone2damper.put(key.getAddress(), value));
+
+        outputFlux = Flux
+                .create(this::connect)
+                .map(this::compute)
+                .publish()
+                .autoConnect();
+
+        outputFluxSubscription = outputFlux.subscribe();
     }
 
     @Override
     public Flux<Flux<Signal<Damper<?>, Double>>> compute(Flux<Signal<UnitControlSignal, Void>> unitFlux, Flux<Signal<ZoneStatus, String>> zoneFlux) {
 
-        unitFlux.subscribeOn(Schedulers.boundedElastic()).subscribe(this::consumeUnit);
-        zoneFlux.subscribeOn(Schedulers.boundedElastic()).subscribe(this::consumeZone);
+        unitFlux.publishOn(Schedulers.boundedElastic()).subscribe(this::consumeUnit);
+        zoneFlux.publishOn(Schedulers.boundedElastic()).subscribe(this::consumeZone);
 
-        return Flux
-                .create(this::connect)
-                .map(this::compute)
-                .publish()
-                .autoConnect();
+        return outputFlux;
     }
 
     private void connect(FluxSink<Pair<Signal<UnitControlSignal, Void>, Map<String, Signal<ZoneStatus, String>>>> sink) {
@@ -65,16 +73,19 @@ public abstract class AbstractDamperController implements DamperController {
     }
 
     private void consumeUnit(Signal<UnitControlSignal, Void> signal) {
+        logger.warn("consumeUnit");
         this.unitStatus = signal;
         inputSink.next(new ImmutablePair<>(unitStatus, zone2status));
     }
 
     private void consumeZone(Signal<ZoneStatus, String> signal) {
+        logger.warn("consumeZone");
         zone2status.put(signal.payload, signal);
         inputSink.next(new ImmutablePair<>(unitStatus, zone2status));
     }
 
     private Flux<Signal<Damper<?>, Double>> compute(Pair<Signal<UnitControlSignal, Void>, Map<String, Signal<ZoneStatus, String>>> source) {
+        logger.warn("compute");
 
         var unitSignal = source.getKey();
 
@@ -146,5 +157,6 @@ public abstract class AbstractDamperController implements DamperController {
     @Override
     public void close() throws Exception {
         park();
+        outputFluxSubscription.dispose();
     }
 }
