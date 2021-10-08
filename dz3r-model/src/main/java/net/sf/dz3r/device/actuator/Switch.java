@@ -1,6 +1,7 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.signal.Signal;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -14,18 +15,9 @@ import reactor.core.publisher.Mono;
  */
 public interface Switch<A extends Comparable<A>> extends Addressable<A> {
 
-    public class State {
-        public final Boolean requested;
-        public final Boolean actual;
-
+    public class State extends DeviceState<Boolean> {
         public State(Boolean requested, Boolean actual) {
-            this.requested = requested;
-            this.actual = actual;
-        }
-
-        @Override
-        public String toString() {
-            return "{requested=" + requested + ", actual=" + actual + "}";
+            super(requested, actual);
         }
     }
 
