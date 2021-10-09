@@ -11,7 +11,9 @@ import java.util.Optional;
 import java.util.Random;
 
 /**
- * Does absolutely nothing other than reflecting itself in the log (and later via JMX).
+ * Does absolutely nothing other than fulfilling the API contract and reflecting itself in the log (and later via JMX).
+ *
+ * A useful tool for troubleshooting a configuration without actual hardware available.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */

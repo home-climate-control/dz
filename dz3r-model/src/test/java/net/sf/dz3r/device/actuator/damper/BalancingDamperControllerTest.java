@@ -16,7 +16,6 @@ import java.time.Instant;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.mockito.Mockito.mock;
 
 class BalancingDamperControllerTest {
 
@@ -35,8 +34,8 @@ class BalancingDamperControllerTest {
             var z1 = new Zone(new Thermostat("Z1", 20, 1, 0, 0, 1), zoneSettings);
             var z2 = new Zone(new Thermostat("Z2", 20, 1, 0, 0, 1), zoneSettings);
 
-            Damper<?> d1 = mock(Damper.class);
-            Damper<?> d2 = mock(Damper.class);
+            var d1 = new NullDamper("d1");
+            var d2 = new NullDamper("d2");
 
             try (BalancingDamperController damperController = new BalancingDamperController(Map.of(
                     z1, d1,
