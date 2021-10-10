@@ -22,17 +22,21 @@ public class SimpleDamperController extends AbstractDamperController {
     }
 
     @Override
-    protected Map<Damper<?>, Double> compute(Map<String, Signal<ZoneStatus, String>> zone2status) {
+    protected Map<Damper<?>, Double> compute(Map<String, Signal<ZoneStatus, String>> zone2signal) {
+
+        logger.debug("compute: zone2signal={}", zone2signal);
 
         var result = new TreeMap<Damper<?>, Double>();
 
-        zone2status.forEach((key, value) -> {
+        zone2signal.forEach((key, value) -> {
 
             var damper = getDamperFor(key);
             var position = value.getValue().status.calling ? 1d : 0d;
 
             result.put(damper, position);
         });
+
+        logger.debug("compute: result={}", result);
 
         return result;
     }

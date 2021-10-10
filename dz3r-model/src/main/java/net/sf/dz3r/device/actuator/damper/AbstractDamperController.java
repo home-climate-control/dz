@@ -8,14 +8,15 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Instant;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Base damper controller logic.
@@ -37,14 +38,14 @@ public abstract class AbstractDamperController implements DamperController {
     private final Map<String, Signal<ZoneStatus, String>> zone2status = new TreeMap<>();
 
     private final Flux<Flux<Signal<Damper<?>, Double>>> outputFlux;
-    private final Disposable outputFluxSubscription;
 
     /**
      * Last known unit status.
      */
     private Signal<UnitControlSignal, Void> unitStatus;
 
-    private FluxSink<Pair<Signal<UnitControlSignal, Void>, Map<String, Signal<ZoneStatus, String>>>> inputSink;
+    private Scheduler controlScheduler = Schedulers.newSingle("damper controller", true);
+    private FluxSink<Pair<Signal<UnitControlSignal, Void>, Map<String, Signal<ZoneStatus, String>>>> controlSink;
 
 
     protected AbstractDamperController(Map<Zone, Damper<?>> zone2damper) {
@@ -56,7 +57,20 @@ public abstract class AbstractDamperController implements DamperController {
                 .publish()
                 .autoConnect();
 
-        outputFluxSubscription = outputFlux.subscribe();
+        new Thread(() -> {
+            outputFlux
+                    .doOnNext(positionSet -> {
+                        logger.debug("positionSet: {}", positionSet);
+                        var counter = new AtomicInteger();
+                        positionSet
+                                .doOnNext(e -> logger.debug("position: {}", e))
+                                .doOnNext(ignored -> counter.incrementAndGet())
+                                .blockLast();
+                        logger.debug("positionSet: {} items", counter.get());
+                    })
+                    .doOnComplete(() -> logger.debug("control thread: complete"))
+                    .blockLast();
+        }).start();
     }
 
     @Override
@@ -69,25 +83,25 @@ public abstract class AbstractDamperController implements DamperController {
     }
 
     private void connect(FluxSink<Pair<Signal<UnitControlSignal, Void>, Map<String, Signal<ZoneStatus, String>>>> sink) {
-        this.inputSink = sink;
+        this.controlSink = sink;
     }
 
     private void consumeUnit(Signal<UnitControlSignal, Void> signal) {
-        logger.warn("consumeUnit");
+        logger.debug("consumeUnit: {}", signal);
         this.unitStatus = signal;
-        inputSink.next(new ImmutablePair<>(unitStatus, zone2status));
+        controlSink.next(new ImmutablePair<>(unitStatus, zone2status));
     }
 
     private void consumeZone(Signal<ZoneStatus, String> signal) {
-        logger.warn("consumeZone");
+        logger.debug("consumeZone: {}", signal);
         zone2status.put(signal.payload, signal);
-        inputSink.next(new ImmutablePair<>(unitStatus, zone2status));
+        controlSink.next(new ImmutablePair<>(unitStatus, zone2status));
     }
 
     private Flux<Signal<Damper<?>, Double>> compute(Pair<Signal<UnitControlSignal, Void>, Map<String, Signal<ZoneStatus, String>>> source) {
-        logger.warn("compute");
 
         var unitSignal = source.getKey();
+        logger.debug("compute");
 
         if (unitSignal.isError() || unitSignal.getValue().fanSpeed == 0) {
             return park();
@@ -111,6 +125,7 @@ public abstract class AbstractDamperController implements DamperController {
      * is not required to move the dampers.
      */
     private Flux<Signal<Damper<?>, Double>> shuffle(Map<Damper<?>, Double> positionMap) {
+        logger.debug("shuffle");
 
         return Flux.create(sink -> {
             Flux.fromIterable(positionMap.entrySet())
@@ -119,12 +134,12 @@ public abstract class AbstractDamperController implements DamperController {
 
                         var damper = kv.getKey();
                         var requestedPosition = kv.getValue();
-                        logger.info("shuffle 1/2: {} = {}", damper, requestedPosition);
+                        logger.debug("shuffle 1/2: {} = {}", damper, requestedPosition);
 
                         var done = damper.set(requestedPosition);
 
                         var finalPosition = done.block();
-                        logger.info("shuffle 2/2: {} = {}", damper, finalPosition);
+                        logger.debug("shuffle 2/2: {} = {}", damper, finalPosition);
 
                         sink.next(new Signal<>(Instant.now(), kv.getKey(), finalPosition));
 
@@ -134,18 +149,19 @@ public abstract class AbstractDamperController implements DamperController {
     }
 
     private Flux<Signal<Damper<?>, Double>> park() {
+        logger.debug("park");
 
         return Flux.create(sink -> {
             Flux.fromIterable(zone2damper.values())
                     .publishOn(Schedulers.boundedElastic())
                     .doOnNext(damper -> {
 
-                        logger.info("park 1/2: {}", damper);
+                        logger.debug("park 1/2: {}", damper);
 
                         var done = damper.park();
 
                         var finalPosition = done.block();
-                        logger.info("park 2/2: {} = {}", damper, finalPosition);
+                        logger.debug("park 2/2: {} = {}", damper, finalPosition);
 
                         sink.next(new Signal<>(Instant.now(), damper, finalPosition));
 
@@ -156,7 +172,10 @@ public abstract class AbstractDamperController implements DamperController {
 
     @Override
     public void close() throws Exception {
+        logger.warn("close()...");
         park();
-        outputFluxSubscription.dispose();
+        controlSink.complete();
+        controlScheduler.dispose();
+        logger.info("closed.");
     }
 }

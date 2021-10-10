@@ -71,11 +71,27 @@ public class NullDamper extends AbstractDamper<String> {
         }
     }
 
+    /**
+     * Get the position.
+     *
+     * Use this only for troubleshooting and test cases; this method is not included into the {@link Damper} API.
+     *
+     * @return Current position.
+     */
+    public Double get() {
+        return position;
+    }
+
     private long getDelayMillis() {
         if (minDelayMillis == 0 && maxDelayMillis == 0) {
             return 0;
         }
 
         return minDelayMillis + rg.nextInt(maxDelayMillis);
+    }
+
+    @Override
+    public String toString() {
+        return "{NullDamper: address=" + getAddress() + ", position=" + position + ", park=" + getParkPosition() + "}";
     }
 }
