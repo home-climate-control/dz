@@ -141,4 +141,54 @@ class BalancingDamperControllerTest {
 
         }).doesNotThrowAnyException();
     }
+
+    /**
+     * Make sure that zero demand from all thermostats doesn't cause NaN sent to dampers.
+     */
+    @Test
+    void testNaN() {
+
+        assertThatCode(() -> {
+
+            var zoneSettings = new ZoneSettings(20);
+            var z1 = new Zone(new Thermostat("Z1", 20, 1, 0, 0, 1), zoneSettings);
+
+            var d1 = new NullDamper("d1");
+
+            try (BalancingDamperController damperController = new BalancingDamperController(Map.of(
+                    z1, d1
+            ))) {
+
+                var unitFlux = Flux
+                        .just(new Signal<UnitControlSignal, Void>(Instant.now(), new UnitControlSignal(1d, 1d)));
+
+                var status1 = new ZoneStatus(zoneSettings, new ThermostatStatus(-50, true));
+                var signalFlux = Flux.just(
+                        new Signal<>(Instant.now(), status1, "Z1", Signal.Status.OK, null)
+                ).log();
+
+
+                int eventCount = 2;
+                var gate = new CountDownLatch(eventCount);
+
+                damperController
+                        .compute(unitFlux, signalFlux)
+                        .take(eventCount)
+                        .doOnNext(ignored -> gate.countDown())
+                        .blockLast();
+
+                logger.info("waiting for the gate...");
+                gate.await();
+                logger.info("past the gate");
+
+                logger.info("d1: {}", d1);
+
+                // VT: NOTE: This test case matches the "existing code", but it is bizarre - a running unit with a
+                // single zone shouldn't ever get anything other than 1.0. Bug report coming up.
+
+                assertThat(d1.get()).isEqualTo(0d);
+            }
+
+        }).doesNotThrowAnyException();
+    }
 }
