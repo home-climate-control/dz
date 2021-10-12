@@ -49,6 +49,15 @@ public abstract class AbstractDamperController implements DamperController {
 
 
     protected AbstractDamperController(Map<Zone, Damper<?>> zone2damper) {
+
+        if (zone2damper.isEmpty()) {
+            throw new IllegalStateException("No zone to damper mapping provided, need at least two pairs");
+        }
+
+        if (zone2damper.size() == 1) {
+            throw new IllegalStateException("Damper controller with just one damper doesn't make sense. Just skip it altogether.");
+        }
+
         zone2damper.forEach((key, value) -> this.zone2damper.put(key.getAddress(), value));
 
         outputFlux = Flux
