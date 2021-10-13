@@ -84,7 +84,7 @@ public abstract class AbstractDamper<A extends Comparable<A>> implements Damper<
     }
 
     @Override
-    public final Mono<Double> park() {
+    public Mono<Double> park() {
         return set(getParkPosition());
     }
 
