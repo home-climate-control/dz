@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
-class BalancingDamperControllerTest {
+class SimpleDamperControllerTest {
 
     private final Logger logger = LogManager.getLogger();
     private final Random rg = new SecureRandom();
@@ -31,7 +31,7 @@ class BalancingDamperControllerTest {
     void testEmptyMapping() {
 
         assertThatIllegalStateException()
-                .isThrownBy(() -> new BalancingDamperController(Map.of()))
+                .isThrownBy(() -> new SimpleDamperController(Map.of()))
                 .withMessage("No zone to damper mapping provided, need at least two pairs");
     }
 
@@ -50,7 +50,7 @@ class BalancingDamperControllerTest {
 
                     var d1 = new NullDamper("d1");
 
-                    new BalancingDamperController(Map.of(z1, d1));
+                    new SimpleDamperController(Map.of(z1, d1));
                 })
                 .withMessage("Damper controller with just one damper doesn't make sense. Just skip it altogether.");
     }
@@ -77,7 +77,7 @@ class BalancingDamperControllerTest {
             d1.setParkPosition(park1);
             d2.setParkPosition(park2);
 
-            try (BalancingDamperController damperController = new BalancingDamperController(Map.of(
+            try (SimpleDamperController damperController = new SimpleDamperController(Map.of(
                     z1, d1,
                     z2, d2
             ))) {
@@ -92,7 +92,6 @@ class BalancingDamperControllerTest {
                         new Signal<>(Instant.now(), status2, "Z2", Signal.Status.OK, null)
                 ).log();
 
-                // This combination will not produce anything other than park() three times
                 int eventCount = 2;
                 var gate = new CountDownLatch(eventCount);
 
@@ -132,7 +131,7 @@ class BalancingDamperControllerTest {
             var d1 = new NullDamper("d1");
             var d2 = new NullDamper("d2");
 
-            try (BalancingDamperController damperController = new BalancingDamperController(Map.of(
+            try (SimpleDamperController damperController = new SimpleDamperController(Map.of(
                     z1, d1,
                     z2, d2
             ))) {
@@ -186,7 +185,7 @@ class BalancingDamperControllerTest {
             var d1 = new NullDamper("d1");
             var d2 = new NullDamper("d2");
 
-            try (BalancingDamperController damperController = new BalancingDamperController(Map.of(
+            try (SimpleDamperController damperController = new SimpleDamperController(Map.of(
                     z1, d1,
                     z2, d2
             ))) {
