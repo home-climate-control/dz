@@ -98,13 +98,28 @@ public abstract class AbstractDamperController implements DamperController {
     private void consumeUnit(Signal<UnitControlSignal, Void> signal) {
         logger.debug("consumeUnit: {}", signal);
         this.unitStatus = signal;
-        controlSink.next(new ImmutablePair<>(unitStatus, zone2status));
+        controlSink.next(new ImmutablePair<>(unitStatus, getZone2status(null)));
     }
+
 
     private void consumeZone(Signal<ZoneStatus, String> signal) {
         logger.debug("consumeZone: {}", signal);
-        zone2status.put(signal.payload, signal);
-        controlSink.next(new ImmutablePair<>(unitStatus, zone2status));
+        controlSink.next(new ImmutablePair<>(unitStatus, getZone2status(signal)));
+    }
+
+    /**
+     * Get the zone to status mapping.
+     *
+     * Unless this is done in a controlled way, {@code ConcurrentModificationException} on a collision of the iterator with
+     * the addition is inevitable.
+     */
+    private synchronized Map<String, Signal<ZoneStatus, String>>  getZone2status(Signal<ZoneStatus, String> signal) {
+
+        if (signal != null) {
+            zone2status.put(signal.payload, signal);
+        }
+
+        return new TreeMap<>(zone2status);
     }
 
     private Flux<Signal<Damper<?>, Double>> compute(Pair<Signal<UnitControlSignal, Void>, Map<String, Signal<ZoneStatus, String>>> source) {

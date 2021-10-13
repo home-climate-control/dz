@@ -24,7 +24,7 @@ public class SimpleDamperController extends AbstractDamperController {
     @Override
     protected Map<Damper<?>, Double> compute(Map<String, Signal<ZoneStatus, String>> zone2signal) {
 
-        logger.debug("compute: zone2signal={}", zone2signal);
+        logger.debug("zone2signal={}", zone2signal);
 
         var result = new TreeMap<Damper<?>, Double>();
 
@@ -36,7 +36,7 @@ public class SimpleDamperController extends AbstractDamperController {
             result.put(damper, position);
         });
 
-        logger.debug("compute: result={}", result);
+        logger.debug("result={}", result);
 
         return result;
     }

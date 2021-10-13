@@ -47,7 +47,7 @@ public class BalancingDamperController extends AbstractDamperController {
         ThreadContext.push("compute");
         try {
 
-            logger.debug("compute: zone2signal={}", zone2signal);
+            logger.debug("zone2signal={}", zone2signal);
 
             var damper2position = new TreeMap<Damper<?>, Double>();
             var demand2zone = new TreeMap<Double, Set<String>>();
@@ -100,7 +100,7 @@ public class BalancingDamperController extends AbstractDamperController {
                 });
             });
 
-            logger.debug("compute: result={}", damper2position);
+            logger.debug("result={}", damper2position);
 
             return damper2position;
 

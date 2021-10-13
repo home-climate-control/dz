@@ -98,7 +98,7 @@ class BalancingDamperControllerTest {
 
                 damperController
                         .compute(unitFlux, signalFlux)
-                        .take(2)
+                        .take(eventCount)
                         .doOnNext(ignored -> gate.countDown())
                         .blockLast();
 
@@ -148,7 +148,7 @@ class BalancingDamperControllerTest {
                 ).log();
 
 
-                int eventCount = 2;
+                int eventCount = 3;
                 var gate = new CountDownLatch(eventCount);
 
                 damperController
@@ -202,7 +202,7 @@ class BalancingDamperControllerTest {
                 ).log();
 
 
-                int eventCount = 2;
+                int eventCount = 3;
                 var gate = new CountDownLatch(eventCount);
 
                 damperController
