@@ -21,13 +21,6 @@ public abstract class AbstractDamper<A extends Comparable<A>> implements Damper<
     protected final Scheduler scheduler;
 
     /**
-     * Position to park if there was no park position {@link #setParkPosition(double) explicitly specified}.
-     *
-     * Normally, the damper should be fully open in this position.
-     */
-    protected static final double DEFAULT_PARK_POSITION = 1.0;
-
-    /**
      * A damper position defined as 'parked'.
      *
      * Default is {@code null} - none. See commits related to https://github.com/home-climate-control/dz/issues/51
@@ -85,6 +78,7 @@ public abstract class AbstractDamper<A extends Comparable<A>> implements Damper<
 
     @Override
     public Mono<Double> park() {
+        logger.debug("park()");
         return set(getParkPosition());
     }
 

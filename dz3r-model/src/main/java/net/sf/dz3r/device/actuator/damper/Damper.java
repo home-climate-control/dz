@@ -55,6 +55,13 @@ public interface Damper<A extends Comparable<A>> extends Addressable<A> {
     Mono<Double> set(double position);
 
     /**
+     * Position to park if there was no park position {@link #setParkPosition(double) explicitly specified}.
+     *
+     * Normally, the damper should be fully open in this position.
+     */
+    public static final double DEFAULT_PARK_POSITION = 1.0;
+
+    /**
      * Get the 'safe' position.
      *
      * @return Damper position that is considered 'parked'. Recommended
