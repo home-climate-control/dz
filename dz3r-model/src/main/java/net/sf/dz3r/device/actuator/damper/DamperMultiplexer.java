@@ -35,6 +35,10 @@ public class DamperMultiplexer<A extends Comparable<A>> extends AbstractDamper<A
     public DamperMultiplexer(A address, Set<Damper<?>> dampers, Double parkPosition) {
         super(address);
 
+        if (dampers.isEmpty()) {
+            logger.warn("no dampers to multiplex, is your configuration complete?");
+        }
+
         this.dampers.addAll(dampers);
 
         if (parkPosition != null) {
