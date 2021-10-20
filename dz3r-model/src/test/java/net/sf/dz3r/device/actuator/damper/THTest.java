@@ -1,25 +1,37 @@
 package net.sf.dz3r.device.actuator.damper;
 
 import net.sf.dz3r.device.actuator.NullSwitch;
-import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.model.ZoneSettings;
+import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.UnitControlSignal;
+import net.sf.dz3r.signal.hvac.ZoneStatus;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.SecureRandom;
-import java.util.Arrays;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -31,13 +43,12 @@ class THTest {
     private final Logger logger = LogManager.getLogger();
     private final Random rg = new SecureRandom();
 
-    private static final String POSITION = "parked position";
-    private static final String STATE = "switch state";
+    private static final long SETTLEMENT_DELAY_MILLIS = 40;
 
     @Test
     void testSyncFastSimple()
             throws IOException, NoSuchMethodException, SecurityException,
-            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InterruptedException {
 
         testSync("fast/simple", SimpleDamperController.class, 0, 0);
     }
@@ -45,7 +56,7 @@ class THTest {
     @Test
     void testSyncSlowSimple()
             throws IOException, NoSuchMethodException, SecurityException,
-            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InterruptedException {
 
         testSync("slow/simple", SimpleDamperController.class, 1, 5);
     }
@@ -53,7 +64,7 @@ class THTest {
     @Test
     void testSyncFastBalancing()
             throws IOException, NoSuchMethodException, SecurityException,
-            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InterruptedException {
 
         testSync("fast/balancing", BalancingDamperController.class, 0, 0);
     }
@@ -61,14 +72,14 @@ class THTest {
     @Test
     void testSyncSlowBalancing()
             throws IOException, NoSuchMethodException, SecurityException,
-            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InterruptedException {
 
         testSync("slow/balancing", BalancingDamperController.class, 1, 5);
     }
 
     private void testSync(String marker, Class<? extends AbstractDamperController> controllerClass, long minDelay, int maxDelay)
             throws IOException, NoSuchMethodException, SecurityException,
-            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+            InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, InterruptedException {
 
         var m = new Marker(marker);
         ThreadContext.push(marker);
@@ -85,21 +96,13 @@ class THTest {
             doReturn("thermostat-west_bathroom").when(tsWestBathroom).getAddress();
             doReturn("thermostat-west").when(tsWest).getAddress();
 
-            Object lock = "lock";
+            Scheduler switchScheduler = Schedulers.newSingle("switch scheduler", true);
 
-            var switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay, lock);
-            var switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay, lock);
-            var switchWestBathroom = new NullSwitch("switch_west_bathroom_damper", minDelay, maxDelay, lock);
-            var switchWestDamper = new NullSwitch("switch_west_damper", minDelay, maxDelay, lock);
-            var switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", minDelay, maxDelay, lock);
-
-            var switches = new LinkedHashSet<Switch<?>>();
-
-            switches.add(switchLivingRoom);
-            switches.add(switchKitchen);
-            switches.add(switchWestBathroom);
-            switches.add(switchWestDamper);
-            switches.add(switchWestBoosterFan);
+            var switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay, switchScheduler);
+            var switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay, switchScheduler);
+            var switchWestBathroom = new NullSwitch("switch_west_bathroom_damper", minDelay, maxDelay, switchScheduler);
+            var switchWestDamper = new NullSwitch("switch_west_damper", minDelay, maxDelay, switchScheduler);
+            var switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", minDelay, maxDelay, switchScheduler);
 
             var damperLivingRoom = new SwitchDamper<>("damper_livingroom", switchLivingRoom, 0.8, 1.0);
             var damperKitchen = new SwitchDamper<>("damper_kitchen", switchKitchen, 0.8, 1.0);
@@ -108,24 +111,9 @@ class THTest {
             var damperWest = new SwitchDamper<>("damper_west", switchWestDamper, 0.8, 1.0);
             var damperWestBoosterFan = new SwitchDamper<>("damper_west_boosterfan", switchWestBoosterFan, 0.8, 0.0, true);
 
-            var west = new LinkedHashSet<Damper<?>>();
-
-            west.add(damperWest);
-            west.add(damperWestBoosterFan);
-
-            var damperMultiplexerWest = new DamperMultiplexer<>("damper_multiplexer_west", west);
-
-            var dampers = new LinkedHashSet<Damper<?>>();
-
-            dampers.add(damperLivingRoom);
-            dampers.add(damperKitchen);
-            dampers.add(damperWestBathroom);
-            dampers.add(damperWest);
-            dampers.add(damperWestBoosterFan);
-            dampers.add(damperMultiplexerWest);
+            var damperMultiplexerWest = new DamperMultiplexer<>("damper_multiplexer_west", Set.of(damperWest, damperWestBoosterFan));
 
             // TreeMap will not work here because of the way Mockito works
-            // Note 'Thermostat' here vs. 'ThermostatModel' for the mock
             var zone2damper = new LinkedHashMap<Zone, Damper<?>>();
 
             zone2damper.put(tsLivingRoom, damperLivingRoom);
@@ -136,85 +124,120 @@ class THTest {
             Constructor<? extends AbstractDamperController> c = controllerClass.getDeclaredConstructor(Map.class);
             var dc = c.newInstance(zone2damper);
 
-//            logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
+            var unitQueue = new LinkedBlockingQueue<Signal<UnitControlSignal, Void>>();
+            var zoneQueue = new LinkedBlockingQueue<Signal<ZoneStatus, String>>();
 
-            // VT: NOTE: It may be a better idea to inject fixed time; let's see if this works
-            var timestamp = System.currentTimeMillis();
+            Flux<Signal<UnitControlSignal, Void>> unitFlux = Flux.create(sink -> {
+                try {
+                    var item = unitQueue.take();
 
-            // This will wait until all the movements are complete - unlike real life scenario;
-            // that'll come later
+                    if (item.isError()) {
+                        sink.complete();
+                        return;
+                    }
+                    sink.next(item);
+                } catch (InterruptedException ex) {
+                    sink.error(ex);
+                }
+            });
 
-            dc.stateChanged(tsWest, new ThermostatSignal(
-                    true, false, true, true,
-                    new DataSample<>(timestamp, "sensor_west", "sensor_west", 3.0625, null)));
+            Flux<Signal<ZoneStatus, String>> zoneFlux = Flux.create(sink -> {
+                try {
+                    var item = zoneQueue.take();
+
+                    if (item.isError()) {
+                        sink.complete();
+                        return;
+                    }
+                    sink.next(item);
+                } catch (InterruptedException ex) {
+                    sink.error(ex);
+                }
+            });
+
+            var timestamp = Instant.now().toEpochMilli();
+
+            Flux<Pair<Signal<UnitControlSignal, Void>, Signal<ZoneStatus, String>>> initialState = Flux.just(
+                    new ImmutablePair<>(
+                            new Signal<>(Instant.ofEpochMilli(timestamp), new UnitControlSignal(0.0, 0.0)),
+                            null)
+            );
+
+            new Thread(() -> {
+                dc.compute(unitFlux.doOnNext(s -> logger.info("unitFlux: {}", s)), zoneFlux.doOnNext(s -> logger.info("zoneFlux: {}", s)))
+                        .doOnNext(item -> logger.warn("dc: {}", item))
+                        .doOnComplete(() -> logger.warn("dc: complete"))
+                        .blockLast();
+            }).start();
+
+            execute(initialState, unitQueue, zoneQueue);
+            Thread.sleep(SETTLEMENT_DELAY_MILLIS);
 
             // The unit is off, dampers are parked
 
-            logStatus(dampers, switches);
+            assertThat(switchLivingRoom.getState().block()).isTrue();
+            assertThat(switchKitchen.getState().block()).isTrue();
+            assertThat(switchWestBathroom.getState().block()).isTrue();
+            assertThat(switchWestDamper.getState().block()).isTrue();
+            assertThat(switchWestBoosterFan.getState().block()).isTrue();
 
-            assertThat(damperLivingRoom.getPosition()).as(POSITION).isEqualTo(damperLivingRoom.getParkPosition());
-            assertThat(damperKitchen.getPosition()).as(POSITION).isEqualTo(damperKitchen.getParkPosition());
-            assertThat(damperWestBathroom.getPosition()).as(POSITION).isEqualTo(damperWestBathroom.getParkPosition());
-            assertThat(damperMultiplexerWest.getPosition()).as(POSITION).isEqualTo(damperMultiplexerWest.getParkPosition());
-            assertThat(damperWest.getPosition()).as(POSITION).isEqualTo(damperWest.getParkPosition());
-            assertThat(damperWestBoosterFan.getPosition()).as(POSITION).isEqualTo(damperWestBoosterFan.getParkPosition());
-
-            assertThat(switchLivingRoom.getState()).as(STATE).isTrue();
-            assertThat(switchKitchen.getState()).as(STATE).isTrue();
-            assertThat(switchWestBathroom.getState()).as(STATE).isTrue();
-            assertThat(switchWestDamper.getState()).as(STATE).isTrue();
-            assertThat(switchWestBoosterFan.getState()).as(STATE).isTrue();
-
-            // The above stateChanged() also changed the state of the Unit to "running",
-            // next stateChanged() will be handled differently
+            var zoneSettings = new ZoneSettings(20);
 
             // For a good measure, let's advance the timestamp between signals
             timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(0, true, 0), null));
 
-            timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(3.0625, true, 0), null));
+            Flux<Pair<Signal<UnitControlSignal, Void>, Signal<ZoneStatus, String>>> step1 = Flux.just(
+                    new ImmutablePair<>(
+                            new Signal<>(Instant.ofEpochMilli(timestamp), new UnitControlSignal(3.0625, 1.0)),
+                            new Signal<>(Instant.ofEpochMilli(timestamp), new ZoneStatus(zoneSettings, new ThermostatStatus(3.0625, true)), "thermostat-west")),
+            new ImmutablePair<>(
+                    new Signal<>(Instant.ofEpochMilli(timestamp), new UnitControlSignal(6.875, 1.0)),
+                    null),
+            new ImmutablePair<>(
+                    new Signal<>(Instant.ofEpochMilli(timestamp), new UnitControlSignal(10.3125, 1.0)),
+                    null),
+            new ImmutablePair<>(
+                    new Signal<>(Instant.ofEpochMilli(timestamp), new UnitControlSignal(13.6875, 1.0)),
+                    null)
+            );
 
-            timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(6.875, true, 0), null));
-
-            timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(10.3125, true, 0), null));
-
-            timestamp += 50 + rg.nextInt(100);
-            dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(13.6875, true, 0), null));
-
+            execute(step1, unitQueue, zoneQueue);
+            Thread.sleep(SETTLEMENT_DELAY_MILLIS);
 
             // After that, the demand rises by small increments until the whole thing blows up
             // The count in the crash log is 9, let's make sure it's exceeded
 
             var demand = 13.6875;
+            var batch = new ArrayList<Pair<Signal<UnitControlSignal, Void>, Signal<ZoneStatus, String>>>();
+
             for (int count = 0; count < 50; count++) {
 
                 timestamp += 50 + rg.nextInt(100);
                 demand += rg.nextDouble()/10;
 
-                dc.consume(new DataSample<>(timestamp, "unit", "unit", new UnitSignal(demand, true, 0), null));
+                batch.add(new ImmutablePair<>(
+                        new Signal<>(Instant.ofEpochMilli(timestamp), new UnitControlSignal(demand, 1.0)),
+                        null));
             }
 
-            // To be continued...
+            execute(Flux.fromIterable(batch), unitQueue, zoneQueue);
 
-            dc.powerOff();
+            // Terminating everything (what used to be powerOff())
 
-            assertThat(damperLivingRoom.getPosition()).as(POSITION).isEqualTo(damperLivingRoom.getParkPosition());
-            assertThat(damperKitchen.getPosition()).as(POSITION).isEqualTo(damperKitchen.getParkPosition());
-            assertThat(damperWestBathroom.getPosition()).as(POSITION).isEqualTo(damperWestBathroom.getParkPosition());
-            assertThat(damperMultiplexerWest.getPosition()).as(POSITION).isEqualTo(damperMultiplexerWest.getParkPosition());
-            assertThat(damperWest.getPosition()).as(POSITION).isEqualTo(damperWest.getParkPosition());
-            assertThat(damperWestBoosterFan.getPosition()).as(POSITION).isEqualTo(damperWestBoosterFan.getParkPosition());
+            Flux<Pair<Signal<UnitControlSignal, Void>, Signal<ZoneStatus, String>>> end = Flux.just(
+                    new ImmutablePair<>(
+                            new Signal<>(Instant.ofEpochMilli(timestamp), null, null, Signal.Status.FAILURE_TOTAL, new IOException("end of flux")),
+                            new Signal<>(Instant.ofEpochMilli(timestamp), null, null, Signal.Status.FAILURE_TOTAL, new IOException("end of flux")))
+            );
 
-            assertThat(switchLivingRoom.getState()).as(STATE).isTrue();
-            assertThat(switchKitchen.getState()).as(STATE).isTrue();
-            assertThat(switchWestBathroom.getState()).as(STATE).isTrue();
-            assertThat(switchWestDamper.getState()).as(STATE).isTrue();
-            assertThat(switchWestBoosterFan.getState()).as(STATE).isTrue();
+            execute(end, unitQueue, zoneQueue);
+            Thread.sleep(SETTLEMENT_DELAY_MILLIS);
 
-            logger.info("Damper map: {}", Arrays.asList(dc.getDamperMap()));
+            assertThat(switchLivingRoom.getState().block()).isTrue();
+            assertThat(switchKitchen.getState().block()).isTrue();
+            assertThat(switchWestBathroom.getState().block()).isTrue();
+            assertThat(switchWestDamper.getState().block()).isTrue();
+            assertThat(switchWestBoosterFan.getState().block()).isTrue();
 
         } finally {
             m.close();
@@ -222,24 +245,30 @@ class THTest {
         }
     }
 
-    private void logStatus(Set<Damper<?>> dampers, Set<Switch<?>> switches) {
-        ThreadContext.push("position");
+    private void execute(
+            Flux<Pair<Signal<UnitControlSignal, Void>, Signal<ZoneStatus, String>>> source,
+            LinkedBlockingQueue<Signal<UnitControlSignal, Void>> unitQueue,
+            LinkedBlockingQueue<Signal<ZoneStatus, String>> zoneQueue) {
 
-//        dampers.stream().forEach(d -> {
-//            try {
-//                logger.info("{}: {}", d.getName(), d.getPosition());
-//            } catch (IOException ex) {
-//                // This damper won't throw it
-//            }
-//        });
-
-        ThreadContext.pop();
-        ThreadContext.push("state");
-
-        switches.stream().forEach(s -> {
-            logger.info("{}: {}", s.getAddress(), s.getState());
-        });
-
-        ThreadContext.pop();
+        source
+                .doOnNext(p -> {
+                    Optional.ofNullable(p.getLeft()).ifPresent(unitSignal -> {
+                        try {
+                            unitQueue.put(unitSignal);
+                        } catch (InterruptedException ex) {
+                            throw new IllegalStateException("Oops", ex);
+                        }
+                    });
+                    Optional.ofNullable(p.getRight()).ifPresent(zoneSignal -> {
+                        try {
+                            zoneQueue.put(zoneSignal);
+                        } catch (InterruptedException ex) {
+                            throw new IllegalStateException("Oops", ex);
+                        }
+                    });
+                })
+                .log()
+                .blockLast();
+        logger.info("--------------------");
     }
 }
