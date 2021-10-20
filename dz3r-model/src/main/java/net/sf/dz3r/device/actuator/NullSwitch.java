@@ -76,7 +76,7 @@ public class NullSwitch extends AbstractSwitch<String> {
 
         delay(delayMillis);
 
-        return Optional.ofNullable(state).orElseThrow(() -> new IOException("setStateSync() hasn't been called yet"));
+        return Optional.ofNullable(state).orElseThrow(() -> new IOException("setStateSync() hasn't been called yet on " + getAddress()));
     }
 
     private long getDelayMillis() {
