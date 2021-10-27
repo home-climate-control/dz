@@ -19,7 +19,7 @@ include 'automation-hat-driver'
 include 'jukebox:jukebox-jmx'
 include 'owapi-reborn'
 include 'servomaster:servomaster-common'
-include 'xbee-api'
+include 'xbee-api-reactive'
 
 // Imperative modules - on the way out
 
