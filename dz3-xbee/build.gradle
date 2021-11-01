@@ -1,5 +1,5 @@
 dependencies {
 
-    implementation project(':xbee-api')
+    implementation project(':xbee-api-reactive')
     implementation project(':dz3-sensors')
 }

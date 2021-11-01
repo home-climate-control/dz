@@ -8,10 +8,10 @@ pluginManagement {
 
 // Legacy dependencies - on the way out
 
-//include 'jukebox:jukebox-common'
-//include 'jukebox:jukebox-datastream'
-//include 'jukebox:jukebox-sem'
-//include 'jukebox:jukebox-service'
+include 'jukebox:jukebox-common'
+include 'jukebox:jukebox-datastream'
+include 'jukebox:jukebox-sem'
+include 'jukebox:jukebox-service'
 
 // External dependencies
 
@@ -23,14 +23,14 @@ include 'xbee-api-reactive'
 
 // Imperative modules - on the way out
 
-//include 'dz3-common'
+include 'dz3-common'
 //include 'dz3-model'
 //include 'dz3-modelhome'
 //include 'dz3-owapi'
 //include 'dz3-owfs'
-//include 'dz3-sensors'
+include 'dz3-sensors'
 //include 'dz3-servomaster'
-//include 'dz3-xbee'
+include 'dz3-xbee'
 
 // Reactive only modules
 
