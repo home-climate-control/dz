@@ -5,10 +5,11 @@ import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.common.IntegerChannelAddress;
 import net.sf.dz3r.device.AbstractDeviceDriver;
 import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.driver.DriverNetworkMonitor;
+import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.onewire.command.OneWireSetSwitchCommand;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
-import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
 import net.sf.dz3r.device.onewire.event.OneWireSwitchState;
 import net.sf.dz3r.instrumentation.Marker;
@@ -36,7 +37,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
 
     private final OneWireEndpoint endpoint;
 
-    private Flux<OneWireNetworkEvent> oneWireFlux;
+    private Flux<DriverNetworkEvent> oneWireFlux;
 
     private OneWireNetworkMonitor monitor;
 
@@ -80,7 +81,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
                 .flatMap(this::getSensorSignal);
     }
 
-    private Mono<Signal<Double, String>> getSensorSignal(OneWireNetworkEvent event) {
+    private Mono<Signal<Double, String>> getSensorSignal(DriverNetworkEvent event) {
 
         if (!(event instanceof OneWireNetworkTemperatureSample)) {
             return Mono.empty();
@@ -91,7 +92,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         return Mono.just(new Signal<>(event.timestamp, sample.sample, sample.address));
     }
 
-    private synchronized Flux<OneWireNetworkEvent> getOneWireFlux() {
+    private synchronized Flux<DriverNetworkEvent> getOneWireFlux() {
         logger.info("getOneWireFlux()");
 
         if (oneWireFlux != null) {
@@ -108,7 +109,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         return oneWireFlux;
     }
 
-    private void handleArrival(OneWireNetworkEvent event) {
+    private void handleArrival(DriverNetworkEvent event) {
 
         // VT: FIXME: Reimplement this as a subscriber
 
@@ -122,7 +123,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         address2path.put(arrivalEvent.address, arrivalEvent.path);
     }
 
-    private void handleDeparture(OneWireNetworkEvent event) {
+    private void handleDeparture(DriverNetworkEvent event) {
 
         // VT: FIXME: Reimplement this as a subscriber
         if (!(event instanceof OneWireNetworkDeparture)) {
@@ -137,9 +138,9 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         logger.error("Departure not handled completely: {}", ((OneWireNetworkDeparture) event).address );
     }
 
-    private FluxSink<OneWireNetworkEvent> sink;
+    private FluxSink<DriverNetworkEvent> sink;
 
-    private void connect(FluxSink<OneWireNetworkEvent> sink) {
+    private void connect(FluxSink<DriverNetworkEvent> sink) {
 
         if (this.sink != null) {
             throw new IllegalStateException("Fatal programming error, can't connect() more than once");
@@ -251,7 +252,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
             return address;
         }
 
-        private OneWireNetworkMonitor getMonitor(String marker) {
+        private DriverNetworkMonitor getMonitor(String marker) {
 
             if (gate.getCount() == 0) {
                 return monitor;

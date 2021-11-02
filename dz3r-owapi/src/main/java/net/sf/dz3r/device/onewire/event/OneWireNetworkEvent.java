@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.onewire.event;
 
-import net.sf.dz3r.device.onewire.command.OneWireCommand;
+import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -10,19 +10,9 @@ import java.util.UUID;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2021
  */
-public class OneWireNetworkEvent {
-
-    public final Instant timestamp;
-
-    /**
-     * The {@link OneWireCommand#messageId} of the command that resulted in this event.
-     *
-     * May be {@code null} if this event was not originated by a command, or if the command is unimportant.
-     */
-    public final UUID correlationId;
+public class OneWireNetworkEvent extends DriverNetworkEvent {
 
     public OneWireNetworkEvent(Instant timestamp, UUID correlationId) {
-        this.timestamp = timestamp;
-        this.correlationId = correlationId;
+        super(timestamp, correlationId);
     }
 }

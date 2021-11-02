@@ -1,10 +1,10 @@
 package net.sf.dz3r.device.onewire.command;
 
-import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.TemperatureContainer;
 import com.dalsemi.onewire.utils.OWPath;
-import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
+import net.sf.dz3r.device.driver.command.DriverCommand;
+import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.FluxSink;
@@ -16,14 +16,14 @@ public class OneWireCommandBumpResolution extends OneWireCommand {
     public final String address;
     public final OWPath path;
 
-    public OneWireCommandBumpResolution(FluxSink<OneWireCommand> commandSink, String address, OWPath path) {
+    public OneWireCommandBumpResolution(FluxSink<DriverCommand<DSPortAdapter>> commandSink, String address, OWPath path) {
         super(UUID.randomUUID(), commandSink);
         this.address = address;
         this.path = path;
     }
 
     @Override
-    protected void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException {
+    protected void execute(DSPortAdapter adapter, DriverCommand<DSPortAdapter> command, FluxSink<DriverNetworkEvent> eventSink) throws Exception {
         ThreadContext.push("bumpResolution");
         var m = new Marker("bumpResolution");
         try {

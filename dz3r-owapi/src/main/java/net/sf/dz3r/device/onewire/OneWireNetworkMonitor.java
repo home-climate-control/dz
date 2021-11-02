@@ -2,17 +2,17 @@ package net.sf.dz3r.device.onewire;
 
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
-import com.dalsemi.onewire.adapter.OneWireIOException;
 import com.dalsemi.onewire.adapter.USerialAdapter;
 import com.dalsemi.onewire.utils.OWPath;
-import net.sf.dz3r.device.onewire.command.OneWireCommand;
+import net.sf.dz3r.device.driver.DriverNetworkMonitor;
+import net.sf.dz3r.device.driver.command.DriverCommand;
+import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.onewire.command.OneWireCommandBumpResolution;
 import net.sf.dz3r.device.onewire.command.OneWireCommandReadTemperatureAll;
 import net.sf.dz3r.device.onewire.command.OneWireCommandRescan;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkErrorEvent;
-import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,11 +32,11 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Watches over 1-Wire network, handles, events, executes commands.
+ * Watches over 1-Wire network, handles events, executes commands.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class OneWireNetworkMonitor implements OWPathResolver {
+public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> implements OWPathResolver {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -44,11 +44,11 @@ public class OneWireNetworkMonitor implements OWPathResolver {
     private final Duration readTemperatureInterval = Duration.ofSeconds(5);
 
     private final OneWireEndpoint endpoint;
-    private final FluxSink<OneWireNetworkEvent> observer;
-    private FluxSink<OneWireCommand> commandSink;
+    private final FluxSink<DriverNetworkEvent> observer;
+    private FluxSink<DriverCommand<DSPortAdapter>> commandSink;
     private Disposable commandSubscription;
 
-    private static AtomicBoolean gate = new AtomicBoolean(false);
+    private static final AtomicBoolean gate = new AtomicBoolean(false);
 
     /**
      * 1-Wire adapter.
@@ -58,7 +58,7 @@ public class OneWireNetworkMonitor implements OWPathResolver {
     private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
     private final Map<String, OWPath> address2path = Collections.synchronizedMap(new TreeMap<>());
 
-    public OneWireNetworkMonitor(OneWireEndpoint endpoint, FluxSink<OneWireNetworkEvent> observer) {
+    public OneWireNetworkMonitor(OneWireEndpoint endpoint, FluxSink<DriverNetworkEvent> observer) {
 
         if (!gate.compareAndSet(false, true)) {
             throw new IllegalStateException("Constructor called more than once, coding error, submit a report with this stack trace");
@@ -96,11 +96,11 @@ public class OneWireNetworkMonitor implements OWPathResolver {
                 .subscribe();
     }
 
-    private void connect(FluxSink<OneWireCommand> commandSink) {
+    private void connect(FluxSink<DriverCommand<DSPortAdapter>> commandSink) {
         this.commandSink = commandSink;
     }
 
-    private Flux<OneWireNetworkEvent> execute(OneWireCommand command) {
+    private Flux<DriverNetworkEvent> execute(DriverCommand<DSPortAdapter> command) {
         ThreadContext.push("execute");
         try {
 
@@ -122,7 +122,8 @@ public class OneWireNetworkMonitor implements OWPathResolver {
      *
      * @return A fully initialized adapter.
      */
-    private DSPortAdapter getAdapter() throws IOException, OneWireException {
+    @Override
+    protected DSPortAdapter getAdapter() throws IOException {
 
         if (adapter != null) {
             return adapter;
@@ -165,7 +166,7 @@ public class OneWireNetworkMonitor implements OWPathResolver {
                 // Now, *this* should take care of it...
                 newAdapter.reset();
 
-            } catch (OneWireIOException ex) {
+            } catch (OneWireException ex) {
 
                 if ("Error communicating with adapter".equals(ex.getMessage())) {
                     throw new IOException("Port '" + endpoint.port
@@ -195,7 +196,7 @@ public class OneWireNetworkMonitor implements OWPathResolver {
         }
     }
 
-    private void handleOneWireEvent(OneWireNetworkEvent event) {
+    private void handleOneWireEvent(DriverNetworkEvent event) {
 
         switch (event.getClass().getSimpleName()) {
             case "OneWireNetworkArrival":
@@ -239,7 +240,7 @@ public class OneWireNetworkMonitor implements OWPathResolver {
         }).start();
     }
 
-    private void broadcastOneWireEvent(OneWireNetworkEvent event) {
+    private void broadcastOneWireEvent(DriverNetworkEvent event) {
         observer.next(event);
     }
 
@@ -252,7 +253,8 @@ public class OneWireNetworkMonitor implements OWPathResolver {
      *
      * @return {@link #commandSink}.
      */
-    public FluxSink<OneWireCommand> getCommandSink() {
+    @Override
+    public FluxSink<DriverCommand<DSPortAdapter>> getCommandSink() {
         if (commandSink == null) {
             throw new IllegalStateException("commandSink still not initialized");
         }

@@ -1,6 +1,8 @@
 package net.sf.dz3r.device.onewire.command;
 
+import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.utils.OWPath;
+import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.onewire.OWPathResolver;
 import reactor.core.publisher.FluxSink;
 
@@ -30,7 +32,7 @@ public abstract class OneWireSwitchCommand extends OneWireCommand {
      * @param address Switch address to send the command to.
      * @param path Path the device is supposed to be on.
      */
-    protected OneWireSwitchCommand(UUID messageId, FluxSink<OneWireCommand> commandSink, OWPathResolver pathResolver, String address, OWPath path) {
+    protected OneWireSwitchCommand(UUID messageId, FluxSink<DriverCommand<DSPortAdapter>> commandSink, OWPathResolver pathResolver, String address, OWPath path) {
         super(messageId, commandSink);
 
         if (address == null) {

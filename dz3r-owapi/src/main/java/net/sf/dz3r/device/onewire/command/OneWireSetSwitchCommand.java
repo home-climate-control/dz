@@ -5,8 +5,9 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.SwitchContainer;
 import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.common.IntegerChannelAddress;
+import net.sf.dz3r.device.driver.command.DriverCommand;
+import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.onewire.OWPathResolver;
-import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.device.onewire.event.OneWireSwitchState;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
@@ -25,13 +26,13 @@ public class OneWireSetSwitchCommand extends OneWireSwitchCommand {
      * @param path Path the device is supposed to be on.
      * @param state State to set.
      */
-    public OneWireSetSwitchCommand(UUID messageId, FluxSink<OneWireCommand> commandSink, OWPathResolver pathResolver, String address, OWPath path, boolean state) {
+    public OneWireSetSwitchCommand(UUID messageId, FluxSink<DriverCommand<DSPortAdapter>> commandSink, OWPathResolver pathResolver, String address, OWPath path, boolean state) {
         super(messageId, commandSink, pathResolver, address, path);
         this.state = state;
     }
 
     @Override
-    protected void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException {
+    protected void execute(DSPortAdapter adapter, DriverCommand<DSPortAdapter> command, FluxSink<DriverNetworkEvent> eventSink) throws Exception {
 
         var marker = "setState(" + address + ")=" + state;
         ThreadContext.push(marker);

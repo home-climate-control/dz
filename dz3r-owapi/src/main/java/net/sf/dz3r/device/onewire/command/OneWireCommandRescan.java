@@ -6,9 +6,10 @@ import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
 import com.dalsemi.onewire.container.SwitchContainer;
 import com.dalsemi.onewire.utils.OWPath;
+import net.sf.dz3r.device.driver.command.DriverCommand;
+import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
-import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.FluxSink;
@@ -26,15 +27,16 @@ import java.util.UUID;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class OneWireCommandRescan extends OneWireCommand {
+
     public final Set<String> knownDevices;
 
-    public OneWireCommandRescan(FluxSink<OneWireCommand> commandSink, Set<String> knownDevices) {
+    public OneWireCommandRescan(FluxSink<DriverCommand<DSPortAdapter>> commandSink, Set<String> knownDevices) {
         super(UUID.randomUUID(), commandSink);
         this.knownDevices = knownDevices;
     }
 
     @Override
-    protected void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException {
+    protected void execute(DSPortAdapter adapter, DriverCommand<DSPortAdapter> command, FluxSink<DriverNetworkEvent> eventSink) throws Exception {
         ThreadContext.push("rescan");
         var m = new Marker("rescan");
         try {
@@ -51,7 +53,7 @@ public class OneWireCommandRescan extends OneWireCommand {
         }
     }
 
-    private void rescan(DSPortAdapter adapter, FluxSink<OneWireNetworkEvent> eventSink,
+    private void rescan(DSPortAdapter adapter, FluxSink<DriverNetworkEvent> eventSink,
                         OWPath path,
                         TreeMap<String, OneWireContainer> address2device,
                         TreeMap<String, OWPath> address2path,
@@ -122,14 +124,14 @@ public class OneWireCommandRescan extends OneWireCommand {
 
     }
 
-    private void checkArrival(TreeSet<String> known, String address, OneWireContainer owc, OWPath path, FluxSink<OneWireNetworkEvent> eventSink) {
+    private void checkArrival(TreeSet<String> known, String address, OneWireContainer owc, OWPath path, FluxSink<DriverNetworkEvent> eventSink) {
         if (!known.contains(address)) {
             logger.warn("Arrived: {}", owc);
             eventSink.next(new OneWireNetworkArrival(Instant.now(), address, path));
         }
     }
 
-    private void checkDepartures(TreeSet<String> known, FluxSink<OneWireNetworkEvent> eventSink) {
+    private void checkDepartures(TreeSet<String> known, FluxSink<DriverNetworkEvent> eventSink) {
         if (!known.isEmpty()) {
             for (var address : known) {
                 logger.warn("Departed: {}", address);

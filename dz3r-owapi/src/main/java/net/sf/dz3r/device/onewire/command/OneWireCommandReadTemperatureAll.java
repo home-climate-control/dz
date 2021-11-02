@@ -5,7 +5,8 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.Command;
 import com.dalsemi.onewire.container.TemperatureContainer;
 import com.dalsemi.onewire.utils.OWPath;
-import net.sf.dz3r.device.onewire.event.OneWireNetworkEvent;
+import net.sf.dz3r.device.driver.command.DriverCommand;
+import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
@@ -28,14 +29,14 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
     public final Set<String> knownDevices;
     public final Map<String, OWPath> address2path;
 
-    public OneWireCommandReadTemperatureAll(FluxSink<OneWireCommand> commandSink, Set<String> knownDevices, Map<String, OWPath> address2path) {
+    public OneWireCommandReadTemperatureAll(FluxSink<DriverCommand<DSPortAdapter>> commandSink, Set<String> knownDevices, Map<String, OWPath> address2path) {
         super(UUID.randomUUID(), commandSink);
         this.knownDevices = knownDevices;
         this.address2path = address2path;
     }
 
     @Override
-    protected void execute(DSPortAdapter adapter, OneWireCommand command, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException {
+    protected void execute(DSPortAdapter adapter, DriverCommand<DSPortAdapter> command, FluxSink<DriverNetworkEvent> eventSink) throws Exception {
         ThreadContext.push("readTemperatureAll");
         var m = new Marker("readTemperatureAll");
         try {
@@ -62,7 +63,7 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
         }
     }
 
-    private void execute(DSPortAdapter adapter, OWPath path, AtomicInteger successCount, AtomicInteger errorCount, FluxSink<OneWireNetworkEvent> eventSink) throws OneWireException {
+    private void execute(DSPortAdapter adapter, OWPath path, AtomicInteger successCount, AtomicInteger errorCount, FluxSink<DriverNetworkEvent> eventSink) throws OneWireException {
         ThreadContext.push("readTemperatureAll(" + path + ")");
         var m = new Marker("readTemperatureAll(" + path + ")");
         try {
@@ -98,7 +99,7 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
         }
     }
 
-    private void readTemperature(DSPortAdapter adapter, String address, FluxSink<OneWireNetworkEvent> eventSink, AtomicInteger successCount, AtomicInteger errorCount) throws OneWireException {
+    private void readTemperature(DSPortAdapter adapter, String address, FluxSink<DriverNetworkEvent> eventSink, AtomicInteger successCount, AtomicInteger errorCount) throws OneWireException {
 
         ThreadContext.push("readTemperature");
         try {

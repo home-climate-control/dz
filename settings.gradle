@@ -34,7 +34,9 @@ include 'dz3-xbee'
 
 // Reactive only modules
 
+include 'dz3r-common'
 include 'dz3r-director'
+include 'dz3r-driver'
 include 'dz3r-http'
 include 'dz3r-http-gae'
 include 'dz3r-influxdb'
