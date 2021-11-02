@@ -1,23 +1,23 @@
 package net.sf.dz3.device.sensor.impl.xbee;
 
-import java.io.IOException;
-
-import org.apache.logging.log4j.ThreadContext;
-
+import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
+import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
+import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
 import com.rapplogic.xbee.api.XBeeAddress64;
-
 import net.sf.dz3.device.sensor.AnalogSensor;
 import net.sf.dz3.device.sensor.SensorType;
 import net.sf.dz3.device.sensor.impl.AbstractDeviceContainer;
 import net.sf.dz3.device.sensor.impl.StringChannelAddress;
 import net.sf.dz3.instrumentation.Marker;
 import net.sf.dz3.util.digest.MessageDigestCache;
-import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
-import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.io.IOException;
+
+import static com.rapplogic.xbee.api.AtCommand.Command.IS;
 
 /**
  * XBee sensor container.
@@ -73,7 +73,7 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
             XBeeAddress64 xbeeAddress = Parser.parse(address.hardwareAddress);
             String channel = address.channel;
 
-            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, "IS");
+            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, IS);
             AtCommandResponse rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_IS_MILLIS);
 
             logger.debug("{} response: {}", channel, rsp);

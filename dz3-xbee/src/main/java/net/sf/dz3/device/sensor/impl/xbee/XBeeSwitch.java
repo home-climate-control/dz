@@ -4,6 +4,7 @@ import com.homeclimatecontrol.jukebox.datastream.logger.impl.DataBroadcaster;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSample;
 import com.homeclimatecontrol.jukebox.datastream.signal.model.DataSink;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
+import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
 import net.sf.dz3.device.sensor.Addressable;
@@ -57,7 +58,7 @@ public class XBeeSwitch implements Switch {
             var xbeeAddress = Parser.parse(address.hardwareAddress);
             var channel = address.channel;
 
-            var request = new RemoteAtRequest(xbeeAddress, channel);
+            var request = new RemoteAtRequest(xbeeAddress, AtCommand.Command.valueOf(channel));
             var rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
             logger.info("{} response: {}", channel, rsp);
@@ -111,7 +112,7 @@ public class XBeeSwitch implements Switch {
             var channel = address.channel;
 
             int deviceState = state ? 5 : 4;
-            var request = new RemoteAtRequest(xbeeAddress, channel, new int[] {deviceState});
+            var request = new RemoteAtRequest(xbeeAddress, AtCommand.Command.valueOf(channel), new int[] {deviceState});
             var rsp = (AtCommandResponse) container.sendSynchronous(request, XBeeConstants.TIMEOUT_AT_MILLIS);
 
             logger.info("{} response: {}", channel, rsp);

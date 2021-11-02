@@ -28,6 +28,7 @@ import net.sf.dz3.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,6 +36,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+
+import static com.rapplogic.xbee.api.AtCommand.Command.AP;
+import static com.rapplogic.xbee.api.AtCommand.Command.ND;
+import static com.rapplogic.xbee.api.AtCommand.Command.NT;
 
 /**
  * Factory for sensors and actuators implemented with XBee modules.
@@ -240,7 +245,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
     private void AP2(XBee target) throws XBeeException, IOException {
 
-        XBeeResponse rsp = target.sendSynchronous(new AtCommand("AP", 2), XBeeConstants.TIMEOUT_AP_MILLIS);
+        XBeeResponse rsp = target.sendSynchronous(new AtCommand(AP, 2), Duration.ofMillis(XBeeConstants.TIMEOUT_AP_MILLIS));
 
         if (rsp.isError()) {
             throw new IOException("Can't set AP=2, response: " + rsp);
@@ -262,7 +267,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
         try {
 
             // get the Node discovery timeout
-            AtCommandResponse nodeTimeout = (AtCommandResponse) target.sendSynchronous(new AtCommand("NT"), XBeeConstants.TIMEOUT_NT_MILLIS);
+            AtCommandResponse nodeTimeout = (AtCommandResponse) target.sendSynchronous(new AtCommand(NT), Duration.ofMillis(XBeeConstants.TIMEOUT_NT_MILLIS));
 
             // default is 6 seconds
             long nodeDiscoveryTimeout = (ByteUtils.convertMultiByteToInt(nodeTimeout.getValue())) * 100L;
@@ -271,7 +276,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
 
             logger.debug("Sending node discover command");
-            target.sendAsynchronous(new AtCommand("ND"));
+            target.sendAsynchronous(new AtCommand(ND));
 
             Thread.sleep(nodeDiscoveryTimeout);
 
@@ -474,7 +479,7 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
 
     public XBeeResponse sendSynchronous(RemoteAtRequest request, int timeout) throws XBeeException {
 
-        return coordinator.sendSynchronous(request, timeout);
+        return coordinator.sendSynchronous(request, Duration.ofMillis(timeout));
     }
 
     @Override

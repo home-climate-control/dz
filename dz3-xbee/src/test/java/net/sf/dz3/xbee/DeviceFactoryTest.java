@@ -20,10 +20,19 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static com.rapplogic.xbee.api.AtCommand.Command.D0;
+import static com.rapplogic.xbee.api.AtCommand.Command.D1;
+import static com.rapplogic.xbee.api.AtCommand.Command.D2;
+import static com.rapplogic.xbee.api.AtCommand.Command.D3;
+import static com.rapplogic.xbee.api.AtCommand.Command.IR;
+import static com.rapplogic.xbee.api.AtCommand.Command.IS;
+import static com.rapplogic.xbee.api.AtCommand.Command.RP;
+import static com.rapplogic.xbee.api.AtCommand.Command._V;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -49,33 +58,33 @@ class DeviceFactoryTest implements DataSink<Double> {
             XBeeAddress64 addr64 = new XBeeAddress64("00 13 A2 00 40 62 AC 98");
 
             {
-                RemoteAtRequest request = new RemoteAtRequest(addr64, "D0", new int[] {2});
-                XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
+                RemoteAtRequest request = new RemoteAtRequest(addr64, D0, new int[] {2});
+                XBeeResponse rsp = coordinator.sendSynchronous(request, Duration.ofSeconds(5));
 
                 logger.info("D0 response: " + rsp);
             }
             {
-                RemoteAtRequest request = new RemoteAtRequest(addr64, "D1", new int[] {2});
-                XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
+                RemoteAtRequest request = new RemoteAtRequest(addr64, D1, new int[] {2});
+                XBeeResponse rsp = coordinator.sendSynchronous(request, Duration.ofSeconds(5));
 
                 logger.info("D1 response: " + rsp);
             }
             {
-                RemoteAtRequest request = new RemoteAtRequest(addr64, "D2", new int[] {2});
-                XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
+                RemoteAtRequest request = new RemoteAtRequest(addr64, D2, new int[] {2});
+                XBeeResponse rsp = coordinator.sendSynchronous(request, Duration.ofSeconds(5));
 
                 logger.info("D2 response: " + rsp);
             }
             {
-                RemoteAtRequest request = new RemoteAtRequest(addr64, "D3", new int[] {2});
-                XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
+                RemoteAtRequest request = new RemoteAtRequest(addr64, D3, new int[] {2});
+                XBeeResponse rsp = coordinator.sendSynchronous(request, Duration.ofSeconds(5));
 
                 logger.info("D3 response: " + rsp);
             }
 
             {
-                RemoteAtRequest request = new RemoteAtRequest(addr64, "IS");
-                XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
+                RemoteAtRequest request = new RemoteAtRequest(addr64, IS);
+                XBeeResponse rsp = coordinator.sendSynchronous(request, Duration.ofSeconds(5));
 
                 logger.info("IS response: " + rsp);
 
@@ -106,14 +115,14 @@ class DeviceFactoryTest implements DataSink<Double> {
             }
 
             {
-                RemoteAtRequest request = new RemoteAtRequest(addr64, "RP", new int[] {0x05});
-                XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
+                RemoteAtRequest request = new RemoteAtRequest(addr64, RP, new int[] {0x05});
+                XBeeResponse rsp = coordinator.sendSynchronous(request, Duration.ofSeconds(5));
 
                 logger.info("IR response: " + rsp);
             }
             {
-                RemoteAtRequest request = new RemoteAtRequest(addr64, "%V", new int[] {2});
-                XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
+                RemoteAtRequest request = new RemoteAtRequest(addr64, _V, new int[] {2});
+                XBeeResponse rsp = coordinator.sendSynchronous(request, Duration.ofSeconds(5));
 
                 logger.info("%V response: " + rsp);
 
@@ -126,9 +135,9 @@ class DeviceFactoryTest implements DataSink<Double> {
                 logger.info("raw " + Integer.toHexString(sensorReading) + " (" + Converter.raw2mV(sensorReading) + "mV)");
             }
             {
-                RemoteAtRequest request = new RemoteAtRequest(addr64, "IR", new int[] {0x14, 0x00});
+                RemoteAtRequest request = new RemoteAtRequest(addr64, IR, new int[] {0x14, 0x00});
 //                RemoteAtRequest request = new RemoteAtRequest(addr64, "IR", new int[] {0});
-                XBeeResponse rsp = coordinator.sendSynchronous(request, 5000);
+                XBeeResponse rsp = coordinator.sendSynchronous(request, Duration.ofSeconds(5));
 
                 logger.info("IR response: " + rsp);
             }
@@ -226,7 +235,7 @@ class DeviceFactoryTest implements DataSink<Double> {
 
     private List<Boolean> read(XBeeDeviceFactory deviceFactory, String deviceAddress) throws IOException {
 
-        List<Boolean> read = new LinkedList<Boolean>();
+        var read = new ArrayList<Boolean>();
 
         for (int offset = 0; offset < 4; offset++) {
 
@@ -246,7 +255,7 @@ class DeviceFactoryTest implements DataSink<Double> {
 
     private List<Boolean> writeRandom(XBeeDeviceFactory deviceFactory, String deviceAddress) throws IOException {
 
-        List<Boolean> written = new LinkedList<Boolean>();
+        var written = new ArrayList<Boolean>();
 
         for (int offset = 0; offset < 4; offset++) {
 

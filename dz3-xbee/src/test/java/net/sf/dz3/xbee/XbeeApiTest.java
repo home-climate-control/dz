@@ -1,5 +1,6 @@
 package net.sf.dz3.xbee;
 
+import com.homeclimatecontrol.xbee.AddressParser;
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
@@ -9,13 +10,36 @@ import com.rapplogic.xbee.api.XBeeException;
 import com.rapplogic.xbee.api.XBeePacket;
 import com.rapplogic.xbee.api.XBeeResponse;
 import com.rapplogic.xbee.util.ByteUtils;
-import net.sf.dz3.device.sensor.impl.xbee.Parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.time.Duration;
+
+import static com.rapplogic.xbee.api.AtCommand.Command.AI;
+import static com.rapplogic.xbee.api.AtCommand.Command.AP;
+import static com.rapplogic.xbee.api.AtCommand.Command.BD;
+import static com.rapplogic.xbee.api.AtCommand.Command.CH;
+import static com.rapplogic.xbee.api.AtCommand.Command.D0;
+import static com.rapplogic.xbee.api.AtCommand.Command.DD;
+import static com.rapplogic.xbee.api.AtCommand.Command.EE;
+import static com.rapplogic.xbee.api.AtCommand.Command.HV;
+import static com.rapplogic.xbee.api.AtCommand.Command.ID;
+import static com.rapplogic.xbee.api.AtCommand.Command.MY;
+import static com.rapplogic.xbee.api.AtCommand.Command.NC;
+import static com.rapplogic.xbee.api.AtCommand.Command.ND;
+import static com.rapplogic.xbee.api.AtCommand.Command.NI;
+import static com.rapplogic.xbee.api.AtCommand.Command.NJ;
+import static com.rapplogic.xbee.api.AtCommand.Command.NO;
+import static com.rapplogic.xbee.api.AtCommand.Command.NP;
+import static com.rapplogic.xbee.api.AtCommand.Command.NT;
+import static com.rapplogic.xbee.api.AtCommand.Command.OI;
+import static com.rapplogic.xbee.api.AtCommand.Command.OP;
+import static com.rapplogic.xbee.api.AtCommand.Command.P0;
+import static com.rapplogic.xbee.api.AtCommand.Command.SD;
+import static com.rapplogic.xbee.api.AtCommand.Command.VR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -24,7 +48,7 @@ class XbeeApiTest {
     private final Logger logger = LogManager.getLogger(getClass());
 
     @Test
-    public void packetEscape() {
+    void packetEscape() {
 
         final int[] knownGoodPacket = new int[] {
                 0x7E, // Start delimiter
@@ -44,17 +68,18 @@ class XbeeApiTest {
                 0xFF,
                 0xFE,
                 0x02, // 0x02 means 'apply changes'
-                0x41,
+                0x44,
                 0x30,
-                0xDC
+                0xD9
         };
 
         ThreadContext.push("testPacketEscape");
 
         try {
 
-            XBeeAddress64 xbeeAddress = Parser.parse("0013A200.4062AC98");
-            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, "A0");
+            XBeeAddress64 xbeeAddress = AddressParser.parse("0013A200.4062AC98");
+
+            RemoteAtRequest request = new RemoteAtRequest(xbeeAddress, D0);
 
             request.setApplyChanges(true);
 
@@ -101,31 +126,31 @@ class XbeeApiTest {
 
                 // Find out who's around
 
-                AT(xbee, "MY");
-                AT(xbee, "NC");
-                AT(xbee, "NI");
-                AT(xbee, "NP");
-                AT(xbee, "DD");
-                AT(xbee, "CH");
-                AT(xbee, "ID");
-                AT(xbee, "OP");
-                AT(xbee, "OI");
-                AT(xbee, "NT");
-                AT(xbee, "NO");
-                AT(xbee, "SD");
-                AT(xbee, "NJ");
-                AT(xbee, "EE");
-                AT(xbee, "AP");
-                AT(xbee, "BD");
-                AT(xbee, "P0");
-                AT(xbee, "VR");
-                AT(xbee, "HV");
-                AT(xbee, "AI");
+                AT(xbee, MY);
+                AT(xbee, NC);
+                AT(xbee, NI);
+                AT(xbee, NP);
+                AT(xbee, DD);
+                AT(xbee, CH);
+                AT(xbee, ID);
+                AT(xbee, OP);
+                AT(xbee, OI);
+                AT(xbee, NT);
+                AT(xbee, NO);
+                AT(xbee, SD);
+                AT(xbee, NJ);
+                AT(xbee, EE);
+                AT(xbee, AP);
+                AT(xbee, BD);
+                AT(xbee, P0);
+                AT(xbee, VR);
+                AT(xbee, HV);
+                AT(xbee, AI);
 
-                AT(xbee, "ND");
-                AT(xbee, "AI");
+                AT(xbee, ND);
+                AT(xbee, AI);
 
-                AT(xbee, "AP", 2);
+                AT(xbee, AP, 2);
 
                 for (int offset = 0; offset < 4; offset++) {
 
@@ -143,9 +168,9 @@ class XbeeApiTest {
                         logger.info("creating request to " + addr64);
 
                         // Send the request to turn on D${offset}
-                        RemoteAtRequest request = new RemoteAtRequest(addr64, target, new int[] {5});
+                        RemoteAtRequest request = new RemoteAtRequest(addr64, AtCommand.Command.valueOf(target), new int[] {5});
 //                        ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(XBeeRequest.DEFAULT_FRAME_ID, addr64, addr16, true, target, new int[] {5});
-                        XBeeResponse rsp = xbee.sendSynchronous(request, 5000);
+                        XBeeResponse rsp = xbee.sendSynchronous(request, Duration.ofSeconds(5));
 
                         logger.info(target + " response: " + rsp);
 
@@ -166,9 +191,9 @@ class XbeeApiTest {
                     try {
 
                         // Query D${offset} status
-                        RemoteAtRequest request = new RemoteAtRequest(addr64, target);
+                        RemoteAtRequest request = new RemoteAtRequest(addr64, AtCommand.Command.valueOf(target));
 
-                        XBeeResponse rsp = xbee.sendSynchronous(request, 10000);
+                        XBeeResponse rsp = xbee.sendSynchronous(request, Duration.ofSeconds(10));
 
                         logger.info(target + " response: " + rsp);
 
@@ -191,9 +216,9 @@ class XbeeApiTest {
                         logger.info("creating request to " + addr64);
 
                         // Send the request to turn on D${offset}
-                        RemoteAtRequest request = new RemoteAtRequest(addr64, target, new int[] {4});
+                        RemoteAtRequest request = new RemoteAtRequest(addr64, AtCommand.Command.valueOf(target), new int[] {4});
 //                        ZNetRemoteAtRequest request = new ZNetRemoteAtRequest(XBeeRequest.DEFAULT_FRAME_ID, addr64, addr16, true, target, new int[] {5});
-                        XBeeResponse rsp = xbee.sendSynchronous(request, 5000);
+                        XBeeResponse rsp = xbee.sendSynchronous(request, Duration.ofSeconds(5));
 
                         logger.info(target + " response: " + rsp);
 
@@ -226,13 +251,13 @@ class XbeeApiTest {
         }
     }
 
-    private void AT(XBee xbee, String command) {
+    private void AT(XBee xbee, AtCommand.Command command) {
 
         ThreadContext.push("AT");
 
         try {
 
-            XBeeResponse rsp = xbee.sendSynchronous(new AtCommand(command), 10*1000);
+            XBeeResponse rsp = xbee.sendSynchronous(new AtCommand(command), Duration.ofSeconds(10));
 
             logger.info(command + " response: " + rsp);
         } catch (Throwable t) {
@@ -242,13 +267,13 @@ class XbeeApiTest {
         }
     }
 
-    private void AT(XBee xbee, String command, int value) {
+    private void AT(XBee xbee, AtCommand.Command command, int value) {
 
         ThreadContext.push("AT");
 
         try {
 
-            XBeeResponse rsp = xbee.sendSynchronous(new AtCommand(command, value), 10*1000);
+            XBeeResponse rsp = xbee.sendSynchronous(new AtCommand(command, value), Duration.ofSeconds(10));
 
             logger.info(command + " response: " + rsp);
         } catch (Throwable t) {
