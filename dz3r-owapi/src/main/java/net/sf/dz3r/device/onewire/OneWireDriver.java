@@ -3,6 +3,7 @@ package net.sf.dz3r.device.onewire;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.common.IntegerChannelAddress;
+import net.sf.dz3r.device.AbstractDeviceDriver;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.onewire.command.OneWireSetSwitchCommand;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
@@ -12,24 +13,17 @@ import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
 import net.sf.dz3r.device.onewire.event.OneWireSwitchState;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.SignalSource;
-import net.sf.dz3r.signal.filter.TimeoutGuard;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
-import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
@@ -38,15 +32,7 @@ import java.util.concurrent.CountDownLatch;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2021
  */
-public class OneWireDriver implements SignalSource<String, Double, String> {
-
-    private final Logger logger = LogManager.getLogger();
-    /**
-     * How long to wait before reporting a timeout.
-     */
-    private Duration timeout = Duration.ofSeconds(30);
-
-    private final Clock clock = Clock.systemUTC();
+public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> {
 
     private final OneWireEndpoint endpoint;
 
@@ -54,7 +40,6 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
 
     private OneWireNetworkMonitor monitor;
 
-    private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
     private final Map<String, OWPath> address2path = Collections.synchronizedMap(new TreeMap<>());
 
     /**
@@ -77,57 +62,6 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
     }
 
     /**
-     * Get the flux of readings from any device producing readings that can be interpreted as {@link Double}.
-     *
-     * One of most interest is the {@link com.dalsemi.onewire.container.TemperatureContainer}.
-     *
-     * @param address Address of the 1-Wire device to get the flux of readings for.
-     *
-     * @return Flux of device readings. See {@link #getSensorsFlux()} for more details.
-     */
-    @Override
-    public Flux<Signal<Double, String>> getFlux(String address) {
-        logger.info("getFlux: {}", address);
-        return new TimeoutGuard<Double, String>(timeout)
-                .compute(Flux.concat(
-                checkPresence(address),
-                getSensorsFlux()
-                        .filter(s -> address.equals(s.payload))));
-    }
-
-    /**
-     * Check device presence as a flag.
-     *
-     * @param address Address to check the presence of.
-     *
-     * @return A Mono with {@code true} if the device is present, and {@code false} if not.
-     */
-    public Mono<Boolean> isPresent(String address) {
-        return Mono.just(devicesPresent.contains(address));
-    }
-
-    /**
-     * Check device presence as a signal.
-     *
-     * @param address Address to check the presence of.
-     *
-     * @return Empty flux if the device is present, flux containing one {@link Signal.Status#FAILURE_TOTAL} signal if not.
-     *
-     * @see #getFlux(String)
-     */
-    public Mono<Signal<Double, String>> checkPresence(String address) {
-        return devicesPresent.contains(address)
-                ? Mono.empty()
-                : Mono.just(
-                new Signal<>(
-                        clock.instant(),
-                        null,
-                        address,
-                        Signal.Status.FAILURE_TOTAL,
-                        new IllegalArgumentException(address + ": not present")));
-    }
-
-    /**
      * Get the flux of readings from all devices producing readings that can be interpreted as {@link Double}.
      *
      * One of most interest is the {@link com.dalsemi.onewire.container.TemperatureContainer}.
@@ -139,7 +73,8 @@ public class OneWireDriver implements SignalSource<String, Double, String> {
      *
      * This flux will only emit an error in case of an unrecoverable problem with the hardware adapter.
      */
-    private Flux<Signal<Double, String>> getSensorsFlux() {
+    @Override
+    protected Flux<Signal<Double, String>> getSensorsFlux() {
         logger.info("getSensorFlux()");
         return getOneWireFlux()
                 .flatMap(this::getSensorSignal);
