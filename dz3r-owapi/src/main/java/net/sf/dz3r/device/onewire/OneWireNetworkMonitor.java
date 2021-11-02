@@ -5,7 +5,6 @@ import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.USerialAdapter;
 import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.device.driver.DriverNetworkMonitor;
-import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.onewire.command.OneWireCommandBumpResolution;
 import net.sf.dz3r.device.onewire.command.OneWireCommandReadTemperatureAll;
@@ -14,8 +13,6 @@ import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkErrorEvent;
 import net.sf.dz3r.instrumentation.Marker;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
@@ -26,10 +23,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Watches over 1-Wire network, handles events, executes commands.
@@ -38,34 +33,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> implements OWPathResolver {
 
-    private final Logger logger = LogManager.getLogger();
-
-    private final Duration rescanInterval = Duration.ofSeconds(30);
     private final Duration readTemperatureInterval = Duration.ofSeconds(5);
 
     private final OneWireEndpoint endpoint;
-    private final FluxSink<DriverNetworkEvent> observer;
-    private FluxSink<DriverCommand<DSPortAdapter>> commandSink;
-    private Disposable commandSubscription;
-
-    private static final AtomicBoolean gate = new AtomicBoolean(false);
+    private final Disposable commandSubscription;
 
     /**
      * 1-Wire adapter.
      */
     private DSPortAdapter adapter = null;
 
-    private final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
     private final Map<String, OWPath> address2path = Collections.synchronizedMap(new TreeMap<>());
 
     public OneWireNetworkMonitor(OneWireEndpoint endpoint, FluxSink<DriverNetworkEvent> observer) {
 
+        super(Duration.ofSeconds(30), observer);
         if (!gate.compareAndSet(false, true)) {
             throw new IllegalStateException("Constructor called more than once, coding error, submit a report with this stack trace");
         }
 
         this.endpoint = endpoint;
-        this.observer = observer;
 
         // Connect the command flux first
         var externalCommandFlux = Flux.create(this::connect);
@@ -73,12 +60,12 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
         // Start the rescan immediately
         var rescanFlux = Flux
                 .interval(Duration.ZERO, rescanInterval)
-                .map(l -> new OneWireCommandRescan(commandSink, new TreeSet<>(devicesPresent)));
+                .map(l -> new OneWireCommandRescan(getCommandSink(), new TreeSet<>(devicesPresent)));
 
         // rescan will queue an extra read all command upon completion
         var readTemperatureFlux = Flux
                 .interval(readTemperatureInterval)
-                .map(l -> new OneWireCommandReadTemperatureAll(commandSink, new TreeSet<>(devicesPresent), new TreeMap<>(address2path)));
+                .map(l -> new OneWireCommandReadTemperatureAll(getCommandSink(), new TreeSet<>(devicesPresent), new TreeMap<>(address2path)));
 
         commandSubscription = Flux
                 .merge(externalCommandFlux, rescanFlux, readTemperatureFlux)
@@ -91,30 +78,9 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
 
                 // Out of critical section - we're not touching hardware anymore
                 .publishOn(Schedulers.boundedElastic())
-                .doOnNext(this::handleOneWireEvent)
-                .doOnNext(this::broadcastOneWireEvent)
+                .doOnNext(this::handleEvent)
+                .doOnNext(this::broadcastEvent)
                 .subscribe();
-    }
-
-    private void connect(FluxSink<DriverCommand<DSPortAdapter>> commandSink) {
-        this.commandSink = commandSink;
-    }
-
-    private Flux<DriverNetworkEvent> execute(DriverCommand<DSPortAdapter> command) {
-        ThreadContext.push("execute");
-        try {
-
-            return command.execute(getAdapter(), command);
-
-        } catch (Throwable t) {
-            logger.error("1-Wire command execution failed: {}", command, t);
-
-            // VT: FIXME: No response for now, but we'll need to propagate error status
-            return Flux.empty();
-
-        } finally {
-            ThreadContext.pop();
-        }
     }
 
     /**
@@ -196,7 +162,8 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
         }
     }
 
-    private void handleOneWireEvent(DriverNetworkEvent event) {
+    @Override
+    protected void handleEvent(DriverNetworkEvent event) {
 
         switch (event.getClass().getSimpleName()) {
             case "OneWireNetworkArrival":
@@ -224,7 +191,7 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
         devicesPresent.add(address);
         address2path.put(address, event.path);
         logger.info("arrival: acknowledged {} at {}", address, event.path);
-        commandSink.next(new OneWireCommandBumpResolution(commandSink, address, event.path));
+        getCommandSink().next(new OneWireCommandBumpResolution(getCommandSink(), address, event.path));
     }
 
     private void handleError(OneWireNetworkErrorEvent<?> event) {
@@ -233,33 +200,11 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
 
         // It would be a good idea to rescan the bus to see what happened - but with a delay to prevent flooding
         new Thread(() -> {
-            Flux.just(new OneWireCommandRescan(commandSink, new TreeSet<>(devicesPresent)))
+            Flux.just(new OneWireCommandRescan(getCommandSink(), new TreeSet<>(devicesPresent)))
                     .delaySequence(Duration.ofSeconds(1))
-                    .doOnNext(commandSink::next)
+                    .doOnNext(getCommandSink()::next)
                     .blockLast();
         }).start();
-    }
-
-    private void broadcastOneWireEvent(DriverNetworkEvent event) {
-        observer.next(event);
-    }
-
-    /**
-     * Get the command sink.
-     *
-     * This method violates the Principle of Least Privilege (outsiders can do things with the sink they really shouldn't),
-     * so let's make a mental note of replacing it with a complicated {@code submit()} that will shield the sink from
-     * malicious (and dumb) programmers.
-     *
-     * @return {@link #commandSink}.
-     */
-    @Override
-    public FluxSink<DriverCommand<DSPortAdapter>> getCommandSink() {
-        if (commandSink == null) {
-            throw new IllegalStateException("commandSink still not initialized");
-        }
-
-        return commandSink;
     }
 
     @Override

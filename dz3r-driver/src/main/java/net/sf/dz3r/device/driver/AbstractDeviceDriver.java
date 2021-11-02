@@ -1,11 +1,13 @@
-package net.sf.dz3r.device;
+package net.sf.dz3r.device.driver;
 
+import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
 import java.time.Clock;
@@ -36,6 +38,8 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P> implem
 
     protected final Set<A> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
 
+    private Flux<DriverNetworkEvent> driverFlux;
+
     /**
      * Get the flux of readings from any device producing readings that can be interpreted as {@code T}.
      *
@@ -54,18 +58,6 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P> implem
                         getSensorsFlux()
                                 .filter(s -> address.equals(s.payload))));
     }
-
-    /**
-     * Get the flux of readings from all devices producing readings that can be interpreted as {@code T}.
-     *
-     * @return Flux of device readings, with the device address as the {@link Signal#payload}.
-     * If the device is not present at subscription time, or when the device departs, the flux will emit a
-     * {@link Signal.Status#FAILURE_TOTAL} signal once, same in case when there isa failure reading from the device.
-     * When the device returns (or is detected for the first time), the readings just start being emitted.
-     *
-     * This flux will only emit an error in case of an unrecoverable problem with the hardware adapter.
-     */
-    protected abstract Flux<Signal<T, P>> getSensorsFlux();
 
     /**
      * Check device presence as a flag.
@@ -98,4 +90,50 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P> implem
                         Signal.Status.FAILURE_TOTAL,
                         new IllegalArgumentException(address + ": not present")));
     }
+
+    /**
+     * Get the flux of readings from all devices producing readings that can be interpreted as {@link Double}.
+     *
+     * @return Flux of device readings, with the device address as the {@link Signal#payload}.
+     * If the device is not present at subscription time, or when the device departs, the flux will emit a
+     * {@link Signal.Status#FAILURE_TOTAL} signal once, same in case when there isa failure reading from the device.
+     * When the device returns (or is detected for the first time), the readings just start being emitted.
+     *
+     * This flux will only emit an error in case of an unrecoverable problem with the hardware adapter.
+     */
+    protected final Flux<Signal<T, P>> getSensorsFlux() {
+        logger.info("getSensorFlux()");
+        return getDriverFlux()
+                .flatMap(this::getSensorSignal);
+    }
+
+    /**
+     * Parse a network event into a flux of sensor readings.
+     *
+     * @param event Event to parse.
+     *
+     * @return Flux of sensor readings (one network sample may contain more than one reading).
+     */
+    protected abstract Flux<Signal<T, P>> getSensorSignal(DriverNetworkEvent event);
+
+    protected final synchronized Flux<DriverNetworkEvent> getDriverFlux() {
+        logger.info("getDriverFlux()");
+
+        if (driverFlux != null) {
+            return driverFlux;
+        }
+
+        driverFlux = Flux
+                .create(this::connect)
+                .doOnNext(this::handleArrival)
+                .doOnNext(this::handleDeparture)
+                .publish()
+                .autoConnect();
+
+        return driverFlux;
+    }
+
+    protected abstract void connect(FluxSink<DriverNetworkEvent> sink);
+    protected abstract void handleArrival(DriverNetworkEvent event);
+    protected abstract void handleDeparture(DriverNetworkEvent event);
 }

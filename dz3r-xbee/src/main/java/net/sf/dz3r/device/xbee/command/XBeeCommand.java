@@ -1,12 +1,10 @@
 package net.sf.dz3r.device.xbee.command;
 
 import com.homeclimatecontrol.xbee.XBeeReactive;
-import net.sf.dz3r.device.xbee.event.XBeeNetworkEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import reactor.core.publisher.Flux;
+import net.sf.dz3r.device.driver.command.DriverCommand;
 import reactor.core.publisher.FluxSink;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -14,26 +12,14 @@ import java.util.UUID;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
-public class XBeeCommand {
+public abstract class XBeeCommand extends DriverCommand<XBeeReactive> {
 
-    protected final Logger logger = LogManager.getLogger();
-
-    /**
-     * Unique ID to track request/response type commands in {@link XBeeNetworkEvent}.
-     */
-    public final UUID messageId;
-
-    /**
-     * Sink to use to issue more commands if necessary.
-     */
-    protected final FluxSink<XBeeCommand> commandSink;
-
-    public XBeeCommand(UUID messageId, FluxSink<XBeeCommand> commandSink) {
-        this.messageId = messageId;
-        this.commandSink = commandSink;
+    protected XBeeCommand(UUID messageId, FluxSink<DriverCommand<XBeeReactive>> commandSink) {
+        super(messageId, commandSink);
     }
 
-    public final Flux<XBeeNetworkEvent> execute(XBeeReactive xbee, XBeeCommand command)  {
+    @Override
+    protected List<Boolean> assessErrorFlags(Exception ex) {
         throw new UnsupportedOperationException("Not Implemented");
     }
 }

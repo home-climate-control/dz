@@ -3,8 +3,8 @@ package net.sf.dz3r.device.onewire;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.common.IntegerChannelAddress;
-import net.sf.dz3r.device.AbstractDeviceDriver;
 import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.driver.AbstractDeviceDriver;
 import net.sf.dz3r.device.driver.DriverNetworkMonitor;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.onewire.command.OneWireSetSwitchCommand;
@@ -37,8 +37,6 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
 
     private final OneWireEndpoint endpoint;
 
-    private Flux<DriverNetworkEvent> oneWireFlux;
-
     private OneWireNetworkMonitor monitor;
 
     private final Map<String, OWPath> address2path = Collections.synchronizedMap(new TreeMap<>());
@@ -62,54 +60,20 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         this.endpoint = new OneWireEndpoint(adapterPort, adapterSpeed);
     }
 
-    /**
-     * Get the flux of readings from all devices producing readings that can be interpreted as {@link Double}.
-     *
-     * One of most interest is the {@link com.dalsemi.onewire.container.TemperatureContainer}.
-     *
-     * @return Flux of device readings, with the device address as the {@link Signal#payload}.
-     * If the device is not present at subscription time, or when the device departs, the flux will emit a
-     * {@link Signal.Status#FAILURE_TOTAL} signal once, same in case when there isa failure reading from the device.
-     * When the device returns (or is detected for the first time), the readings just start being emitted.
-     *
-     * This flux will only emit an error in case of an unrecoverable problem with the hardware adapter.
-     */
     @Override
-    protected Flux<Signal<Double, String>> getSensorsFlux() {
-        logger.info("getSensorFlux()");
-        return getOneWireFlux()
-                .flatMap(this::getSensorSignal);
-    }
-
-    private Mono<Signal<Double, String>> getSensorSignal(DriverNetworkEvent event) {
+    protected Flux<Signal<Double, String>> getSensorSignal(DriverNetworkEvent event) {
 
         if (!(event instanceof OneWireNetworkTemperatureSample)) {
-            return Mono.empty();
+            return Flux.empty();
         }
 
         var sample = (OneWireNetworkTemperatureSample) event;
 
-        return Mono.just(new Signal<>(event.timestamp, sample.sample, sample.address));
+        return Flux.just(new Signal<>(event.timestamp, sample.sample, sample.address));
     }
 
-    private synchronized Flux<DriverNetworkEvent> getOneWireFlux() {
-        logger.info("getOneWireFlux()");
-
-        if (oneWireFlux != null) {
-            return oneWireFlux;
-        }
-
-        oneWireFlux = Flux
-                .create(this::connect)
-                .doOnNext(this::handleArrival)
-                .doOnNext(this::handleDeparture)
-                .publish()
-                .autoConnect();
-
-        return oneWireFlux;
-    }
-
-    private void handleArrival(DriverNetworkEvent event) {
+    @Override
+    protected void handleArrival(DriverNetworkEvent event) {
 
         // VT: FIXME: Reimplement this as a subscriber
 
@@ -123,7 +87,8 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         address2path.put(arrivalEvent.address, arrivalEvent.path);
     }
 
-    private void handleDeparture(DriverNetworkEvent event) {
+    @Override
+    protected void handleDeparture(DriverNetworkEvent event) {
 
         // VT: FIXME: Reimplement this as a subscriber
         if (!(event instanceof OneWireNetworkDeparture)) {
@@ -136,18 +101,6 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         address2path.remove(departureEvent.address);
 
         logger.error("Departure not handled completely: {}", ((OneWireNetworkDeparture) event).address );
-    }
-
-    private FluxSink<DriverNetworkEvent> sink;
-
-    private void connect(FluxSink<DriverNetworkEvent> sink) {
-
-        if (this.sink != null) {
-            throw new IllegalStateException("Fatal programming error, can't connect() more than once");
-        }
-
-        logger.info("Starting 1-Wire monitor for {}", endpoint);
-        this.monitor = new OneWireNetworkMonitor(endpoint, sink);
     }
 
     /**
@@ -234,7 +187,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
                         logger.debug("No 1-Wire monitor, getting one");
 
                         // This guarantees the monitor availability, but not the device presence
-                        getOneWireFlux().blockFirst();
+                        getDriverFlux().blockFirst();
 
                         logger.debug("Obtained the 1-Wire monitor");
                         gate.countDown();
@@ -252,7 +205,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
             return address;
         }
 
-        private DriverNetworkMonitor getMonitor(String marker) {
+        private DriverNetworkMonitor<DSPortAdapter> getMonitor(String marker) {
 
             if (gate.getCount() == 0) {
                 return monitor;
@@ -321,7 +274,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
             return Mono.create(sink -> {
                 try {
 
-                    var state = getOneWireFlux()
+                    var state = getDriverFlux()
                             .filter(OneWireSwitchState.class::isInstance)
                             .map(OneWireSwitchState.class::cast)
                             .filter(s -> s.correlationId.equals(messageId))
@@ -343,5 +296,16 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
             getMonitor("getState");
             throw new UnsupportedOperationException("Not Implemented");
         }
+    }
+
+    @Override
+    protected void connect(FluxSink<DriverNetworkEvent> sink) {
+
+        if (this.monitor != null) {
+            throw new IllegalStateException("Fatal programming error, can't connect() more than once");
+        }
+
+        logger.info("Starting 1-Wire monitor for {}", endpoint);
+        this.monitor = new OneWireNetworkMonitor(endpoint, sink);
     }
 }

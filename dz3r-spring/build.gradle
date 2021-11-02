@@ -24,8 +24,7 @@ dependencies {
     runtimeOnly project(':dz3r-owapi')
 
     // Enable XBee
-    // ... later
-    // runtimeOnly project(':dz3-xbee')
+    runtimeOnly project(':dz3r-xbee')
 
     // Enable MQTT
     runtimeOnly project(':dz3r-mqtt')
