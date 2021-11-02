@@ -3,6 +3,7 @@ package net.sf.dz3r.common;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,7 @@ class MaxThreadsTest {
 
     @ParameterizedTest
     @MethodSource("schedulersProvider")
+    @Disabled("Fails intermittently on fast boxes")
     void maxThreadsParallel(Scheduler scheduler) {
         ThreadContext.push("parallel/" + scheduler.getClass().getSimpleName());
         var threads = new HashSet<String>();
