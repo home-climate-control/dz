@@ -48,9 +48,6 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
     public OneWireNetworkMonitor(OneWireEndpoint endpoint, FluxSink<DriverNetworkEvent> observer) {
 
         super(Duration.ofSeconds(30), observer);
-        if (!gate.compareAndSet(false, true)) {
-            throw new IllegalStateException("Constructor called more than once, coding error, submit a report with this stack trace");
-        }
 
         this.endpoint = endpoint;
 

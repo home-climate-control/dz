@@ -13,7 +13,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Watches over a device driver network, handles events, executes commands.
@@ -31,8 +30,6 @@ public abstract class DriverNetworkMonitor<T> {
 
     protected final Set<String> devicesPresent = Collections.synchronizedSet(new TreeSet<>());
     private FluxSink<DriverCommand<T>> commandSink;
-
-    protected static final AtomicBoolean gate = new AtomicBoolean(false);
 
     protected DriverNetworkMonitor(Duration rescanInterval, FluxSink<DriverNetworkEvent> observer) {
         this.rescanInterval = rescanInterval;
