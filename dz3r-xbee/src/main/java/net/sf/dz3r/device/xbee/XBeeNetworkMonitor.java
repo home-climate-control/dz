@@ -7,6 +7,7 @@ import net.sf.dz3r.device.xbee.command.XBeeCommandRescan;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
@@ -15,9 +16,15 @@ import java.util.TreeSet;
 
 public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> implements AutoCloseable {
 
+    /**
+     * Scheduler for executing XBee commands.
+     *
+     * It must be single (don't want to overwhelm the hardware), but can't be non-blocking - XBee itself
+     * is now reactive, but we do need to perform blocking operations with it (usually short-lived hardware requests).
+     */
+    private final Scheduler xbeeScheduler = Schedulers.newBoundedElastic(1, 1000, "XBee command");
 
     private final Disposable commandSubscription;
-
 
     private final String port;
     private XBeeReactive adapter;
@@ -40,7 +47,7 @@ public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> imple
                 .merge(externalCommandFlux, rescanFlux)
 
                 // Critical section - rather not send more than one command to XBee at a time, it can't handle it anyway
-                .publishOn(Schedulers.newSingle("XBee command"))
+                .publishOn(xbeeScheduler)
                 .doOnNext(c -> logger.debug("XBee command: {}", c))
                 .flatMap(this::execute)
                 .doOnNext(e -> logger.debug("XBee event: {}", e))
@@ -59,6 +66,7 @@ public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> imple
     @Override
     public void close() throws Exception {
         commandSubscription.dispose();
+        xbeeScheduler.dispose();
     }
 
     @Override

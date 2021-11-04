@@ -4,6 +4,7 @@ import com.homeclimatecontrol.xbee.XBeeReactive;
 import net.sf.dz3r.device.driver.command.DriverCommand;
 import reactor.core.publisher.FluxSink;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +21,14 @@ public abstract class XBeeCommand extends DriverCommand<XBeeReactive> {
 
     @Override
     protected List<Boolean> assessErrorFlags(Exception ex) {
-        throw new UnsupportedOperationException("Not Implemented");
+
+        // For now, return "don't know", fill in the details later
+
+        var result = new ArrayList<Boolean>();
+
+        result.add(null);
+        result.add(null);
+
+        return result;
     }
 }

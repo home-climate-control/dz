@@ -40,9 +40,15 @@ public abstract class DriverCommand<T> {
     public final Flux<DriverNetworkEvent> execute(T adapter, DriverCommand<T> command) {
         return Flux.create(sink -> {
             try {
+
                 execute(adapter, command, sink);
                 sink.complete();
+
             } catch (Exception ex) {
+
+                // This exception is likely to be mumbled over in subscribers, let's see if this is not too verbose
+                logger.error("Error executing {}", command, ex);
+
                 var flags = assessErrorFlags(ex);
                 sink.next(new DriverNetworkErrorEvent<>(Instant.now(), command.messageId, flags.get(0), flags.get(1), ex));
             }
