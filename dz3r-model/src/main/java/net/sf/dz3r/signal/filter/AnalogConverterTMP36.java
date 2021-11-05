@@ -1,6 +1,4 @@
-package net.sf.dz3.device.sensor.impl;
-
-import net.sf.dz3.device.sensor.AnalogConverter;
+package net.sf.dz3r.signal.filter;
 
 /**
  * Converts voltage in mV to temperature in °C for
@@ -10,8 +8,6 @@ import net.sf.dz3.device.sensor.AnalogConverter;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2010
  *
  * @see AnalogConverterLM34
- *
- * @deprecated Use {@code AnalogConverterTMP36} in {@code net.sf.dz3r.signal.filter}.
  */
 public class AnalogConverterTMP36 implements AnalogConverter {
 
@@ -29,7 +25,6 @@ public class AnalogConverterTMP36 implements AnalogConverter {
     public Double convert(Double signal) {
 
         if (signal == null) {
-
             return null;
         }
 

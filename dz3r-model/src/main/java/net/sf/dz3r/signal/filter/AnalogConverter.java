@@ -1,13 +1,10 @@
-package net.sf.dz3.device.sensor;
+package net.sf.dz3r.signal.filter;
 
 /**
  * Provides ability to convert analog signal in arbitrarily complex way.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2010
- *
- * @deprecated Use {@code AnalogConverter} in {@code net.sf.dz3r.signal.filter}.
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */
-@Deprecated
 public interface AnalogConverter {
 
     /**
