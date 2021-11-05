@@ -103,6 +103,17 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         logger.error("Departure not handled completely: {}", ((OneWireNetworkDeparture) event).address );
     }
 
+    @Override
+    protected void connect(FluxSink<DriverNetworkEvent> sink) {
+
+        if (this.monitor != null) {
+            throw new IllegalStateException("Fatal programming error, can't connect() more than once");
+        }
+
+        logger.info("Starting 1-Wire monitor for {}", endpoint);
+        this.monitor = new OneWireNetworkMonitor(endpoint, sink);
+    }
+
     /**
      * Get the switch with no heartbeat support.
      *
@@ -146,6 +157,11 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         if (heartbeatSeconds < 0) {
             throw new IllegalArgumentException("heartbeatSeconds can't be negative (" + heartbeatSeconds + " given)");
         }
+    }
+
+    @Override
+    public void close() {
+        logger.debug("close(): NOP");
     }
 
     public class SwitchProxy implements Switch<String> {
@@ -296,16 +312,5 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
             getMonitor("getState");
             throw new UnsupportedOperationException("Not Implemented");
         }
-    }
-
-    @Override
-    protected void connect(FluxSink<DriverNetworkEvent> sink) {
-
-        if (this.monitor != null) {
-            throw new IllegalStateException("Fatal programming error, can't connect() more than once");
-        }
-
-        logger.info("Starting 1-Wire monitor for {}", endpoint);
-        this.monitor = new OneWireNetworkMonitor(endpoint, sink);
     }
 }

@@ -36,25 +36,18 @@ public class XBeeCommandRescan extends XBeeCommand {
         var m = new Marker("rescan");
         try {
 
+            logger.debug("Devices already known: {}", knownDevices);
+
             var scan = new NetworkBrowser()
                     .browse(adapter)
                     .subscribeOn(Schedulers.boundedElastic())
-
-                    // This block() covers sending NT command and receiving the response from local hardware, better not be interrupted
                     .block();
 
-            // ...but this needs to be done elsewhere, the responses are coming back asynchronously from the XBee network
-            // and with quite a generous timeout, no sense waiting
-            new Thread(() -> {
-                try {
-                    scan
-                            .discovered
-                            .doOnNext(node -> checkArrival(knownDevices, node, eventSink))
-                            .blockLast();
-                } catch (Throwable t) { // NOSONAR This is intended, there's nobody else to report problems above us
-                    logger.error("Failed to collect ND responses", t);
-                }
-            }).start();
+            scan // NOSONAR False positive, no NPE here
+                    .discovered
+                    .log()
+                    .doOnNext(node -> checkArrival(knownDevices, node, eventSink))
+                    .blockLast();
 
         } finally {
             m.close();

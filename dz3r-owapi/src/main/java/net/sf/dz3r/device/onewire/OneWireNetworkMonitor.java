@@ -31,7 +31,7 @@ import java.util.TreeSet;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> implements OWPathResolver {
+public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> implements OWPathResolver, AutoCloseable {
 
     private final Duration readTemperatureInterval = Duration.ofSeconds(5);
 
@@ -59,6 +59,7 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
                 .interval(Duration.ZERO, rescanInterval)
                 .map(l -> new OneWireCommandRescan(getCommandSink(), new TreeSet<>(devicesPresent)));
 
+        // 1-Wire devices will not read themselves (as XBee devices do), sample read must be initiated
         // rescan will queue an extra read all command upon completion
         var readTemperatureFlux = Flux
                 .interval(readTemperatureInterval)
@@ -207,5 +208,10 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
     @Override
     public OWPath getPath(String address) {
         return address2path.get(address);
+    }
+
+    @Override
+    public void close() {
+        commandSubscription.dispose();
     }
 }

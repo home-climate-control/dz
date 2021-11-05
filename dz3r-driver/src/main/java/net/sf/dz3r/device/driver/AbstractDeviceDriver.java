@@ -25,7 +25,7 @@ import java.util.TreeSet;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2021
  */
-public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P> implements SignalSource<A, T, P> {
+public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P> implements SignalSource<A, T, P>, AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -117,12 +117,13 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P> implem
     protected abstract Flux<Signal<T, P>> getSensorSignal(DriverNetworkEvent event);
 
     protected final synchronized Flux<DriverNetworkEvent> getDriverFlux() {
-        logger.info("getDriverFlux()");
 
         if (driverFlux != null) {
+            logger.info("getDriverFlux(): existing");
             return driverFlux;
         }
 
+        logger.info("getDriverFlux(): new");
         driverFlux = Flux
                 .create(this::connect)
                 .doOnNext(this::handleArrival)

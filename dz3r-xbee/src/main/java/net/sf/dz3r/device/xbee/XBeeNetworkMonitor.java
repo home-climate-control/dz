@@ -1,39 +1,46 @@
 package net.sf.dz3r.device.xbee;
 
+import com.homeclimatecontrol.xbee.AddressParser;
 import com.homeclimatecontrol.xbee.XBeeReactive;
+import com.rapplogic.xbee.api.XBeeResponse;
+import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
 import net.sf.dz3r.device.driver.DriverNetworkMonitor;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.xbee.command.XBeeCommandRescan;
+import net.sf.dz3r.device.xbee.event.XBeeNetworkArrival;
+import net.sf.dz3r.device.xbee.event.XBeeNetworkIOSample;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> implements AutoCloseable {
 
-    /**
-     * Scheduler for executing XBee commands.
-     *
-     * It must be single (don't want to overwhelm the hardware), but can't be non-blocking - XBee itself
-     * is now reactive, but we do need to perform blocking operations with it (usually short-lived hardware requests).
-     */
-    private final Scheduler xbeeScheduler = Schedulers.newBoundedElastic(1, 1000, "XBee command");
-
     private final Disposable commandSubscription;
+    private final Disposable xbeeSubscription;
 
-    private final String port;
-    private XBeeReactive adapter;
+    private final XBeeReactive adapter;
+
+    private final Map<String, Instant> lastSeen = Collections.synchronizedMap(new TreeMap<>());
 
     public XBeeNetworkMonitor(String port, FluxSink<DriverNetworkEvent> observer) {
 
         super(Duration.ofSeconds(60), observer);
 
-        this.port = port;
+        try {
+            adapter = new XBeeReactive(port);
+        } catch (IOException e) {
+            // Not much we can reasonably do at this point
+            throw new IllegalStateException("Failed to get XBee adapter on " + port, e);
+        }
 
         // Connect the command flux first
         var externalCommandFlux = Flux.create(this::connect);
@@ -46,36 +53,69 @@ public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> imple
         commandSubscription = Flux
                 .merge(externalCommandFlux, rescanFlux)
 
-                // Critical section - rather not send more than one command to XBee at a time, it can't handle it anyway
-                .publishOn(xbeeScheduler)
+                // XBee itself will take care of sending commands in FIFO order, and parsing responses
+                .publishOn(Schedulers.boundedElastic())
+
                 .doOnNext(c -> logger.debug("XBee command: {}", c))
                 .flatMap(this::execute)
                 .doOnNext(e -> logger.debug("XBee event: {}", e))
-
-                // Out of critical section - we're not touching hardware anymore
-                .publishOn(Schedulers.boundedElastic())
                 .doOnNext(this::handleEvent)
                 .doOnNext(this::broadcastEvent)
+                .subscribe();
+
+        // Unlike 1-Wire devices that need to be polled, XBee devices (in DZ) are configured to broadcast samples,
+        // all we need to do is to listen to them and process those we need
+        xbeeSubscription = getAdapter()
+                .receive()
+                .doOnNext(event -> handleXBeeEvent(event, observer))
                 .subscribe();
     }
 
     @Override
     protected void handleEvent(DriverNetworkEvent event) {
-    }
 
-    @Override
-    public void close() throws Exception {
-        commandSubscription.dispose();
-        xbeeScheduler.dispose();
-    }
-
-    @Override
-    protected XBeeReactive getAdapter() throws IOException {
-
-        if (adapter == null) {
-            adapter = new XBeeReactive(port);
+        switch (event.getClass().getSimpleName()) { // NOSONAR Just wait a bit
+            case "XBeeNetworkArrival":
+                handleArrival((XBeeNetworkArrival) event);
+                break;
+            default:
+                logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
+    }
 
+    private void handleXBeeEvent(XBeeResponse event, FluxSink<DriverNetworkEvent> observer) {
+        logger.debug("XBee event: {} {}", event.getClass().getName(), event);
+        switch (event.getClass().getSimpleName()) { // NOSONAR Just wait a bit
+            case "ZNetRxIoSampleResponse":
+                handleIOSample((ZNetRxIoSampleResponse) event, observer);
+                break;
+            default:
+                logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
+        }
+    }
+
+    private void handleIOSample(ZNetRxIoSampleResponse event, FluxSink<DriverNetworkEvent> observer) {
+        observer.next(new XBeeNetworkIOSample(Instant.now(), AddressParser.render4x4(event.getRemoteAddress64()), event));
+    }
+
+    private void handleArrival(XBeeNetworkArrival event) {
+        var address = event.address;
+
+        // This will only add the *device* address, but not individual channel address.
+        devicesPresent.add(address);
+        lastSeen.put(event.address, event.timestamp);
+
+        logger.info("arrival: acknowledged {}", address);
+    }
+
+    @Override
+    protected XBeeReactive getAdapter() {
         return adapter;
+    }
+
+    @Override
+    public void close() {
+        commandSubscription.dispose();
+        xbeeSubscription.dispose();
     }
 }
