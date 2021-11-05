@@ -5,6 +5,10 @@ import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkArrival;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkIOSample;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.filter.AnalogConverter;
+import net.sf.dz3r.signal.filter.AnalogConverterLM34;
+import net.sf.dz3r.signal.filter.AnalogConverterTMP36;
+import net.sf.dz3r.signal.filter.ConvertingFilter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
@@ -85,5 +89,31 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String> {
     @Override
     public void close() {
         monitor.close();
+    }
+
+    /**
+     * Get the flux of readings with {@link AbstractDeviceDriver#getFlux(Comparable)}, and convert each value.
+     *
+     * @param address Device address to get the flux of readings for.
+     * @param conversion Either {@code LM34}, or {@code TMP36}.
+     *
+     * @return Flux of device readings.
+     *
+     * @throws IllegalArgumentException if the {@code conversion} argument is neither of two supported.
+     */
+    public final Flux<Signal<Double, String>> getFlux(String address, String conversion) {
+        AnalogConverter converter;
+        switch (conversion.toUpperCase()) {
+            case "LM34":
+                converter = new AnalogConverterLM34();
+                break;
+            case "TMP36":
+                converter = new AnalogConverterTMP36();
+                break;
+            default:
+                throw new IllegalArgumentException("Supported values are: LM34, TMP36");
+        }
+
+        return new ConvertingFilter<String>(converter).compute(getFlux(address));
     }
 }
