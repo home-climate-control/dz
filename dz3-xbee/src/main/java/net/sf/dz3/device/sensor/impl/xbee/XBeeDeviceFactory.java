@@ -644,13 +644,13 @@ public class XBeeDeviceFactory extends AbstractDeviceFactory<XBeeDeviceContainer
                 case AT_RESPONSE:
 
                     AtCommandResponse atCommandResponse = (AtCommandResponse) packet;
-                    String command = atCommandResponse.getCommand();
+                    var command = atCommandResponse.getCommand();
 
-                    if ("ND".equals(command)) {
+                    if (ND.equals(command)) {
 
                         createPrototype(ZBNodeDiscover.parse(atCommandResponse));
 
-                    } else if ("NT".equals(command)) {
+                    } else if (NT.equals(command)) {
 
                         // No big deal, browse() initiated it and handled it
 
