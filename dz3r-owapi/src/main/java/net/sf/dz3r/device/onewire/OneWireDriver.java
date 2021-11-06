@@ -117,7 +117,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
     /**
      * Get the switch with no heartbeat support.
      *
-     * It is highly recommended to use {@link #getSwitch(String, long)} because of easy 1-Wire bus flooding
+     * It is highly recommended using {@link #getSwitch(String, long)} because of easy 1-Wire bus flooding
      * with some producers.
      *
      * @param address Switch address.
