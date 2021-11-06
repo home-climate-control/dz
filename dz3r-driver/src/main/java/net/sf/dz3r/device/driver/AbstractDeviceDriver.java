@@ -1,20 +1,28 @@
 package net.sf.dz3r.device.driver;
 
+import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
+import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Base class for device drivers.
@@ -22,10 +30,11 @@ import java.util.TreeSet;
  * @param <A> Address type.
  * @param <T> Signal value type.
  * @param <P> Extra payload type.
+ * @param <D> Adapter type
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2021
  */
-public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P> implements SignalSource<A, T, P>, AutoCloseable {
+public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> implements SignalSource<A, T, P>, AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -134,7 +143,175 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P> implem
         return driverFlux;
     }
 
+    /**
+     * Get the switch with no heartbeat support.
+     *
+     * It is highly recommended using {@link #getSwitch(A, long)} because of easy 1-Wire bus flooding
+     * with some producers.
+     *
+     * @param address Switch address.
+     * @return The switch.
+     */
+    public Switch<A> getSwitch(A address) {
+        return getSwitch(address, 0);
+    }
+
+    /**
+     * Get the switch with given heartbeat.
+     *
+     * @param address Switch address.
+     * @param heartbeatSeconds Number of seconds to wait between sending identical state commands to hardware.
+     *                         30 seconds is a reasonable default.
+     * @return The switch.
+     */
+    public Switch<A> getSwitch(A address, long heartbeatSeconds) {
+        logger.info("getSwitch: {}", address);
+
+        checkSwitchAddress(address);
+        checkHeartbeat(heartbeatSeconds);
+
+        // With the sensor, we can just dole out a flux and let them wait.
+        // Here, need something similar - nothing may be available at this point, but they still need it
+        // (worse, they might just try to issue commands right away).
+
+        return getSwitchProxy(address, heartbeatSeconds);
+    }
+
+    private void checkHeartbeat(long heartbeatSeconds) {
+        if (heartbeatSeconds < 0) {
+            throw new IllegalArgumentException("heartbeatSeconds can't be negative (" + heartbeatSeconds + " given)");
+        }
+    }
+
     protected abstract void connect(FluxSink<DriverNetworkEvent> sink);
     protected abstract void handleArrival(DriverNetworkEvent event);
     protected abstract void handleDeparture(DriverNetworkEvent event);
+    protected abstract SwitchProxy getSwitchProxy(A address, long heartbeatSeconds);
+    protected abstract void checkSwitchAddress(A address);
+    protected abstract DriverNetworkMonitor<D> getMonitor();
+
+    public abstract class SwitchProxy implements Switch<A> {
+
+        private final A address;
+        private final Duration heartbeat;
+
+        /**
+         * Last requested state; {@code null} if {@link #setState(boolean)} hasn't been called yet.
+         */
+        private Boolean requested;
+
+        /**
+         * Timestamp of last {@link #setState(boolean)}; {@code null} if it hasn't been called yet.
+         */
+        private Instant requestedAt;
+
+        /**
+         * Monitor acquisition gate.
+         *
+         * Once the monitor is available, we don't need this anymore, so we're using a one time use disposable semaphore.
+         */
+        private final CountDownLatch gate = new CountDownLatch(1);
+
+        protected SwitchProxy(A address, long heartbeatSeconds) {
+            this.address = address;
+            this.heartbeat = Duration.ofSeconds(heartbeatSeconds);
+
+            new Thread(() -> {
+                ThreadContext.push("switchProxy:" + address);
+                var m = new Marker("switchProxy:" + address);
+
+                logger.info("address={}, heartbeat={}", address, heartbeat);
+                try {
+
+                    // Need to get the monitor first
+
+                    if (AbstractDeviceDriver.this.getMonitor() == null) {
+                        logger.debug("No network monitor, getting one");
+
+                        // This guarantees the monitor availability, but not the device presence
+                        getDriverFlux().blockFirst();
+
+                        logger.debug("Obtained the network monitor");
+                        gate.countDown();
+                    }
+
+                } finally {
+                    m.close();
+                    ThreadContext.pop();
+                }
+            }).start();
+        }
+
+        @Override
+        public final A getAddress() {
+            return address;
+        }
+
+        private DriverNetworkMonitor<D> getMonitor(String marker) {
+
+            if (gate.getCount() == 0) {
+                return AbstractDeviceDriver.this.getMonitor();
+            }
+
+            logger.debug("{}({}): waiting for 1-Wire  monitor to become available", marker, address);
+
+            try {
+                gate.await();
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Interrupted while waiting for 1-Wire  monitor for " + address, ex);
+            }
+
+            logger.debug("{}({}): 1-Wire monitor ready", marker, address);
+            return AbstractDeviceDriver.this.getMonitor();
+        }
+
+        @Override
+        public Flux<Signal<Switch.State, String>> getFlux() {
+
+            getMonitor("getFlux");
+            throw new UnsupportedOperationException("Not Implemented");
+        }
+
+        @Override
+        public Mono<Boolean> setState(boolean state) {
+
+            try {
+
+                if (heartbeat.getSeconds() > 0 && requested != null && requested == state) {
+
+                    var skip = Optional
+                            .ofNullable(requestedAt)
+                            .map(at -> Instant.now().isBefore(at.plus(heartbeat)))
+                            .orElse(false);
+
+                    if (skip) {
+                        logger.debug("skipping setState({})={} - {} since last",
+                                address, state, Duration.between(requestedAt, Instant.now()));
+                        return Mono.just(state);
+                    }
+                }
+
+                var commandSink = getMonitor("setState").getCommandSink();
+                var messageId = UUID.randomUUID();
+                commandSink.next(getSetSwitchCommand(address, commandSink, messageId, state));
+
+                return expectSwitchState(messageId);
+
+            } finally {
+                requested = state;
+                requestedAt = Instant.now();
+            }
+        }
+
+        protected abstract Mono<Boolean> expectSwitchState(UUID messageId);
+        protected abstract DriverCommand<D> getSetSwitchCommand(A address, FluxSink<DriverCommand<D>> commandSink, UUID messageId, boolean state);
+
+        @Override
+        public Mono<Boolean> getState() {
+
+            getMonitor("getState");
+            throw new UnsupportedOperationException("Not Implemented");
+        }
+    }
 }

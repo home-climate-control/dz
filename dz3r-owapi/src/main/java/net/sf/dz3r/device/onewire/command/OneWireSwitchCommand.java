@@ -27,7 +27,7 @@ public abstract class OneWireSwitchCommand extends OneWireCommand {
     public final OWPath path;
 
     /**
-     * Create an instance without the command sink.
+     * Create an instance.
      *
      * @param address Switch address to send the command to.
      * @param path Path the device is supposed to be on.

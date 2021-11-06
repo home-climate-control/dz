@@ -19,6 +19,7 @@ import java.util.UUID;
 public class OneWireSetSwitchCommand extends OneWireSwitchCommand {
 
     public final boolean state;
+
     /**
      * Create an instance.
      *

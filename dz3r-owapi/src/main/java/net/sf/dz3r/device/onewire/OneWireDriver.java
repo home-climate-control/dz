@@ -3,37 +3,31 @@ package net.sf.dz3r.device.onewire;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.common.IntegerChannelAddress;
-import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.driver.AbstractDeviceDriver;
 import net.sf.dz3r.device.driver.DriverNetworkMonitor;
+import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.onewire.command.OneWireSetSwitchCommand;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
 import net.sf.dz3r.device.onewire.event.OneWireSwitchState;
-import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.signal.Signal;
-import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TreeMap;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 
 /**
  * Driver for 1-Wire subsystem using the <a href="https://github.com/home-climate-control/owapi-reborn">owapi-reborn</a> library.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2021
  */
-public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> {
+public class OneWireDriver extends AbstractDeviceDriver<String, Double, String, DSPortAdapter> {
 
     private final OneWireEndpoint endpoint;
 
@@ -114,49 +108,19 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         this.monitor = new OneWireNetworkMonitor(endpoint, sink);
     }
 
-    /**
-     * Get the switch with no heartbeat support.
-     *
-     * It is highly recommended using {@link #getSwitch(String, long)} because of easy 1-Wire bus flooding
-     * with some producers.
-     *
-     * @param address Switch address.
-     * @return The switch.
-     */
-    public Switch<String> getSwitch(String address) {
-        return getSwitch(address, 0);
+    @Override
+    protected SwitchProxy getSwitchProxy(String address, long heartbeatSeconds) {
+        return new OneWireSwitchProxy(address, heartbeatSeconds);
     }
 
-    /**
-     * Get the switch with given heartbeat.
-     *
-     * @param address Switch address.
-     * @param heartbeatSeconds Number of seconds to wait between sending identical state commands to hardware.
-     *                         30 seconds is a reasonable default.
-     * @return The switch.
-     */
-    public Switch<String> getSwitch(String address, long heartbeatSeconds) {
-        logger.info("getSwitch: {}", address);
-
-        checkSwitchAddress(address);
-        checkHeartbeat(heartbeatSeconds);
-
-        // With the sensor, we can just dole out a flux and let them wait.
-        // Here, need something similar - nothing may be available at this point, but they still need it
-        // (worse, they might just try to issue commands right away).
-
-        return new SwitchProxy(address, heartbeatSeconds);
-    }
-
-    private void checkSwitchAddress(String address) {
+    @Override
+    protected void checkSwitchAddress(String address) {
         new IntegerChannelAddress(address);
         // Syntax is OK if we made it this far, let's proceed
     }
-
-    private void checkHeartbeat(long heartbeatSeconds) {
-        if (heartbeatSeconds < 0) {
-            throw new IllegalArgumentException("heartbeatSeconds can't be negative (" + heartbeatSeconds + " given)");
-        }
+    @Override
+    protected DriverNetworkMonitor<DSPortAdapter> getMonitor() {
+        return monitor;
     }
 
     @Override
@@ -164,129 +128,25 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
         logger.debug("close(): NOP");
     }
 
-    public class SwitchProxy implements Switch<String> {
-
-        private final String address;
-        private final Duration heartbeat;
-
-        /**
-         * Last requested state; {@code null} if {@link #setState(boolean)} hasn't been called yet.
-         */
-        private Boolean requested;
-
-        /**
-         * Timestamp of last {@link #setState(boolean)}; {@code null} if it hasn't been called yet.
-         */
-        private Instant requestedAt;
-
-        /**
-         * Monitor acquisition gate.
-         *
-         * Once the monitor is available, we don't need this anymore, so we're using a one time use disposable semaphore.
-         */
-        private final CountDownLatch gate = new CountDownLatch(1);
-
-        public SwitchProxy(String address, long heartbeatSeconds) {
-            this.address = address;
-            this.heartbeat = Duration.ofSeconds(heartbeatSeconds);
-
-            new Thread(() -> {
-                ThreadContext.push("switchProxy:" + address);
-                var m = new Marker("switchProxy:" + address);
-
-                logger.info("address={}, heartbeat={}", address, heartbeat);
-                try {
-
-                    // Need to get the monitor first
-
-                    if (monitor == null) {
-                        logger.debug("No 1-Wire monitor, getting one");
-
-                        // This guarantees the monitor availability, but not the device presence
-                        getDriverFlux().blockFirst();
-
-                        logger.debug("Obtained the 1-Wire monitor");
-                        gate.countDown();
-                    }
-
-                } finally {
-                    m.close();
-                    ThreadContext.pop();
-                }
-            }).start();
+    public class OneWireSwitchProxy extends SwitchProxy {
+        public OneWireSwitchProxy(String address, long heartbeatSeconds) {
+            super(address, heartbeatSeconds);
         }
 
         @Override
-        public final String getAddress() {
-            return address;
-        }
-
-        private DriverNetworkMonitor<DSPortAdapter> getMonitor(String marker) {
-
-            if (gate.getCount() == 0) {
-                return monitor;
-            }
-
-            logger.debug("{}({}): waiting for 1-Wire  monitor to become available", marker, address);
-
-            try {
-                gate.await();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                throw new IllegalStateException("Interrupted while waiting for 1-Wire  monitor for " + address, ex);
-            }
-
-            logger.debug("{}({}): 1-Wire monitor ready", marker, address);
-            return monitor;
+        protected DriverCommand<DSPortAdapter> getSetSwitchCommand(String address, FluxSink<DriverCommand<DSPortAdapter>> commandSink, UUID messageId, boolean state) {
+            var channelAddress = new IntegerChannelAddress(address);
+            return new OneWireSetSwitchCommand(
+                    messageId,
+                    commandSink,
+                    (OWPathResolver) getMonitor(),
+                    address,
+                    address2path.get(channelAddress.hardwareAddress),
+                    state);
         }
 
         @Override
-        public Flux<Signal<State, String>> getFlux() {
-
-            getMonitor("getFlux");
-            throw new UnsupportedOperationException("Not Implemented");
-        }
-
-        @Override
-        public Mono<Boolean> setState(boolean state) {
-
-            try {
-
-                if (heartbeat.getSeconds() > 0 && requested != null && requested == state) {
-
-                    var skip = Optional
-                            .ofNullable(requestedAt)
-                            .map(at -> Instant.now().isBefore(at.plus(heartbeat)))
-                            .orElse(false);
-
-                    if (skip) {
-                        logger.debug("skipping setState({})={} - {} since last",
-                                address, state, Duration.between(requestedAt, Instant.now()));
-                        return Mono.just(state);
-                    }
-                }
-
-                var channelAddress = new IntegerChannelAddress(address);
-                var commandSink = getMonitor("setState").getCommandSink();
-                var messageId = UUID.randomUUID();
-                commandSink.next(
-                        new OneWireSetSwitchCommand(
-                                messageId,
-                                commandSink,
-                                monitor,
-                                address,
-                                address2path.get(channelAddress.hardwareAddress),
-                                state));
-
-                return expectSwitchState(messageId);
-
-            } finally {
-                requested = state;
-                requestedAt = Instant.now();
-            }
-        }
-
-        private Mono<Boolean> expectSwitchState(UUID messageId) {
+        protected Mono<Boolean> expectSwitchState(UUID messageId) {
             return Mono.create(sink -> {
                 try {
 
@@ -304,13 +164,6 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String> 
                     sink.error(e);
                 }
             });
-        }
-
-        @Override
-        public Mono<Boolean> getState() {
-
-            getMonitor("getState");
-            throw new UnsupportedOperationException("Not Implemented");
         }
     }
 }

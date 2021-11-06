@@ -11,7 +11,7 @@ public class StringChannelAddress extends ChannelAddress<String> {
     /**
      * Create an instance out of a colon separated string.
      *
-     * @param address Hardware device address, followed by a colon, followed by decimal channel number.
+     * @param address Hardware device address, followed by a colon, followed by string channel address.
      *
      * @exception IllegalArgumentException if the format can't be parsed.
      */

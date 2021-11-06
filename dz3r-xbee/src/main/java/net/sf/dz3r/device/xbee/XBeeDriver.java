@@ -1,6 +1,10 @@
 package net.sf.dz3r.device.xbee;
 
+import com.homeclimatecontrol.xbee.XBeeReactive;
+import net.sf.dz3r.common.StringChannelAddress;
 import net.sf.dz3r.device.driver.AbstractDeviceDriver;
+import net.sf.dz3r.device.driver.DriverNetworkMonitor;
+import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkArrival;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkIOSample;
@@ -11,13 +15,16 @@ import net.sf.dz3r.signal.filter.AnalogConverterTMP36;
 import net.sf.dz3r.signal.filter.ConvertingFilter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 /**
  * Driver for XBee subsystem using the <a href="https://github.com/home-climate-control/xbee-api-reactive">xbee-api-reactive</a> library.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
  */
-public class XBeeDriver extends AbstractDeviceDriver<String, Double, String> {
+public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBeeReactive> {
 
     private final String port;
 
@@ -76,6 +83,22 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String> {
     }
 
     @Override
+    protected SwitchProxy getSwitchProxy(String address, long heartbeatSeconds) {
+        return new XBeeSwitchProxy(address, heartbeatSeconds);
+    }
+
+    @Override
+    protected void checkSwitchAddress(String address) {
+        new StringChannelAddress(address);
+        // Syntax is OK if we made it this far, let's proceed
+    }
+
+    @Override
+    protected DriverNetworkMonitor<XBeeReactive> getMonitor() {
+        return monitor;
+    }
+
+    @Override
     protected void connect(FluxSink<DriverNetworkEvent> sink) {
 
         if (this.monitor != null) {
@@ -115,5 +138,21 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String> {
         }
 
         return new ConvertingFilter<String>(converter).compute(getFlux(address));
+    }
+
+    private class XBeeSwitchProxy extends SwitchProxy {
+        public XBeeSwitchProxy(String address, long heartbeatSeconds) {
+            super(address, heartbeatSeconds);
+        }
+
+        @Override
+        protected DriverCommand<XBeeReactive> getSetSwitchCommand(String address, FluxSink<DriverCommand<XBeeReactive>> commandSink, UUID messageId, boolean state) {
+            throw new UnsupportedOperationException("Not Implemented");
+        }
+
+        @Override
+        protected Mono<Boolean> expectSwitchState(UUID messageId) {
+            throw new UnsupportedOperationException("Not Implemented");
+        }
     }
 }
