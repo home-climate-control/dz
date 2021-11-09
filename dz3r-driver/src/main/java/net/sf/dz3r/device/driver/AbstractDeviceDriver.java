@@ -146,7 +146,7 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
     /**
      * Get the switch with no heartbeat support.
      *
-     * It is highly recommended using {@link #getSwitch(A, long)} because of easy 1-Wire bus flooding
+     * It is highly recommended using {@link #getSwitch(A, long)} because of easy hardware bus flooding
      * with some producers.
      *
      * @param address Switch address.
@@ -253,16 +253,16 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
                 return AbstractDeviceDriver.this.getMonitor();
             }
 
-            logger.debug("{}({}): waiting for 1-Wire  monitor to become available", marker, address);
+            logger.debug("{}({}): waiting for network  monitor to become available", marker, address);
 
             try {
                 gate.await();
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
-                throw new IllegalStateException("Interrupted while waiting for 1-Wire  monitor for " + address, ex);
+                throw new IllegalStateException("Interrupted while waiting for network  monitor for " + address, ex);
             }
 
-            logger.debug("{}({}): 1-Wire monitor ready", marker, address);
+            logger.debug("{}({}): network monitor ready", marker, address);
             return AbstractDeviceDriver.this.getMonitor();
         }
 
