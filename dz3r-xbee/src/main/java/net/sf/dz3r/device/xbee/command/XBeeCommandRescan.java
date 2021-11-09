@@ -45,7 +45,6 @@ public class XBeeCommandRescan extends XBeeCommand {
 
             scan // NOSONAR False positive, no NPE here
                     .discovered
-                    .log()
                     .doOnNext(node -> checkArrival(knownDevices, node, eventSink))
                     .blockLast();
 
