@@ -6,8 +6,10 @@ import net.sf.dz3r.device.driver.AbstractDeviceDriver;
 import net.sf.dz3r.device.driver.DriverNetworkMonitor;
 import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
+import net.sf.dz3r.device.xbee.command.XBeeSetSwitchCommand;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkArrival;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkIOSample;
+import net.sf.dz3r.device.xbee.event.XBeeSwitchState;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.filter.AnalogConverter;
 import net.sf.dz3r.signal.filter.AnalogConverterLM34;
@@ -147,12 +149,31 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBe
 
         @Override
         protected DriverCommand<XBeeReactive> getSetSwitchCommand(String address, FluxSink<DriverCommand<XBeeReactive>> commandSink, UUID messageId, boolean state) {
-            throw new UnsupportedOperationException("Not Implemented");
+            return new XBeeSetSwitchCommand(
+                    messageId,
+                    commandSink,
+                    address,
+                    state);
         }
 
         @Override
         protected Mono<Boolean> expectSwitchState(UUID messageId) {
-            throw new UnsupportedOperationException("Not Implemented");
+            return Mono.create(sink -> {
+                try {
+
+                    var state = getDriverFlux()
+                            .filter(XBeeSwitchState.class::isInstance)
+                            .map(XBeeSwitchState.class::cast)
+                            .doOnNext(s -> logger.debug("{}", s))
+                            .blockFirst()
+                            .state;
+
+                    sink.success(state);
+
+                } catch (Exception e) {
+                    sink.error(e);
+                }
+            });
         }
     }
 }
