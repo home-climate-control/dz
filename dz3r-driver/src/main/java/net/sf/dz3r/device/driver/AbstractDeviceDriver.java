@@ -165,7 +165,14 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
      * @return The switch.
      */
     public Switch<A> getSwitch(A address, long heartbeatSeconds) {
-        logger.info("getSwitch: {}", address);
+
+        if (heartbeatSeconds == 0) {
+            logger.warn("getSwitch: {} (no heartbeat)", address);
+            logger.warn("getSwitch: providing a heartbeat ensures your logs and hardware are not flooded, consider adding one");
+        } else {
+            logger.info("getSwitch: {} ({} seconds heartbeat)", address, heartbeatSeconds);
+
+        }
 
         checkSwitchAddress(address);
         checkHeartbeat(heartbeatSeconds);
