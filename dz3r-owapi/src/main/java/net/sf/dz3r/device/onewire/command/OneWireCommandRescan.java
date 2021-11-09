@@ -94,8 +94,8 @@ public class OneWireCommandRescan extends OneWireCommand {
                 known.remove(address);
             }
 
-            logger.info("Branches found: {}", branches.size());
-            branches.forEach(b -> logger.info("  {}", b));
+            logger.debug("Branches found: {}", branches.size());
+            branches.forEach(b -> logger.debug("  {}", b));
 
             for (var branchPath : branches) {
                 rescan(adapter, eventSink, branchPath, address2device, address2path, known, depth++);
