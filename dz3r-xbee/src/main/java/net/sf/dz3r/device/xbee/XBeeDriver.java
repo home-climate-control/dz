@@ -46,18 +46,18 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBe
         var sample = ((XBeeNetworkIOSample) event).sample;
 
         return Flux.create(sink -> {
-            // We're only interested in analog data for now, and there's 4 channels of it
-            for (var pin = 0; pin < 4; pin++) {
-                if (sample.isAnalogEnabled(pin)) {
+            // We're only interested in analog data for now, and there's 4 channels of it (plus supply voltage)
+            for (var kv : sample.analogSamples.entrySet()) {
 
-                    String address = ((XBeeNetworkIOSample) event).address + ":A" + pin;
+                var pin = kv.getKey();
+                var signal = Double.valueOf(kv.getValue());
+                String address = ((XBeeNetworkIOSample) event).address + ":A" + pin;
 
-                    // This will take care of the device *and* channel address.
-                    // There's no need to send an arrival notification.
-                    devicesPresent.add(address);
+                // This will take care of the device *and* channel address.
+                // There's no need to send an arrival notification.
+                devicesPresent.add(address);
 
-                    sink.next(new Signal<>(event.timestamp, Double.valueOf(sample.getAnalog(pin)), address));
-                }
+                sink.next(new Signal<>(event.timestamp, signal, address));
             }
             sink.complete();
         });

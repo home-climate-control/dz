@@ -2,8 +2,8 @@ package net.sf.dz3r.device.xbee.command;
 
 import com.homeclimatecontrol.xbee.AddressParser;
 import com.homeclimatecontrol.xbee.XBeeReactive;
+import com.homeclimatecontrol.xbee.response.command.NDResponse;
 import com.homeclimatecontrol.xbee.zigbee.NetworkBrowser;
-import com.rapplogic.xbee.api.zigbee.ZBNodeDiscover;
 import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkArrival;
@@ -55,11 +55,11 @@ public class XBeeCommandRescan extends XBeeCommand {
         }
     }
 
-    private void checkArrival(Set<String> known, ZBNodeDiscover node, FluxSink<DriverNetworkEvent> eventSink) {
+    private void checkArrival(Set<String> known, NDResponse node, FluxSink<DriverNetworkEvent> eventSink) {
 
-        var address = AddressParser.render4x4(node.getNodeAddress64());
+        var address = AddressParser.render4x4(node.address64);
         if (!known.contains(address)) {
-            logger.warn("Arrived: {}({}) {}", AddressParser.render4x4(node.getNodeAddress64()), node.getNodeIdentifier(), node.getType()); // NOSONAR Shut up already
+            logger.warn("Arrived: {}({}) {}", AddressParser.render4x4(node.address64), node.nodeIdentifier, node.deviceType); // NOSONAR Shut up already
             eventSink.next(new XBeeNetworkArrival(Instant.now(), address));
         }
     }

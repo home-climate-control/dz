@@ -2,8 +2,8 @@ package net.sf.dz3r.device.xbee;
 
 import com.homeclimatecontrol.xbee.AddressParser;
 import com.homeclimatecontrol.xbee.XBeeReactive;
-import com.rapplogic.xbee.api.XBeeResponse;
-import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
+import com.homeclimatecontrol.xbee.response.frame.IOSampleIndicator;
+import com.homeclimatecontrol.xbee.response.frame.XBeeResponseFrame;
 import net.sf.dz3r.device.driver.DriverNetworkMonitor;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.xbee.command.XBeeCommandRescan;
@@ -83,19 +83,19 @@ public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> imple
         }
     }
 
-    private void handleXBeeEvent(XBeeResponse event, FluxSink<DriverNetworkEvent> observer) {
+    private void handleXBeeEvent(XBeeResponseFrame event, FluxSink<DriverNetworkEvent> observer) {
         logger.debug("XBee event: {} {}", event.getClass().getName(), event);
         switch (event.getClass().getSimpleName()) { // NOSONAR Just wait a bit
             case "ZNetRxIoSampleResponse":
-                handleIOSample((ZNetRxIoSampleResponse) event, observer);
+                handleIOSample((IOSampleIndicator) event, observer);
                 break;
             default:
                 logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
     }
 
-    private void handleIOSample(ZNetRxIoSampleResponse event, FluxSink<DriverNetworkEvent> observer) {
-        observer.next(new XBeeNetworkIOSample(Instant.now(), AddressParser.render4x4(event.getRemoteAddress64()), event));
+    private void handleIOSample(IOSampleIndicator event, FluxSink<DriverNetworkEvent> observer) {
+        observer.next(new XBeeNetworkIOSample(Instant.now(), AddressParser.render4x4(event.sourceAddress64), event));
     }
 
     private void handleArrival(XBeeNetworkArrival event) {

@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.xbee.event;
 
+import com.homeclimatecontrol.xbee.response.frame.IOSampleIndicator;
 import com.rapplogic.xbee.api.zigbee.ZNetRxIoSampleResponse;
 
 import java.time.Instant;
@@ -11,9 +12,9 @@ import java.time.Instant;
  */
 public class XBeeNetworkIOSample extends XBeeNetworkDeviceStateEvent {
 
-    public final ZNetRxIoSampleResponse sample;
+    public final IOSampleIndicator sample;
 
-    public XBeeNetworkIOSample(Instant timestamp, String address, ZNetRxIoSampleResponse sample) {
+    public XBeeNetworkIOSample(Instant timestamp, String address, IOSampleIndicator sample) {
         super(timestamp, null, address);
         this.sample = sample;
     }
