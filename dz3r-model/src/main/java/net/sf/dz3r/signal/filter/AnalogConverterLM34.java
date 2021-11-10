@@ -2,7 +2,7 @@ package net.sf.dz3r.signal.filter;
 
 /**
  * Converts voltage in mV to temperature in °C for
- * {@link http://www.national.com/ds/LM/LM34.pdf LM34} analog temperature sensor.
+ * <a href="http://www.national.com/ds/LM/LM34.pdf">LM34</a> analog temperature sensor.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2010
  *

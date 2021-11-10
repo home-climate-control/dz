@@ -87,10 +87,11 @@ public class ZoneSettings {
     @Override
     public boolean equals(Object o) {
         return o instanceof ZoneSettings
-                && enabled == ((ZoneSettings) o).enabled
+                && enabled.equals(((ZoneSettings) o).enabled)
                 && setpoint.equals(((ZoneSettings) o).setpoint)
-                && voting == ((ZoneSettings) o).voting
-                && hold == ((ZoneSettings) o).hold
+                && voting.equals(((ZoneSettings) o).voting)
+                // hold is the only member that can be null along the business logic pipeline
+                && ((hold == null && ((ZoneSettings) o).hold == null) || (hold != null && hold.equals(((ZoneSettings) o).hold)))
                 && dumpPriority.equals(((ZoneSettings) o).dumpPriority);
     }
 

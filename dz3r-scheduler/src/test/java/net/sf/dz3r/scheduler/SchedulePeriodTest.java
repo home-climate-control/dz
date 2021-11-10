@@ -1,7 +1,5 @@
 package net.sf.dz3r.scheduler;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -14,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException
 
 class SchedulePeriodTest {
 
-    private final Logger logger = LogManager.getLogger();
     private final SchedulePeriodFactory schedulePeriodFactory = new SchedulePeriodFactory();
 
     private static final LocalTime TWO_FIFTEEN = LocalTime.parse("02:15");

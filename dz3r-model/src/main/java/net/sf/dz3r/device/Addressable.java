@@ -12,11 +12,14 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 public interface Addressable<T extends Comparable<T>> extends Comparable<Addressable<T>> {
 
     /**
+     * Get the address.
+     *
      * @return The address.
      */
     @JmxAttribute(description = "Address")
     T getAddress();
 
+    @Override
     default int compareTo(Addressable<T> other) {
         return getAddress().compareTo(other.getAddress());
     }

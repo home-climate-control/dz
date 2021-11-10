@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
+import java.time.Duration;
+
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
@@ -19,23 +21,19 @@ class MqttListenerTest {
     @Test
     void create() {
         assertThatCode(() -> {
-            var ml = new MqttListener(new MqttEndpoint("localhost"));
+            new MqttListener(new MqttEndpoint("localhost"));
         }).doesNotThrowAnyException();
     }
 
     @Test
-    void subscribe() throws InterruptedException {
+    void subscribe() {
 
         assertThatCode(() -> {
-            var ml = new MqttListener(new MqttEndpoint("localhost"));
-            var subscription= ml
+            new MqttListener(new MqttEndpoint("localhost"))
                     .getFlux("")
                     .doOnNext(v -> logger.info("message: {} {}", v.topic, v.message))
-                    .subscribe();
-
-            Thread.sleep(3_000);
-
-            subscription.dispose();
+                    .take(Duration.ofSeconds(1))
+                    .blockLast();
         }).doesNotThrowAnyException();
     }
 }

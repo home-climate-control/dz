@@ -2,8 +2,8 @@ package net.sf.dz3r.signal.filter;
 
 /**
  * Converts voltage in mV to temperature in °C for
- * {@link http://www.analog.com/en/temperature-sensing-and-thermal-management/digital-temperature-sensors/tmp36/products/product.html
- * TMP36} analog temperature sensor.
+ * <a href="http://www.analog.com/en/temperature-sensing-and-thermal-management/digital-temperature-sensors/tmp36/products/product.html">TMP36</a>
+ * analog temperature sensor.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2010
  *

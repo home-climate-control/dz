@@ -13,6 +13,7 @@ import net.sf.dz3.device.sensor.AnalogConverter;
  *
  * @deprecated Use {@code AnalogConverterTMP36} in {@code net.sf.dz3r.signal.filter}.
  */
+@Deprecated
 public class AnalogConverterTMP36 implements AnalogConverter {
 
     /**

@@ -10,8 +10,8 @@ import org.apache.logging.log4j.Logger;
  *
  * Usage pattern (just like {@link org.apache.logging.log4j.ThreadContext}:
  *
+ * <pre>
  * {@code
- *
  * NDC.push("whatever");
  * Marker m = new Marker("something complicated");
  *
@@ -24,7 +24,8 @@ import org.apache.logging.log4j.Logger;
  *     m.close();
  *     NDC.pop();
  * }
- *
+ * }
+ * </pre>
  */
 public class Marker {
 

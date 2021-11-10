@@ -16,7 +16,6 @@ import reactor.core.publisher.Flux;
  * @param <O> Signal type.
  * @param <P> Signal payload type.
  *
- * @see net.sf.dz3.controller.ProcessController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessController.Status<O>, P> {
@@ -62,7 +61,7 @@ public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessCo
     @Override
     Flux<Signal<Status<O>, P>> compute(Flux<Signal<I, P>> pv);
 
-    public static class Status<T> {
+    class Status<T> {
 
         public final double setpoint;
         public final Double error;

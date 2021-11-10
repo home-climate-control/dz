@@ -15,6 +15,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
+ * Base class for zone chart implementations.
+ *
+ * Currently just {@link ZoneChart2021}, all others lost the evolutionary performance battle.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -251,7 +254,7 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
                 return null;
             }
 
-            logger.debug("RingBuffer: flushing at {}", () -> Duration.ofMillis((age)));
+            logger.debug("RingBuffer: flushing at {}", () -> Duration.ofMillis(age));
 
             var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 

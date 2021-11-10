@@ -120,7 +120,7 @@ class SwitchDamperTest {
     void thresholdGood() {
         assertThatCode(() -> {
             var s = mock(Switch.class);
-            var d = new SwitchDamper<>("sd", s, rg.nextDouble());
+            new SwitchDamper<>("sd", s, rg.nextDouble());
         }).doesNotThrowAnyException();
     }
 
