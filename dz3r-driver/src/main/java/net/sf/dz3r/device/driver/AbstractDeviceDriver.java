@@ -111,7 +111,7 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
      * This flux will only emit an error in case of an unrecoverable problem with the hardware adapter.
      */
     protected final Flux<Signal<T, P>> getSensorsFlux() {
-        logger.info("getSensorFlux()");
+        logger.debug("getSensorFlux()");
         return getDriverFlux()
                 .flatMap(this::getSensorSignal);
     }
@@ -128,11 +128,11 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
     protected final synchronized Flux<DriverNetworkEvent> getDriverFlux() {
 
         if (driverFlux != null) {
-            logger.info("getDriverFlux(): existing");
+            logger.debug("getDriverFlux(): existing");
             return driverFlux;
         }
 
-        logger.info("getDriverFlux(): new");
+        logger.debug("getDriverFlux(): new");
         driverFlux = Flux
                 .create(this::connect)
                 .doOnNext(this::handleArrival)
