@@ -78,11 +78,11 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
     }
 
     @Override
-    protected Signal<Status<Double>, P> wrapCompute(Signal<Double, P> pv) {
+    protected Signal<Status<Double>, P> wrapCompute(Double setpoint, Signal<Double, P> pv) {
         // This will only be non-null upon second invocation
         var lastOutputSignal = getLastOutputSignal();
 
-        var error = getError();
+        var error = getError(pv, setpoint);
         var p = error * getP();
         lastP = p;
         var signal = p;
@@ -136,13 +136,13 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
         if (Double.compare(signal, Double.NaN) == 0) {
             throw new IllegalStateException("signal is NaN, components: "
                     + new PidStatus(
-                    new Status<>(getSetpoint(), error, signal),
+                    new Status<>(setpoint, error, signal),
                     lastP, lastI, lastD));
         }
 
         return new Signal<>(pv.timestamp,
                 new PidStatus(
-                        new Status<>(getSetpoint(), error, signal),
+                        new Status<>(setpoint, error, signal),
                         lastP, lastI, lastD),
                 pv.payload,
                 pv.status,

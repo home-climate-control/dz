@@ -5,6 +5,7 @@ import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 
 /**
  * Base class for reactive process controllers.
@@ -21,6 +22,9 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
      * The process setpoint.
      */
     private double setpoint;
+
+    private final Flux<Double> setpointFlux;
+    private FluxSink<Double> setpointSink;
 
     /**
      * The current process variable value.
@@ -40,16 +44,20 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
      */
     protected AbstractProcessController(String jmxName, double setpoint) {
         this.jmxName = jmxName;
-        this.setpoint = setpoint;
+
+        setpointFlux = Flux.create(this::connectSetpoint);
+        setpointFlux.subscribe(s -> this.setpoint = s);
+
+        setSetpoint(setpoint);
+    }
+
+    private void connectSetpoint(FluxSink<Double> setpointSink) {
+        this.setpointSink = setpointSink;
     }
 
     @Override
     public void setSetpoint(double setpoint) {
-
-        this.setpoint = setpoint;
-
-        // May need to recalculate the status and emit the next computed value
-        configurationChanged();
+        setpointSink.next(setpoint);
     }
 
     @Override
@@ -86,14 +94,19 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
 
     @Override
     public final Flux<Signal<Status<O>, P>> compute(Flux<Signal<I, P>> pv) {
-        return pv.map(this::doCompute);
+
+        // Whatever is in setpointFlux already, will not get replayed, and pv signals will get lost.
+        // Need to re-inject it.
+        return Flux.combineLatest(
+                Flux.concat(
+                        Flux.just(setpoint),
+                        setpointFlux
+                ),
+                pv.doOnComplete(() -> setpointSink.complete()), // or it will hang forever
+                this::compute);
     }
 
-    private Signal<Status<O>, P> doCompute(Signal<I, P> pv) {
-
-        if (pv == null) {
-            throw new IllegalArgumentException("pv can't be null");
-        }
+    private Signal<Status<O>, P> compute(Double setpoint, Signal<I, P> pv) {
 
         if (pv.isError()) {
 
@@ -111,12 +124,12 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
         }
 
         this.pv = pv;
-        lastOutputSignal = wrapCompute(pv);
+        lastOutputSignal = wrapCompute(setpoint, pv);
 
         return lastOutputSignal;
     }
 
-    protected abstract Signal<Status<O>, P> wrapCompute(Signal<I, P> pv);
+    protected abstract Signal<Status<O>, P> wrapCompute(Double setpoint, Signal<I, P> pv);
 
     /**
      * Acknowledge the configuration change, recalculate and issue control signal if necessary.

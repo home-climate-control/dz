@@ -37,19 +37,22 @@ class AbstractProcessControllerTest {
         // in imperative implementation it doesn't; it'll wait till the next incoming signal to do so
         pc.setSetpoint(30.0);
 
-        pvSink.next(25.0);
+        pvSink.next(35.0);
 
         pvSink.complete();
 
-        // This is also wrong, should be 4
-        assertThat(accumulator).hasSize(3);
+        // Three signals corresponding to process variable change, and one to setpoint change
+        assertThat(accumulator).hasSize(4);
 
-        // This is right
+        // PV change
         assertThat(accumulator.get(0).getValue().signal).isEqualTo(-1.0);
         assertThat(accumulator.get(1).getValue().signal).isEqualTo(1.0);
 
-        // And this is wrong, one signal is missing
+        // Setpoint change
         assertThat(accumulator.get(2).getValue().signal).isEqualTo(-1.0);
+
+        // PV change again
+        assertThat(accumulator.get(3).getValue().signal).isEqualTo(1.0);
 
         out.dispose();
     }
@@ -72,23 +75,24 @@ class AbstractProcessControllerTest {
         pvSink.next(15.0);
         pvSink.next(25.0);
 
-        // This should make the controller emit a signal since the setpoint now calls for action, but
-        // in imperative implementation it doesn't; it'll wait till the next incoming signal to do so
         pc.setSetpoint(30.0);
 
-        pvSink.next(25.0);
+        pvSink.next(35.0);
 
         pvSink.complete();
 
-        // This is also wrong, should be 4
-        assertThat(accumulator).hasSize(3);
+        // Three signals corresponding to process variable change, and one to setpoint change
+        assertThat(accumulator).hasSize(4);
 
-        // This is right
+        // PV change
         assertThat(accumulator.get(0).getValue().signal).isEqualTo(-5.0);
         assertThat(accumulator.get(1).getValue().signal).isEqualTo(5.0);
 
-        // And this is wrong, one signal is missing
+        // Setpoint change
         assertThat(accumulator.get(2).getValue().signal).isEqualTo(-5.0);
+
+        // PV change again
+        assertThat(accumulator.get(3).getValue().signal).isEqualTo(5.0);
 
         out.dispose();
     }

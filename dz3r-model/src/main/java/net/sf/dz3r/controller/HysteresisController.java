@@ -127,7 +127,7 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
     }
 
     @Override
-    protected Signal<Status<Double>, P> wrapCompute(Signal<Double, P> pv) {
+    protected Signal<Status<Double>, P> wrapCompute(Double setpoint, Signal<Double, P> pv) {
 
         if (pv == null) {
             // This should've been handled up the call stack already, but let's be paranoid
@@ -136,7 +136,7 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
 
         if (pv.isError()) {
             // Nothing good at least; let's pass up the error
-            return new Signal<>(pv.timestamp, new Status<>(getSetpoint(), null, null), pv.payload, pv.status, pv.getError());
+            return new Signal<>(pv.timestamp, new Status<>(setpoint, null, null), pv.payload, pv.status, pv.getError());
         }
 
         var sample = pv.getValue(); // NOSONAR false positive
@@ -147,18 +147,18 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
 
         if (state) {
 
-            if (sample - thresholdLow <= getSetpoint()) {
+            if (sample - thresholdLow <= setpoint) {
                 state = false;
             }
 
         } else {
 
-            if (sample - thresholdHigh >= getSetpoint()) {
+            if (sample - thresholdHigh >= setpoint) {
                 state = true;
             }
         }
 
-        return new Signal<>(pv.timestamp, new Status<>(getSetpoint(), getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS), pv.payload);
+        return new Signal<>(pv.timestamp, new Status<>(setpoint, getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS), pv.payload);
     }
 
     @Override
