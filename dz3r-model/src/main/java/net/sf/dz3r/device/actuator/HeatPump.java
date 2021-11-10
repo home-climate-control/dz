@@ -326,7 +326,7 @@ public class HeatPump extends AbstractHvacDevice {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
 
         logger.warn("Shutting down");
 
@@ -351,15 +351,15 @@ public class HeatPump extends AbstractHvacDevice {
         }
     }
 
-    protected void setMode(boolean state) throws IOException {
+    protected void setMode(boolean state) throws IOException { // NOSONAR Subclass throws this exception
         switchMode.setState(state).block();
     }
 
-    protected void setRunning(boolean state) throws IOException {
+    protected void setRunning(boolean state) throws IOException { // NOSONAR Subclass throws this exception
         switchRunning.setState(state).block();
     }
 
-    protected void setFan(boolean state) throws IOException {
+    protected void setFan(boolean state) throws IOException { // NOSONAR Subclass throws this exception
         switchFan.setState(state).block();
     }
 }

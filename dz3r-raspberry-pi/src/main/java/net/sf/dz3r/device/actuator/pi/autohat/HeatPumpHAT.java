@@ -143,7 +143,7 @@ public class HeatPumpHAT extends HeatPump {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() throws IOException {
 
         super.close();
 
