@@ -1,13 +1,16 @@
 package net.sf.dz3r.model;
 
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.test.StepVerifier;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
@@ -104,5 +107,54 @@ class ZoneTest {
                     assertThat(s.payload).isEqualTo(name);
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void setpointChangeEmitsSignal() {
+
+        var source = Flux
+                .create(this::connectSetpoint)
+                .map(v -> new Signal<Double, String>(Instant.now(), v));
+
+        var setpoint = 20.0;
+        var name = UUID.randomUUID().toString();
+        var ts = new Thermostat(name, setpoint, 1, 0, 0, 1);
+        var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
+
+        var accumulator = new ArrayList<Signal<ZoneStatus, String>>();
+        var out = z
+                .compute(source)
+                .log()
+                .subscribe(accumulator::add);
+
+        pvSink.next(15.0);
+        pvSink.next(25.0);
+
+        // This should make the controller emit a signal since the setpoint now calls for action, but
+        // in imperative implementation it doesn't; it'll wait till the next incoming signal to do so
+        z.setSettings(new ZoneSettings(z.getSettings(), 30.0));
+
+        pvSink.next(25.0);
+
+        pvSink.complete();
+
+        // This is also wrong, should be 4
+        assertThat(accumulator).hasSize(3);
+
+        // This is right
+        assertThat(accumulator.get(0).getValue().status.calling).isFalse();
+        assertThat(accumulator.get(1).getValue().status.calling).isTrue();
+
+        // And this is wrong, one signal is missing
+        assertThat(accumulator.get(2).getValue().status.calling).isFalse();
+
+        out.dispose();
+    }
+
+    private FluxSink<Double> pvSink;
+
+
+    private void connectSetpoint(FluxSink<Double> pvSink) {
+        this.pvSink = pvSink;
     }
 }

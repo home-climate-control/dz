@@ -9,10 +9,12 @@ import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.test.StepVerifier;
 import reactor.tools.agent.ReactorDebugAgent;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
@@ -171,5 +173,50 @@ class ThermostatTest {
         // Partial [control path] error got masked by the PID controller, it's invisible here - this is expected
         assertThat(s.isOK()).isTrue();
         assertThat(s.isError()).isFalse();
+    }
+    @Test
+    void setpointChangeEmitsSignal() {
+
+        var source = Flux
+                .create(this::connectSetpoint)
+                .map(v -> new Signal<Double, Void>(Instant.now(), v));
+
+        var ts = new Thermostat("ts", 20, 1, 0, 0, 1.1);
+
+        var accumulator = new ArrayList<Signal<ProcessController.Status<ThermostatStatus>, Void>>();
+        var out = ts
+                .compute(source)
+                .log()
+                .subscribe(accumulator::add);
+
+        pvSink.next(15.0);
+        pvSink.next(25.0);
+
+        // This should make the controller emit a signal since the setpoint now calls for action, but
+        // in imperative implementation it doesn't; it'll wait till the next incoming signal to do so
+        ts.setSetpoint(30.0);
+
+        pvSink.next(25.0);
+
+        pvSink.complete();
+
+        // This is also wrong, should be 4
+        assertThat(accumulator).hasSize(3);
+
+        // This is right
+        assertThat(accumulator.get(0).getValue().signal.calling).isFalse();
+        assertThat(accumulator.get(1).getValue().signal.calling).isTrue();
+
+        // And this is wrong, one signal is missing
+        assertThat(accumulator.get(2).getValue().signal.calling).isFalse();
+
+        out.dispose();
+    }
+
+    private FluxSink<Double> pvSink;
+
+
+    private void connectSetpoint(FluxSink<Double> pvSink) {
+        this.pvSink = pvSink;
     }
 }
