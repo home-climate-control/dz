@@ -7,6 +7,7 @@ import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -81,7 +82,7 @@ public class SwitchableStackedHvacDevice extends AbstractHvacDevice {
     }
 
     @Override
-    public void close() throws Exception {
+    protected void doClose() throws IOException {
         logger.warn("Shutting down");
         for (var s : devices) {
             logger.warn("close(): shutting down {} ", s);

@@ -142,6 +142,7 @@ public class HeatPump extends AbstractHvacDevice {
 
         return Flux.concat(init, in, shutdown)
                 .filter(Signal::isOK)
+                .filter(ignored -> !isClosed())
                 .flatMap(s -> Flux.create(sink -> process(s, sink)));
     }
 
@@ -326,7 +327,7 @@ public class HeatPump extends AbstractHvacDevice {
     }
 
     @Override
-    public void close() throws IOException {
+    protected void doClose() throws IOException {
 
         logger.warn("Shutting down");
 

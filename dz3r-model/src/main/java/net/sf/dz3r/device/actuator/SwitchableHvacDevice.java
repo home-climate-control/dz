@@ -177,7 +177,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
     }
 
     @Override
-    public void close() throws Exception {
+    protected void doClose() {
         logger.warn("Shutting down");
         logger.warn("close(): setting {} to off", theSwitch);
         theSwitch.setState(false).block();

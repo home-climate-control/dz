@@ -3,6 +3,7 @@ package net.sf.dz3r.device.actuator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -21,6 +22,8 @@ public abstract class AbstractHvacDevice implements HvacDevice {
      * The moment this device turned on, {@code null} if currently off.
      */
     private Instant startedAt;
+
+    private boolean isClosed;
 
     protected AbstractHvacDevice(String name) {
         this.name = name;
@@ -65,4 +68,22 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     public Duration uptime() {
         return startedAt == null ? null : Duration.between(startedAt, Instant.now());
     }
+
+    protected boolean isClosed() {
+        return isClosed;
+    }
+
+    @Override
+    public final void close() throws IOException {
+
+        if (isClosed) {
+            logger.warn("redundant close(), ignored");
+            return;
+        }
+
+        isClosed = true;
+        doClose();
+    }
+
+    protected abstract void doClose() throws IOException;
 }
