@@ -18,7 +18,7 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
     /**
      * @see #consumeSensorSignal(Signal)
      */
-    private transient Signal<Double, String> sensorSignal;
+    private Signal<Double, String> sensorSignal;
 
     /**
      * @see #consumeMode(Signal)
