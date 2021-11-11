@@ -1,11 +1,15 @@
 package net.sf.dz3r.view.http.gae.v3;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.view.http.gae.v3.wire.ZoneCommand;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;
 import net.sf.dz3r.view.http.v3.HttpConnector;
 import org.apache.http.client.HttpClient;
@@ -27,7 +31,9 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -40,6 +46,8 @@ public class HttpConnectorGAE extends HttpConnector {
     protected final HttpClientContext context = HttpClientContext.create();
 
     private final Set<String> zoneNames;
+    private final Map<String, Zone> name2zone = new TreeMap<>();
+
     private final Duration pollInterval = Duration.of(10, ChronoUnit.SECONDS);
 
     /**
@@ -55,6 +63,10 @@ public class HttpConnectorGAE extends HttpConnector {
 
     @Override
     public void connect(UnitDirector.Feed feed) {
+
+        for (var zone : feed.sensorFlux2zone.values()) {
+            name2zone.put(zone.getAddress(), zone);
+        }
 
         var zoneRenderer = new ZoneRenderer();
 
@@ -154,8 +166,41 @@ public class HttpConnectorGAE extends HttpConnector {
         }
     }
 
-    private void processResponse(String response) {
-        logger.warn("HTTP response: {}", response);
+    private void processResponse(String response) throws JsonProcessingException {
+        ThreadContext.push("processResponse");
+        try {
+
+            var buffer = objectMapper.readValue(response, new TypeReference<Set<ZoneCommand>>(){});
+            logger.debug("Commands received ({}): {}", buffer.size(), buffer);
+
+            Flux.fromIterable(buffer)
+                    .publishOn(Schedulers.boundedElastic())
+                    .subscribe(this::executeCommand);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void executeCommand(ZoneCommand command) {
+        ThreadContext.push("executeCommand");
+        try {
+
+            // Input is not sanitized, need to do it here
+            Optional
+                    .ofNullable(name2zone.get(command.name))
+                    .ifPresent(z -> z.setSettings(
+                            new ZoneSettings(
+                                    command.enabled,
+                                    command.setpointTemperature,
+                                    command.voting,
+                                    command.onHold,
+                                    null)
+                    ));
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     /**
