@@ -3,7 +3,9 @@ package net.sf.dz3r.device.xbee;
 import com.homeclimatecontrol.xbee.AddressParser;
 import com.homeclimatecontrol.xbee.XBeeReactive;
 import com.homeclimatecontrol.xbee.response.frame.IOSampleIndicator;
+import com.homeclimatecontrol.xbee.response.frame.LocalATCommandResponse;
 import com.homeclimatecontrol.xbee.response.frame.XBeeResponseFrame;
+import com.rapplogic.xbee.api.AtCommand;
 import net.sf.dz3r.device.driver.DriverNetworkMonitor;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.device.xbee.command.XBeeCommandRescan;
@@ -22,6 +24,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import static com.rapplogic.xbee.api.AtCommand.Command.AP;
+
 public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> implements AutoCloseable {
 
     private final Disposable commandSubscription;
@@ -36,7 +40,11 @@ public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> imple
         super(Duration.ofSeconds(60), observer);
 
         try {
+
             adapter = new XBeeReactive(port);
+
+            API2(adapter);
+
         } catch (IOException e) {
             // Not much we can reasonably do at this point
             throw new IllegalStateException("Failed to get XBee adapter on " + port, e);
@@ -69,6 +77,19 @@ public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> imple
                 .receive()
                 .doOnNext(event -> handleXBeeEvent(event, observer))
                 .subscribe();
+    }
+
+    private void API2(XBeeReactive adapter) throws IOException {
+
+        var response = adapter.sendAT(new AtCommand(AP, 2), Duration.ofSeconds(5)).block();
+
+        if (response == null) {
+            throw new IOException("null response to API2");
+        }
+
+        if (!response.status.equals(LocalATCommandResponse.Status.OK)) {
+            throw new IOException("Couldn't set API2: " + response);
+        }
     }
 
     @Override
