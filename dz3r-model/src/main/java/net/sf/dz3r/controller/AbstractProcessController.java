@@ -118,7 +118,7 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
         }
 
         if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
-            throw new IllegalArgumentException("Can't go back in time: last sample was @"
+            logger.warn("Can't go back in time: last sample was @"
                     + lastOutputSignal.timestamp + ", this is @" + pv.timestamp
                     + ", " + (lastOutputSignal.timestamp.toEpochMilli() - pv.timestamp.toEpochMilli()) + "ms difference");
         }
