@@ -99,7 +99,7 @@ public abstract class AbstractMedianFilter<T extends  Comparable<T>, P> implemen
 
     private T filterEven(List<Signal<T, P>> source) {
 
-        var result = new ArrayList<T>(1);
+        var result = new ArrayList<T>(source.size());
         Flux.fromIterable(source)
                 .map(Signal::getValue)
                 .sort()
@@ -115,7 +115,7 @@ public abstract class AbstractMedianFilter<T extends  Comparable<T>, P> implemen
 
     private T filterOdd(List<Signal<T, P>> source) {
 
-        var sorted = new ArrayList<T>(1);
+        var sorted = new ArrayList<T>(source.size());
         Flux.fromIterable(source)
                 .map(Signal::getValue)
                 .sort()
