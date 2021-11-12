@@ -3,9 +3,9 @@ package net.sf.dz3r.signal.filter;
 import net.sf.dz3r.signal.Signal;
 import reactor.core.publisher.Flux;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Median set filter.
@@ -48,10 +48,10 @@ public abstract class MedianSetFilter<T extends  Comparable<T>, P> extends Abstr
 
         channelMap.put(signal.payload, signal);
 
-        var buffer = Flux.fromIterable(channelMap.values())
+        var buffer = new ArrayList<Signal<T, P>>(channelMap.size());
+        Flux.fromIterable(channelMap.values())
                 .sort(this::sortByTimestamp)
-                .collect(Collectors.toList())
-                .block();
+                .subscribe(buffer::add);
 
         if (buffer.size() < 2) { // NOSONAR false positive
             // Nothing to filter yet

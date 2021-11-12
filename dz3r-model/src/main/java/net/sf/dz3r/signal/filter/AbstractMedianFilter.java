@@ -8,7 +8,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * Base class implementing common behavior features for {@link MedianFilter} and {@link MedianSetFilter}.
@@ -54,7 +53,8 @@ public abstract class AbstractMedianFilter<T extends  Comparable<T>, P> implemen
         var errorCount = new AtomicInteger();
         List<Throwable> errors = new ArrayList<>();
 
-        var values = Flux.fromIterable(source)
+        var values = new ArrayList<Signal<T, P>>(source.size());
+        Flux.fromIterable(source)
                 .doOnNext(s -> {
 
                     if (!s.isOK()) {
@@ -68,8 +68,7 @@ public abstract class AbstractMedianFilter<T extends  Comparable<T>, P> implemen
                     }
                 })
                 .filter(s -> s.getValue() != null)
-                .collect(Collectors.toList())
-                .block();
+                .subscribe(values::add);
 
 
         // Some elements may be partial or total errors
@@ -100,24 +99,27 @@ public abstract class AbstractMedianFilter<T extends  Comparable<T>, P> implemen
 
     private T filterEven(List<Signal<T, P>> source) {
 
-        return Flux.fromIterable(source)
+        var result = new ArrayList<T>(1);
+        Flux.fromIterable(source)
                 .map(Signal::getValue)
                 .sort()
                 .skip(source.size() / 2L - 1)
                 .take(2)
                 .reduce(this::average)
-                .block();
+                .subscribe(result::add);
+
+        return result.get(0);
     }
 
     protected abstract T average(T t1, T t2);
 
     private T filterOdd(List<Signal<T, P>> source) {
 
-        var sorted = Flux.fromIterable(source)
+        var sorted = new ArrayList<T>(1);
+        Flux.fromIterable(source)
                 .map(Signal::getValue)
                 .sort()
-                .collect(Collectors.toList())
-                .block();
+                .subscribe(sorted::add);
 
         return sorted.get((source.size() - 1) / 2); // NOSONAR false positive
     }
