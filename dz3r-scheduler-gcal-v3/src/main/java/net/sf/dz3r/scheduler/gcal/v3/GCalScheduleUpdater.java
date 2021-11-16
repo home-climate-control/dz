@@ -231,15 +231,10 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
 
         var calendar = source.getKey();
         var schedule = new TreeMap<SchedulePeriod, ZoneSettings>();
-        var scheduleWrapper = Collections.synchronizedMap(schedule);
 
         Flux.fromIterable(source.getValue())
-                .parallel()
-                .runOn(Schedulers.boundedElastic())
                 .flatMap(this::convertEvent)
-                .doOnNext(kv -> scheduleWrapper.put(kv.getKey(), kv.getValue()))
-                .sequential()
-                .blockLast();
+                .subscribe(kv -> schedule.put(kv.getKey(), kv.getValue()));
 
         return new AbstractMap.SimpleEntry<>(calendar.getSummary(), schedule);
     }
