@@ -29,13 +29,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 public class HttpConnectorGAE extends HttpConnector {
 
@@ -101,10 +101,13 @@ public class HttpConnectorGAE extends HttpConnector {
     }
 
     private Flux<Signal<Double, String>> getAggregateSensorFlux(Map<Flux<Signal<Double, Void>>, Zone> source) {
-        return Flux.merge(Flux.fromIterable(source.entrySet())
+
+        var accumulator = new ArrayList<Flux<Signal<Double, String>>>(source.size());
+        Flux.fromIterable(source.entrySet())
                 .map(this::getSensorFlux)
-                .collect(Collectors.toSet())
-                .block());
+                .subscribe(accumulator::add);
+
+        return Flux.merge(accumulator);
     }
 
     private Flux<Signal<Double, String>> getSensorFlux(Map.Entry<Flux<Signal<Double, Void>>, Zone> source) {
