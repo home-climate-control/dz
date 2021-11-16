@@ -106,7 +106,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
                 // This is still computationally expensive, but with a different breakdown; regroup (inside)
                 .sequential()
                 .map(this::convertEvents)
-                .map(this::convertZoneName);
+                .flatMap(this::convertZoneName);
     }
 
     private Map.Entry<Calendar, List<CalendarListEntry>> getCalendars(Long ignore) {
@@ -264,15 +264,13 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
         }
     }
 
-    private Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> convertZoneName(Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> source) {
+    private Flux<Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>>> convertZoneName(Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> source) {
 
         var calendarName = source.getKey();
-        var zoneName = Flux.fromIterable(name2calendar.entrySet())
+        return Flux.fromIterable(name2calendar.entrySet())
                 .filter(kv -> kv.getValue().equals(calendarName))
-                .map(Map.Entry::getKey)
-                .blockFirst();
-
-        return new AbstractMap.SimpleEntry<>(zoneName, source.getValue());
+                .take(1)
+                .map(kv -> new AbstractMap.SimpleEntry<>(kv.getKey(), source.getValue()));
     }
 
     private SchedulePeriod parsePeriod(Event event) {
