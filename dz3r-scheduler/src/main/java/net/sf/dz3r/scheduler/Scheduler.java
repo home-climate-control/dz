@@ -63,7 +63,7 @@ public class Scheduler {
                 .subscribe();
 
         // Execute
-        Flux.interval(scheduleGranularity)
+        Flux.interval(scheduleGranularity, Schedulers.boundedElastic())
                 .flatMap(s -> Flux.fromIterable(zone2schedule.entrySet()))
                 .doOnNext(this::applySchedule)
                 .subscribeOn(Schedulers.boundedElastic())
