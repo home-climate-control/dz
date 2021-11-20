@@ -5,8 +5,9 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 import reactor.tools.agent.ReactorDebugAgent;
@@ -15,10 +16,12 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
-@Disabled("Becomes flaky once in a while for no apparent reason; might need to revisit both the test and the implementation")
 class TimeoutGuardTest {
 
     private final Logger logger = LogManager.getLogger();
@@ -216,5 +219,64 @@ class TimeoutGuardTest {
                     assertThat(s.getError()).isInstanceOf(TimeoutException.class);
                 })
                 .verifyComplete();
+    }
+
+    @ParameterizedTest
+    @MethodSource("rangeFluxProvider")
+    void backpressure(Flux<Integer> source) {
+
+        var counter = new AtomicLong();
+
+        try {
+            var timeout = Duration.ofMillis(5);
+            var guard = new TimeoutGuard<Integer, Void>(timeout, false);
+            var signal = source
+                    .doOnNext(ignored -> counter.incrementAndGet())
+                    .map(i -> new Signal<Integer, Void>(Instant.now(), i));
+            var guarded = guard.compute(signal);
+
+            // Bottomline: no matter what the overflow strategy is, it fails anyway.
+
+            assertThatIllegalStateException()
+                    .isThrownBy(guarded::blockLast)
+                    .withMessage("The receiver is overrun by more signals than expected (bounded queue...)");
+
+        } finally {
+            logger.info("{} failed at: {}", source.getClass().getName(), counter.get());
+        }
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("rangeFluxProvider")
+    void backpressureUnguarded(Flux<Integer> source) {
+
+        var counter = new AtomicLong();
+
+        try {
+            var timeout = Duration.ofMillis(5);
+            var guard = new TimeoutGuard<Integer, Void>(timeout, false);
+            var signal = source
+                    .doOnNext(ignored -> counter.incrementAndGet())
+                    .map(i -> new Signal<Integer, Void>(Instant.now(), i));
+
+            // We're good no matter what
+
+            assertThatCode(signal::blockLast).doesNotThrowAnyException();
+
+        } finally {
+            logger.info("{} count: {}", source.getClass().getName(), counter.get());
+        }
+    }
+
+    private static Stream<Flux<Integer>> rangeFluxProvider() {
+        var source = Flux
+                .range(0, 5000000);
+
+        return Stream.of(
+                source.onBackpressureBuffer(),
+                source.onBackpressureDrop(),
+                source.onBackpressureLatest()
+        );
     }
 }
