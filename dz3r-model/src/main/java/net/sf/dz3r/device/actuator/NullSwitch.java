@@ -32,7 +32,7 @@ public class NullSwitch extends AbstractSwitch<String> {
      * @param address Address to use.
      */
     public NullSwitch(String address) {
-        this(address, 0, 0, Schedulers.newSingle("NullSwitch", true));
+        this(address, 0, 0, Schedulers.newSingle("NullSwitch:" + address, true));
     }
 
     /**

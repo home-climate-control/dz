@@ -69,7 +69,7 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
                 .merge(externalCommandFlux, rescanFlux, readTemperatureFlux)
 
                 // Critical section - can't allow more than one thread to talk to the serial stream
-                .publishOn(Schedulers.newSingle("1-Wire command"))
+                .publishOn(Schedulers.newSingle("OneWireCommand"))
                 .doOnNext(c -> logger.debug("1-Wire command: {}", c))
                 .flatMap(this::execute)
                 .doOnNext(e -> logger.debug("1-Wire event: {}", e))

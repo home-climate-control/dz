@@ -44,7 +44,7 @@ public abstract class AbstractDamperController implements DamperController {
      */
     private Signal<UnitControlSignal, Void> unitStatus;
 
-    private Scheduler controlScheduler = Schedulers.newSingle("damper controller", true);
+    private Scheduler controlScheduler = Schedulers.newSingle("DamperController", true);
     private FluxSink<Pair<Signal<UnitControlSignal, Void>, Map<String, Signal<ZoneStatus, String>>>> controlSink;
 
 

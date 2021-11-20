@@ -33,7 +33,7 @@ public class NullDamper extends AbstractDamper<String> {
      * @param address Address to use.
      */
     public NullDamper(String address) {
-        this(address, 0, 0, Schedulers.newSingle("NullSwitch", true));
+        this(address, 0, 0, Schedulers.newSingle("NullDamper", true));
     }
 
     /**
