@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
+import java.time.Duration;
+
 /**
  * Base class for reactive process controllers.
  *
@@ -118,9 +120,11 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
         }
 
         if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
-            logger.warn("Can't go back in time: last sample was @"
-                    + lastOutputSignal.timestamp + ", this is @" + pv.timestamp
-                    + ", " + (lastOutputSignal.timestamp.toEpochMilli() - pv.timestamp.toEpochMilli()) + "ms difference");
+            logger.warn("Can't go back in time: last sample was @{}, this is @{}, {}ms difference: {}",
+                    lastOutputSignal.timestamp,
+                    pv.timestamp,
+                    Duration.between(lastOutputSignal.timestamp, pv.timestamp).toMillis(),
+                    pv);
         }
 
         this.pv = pv;
