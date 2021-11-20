@@ -1,6 +1,7 @@
 package net.sf.dz3r.view.swing;
 
 import net.sf.dz3r.view.swing.zone.AbstractZoneChart;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -155,37 +156,47 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
     @Override
     public synchronized void paintComponent(Graphics g) {
 
-        // VT: NOTE: Consider replacing this with a Marker - careful, though, this is a time sensitive path
+        ThreadContext.push("paintComponent");
         long startTime = clock.instant().toEpochMilli();
 
-        // Draw background
-        super.paintComponent(g);
+        try {
 
-        var g2d = (Graphics2D) g;
-        var boundary = getSize();
-        var insets = getInsets();
 
-        paintBackground(g2d, boundary, insets);
+            // Draw background
+            super.paintComponent(g);
 
-        var now = clock.instant().toEpochMilli();
-        var xScale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
-        var xOffset = now - chartLengthMillis;
+            var g2d = (Graphics2D) g;
+            var boundary = getSize();
+            var insets = getInsets();
 
-        paintTimeGrid(g2d, boundary, insets, now, xScale, xOffset);
+            paintBackground(g2d, boundary, insets);
 
-        checkWidth(boundary);
+            var now = clock.instant().toEpochMilli();
+            var xScale = (double) (boundary.width - insets.left - insets.right) / (double) chartLengthMillis;
+            var xOffset = now - chartLengthMillis;
 
-        if (!isDataAvailable()) {
-            return;
+            paintTimeGrid(g2d, boundary, insets, now, xScale, xOffset);
+
+            checkWidth(boundary);
+
+            if (!isDataAvailable()) {
+                return;
+            }
+
+            var yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
+            var yOffset = dataMax + PADDING;
+
+            paintValueGrid(g2d, boundary, insets, xScale, xOffset, yScale, yOffset);
+            paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
+
+            logger.debug("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
+
+        } catch (Exception ex) {
+            logger.warn("Painted in {}ms (FAIL)", (clock.instant().toEpochMilli() - startTime));
+            logger.warn("Unexpected exception, ignored", ex);
+        } finally {
+            ThreadContext.pop();
         }
-
-        var yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
-        var yOffset = dataMax + PADDING;
-
-        paintValueGrid(g2d, boundary, insets, xScale, xOffset, yScale, yOffset);
-        paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
-
-        logger.debug("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
     }
 
     private void paintBackground(Graphics2D g2d, Dimension boundary, Insets insets) {
