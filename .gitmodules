@@ -7,11 +7,9 @@
 [submodule "xbee-api-reactive"]
 	path = xbee-api-reactive
 	url = https://github.com/home-climate-control/xbee-api-reactive.git
-	branch = reactive
 [submodule "owapi-reborn"]
 	path = owapi-reborn
 	url = https://github.com/home-climate-control/owapi-reborn.git
-	branch = overhaul-2021-09
 [submodule "automation-hat-driver"]
 	path = automation-hat-driver
 	url = https://github.com/home-climate-control/automation-hat-driver.git
