@@ -25,8 +25,8 @@ class TimeoutGuardTest {
 
     private final Logger logger = LogManager.getLogger();
 
-    private final Duration timeout = Duration.ofMillis(50);
-    private final Duration timeoutDelta = Duration.ofMillis(10);
+    private final Duration timeout = Duration.ofMillis(20);
+    private final Duration timeoutDelta = Duration.ofMillis(5);
 
     private static final int BACKPRESSURE_COUNT = 50000;
 

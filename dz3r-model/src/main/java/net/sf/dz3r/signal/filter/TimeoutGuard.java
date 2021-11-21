@@ -82,8 +82,6 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P>, AutoCloseab
                 var now = Instant.now();
                 var leftToWait = timeout.minus(Duration.between(lastSeenAt, now));
 
-                logger.debug("Left to wait: {}ms", leftToWait.toMillis());
-
                 if ((leftToWait.toMillis() <= 0) && (!inTimeout || repeat)) {
                     generateTimeoutSignal(now);
                     continue;
@@ -103,8 +101,6 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P>, AutoCloseab
 
     private void generateTimeoutSignal(Instant now) {
 
-        logger.warn("generating timeout signal for {}", now);
-
         timeoutFluxSink.next(new Signal<>(
                         now,
                         null,
@@ -121,20 +117,13 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P>, AutoCloseab
 
         var actual = in
                 .doOnNext(s -> touch(s.timestamp))
-                .doOnNext(ignored -> inTimeout = false)
-                .doOnNext(s -> logger.warn("  signal: {}", s));
+                .doOnNext(ignored -> inTimeout = false);
 
-        var guard = timeoutFlux
-                .doOnNext(s -> logger.warn("  guard:  {}", s));
-
-        return Flux
-                .merge(actual, guard)
-                .log();
+        return Flux.merge(actual, timeoutFlux);
     }
 
     private synchronized void touch(Instant timestamp) {
         lastSeenAt = timestamp;
-        logger.warn("set lastSeenAt={}", lastSeenAt);
         notifyAll();
     }
 
