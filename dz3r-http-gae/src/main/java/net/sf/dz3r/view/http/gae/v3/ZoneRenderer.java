@@ -49,31 +49,32 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
             logger.error("Not implemented: reporting error signal: {}", source);
             return Flux.empty();
         } else {
-//        long timestamp, String name, HvacMode mode, ZoneState state,
-//        double signal, double currentTemperature,
-//        double setpointTemperature, boolean enabled, boolean onHold, boolean voting,
-//        String periodName,
-//        double deviationSetpoint,
-//        boolean deviationEnabled,
-//        boolean deviationVoting,
-//        String error
-            return Flux.just(new ZoneSnapshot(
-                    source.timestamp.toEpochMilli(),
-                    zoneName,
-                    modeMap.get(hvacMode),
-                    renderState(status.settings.enabled, status.status.calling),
-                    status.status.demand,
-                    sensorSignal.getValue(),
-                    status.settings.setpoint,
-                    status.settings.enabled,
-                    status.settings.hold,
-                    status.settings.voting,
-                    null,
-                    0.0,
-                    false,
-                    false,
-                    null
-                    ));
+
+            try {
+                return Flux.just(new ZoneSnapshot(
+                        source.timestamp.toEpochMilli(),
+                        zoneName,
+                        modeMap.get(hvacMode),
+                        renderState(status.settings.enabled, status.status.calling),
+                        status.status.demand,
+                        sensorSignal.getValue(),
+                        status.settings.setpoint,
+                        status.settings.enabled,
+                        status.settings.hold,
+                        status.settings.voting,
+                        null,
+                        0.0,
+                        false,
+                        false,
+                        null
+                ));
+            } catch (Exception ex) {
+                logger.warn("hvacMode={}", hvacMode);
+                logger.warn("sensorSignal={}", sensorSignal);
+                logger.warn("source={}", source);
+                logger.error("Failed to create zone snapshot, dropped (see logs right above for context)", ex);
+                return Flux.empty();
+            }
         }
     }
 
