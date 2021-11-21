@@ -20,11 +20,15 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 
 class TimeoutGuardTest {
 
     private final Logger logger = LogManager.getLogger();
+
+    private final Duration timeout = Duration.ofMillis(50);
+    private final Duration timeoutDelta = Duration.ofMillis(10);
+
+    private static final int BACKPRESSURE_COUNT = 50000;
 
     @BeforeAll
     static void init() {
@@ -34,11 +38,10 @@ class TimeoutGuardTest {
     @Test
     void nodelay() {
 
-        var timeout = Duration.ofMillis(50);
         var guard = new TimeoutGuard<Integer, Void>(timeout);
 
         var source = Flux.range(0, 3).map(v -> new Signal<>(Instant.now(), v, (Void) null));
-        var guarded = guard.compute(source);
+        var guarded = guard.compute(source).take(3);
 
         // VT: NOTE: I'm not sure StepVerifier.withVirtualTime() will work here
 
@@ -46,25 +49,17 @@ class TimeoutGuardTest {
 
                 // There's no delay for all the three input elements
 
-                .assertNext(s -> assertThat(s.getValue()).isEqualTo(0))
+                .assertNext(s -> assertThat(s.getValue()).isZero())
                 .assertNext(s -> assertThat(s.getValue()).isEqualTo(1))
                 .assertNext(s -> assertThat(s.getValue()).isEqualTo(2))
-
-                // The last window is always empty, so there'll always be an error item before the flux is complete
-
-                .assertNext(s -> {
-                    assertThat(s.getValue()).isNull();
-                    assertThat(s.isError()).isTrue();
-                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
-                })
                 .verifyComplete();
     }
 
     private Flux<Signal<Integer, Void>> createFlux(Duration timeout, TimeoutGuard<Integer, Void> guard) {
 
         var sequence1 = Flux.just(1, 2, 3);
-        var sequence2 = Flux.just(4, 5).delayElements(timeout.plus(Duration.ofMillis(10)));
-        var sequence3 = Flux.just(6, 7, 8).delayElements(timeout.minus(Duration.ofMillis(10)));
+        var sequence2 = Flux.just(4, 5).delayElements(timeout.plus(timeoutDelta));
+        var sequence3 = Flux.just(6, 7, 8).delayElements(timeout.minus(timeoutDelta));
         var sequence4 = Flux.just(9, 10).delaySequence(timeout.plus(timeout).plus(timeout));
 
         var source = Flux.concat(
@@ -91,9 +86,8 @@ class TimeoutGuardTest {
     @Test
     void timeoutSingle() {
 
-        var timeout = Duration.ofMillis(50);
         var guard = new TimeoutGuard<Integer, Void>(timeout, false);
-        var guarded = createFlux(timeout, guard);
+        var guarded = createFlux(timeout, guard).take(13);
 
 //        guarded.blockLast();
 
@@ -140,23 +134,14 @@ class TimeoutGuardTest {
                 .assertNext(s -> assertThat(s.getValue()).isEqualTo(9))
                 .assertNext(s -> assertThat(s.getValue()).isEqualTo(10))
 
-                // The last window is always empty, so there'll always be an error item before the flux is complete
-
-                .assertNext(s -> {
-                    // First element is always a timeout, why?
-                    assertThat(s.getValue()).isNull();
-                    assertThat(s.isError()).isTrue();
-                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
-                })
                 .verifyComplete();
     }
 
     @Test
     void timeoutRepeating() {
 
-        var timeout = Duration.ofMillis(50);
         var guard = new TimeoutGuard<Integer, Void>(timeout, true);
-        var guarded = createFlux(timeout, guard);
+        var guarded = createFlux(timeout, guard).take(16);
 
         // VT: NOTE: I'm not sure StepVerifier.withVirtualTime() will work here
 
@@ -210,10 +195,9 @@ class TimeoutGuardTest {
                 .assertNext(s -> assertThat(s.getValue()).isEqualTo(9))
                 .assertNext(s -> assertThat(s.getValue()).isEqualTo(10))
 
-                // The last window is always empty, so there'll always be an error item before the flux is complete
+                // From this point on the flux will just be repeating timeout signals, so take 16 and be done with it
 
                 .assertNext(s -> {
-                    // First element is always a timeout, why?
                     assertThat(s.getValue()).isNull();
                     assertThat(s.isError()).isTrue();
                     assertThat(s.getError()).isInstanceOf(TimeoutException.class);
@@ -233,16 +217,22 @@ class TimeoutGuardTest {
             var signal = source
                     .doOnNext(ignored -> counter.incrementAndGet())
                     .map(i -> new Signal<Integer, Void>(Instant.now(), i));
-            var guarded = guard.compute(signal);
+            var guarded = guard
+                    .compute(signal)
+                    .take(BACKPRESSURE_COUNT);
 
-            // Bottomline: no matter what the overflow strategy is, it fails anyway.
+            // No matter what the overflow strategy is, it should not break.
 
-            assertThatIllegalStateException()
-                    .isThrownBy(guarded::blockLast)
-                    .withMessage("The receiver is overrun by more signals than expected (bounded queue...)");
+            var start = Instant.now();
+
+            assertThatCode(guarded::blockLast).doesNotThrowAnyException();
+            assertThat(counter.get()).isEqualTo(BACKPRESSURE_COUNT);
+
+            var elapsed = Duration.between(start, Instant.now()).toMillis();
+            logger.info("{}: elapsed {}ms, tps {}", source.getClass().getName(), elapsed, (double) BACKPRESSURE_COUNT * 1000 / elapsed);
 
         } finally {
-            logger.info("{} failed at: {}", source.getClass().getName(), counter.get());
+            logger.info("{} final count: {}", source.getClass().getName(), counter.get());
         }
     }
 
@@ -271,7 +261,7 @@ class TimeoutGuardTest {
 
     private static Stream<Flux<Integer>> rangeFluxProvider() {
         var source = Flux
-                .range(0, 5000000);
+                .range(0, BACKPRESSURE_COUNT);
 
         return Stream.of(
                 source.onBackpressureBuffer(),
