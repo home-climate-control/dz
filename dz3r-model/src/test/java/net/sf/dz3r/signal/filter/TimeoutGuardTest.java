@@ -41,7 +41,11 @@ class TimeoutGuardTest {
         var guard = new TimeoutGuard<Integer, Void>(timeout);
 
         var source = Flux.range(0, 3).map(v -> new Signal<>(Instant.now(), v, (Void) null));
-        var guarded = guard.compute(source).take(3);
+        var guarded = guard
+                .compute(source)
+
+                // Have to enforce this because otherwise everything is gone before the thread can even start
+                .take(3);
 
         // VT: NOTE: I'm not sure StepVerifier.withVirtualTime() will work here
 
@@ -87,7 +91,7 @@ class TimeoutGuardTest {
     void timeoutSingle() {
 
         var guard = new TimeoutGuard<Integer, Void>(timeout, false);
-        var guarded = createFlux(timeout, guard).take(13);
+        var guarded = createFlux(timeout, guard);
 
 //        guarded.blockLast();
 
@@ -141,7 +145,7 @@ class TimeoutGuardTest {
     void timeoutRepeating() {
 
         var guard = new TimeoutGuard<Integer, Void>(timeout, true);
-        var guarded = createFlux(timeout, guard).take(16);
+        var guarded = createFlux(timeout, guard);
 
         // VT: NOTE: I'm not sure StepVerifier.withVirtualTime() will work here
 
@@ -195,13 +199,7 @@ class TimeoutGuardTest {
                 .assertNext(s -> assertThat(s.getValue()).isEqualTo(9))
                 .assertNext(s -> assertThat(s.getValue()).isEqualTo(10))
 
-                // From this point on the flux will just be repeating timeout signals, so take 16 and be done with it
-
-                .assertNext(s -> {
-                    assertThat(s.getValue()).isNull();
-                    assertThat(s.isError()).isTrue();
-                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
-                })
+                // This is where the signal flux ends, so does everything - we're done
                 .verifyComplete();
     }
 

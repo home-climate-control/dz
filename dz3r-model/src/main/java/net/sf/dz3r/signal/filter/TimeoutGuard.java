@@ -21,7 +21,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P>, AutoCloseable {
+public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -117,7 +117,8 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P>, AutoCloseab
 
         var actual = in
                 .doOnNext(s -> touch(s.timestamp))
-                .doOnNext(ignored -> inTimeout = false);
+                .doOnNext(ignored -> inTimeout = false)
+                .doOnComplete(this::close);
 
         return Flux.merge(actual, timeoutFlux);
     }
@@ -127,8 +128,8 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P>, AutoCloseab
         notifyAll();
     }
 
-    @Override
-    public void close() {
+    private void close() {
+        timeoutFluxSink.complete();
         timeoutFluxSubscription.dispose();
         guardThread.interrupt();
     }
