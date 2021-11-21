@@ -1,5 +1,0 @@
-dependencies {
-
-    implementation 'org.apache.commons:commons-lang3:3.3.2'
-    api project(':jukebox:jukebox-datastream')
-}
