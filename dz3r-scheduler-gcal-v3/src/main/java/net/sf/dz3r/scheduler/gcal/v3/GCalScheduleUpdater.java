@@ -35,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -44,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -63,6 +65,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
 
     private final Map<String, String> name2calendar;
     private final Duration pollInterval;
+    private final ZoneId timeZoneId;
 
     /**
      * Create an instance with a poll interval of 1 minute.
@@ -82,6 +85,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
     public GCalScheduleUpdater(Map<String, String> name2calendar, Duration pollInterval) {
         this.name2calendar = name2calendar;
         this.pollInterval = pollInterval;
+        timeZoneId = TimeZone.getDefault().toZoneId();
     }
 
     @Override
@@ -201,7 +205,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             var events = calendarClient.events().list(calendarId);
 
             // Let's grab three days of events in case there are events across midnight
-            var now = ZonedDateTime.now();
+            var now = ZonedDateTime.now(timeZoneId);
             var min = now.minus(1, ChronoUnit.DAYS);
             var max = now.plus(1, ChronoUnit.DAYS);
 
@@ -319,10 +323,10 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             var dateTime = ZonedDateTime.parse(googleDateTime.toString());
             var date = dateTime.toLocalDate();
 
-            return date.equals(LocalDate.now());
+            return date.equals(LocalDate.now(timeZoneId));
         }
 
-        return LocalDate.parse(eventDateTime.getDate().toString()).equals(LocalDate.now());
+        return LocalDate.parse(eventDateTime.getDate().toString()).equals(LocalDate.now(timeZoneId));
     }
 
 
@@ -336,7 +340,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             logger.error("Lo and behold, recurrence is not null: {}", r);
         }
 
-        var today = LocalDate.now().getDayOfWeek().getValue() - 1;
+        var today = LocalDate.now(timeZoneId).getDayOfWeek().getValue() - 1;
 
         final var days = "MTWTFSS";
         var result = new StringBuilder();

@@ -14,6 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.TimeZone;
 import java.util.TreeMap;
 
 /**
@@ -36,7 +37,7 @@ public class Scheduler {
     private final Map<Zone, SchedulePeriod> zone2period = new TreeMap<>();
 
     public Scheduler(Map<String, Zone> name2zone) {
-        this(Clock.systemDefaultZone(), name2zone, Duration.of(10, ChronoUnit.SECONDS));
+        this(Clock.system(TimeZone.getDefault().toZoneId()), name2zone, Duration.of(10, ChronoUnit.SECONDS));
     }
 
     public Scheduler(Clock clock, Map<String, Zone> name2zone, Duration scheduleGranularity) {
