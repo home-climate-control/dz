@@ -27,6 +27,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
     private final HvacMode mode;
     private final Switch<?> theSwitch;
+    private final boolean inverted;
 
     /**
      * Requested device state.
@@ -54,9 +55,22 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
      * @param mode Supported mode. There can be only one.
      */
     public SwitchableHvacDevice(String name, HvacMode mode, Switch<?> theSwitch) {
+        this(name, mode, theSwitch, false);
+    }
+
+    /**
+     * Create a named instance, possibly inverted.
+     *
+     * @param name Device name.
+     * @param mode Supported mode. There can be only one.
+     * @param inverted {@code true} if the switch is inverted.
+     */
+    public SwitchableHvacDevice(String name, HvacMode mode, Switch<?> theSwitch, boolean inverted) {
         super(name);
 
         this.mode = mode;
+        this.inverted = inverted;
+
         this.requested = new HvacCommand(mode, null, null);
 
         this.theSwitch = theSwitch;
@@ -94,7 +108,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     // By this time, the command has been verified to be valid
                                     requested = command;
 
-                                    theSwitch.setState(state).block();
+                                    theSwitch.setState(state != inverted).block();
                                     actual = state;
                                     updateUptime(state);
 
@@ -180,7 +194,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
     protected void doClose() {
         logger.warn("Shutting down");
         logger.warn("close(): setting {} to off", theSwitch);
-        theSwitch.setState(false).block();
+        theSwitch.setState(inverted).block();
         logger.info("Shut down.");
     }
 

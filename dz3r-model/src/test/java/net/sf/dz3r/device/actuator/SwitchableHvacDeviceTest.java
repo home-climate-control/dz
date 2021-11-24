@@ -241,4 +241,28 @@ class SwitchableHvacDeviceTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void inverted() {
+
+        var now = Instant.now();
+        var s = new NullSwitch("a");
+        var d = new SwitchableHvacDevice("d", HvacMode.COOLING, s, true);
+
+        var sequence = Flux.just(
+                // First, request cooling
+                new Signal<HvacCommand, Void>(now, new HvacCommand(null, 0.8, null)),
+                // Now, request fan on
+                new Signal<HvacCommand, Void>(now.plus(300, ChronoUnit.MILLIS), new HvacCommand(null, null, 0.5)),
+                // Now request it off - the device must stay on
+                new Signal<HvacCommand, Void>(now.plus(600, ChronoUnit.MILLIS), new HvacCommand(null, null, 0.0)),
+                // Now request no cooling - everything should shut off
+                new Signal<HvacCommand, Void>(now.plus(900, ChronoUnit.MILLIS), new HvacCommand(null, 0.0, null))
+        );
+
+        var result = d.compute(sequence).log().blockLast();
+
+        // A bit simpler than full, but it'll do
+        assertThat(s.getState().block()).isTrue();
+    }
 }
