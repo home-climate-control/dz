@@ -25,8 +25,13 @@ class TimeoutGuardTest {
 
     private final Logger logger = LogManager.getLogger();
 
-    private final Duration timeout = Duration.ofMillis(20);
-    private final Duration timeoutDelta = Duration.ofMillis(5);
+    /**
+     * How much longer the duration needs to be to make slow hosts not to flake out.
+     */
+    private final double factor = 2;
+
+    private final Duration timeout = Duration.ofMillis((long) (20 * factor));
+    private final Duration timeoutDelta = Duration.ofMillis((long) (5 * factor));
 
     private static final int BACKPRESSURE_COUNT = 50000;
 
