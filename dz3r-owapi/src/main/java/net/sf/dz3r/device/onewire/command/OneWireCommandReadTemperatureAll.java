@@ -37,8 +37,8 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
 
     @Override
     protected void execute(DSPortAdapter adapter, DriverCommand<DSPortAdapter> command, FluxSink<DriverNetworkEvent> eventSink) throws Exception {
-        ThreadContext.push("readTemperatureAll");
-        var m = new Marker("readTemperatureAll");
+        ThreadContext.push("readTemperatureAll/" + messageId);
+        var m = new Marker("readTemperatureAll/" + messageId);
         try {
 
             logger.debug("known devices: {}", knownDevices.size());

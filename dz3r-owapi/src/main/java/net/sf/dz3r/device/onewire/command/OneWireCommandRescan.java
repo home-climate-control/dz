@@ -37,8 +37,8 @@ public class OneWireCommandRescan extends OneWireCommand {
 
     @Override
     protected void execute(DSPortAdapter adapter, DriverCommand<DSPortAdapter> command, FluxSink<DriverNetworkEvent> eventSink) throws Exception {
-        ThreadContext.push("rescan");
-        var m = new Marker("rescan");
+        ThreadContext.push("rescan/" + messageId);
+        var m = new Marker("rescan/" + messageId);
         try {
 
             var address2device = new TreeMap<String, OneWireContainer>();
