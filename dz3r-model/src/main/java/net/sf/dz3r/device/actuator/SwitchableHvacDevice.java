@@ -155,7 +155,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
             throw new IllegalArgumentException(command.mode.description + " is not supported by this instance");
         }
 
-        if (mode != HvacMode.COOLING && command.fanSpeed > 0) {
+        if (mode != HvacMode.COOLING && command.fanSpeed != null && command.fanSpeed > 0) {
             throw new IllegalArgumentException("fanSpeed=" + command.fanSpeed + " is not supported by this instance (not in cooling mode)");
         }
 
