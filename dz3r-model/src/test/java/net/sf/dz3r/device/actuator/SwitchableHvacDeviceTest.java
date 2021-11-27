@@ -4,6 +4,7 @@ import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
@@ -107,6 +108,7 @@ class SwitchableHvacDeviceTest {
      * Make sure that the fan function is not allowed for heat-only devices.
      */
     @Test
+    @Disabled("until #222 is fixed")
     void noFansForHeating() {
 
         var d = new SwitchableHvacDevice("d", HvacMode.HEATING, mock(Switch.class));

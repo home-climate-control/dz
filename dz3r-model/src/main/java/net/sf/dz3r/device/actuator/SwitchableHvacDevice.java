@@ -156,7 +156,9 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
         }
 
         if (mode != HvacMode.COOLING && command.fanSpeed != null && command.fanSpeed > 0) {
-            throw new IllegalArgumentException("fanSpeed=" + command.fanSpeed + " is not supported by this instance (not in cooling mode)");
+            // FIXME: https://github.com/home-climate-control/dz/issues/222
+//            throw new IllegalArgumentException("fanSpeed=" + command.fanSpeed + " is not supported by this instance (not in cooling mode)");
+            logger.warn("fanSpeed=>0 should not be issued to this device in heating mode, kick the maintainer to fix #222 (command={})", command);
         }
 
         var result = new HvacCommand(
