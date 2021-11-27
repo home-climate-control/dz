@@ -57,6 +57,10 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
      */
     public TimeoutGuard(Duration timeout, boolean repeat) {
 
+        if (timeout.minus(Duration.ofMillis(1)).isNegative()) {
+            throw new IllegalArgumentException("Unreasonably short timeout of " + timeout);
+        }
+
         this.timeout = timeout;
         this.repeat = repeat;
 
@@ -84,6 +88,10 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
 
                 if ((leftToWait.toMillis() <= 0) && (!inTimeout || repeat)) {
                     generateTimeoutSignal(now);
+                }
+
+                if (leftToWait.toMillis() <= 0) {
+                    touch(now);
                     continue;
                 }
 
@@ -100,7 +108,6 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
     }
 
     private void generateTimeoutSignal(Instant now) {
-
         timeoutFluxSink.next(new Signal<>(
                         now,
                         null,
@@ -109,7 +116,6 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
                         new TimeoutException(String.format("Timeout of %s is exceeded", timeout))));
 
         inTimeout = true;
-        lastSeenAt = now;
     }
 
     @Override

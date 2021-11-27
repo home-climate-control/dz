@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
 class TimeoutGuardTest {
 
@@ -271,5 +272,55 @@ class TimeoutGuardTest {
                 source.onBackpressureDrop(),
                 source.onBackpressureLatest()
         );
+    }
+
+    @Test
+    void negativeWaitTime() {
+
+        // As of rev. f26367bf5950a07c7093331149307b7144e20d21:
+        // leftToWait.toMillis() <= 0 AND (inTimeout == true AND repeat == false) will cause
+        // wait() with negative time
+
+        // Normal operation will yield 0, timeout, 1, timeout, 2
+        // Failure will yield something else
+
+        var timeout = Duration.ofMillis(1);
+        var guard = new TimeoutGuard<Integer, Void>(timeout, false);
+        var signal = Flux.interval(Duration.ofMillis(50))
+                .map(i -> new Signal<Integer, Void>(Instant.now(), i.intValue()));
+        var guarded = guard
+                .compute(signal)
+                .log()
+                .take(5);
+
+        StepVerifier.create(guarded)
+
+                .assertNext(s -> assertThat(s.getValue()).isZero())
+
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isNull();
+                    assertThat(s.isError()).isTrue();
+                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
+                })
+
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(1))
+
+                .assertNext(s -> {
+                    assertThat(s.getValue()).isNull();
+                    assertThat(s.isError()).isTrue();
+                    assertThat(s.getError()).isInstanceOf(TimeoutException.class);
+                })
+
+                .assertNext(s -> assertThat(s.getValue()).isEqualTo(2))
+
+                .verifyComplete();
+
+    }
+
+    @Test
+    void timeoutTooShort() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new TimeoutGuard<Integer, Void>(Duration.ofNanos(1), false))
+                .withMessage("Unreasonably short timeout of PT0.000000001S");
     }
 }
