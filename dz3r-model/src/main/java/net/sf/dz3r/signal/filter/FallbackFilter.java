@@ -9,7 +9,6 @@ import reactor.core.publisher.Flux;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * A filter that passes the signal from the first source as long as it is not {@link Signal#isError()},
@@ -43,9 +42,7 @@ public class FallbackFilter<T, P> implements SignalProcessor<T, T, P> {
 
     public FallbackFilter(List<P> fallbackChain) {
         Flux.fromIterable(fallbackChain)
-                .doOnNext(s -> fallbackMap.put(s, null))
-                .subscribe()
-                .dispose();
+                .subscribe(s -> fallbackMap.put(s, null));
     }
 
     @Override
@@ -92,7 +89,7 @@ public class FallbackFilter<T, P> implements SignalProcessor<T, T, P> {
                 .filter(Signal::isError)
                 .sort(this::reverseByTimestamp)
                 .map(s -> s.error)
-                .collect(Collectors.toList())
+                .collectList()
                 .block();
 
         if (errors.isEmpty()) { // NOSONAR false positive
