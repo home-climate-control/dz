@@ -43,12 +43,16 @@ subprojects {
         }
     }
 
+    // VT: NOTE: This plugin is unforgivably slow (adds well over a minute to build time),
+    // need to invoke it conditionally
+    /*
     apply(plugin ="com.github.spotbugs")
 
     spotbugs {
         excludeFilter.set(rootProject.file("findbugs-exclude.xml"))
         ignoreFailures.set(true)
     }
+    */
 
     repositories {
         mavenCentral()
