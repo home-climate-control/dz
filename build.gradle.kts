@@ -43,13 +43,12 @@ subprojects {
         }
     }
 
-//    apply(plugin ="com.github.spotbugs")
-//
-//    spotbugs {
-//
-//        excludeFilter.set(file("$rootProject.projectDir/findbugs-exclude.xml"))
-//        ignoreFailures.set(true)
-//    }
+    apply(plugin ="com.github.spotbugs")
+
+    spotbugs {
+        excludeFilter.set(rootProject.file("findbugs-exclude.xml"))
+        ignoreFailures.set(true)
+    }
 
     repositories {
         mavenCentral()
