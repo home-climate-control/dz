@@ -13,6 +13,8 @@ sonarqube {
         property("sonar.projectKey", "home-climate-control_dz")
         property("sonar.organization", "home-climate-control")
         property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.reportPaths", "build/jacoco/test.exec")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
     }
 }
 
