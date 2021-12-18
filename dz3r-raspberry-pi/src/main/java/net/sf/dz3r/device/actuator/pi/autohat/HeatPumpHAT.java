@@ -124,6 +124,7 @@ public class HeatPumpHAT extends HeatPump {
     @Override
     protected void setMode(boolean state) throws IOException {
         super.setMode(state);
+        PimoroniAutomationHAT.getInstance().status().warn().intensity().write(statusLightsIntensity);
         PimoroniAutomationHAT.getInstance().status().warn().write(state);
         logger.debug("mode={}", state);
     }
