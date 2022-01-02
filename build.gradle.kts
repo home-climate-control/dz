@@ -1,8 +1,9 @@
 plugins {
-    id("java")
-    id("java-library")
-    id("maven-publish")
-    id("jacoco")
+    `version-catalog`
+    `java`
+    `java-library`
+    `maven-publish`
+    jacoco
     id("com.github.spotbugs")
     id("net.ltgt.errorprone")
     id("org.sonarqube")
@@ -64,20 +65,30 @@ subprojects {
 
     dependencies {
 
-        implementation("org.apache.logging.log4j:log4j-api:2.14.1")
-        implementation("org.apache.logging.log4j:log4j-core:2.14.1")
+        constraints {
+            implementation("org.apache.logging.log4j:log4j-core") {
+                version {
+                    strictly("[2.17, 3[")
+                    prefer("2.17.0")
+                }
+                because("CVE-2021-44228, CVE-2021-45046, CVE-2021-45105: Log4j vulnerable to remote code execution and other critical security vulnerabilities")
+            }
+        }
 
-        implementation("io.projectreactor:reactor-core:3.4.11")
-        implementation("io.projectreactor:reactor-tools:3.4.11")
+        testImplementation(rootProject.libs.log4j2.api)
+        implementation(rootProject.libs.log4j2.core)
 
-        testImplementation("org.mockito:mockito-core:3.11.2")
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-        testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.1")
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
-        testImplementation("org.assertj:assertj-core:3.21.0")
-        testImplementation("io.projectreactor:reactor-test:3.4.11")
+        implementation(rootProject.libs.reactor.core)
+        implementation(rootProject.libs.reactor.tools)
 
-        errorprone("com.google.errorprone:error_prone_core:2.10.0")
+        testImplementation(rootProject.libs.mockito)
+        testImplementation(rootProject.libs.junit.jupiter.api)
+        testImplementation(rootProject.libs.junit.jupiter.params)
+        testRuntimeOnly(rootProject.libs.junit.jupiter.engine)
+        testImplementation(rootProject.libs.assertj)
+        testImplementation(rootProject.libs.reactor.test)
+
+        errorprone(rootProject.libs.errorprone)
     }
 
     tasks.test {
