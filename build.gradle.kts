@@ -6,6 +6,7 @@ plugins {
     id("com.github.spotbugs")
     id("net.ltgt.errorprone")
     id("org.sonarqube")
+    id("com.autonomousapps.dependency-analysis")
 }
 
 sonarqube {

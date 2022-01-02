@@ -3,6 +3,7 @@ pluginManagement {
         id("com.github.spotbugs") version "5.0.2"
         id("net.ltgt.errorprone") version "2.0.2"
         id("org.sonarqube") version "3.3"
+        id("com.autonomousapps.dependency-analysis") version "0.79.0"
     }
 }
 
