@@ -75,8 +75,22 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
 
         var timestamp = Instant.now(); // NOSONAR false positive
 
-        return new Signal<>(
-                timestamp,
-                Double.parseDouble(mqttSignal.message));
+        try {
+
+            return new Signal<>(
+                    timestamp,
+                    Double.parseDouble(mqttSignal.message));
+
+        } catch (Exception ex) {
+
+            // Most probable cause is NaN from the sensor - which is usually a hardware failure, better propagate it
+
+            return new Signal<>(
+                    timestamp,
+                    null,
+                    null,
+                    Signal.Status.FAILURE_TOTAL,
+                    ex);
+        }
     }
 }
