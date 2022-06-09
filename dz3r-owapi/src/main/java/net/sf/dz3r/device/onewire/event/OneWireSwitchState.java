@@ -12,6 +12,11 @@ public class OneWireSwitchState extends OneWireNetworkDeviceStateEvent {
         this.state = state;
     }
 
+    public final boolean getState() {
+        // Just syntax sugar for lambdas
+        return state;
+    }
+
     @Override
     public String toString() {
         return "{OneWireSwitchState timestamp=" + timestamp

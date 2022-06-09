@@ -147,23 +147,13 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String, 
 
         @Override
         protected Mono<Boolean> expectSwitchState(UUID messageId) {
-            return Mono.create(sink -> {
-                try {
-
-                    var state = getDriverFlux()
-                            .filter(OneWireSwitchState.class::isInstance)
-                            .map(OneWireSwitchState.class::cast)
-                            .filter(s -> s.correlationId.equals(messageId))
-                            .doOnNext(s -> logger.debug("{}", s))
-                            .blockFirst()
-                            .state;
-
-                    sink.success(state);
-
-                } catch (Exception e) {
-                    sink.error(e);
-                }
-            });
+            return getDriverFlux()
+                    .filter(OneWireSwitchState.class::isInstance)
+                    .map(OneWireSwitchState.class::cast)
+                    .filter(s -> s.correlationId.equals(messageId))
+                    .doOnNext(s -> logger.debug("{}", s))
+                    .map(OneWireSwitchState::getState)
+                    .next();
         }
     }
 }
