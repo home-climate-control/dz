@@ -116,10 +116,15 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     private void initGraphics() {
 
         currentLabel.setFont(currentFontC);
-        currentLabel.setToolTipText("Current temperature (Left/Right to change zone)");
+        currentLabel.setToolTipText("<html>Current temperature<hr>Left/Right to change zone</html>");
 
         setpointLabel.setFont(setpointFont);
-        setpointLabel.setToolTipText("Setpoint (Up/Down to change)");
+        setpointLabel.setToolTipText("<html>Setpoint<hr>"
+                + "Up/Down to change by " + numberFormat.format(SETPOINT_DELTA) + "&deg;<br>"
+                + "Shift+Up/Down to change by " + numberFormat.format(SETPOINT_DELTA * getSetpointDeltaModifier(true, false)) + "&deg;<br>"
+                + "Ctrl+Up/Down to change by " + numberFormat.format(SETPOINT_DELTA * getSetpointDeltaModifier(false, true)) + "&deg;<br>"
+                + "Shift+Ctrl+Up/Down to change by " + numberFormat.format(SETPOINT_DELTA * getSetpointDeltaModifier(true, true)) + "&deg;<br>"
+                + "</html>");
 
         createLayout(zone.getAddress(), chart);
     }
