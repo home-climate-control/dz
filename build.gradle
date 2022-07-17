@@ -2,6 +2,7 @@ plugins {
     id 'com.github.spotbugs'
     id 'net.ltgt.errorprone' apply false
     id 'org.sonarqube'
+    id 'com.gorylenko.gradle-git-properties' apply false
 }
 
 sonarqube {
