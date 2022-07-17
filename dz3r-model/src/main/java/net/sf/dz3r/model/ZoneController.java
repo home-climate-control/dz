@@ -72,8 +72,27 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
         logger.debug("compute()");
 
         return in
+                .filter(this::isOurs)
                 .doOnNext(this::capture)
                 .map(this::process);
+    }
+
+    /**
+     * Check if the signal belongs to this zone controller.
+     *
+     * @return {@code true} if this is our signal.
+     */
+    private boolean isOurs(Signal<ZoneStatus, String> signal) {
+
+        if (zoneMap.containsKey(signal.payload)) {
+            return true;
+        }
+
+        // Unless this is done, computeDemand() will be off
+        // warn() is warranted here, this likely indicates a programming or configuration problem
+        logger.warn("Alien zone '{}', signal dropped: {}", signal.payload, signal);
+
+        return false;
     }
 
     /**
@@ -84,13 +103,6 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
      * @param signal Incoming signal.
      */
     private void capture(Signal<ZoneStatus, String> signal) {
-
-        if (!zoneMap.containsKey(signal.payload)) {
-
-            // Unless this is done, computeDemand() will be off
-            logger.debug("Alien zone '{}', signal dropped: {}", signal.payload, signal);
-            return;
-        }
 
         logger.debug("capture: {}", signal);
 
@@ -108,7 +120,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
      */
     private Signal<UnitControlSignal, String> process(Signal<ZoneStatus, String> signal) {
 
-        // VT: FIXME: Handle alien zone signal here (complain, return null, filter it out later)
+        // VT: NOTE: private method, it is safe to assume that alien signals have been filtered out by isOurs()
 
         var nonError = zone2status
                 .entrySet()

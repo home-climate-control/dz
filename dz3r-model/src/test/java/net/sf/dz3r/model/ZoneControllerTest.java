@@ -354,6 +354,28 @@ class ZoneControllerTest {
      */
     @Test
     void alienZone() {
-        // VT: FIXME: Implement this
+        var ts1 = new Thermostat("ours", 20, 1, 0, 0, 1);
+        var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
+
+        var ts2 = new Thermostat("alien", 25, 1, 0, 0, 1);
+        var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
+
+        // Note, no z2
+        var zc = new ZoneController(Set.of(z1));
+
+        var sequence = Flux
+                .just(new Signal<Double, String>(Instant.now(), 30.0));
+
+        var flux1 = z1.compute(sequence);
+        var flux2 = z2.compute(sequence);
+
+        // Note concat(), order is important for StepVerifier
+        var fluxZ = zc.compute(Flux.concat(flux1, flux2));
+
+        // Note, flux2 never made it through
+        StepVerifier
+                .create(fluxZ)
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                .verifyComplete();
     }
 }
