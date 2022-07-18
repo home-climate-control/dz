@@ -345,8 +345,73 @@ class ZoneControllerTest {
      * Make sure the zone controller handles incoming error signals as expected.
      */
     @Test
-    void errorSignal() {
-        // VT: FIXME: Implement this
+    void errorSignalSingleZone() {
+
+        var ts = new Thermostat("ts", 20, 1, 0, 0, 1);
+        var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
+
+        var zc = new ZoneController(Set.of(z));
+
+        var sequence = Flux
+                .just(
+                        new Signal<Double, String>(Instant.now(), 30.0),
+                        new Signal<Double, String>(Instant.now().plus(1, ChronoUnit.SECONDS), null, null, Signal.Status.FAILURE_TOTAL, new IllegalStateException("test")),
+                        new Signal<Double, String>(Instant.now(), 30.0)
+                        );
+
+        var fluxSignal = z.compute(sequence);
+        var fluxZone = zc.compute(fluxSignal);
+
+        // Error signal from the only zone means we need to shut the unit off
+        StepVerifier
+                .create(fluxZone)
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                .verifyComplete();
+    }
+
+    /**
+     * Make sure the zone controller handles incoming error signals as expected.
+     */
+    @Test
+    void errorSignalOneInMultiZone() {
+
+        var ts1 = new Thermostat("ts20", 20, 1, 0, 0, 1);
+        var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
+
+        var ts2 = new Thermostat("ts25", 25, 1, 0, 0, 1);
+        var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
+
+        var zc = new ZoneController(Set.of(z1, z2));
+
+        var sequence1 = Flux
+                .just(
+                        new Signal<Double, String>(Instant.now(), 30.0),
+                        new Signal<Double, String>(Instant.now().plus(6, ChronoUnit.SECONDS), 30.0)
+                );
+        var sequence2 = Flux
+                .just(
+                        new Signal<Double, String>(Instant.now().plus(2, ChronoUnit.SECONDS), 30.0),
+                        new Signal<Double, String>(Instant.now().plus(4, ChronoUnit.SECONDS), null, null, Signal.Status.FAILURE_TOTAL, new IllegalStateException("test")),
+                        new Signal<Double, String>(Instant.now().plus(8, ChronoUnit.SECONDS), 30.0)
+                );
+
+        var flux1 = z1.compute(sequence1);
+        var flux2 = z2.compute(sequence2);
+
+        // Note concat(), order is important for StepVerifier
+        var fluxZ = zc.compute(Flux.concat(flux1, flux2));
+
+        // Error signal from just one zone means we just adjust the demand accordingly
+        StepVerifier
+                .create(fluxZ)
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
+                .verifyComplete();
     }
 
     /**
@@ -354,6 +419,7 @@ class ZoneControllerTest {
      */
     @Test
     void alienZone() {
+
         var ts1 = new Thermostat("ours", 20, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
 
