@@ -4,8 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.TimeZone;
 
 /**
  * Common functionality for all HVAC device drivers.
@@ -15,6 +17,8 @@ import java.time.Instant;
 public abstract class AbstractHvacDevice implements HvacDevice {
 
     protected final Logger logger = LogManager.getLogger();
+    protected final Clock clock;
+
 
     private final String name;
 
@@ -26,6 +30,11 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     private boolean isClosed;
 
     protected AbstractHvacDevice(String name) {
+        this(Clock.system(TimeZone.getDefault().toZoneId()), name);
+    }
+
+    protected AbstractHvacDevice(Clock clock, String name) {
+        this.clock = clock;
         this.name = name;
     }
 
@@ -44,14 +53,15 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     /**
      * Update uptime.
      *
+     * @param timestamp Timestamp to associate the uptime start with.
      * @param state {@code true} if on.
      */
-    protected final synchronized void updateUptime(boolean state) {
+    protected final synchronized void updateUptime(Instant timestamp, boolean state) {
 
         if (state) {
 
             if (startedAt == null) {
-                startedAt = Instant.now();
+                startedAt = timestamp;
             }
 
         } else {

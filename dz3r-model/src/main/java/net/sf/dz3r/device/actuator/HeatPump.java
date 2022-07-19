@@ -11,7 +11,6 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Set;
 
 /**
@@ -132,12 +131,12 @@ public class HeatPump extends AbstractHvacDevice {
 
         // Shut off the condenser, let the fan be as is
         Flux<Signal<HvacCommand, Void>> init = Flux.just(
-                new Signal<>(Instant.now(), new HvacCommand(null, 0.0, null))
+                new Signal<>(clock.instant(), new HvacCommand(null, 0.0, null))
         );
 
         // Shut off everything
         Flux<Signal<HvacCommand, Void>> shutdown = Flux.just(
-                new Signal<>(Instant.now(), new HvacCommand(null, 0.0, 0.0))
+                new Signal<>(clock.instant(), new HvacCommand(null, 0.0, 0.0))
         );
 
         return Flux.concat(init, in, shutdown)
@@ -159,7 +158,7 @@ public class HeatPump extends AbstractHvacDevice {
         } catch (Throwable t) { // NOSONAR Consequences have been considered
 
             logger.error("Failed to compute {}", signal, t);
-            sink.next(new Signal<>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, t));
+            sink.next(new Signal<>(clock.instant(), null, null, Signal.Status.FAILURE_TOTAL, t));
 
         } finally {
             sink.complete();
@@ -201,7 +200,7 @@ public class HeatPump extends AbstractHvacDevice {
 
             var requestedDemand = reconcile(actual, new HvacCommand(null, 0.0, null));
             sink.next(
-                    new Signal<>(Instant.now(),
+                    new Signal<>(clock.instant(),
                             new HeatpumpStatus(
                                     HvacDeviceStatus.Kind.REQUESTED,
                                     requestedDemand,
@@ -209,13 +208,13 @@ public class HeatPump extends AbstractHvacDevice {
                                     uptime())));
 
             setRunning(reverseRunning);
-            updateUptime(false);
+            updateUptime(clock.instant(), false);
 
             // Note, #requested is not set - this is a transition
             actual = reconcile(actual, requestedDemand);
 
             sink.next(
-                    new Signal<>(Instant.now(),
+                    new Signal<>(clock.instant(),
                             new HeatpumpStatus(
                                     HvacDeviceStatus.Kind.ACTUAL,
                                     requestedDemand,
@@ -232,7 +231,7 @@ public class HeatPump extends AbstractHvacDevice {
                 actual,
                 new HvacCommand(newMode, null, null));
         sink.next(
-                new Signal<>(Instant.now(),
+                new Signal<>(clock.instant(),
                         new HeatpumpStatus(
                                 HvacDeviceStatus.Kind.REQUESTED,
                                 requested,
@@ -241,7 +240,7 @@ public class HeatPump extends AbstractHvacDevice {
         setMode((newMode == HvacMode.HEATING) != reverseMode);
         actual = reconcile(actual, requested);
         sink.next(
-                new Signal<>(Instant.now(),
+                new Signal<>(clock.instant(),
                         new HeatpumpStatus(
                                 HvacDeviceStatus.Kind.ACTUAL,
                                 requested,
@@ -291,7 +290,7 @@ public class HeatPump extends AbstractHvacDevice {
                 actual,
                 new HvacCommand(null, command.demand, command.fanSpeed));
         sink.next(
-                new Signal<>(Instant.now(),
+                new Signal<>(clock.instant(),
                         new HeatpumpStatus(
                                 HvacDeviceStatus.Kind.REQUESTED,
                                 requestedOperation,
@@ -299,16 +298,16 @@ public class HeatPump extends AbstractHvacDevice {
                                 uptime())));
 
         setRunning((requestedOperation.demand > 0) != reverseRunning);
-        updateUptime(requestedOperation.demand > 0);
+        updateUptime(clock.instant(), requestedOperation.demand > 0);
 
         if (requestedOperation.fanSpeed != null) {
             setFan((requestedOperation.fanSpeed > 0) != reverseFan);
-            updateUptime(requestedOperation.fanSpeed > 0);
+            updateUptime(clock.instant(), requestedOperation.fanSpeed > 0);
         }
         actual = reconcile(actual, requestedOperation);
 
         sink.next(
-                new Signal<>(Instant.now(),
+                new Signal<>(clock.instant(),
                         new HeatpumpStatus(
                                 HvacDeviceStatus.Kind.ACTUAL,
                                 requestedOperation,

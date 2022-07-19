@@ -8,7 +8,6 @@ import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 
@@ -103,22 +102,22 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
                                     logger.debug("State: {}", state);
 
-                                    sink.next(new Signal<>(Instant.now(), new SwitchStatus(SwitchStatus.Kind.REQUESTED, command, actual, uptime())));
+                                    sink.next(new Signal<>(clock.instant(), new SwitchStatus(SwitchStatus.Kind.REQUESTED, command, actual, uptime())));
 
                                     // By this time, the command has been verified to be valid
                                     requested = command;
 
                                     theSwitch.setState(state != inverted).block();
                                     actual = state;
-                                    updateUptime(state);
+                                    updateUptime(clock.instant(), state);
 
                                     var complete = new SwitchStatus(SwitchStatus.Kind.ACTUAL, command, actual, uptime());
-                                    sink.next(new Signal<>(Instant.now(), complete));
+                                    sink.next(new Signal<>(clock.instant(), complete));
 
                                 } catch (Throwable t) { // NOSONAR Consequences have been considered
 
                                     logger.error("Failed to compute {}", signal, t);
-                                    sink.next(new Signal<>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, t));
+                                    sink.next(new Signal<>(clock.instant(), null, null, Signal.Status.FAILURE_TOTAL, t));
 
                                 } finally {
                                     sink.complete();
