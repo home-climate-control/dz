@@ -20,8 +20,8 @@ import java.util.concurrent.ExecutionException;
 /**
  * MQTT stream cold publisher.
  *
- * Doesn't implement the {@link net.sf.dz3r.signal.SignalSource} interface - no need at this point,
- * DZ entities haven't been resolved yet.
+ * Doesn't implement the {@link net.sf.dz3r.signal.SignalSource} interface - no need at this point
+ * in the data pipeline, DZ entities haven't been resolved yet.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -37,9 +37,9 @@ public class MqttListener implements Addressable<MqttEndpoint> {
     /**
      * MQTT client.
      *
-     * Note that the client is the MQTT v.3 client - this is what {@code mosquitto} supports.
+     * Note that the client is the MQTT v.3 client - this is what {@code mosquitto} supports up to Debian/Raspbian Buster.
      * May be upgraded to {@link com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient} when a suitable
-     * broker replacement is found and verified.
+     * broker replacement is found and verified, or Bullseye is stable enough.
      */
     private Mqtt3AsyncClient client;
 
