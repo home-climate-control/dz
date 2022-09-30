@@ -32,6 +32,8 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
      * Note that the client is the MQTT v.3 client - this is what {@code mosquitto} supports up to Debian/Raspbian Buster.
      * May be upgraded to {@link com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient} when a suitable
      * broker replacement is found and verified, or Bullseye is stable enough.
+     *
+     * This object must not be accessed directly; use {@link #getClient()} instead.
      */
     private Mqtt3AsyncClient client;
 
@@ -46,7 +48,7 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
         logger.info("Endpoint: {}", address);
     }
 
-    private synchronized Mqtt3AsyncClient getClient() {
+    protected synchronized Mqtt3AsyncClient getClient() {
 
         if (client != null) {
             return client;
@@ -81,7 +83,10 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
 
             try {
 
-                logger.info("Connecting to {} (disable reconnect if this gets stuck)", address);
+                logger.info("Connecting to {}{}",
+                        address,
+                        autoReconnect ? " (disable reconnect if this gets stuck)" : "");
+
                 var ack = instance.send();
 
                 // send() throws an exception upon failure, will this ever be anything other than SUCCESS?

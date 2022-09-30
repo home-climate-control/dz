@@ -1,5 +1,8 @@
 package net.sf.dz3r.device.mqtt.v1;
 
+import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
+
 /**
  * Read/write MQTT adapter.
  *
@@ -21,7 +24,16 @@ public class MqttAdapter extends AbstractMqttAdapter {
         super(address, username, password, autoReconnect);
     }
 
-    public void publish(String topic, String payload) {
-        throw new UnsupportedOperationException("Not Implemented");
+    public void publish(String topic, String payload, MqttQos qos, boolean retain) {
+
+        var message = Mqtt3Publish
+                .builder()
+                .topic(topic)
+                .payload(payload == null ? null : payload.getBytes())
+                .qos(qos)
+                .retain(retain)
+                .build();
+
+        getClient().publish(message);
     }
 }
