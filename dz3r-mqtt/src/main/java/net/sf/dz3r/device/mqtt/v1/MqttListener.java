@@ -171,7 +171,7 @@ public class MqttListener implements Addressable<MqttEndpoint> {
 
         var result = flux.publish().autoConnect();
 
-        var ackFuture = getClient().toAsync()
+        var ackFuture = getClient()
                 .subscribeWith()
                 .topicFilter(topic + "/#")
                 .callback(p -> {
