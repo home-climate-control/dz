@@ -8,11 +8,14 @@ import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
+import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Map;
 
 /**
@@ -30,7 +33,7 @@ public class BinarySwitch extends AbstractSwitch<MqttMessageAddress> {
 
     private Flux<MqttSignal> mqttCurrentValueFlux;
 
-    private Boolean lastKnownState;
+    private Signal<Boolean, Void> lastKnownState;
 
     protected BinarySwitch(String host, String deviceRootTopic) {
         this(host, MqttEndpoint.DEFAULT_PORT, null, null, false, deviceRootTopic, null);
@@ -46,6 +49,14 @@ public class BinarySwitch extends AbstractSwitch<MqttMessageAddress> {
         mqttAdapter = new MqttAdapter(getAddress().endpoint, username, password, reconnect);
         this.deviceRootTopic = deviceRootTopic;
 
+        // Z-Wave JS UI produces multiple MQTT messages per targetValue/set message, must drain them proactively
+        // or we'll run out of sync
+
+        getCurrentValueFlux()
+                .doOnNext(signal -> logger.debug("async: {}", signal))
+                .map(this::getState)
+                .doOnNext(state -> lastKnownState = state)
+                .subscribe();
     }
 
     private String getCurrentValueTopic() {
@@ -62,12 +73,16 @@ public class BinarySwitch extends AbstractSwitch<MqttMessageAddress> {
         // This should make sure the MQTT broker connection is alive
         getCurrentValueFlux();
 
+        // VT: NOTE: This message will generate a flurry of MQTT state notification - the number is indeterminate,
+        // sometimes three, sometimes four.
         mqttAdapter.publish(
                 getTargetValueSetTopic(),
                 "{\"value\": " + state + "}",
                 MqttQos.AT_LEAST_ONCE,
                 false);
 
+        // Due to the note above, can't just read one message and expect the value to be the same (this fails).
+        // Need to drain the stream and return the last known state.
         getStateSync(true);
     }
 
@@ -93,7 +108,7 @@ public class BinarySwitch extends AbstractSwitch<MqttMessageAddress> {
 
             if (lastKnownState != null) {
                 logger.debug("returning cached state: {}", lastKnownState);
-                return lastKnownState;
+                return lastKnownState.getValue();
             }
 
             logger.debug("Awaiting new state for {}...", getCurrentValueTopic());
@@ -102,14 +117,16 @@ public class BinarySwitch extends AbstractSwitch<MqttMessageAddress> {
                     .map(this::getState)
                     .blockFirst();
 
-            return lastKnownState;
+            logger.debug("signal @{}: {}", lastKnownState.timestamp.atZone(ZoneId.systemDefault()), lastKnownState);
+
+            return lastKnownState.getValue();
 
         } finally {
             ThreadContext.pop();
         }
     }
 
-    private boolean getState(MqttSignal mqttSignal) {
+    private Signal<Boolean, Void> getState(MqttSignal mqttSignal) {
 
         ThreadContext.push("getState");
         try {
@@ -120,7 +137,10 @@ public class BinarySwitch extends AbstractSwitch<MqttMessageAddress> {
 
             logger.debug("payload: {}", payload);
 
-            return Boolean.valueOf(payload.get("value").toString());
+            var timestamp = Instant.ofEpochMilli(Long.parseLong(payload.get("time").toString()));
+            var state = Boolean.valueOf(payload.get("value").toString());
+
+            return new Signal<>(timestamp, state);
 
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
