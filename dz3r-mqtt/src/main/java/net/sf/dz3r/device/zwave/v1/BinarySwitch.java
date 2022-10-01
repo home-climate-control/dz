@@ -152,7 +152,7 @@ public class BinarySwitch extends AbstractSwitch<MqttMessageAddress> {
             return new Signal<>(timestamp, state);
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Can't parse JSON: " + mqttSignal.message, e);
         } finally {
             ThreadContext.pop();
         }
