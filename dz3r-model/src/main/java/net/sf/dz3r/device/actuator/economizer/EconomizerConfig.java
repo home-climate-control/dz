@@ -11,13 +11,15 @@ public class EconomizerConfig {
 
     /**
      * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
+     *
+     * VT: NOTE: Anti-jitter measures are provided elsewhere.
      */
     public final double changeoverDelta;
 
     /**
      * When this temperature is reached, the device is shut off.
      *
-     * VT: NOTE: No anti-jitter measures are provided at this time.
+     * VT: NOTE: Anti-jitter measures are provided elsewhere.
      */
     public final double targetTemperature;
 
