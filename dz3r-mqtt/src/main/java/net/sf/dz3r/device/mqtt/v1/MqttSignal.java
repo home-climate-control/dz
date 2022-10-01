@@ -17,4 +17,9 @@ public class MqttSignal {
         this.topic = topic;
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "{topic=" + topic + ",message=" + message + "}";
+    }
 }
