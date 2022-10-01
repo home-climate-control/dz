@@ -33,7 +33,7 @@ class BinarySwitchTest {
         ReactorDebugAgent.init();
     }
     @Test
-    void write1010() {
+    void setStateSync1010() {
 
         assertThatCode(() -> {
 
