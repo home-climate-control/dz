@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Implementation for Z-Wave Binary Switch Generic Device Class over MQTT.
@@ -117,9 +118,17 @@ public class BinarySwitch extends AbstractSwitch<MqttMessageAddress> {
                     .map(this::getState)
                     .blockFirst();
 
-            logger.debug("signal @{}: {}", lastKnownState.timestamp.atZone(ZoneId.systemDefault()), lastKnownState);
+            // Sonar is paranoid, reports blockFirst() can return null. That's a pretty bizarre corner case, but OK.
 
-            return lastKnownState.getValue();
+            logger.debug("signal @{}: {}",
+                    Optional.ofNullable(lastKnownState)
+                            .map(state -> state.timestamp.atZone(ZoneId.systemDefault()))
+                            .orElse(null),
+                    lastKnownState);
+
+            return Optional.ofNullable(lastKnownState)
+                    .map(Signal::getValue)
+                    .orElseThrow(() -> new IllegalStateException("null lastKnownState - something is seriously wrong"));
 
         } finally {
             ThreadContext.pop();
