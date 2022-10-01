@@ -3,7 +3,7 @@ package net.sf.dz3r.view.influxdb.v3;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.MetricsCollector;
-import net.sf.dz3r.view.influxdb.common.Config;
+import net.sf.dz3r.view.influxdb.common.InfluxDbConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.influxdb.InfluxDB;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
 
     private final Logger logger = LogManager.getLogger();
-    private final Config config;
+    private final InfluxDbConfig config;
     private InfluxDB db;
 
     private final Map<Flux<Signal<Double, Void>>, String> sensorFeed2name;
@@ -51,7 +51,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
             String password,
             Map<Flux<Signal<Double, Void>>, String> sensorFeed2name) {
 
-        config = new Config(dbName, instance, dbURL, username, password);
+        config = new InfluxDbConfig(dbName, instance, dbURL, username, password);
 
         this.sensorFeed2name = sensorFeed2name;
     }
