@@ -49,4 +49,12 @@ public class EconomizerConfig {
         this.targetTemperature = targetTemperature;
         this.keepHvacOn = keepHvacOn;
     }
+
+    public String toString() {
+        return "{mode=" + mode
+                + ", changeoverDelta=" + changeoverDelta
+                + ", targetTemperature=" + targetTemperature
+                + ", keepHvacOn=" + keepHvacOn
+                + "}";
+    }
 }

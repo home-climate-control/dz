@@ -31,7 +31,12 @@ public class Economizer<A extends Comparable<A>> implements SignalProcessor<Doub
     public final Zone targetZone;
 
     /**
-     * Last known ambient temperature
+     * Last known indoor temperature. Can't be an error.
+     */
+    private Signal<Double, String> indoor;
+
+    /**
+     * Last known ambient temperature. Can't be an error.
      */
     private Signal<Double, Void> ambient;
 
@@ -66,21 +71,24 @@ public class Economizer<A extends Comparable<A>> implements SignalProcessor<Doub
 
         ambientFlux
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext(this::recordAmbient)
+                .flatMap(this::computeAmbient)
+                .doOnNext(this::recordDeviceState)
+
+                // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
+                .flatMap(state -> targetDevice.setState(actuatorState))
+
+                // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
     }
 
-    private void recordAmbient(Signal<Double, Void> source) {
+    private void recordDeviceState(Signal<Boolean, Void> stateSignal) {
 
-        ThreadContext.push("recordAmbient");
+        var newState = stateSignal.getValue();
 
-        try {
+        if ((actuatorState == null && newState != null) || newState.compareTo(actuatorState) != 0) {
 
-            logger.debug("ambient={}", source);
-            this.ambient = source;
-
-        } finally {
-            ThreadContext.pop();
+            logger.info("{}: state change: {} => {}", name, actuatorState, newState);
+            actuatorState = newState;
         }
     }
 
@@ -108,12 +116,13 @@ public class Economizer<A extends Comparable<A>> implements SignalProcessor<Doub
 
         indoorFlux
                 .subscribeOn(Schedulers.boundedElastic())
-                .map(this::computeEconomizer)
-                .doOnNext(state -> actuatorState = state.getValue())
+                .flatMap(this::computeIndoor)
+                .doOnNext(this::recordDeviceState)
 
                 // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
-                .flatMap(state -> targetDevice.setState(state.getValue()))
+                .flatMap(state -> targetDevice.setState(actuatorState))
 
+                // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
 
         return targetZone
@@ -121,46 +130,122 @@ public class Economizer<A extends Comparable<A>> implements SignalProcessor<Doub
                 .map(this::computeZone);
     }
 
-    private Signal<Boolean, String> computeEconomizer(Signal<Double, String> source) {
+    /**
+     * Aggregate with {@link #ambient} and pass control to {@link #computeDeviceState(Signal, Signal)}.
+     *
+     * @return Empty flux if it isn't possible to compute the value, or the target device to execute.
+     */
+    private Flux<Signal<Boolean, Void>> computeIndoor(Signal<Double, String> indoor) {
 
-        if (source.isError()) {
+        ThreadContext.push("computeIndoor");
 
-            // Can't do much here other than shut the economizer off, who knows what's going on there
-            return new Signal<>(source.timestamp, Boolean.FALSE, source.payload);
+        try {
+
+            logger.debug("indoor={}", indoor);
+
+            if (indoor.isError()) {
+
+                // Can't do much here other than shut the economizer off, who knows what's going on there
+                return Flux.just(new Signal<>(indoor.timestamp, Boolean.FALSE));
+            }
+
+            this.indoor = indoor;
+
+            return computeDeviceState(indoor, ambient);
+
+
+        } finally {
+            ThreadContext.pop();
         }
+    }
 
-        // VT: FIXME: This will create LOTS of jitter, don't use with units that can't deal with it
+    /**
+     * Aggregate with {@link #indoor} and pass control to {@link #computeDeviceState(Signal, Signal)}.
+     *
+     * @return Empty flux if it isn't possible to compute the value, or the target device to execute.
+     */
+    private Flux<Signal<Boolean, Void>>  computeAmbient(Signal<Double, Void> ambient) {
 
-        Boolean state;
-        var indoor = source.getValue();
+        ThreadContext.push("computeAmbient");
 
-        switch (config.mode) {
+        try {
 
-            case COOLING:
+            logger.debug("ambient={}", ambient);
 
-                if ((ambient.getValue() < indoor - config.changeoverDelta) && indoor > config.targetTemperature) {
-                    state = Boolean.TRUE;
-                } else {
-                    state = Boolean.FALSE;
-                }
-                break;
+            if (ambient.isError()) {
 
-            case HEATING:
+                // Can't do much here other than shut the economizer off, who knows what's going on there
+                return Flux.just(new Signal<>(ambient.timestamp, Boolean.FALSE));
+            }
 
-                if ((ambient.getValue() > indoor + config.changeoverDelta) && indoor < config.targetTemperature) {
-                    state = Boolean.TRUE;
-                } else {
-                    state = Boolean.FALSE;
-                }
-                break;
+            this.ambient = ambient;
 
-            default:
+            return computeDeviceState(indoor, ambient);
 
-                logger.error("missing config.mode??? config={}", config);
-                state = Boolean.FALSE;
+        } finally {
+            ThreadContext.pop();
         }
+    }
 
-        return new Signal<>(source.timestamp, state, source.payload);
+    private Flux<Signal<Boolean, Void>> computeDeviceState(Signal<Double, String> indoor, Signal<Double, Void> ambient) {
+
+        ThreadContext.push("computeDeviceState");
+
+        try {
+
+            logger.debug("indoor={}, ambient={}", indoor, ambient);
+
+            if (indoor == null || ambient == null) {
+
+                // One of the components is not ready yet
+                logger.debug("Just staring up? ambient or indoor are null");
+                return Flux.empty();
+            }
+
+            // The latter one wins
+            var timestamp = indoor.timestamp.isAfter(ambient.timestamp) ? indoor.timestamp : ambient.timestamp;
+
+            // VT: FIXME: This will create LOTS of jitter, don't use with units that can't deal with it
+
+            var indoorTemperature = indoor.getValue();
+            var ambientTemperature = ambient.getValue();
+
+            logger.debug("indoor={}, ambient={}", indoorTemperature, ambientTemperature);
+
+            Boolean state;
+            switch (config.mode) {
+
+                case COOLING:
+
+                    if ((ambient.getValue() < indoorTemperature - config.changeoverDelta) && indoorTemperature > config.targetTemperature) {
+                        state = Boolean.TRUE;
+                    } else {
+                        state = Boolean.FALSE;
+                    }
+                    break;
+
+                case HEATING:
+
+                    if ((ambient.getValue() > indoorTemperature + config.changeoverDelta) && indoorTemperature < config.targetTemperature) {
+                        state = Boolean.TRUE;
+                    } else {
+                        state = Boolean.FALSE;
+                    }
+                    break;
+
+                default:
+
+                    logger.error("missing config.mode??? config={}", config);
+                    state = Boolean.FALSE;
+            }
+
+            logger.debug("state={}", state);
+
+            return Flux.just(new Signal<>(timestamp, state));
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     private Signal<ZoneStatus, String> computeZone(Signal<ZoneStatus, String> source) {
