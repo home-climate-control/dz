@@ -1,5 +1,6 @@
 package net.sf.dz3.xbee;
 
+import com.homeclimatecontrol.xbee.FrameIdGenerator;
 import com.rapplogic.xbee.api.AtCommand;
 import com.rapplogic.xbee.api.AtCommandResponse;
 import com.rapplogic.xbee.api.RemoteAtRequest;
@@ -13,6 +14,7 @@ import net.sf.dz3.device.sensor.impl.xbee.Parser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +25,11 @@ class XbeeApiTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
+    @BeforeEach
+    void resetFrameId() {
+        FrameIdGenerator.getInstance().reset();
+    }
+
     @Test
     public void packetEscape() {
 
@@ -31,7 +38,7 @@ class XbeeApiTest {
                 0x00, // Length MSB
                 0x0F, // Length LSB
                 0x17, // 'Remote AT' command (frame data start)
-                0x01, // Frame ID
+                0x02, // Frame ID
                 0x00,
                 0x7D, // 0x7D33 is 0x13 escaped
                 0x33,
@@ -46,7 +53,7 @@ class XbeeApiTest {
                 0x02, // 0x02 means 'apply changes'
                 0x41,
                 0x30,
-                0xDC
+                0xDB
         };
 
         ThreadContext.push("testPacketEscape");
