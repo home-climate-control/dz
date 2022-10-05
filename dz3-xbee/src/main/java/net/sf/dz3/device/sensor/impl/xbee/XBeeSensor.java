@@ -79,9 +79,9 @@ public class XBeeSensor extends AbstractDeviceContainer implements AnalogSensor 
 
             logger.debug("{} response: {}", channel, rsp);
 
-            if (rsp.isError()) {
+            if (rsp.isError() || !rsp.isOk()) {
 
-                throw new IOException(channel + " + query failed, status: " + rsp.getStatus());
+                throw new IOException(channel + " + query failed, response: " + rsp);
             }
 
             IoSample sample = new IoSample(rsp.getValue(), xbeeAddress, logger);
