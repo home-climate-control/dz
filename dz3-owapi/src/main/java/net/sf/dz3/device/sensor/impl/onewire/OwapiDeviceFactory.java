@@ -4,6 +4,7 @@ import com.dalsemi.onewire.OneWireAccessProvider;
 import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.adapter.OneWireIOException;
+import com.dalsemi.onewire.adapter.USerialAdapter;
 import com.dalsemi.onewire.container.HumidityContainer;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.SwitchContainer;
@@ -28,7 +29,6 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.io.IOException;
 import java.util.ConcurrentModificationException;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -57,14 +57,14 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
      * Adapter speed.
      *
      * This value is injected via constructor. If the value given is bad, it will be
-     * defaulted to {@link DSPortAdapter#SPEED_REGULAR}.
+     * defaulted to {@link DSPortAdapter.Speed#REGULAR}.
      */
-    private final int adapterSpeed;
+    private final DSPortAdapter.Speed adapterSpeed;
 
     /**
      * Mapping from the adapter speed value to speed name.
      */
-    private final Map<Integer, String> speedInt2speedName = new TreeMap<>();
+    private final Map<DSPortAdapter.Speed, String> speedInt2speedName = new TreeMap<>();
 
     /**
      * 1-Wire adapter.
@@ -116,17 +116,17 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             logger.info("Port:  {}", adapterPort);
 
-            var speedName2speedInt = new TreeMap<String, Integer>();
+            var speedName2speedInt = new TreeMap<String, DSPortAdapter.Speed>();
 
-            speedName2speedInt.put("overdrive", DSPortAdapter.SPEED_OVERDRIVE);
-            speedName2speedInt.put("hyperdrive", DSPortAdapter.SPEED_HYPERDRIVE);
-            speedName2speedInt.put("flex", DSPortAdapter.SPEED_FLEX);
-            speedName2speedInt.put("regular", DSPortAdapter.SPEED_REGULAR);
+            speedName2speedInt.put("overdrive", DSPortAdapter.Speed.OVERDRIVE);
+            speedName2speedInt.put("hyperdrive", DSPortAdapter.Speed.HYPERDRIVE);
+            speedName2speedInt.put("flex", DSPortAdapter.Speed.FLEX);
+            speedName2speedInt.put("regular", DSPortAdapter.Speed.REGULAR);
 
-            speedInt2speedName.put(DSPortAdapter.SPEED_OVERDRIVE, "overdrive");
-            speedInt2speedName.put(DSPortAdapter.SPEED_HYPERDRIVE, "hyperdrive");
-            speedInt2speedName.put(DSPortAdapter.SPEED_FLEX, "flex");
-            speedInt2speedName.put(DSPortAdapter.SPEED_REGULAR, "regular");
+            speedInt2speedName.put(DSPortAdapter.Speed.OVERDRIVE, "overdrive");
+            speedInt2speedName.put(DSPortAdapter.Speed.HYPERDRIVE, "hyperdrive");
+            speedInt2speedName.put(DSPortAdapter.Speed.FLEX, "flex");
+            speedInt2speedName.put(DSPortAdapter.Speed.REGULAR, "regular");
 
             var speedValue = speedName2speedInt.get(speed);
 
@@ -134,7 +134,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                 logger.warn("Unknown speed '{}', defaulted to regular", speed);
             }
 
-            adapterSpeed = speedValue == null ? DSPortAdapter.SPEED_REGULAR : speedValue;
+            adapterSpeed = speedValue == null ? DSPortAdapter.Speed.REGULAR : speedValue;
 
             logger.info("Speed: {}", speedInt2speedName.get(adapterSpeed));
 
@@ -204,40 +204,41 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
         try {
 
-            var portsAvailable = getPortsAvailable();
+            boolean ok;
+            try {
 
-            if (adapter == null) {
+                adapter = new USerialAdapter();
 
-                throw new IllegalArgumentException("Port '" + adapterPort + "' unavailable, valid values: "
-                        + portsAvailable + "\n"
-                        + "Things to check:\n"
-                        + "    http://stackoverflow.com/questions/9628988/ubuntu-rxtx-does-not-recognize-usb-serial-device yet?");
-            }
-
-            if (!adapter.selectPort(adapterPort)) {
-
-                // VT: NOTE: Having succeeded at selecting the port doesn't
-                // necessarily mean that we'll be fine. Serial based adapters
-                // don't seem to be accessed during selectPort(), and it's quite
-                // possible to successfully select a non-existing port.
+                // VT: NOTE: Having succeeded at selecting the port doesn't necessarily mean that we'll be fine.
+                // Serial based adapters don't seem to be accessed during selectPort(), and it's quite
+                // possible to successfully select a port that doesn't correspond to an existing adapter.
                 // Additional test is required to make sure we're OK.
 
-                throw new IllegalArgumentException("Unable to select port '" + adapterPort
-                        + "', make sure it's the right one (available: " + portsAvailable + ")");
+                ok = adapter.selectPort(adapterPort);
+
+            } catch (OneWireException ex) {
+                logger.error("Failed to open port '{}'", adapterPort, ex);
+                ok = false;
+            }
+
+            if (!ok) {
+
+                throw new IllegalArgumentException("Port '" + adapterPort + "' unavailable, valid values: "
+                        + DSPortAdapter.getPortNames() + "\n"
+                        + "Things to check:\n"
+                        + "    http://stackoverflow.com/questions/9628988/ubuntu-rxtx-does-not-recognize-usb-serial-device yet?");
             }
 
             try {
 
                 // Now, *this* should take care of it...
-
                 adapter.reset();
 
             } catch (OneWireIOException ex) {
 
                 if ("Error communicating with adapter".equals(ex.getMessage())) {
-
                     throw new IOException("Port '" + adapterPort
-                            + "' doesn't seem to have adapter connected, check others: " + portsAvailable, ex);
+                            + "' doesn't seem to have adapter connected, check others: " + DSPortAdapter.getPortNames(), ex);
                 }
             }
 
@@ -321,16 +322,11 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
 
             var portsAvailable = new TreeSet<String>();
 
-            for (Enumeration<DSPortAdapter> adapters = OneWireAccessProvider
-                    .enumerateAllAdapters(); adapters.hasMoreElements();) {
-
-                DSPortAdapter a = adapters.nextElement();
+            for (DSPortAdapter a : OneWireAccessProvider.getAdapters()) {
 
                 logger.debug("Adapter found: {}", a.getAdapterName());
 
-                for (Enumeration<String> ports = a.getPortNames(); ports.hasMoreElements();) {
-
-                    String portName = ports.nextElement();
+                for (String portName : a.getPortNames()) {
 
                     logger.debug("Port found: {}", portName);
 
@@ -1252,7 +1248,7 @@ public class OwapiDeviceFactory extends AbstractDeviceFactory<OneWireDeviceConta
                     "dz",
                     getClass().getSimpleName(),
                     type.type + getAddress(),
-                    "1-Wire " + type.description + " sensor , adress " + getAddress());
+                    "1-Wire " + type.description + " sensor , address " + getAddress());
         }
 
         @Override

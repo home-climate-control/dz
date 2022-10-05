@@ -62,9 +62,9 @@ public class XBeeSwitch implements Switch {
 
             logger.info("{} response: {}", channel, rsp);
 
-            if (rsp.isError()) {
+            if (rsp.isError() || !rsp.isOk()) {
 
-                throw new IOException(channel + " + query failed, status: " + rsp.getStatus());
+                throw new IOException(channel + " + query failed, response: " + rsp);
             }
 
             int[] buffer = rsp.getValue();
@@ -117,9 +117,9 @@ public class XBeeSwitch implements Switch {
             logger.info("{} response: {}", channel, rsp);
             dataBroadcaster.broadcast(new DataSample<>(System.currentTimeMillis(), getAddress(), getAddress(), state, null));
 
-            if (rsp.isError()) {
+            if (rsp.isError() || !rsp.isOk()) {
 
-                throw new IOException(channel + " + query failed, status: " + rsp.getStatus());
+                throw new IOException(channel + " + query failed, response: " + rsp);
             }
 
         } catch (Throwable t) { // NOSONAR Consequences have been considered
