@@ -25,7 +25,8 @@ import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
  * Requires XBee to be programmed to broadcast sensor readings. Setting sample rate to one in 30 seconds provides
  * acceptable quality of control.
  *
- * @see https://www.digi.com/resources/documentation/digidocs/pdfs/90000976.pdf, I/O sample rate (IR command).
+ * @see <a href="https://www.digi.com/resources/documentation/digidocs/pdfs/90000976.pdf">Zigbee RF Modules XBEE2, XBEEPRO2, PRO S2B User Guide</a>,
+ * I/O sample rate (IR command).
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2020
  */
