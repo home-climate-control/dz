@@ -50,6 +50,8 @@ class EconomizerTest {
         var targetZone = new Zone(
                 new Thermostat("ts", setpoint, 1, 0, 0, 1),
                 new ZoneSettings(setpoint));
+
+        // VT: FIXME: Replace with a mock to verify()
         var targetDevice = new NullSwitch("s");
 
         // Can't feed it right away, it will all be consumed within the constructor

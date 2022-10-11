@@ -65,16 +65,21 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         this.targetZone = targetZone;
         this.targetDevice = targetDevice;
 
-        Flux
+        // Just get the (indoor, ambient) pair flux with no nulls or errors
+        var stage1 = Flux
                 .create(this::connectCombined)
                 .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(pair -> logger.debug("raw indoor={}, ambient={}", pair.getLeft(), pair.getRight()))
                 .filter(pair -> pair.getLeft() != null && pair.getRight() != null)
                 .filter(pair -> !pair.getLeft().isError() && !pair.getRight().isError())
-                .map(this::computeCombined)
-                .flatMap(this::computeDeviceState)
-                .doOnNext(this::recordDeviceState)
+                .map(this::computeCombined);
 
+        // Get the signal
+        var stage2 = computeDeviceState(stage1)
+                .doOnNext(this::recordDeviceState);
+
+        // And act on it
+        stage2
                 // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
                 .flatMap(state -> targetDevice.setState(actuatorState))
 
@@ -88,6 +93,8 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
     }
+
+    protected abstract Flux<Signal<Boolean, Void>> computeDeviceState(Flux<Signal<Double, Void>> signal);
 
     @Override
     public String getAddress() {
@@ -204,25 +211,6 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         return config.mode == HvacMode.COOLING
                 ? indoor - config.targetTemperature
                 : config.targetTemperature - indoor;
-    }
-
-    private Flux<Signal<Boolean, Void>> computeDeviceState(Signal<Double, Void> signal) {
-
-        ThreadContext.push("computeDeviceState");
-
-        try {
-
-            // VT: FIXME: This will create LOTS of jitter, don't use with units that can't deal with it
-
-            Boolean state = signal.getValue() > 0 ? Boolean.TRUE : Boolean.FALSE;
-
-            logger.debug("state={}", state);
-
-            return Flux.just(new Signal<>(signal.timestamp, state));
-
-        } finally {
-            ThreadContext.pop();
-        }
     }
 
     private Signal<ZoneStatus, String> computeZone(Signal<ZoneStatus, String> source) {

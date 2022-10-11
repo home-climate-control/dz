@@ -44,12 +44,27 @@ public class EconomizerConfig {
      * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
      */
     public EconomizerConfig(HvacMode mode, double changeoverDelta, double targetTemperature, boolean keepHvacOn) {
+
         this.mode = mode;
         this.changeoverDelta = changeoverDelta;
         this.targetTemperature = targetTemperature;
         this.keepHvacOn = keepHvacOn;
+
+        checkArgs();
     }
 
+    protected void checkArgs() {
+
+        if (mode == null) {
+            throw new IllegalArgumentException("mode can't be null");
+        }
+
+        if (changeoverDelta < 0) {
+            throw new IllegalArgumentException("changeoverDelta must be non-negative");
+        }
+    }
+
+    @Override
     public String toString() {
         return "{mode=" + mode
                 + ", changeoverDelta=" + changeoverDelta
