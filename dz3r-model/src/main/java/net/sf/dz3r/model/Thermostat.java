@@ -141,6 +141,11 @@ public class Thermostat implements ProcessController<Double, ThermostatStatus, V
         return pv.getValue() - setpoint;
     }
 
+    /**
+     * Compute the thermostat status flux.
+     *
+     * @see net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer#computeDeviceState(Flux)
+     */
     @Override
     public Flux<Signal<Status<ThermostatStatus>, Void>> compute(Flux<Signal<Double, Void>> pv) {
 
