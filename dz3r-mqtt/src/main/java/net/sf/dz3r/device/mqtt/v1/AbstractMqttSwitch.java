@@ -1,6 +1,5 @@
 package net.sf.dz3r.device.mqtt.v1;
 
-import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.device.actuator.AbstractSwitch;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
@@ -49,24 +48,6 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
 
         return mqttStateFlux;
     }
-    @Override
-    protected void setStateSync(boolean state) throws IOException {
-
-        // This should make sure the MQTT broker connection is alive
-        getStateFlux();
-
-        // VT: NOTE: This message will generate a flurry of MQTT state notification - the number is indeterminate,
-        // sometimes three, sometimes four.
-        mqttAdapter.publish(
-                getSetStateTopic(),
-                renderPayload(state),
-                MqttQos.AT_LEAST_ONCE,
-                false);
-
-        // Due to the note above, can't just read one message and expect the value to be the same (this fails).
-        // Need to drain the stream and return the last known state.
-        getStateSync(true);
-    }
 
     @Override
     protected boolean getStateSync() throws IOException {
@@ -78,7 +59,7 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
      *
      * @param flushCache {@code true} if the currently known value must be discarded and new value needs to be awaited.
      */
-    private boolean getStateSync(boolean flushCache) {
+    protected boolean getStateSync(boolean flushCache) {
 
         ThreadContext.push("getStateSync" + (flushCache ? "+flush" : ""));
 
