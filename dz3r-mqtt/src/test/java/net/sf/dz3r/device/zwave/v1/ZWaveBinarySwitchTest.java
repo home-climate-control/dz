@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
         matches = "safe",
         disabledReason = "Only execute this test if a suitable MQTT broker and Z-Wave switch device are available"
 )
-class BinarySwitchTest {
+class ZWaveBinarySwitchTest {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -37,7 +37,7 @@ class BinarySwitchTest {
 
         assertThatCode(() -> {
 
-            var zwaveSwitch = new BinarySwitch(MQTT_BROKER, ZWAVE_SWITCH_TOPIC);
+            var zwaveSwitch = new SwitchWrapper(MQTT_BROKER, ZWAVE_SWITCH_TOPIC);
 
             // VT: NOTE: This switch doesn't control anything critical now, does it?
 
@@ -61,5 +61,21 @@ class BinarySwitchTest {
             logger.info("DONE");
 
         }).doesNotThrowAnyException();
+    }
+
+    private static class SwitchWrapper extends ZWaveBinarySwitch {
+
+        protected SwitchWrapper(String host, String deviceRootTopic) {
+            super(host, deviceRootTopic);
+        }
+
+        @Override
+        public void setStateSync(boolean state) throws IOException {
+            super.setStateSync(state);
+        }
+        @Override
+        public boolean getStateSync() throws IOException {
+            return super.getStateSync();
+        }
     }
 }
