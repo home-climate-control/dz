@@ -31,7 +31,7 @@ public interface Switch<A extends Comparable<A>> extends Addressable<A> {
     /**
      * Set state.
      *
-     * @return A mono that is completed when the state is actually set.
+     * @return A mono that is completed when the state is actually set and verified.
      */
     Mono<Boolean> setState(boolean state);
 

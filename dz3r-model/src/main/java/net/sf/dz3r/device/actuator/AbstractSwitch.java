@@ -87,27 +87,19 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     @Override
     public final Mono<Boolean> setState(boolean state) {
 
-        return Mono.<Boolean>create(sink -> {
-                    ThreadContext.push("setState");
-                    try {
+        ThreadContext.push("setState");
+        try {
 
-                        reportState(new Signal<>(Instant.now(), new State(state, lastKnownState)));
-                        setStateSync(state);
+            reportState(new Signal<>(Instant.now(), new State(state, lastKnownState)));
+            setStateSync(state);
 
-                        lastKnownState = getStateSync();
-                        reportState(new Signal<>(Instant.now(), new State(state, lastKnownState)));
-                        sink.success(lastKnownState);
+            return getState();
 
-                    } catch (Throwable t) { // NOSONAR Consequences have been considered
-
-                        reportState(new Signal<>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, t));
-                        sink.error(t);
-
-                    } finally {
-                        ThreadContext.pop();
-                    }
-                })
-                .subscribeOn(scheduler);
+        } catch (IOException e) {
+            return Mono.create(sink -> sink.error(e));
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     private void reportState(Signal<State, String> signal) {
@@ -125,7 +117,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     }
 
     @Override
-    public final Mono<Boolean> getState() {
+    public Mono<Boolean> getState() {
         return Mono.<Boolean>create(sink -> {
                     ThreadContext.push("getState");
                     try {

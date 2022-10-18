@@ -63,6 +63,21 @@ class ESPHomeSwitchTest {
         }).doesNotThrowAnyException();
     }
 
+    @Test
+    void testFlux1010() {
+
+        var esphomeSwitch = new ESPHomeSwitch(MQTT_BROKER, ZWAVE_SWITCH_TOPIC);
+
+        assertThatCode(() -> {
+            Flux
+                    .just(true, false, true, false)
+                    .flatMap(esphomeSwitch::setState)
+                    .doOnNext(state -> logger.info("state: {}", state))
+                    .blockLast();
+
+        }).doesNotThrowAnyException();
+    }
+
     private static class SwitchWrapper extends ESPHomeSwitch {
 
         protected SwitchWrapper(String host, String deviceRootTopic) {
@@ -75,7 +90,7 @@ class ESPHomeSwitchTest {
         }
         @Override
         public boolean getStateSync() throws IOException {
-            return super.getStateSync();
+            return getState().block();
         }
     }
 }

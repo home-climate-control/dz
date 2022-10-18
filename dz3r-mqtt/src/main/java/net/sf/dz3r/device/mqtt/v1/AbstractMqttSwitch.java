@@ -4,11 +4,11 @@ import net.sf.dz3r.device.actuator.AbstractSwitch;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.io.IOException;
 import java.time.ZoneId;
-import java.util.Optional;
 
 public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddress> {
 
@@ -48,49 +48,33 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
 
         return mqttStateFlux;
     }
-
     @Override
     protected boolean getStateSync() throws IOException {
-        return getStateSync(false);
+        throw new IllegalAccessError("This shouldn't have happened");
     }
 
-    /**
-     * Read, store, and return the hardware switch value.
-     *
-     * @param flushCache {@code true} if the currently known value must be discarded and new value needs to be awaited.
-     */
-    protected boolean getStateSync(boolean flushCache) {
+    @Override
+    public Mono<Boolean> getState() {
 
-        ThreadContext.push("getStateSync" + (flushCache ? "+flush" : ""));
+        ThreadContext.push("getStateSync");
 
         try {
 
-            if (flushCache) {
-                lastKnownState = null;
-            }
+            // lastKnownState may have been cleared by setStateSync() in subclasses
+            // to force a re-read - that's fragile, but unavoidable
 
             if (lastKnownState != null) {
                 logger.debug("returning cached state: {}", lastKnownState);
-                return lastKnownState.getValue();
+                return Mono.just(lastKnownState.getValue());
             }
 
             logger.debug("Awaiting new state for {}...", getGetStateTopic());
 
-            lastKnownState = getStateFlux()
+            return getStateFlux()
+                    .next()
                     .map(this::getState)
-                    .blockFirst();
-
-            // Sonar is paranoid, reports blockFirst() can return null. That's a pretty bizarre corner case, but OK.
-
-            logger.debug("signal @{}: {}",
-                    Optional.ofNullable(lastKnownState)
-                            .map(state -> state.timestamp.atZone(ZoneId.systemDefault()))
-                            .orElse(null),
-                    lastKnownState);
-
-            return Optional.ofNullable(lastKnownState)
-                    .map(Signal::getValue)
-                    .orElseThrow(() -> new IllegalStateException("null lastKnownState - something is seriously wrong"));
+                    .doOnNext(state -> logger.debug("signal @{}: {}", state.timestamp.atZone(ZoneId.systemDefault()), lastKnownState))
+                    .map(Signal::getValue);
 
         } finally {
             ThreadContext.pop();

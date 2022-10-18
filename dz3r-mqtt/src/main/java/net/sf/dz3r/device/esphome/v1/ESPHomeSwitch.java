@@ -103,8 +103,6 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
     @Override
     protected void setStateSync(boolean state) throws IOException {
 
-        var oldState = lastKnownState;
-
         // This should make sure the MQTT broker connection is alive
         getStateFlux();
 
@@ -122,6 +120,7 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
             return;
         }
 
-        getStateSync(true);
+        // Force obtaining a fresh value with next getStateSync()
+        lastKnownState = null;
     }
 }

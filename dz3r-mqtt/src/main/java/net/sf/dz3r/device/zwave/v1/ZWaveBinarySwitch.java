@@ -122,6 +122,8 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
 
         // Due to the note above, can't just read one message and expect the value to be the same (this fails).
         // Need to drain the stream and return the last known state.
-        getStateSync(true);
+
+        // Force obtaining a fresh value with next getStateSync()
+        lastKnownState = null;
     }
 }

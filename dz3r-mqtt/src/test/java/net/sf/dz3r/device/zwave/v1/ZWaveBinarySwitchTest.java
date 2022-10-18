@@ -63,6 +63,20 @@ class ZWaveBinarySwitchTest {
         }).doesNotThrowAnyException();
     }
 
+    @Test
+    void testFlux1010() {
+
+        var zwaveSwitch = new ZWaveBinarySwitch(MQTT_BROKER, ZWAVE_SWITCH_TOPIC);
+
+        assertThatCode(() -> {
+            Flux
+                    .just(true, false, true, false)
+                    .flatMap(zwaveSwitch::setState)
+                    .doOnNext(state -> logger.info("state: {}", state))
+                    .blockLast();
+
+        }).doesNotThrowAnyException();
+    }
     private static class SwitchWrapper extends ZWaveBinarySwitch {
 
         protected SwitchWrapper(String host, String deviceRootTopic) {
@@ -75,7 +89,7 @@ class ZWaveBinarySwitchTest {
         }
         @Override
         public boolean getStateSync() throws IOException {
-            return super.getStateSync();
+            return getState().block();
         }
     }
 }
