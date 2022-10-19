@@ -59,6 +59,8 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
 
         controller = new SimplePidController<>("(controller) " + name, 0, config.P, config.I, 0, config.saturationLimit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + name, 0, HYSTERESIS);
+
+        initFluxes(ambientFlux);
     }
 
     /**

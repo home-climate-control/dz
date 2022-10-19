@@ -65,6 +65,13 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         this.targetZone = targetZone;
         this.targetDevice = targetDevice;
 
+        // Don't forget to connect fluxes; this can only be done in subclasses after all the
+        // necessary components were initialized
+        // initFluxes(ambientFlux); // NOSONAR
+    }
+
+    protected final void initFluxes(Flux<Signal<Double, Void>> ambientFlux) {
+
         // Just get the (indoor, ambient) pair flux with no nulls or errors
         var stage1 = Flux
                 .create(this::connectCombined)

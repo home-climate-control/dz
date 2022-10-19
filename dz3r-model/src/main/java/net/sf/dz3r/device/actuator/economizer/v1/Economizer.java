@@ -35,6 +35,8 @@ public class Economizer<A extends Comparable<A>> extends AbstractEconomizer<A> {
             Switch<A> targetDevice) {
 
         super(name, config, targetZone, ambientFlux, targetDevice);
+
+        initFluxes(ambientFlux);
     }
 
     @Override
