@@ -18,7 +18,7 @@ import reactor.tools.agent.ReactorDebugAgent;
 
 import java.time.Instant;
 
-class EconomizerTest {
+class SimpleEconomizerTest {
 
     private final Logger logger = LogManager.getLogger();
     private FluxSink<Signal<Double, Void>> ambientSink;
@@ -58,7 +58,7 @@ class EconomizerTest {
         var ambientFlux = getAmbientFlux();
         var deferredAmbientFlux = Flux.create(this::connectAmbient);
 
-        var economizer = new Economizer<String>(
+        var economizer = new SimpleEconomizer<String>(
                 "economizer",
                 config,
                 targetZone,

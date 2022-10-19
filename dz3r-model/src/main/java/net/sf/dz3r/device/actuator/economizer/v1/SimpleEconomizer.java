@@ -11,11 +11,11 @@ import reactor.core.publisher.Flux;
 /**
  * Simple economizer implementation with no jitter control (rather a prototype).
  *
- * More information: <a href="https://github.com/home-climate-control/dz/wiki/HVAC-Device:-Economizer">HVAC Device: Economizer</a>
+ * More information: <a href="https://github.com/home-climate-control/dz/wiki/HVAC-Device:-Economizer">HVAC Device: SimpleEconomizer</a>
  *
  * @param <A> Actuator device address type.
  */
-public class Economizer<A extends Comparable<A>> extends AbstractEconomizer<A> {
+public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A> {
 
     /**
      * Create an instance.
@@ -27,7 +27,7 @@ public class Economizer<A extends Comparable<A>> extends AbstractEconomizer<A> {
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
-    public Economizer(
+    public SimpleEconomizer(
             String name,
             EconomizerConfig config,
             Zone targetZone,
