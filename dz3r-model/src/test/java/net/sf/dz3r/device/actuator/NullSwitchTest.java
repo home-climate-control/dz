@@ -63,7 +63,9 @@ class NullSwitchTest {
 
         }).start();
 
-        var actionFlux = Flux.just(ns.setState(true), ns.setState(false))
+        var actionFlux = Flux
+                .just(true, false)
+                .map(ns::setState)
                 .map(Mono::block)
                 .log();
 
