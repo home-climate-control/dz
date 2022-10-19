@@ -160,7 +160,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         return targetZone
                 .compute(indoorFlux)
-                .map(this::computeZone);
+                .map(this::computeHvacSuppression);
     }
 
     private Signal<Double, Void> computeCombined(Pair<Signal<Double, String>, Signal<Double, Void>> pair) {
@@ -220,7 +220,13 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
                 : config.targetTemperature - indoor;
     }
 
-    private Signal<ZoneStatus, String> computeZone(Signal<ZoneStatus, String> source) {
+    /**
+     * Figure out whether the HVAC needs to be suppressed and adjust the signal if so.
+     *
+     * @param source Signal computed by {@link Zone}.
+     * @return Signal with {@link ZoneStatus#status} possibly adjusted to shut off the HVAC if the economizer is active.
+     */
+    private Signal<ZoneStatus, String> computeHvacSuppression(Signal<ZoneStatus, String> source) {
 
         if (actuatorState == null || actuatorState == Boolean.FALSE) {
 
