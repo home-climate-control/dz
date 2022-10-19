@@ -17,6 +17,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Schedulers;
 
+/**
+ * Common implementation for all economizer classes.
+ *
+ * @param <A> Actuator device address type.
+ */
 public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String> {
 
     protected final Logger logger = LogManager.getLogger();
