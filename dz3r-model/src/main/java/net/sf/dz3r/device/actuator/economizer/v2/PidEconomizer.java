@@ -6,7 +6,7 @@ import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
-import net.sf.dz3r.device.actuator.economizer.PidEconomizerSettings;
+import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
@@ -48,7 +48,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected PidEconomizer(
-            PidEconomizerSettings settings,
+            EconomizerSettings settings,
             Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
