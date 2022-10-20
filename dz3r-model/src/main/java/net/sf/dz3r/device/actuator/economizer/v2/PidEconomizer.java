@@ -45,7 +45,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
-    protected PidEconomizer(
+    public PidEconomizer(
             EconomizerSettings settings,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {

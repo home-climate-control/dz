@@ -4,6 +4,9 @@ import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
+import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
+import net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.ThermostatStatus;
@@ -11,6 +14,8 @@ import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+
+import java.util.Optional;
 
 /**
  * Home climate control zone.
@@ -39,15 +44,32 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      */
     private ZoneSettings settings;
 
+    private AbstractEconomizer<?> economizer;
+
     /**
-     * Create an instance.
+     * Create an instance without an economizer.
      *
      * @param ts Thermostat to use.
      * @param settings Zone settings. Thermostat setpoint overrides zone setpoint - this argument is here to configure initial flags.
      */
     public Zone(Thermostat ts, ZoneSettings settings) {
+        this(ts, settings, null);
+    }
+
+    /**
+     * Create an instance with an economizer.
+     *
+     * @param ts Thermostat to use.
+     * @param settings Zone settings. Thermostat setpoint overrides zone setpoint - this argument is here to configure initial flags.
+     * @param economizerContext Optional context to initialize the economizer with.
+     */
+    public Zone(Thermostat ts, ZoneSettings settings, EconomizerContext<?> economizerContext) {
         this.ts = ts;
         setSettings(new ZoneSettings(settings, ts.getSetpoint()));
+
+        economizer = Optional.ofNullable(economizerContext)
+                .map(ctx -> new PidEconomizer<>(ctx.settings, ctx.ambientFlux, ctx.targetDevice))
+                .orElse(null);
     }
 
     public void setSettings(ZoneSettings settings) {
@@ -71,8 +93,12 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         logger.debug("compute()");
 
+        var source = Optional.ofNullable(economizer)
+                .map(eco -> eco.compute(in))
+                .orElse(in);
+
         // Since the zone doesn't need the payload, but the thermostat does, need to translate the input
-        var stage0 = in
+        var stage0 = source
                 .map(s -> new Signal<>(s.timestamp, s.getValue(), (Void) null, s.status, s.error));
 
         // Not to disrupt the thermostat control logic, input signal is fed to it
@@ -86,9 +112,12 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
                 .doOnNext(e -> logger.debug("translated/{}: {}", getAddress(), e));
 
         // Now, dampen the signal if the zone is disabled
-        return stage2
+        var stage3 = stage2
                 .map(this::suppressIfNotEnabled)
                 .doOnNext(e -> logger.debug("isOn/{}: {} {}", getAddress(), settings.enabled ? "enabled" : "DISABLED", e));
+
+        // And finally, suppress if the economizer says so
+        return stage3.map(this::suppressEconomizer);
     }
 
     private Signal<ZoneStatus, String> translate(Signal<ProcessController.Status<ThermostatStatus>, Void> source) {
@@ -113,6 +142,13 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
                 source.payload,
                 source.status,
                 source.error);
+    }
+
+    private Signal<ZoneStatus, String> suppressEconomizer(Signal<ZoneStatus, String> source) {
+
+        return Optional.ofNullable(economizer)
+                .map(eco -> eco.computeHvacSuppression(source))
+                .orElse(source);
     }
 
     /**

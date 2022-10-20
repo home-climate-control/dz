@@ -148,17 +148,27 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     public Flux<Signal<Double, String>> compute(Flux<Signal<Double, String>> indoorFlux) {
 
         // This better be ready, or we'll blow up
-        logger.debug("awaiting combined sink...");
-        try {
-            combinedReady.await();
-        } catch (InterruptedException ex) {
-            throw new IllegalStateException("failed to acquire combined sink", ex);
-        }
-        logger.debug("acquired combined sink");
+        acquireCombinedSink();
 
         // Not doing much right here - just recording the indoor signal and passing it down
         // while doing all the calculations in a side channel
         return indoorFlux.doOnNext(this::recordIndoor);
+    }
+
+    private void acquireCombinedSink() {
+
+        logger.debug("awaiting combined sink...");
+        try {
+
+            combinedReady.await();
+
+        } catch (InterruptedException ex) {
+
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("failed to acquire combined sink", ex);
+        }
+
+        logger.debug("acquired combined sink");
     }
 
     private Signal<Double, Void> computeCombined(Pair<Signal<Double, String>, Signal<Double, Void>> pair) {
