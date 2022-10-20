@@ -6,6 +6,10 @@ public class EconomizerConfig {
 
     /**
      * Which mode this device is active in.
+     *
+     * Note that even though the mode can be determined implicitly from the {@link net.sf.dz3r.model.Thermostat} PID controller
+     * settings of the zone it is connected to, it is still specified explicitly - there may be cases when the economizer mode
+     * may be the opposite of the HVAC.
      */
     public final HvacMode mode;
 

@@ -146,7 +146,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         // - compare the indoor flux against the changeover and target temperature, and
         //   issue a control signal when the actuator needs to be on
         // - feed the indoor flux to the zone, intercept the zone output, and suppress demand there
-        //   when the actuator is on
+        //   when the actuator is on (if so configured)
 
         indoorFlux
                 .subscribeOn(Schedulers.boundedElastic())
