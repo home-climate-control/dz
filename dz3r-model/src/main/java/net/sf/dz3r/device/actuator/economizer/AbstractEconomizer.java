@@ -24,7 +24,7 @@ import java.util.concurrent.CountDownLatch;
  *
  * @param <A> Actuator device address type.
  */
-public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, Double, String>, Addressable<String> {
+public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -268,5 +268,17 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
                 source.payload,
                 source.status,
                 source.error);
+    }
+
+    @Override
+    public void close() throws Exception {
+        ThreadContext.push("close");
+        try {
+            logger.info("Shutting down");
+            targetDevice.setState(false).block();
+        } finally {
+            logger.info("Shut down");
+            ThreadContext.pop();
+        }
     }
 }

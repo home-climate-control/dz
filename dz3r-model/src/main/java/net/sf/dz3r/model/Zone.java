@@ -13,6 +13,7 @@ import net.sf.dz3r.signal.hvac.ThermostatStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
 import java.util.Optional;
@@ -25,7 +26,7 @@ import java.util.Optional;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, JmxAware {
+public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, JmxAware, AutoCloseable {
 
     public enum State {
 
@@ -173,5 +174,22 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     @Override
     public String toString() {
         return "{zone name=" + ts.getAddress() + ", settings={" + settings + "}}";
+    }
+
+    @Override
+    public void close() throws Exception {
+        ThreadContext.push("close");
+        try {
+
+            logger.info("Shutting down");
+
+            if (economizer != null) {
+                economizer.close();
+
+            }
+        } finally {
+            logger.info("Shut down");
+            ThreadContext.pop();
+        }
     }
 }
