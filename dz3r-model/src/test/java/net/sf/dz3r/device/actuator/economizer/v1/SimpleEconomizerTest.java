@@ -14,11 +14,11 @@ import reactor.core.publisher.FluxSink;
 import reactor.tools.agent.ReactorDebugAgent;
 
 import java.time.Instant;
+import java.util.concurrent.CountDownLatch;
 
 class SimpleEconomizerTest {
 
     private final Logger logger = LogManager.getLogger();
-    private FluxSink<Signal<Double, Void>> ambientSink;
 
     @BeforeAll
     static void init() {
@@ -50,7 +50,8 @@ class SimpleEconomizerTest {
 
         // Can't feed it right away, it will all be consumed within the constructor
         var ambientFlux = getAmbientFlux();
-        var deferredAmbientFlux = Flux.create(this::connectAmbient);
+        var sinkWrapper = new SinkWrapper<Signal<Double, Void>>();
+        var deferredAmbientFlux = Flux.create(sinkWrapper::connect);
 
         var economizer = new SimpleEconomizer<String>(
                 settings,
@@ -61,14 +62,13 @@ class SimpleEconomizerTest {
                 .compute(Flux.just(new Signal<>(Instant.now(), indoor)))
                 .blockLast();
 
+        var ambientSink = sinkWrapper.getSink();
+
         ambientFlux
                 .doOnNext(ambientSink::next)
                 .blockLast();
     }
 
-    private void connectAmbient(FluxSink<Signal<Double, Void>> ambientSink) {
-        this.ambientSink = ambientSink;
-    }
 
     /**
      * Make sure that the economizer turns on when the ambient temperature falls below its trigger point,
@@ -101,5 +101,28 @@ class SimpleEconomizerTest {
                 .map(Integer::doubleValue)
                 .doOnNext(t -> logger.info("emit ambient={}", t))
                 .map(t  -> new Signal<Double, Void>(Instant.now(), t));
+    }
+
+    private static class SinkWrapper<T> {
+        private final Logger logger = LogManager.getLogger();
+        private FluxSink<T> sink;
+        private final CountDownLatch gate = new CountDownLatch(1);
+
+        public void connect(FluxSink<T> sink) {
+            this.sink = sink;
+            gate.countDown();
+            logger.info("sink is ready");
+        }
+
+        public FluxSink<T> getSink() {
+            logger.info("acquiring sink...");
+            try {
+                gate.await();
+                logger.info("sink acquired");
+                return sink;
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
