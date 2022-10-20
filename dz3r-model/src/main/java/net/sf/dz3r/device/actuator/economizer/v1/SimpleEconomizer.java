@@ -2,7 +2,7 @@ package net.sf.dz3r.device.actuator.economizer.v1;
 
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
-import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
+import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
@@ -27,12 +27,12 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
      * @param targetDevice Switch to control the economizer actuator.
      */
     public SimpleEconomizer(
-            EconomizerConfig config,
+            EconomizerSettings settings,
             Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(config, targetZone, ambientFlux, targetDevice);
+        super(settings, targetZone, ambientFlux, targetDevice);
 
         initFluxes(ambientFlux);
     }

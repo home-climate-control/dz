@@ -25,7 +25,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     protected final Logger logger = LogManager.getLogger();
 
-    public final EconomizerConfig config;
+    public final EconomizerSettings config;
 
     public final Zone targetZone;
 
@@ -57,12 +57,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected AbstractEconomizer(
-            EconomizerConfig config,
+            EconomizerSettings settings,
             Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        this.config = config;
+        this.config = settings;
         this.targetZone = targetZone;
         this.targetDevice = targetDevice;
 
@@ -195,7 +195,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     }
 
     /**
-     * Get the {@link EconomizerConfig#changeoverDelta ambient} delta signal.
+     * Get the {@link EconomizerSettings#changeoverDelta ambient} delta signal.
      *
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */
@@ -207,7 +207,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     }
 
     /**
-     * Get the {@link EconomizerConfig#targetTemperature} delta signal.
+     * Get the {@link EconomizerSettings#targetTemperature} delta signal.
      *
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */

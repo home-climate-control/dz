@@ -6,7 +6,7 @@ import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
-import net.sf.dz3r.device.actuator.economizer.PidEconomizerConfig;
+import net.sf.dz3r.device.actuator.economizer.PidEconomizerSettings;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
@@ -48,14 +48,14 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected PidEconomizer(
-            PidEconomizerConfig config,
+            PidEconomizerSettings settings,
             Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(config, targetZone, ambientFlux, targetDevice);
+        super(settings, targetZone, ambientFlux, targetDevice);
 
-        controller = new SimplePidController<>("(eco controller) " + targetZone.getAddress(), 0, config.P, config.I, 0, config.saturationLimit);
+        controller = new SimplePidController<>("(eco controller) " + targetZone.getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
         signalRenderer = new HysteresisController<>("(eco signalRenderer) " + targetZone.getAddress(), 0, HYSTERESIS);
 
         initFluxes(ambientFlux);

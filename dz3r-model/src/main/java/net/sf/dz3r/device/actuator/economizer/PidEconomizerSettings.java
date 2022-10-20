@@ -2,7 +2,7 @@ package net.sf.dz3r.device.actuator.economizer;
 
 import net.sf.dz3r.model.HvacMode;
 
-public class PidEconomizerConfig extends EconomizerConfig {
+public class PidEconomizerSettings extends EconomizerSettings {
 
     public final double P;
 
@@ -13,7 +13,7 @@ public class PidEconomizerConfig extends EconomizerConfig {
      * Primary constructor with just the {@link #mode}, {@link #changeoverDelta}, and {@link #targetTemperature} values provided,
      * {@link #keepHvacOn} set to {@code false}, and PI controller with default settings.
      */
-    public PidEconomizerConfig(HvacMode mode, double changeoverDelta, double targetTemperature) {
+    public PidEconomizerSettings(HvacMode mode, double changeoverDelta, double targetTemperature) {
 
         // VT: FIXME: I and saturationLimit of 0 are bad defaults, will need to be adjusted when deployed to production
         this(mode, changeoverDelta, targetTemperature, false, 1, 0, 0);
@@ -27,9 +27,9 @@ public class PidEconomizerConfig extends EconomizerConfig {
      * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
      * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
      */
-    public PidEconomizerConfig(HvacMode mode, double changeoverDelta, double targetTemperature,
-                               boolean keepHvacOn,
-                               double P, double I, double saturationLimit) {
+    public PidEconomizerSettings(HvacMode mode, double changeoverDelta, double targetTemperature,
+                                 boolean keepHvacOn,
+                                 double P, double I, double saturationLimit) {
 
         super(mode, changeoverDelta, targetTemperature, keepHvacOn);
 

@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator.economizer.v1;
 
 import net.sf.dz3r.device.actuator.NullSwitch;
-import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
+import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
@@ -37,7 +37,7 @@ class SimpleEconomizerTest {
 
         // Target temperature is below the lowest in the ambient flux,
         // the economizer will just turn on and off
-        var config = new EconomizerConfig(
+        var settings = new EconomizerSettings(
                 HvacMode.COOLING,
                 2,
                 10);
@@ -59,7 +59,7 @@ class SimpleEconomizerTest {
         var deferredAmbientFlux = Flux.create(this::connectAmbient);
 
         var economizer = new SimpleEconomizer<String>(
-                config,
+                settings,
                 targetZone,
                 deferredAmbientFlux,
                 targetDevice);
@@ -88,7 +88,7 @@ class SimpleEconomizerTest {
 
         // Target temperature is within the range of the ambient flux,
         // the economizer will turn on, then off, then on and off again
-        var config = new EconomizerConfig(
+        var settings = new EconomizerSettings(
                 HvacMode.COOLING,
                 2,
                 18);

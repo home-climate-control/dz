@@ -2,7 +2,7 @@ package net.sf.dz3r.device.actuator.economizer;
 
 import net.sf.dz3r.model.HvacMode;
 
-public class EconomizerConfig {
+public class EconomizerSettings {
 
     /**
      * Which mode this device is active in.
@@ -38,7 +38,7 @@ public class EconomizerConfig {
      * Primary constructor with just the {@link #mode}, {@link #changeoverDelta}, and {@link #targetTemperature} values provided,
      * and {@link #keepHvacOn} set to {@code false}.
      */
-    public EconomizerConfig(HvacMode mode, double changeoverDelta, double targetTemperature) {
+    public EconomizerSettings(HvacMode mode, double changeoverDelta, double targetTemperature) {
         this(mode, changeoverDelta, targetTemperature, false);
     }
 
@@ -47,7 +47,7 @@ public class EconomizerConfig {
      *
      * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
      */
-    public EconomizerConfig(HvacMode mode, double changeoverDelta, double targetTemperature, boolean keepHvacOn) {
+    public EconomizerSettings(HvacMode mode, double changeoverDelta, double targetTemperature, boolean keepHvacOn) {
 
         this.mode = mode;
         this.changeoverDelta = changeoverDelta;
