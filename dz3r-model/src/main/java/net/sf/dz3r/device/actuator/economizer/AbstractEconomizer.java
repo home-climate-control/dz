@@ -25,7 +25,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     protected final Logger logger = LogManager.getLogger();
 
-    public final EconomizerSettings config;
+    public final EconomizerSettings settings;
 
     public final Zone targetZone;
 
@@ -62,7 +62,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        this.config = settings;
+        this.settings = settings;
         this.targetZone = targetZone;
         this.targetDevice = targetDevice;
 
@@ -201,9 +201,9 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      */
     double getAmbientDelta(double indoor, double ambient) {
 
-        return config.mode == HvacMode.COOLING
-                ? indoor - (ambient + config.changeoverDelta)
-                : ambient - (indoor + config.changeoverDelta);
+        return settings.mode == HvacMode.COOLING
+                ? indoor - (ambient + settings.changeoverDelta)
+                : ambient - (indoor + settings.changeoverDelta);
     }
 
     /**
@@ -212,9 +212,9 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */
     double getTargetDelta(double indoor) {
-        return config.mode == HvacMode.COOLING
-                ? indoor - config.targetTemperature
-                : config.targetTemperature - indoor;
+        return settings.mode == HvacMode.COOLING
+                ? indoor - settings.targetTemperature
+                : settings.targetTemperature - indoor;
     }
 
     /**
@@ -231,7 +231,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             return source;
         }
 
-        if (config.keepHvacOn) {
+        if (settings.keepHvacOn) {
 
             // We're feeding indoor air to HVAC air return, right?
             return source;
