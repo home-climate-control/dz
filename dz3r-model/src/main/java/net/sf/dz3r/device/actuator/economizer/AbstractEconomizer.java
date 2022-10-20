@@ -88,12 +88,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         // Get the signal
         var stage2 = computeDeviceState(stage1)
-                .doOnNext(this::recordDeviceState);
+                .map(this::recordDeviceState);
 
         // And act on it
         stage2
                 // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
-                .flatMap(state -> targetDevice.setState(actuatorState))
+                .flatMap(targetDevice::setState)
 
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
@@ -126,7 +126,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         logger.debug("combined sink ready");
     }
 
-    private void recordDeviceState(Signal<Boolean, Void> stateSignal) {
+    private Boolean recordDeviceState(Signal<Boolean, Void> stateSignal) {
 
         var newState = stateSignal.getValue();
 
@@ -135,6 +135,8 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             logger.info("{}: state change: {} => {}", getAddress(), actuatorState, newState);
             actuatorState = newState;
         }
+
+        return actuatorState;
     }
 
     /**
