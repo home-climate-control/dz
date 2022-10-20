@@ -14,15 +14,15 @@ import net.sf.dz3r.model.ZoneSettings;
 public class ZoneStatus {
 
     public final ZoneSettings settings;
-    public final ThermostatStatus status;
+    public final ThermostatStatus thermostatStatus;
 
-    public ZoneStatus(ZoneSettings settings, ThermostatStatus status) {
+    public ZoneStatus(ZoneSettings settings, ThermostatStatus thermostatStatus) {
         this.settings = settings;
-        this.status = status;
+        this.thermostatStatus = thermostatStatus;
     }
 
     @Override
     public String toString() {
-        return "{settings=" + settings + ", status=" + status + "}";
+        return "{settings=" + settings + ", thermostat=" + thermostatStatus + "}";
     }
 }

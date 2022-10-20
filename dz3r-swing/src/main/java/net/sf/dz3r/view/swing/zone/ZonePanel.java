@@ -537,8 +537,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
         var tint = new TintedValueAndSetpoint(
                 sensorSignal.getValue(),
-                zoneStatus.status.demand * 2,
-                zoneStatus.status.calling,
+                zoneStatus.thermostatStatus.demand * 2,
+                zoneStatus.thermostatStatus.calling,
                 zoneStatus.settings.setpoint);
 
         // VT: FIXME: This must be driven via Flux
@@ -610,7 +610,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var g2d = (Graphics2D) g;
         var d = getSize();
 
-        var signal = zoneStatus.status.demand;
+        var signal = zoneStatus.thermostatStatus.demand;
         var mode = getMode();
         var state = resolveState();
         var boundary = new Rectangle(0, 0, d.width, d.height);
@@ -641,6 +641,6 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return Zone.State.OFF;
         }
 
-        return zoneStatus.status.calling ? Zone.State.CALLING : Zone.State.HAPPY;
+        return zoneStatus.thermostatStatus.calling ? Zone.State.CALLING : Zone.State.HAPPY;
     }
 }

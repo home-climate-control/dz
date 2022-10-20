@@ -237,7 +237,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      * Figure out whether the HVAC needs to be suppressed and adjust the signal if so.
      *
      * @param source Signal computed by {@link Zone}.
-     * @return Signal with {@link ZoneStatus#status} possibly adjusted to shut off the HVAC if the economizer is active.
+     * @return Signal with {@link ZoneStatus#thermostatStatus} possibly adjusted to shut off the HVAC if the economizer is active.
      */
     public Signal<ZoneStatus, String> computeHvacSuppression(Signal<ZoneStatus, String> source) {
 

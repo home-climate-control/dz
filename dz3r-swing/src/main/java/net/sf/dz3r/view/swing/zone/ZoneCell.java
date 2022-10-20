@@ -32,7 +32,7 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
         paintGradient(
                 getState(),
                 getMode(),
-                zoneStatus == null ? null : zoneStatus.status.demand,
+                zoneStatus == null ? null : zoneStatus.thermostatStatus.demand,
                 g2d, boundary);
     }
 
@@ -115,7 +115,7 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
             return Zone.State.OFF;
         }
 
-        return zoneStatus.status.calling ? Zone.State.CALLING : Zone.State.HAPPY;
+        return zoneStatus.thermostatStatus.calling ? Zone.State.CALLING : Zone.State.HAPPY;
     }
 
     @Override
