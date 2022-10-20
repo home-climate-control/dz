@@ -59,7 +59,6 @@ class SimpleEconomizerTest {
         var deferredAmbientFlux = Flux.create(this::connectAmbient);
 
         var economizer = new SimpleEconomizer<String>(
-                "economizer",
                 config,
                 targetZone,
                 deferredAmbientFlux,

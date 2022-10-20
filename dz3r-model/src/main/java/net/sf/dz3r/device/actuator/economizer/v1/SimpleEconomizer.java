@@ -22,19 +22,17 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
      *
      * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
      *
-     * @param name Human readable name.
      * @param targetZone Zone to serve.
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
     public SimpleEconomizer(
-            String name,
             EconomizerConfig config,
             Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(name, config, targetZone, ambientFlux, targetDevice);
+        super(config, targetZone, ambientFlux, targetDevice);
 
         initFluxes(ambientFlux);
     }

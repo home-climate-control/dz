@@ -1,6 +1,5 @@
 package net.sf.dz3r.device.actuator.economizer;
 
-import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
@@ -22,11 +21,10 @@ import reactor.core.scheduler.Schedulers;
  *
  * @param <A> Actuator device address type.
  */
-public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String> {
+public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, ZoneStatus, String> {
 
     protected final Logger logger = LogManager.getLogger();
 
-    public final String name;
     public final EconomizerConfig config;
 
     public final Zone targetZone;
@@ -54,18 +52,16 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      *
      * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
      *
-     * @param name Human readable name.
      * @param targetZone Zone to serve.
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected AbstractEconomizer(
-            String name,
             EconomizerConfig config,
             Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
-        this.name = name;
+
         this.config = config;
         this.targetZone = targetZone;
         this.targetDevice = targetDevice;
@@ -108,10 +104,6 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     protected abstract Flux<Signal<Boolean, Void>> computeDeviceState(Flux<Signal<Double, Void>> signal);
 
-    @Override
-    public String getAddress() {
-        return name;
-    }
     private void recordAmbient(Signal<Double, Void> ambient) {
 
         this.ambient = ambient;
@@ -134,7 +126,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         if ((actuatorState == null && newState != null) || newState.compareTo(actuatorState) != 0) {
 
-            logger.info("{}: state change: {} => {}", name, actuatorState, newState);
+            logger.info("{}: eco state change: {} => {}", targetZone.getAddress(), actuatorState, newState);
             actuatorState = newState;
         }
     }

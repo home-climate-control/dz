@@ -43,22 +43,20 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      *
      * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
      *
-     * @param name Human readable name.
      * @param targetZone Zone to serve.
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected PidEconomizer(
-            String name,
             PidEconomizerConfig config,
             Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(name, config, targetZone, ambientFlux, targetDevice);
+        super(config, targetZone, ambientFlux, targetDevice);
 
-        controller = new SimplePidController<>("(controller) " + name, 0, config.P, config.I, 0, config.saturationLimit);
-        signalRenderer = new HysteresisController<>("(signalRenderer) " + name, 0, HYSTERESIS);
+        controller = new SimplePidController<>("(eco controller) " + targetZone.getAddress(), 0, config.P, config.I, 0, config.saturationLimit);
+        signalRenderer = new HysteresisController<>("(eco signalRenderer) " + targetZone.getAddress(), 0, HYSTERESIS);
 
         initFluxes(ambientFlux);
     }
@@ -79,7 +77,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
             // Might want to make this available to outside consumers for instrumentation.
             var stage1 = controller
                     .compute(pv)
-                    .doOnNext(e -> logger.debug("controller/{}: {}", name, e));
+                    .doOnNext(e -> logger.debug("controller/{}: {}", targetZone.getAddress(), e));
 
             // Discard things the renderer doesn't understand.
             // Total failure is denoted by NaN by stage 1, it will get through.
@@ -91,7 +89,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
             // Might want to expose this as well
             return signalRenderer
                     .compute(stage2)
-                    .doOnNext(e -> logger.debug("renderer/{}: {}", name, e))
+                    .doOnNext(e -> logger.debug("renderer/{}: {}", targetZone.getAddress(), e))
                     .map(this::mapOutput);
 
         } finally {
