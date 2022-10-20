@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.model.HvacMode;
@@ -106,7 +107,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
                 .subscribe();
     }
 
-    protected abstract Flux<Signal<Boolean, Void>> computeDeviceState(Flux<Signal<Double, Void>> signal);
+    protected abstract Flux<Signal<Boolean, ProcessController.Status<Double>>> computeDeviceState(Flux<Signal<Double, Void>> signal);
 
     private void recordAmbient(Signal<Double, Void> ambient) {
 
@@ -126,7 +127,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         logger.debug("combined sink ready");
     }
 
-    private Boolean recordDeviceState(Signal<Boolean, Void> stateSignal) {
+    private Boolean recordDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
 
         var newState = stateSignal.getValue();
 
@@ -135,6 +136,8 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             logger.info("{}: state change: {} => {}", getAddress(), actuatorState, newState);
             actuatorState = newState;
         }
+
+        // Not flatmapping the result so that the transmission layer can deal with dupes as they see fit
 
         return actuatorState;
     }

@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer.v1;
 
+import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
@@ -35,13 +36,13 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
     }
 
     @Override
-    protected Flux<Signal<Boolean, Void>> computeDeviceState(Flux<Signal<Double, Void>> signal) {
+    protected Flux<Signal<Boolean, ProcessController.Status<Double>>> computeDeviceState(Flux<Signal<Double, Void>> signal) {
 
         return signal
                 .map(this::computeState);
     }
 
-    private Signal<Boolean, Void> computeState(Signal<Double, Void> signal) {
+    private Signal<Boolean, ProcessController.Status<Double>> computeState(Signal<Double, Void> signal) {
 
         ThreadContext.push("computeDeviceState");
 

@@ -64,7 +64,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      * @see Thermostat#compute(Flux)
      */
     @Override
-    protected Flux<Signal<Boolean, Void>> computeDeviceState(Flux<Signal<Double, Void>> pv) {
+    protected Flux<Signal<Boolean, ProcessController.Status<Double>>> computeDeviceState(Flux<Signal<Double, Void>> pv) {
 
         ThreadContext.push("computeDeviceState");
 
@@ -94,10 +94,10 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
         }
     }
 
-    private Signal<Boolean, Void> mapOutput(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> source) {
+    private Signal<Boolean, ProcessController.Status<Double>> mapOutput(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> source) {
 
         var calling = Double.compare(source.getValue().signal, 1.0) == 0;
 
-        return new Signal<>(source.timestamp, calling);
+        return new Signal<>(source.timestamp, calling, source.getValue());
     }
 }
