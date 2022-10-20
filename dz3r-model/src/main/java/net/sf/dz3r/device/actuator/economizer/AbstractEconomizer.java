@@ -241,7 +241,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      */
     public Signal<ZoneStatus, String> computeHvacSuppression(Signal<ZoneStatus, String> source) {
 
-        if (actuatorState == null || actuatorState == Boolean.FALSE) {
+        if (actuatorState == null || actuatorState.equals(Boolean.FALSE)) {
 
             // Economizer inactive, no change required
             return source;

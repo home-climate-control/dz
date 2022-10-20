@@ -30,7 +30,7 @@ class SimpleEconomizerTest {
      * and then turns off when it raises again.
      */
     @Test
-    void dropToOnAndBack() throws InterruptedException {
+    void dropToOnAndBack() {
 
         // Target temperature is below the lowest in the ambient flux,
         // the economizer will just turn on and off
@@ -41,9 +41,6 @@ class SimpleEconomizerTest {
                 10);
 
         var indoor = 25.0;
-
-        // Irrelevant, economizer overrides it
-        var setpoint = 32.0;
 
         // VT: FIXME: Replace with a mock to verify()
         var targetDevice = new NullSwitch("s");
@@ -87,7 +84,6 @@ class SimpleEconomizerTest {
                 2,
                 18);
 
-        var setpoint = 25;
         var ambient = getAmbientFlux();
     }
 
@@ -100,7 +96,7 @@ class SimpleEconomizerTest {
                         Flux.range(15, 16))
                 .map(Integer::doubleValue)
                 .doOnNext(t -> logger.info("emit ambient={}", t))
-                .map(t  -> new Signal<Double, Void>(Instant.now(), t));
+                .map(t  -> new Signal<>(Instant.now(), t));
     }
 
     private static class SinkWrapper<T> {
