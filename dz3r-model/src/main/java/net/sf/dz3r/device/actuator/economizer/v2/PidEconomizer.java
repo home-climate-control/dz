@@ -8,7 +8,6 @@ import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Thermostat;
-import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
@@ -43,20 +42,18 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      *
      * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
      *
-     * @param targetZone Zone to serve.
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected PidEconomizer(
             EconomizerSettings settings,
-            Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(settings, targetZone, ambientFlux, targetDevice);
+        super(settings, ambientFlux, targetDevice);
 
-        controller = new SimplePidController<>("(eco controller) " + targetZone.getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
-        signalRenderer = new HysteresisController<>("(eco signalRenderer) " + targetZone.getAddress(), 0, HYSTERESIS);
+        controller = new SimplePidController<>("(controller) " + getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
+        signalRenderer = new HysteresisController<>("(signalRenderer) " + getAddress(), 0, HYSTERESIS);
 
         initFluxes(ambientFlux);
     }
@@ -77,7 +74,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
             // Might want to make this available to outside consumers for instrumentation.
             var stage1 = controller
                     .compute(pv)
-                    .doOnNext(e -> logger.debug("controller/{}: {}", targetZone.getAddress(), e));
+                    .doOnNext(e -> logger.debug("controller/{}: {}", getAddress(), e));
 
             // Discard things the renderer doesn't understand.
             // Total failure is denoted by NaN by stage 1, it will get through.
@@ -89,7 +86,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
             // Might want to expose this as well
             return signalRenderer
                     .compute(stage2)
-                    .doOnNext(e -> logger.debug("renderer/{}: {}", targetZone.getAddress(), e))
+                    .doOnNext(e -> logger.debug("renderer/{}: {}", getAddress(), e))
                     .map(this::mapOutput);
 
         } finally {

@@ -3,9 +3,6 @@ package net.sf.dz3r.device.actuator.economizer.v1;
 import net.sf.dz3r.device.actuator.NullSwitch;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.model.Thermostat;
-import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,11 +30,12 @@ class SimpleEconomizerTest {
      * and then turns off when it raises again.
      */
     @Test
-    void dropToOnAndBack() {
+    void dropToOnAndBack() throws InterruptedException {
 
         // Target temperature is below the lowest in the ambient flux,
         // the economizer will just turn on and off
         var settings = new EconomizerSettings(
+                "eco",
                 HvacMode.COOLING,
                 2,
                 10);
@@ -46,10 +44,6 @@ class SimpleEconomizerTest {
 
         // Irrelevant, economizer overrides it
         var setpoint = 32.0;
-
-        var targetZone = new Zone(
-                new Thermostat("ts", setpoint, 1, 0, 0, 1),
-                new ZoneSettings(setpoint));
 
         // VT: FIXME: Replace with a mock to verify()
         var targetDevice = new NullSwitch("s");
@@ -60,7 +54,6 @@ class SimpleEconomizerTest {
 
         var economizer = new SimpleEconomizer<String>(
                 settings,
-                targetZone,
                 deferredAmbientFlux,
                 targetDevice);
 
@@ -89,6 +82,7 @@ class SimpleEconomizerTest {
         // Target temperature is within the range of the ambient flux,
         // the economizer will turn on, then off, then on and off again
         var settings = new EconomizerSettings(
+                "eco",
                 HvacMode.COOLING,
                 2,
                 18);

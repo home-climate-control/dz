@@ -3,7 +3,6 @@ package net.sf.dz3r.device.actuator.economizer.v1;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
-import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
@@ -22,17 +21,15 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
      *
      * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
      *
-     * @param targetZone Zone to serve.
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
     public SimpleEconomizer(
             EconomizerSettings settings,
-            Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(settings, targetZone, ambientFlux, targetDevice);
+        super(settings, ambientFlux, targetDevice);
 
         initFluxes(ambientFlux);
     }

@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
@@ -16,18 +17,18 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  * Common implementation for all economizer classes.
  *
  * @param <A> Actuator device address type.
  */
-public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, ZoneStatus, String> {
+public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, Double, String>, Addressable<String> {
 
     protected final Logger logger = LogManager.getLogger();
 
     public final EconomizerSettings settings;
-
-    public final Zone targetZone;
 
     protected final Switch<A> targetDevice;
 
@@ -47,23 +48,22 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     private Boolean actuatorState;
     private FluxSink<Pair<Signal<Double, String>, Signal<Double, Void>>> combinedSink;
 
+    private final CountDownLatch combinedReady = new CountDownLatch(1);
+
     /**
      * Create an instance.
      *
      * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
      *
-     * @param targetZone Zone to serve.
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected AbstractEconomizer(
             EconomizerSettings settings,
-            Zone targetZone,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
         this.settings = settings;
-        this.targetZone = targetZone;
         this.targetDevice = targetDevice;
 
         // Don't forget to connect fluxes; this can only be done in subclasses after all the
@@ -71,6 +71,10 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         // initFluxes(ambientFlux); // NOSONAR
     }
 
+    @Override
+    public String getAddress() {
+        return settings.name;
+    }
     protected final void initFluxes(Flux<Signal<Double, Void>> ambientFlux) {
 
         // Just get the (indoor, ambient) pair flux with no nulls or errors
@@ -118,6 +122,8 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     private void connectCombined(FluxSink<Pair<Signal<Double, String>, Signal<Double, Void>>> sink) {
         combinedSink = sink;
+        combinedReady.countDown();
+        logger.debug("combined sink ready");
     }
 
     private void recordDeviceState(Signal<Boolean, Void> stateSignal) {
@@ -126,7 +132,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         if ((actuatorState == null && newState != null) || newState.compareTo(actuatorState) != 0) {
 
-            logger.info("{}: eco state change: {} => {}", targetZone.getAddress(), actuatorState, newState);
+            logger.info("{}: state change: {} => {}", getAddress(), actuatorState, newState);
             actuatorState = newState;
         }
     }
@@ -139,25 +145,20 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      * @return Flux to send to {@code UnitDirector} instead of the zone flux.
      */
     @Override
-    public Flux<Signal<ZoneStatus, String>> compute(Flux<Signal<Double, String>> indoorFlux) {
+    public Flux<Signal<Double, String>> compute(Flux<Signal<Double, String>> indoorFlux) {
 
-        // Summary of what we need to do here:
+        // This better be ready, or we'll blow up
+        logger.debug("awaiting combined sink...");
+        try {
+            combinedReady.await();
+        } catch (InterruptedException ex) {
+            throw new IllegalStateException("failed to acquire combined sink", ex);
+        }
+        logger.debug("acquired combined sink");
 
-        // - compare the indoor flux against the changeover and target temperature, and
-        //   issue a control signal when the actuator needs to be on
-        // - feed the indoor flux to the zone, intercept the zone output, and suppress demand there
-        //   when the actuator is on (if so configured)
-
-        indoorFlux
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext(this::recordIndoor)
-
-                // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
-                .subscribe();
-
-        return targetZone
-                .compute(indoorFlux)
-                .map(this::computeHvacSuppression);
+        // Not doing much right here - just recording the indoor signal and passing it down
+        // while doing all the calculations in a side channel
+        return indoorFlux.doOnNext(this::recordIndoor);
     }
 
     private Signal<Double, Void> computeCombined(Pair<Signal<Double, String>, Signal<Double, Void>> pair) {
@@ -223,7 +224,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      * @param source Signal computed by {@link Zone}.
      * @return Signal with {@link ZoneStatus#status} possibly adjusted to shut off the HVAC if the economizer is active.
      */
-    private Signal<ZoneStatus, String> computeHvacSuppression(Signal<ZoneStatus, String> source) {
+    public Signal<ZoneStatus, String> computeHvacSuppression(Signal<ZoneStatus, String> source) {
 
         if (actuatorState == null || actuatorState == Boolean.FALSE) {
 

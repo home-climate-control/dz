@@ -4,26 +4,20 @@ import net.sf.dz3r.model.HvacMode;
 
 public class EconomizerSettings {
 
+    public final String name;
+
     /**
      * Which mode this device is active in.
-     *
-     * Note that even though the mode can be determined implicitly from the {@link net.sf.dz3r.model.Thermostat} PID controller
-     * settings of the zone it is connected to, it is still specified explicitly - there may be cases when the economizer mode
-     * may be the opposite of the HVAC.
      */
     public final HvacMode mode;
 
     /**
      * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
-     *
-     * VT: NOTE: Anti-jitter measures are provided elsewhere.
      */
     public final double changeoverDelta;
 
     /**
      * When this temperature is reached, the device is shut off.
-     *
-     * VT: NOTE: Anti-jitter measures are provided elsewhere.
      */
     public final double targetTemperature;
 
@@ -44,9 +38,9 @@ public class EconomizerSettings {
      * Primary constructor with just the {@link #mode}, {@link #changeoverDelta}, and {@link #targetTemperature} values provided,
      * {@link #keepHvacOn} set to {@code false}, and PI controller with default settings.
      */
-    public EconomizerSettings(HvacMode mode, double changeoverDelta, double targetTemperature) {
+    public EconomizerSettings( String name, HvacMode mode, double changeoverDelta, double targetTemperature) {
         // VT: FIXME: I and saturationLimit of 0 are bad defaults, will need to be adjusted when deployed to production
-        this(mode, changeoverDelta, targetTemperature, false, 1, 0, 0);
+        this(name, mode, changeoverDelta, targetTemperature, false, 1, 0, 0);
     }
 
     /**
@@ -57,9 +51,11 @@ public class EconomizerSettings {
      * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
      * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
      */
-    public EconomizerSettings(HvacMode mode, double changeoverDelta, double targetTemperature,
+    public EconomizerSettings(String name,
+                              HvacMode mode, double changeoverDelta, double targetTemperature,
                               boolean keepHvacOn,
                               double P, double I, double saturationLimit) {
+        this.name = name;
 
         this.mode = mode;
         this.changeoverDelta = changeoverDelta;
