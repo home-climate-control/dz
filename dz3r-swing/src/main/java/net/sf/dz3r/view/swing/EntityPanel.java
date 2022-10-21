@@ -8,12 +8,15 @@ import java.awt.GridBagLayout;
 import java.awt.event.KeyListener;
 
 /**
- * Superclass for everything that shows up on the Console.
+ * Superclass for everything interactive that shows up on the Console.
  *
  * Everything that does will have two parts: the top will contain information and controls,
  * the bottom will contain the visualization.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @param <T> Signal value type.
+ * @param <P> Extra payload type.
+ * @see EntityCell
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
  */
 public abstract class EntityPanel<T, P> extends SwingSink<T, P> implements KeyListener {
 

@@ -22,8 +22,6 @@ public class ZoneChart2021 extends AbstractZoneChart {
     @Override
     protected void update() {
 
-        var signal = getSignal();
-
         if (append(getSignal())) {
             repaint();
         }
@@ -31,7 +29,6 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
     private boolean append(Signal<TintedValueAndSetpoint, Void> signal) {
 
-        // VT: FIXME: Convert to Instant
         adjustVerticalLimits(signal.timestamp.toEpochMilli(), signal.getValue().value, signal.getValue().setpoint);
 
         synchronized (AbstractZoneChart.class) {
@@ -67,7 +64,6 @@ public class ZoneChart2021 extends AbstractZoneChart {
             // The average is still being calculated, nothing to do
             return false;
         }
-
 
         dsValues.append(signal.timestamp.toEpochMilli(), tintedValue, true);
         dsSetpoints.append(signal.timestamp.toEpochMilli(), signal.getValue().setpoint, true);

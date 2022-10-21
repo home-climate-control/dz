@@ -237,11 +237,9 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
         public TintedValue append(Signal<? extends TintedValue, Void> signal) {
 
             if (timestamp == null) {
-                // VT: FIXME: Convert to Instant
                 timestamp = signal.timestamp.toEpochMilli();
             }
 
-            // VT: FIXME: Convert to Instant
             var age = signal.timestamp.toEpochMilli() - timestamp;
 
             if ( age < expirationInterval) {
@@ -262,7 +260,6 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
             valueAccumulator = signal.getValue().value;
             tintAccumulator = signal.getValue().tint;
             emphasizeAccumulator = 0;
-            // VT: FIXME: Convert to Instant
             timestamp = signal.timestamp.toEpochMilli();
 
             return result;
