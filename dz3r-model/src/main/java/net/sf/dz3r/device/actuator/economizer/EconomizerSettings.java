@@ -2,7 +2,12 @@ package net.sf.dz3r.device.actuator.economizer;
 
 import net.sf.dz3r.model.HvacMode;
 
-public class EconomizerSettings {
+/**
+ * Full set of economizer settings.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ */
+public class EconomizerSettings extends EconomizerTransientSettings {
 
     public final String name;
 
@@ -10,16 +15,6 @@ public class EconomizerSettings {
      * Which mode this device is active in.
      */
     public final HvacMode mode;
-
-    /**
-     * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
-     */
-    public final double changeoverDelta;
-
-    /**
-     * When this temperature is reached, the device is shut off.
-     */
-    public final double targetTemperature;
 
     /**
      * {@code true} means that turning on the device will NOT turn the HVAC off.
@@ -38,7 +33,7 @@ public class EconomizerSettings {
      * Primary constructor with just the {@link #mode}, {@link #changeoverDelta}, and {@link #targetTemperature} values provided,
      * {@link #keepHvacOn} set to {@code false}, and PI controller with default settings.
      */
-    public EconomizerSettings( String name, HvacMode mode, double changeoverDelta, double targetTemperature) {
+    public EconomizerSettings(String name, HvacMode mode, double changeoverDelta, double targetTemperature) {
         // VT: FIXME: I and saturationLimit of 0 are bad defaults, will need to be adjusted when deployed to production
         this(name, mode, changeoverDelta, targetTemperature, false, 1, 0, 0);
     }
@@ -55,11 +50,10 @@ public class EconomizerSettings {
                               HvacMode mode, double changeoverDelta, double targetTemperature,
                               boolean keepHvacOn,
                               double P, double I, double saturationLimit) {
+        super(changeoverDelta, targetTemperature);
         this.name = name;
 
         this.mode = mode;
-        this.changeoverDelta = changeoverDelta;
-        this.targetTemperature = targetTemperature;
         this.keepHvacOn = keepHvacOn;
 
         this.P = P;

@@ -36,8 +36,8 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
             b.addField("hold", status.settings.hold);
             b.addField("dumpPriority", status.settings.dumpPriority);
 
-            b.addField("calling", status.thermostatStatus.calling);
-            b.addField("demand", status.thermostatStatus.demand);
+            b.addField("calling", status.callingStatus.calling);
+            b.addField("demand", status.callingStatus.demand);
         }
 
         if (signal.error != null) {

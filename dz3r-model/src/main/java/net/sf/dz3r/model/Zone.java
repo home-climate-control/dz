@@ -9,7 +9,7 @@ import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
-import net.sf.dz3r.signal.hvac.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.CallingStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -121,11 +121,11 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         return stage3.map(this::suppressEconomizer);
     }
 
-    private Signal<ZoneStatus, String> translate(Signal<ProcessController.Status<ThermostatStatus>, Void> source) {
+    private Signal<ZoneStatus, String> translate(Signal<ProcessController.Status<CallingStatus>, Void> source) {
 
         return new Signal<>(
                 source.timestamp,
-                new ZoneStatus(settings, source.getValue().signal),
+                new ZoneStatus(settings, source.getValue().signal, null),
                 getAddress(),
                 source.status,
                 source.error);
@@ -139,7 +139,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         return new Signal<>(
                 source.timestamp,
-                new ZoneStatus(new ZoneSettings(source.getValue().settings, false), new ThermostatStatus(0, false)),
+                new ZoneStatus(new ZoneSettings(source.getValue().settings, false), new CallingStatus(0, false), null),
                 source.payload,
                 source.status,
                 source.error);
@@ -181,14 +181,14 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         ThreadContext.push("close");
         try {
 
-            logger.info("Shutting down");
+            logger.info("Shutting down: {}", getAddress());
 
             if (economizer != null) {
                 economizer.close();
 
             }
         } finally {
-            logger.info("Shut down");
+            logger.info("Shut down: {}", getAddress());
             ThreadContext.pop();
         }
     }

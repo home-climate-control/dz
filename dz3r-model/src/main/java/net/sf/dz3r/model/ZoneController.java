@@ -131,7 +131,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .filter(kv -> kv.getValue().getValue().settings.enabled);
 
         var unhappy = enabled
-                .filter(kv -> kv.getValue().getValue().thermostatStatus.calling)
+                .filter(kv -> kv.getValue().getValue().callingStatus.calling)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         var unhappyVoting = unhappy
@@ -212,7 +212,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
         return source
                 .values()
                 .stream()
-                .map(e -> e.getValue().thermostatStatus.demand)
+                .map(e -> e.getValue().callingStatus.demand)
                 .reduce(Double::sum).orElse(0d);
     }
 }

@@ -7,7 +7,8 @@ import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
-import net.sf.dz3r.signal.hvac.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.CallingStatus;
+import net.sf.dz3r.signal.hvac.EconomizerStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -44,6 +45,13 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     private Signal<Double, Void> ambient;
 
     /**
+     * Economizer status.
+     *
+     * Can't be {@code null}, that will throw off {@link Zone#compute(Flux)} reporting.
+     */
+    private EconomizerStatus economizerStatus;
+
+    /**
      * Mirrors the state of {@link #targetDevice} to avoid expensive operations.
      */
     private Boolean actuatorState;
@@ -66,6 +74,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         this.settings = settings;
         this.targetDevice = targetDevice;
+        this.economizerStatus = new EconomizerStatus(new EconomizerTransientSettings(settings), 0, false, null);
 
         // Don't forget to connect fluxes; this can only be done in subclasses after all the
         // necessary components were initialized
@@ -128,6 +137,8 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     }
 
     private Boolean recordDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
+
+        economizerStatus = new EconomizerStatus(new EconomizerTransientSettings(settings), stateSignal.payload.signal, stateSignal.getValue(), ambient);
 
         var newState = stateSignal.getValue();
 
@@ -237,21 +248,9 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      * Figure out whether the HVAC needs to be suppressed and adjust the signal if so.
      *
      * @param source Signal computed by {@link Zone}.
-     * @return Signal with {@link ZoneStatus#thermostatStatus} possibly adjusted to shut off the HVAC if the economizer is active.
+     * @return Signal with {@link ZoneStatus#callingStatus} possibly adjusted to shut off the HVAC if the economizer is active.
      */
     public Signal<ZoneStatus, String> computeHvacSuppression(Signal<ZoneStatus, String> source) {
-
-        if (actuatorState == null || actuatorState.equals(Boolean.FALSE)) {
-
-            // Economizer inactive, no change required
-            return source;
-        }
-
-        if (settings.keepHvacOn) {
-
-            // We're feeding indoor air to HVAC air return, right?
-            return source;
-        }
 
         if (source.isError()) {
 
@@ -262,10 +261,34 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             return source;
         }
 
+        // Augment the source with the economizer status
+        var augmentedSource = new Signal<>(
+                source.timestamp,
+                new ZoneStatus(
+                        source.getValue().settings,
+                        source.getValue().callingStatus,
+                        economizerStatus),
+                source.payload,
+                source.status,
+                source.error);
+
+        if (actuatorState == null || actuatorState.equals(Boolean.FALSE)) {
+
+            // Economizer inactive, no change required
+            return augmentedSource;
+        }
+
+        if (settings.keepHvacOn) {
+
+            // We're feeding indoor air to HVAC air return, right?
+            return augmentedSource;
+        }
+
         // Need to suppress demand and keep the HVAC off while the economizer is on
         var adjusted = new ZoneStatus(
                 source.getValue().settings,
-                new ThermostatStatus(0, false));
+                new CallingStatus(0, false),
+                economizerStatus);
 
         return new Signal<>(
                 source.timestamp,
@@ -279,10 +302,10 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     public void close() throws Exception {
         ThreadContext.push("close");
         try {
-            logger.info("Shutting down");
+            logger.info("Shutting down: {}", getAddress());
             targetDevice.setState(false).block();
         } finally {
-            logger.info("Shut down");
+            logger.info("Shut down: {}", getAddress());
             ThreadContext.pop();
         }
     }

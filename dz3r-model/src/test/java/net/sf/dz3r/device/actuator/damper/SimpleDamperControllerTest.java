@@ -4,7 +4,7 @@ import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.hvac.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.CallingStatus;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
@@ -87,8 +87,8 @@ class SimpleDamperControllerTest {
                 var unitFlux = Flux
                         .just(new Signal<UnitControlSignal, Void>(Instant.now(), new UnitControlSignal(0d, 0d)));
 
-                var status1 = new ZoneStatus(zoneSettings, new ThermostatStatus(50, true));
-                var status2 = new ZoneStatus(zoneSettings, new ThermostatStatus(-50, false));
+                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(50, true), null);
+                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(-50, false), null);
                 var signalFlux = Flux.just(
                         new Signal<>(Instant.now(), status1, "Z1", Signal.Status.OK, null),
                         new Signal<>(Instant.now(), status2, "Z2", Signal.Status.OK, null)
@@ -141,8 +141,8 @@ class SimpleDamperControllerTest {
                 var unitFlux = Flux
                         .just(new Signal<UnitControlSignal, Void>(Instant.now(), new UnitControlSignal(1d, 1d)));
 
-                var status1 = new ZoneStatus(zoneSettings, new ThermostatStatus(50, true));
-                var status2 = new ZoneStatus(zoneSettings, new ThermostatStatus(-50, false));
+                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(50, true), null);
+                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(-50, false), null);
                 var signalFlux = Flux.just(
                         new Signal<>(Instant.now(), status1, "Z1", Signal.Status.OK, null),
                         new Signal<>(Instant.now(), status2, "Z2", Signal.Status.OK, null)
@@ -195,8 +195,8 @@ class SimpleDamperControllerTest {
                 var unitFlux = Flux
                         .just(new Signal<UnitControlSignal, Void>(Instant.now(), new UnitControlSignal(1d, 1d)));
 
-                var status1 = new ZoneStatus(zoneSettings, new ThermostatStatus(-50, false));
-                var status2 = new ZoneStatus(zoneSettings, new ThermostatStatus(-50, false));
+                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(-50, false), null);
+                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(-50, false), null);
                 var signalFlux = Flux.just(
                         new Signal<>(Instant.now(), status1, "Z1", Signal.Status.OK, null),
                 new Signal<>(Instant.now(), status2, "Z2", Signal.Status.OK, null)
