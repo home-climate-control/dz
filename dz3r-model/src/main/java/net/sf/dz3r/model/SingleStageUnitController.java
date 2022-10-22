@@ -34,8 +34,9 @@ public class SingleStageUnitController extends AbstractUnitController {
         return in
                 .filter(Signal::isOK)
                 .map(s -> {
-                    double value = s.getValue().demand > 0 ? 1 : 0;
-                    return new Signal<>(s.timestamp, new HvacCommand(null, value, value));
+                    var demand = s.getValue().demand;
+                    var output = demand > 0 ? demand : 0;
+                    return new Signal<>(s.timestamp, new HvacCommand(null, output, output));
                 });
     }
 
