@@ -7,6 +7,8 @@ package net.sf.dz3r.device.actuator.economizer;
  */
 public class EconomizerTransientSettings {
 
+    public final Boolean enabled;
+
     /**
      * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
      */
@@ -17,19 +19,24 @@ public class EconomizerTransientSettings {
      */
     public final double targetTemperature;
 
-    public EconomizerTransientSettings(double changeoverDelta, double targetTemperature) {
+    public EconomizerTransientSettings(Boolean enabled, double changeoverDelta, double targetTemperature) {
+
+        this.enabled = enabled;
         this.changeoverDelta = changeoverDelta;
         this.targetTemperature = targetTemperature;
     }
 
     public EconomizerTransientSettings(EconomizerSettings source) {
+
+        this.enabled = source.enabled;
         this.changeoverDelta = source.changeoverDelta;
         this.targetTemperature = source.targetTemperature;
     }
 
     @Override
     public String toString() {
-        return "{changeoverDelta=" + changeoverDelta
+        return "{enabled=" + enabled
+                + ", changeoverDelta=" + changeoverDelta
                 + ", targetTemperature=" + targetTemperature
                 + "}";
     }

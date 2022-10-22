@@ -37,6 +37,7 @@ class SimpleEconomizerTest {
         var settings = new EconomizerSettings(
                 "eco",
                 HvacMode.COOLING,
+                true,
                 2,
                 10);
 
@@ -81,6 +82,7 @@ class SimpleEconomizerTest {
         var settings = new EconomizerSettings(
                 "eco",
                 HvacMode.COOLING,
+                true,
                 2,
                 18);
 

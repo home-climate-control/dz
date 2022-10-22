@@ -33,9 +33,25 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * Primary constructor with just the {@link #mode}, {@link #changeoverDelta}, and {@link #targetTemperature} values provided,
      * {@link #keepHvacOn} set to {@code false}, and PI controller with default settings.
      */
-    public EconomizerSettings(String name, HvacMode mode, double changeoverDelta, double targetTemperature) {
+    public EconomizerSettings(String name, HvacMode mode, Boolean enabled, double changeoverDelta, double targetTemperature) {
         // VT: FIXME: I and saturationLimit of 0 are bad defaults, will need to be adjusted when deployed to production
-        this(name, mode, changeoverDelta, targetTemperature, false, 1, 0, 0);
+        this(name, mode, enabled, changeoverDelta, targetTemperature, false, 1, 0, 0);
+    }
+
+    /**
+     * All except {@code enabled} argument constructor (defaults to {@code true}, for common sense.
+     *
+     * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
+     * @param P Internal {@link net.sf.dz3r.controller.pid.PidController} P component.
+     * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
+     * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
+     */
+    public EconomizerSettings(String name,
+                              HvacMode mode,
+                              double changeoverDelta, double targetTemperature,
+                              boolean keepHvacOn,
+                              double P, double I, double saturationLimit) {
+        this(name, mode, true, changeoverDelta, targetTemperature, keepHvacOn, P, I, saturationLimit);
     }
 
     /**
@@ -47,10 +63,12 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
      */
     public EconomizerSettings(String name,
-                              HvacMode mode, double changeoverDelta, double targetTemperature,
+                              HvacMode mode,
+                              Boolean enabled,
+                              double changeoverDelta, double targetTemperature,
                               boolean keepHvacOn,
                               double P, double I, double saturationLimit) {
-        super(changeoverDelta, targetTemperature);
+        super(enabled, changeoverDelta, targetTemperature);
         this.name = name;
 
         this.mode = mode;
@@ -77,6 +95,7 @@ public class EconomizerSettings extends EconomizerTransientSettings {
     @Override
     public String toString() {
         return "{mode=" + mode
+                + ", enabled=" + enabled
                 + ", changeoverDelta=" + changeoverDelta
                 + ", targetTemperature=" + targetTemperature
                 + ", keepHvacOn=" + keepHvacOn
