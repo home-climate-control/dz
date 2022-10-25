@@ -11,7 +11,9 @@ import net.sf.dz3r.signal.Signal;
  * higher than the setpoint plus hysteresis, and it becomes negative when the
  * process variable becomes lower than the setpoint minus hysteresis.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @param <P> Payload type.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
  */
 public class HysteresisController<P> extends AbstractProcessController<Double, Double, P> {
 
@@ -136,7 +138,7 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
 
         if (pv.isError()) {
             // Nothing good at least; let's pass up the error
-            return new Signal<>(pv.timestamp, new Status<>(setpoint, null, null), pv.payload, pv.status, pv.getError());
+            return new Signal<>(pv.timestamp, new HysteresisStatus(setpoint, null, null, null), pv.payload, pv.status, pv.getError());
         }
 
         var sample = pv.getValue(); // NOSONAR false positive
@@ -158,7 +160,7 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
             }
         }
 
-        return new Signal<>(pv.timestamp, new Status<>(setpoint, getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS), pv.payload);
+        return new Signal<>(pv.timestamp, new HysteresisStatus(setpoint, getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS, sample), pv.payload);
     }
 
     @Override
@@ -173,5 +175,21 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
                 "Hysteresis Controller",
                 jmxName,
                 "Emits hysteresis control signal");
+    }
+
+    public static class HysteresisStatus extends Status<Double> {
+
+        public final Double sample;
+
+        public HysteresisStatus(double setpoint, Double error, Double signal, Double sample) {
+            super(setpoint, error, signal);
+
+            this.sample = sample;
+        }
+
+        @Override
+        public String toString() {
+            return "setpoint=" + setpoint + ",error=" + error + ",signal=" + signal + ",sample=" + sample;
+        }
     }
 }

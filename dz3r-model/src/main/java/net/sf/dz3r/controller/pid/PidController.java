@@ -42,7 +42,7 @@ public interface PidController<P> extends ProcessController<Double, Double, P> {
      * Note that though the class carries the P, I, D values, it doesn't reflect the PID controller configuration,
      * but state.
      */
-    public static class PidStatus extends Status<Double> {
+    class PidStatus extends Status<Double> {
 
         /**
          * Proportional value.
