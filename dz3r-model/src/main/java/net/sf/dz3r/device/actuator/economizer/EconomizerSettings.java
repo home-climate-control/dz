@@ -10,7 +10,8 @@ import net.sf.dz3r.model.HvacMode;
 public class EconomizerSettings extends EconomizerTransientSettings {
 
     /**
-     * Which mode this device is active in.
+     * Which mode this device is active in. This mode may be different from the zone mode; it is the user's
+     * responsibility to make sure the system doesn't enter a runaway loop.
      */
     public final HvacMode mode;
 
