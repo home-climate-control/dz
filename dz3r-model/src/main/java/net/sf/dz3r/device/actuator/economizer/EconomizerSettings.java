@@ -34,8 +34,7 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * {@link #keepHvacOn} set to {@code false}, and PI controller with default settings.
      */
     public EconomizerSettings(String name, HvacMode mode, Boolean enabled, double changeoverDelta, double targetTemperature) {
-        // VT: FIXME: I and saturationLimit of 0 are bad defaults, will need to be adjusted when deployed to production
-        this(name, mode, enabled, changeoverDelta, targetTemperature, false, 1, 0, 0);
+        this(name, mode, enabled, changeoverDelta, targetTemperature, false, 1, 0.000004, 1.1);
     }
 
     /**
