@@ -35,7 +35,6 @@ class SimpleEconomizerTest {
         // Target temperature is below the lowest in the ambient flux,
         // the economizer will just turn on and off
         var settings = new EconomizerSettings(
-                "eco",
                 HvacMode.COOLING,
                 true,
                 2,
@@ -52,6 +51,7 @@ class SimpleEconomizerTest {
         var deferredAmbientFlux = Flux.create(sinkWrapper::connect);
 
         var economizer = new SimpleEconomizer<String>(
+                "economizer",
                 settings,
                 deferredAmbientFlux,
                 targetDevice);
@@ -80,7 +80,6 @@ class SimpleEconomizerTest {
         // Target temperature is within the range of the ambient flux,
         // the economizer will turn on, then off, then on and off again
         var settings = new EconomizerSettings(
-                "eco",
                 HvacMode.COOLING,
                 true,
                 2,

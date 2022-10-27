@@ -9,8 +9,6 @@ import net.sf.dz3r.model.HvacMode;
  */
 public class EconomizerSettings extends EconomizerTransientSettings {
 
-    public final String name;
-
     /**
      * Which mode this device is active in.
      */
@@ -33,8 +31,8 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * Primary constructor with just the {@link #mode}, {@link #changeoverDelta}, and {@link #targetTemperature} values provided,
      * {@link #keepHvacOn} set to {@code false}, and PI controller with default settings.
      */
-    public EconomizerSettings(String name, HvacMode mode, Boolean enabled, double changeoverDelta, double targetTemperature) {
-        this(name, mode, enabled, changeoverDelta, targetTemperature, false, 1, 0.000004, 1.1);
+    public EconomizerSettings(HvacMode mode, Boolean enabled, double changeoverDelta, double targetTemperature) {
+        this(mode, enabled, changeoverDelta, targetTemperature, false, 1, 0.000004, 1.1);
     }
 
     /**
@@ -45,12 +43,11 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
      * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
      */
-    public EconomizerSettings(String name,
-                              HvacMode mode,
+    public EconomizerSettings(HvacMode mode,
                               double changeoverDelta, double targetTemperature,
                               boolean keepHvacOn,
                               double P, double I, double saturationLimit) {
-        this(name, mode, true, changeoverDelta, targetTemperature, keepHvacOn, P, I, saturationLimit);
+        this(mode, true, changeoverDelta, targetTemperature, keepHvacOn, P, I, saturationLimit);
     }
 
     /**
@@ -61,14 +58,12 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
      * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
      */
-    public EconomizerSettings(String name,
-                              HvacMode mode,
+    public EconomizerSettings(HvacMode mode,
                               Boolean enabled,
                               double changeoverDelta, double targetTemperature,
                               boolean keepHvacOn,
                               double P, double I, double saturationLimit) {
         super(enabled, changeoverDelta, targetTemperature);
-        this.name = name;
 
         this.mode = mode;
         this.keepHvacOn = keepHvacOn;

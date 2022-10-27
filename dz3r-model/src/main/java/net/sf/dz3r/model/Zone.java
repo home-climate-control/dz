@@ -69,7 +69,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         setSettings(new ZoneSettings(settings, ts.getSetpoint()));
 
         economizer = Optional.ofNullable(economizerContext)
-                .map(ctx -> new PidEconomizer<>(ctx.settings, ctx.ambientFlux, ctx.targetDevice))
+                .map(ctx -> new PidEconomizer<>(ts.getAddress(), ctx.settings, ctx.ambientFlux, ctx.targetDevice))
                 .orElse(null);
     }
 

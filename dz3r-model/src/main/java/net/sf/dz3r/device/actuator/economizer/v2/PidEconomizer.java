@@ -46,11 +46,12 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      * @param targetDevice Switch to control the economizer actuator.
      */
     public PidEconomizer(
+            String name,
             EconomizerSettings settings,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(settings, ambientFlux, targetDevice);
+        super(name, settings, ambientFlux, targetDevice);
 
         controller = new SimplePidController<>("(controller) " + getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + getAddress(), 0, HYSTERESIS);

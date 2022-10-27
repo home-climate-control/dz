@@ -31,6 +31,8 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     protected final Logger logger = LogManager.getLogger();
 
+    public final String name;
+
     public final EconomizerSettings settings;
 
     protected final Switch<A> targetDevice;
@@ -69,10 +71,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected AbstractEconomizer(
+            String name,
             EconomizerSettings settings,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
+        this.name = name;
         this.settings = settings;
         this.targetDevice = targetDevice;
         this.economizerStatus = new EconomizerStatus(
@@ -86,7 +90,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     @Override
     public String getAddress() {
-        return settings.name;
+        return name;
     }
     protected final void initFluxes(Flux<Signal<Double, Void>> ambientFlux) {
 

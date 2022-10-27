@@ -26,11 +26,12 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
      * @param targetDevice Switch to control the economizer actuator.
      */
     public SimpleEconomizer(
+            String name,
             EconomizerSettings settings,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(settings, ambientFlux, targetDevice);
+        super(name, settings, ambientFlux, targetDevice);
 
         initFluxes(ambientFlux);
     }
