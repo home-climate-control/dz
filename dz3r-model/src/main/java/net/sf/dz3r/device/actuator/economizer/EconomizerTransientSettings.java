@@ -12,14 +12,14 @@ public class EconomizerTransientSettings {
     /**
      * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
      */
-    public final double changeoverDelta;
+    public final Double changeoverDelta;
 
     /**
      * When this temperature is reached, the device is shut off.
      */
-    public final double targetTemperature;
+    public final Double targetTemperature;
 
-    public EconomizerTransientSettings(Boolean enabled, double changeoverDelta, double targetTemperature) {
+    public EconomizerTransientSettings(Boolean enabled, Double changeoverDelta, Double targetTemperature) {
 
         this.enabled = enabled;
         this.changeoverDelta = changeoverDelta;

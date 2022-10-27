@@ -37,8 +37,8 @@ class SimpleEconomizerTest {
         var settings = new EconomizerSettings(
                 HvacMode.COOLING,
                 true,
-                2,
-                10);
+                2.0,
+                10.0);
 
         var indoor = 25.0;
 
@@ -82,8 +82,8 @@ class SimpleEconomizerTest {
         var settings = new EconomizerSettings(
                 HvacMode.COOLING,
                 true,
-                2,
-                18);
+                2.0,
+                18.0);
 
         var ambient = getAmbientFlux();
     }

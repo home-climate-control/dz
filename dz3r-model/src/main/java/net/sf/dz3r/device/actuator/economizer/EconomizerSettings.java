@@ -20,20 +20,20 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * You probably want to keep this at {@code false}, unless the indoor temperature is measured at HVAC return
      * and fresh air is injected into HVAC return.
      */
-    public final boolean keepHvacOn;
+    public final Boolean keepHvacOn;
 
-    public final double P;
+    public final Double P;
 
-    public final double I;
+    public final Double I;
 
-    public final double saturationLimit;
+    public final Double saturationLimit;
 
     /**
      * Primary constructor with just the {@link #mode}, {@link #changeoverDelta}, and {@link #targetTemperature} values provided,
      * {@link #keepHvacOn} set to {@code false}, and PI controller with default settings.
      */
-    public EconomizerSettings(HvacMode mode, Boolean enabled, double changeoverDelta, double targetTemperature) {
-        this(mode, enabled, changeoverDelta, targetTemperature, false, 1, 0.000004, 1.1);
+    public EconomizerSettings(HvacMode mode, Boolean enabled, Double changeoverDelta, Double targetTemperature) {
+        this(mode, enabled, changeoverDelta, targetTemperature, false, 1.0, 0.000004, 1.1);
     }
 
     /**
@@ -45,9 +45,9 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
      */
     public EconomizerSettings(HvacMode mode,
-                              double changeoverDelta, double targetTemperature,
-                              boolean keepHvacOn,
-                              double P, double I, double saturationLimit) {
+                              Double changeoverDelta, Double targetTemperature,
+                              Boolean keepHvacOn,
+                              Double P, Double I, Double saturationLimit) {
         this(mode, true, changeoverDelta, targetTemperature, keepHvacOn, P, I, saturationLimit);
     }
 
@@ -61,9 +61,9 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      */
     public EconomizerSettings(HvacMode mode,
                               Boolean enabled,
-                              double changeoverDelta, double targetTemperature,
-                              boolean keepHvacOn,
-                              double P, double I, double saturationLimit) {
+                              Double changeoverDelta, Double targetTemperature,
+                              Boolean keepHvacOn,
+                              Double P, Double I, Double saturationLimit) {
         super(enabled, changeoverDelta, targetTemperature);
 
         this.mode = mode;
@@ -85,6 +85,24 @@ public class EconomizerSettings extends EconomizerTransientSettings {
         if (changeoverDelta < 0) {
             throw new IllegalArgumentException("changeoverDelta must be non-negative");
         }
+    }
+
+    /**
+     * Merge this instance with an update.
+     *
+     * @param from Adjustment instance. Non-null values take precedence over this object's values.
+     */
+    public EconomizerSettings merge(EconomizerSettings from) {
+
+        return new EconomizerSettings(
+                from.mode != null ? from.mode : mode,
+                from.enabled != null ? from.enabled : enabled,
+                from.changeoverDelta != null ? from.changeoverDelta : changeoverDelta,
+                from.targetTemperature != null ? from.targetTemperature : targetTemperature,
+                from.keepHvacOn != null ? from.keepHvacOn : keepHvacOn,
+                from.P != null ? from.P : P,
+                from.I != null ? from.I : I,
+                from.saturationLimit != null ? from.saturationLimit : saturationLimit);
     }
 
     @Override

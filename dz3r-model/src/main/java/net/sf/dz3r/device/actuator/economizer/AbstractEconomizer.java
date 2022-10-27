@@ -33,7 +33,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     public final String name;
 
-    public final EconomizerSettings settings;
+    public EconomizerSettings settings;
 
     protected final Switch<A> targetDevice;
 
@@ -86,6 +86,16 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         // Don't forget to connect fluxes; this can only be done in subclasses after all the
         // necessary components were initialized
         // initFluxes(ambientFlux); // NOSONAR
+    }
+
+    public void setSettings(EconomizerSettings settings) {
+        if (settings == null) {
+            throw new IllegalArgumentException("settings can't be null");
+        }
+
+        this.settings = this.settings == null ? settings : this.settings.merge(settings);
+
+        logger.info("setSettings({}): {}", getAddress(), settings);
     }
 
     @Override
