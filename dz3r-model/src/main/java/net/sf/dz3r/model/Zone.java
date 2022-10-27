@@ -139,7 +139,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         return new Signal<>(
                 source.timestamp,
-                new ZoneStatus(new ZoneSettings(source.getValue().settings, false), new CallingStatus(0, false), null),
+                new ZoneStatus(new ZoneSettings(source.getValue().settings, false), new CallingStatus(null, 0, false), null),
                 source.payload,
                 source.status,
                 source.error);

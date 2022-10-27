@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.Switch;
@@ -74,7 +75,9 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         this.settings = settings;
         this.targetDevice = targetDevice;
-        this.economizerStatus = new EconomizerStatus(new EconomizerTransientSettings(settings), 0, false, null);
+        this.economizerStatus = new EconomizerStatus(
+                new EconomizerTransientSettings(settings),
+                null, 0, false, null);
 
         // Don't forget to connect fluxes; this can only be done in subclasses after all the
         // necessary components were initialized
@@ -138,7 +141,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     private Boolean recordDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
 
-        economizerStatus = new EconomizerStatus(new EconomizerTransientSettings(settings), stateSignal.payload.signal, stateSignal.getValue(), ambient);
+        economizerStatus = new EconomizerStatus(
+                new EconomizerTransientSettings(settings),
+                ((HysteresisController.HysteresisStatus) stateSignal.payload).sample,
+                stateSignal.payload.signal,
+                stateSignal.getValue(),
+                ambient);
 
         var newState = stateSignal.getValue();
 
@@ -287,7 +295,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         // Need to suppress demand and keep the HVAC off while the economizer is on
         var adjusted = new ZoneStatus(
                 source.getValue().settings,
-                new CallingStatus(0, false),
+                new CallingStatus(null, 0, false),
                 economizerStatus);
 
         return new Signal<>(

@@ -69,6 +69,7 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
 
         b.addField("calling", economizerStatus.callingStatus.calling);
         b.addField("demand", economizerStatus.callingStatus.demand);
+        b.addField("sample", economizerStatus.callingStatus.sample);
 
         // May not be ready yet at startup time
         if (economizerStatus.ambient != null) {

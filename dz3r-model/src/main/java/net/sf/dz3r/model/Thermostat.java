@@ -173,12 +173,15 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
 
     private Signal<Status<CallingStatus>, Void> mapOutput(Signal<Status<Double>, Status<Double>> source) {
 
+        var sample = source.getValue() instanceof HysteresisController.HysteresisStatus
+                ? ((HysteresisController.HysteresisStatus) source.getValue()).sample
+                : null;
         var demand = source.payload.signal - signalRenderer.getThresholdLow();
         var calling = Double.compare(source.getValue().signal, 1.0) == 0;
 
         return new Signal<>(
                 source.timestamp,
-                new Status<>(source.payload.setpoint, source.payload.error, new CallingStatus(demand, calling)),
+                new Status<>(source.payload.setpoint, source.payload.error, new CallingStatus(sample, demand, calling)),
                 null,
                 source.status,
                 source.error);

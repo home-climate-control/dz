@@ -15,10 +15,10 @@ public class EconomizerStatus {
     public final CallingStatus callingStatus;
     public final Signal<Double, Void> ambient;
 
-    public EconomizerStatus(EconomizerTransientSettings settings, double demand, boolean calling, Signal<Double, Void> ambient) {
+    public EconomizerStatus(EconomizerTransientSettings settings, Double sample, double demand, boolean calling, Signal<Double, Void> ambient) {
 
         this.settings = settings;
-        this.callingStatus = new CallingStatus(demand, calling);
+        this.callingStatus = new CallingStatus(sample, demand, calling);
         this.ambient = ambient;
     }
 

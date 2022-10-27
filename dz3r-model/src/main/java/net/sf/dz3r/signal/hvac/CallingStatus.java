@@ -9,16 +9,22 @@ package net.sf.dz3r.signal.hvac;
  */
 public class CallingStatus {
 
+    /**
+     * Raw component of the hysteresis controller. Here for instrumentation purposes only.
+     */
+    public final Double sample;
+
     public final double demand;
     public final boolean calling;
 
-    public CallingStatus(double demand, boolean calling) {
+    public CallingStatus(Double sample, double demand, boolean calling) {
+        this.sample = sample;
         this.demand = demand;
         this.calling = calling;
     }
 
     @Override
     public String toString() {
-        return "{demand=" + demand + ", calling=" + calling + "}";
+        return "{sample=" + sample + ",demand=" + demand + ", calling=" + calling + "}";
     }
 }
