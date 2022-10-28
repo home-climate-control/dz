@@ -45,7 +45,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      */
     private ZoneSettings settings;
 
-    private AbstractEconomizer<?> economizer;
+    private final AbstractEconomizer<?> economizer;
 
     /**
      * Create an instance without an economizer.
