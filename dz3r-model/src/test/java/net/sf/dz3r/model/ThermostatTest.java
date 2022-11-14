@@ -2,7 +2,7 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.hvac.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.CallingStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -138,7 +138,7 @@ class ThermostatTest {
         }
     }
 
-    private void assertOK(Signal<ProcessController.Status<ThermostatStatus>, Void> s) {
+    private void assertOK(Signal<ProcessController.Status<CallingStatus>, Void> s) {
 
         assertThat(s.getValue().setpoint).isEqualTo(20.0);
         assertThat(s.getValue().error).isEqualTo(22.0);
@@ -149,7 +149,7 @@ class ThermostatTest {
         assertThat(s.isError()).isFalse();
     }
 
-    private void assertTotal(Signal<ProcessController.Status<ThermostatStatus>, Void> s) {
+    private void assertTotal(Signal<ProcessController.Status<CallingStatus>, Void> s) {
 
         assertThat(s.getValue().setpoint).isEqualTo(20.0);
 
@@ -164,7 +164,7 @@ class ThermostatTest {
         assertThat(s.isError()).isTrue();
     }
 
-    private void assertPartial(Signal<ProcessController.Status<ThermostatStatus>, Void> s) {
+    private void assertPartial(Signal<ProcessController.Status<CallingStatus>, Void> s) {
 
         assertThat(s.getValue().setpoint).isEqualTo(20.0);
         assertThat(s.getValue().error).isEqualTo(22.0);
@@ -183,7 +183,7 @@ class ThermostatTest {
 
         var ts = new Thermostat("ts", 20, 1, 0, 0, 1.1);
 
-        var accumulator = new ArrayList<Signal<ProcessController.Status<ThermostatStatus>, Void>>();
+        var accumulator = new ArrayList<Signal<ProcessController.Status<CallingStatus>, Void>>();
         var out = ts
                 .compute(source)
                 .log()

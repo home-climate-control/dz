@@ -5,6 +5,14 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
+/**
+ * Companion to {@link EntityPanel} which shows the abbreviated status visualization.
+ *
+ * @param <T> Signal value type.
+ * @param <P> Extra payload type.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ */
 public abstract class EntityCell<T, P> extends SwingSink<T, P> {
 
     private boolean selected = false;

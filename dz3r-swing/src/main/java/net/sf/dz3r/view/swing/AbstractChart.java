@@ -17,6 +17,14 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Base class for all the charts.
+ *
+ * @param <T> Signal value type.
+ * @param <P> Extra payload type.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ */
 public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
     protected static final Stroke strokeSingle = new BasicStroke();

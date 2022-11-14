@@ -328,12 +328,12 @@ public class HeatPump extends AbstractHvacDevice {
     @Override
     protected void doClose() throws IOException {
 
-        logger.warn("Shutting down");
+        logger.warn("Shutting down: {}", getAddress());
 
         switchRunning.setState(false).block();
         switchFan.setState(false).block();
         switchMode.setState(false).block();
-        logger.info("Shut down.");
+        logger.info("Shut down: {}", getAddress());
     }
 
     public static class HeatpumpStatus extends HvacDeviceStatus {

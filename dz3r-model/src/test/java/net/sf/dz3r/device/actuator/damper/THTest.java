@@ -5,7 +5,7 @@ import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.hvac.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.CallingStatus;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -191,7 +191,7 @@ class THTest {
             Flux<Pair<Signal<UnitControlSignal, Void>, Signal<ZoneStatus, String>>> step1 = Flux.just(
                     new ImmutablePair<>(
                             new Signal<>(Instant.ofEpochMilli(timestamp), new UnitControlSignal(3.0625, 1.0)),
-                            new Signal<>(Instant.ofEpochMilli(timestamp), new ZoneStatus(zoneSettings, new ThermostatStatus(3.0625, true)), "thermostat-west")),
+                            new Signal<>(Instant.ofEpochMilli(timestamp), new ZoneStatus(zoneSettings, new CallingStatus(null, 3.0625, true), null), "thermostat-west")),
             new ImmutablePair<>(
                     new Signal<>(Instant.ofEpochMilli(timestamp), new UnitControlSignal(6.875, 1.0)),
                     null),

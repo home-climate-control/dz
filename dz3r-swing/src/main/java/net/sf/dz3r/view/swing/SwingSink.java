@@ -7,6 +7,14 @@ import reactor.core.publisher.Flux;
 
 import javax.swing.JPanel;
 
+/**
+ * Generic component capable of accepting a {@link Signal} {@link Flux}.
+ *
+ * @param <T> Signal value type.
+ * @param <P> Extra payload type.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ */
 public abstract class SwingSink<T, P> extends JPanel {
 
     protected final transient Logger logger = LogManager.getLogger();

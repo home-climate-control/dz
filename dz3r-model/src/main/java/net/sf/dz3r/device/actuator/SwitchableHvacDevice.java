@@ -193,10 +193,10 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
     @Override
     protected void doClose() {
-        logger.warn("Shutting down");
+        logger.warn("Shutting down: {}", getAddress());
         logger.warn("close(): setting {} to off", theSwitch);
         theSwitch.setState(inverted).block();
-        logger.info("Shut down.");
+        logger.info("Shut down: {}", getAddress());
     }
 
     public static class SwitchStatus extends HvacDeviceStatus {

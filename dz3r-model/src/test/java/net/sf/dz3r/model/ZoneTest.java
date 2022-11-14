@@ -73,11 +73,11 @@ class ZoneTest {
                 .create(out)
                 .assertNext(s -> {
                     assertThat(s.getValue().settings.setpoint).isEqualTo(setpoint);
-                    assertThat(s.getValue().status.calling).isTrue();
+                    assertThat(s.getValue().callingStatus.calling).isTrue();
                     assertThat(s.payload).isEqualTo(name);
                 })
-                .assertNext(s -> assertThat(s.getValue().status.calling).isFalse())
-                .assertNext(s -> assertThat(s.getValue().status.calling).isFalse())
+                .assertNext(s -> assertThat(s.getValue().callingStatus.calling).isFalse())
+                .assertNext(s -> assertThat(s.getValue().callingStatus.calling).isFalse())
                 .verifyComplete();
     }
 
@@ -103,7 +103,7 @@ class ZoneTest {
                 .create(out)
                 .assertNext(s -> {
                     assertThat(s.getValue().settings.setpoint).isEqualTo(setpoint);
-                    assertThat(s.getValue().status.calling).isFalse();
+                    assertThat(s.getValue().callingStatus.calling).isFalse();
                     assertThat(s.payload).isEqualTo(name);
                 })
                 .verifyComplete();
@@ -140,14 +140,14 @@ class ZoneTest {
         assertThat(accumulator).hasSize(4);
 
         // PV change
-        assertThat(accumulator.get(0).getValue().status.calling).isFalse();
-        assertThat(accumulator.get(1).getValue().status.calling).isTrue();
+        assertThat(accumulator.get(0).getValue().callingStatus.calling).isFalse();
+        assertThat(accumulator.get(1).getValue().callingStatus.calling).isTrue();
 
         // Setpoint change
-        assertThat(accumulator.get(2).getValue().status.calling).isFalse();
+        assertThat(accumulator.get(2).getValue().callingStatus.calling).isFalse();
 
         // PV change again
-        assertThat(accumulator.get(3).getValue().status.calling).isTrue();
+        assertThat(accumulator.get(3).getValue().callingStatus.calling).isTrue();
 
         out.dispose();
     }

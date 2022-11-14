@@ -83,11 +83,11 @@ public class SwitchableStackedHvacDevice extends AbstractHvacDevice {
 
     @Override
     protected void doClose() throws IOException {
-        logger.warn("Shutting down");
+        logger.warn("Shutting down: {}", getAddress());
         for (var s : devices) {
             logger.warn("close(): shutting down {} ", s);
             s.close();
         }
-        logger.info("Shut down.");
+        logger.info("Shut down: {}", getAddress());
     }
 }

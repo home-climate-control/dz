@@ -6,7 +6,7 @@ import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.hvac.ThermostatStatus;
+import net.sf.dz3r.signal.hvac.CallingStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -28,7 +28,7 @@ import reactor.core.publisher.Flux;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class Thermostat implements ProcessController<Double, ThermostatStatus, Void>, Addressable<String> {
+public class Thermostat implements ProcessController<Double, CallingStatus, Void>, Addressable<String> {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -141,8 +141,13 @@ public class Thermostat implements ProcessController<Double, ThermostatStatus, V
         return pv.getValue() - setpoint;
     }
 
+    /**
+     * Compute the thermostat status flux.
+     *
+     * @see net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer#computeDeviceState(Flux)
+     */
     @Override
-    public Flux<Signal<Status<ThermostatStatus>, Void>> compute(Flux<Signal<Double, Void>> pv) {
+    public Flux<Signal<Status<CallingStatus>, Void>> compute(Flux<Signal<Double, Void>> pv) {
 
         logger.debug("compute()");
 
@@ -166,14 +171,17 @@ public class Thermostat implements ProcessController<Double, ThermostatStatus, V
                 .map(this::mapOutput);
     }
 
-    private Signal<Status<ThermostatStatus>, Void> mapOutput(Signal<Status<Double>, Status<Double>> source) {
+    private Signal<Status<CallingStatus>, Void> mapOutput(Signal<Status<Double>, Status<Double>> source) {
 
+        var sample = source.getValue() instanceof HysteresisController.HysteresisStatus
+                ? ((HysteresisController.HysteresisStatus) source.getValue()).sample
+                : null;
         var demand = source.payload.signal - signalRenderer.getThresholdLow();
         var calling = Double.compare(source.getValue().signal, 1.0) == 0;
 
         return new Signal<>(
                 source.timestamp,
-                new Status<>(source.payload.setpoint, source.payload.error, new ThermostatStatus(demand, calling)),
+                new Status<>(source.payload.setpoint, source.payload.error, new CallingStatus(sample, demand, calling)),
                 null,
                 source.status,
                 source.error);
