@@ -91,14 +91,14 @@ public class UnitDirector implements Addressable<String> {
 
                 logger.warn("Received termination signal");
                 sigTerm.countDown();
-                logger.warn("Shutting down");
+                logger.warn("Shutting down: {}", getAddress() );
                 try {
                     shutdownComplete.await();
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                     logger.error("Interrupted, can do nothing about it", ex);
                 }
-                logger.info("Shut down.");
+                logger.info("Shut down: {}", getAddress());
 
             } finally {
                 ThreadContext.pop();
