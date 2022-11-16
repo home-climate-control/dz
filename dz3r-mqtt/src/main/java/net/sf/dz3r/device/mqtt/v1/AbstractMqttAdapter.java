@@ -26,6 +26,8 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
     private final String password;
     public final boolean autoReconnect;
 
+    public final boolean includeSubtopics;
+
     /**
      * MQTT client.
      *
@@ -38,12 +40,17 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
     private Mqtt3AsyncClient client;
 
     private final Map<String, Flux<MqttSignal>> topic2flux = new TreeMap<>();
-    protected AbstractMqttAdapter(MqttEndpoint address, String username, String password, boolean autoReconnect) {
+    protected AbstractMqttAdapter(
+            MqttEndpoint address,
+            String username, String password,
+            boolean autoReconnect,
+            boolean includeSubtopics) {
 
         this.address = address;
         this.username = username;
         this.password = password;
         this.autoReconnect = autoReconnect;
+        this.includeSubtopics = includeSubtopics;
 
         logger.info("Endpoint: {}", address);
     }
@@ -159,7 +166,7 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
 
         var ackFuture = getClient()
                 .subscribeWith()
-                .topicFilter(topic + "/#")
+                .topicFilter(topic + (includeSubtopics ? "/#" : ""))
                 .callback(p -> {
 
                     // This will be null until someone calls subscribe() on the flux

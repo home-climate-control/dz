@@ -35,7 +35,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
                            boolean reconnect,
                            String mqttRootTopicSub) {
 
-        mqttListener = new MqttListener(new MqttEndpoint(host, port), username, password, reconnect);
+        mqttListener = new MqttListener(new MqttEndpoint(host, port), username, password, reconnect, true);
         this.mqttRootTopicSub = mqttRootTopicSub;
     }
 

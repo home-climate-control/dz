@@ -18,16 +18,17 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
     protected Signal<Boolean, Void> lastKnownState;
 
     protected AbstractMqttSwitch(MqttMessageAddress address) {
-        this(address, null, null, false, null);
+        this(address, null, null, false, true, null);
     }
 
     protected AbstractMqttSwitch(MqttMessageAddress address,
                                  String username, String password,
                                  boolean reconnect,
+                                 boolean includeSubtopics,
                                  Scheduler scheduler) {
 
         super(address, scheduler);
-        mqttAdapter = new MqttAdapter(getAddress().endpoint, username, password, reconnect);
+        mqttAdapter = new MqttAdapter(getAddress().endpoint, username, password, reconnect, includeSubtopics);
     }
 
     protected abstract String getGetStateTopic();

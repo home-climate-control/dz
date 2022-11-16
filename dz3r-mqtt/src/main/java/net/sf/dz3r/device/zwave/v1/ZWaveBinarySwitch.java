@@ -44,7 +44,12 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
                                 boolean reconnect,
                                 String deviceRootTopic,
                                 Scheduler scheduler) {
-        super(new MqttMessageAddress(new MqttEndpoint(host, port), deviceRootTopic), username, password, reconnect, scheduler);
+        super(new MqttMessageAddress(
+                new MqttEndpoint(host, port), deviceRootTopic),
+                username, password,
+                reconnect,
+                true,
+                scheduler);
 
         this.deviceRootTopic = deviceRootTopic;
 
