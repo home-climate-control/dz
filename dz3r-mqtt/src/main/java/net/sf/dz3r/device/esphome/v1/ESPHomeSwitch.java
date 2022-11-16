@@ -18,6 +18,7 @@ import java.time.Instant;
  * for configuration details.
  *
  * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch
+ * @see net.sf.dz3r.device.z2m.v1.Z2MSwitch
  */
 public class ESPHomeSwitch extends AbstractMqttSwitch {
 

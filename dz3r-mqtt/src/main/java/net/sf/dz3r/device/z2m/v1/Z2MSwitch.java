@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.zwave.v1;
+package net.sf.dz3r.device.z2m.v1;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,41 +15,38 @@ import java.time.Instant;
 import java.util.Map;
 
 /**
- * Implementation for Z-Wave Binary Switch Generic Device Class over MQTT.
- *
- * See <a href="https://github.com/home-climate-control/dz/issues/235">#235</a> for details.
+ * Implementation for a Zigbee switch over <a href="https://zigbee2mqtt.io">Zigbee2MQTT</a>.
  *
  * @see net.sf.dz3r.device.esphome.v1.ESPHomeSwitch
- * @see net.sf.dz3r.device.z2m.v1.Z2MSwitch
+ * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch
  */
-public class ZWaveBinarySwitch extends AbstractMqttSwitch {
+public class Z2MSwitch extends AbstractMqttSwitch {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final String deviceRootTopic;
 
-    protected ZWaveBinarySwitch(String host, String deviceRootTopic) {
+    protected Z2MSwitch(String host, String deviceRootTopic) {
         this(host, MqttEndpoint.DEFAULT_PORT, null, null, false, deviceRootTopic, null);
     }
 
-    protected ZWaveBinarySwitch(String host, int port,
-                                String username, String password,
-                                boolean reconnect,
-                                String deviceRootTopic) {
+    protected Z2MSwitch(String host, int port,
+                        String username, String password,
+                        boolean reconnect,
+                        String deviceRootTopic) {
         this(host, port, username, password, reconnect, deviceRootTopic, null);
     }
 
-    protected ZWaveBinarySwitch(String host, int port,
-                                String username, String password,
-                                boolean reconnect,
-                                String deviceRootTopic,
-                                Scheduler scheduler) {
+    protected Z2MSwitch(String host, int port,
+                        String username, String password,
+                        boolean reconnect,
+                        String deviceRootTopic,
+                        Scheduler scheduler) {
         super(new MqttMessageAddress(new MqttEndpoint(host, port), deviceRootTopic), username, password, reconnect, scheduler);
 
         this.deviceRootTopic = deviceRootTopic;
 
-        // Z-Wave JS UI produces multiple MQTT messages per targetValue/set message, must drain them proactively
-        // or we'll run out of sync
+        // VT: NOTE: Do we need to sync here like we do in Z-Wave?
 
         getStateFlux()
                 .doOnNext(signal -> logger.debug("async: {}", signal))
@@ -60,17 +57,18 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
 
     @Override
     protected String getGetStateTopic() {
-        return getCurrentValueTopic();
+        // Z2M pushes device state as JSON in the device root topic
+        return deviceRootTopic;
     }
 
     @Override
     protected String getSetStateTopic() {
-        return getTargetValueSetTopic();
+        return deviceRootTopic + "/set";
     }
 
     @Override
     protected String renderPayload(boolean state) {
-        return "{\"value\": " + state + "}";
+        return "{\"state\": \"" + (state ? "ON" : "OFF") + "\"}";
     }
 
     @Override
@@ -78,33 +76,32 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
         ThreadContext.push("parseState");
         try {
 
-        var payload = objectMapper.readValue(message, Map.class);
+            var payload = objectMapper.readValue(message, Map.class);
 
-        logger.debug("payload: {}", payload);
+            logger.debug("payload: {}", payload);
 
-        var timestamp = Instant.ofEpochMilli(Long.parseLong(payload.get("time").toString()));
-        var state = Boolean.valueOf(payload.get("value").toString());
+            // There is no timestamp in Z2M message payload
+            var timestamp = Instant.now();
+            var stateString = String.valueOf(payload.get("state"));
+            boolean state;
 
-        return new Signal<>(timestamp, state);
+            switch (stateString) {
+                case "OFF":
+                    state = false;
+                    break;
+                case "ON":
+                    state = true;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Don't know how to parse state out of: " + message);
+            }
+
+            return new Signal<>(timestamp, state);
         } catch (JsonProcessingException e) {
             throw new IllegalStateException("Can't parse JSON: " + message, e);
         } finally {
             ThreadContext.pop();
         }
-    }
-
-    /**
-     * Z-Wave gateway specific "get state" topic name.
-     */
-    private String getCurrentValueTopic() {
-        return deviceRootTopic + "/37/0/currentValue";
-    }
-
-    /**
-     * Z-Wave gateway specific "set state" topic name.
-     */
-    private String getTargetValueSetTopic() {
-        return deviceRootTopic + "/37/0/targetValue/set";
     }
 
     @Override
