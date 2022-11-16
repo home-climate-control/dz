@@ -32,7 +32,7 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
      *
      * VT: FIXME: Controller logic will not kick in correctly unless the value is delivered at regular short intervals, need a repeater
      */
-    private Duration timeout = Duration.ofMinutes(30);
+    private Duration timeout = Duration.ofMinutes(5);
 
     private final MqttListener mqttListener;
     private final String mqttRootTopicSub;
