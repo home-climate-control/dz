@@ -18,6 +18,7 @@ import java.time.Instant;
  * for configuration details.
  *
  * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch
+ * @see net.sf.dz3r.device.z2m.v1.Z2MSwitch
  */
 public class ESPHomeSwitch extends AbstractMqttSwitch {
 
@@ -57,7 +58,12 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
                             String deviceRootTopic,
                             Scheduler scheduler) {
 
-        super(new MqttMessageAddress(new MqttEndpoint(host, port), deviceRootTopic), username, password, reconnect, scheduler);
+        super(new MqttMessageAddress(
+                new MqttEndpoint(host, port), deviceRootTopic),
+                username, password,
+                reconnect,
+                true,
+                scheduler);
 
         this.deviceRootTopic = deviceRootTopic;
 
