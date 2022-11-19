@@ -3,6 +3,7 @@ package net.sf.dz3r.device.actuator.economizer;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.actuator.StackingSwitch;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
@@ -35,7 +36,9 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     public EconomizerSettings settings;
 
-    protected final Switch<A> targetDevice;
+    private final Switch<A> targetDevice;
+
+    private final StackingSwitch targetDeviceStack;
 
     /**
      * Last known indoor temperature. Can't be an error.
@@ -78,7 +81,16 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         this.name = name;
         this.settings = settings;
+
         this.targetDevice = targetDevice;
+
+        // There are two virtual switches linked to this switch:
+        //
+        // "demand" - controlled by heating and cooling operations
+        // "ventilation" - controlled by explicit requests to turn the fan on or off
+
+        this.targetDeviceStack = new StackingSwitch("economizer", targetDevice);
+
         this.economizerStatus = new EconomizerStatus(
                 new EconomizerTransientSettings(settings),
                 null, 0, false, null);
@@ -117,10 +129,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         var stage2 = computeDeviceState(stage1)
                 .map(this::recordDeviceState);
 
+        var demandDevice = targetDeviceStack.getSwitch("demand");
+
         // And act on it
         stage2
                 // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
-                .flatMap(targetDevice::setState)
+                .flatMap(demandDevice::setState)
 
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
@@ -155,10 +169,13 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     private Boolean recordDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
 
+        var sample = stateSignal.payload == null ? null : ((HysteresisController.HysteresisStatus) stateSignal.payload).sample;
+        var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
+
         economizerStatus = new EconomizerStatus(
                 new EconomizerTransientSettings(settings),
-                ((HysteresisController.HysteresisStatus) stateSignal.payload).sample,
-                stateSignal.payload.signal,
+                sample,
+                demand,
                 stateSignal.getValue(),
                 ambient);
 
