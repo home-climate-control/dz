@@ -31,7 +31,20 @@ public class HeatPump extends AbstractHvacDevice {
 
     private final Switch<?> switchMode;
     private final Switch<?> switchRunning;
+
+    /**
+     * Fan hardware control switch.
+     *
+     * @see #switchFanStack
+     */
     private final Switch<?> switchFan;
+
+    /**
+     * Fan logical control switch.
+     *
+     * @see #switchFan
+     */
+    private final StackingSwitch switchFanStack;
 
     private final boolean reverseMode;
     private final boolean reverseRunning;
@@ -113,6 +126,13 @@ public class HeatPump extends AbstractHvacDevice {
         this.switchMode = switchMode;
         this.switchRunning = switchRunning;
         this.switchFan = switchFan;
+
+        // There are two virtual switches linked to this switch:
+        //
+        // "demand" - controlled by heating and cooling operations
+        // "ventilation" - controlled by explicit requests to turn the fan on or off
+
+        this.switchFanStack = new StackingSwitch("fan", switchFan);
 
         this.reverseMode = reverseMode;
         this.reverseRunning = reverseRunning;
@@ -360,6 +380,6 @@ public class HeatPump extends AbstractHvacDevice {
     }
 
     protected void setFan(boolean state) throws IOException { // NOSONAR Subclass throws this exception
-        switchFan.setState(state).block();
+        switchFanStack.getSwitch("demand").setState(state).block();
     }
 }
