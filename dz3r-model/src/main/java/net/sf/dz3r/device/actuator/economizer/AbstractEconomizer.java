@@ -155,10 +155,13 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     private Boolean recordDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
 
+        var sample = stateSignal.payload == null ? null : ((HysteresisController.HysteresisStatus) stateSignal.payload).sample;
+        var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
+
         economizerStatus = new EconomizerStatus(
                 new EconomizerTransientSettings(settings),
-                ((HysteresisController.HysteresisStatus) stateSignal.payload).sample,
-                stateSignal.payload.signal,
+                sample,
+                demand,
                 stateSignal.getValue(),
                 ambient);
 
