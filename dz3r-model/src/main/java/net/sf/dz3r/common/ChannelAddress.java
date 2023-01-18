@@ -31,7 +31,11 @@ public abstract class ChannelAddress<T> implements Comparable<ChannelAddress<T>>
      */
     protected ChannelAddress(String compositeAddress) {
 
-        String[] parts = compositeAddress.split(":");
+        String[] parts = compositeAddress.split(":", -1);
+
+        if (parts.length == 0 || parts[0].isEmpty()) {
+            throw new IllegalArgumentException("Invalid address, format: ${1-wire-address}:${channel}");
+        }
 
         if (parts.length < 2) {
             throw new IllegalArgumentException("Channel not present (separator is ':', remember?)");

@@ -44,6 +44,25 @@ class ChannelAddressTest {
                 .withMessage("Channel number must be non-negative (-1 given)");
     }
 
+    /**
+     * Make sure that <a href="https://errorprone.info/bugpattern/StringSplitter">this corner case</a> is covered.
+     */
+    @Test
+    void errorProneTriggerEmpty() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new IntegerChannelAddress(""))
+                .withMessage("Invalid address, format: ${1-wire-address}:${channel}");
+    }
+
+    /**
+     * Make sure that <a href="https://errorprone.info/bugpattern/StringSplitter">this corner case</a> is covered.
+     */
+    @Test
+    void errorProneTriggerSeparator() {
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> new IntegerChannelAddress(":"))
+                .withMessage("Invalid address, format: ${1-wire-address}:${channel}");
+    }
     @Test
     void comparable() {
 
