@@ -16,8 +16,9 @@ import java.util.Set;
  *
  * Examples of this device are - a simple fan, a whole house fan, a heater fan, a radiant heater and so on.
  *
- * For simplicity, it is assumed that cooling-only devices provide ventilation, while heating-only devices don't.
- * Exceptions such as a furnace with a fan for now will need to be handled with the {@link HeatPump} driver.
+ * For safety, it is assumed that cooling-only devices will support ventilation requests, while heating-only devices don't.
+ * Exceptions such as a furnace with a fan for now will need to be handled with the {@link HeatPump} driver with
+ * {@link NullSwitch} provided for {@link HeatPump#setMode(boolean) mode switch}.
  *
  * @see net.sf.dz3r.model.SingleStageUnitController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
@@ -156,8 +157,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
         if (mode != HvacMode.COOLING && command.fanSpeed != null && command.fanSpeed > 0) {
             // FIXME: https://github.com/home-climate-control/dz/issues/222
-//            throw new IllegalArgumentException("fanSpeed=" + command.fanSpeed + " is not supported by this instance (not in cooling mode)");
-            logger.warn("fanSpeed=>0 should not be issued to this device in heating mode, kick the maintainer to fix #222 (command={})", command);
+            logger.warn("fanSpeed>0 should not be issued to this device in heating mode, ignored. Kick the maintainer to fix #222 (command={})", command);
         }
 
         var result = new HvacCommand(
