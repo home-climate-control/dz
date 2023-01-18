@@ -171,13 +171,6 @@ public class DataSet<T> {
         }
     }
 
-    /**
-     * @return Iterator on the time values for the data entries.
-     */
-    public final Iterator<Long> iterator() {
-        return samples.keySet().iterator();
-    }
-
     public final Iterator<Map.Entry<Long, T>> entryIterator() {
       return samples.entrySet().iterator();
     }
