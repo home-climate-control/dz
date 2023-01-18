@@ -6,7 +6,6 @@ import org.influxdb.dto.Point;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.tools.agent.ReactorDebugAgent;
 
@@ -81,7 +80,7 @@ class InfluxDbLoggerTest {
                         logger.error("Oops", t);
                         ok.set(false);
                     })
-                    .subscribe((Subscriber) getLogger());
+                    .subscribe(getLogger());
 
             if (!ok.get()) {
                 fail("Abnormal termination, check the logs");
