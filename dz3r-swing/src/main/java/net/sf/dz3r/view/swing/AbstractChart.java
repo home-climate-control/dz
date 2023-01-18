@@ -131,7 +131,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
      *
      * We cheat - the only thing that needs to be changed is the value grid. Quick and easy to repaint.
      *
-     * @see #paintValueGrid(Graphics2D, Dimension, Insets, double, long, double, double)
+     * @see #paintValueGrid(Graphics2D, Dimension, Insets, double, double)
      */
     private boolean needFahrenheit;
 
@@ -194,7 +194,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
             var yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
             var yOffset = dataMax + PADDING;
 
-            paintValueGrid(g2d, boundary, insets, xScale, xOffset, yScale, yOffset);
+            paintValueGrid(g2d, boundary, insets, yScale, yOffset);
             paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
             logger.debug("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
@@ -275,7 +275,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
     @SuppressWarnings("squid:S107")
     private void paintValueGrid(
             Graphics2D g2d, Dimension boundary, Insets insets,
-            double xScale, long xOffset, double yScale, double yOffset) {
+            double yScale, double yOffset) {
 
         // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
