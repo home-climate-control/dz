@@ -250,8 +250,6 @@ class TimeoutGuardTest {
         var counter = new AtomicLong();
 
         try {
-            var timeout = Duration.ofMillis(5);
-            var guard = new TimeoutGuard<Integer, Void>(timeout, false);
             var signal = source
                     .doOnNext(ignored -> counter.incrementAndGet())
                     .map(i -> new Signal<Integer, Void>(Instant.now(), i));

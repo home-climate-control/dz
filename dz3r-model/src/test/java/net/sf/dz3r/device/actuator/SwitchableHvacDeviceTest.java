@@ -262,7 +262,7 @@ class SwitchableHvacDeviceTest {
                 new Signal<HvacCommand, Void>(now.plus(900, ChronoUnit.MILLIS), new HvacCommand(null, 0.0, null))
         );
 
-        var result = d.compute(sequence).log().blockLast();
+        d.compute(sequence).log().blockLast();
 
         // A bit simpler than full, but it'll do
         assertThat(s.getState().block()).isTrue();

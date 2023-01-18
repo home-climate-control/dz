@@ -41,7 +41,7 @@ class ESPHomeSwitchTest {
 
             // VT: NOTE: This switch doesn't control anything critical now, does it?
 
-            var flux = Flux
+            Flux
                     .just(true, false, true, false)
                     .delayElements(Duration.ofSeconds(1))
                     .publishOn(Schedulers.boundedElastic())
