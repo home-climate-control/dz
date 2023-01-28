@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -105,7 +106,7 @@ public class OAuth2DeviceIdentityProvider {
                 }
             }
 
-            try ( var pw = new PrintWriter(new FileWriter(target))) {
+            try ( var pw = new PrintWriter(new FileWriter(target, StandardCharsets.UTF_8))) {
                 pw.println(token);
             }
 
@@ -134,7 +135,7 @@ public class OAuth2DeviceIdentityProvider {
             return null;
         }
 
-        try (var br = new BufferedReader(new FileReader(source))) {
+        try (var br = new BufferedReader(new FileReader(source, StandardCharsets.UTF_8))) {
             return br.readLine();
         }
     }
