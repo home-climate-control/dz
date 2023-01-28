@@ -152,6 +152,7 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
      * @param address Switch address.
      * @return The switch.
      */
+    @SuppressWarnings("InvalidLink") // errorprone glitch, it doesn't understand a link with generics
     public Switch<A> getSwitch(A address) {
         return getSwitch(address, 0);
     }
