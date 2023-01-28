@@ -2,7 +2,6 @@ package net.sf.dz3r.view.http.gae.v3;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
@@ -21,14 +20,14 @@ public class HttpClientFactory {
      */
     public static HttpClient createClient() {
 
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
+        var clientBuilder = HttpClientBuilder.create();
 
         // VT: NOTE: Let's try to keep piling connections until the connection can be made,
         // and then let the remote end sort it out
 
         clientBuilder.setMaxConnPerRoute(100);
 
-        Builder rcBuilder = RequestConfig.custom();
+        var rcBuilder = RequestConfig.custom();
 
         // VT: NOTE: It is likely that new connections will be opened every 10 to 40 seconds;
         // if there's no movement in ten seconds, there's likely a bigger problem,
