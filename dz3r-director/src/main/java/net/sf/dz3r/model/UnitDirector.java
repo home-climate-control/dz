@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
@@ -166,10 +165,10 @@ public class UnitDirector implements Addressable<String> {
             return;
         }
 
-        var name2zone = new TreeMap<String, Zone>();
-        Flux.fromIterable(zones)
-                .doOnNext(z -> name2zone.put(z.getAddress(), z))
-                .blockLast();
+        var name2zone = Flux.fromIterable(zones)
+                .map(z -> new AbstractMap.SimpleEntry<>(z.getAddress(), z))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                .block();
 
         var scheduler = new Scheduler(name2zone);
 
