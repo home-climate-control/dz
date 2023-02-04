@@ -91,7 +91,7 @@ public class Scheduler {
         var zone = source.getKey();
         var zoneName = zone.getAddress();
 
-        if (zone.getSettings().hold) {
+        if (Boolean.TRUE.equals(zone.getSettings().hold)) {
             logger.debug("{}: on hold, left alone", zoneName);
             return;
         }
