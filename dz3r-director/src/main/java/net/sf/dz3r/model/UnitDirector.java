@@ -2,6 +2,7 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.HvacDevice;
+import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.scheduler.Scheduler;
 import net.sf.dz3r.signal.Signal;
@@ -67,7 +68,11 @@ public class UnitDirector implements Addressable<String> {
 
         this.name = name;
 
-        feed = connectFeeds(sensorFlux2zone, unitController, hvacDevice, hvacMode);
+        var scheduleFlux = Optional.ofNullable(scheduleUpdater)
+                .map(u -> connectScheduler(sensorFlux2zone.values(), u))
+                .orElse(Flux.empty());
+
+        feed = connectFeeds(sensorFlux2zone, unitController, hvacDevice, hvacMode, scheduleFlux);
 
         var zones = sensorFlux2zone.values();
 
@@ -125,7 +130,8 @@ public class UnitDirector implements Addressable<String> {
             Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
             UnitController unitController,
             HvacDevice hvacDevice,
-            HvacMode hvacMode) {
+            HvacMode hvacMode,
+            Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> scheduleFlux) {
 
         var aggregateZoneFlux = Flux
                 .merge(extractSensorFluxes(sensorFlux2zone))
@@ -154,15 +160,16 @@ public class UnitDirector implements Addressable<String> {
                 aggregateZoneFlux,
                 zoneControllerFlux,
                 unitControllerFlux,
-                hvacDeviceFlux
+                hvacDeviceFlux,
+                scheduleFlux
         );
     }
 
-    private void connectScheduler(Collection<Zone> zones, ScheduleUpdater scheduleUpdater) {
+    private Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> connectScheduler(Collection<Zone> zones, ScheduleUpdater scheduleUpdater) {
 
         if (scheduleUpdater == null) {
             logger.warn("no scheduler provided, running defaults");
-            return;
+            return Flux.empty();
         }
 
         var name2zone = Flux.fromIterable(zones)
@@ -172,7 +179,7 @@ public class UnitDirector implements Addressable<String> {
 
         var scheduler = new Scheduler(name2zone);
 
-        scheduler.connect(scheduleUpdater.update());
+        return scheduler.connect(scheduleUpdater.update());
     }
 
     @Override
@@ -247,6 +254,7 @@ public class UnitDirector implements Addressable<String> {
         public final Flux<Signal<UnitControlSignal, Void>> zoneControllerFlux;
         public final Flux<Signal<HvacCommand, Void>> unitControllerFlux;
         public final Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux;
+        public final Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> scheduleFlux;
 
         public Feed(
                 String unit,
@@ -254,7 +262,7 @@ public class UnitDirector implements Addressable<String> {
                 Flux<Signal<ZoneStatus, String>> aggregateZoneFlux,
                 Flux<Signal<UnitControlSignal, Void>> zoneControllerFlux,
                 Flux<Signal<HvacCommand, Void>> unitControllerFlux,
-                Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux) {
+                Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux, Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> scheduleFlux) {
 
             this.unit = unit;
             this.sensorFlux2zone = sensorFlux2zone;
@@ -262,6 +270,7 @@ public class UnitDirector implements Addressable<String> {
             this.zoneControllerFlux = zoneControllerFlux;
             this.unitControllerFlux = unitControllerFlux;
             this.hvacDeviceFlux = hvacDeviceFlux;
+            this.scheduleFlux = scheduleFlux;
         }
     }
 
