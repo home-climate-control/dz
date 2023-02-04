@@ -220,17 +220,17 @@ public class UnitDirector implements Addressable<String> {
                             }
                     );
 
-            logger.info("Awaiting termination signal");
+            logger.info("Awaiting termination signal: {}", name);
             sigTerm.await();
 
-            logger.info("Received termination signal");
+            logger.info("Received termination signal: {}", name);
             theEnd.dispose();
 
-            logger.info("Shut down");
+            logger.info("Shut down: {}", name);
             shutdownComplete.countDown();
 
         } catch (Throwable t) { // NOSONAR Consequences have been considered
-            logger.fatal("Unexpected exception");
+            logger.fatal("Unexpected exception (" + name + ")");
         } finally {
             ThreadContext.pop();
         }
