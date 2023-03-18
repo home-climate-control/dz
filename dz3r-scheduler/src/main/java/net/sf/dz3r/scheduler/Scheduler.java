@@ -4,6 +4,7 @@ import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -60,15 +61,19 @@ public class Scheduler {
         var observe = source
                 .flatMap(this::updateSchedule)
                 .flatMap(this::applySchedule)
+                .doOnNext(s -> logger.info("scheduleObserve: {}", s))
                 .subscribeOn(Schedulers.boundedElastic());
 
         // Execute
         var execute = Flux.interval(scheduleGranularity, Schedulers.boundedElastic())
                 .flatMap(s -> Flux.fromIterable(zone2schedule.entrySet()))
                 .flatMap(this::applySchedule)
+                .doOnNext(s -> logger.info("scheduleExecute: {}", s))
                 .subscribeOn(Schedulers.boundedElastic());
 
-        return Flux.merge(observe, execute);
+        return Flux
+                .merge(observe, execute)
+                .doOnNext(s -> logger.info("scheduleFlux: {}", s));
     }
 
     private Flux<Map.Entry<Zone, SortedMap<SchedulePeriod, ZoneSettings>>> updateSchedule(Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> source) {
@@ -88,46 +93,54 @@ public class Scheduler {
 
     private synchronized Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> applySchedule(Map.Entry<Zone, SortedMap<SchedulePeriod, ZoneSettings>> source) {
 
-        var zone = source.getKey();
-        var zoneName = zone.getAddress();
+        ThreadContext.push("applySchedule");
 
-        if (Boolean.TRUE.equals(zone.getSettings().hold)) {
-            logger.debug("{}: on hold, left alone", zoneName);
+        try {
 
-            // This and below:
-            // Whatever was displayed at the console previously, will stay.
-            // May be problematic for HCC Remote and generally look weird, need to confirm that UX is right.
-            return Flux.empty();
-        }
+            var zone = source.getKey();
+            var zoneName = zone.getAddress();
 
-        var schedule = source.getValue();
+            if (Boolean.TRUE.equals(zone.getSettings().hold)) {
+                logger.debug("{}: on hold, left alone", zoneName);
 
-        logger.debug("{} schedule ({} entries)", zoneName, schedule.size());
+                // This and below:
+                // Whatever was displayed at the console previously, will stay.
+                // May be problematic for HCC Remote and generally look weird, need to confirm that UX is right.
+                return Flux.empty();
+            }
 
-        Flux.fromIterable(schedule.keySet())
-                .subscribe(s -> logger.debug("  {}", s));
+            var schedule = source.getValue();
 
-        var now = LocalDateTime.now(clock);
-        var period = periodMatcher.match(schedule, now);
-        var currentPeriod = zone2period.get(zone);
+            logger.debug("{} schedule ({} entries)", zoneName, schedule.size());
 
-        logger.debug("{}: matched time={} period={}", zoneName, now, period);
+            Flux.fromIterable(schedule.keySet())
+                    .subscribe(s -> logger.debug("  {}", s));
 
-        if (same(currentPeriod, period)) {
-            logger.debug("{}: already at {}", zoneName, period);
-            return Flux.empty();
-        }
+            var now = LocalDateTime.now(clock);
+            var period = periodMatcher.match(schedule, now);
+            var currentPeriod = zone2period.get(zone);
 
-        zone2period.put(zone, period);
+            logger.debug("{}: matched time={} period={}", zoneName, now, period);
 
-        if (period != null) {
-            var settings = source.getValue().get(period);
-            logger.info("{}: settings applied: {}", zoneName, settings);
-            zone.setSettings(settings);
-            return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, new AbstractMap.SimpleEntry<>(period, settings)));
-        } else {
-            logger.info("{}: no active period, settings left as they were", zoneName);
-            return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, null));
+            if (same(currentPeriod, period)) {
+                logger.debug("{}: already at {}", zoneName, period);
+                return Flux.empty();
+            }
+
+            zone2period.put(zone, period);
+
+            if (period != null) {
+                var settings = source.getValue().get(period);
+                logger.info("{}: settings applied: {}", zoneName, settings);
+                zone.setSettings(settings);
+                return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, new AbstractMap.SimpleEntry<>(period, settings)));
+            } else {
+                logger.info("{}: no active period, settings left as they were", zoneName);
+                return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, null));
+            }
+
+        } finally {
+            ThreadContext.pop();
         }
     }
 

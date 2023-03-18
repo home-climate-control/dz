@@ -3,6 +3,7 @@ package net.sf.dz3r.view.swing.zone;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
+import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
@@ -28,6 +29,7 @@ import java.awt.event.KeyListener;
 import java.text.DecimalFormat;
 import java.time.Clock;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -575,6 +577,18 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var c = ColorScheme.getScheme(getMode()).setpoint;
         currentLabel.setForeground(c);
         setpointLabel.setForeground(c);
+    }
+
+    /**
+     * Selectively update only the UI parts affected by schedule periods.
+     */
+    public void subscribeSchedule(Flux<Map.Entry<SchedulePeriod, ZoneSettings>> source) {
+        source.subscribe(this::consumeSchedule);
+    }
+
+    private void consumeSchedule(Map.Entry<SchedulePeriod, ZoneSettings> period2settings) {
+
+        logger.info("consumeSchedule: {} = ({}, {})", zone.getAddress(), period2settings.getKey(), period2settings.getValue());
     }
 
     /**
