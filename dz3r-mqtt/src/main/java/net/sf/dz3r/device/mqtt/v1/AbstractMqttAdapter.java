@@ -194,8 +194,6 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
             var ack = ackFuture.get();
             logger.info("Subscribed: {}", ack.getReturnCodes());
 
-            topic2flux.put(topic, result);
-
             return result;
 
         } catch (InterruptedException ex) {
