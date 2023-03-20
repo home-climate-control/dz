@@ -10,8 +10,8 @@
         </Console>
         <RollingFile
             name="DebugAppender"
-            fileName="debug.log"
-            filePattern="debug.log.%d{yyyy-MM-dd}">
+            fileName="logs/debug.log"
+            filePattern="logs/debug.log.%d{yyyy-MM-dd}">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
@@ -23,8 +23,8 @@
         </RollingFile>
         <RollingFile
             name="WarnAppender"
-            fileName="dz.log"
-            filePattern="dz.log.%d{yyyy-MM-dd}">
+            fileName="logs/dz.log"
+            filePattern="logs/dz.log.%d{yyyy-MM-dd}">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
