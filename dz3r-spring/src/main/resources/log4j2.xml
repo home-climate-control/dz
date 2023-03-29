@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Configuration status="WARN" monitorInterval="30">
+    <Properties>
+        <Property name="logDir">logs</Property>
+    </Properties>
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
             <PatternLayout pattern="%highlight{%d{HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
@@ -10,12 +13,39 @@
         </Console>
         <RollingFile
             name="DebugAppender"
-            fileName="logs/debug.log"
-            filePattern="logs/debug.log.%d{yyyy-MM-dd}">
+            fileName="${logDir}/dz-debug.log"
+            filePattern="${logDir}/dz-debug.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${logDir}" maxDepth="2">
+                    <IfFileName glob="*/dz-debug.log.*.gz" />
+                    <!-- Debug level logs are BIG -->
+                    <IfLastModified age="P7D" />
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <!-- Set your comfortable debug level for the debug log. Best be left as is.-->
+                <ThresholdFilter level="trace"  onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+        <RollingFile
+                name="InfoAppender"
+                fileName="${logDir}/dz-info.log"
+                filePattern="${logDir}/dz-info.log.%d{yyyy-MM-dd}.gz">
+            <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${logDir}" maxDepth="2">
+                    <IfFileName glob="*/dz-info.log.*.gz" />
+                    <!-- Debug level logs are BIG -->
+                    <IfLastModified age="P7D" />
+                </Delete>
+            </DefaultRolloverStrategy>
             <Filters>
                 <!-- Set your comfortable debug level for the debug log. Best be left as is.-->
                 <ThresholdFilter level="trace"  onMatch="ACCEPT" onMismatch="DENY"/>
@@ -23,12 +53,18 @@
         </RollingFile>
         <RollingFile
             name="WarnAppender"
-            fileName="logs/dz.log"
-            filePattern="logs/dz.log.%d{yyyy-MM-dd}">
+            fileName="${logDir}/dz-warn.log"
+            filePattern="${logDir}/dz-warn.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${logDir}" maxDepth="2">
+                    <IfFileName glob="*/dz-warn.log.*.gz" />
+                    <IfLastModified age="P30D" />
+                </Delete>
+            </DefaultRolloverStrategy>
             <Filters>
                 <!-- Set your comfortable debug level for the long term log. -->
                 <ThresholdFilter level="warn"  onMatch="ACCEPT" onMismatch="DENY"/>
@@ -58,13 +94,16 @@
         <Root level="INFO">
 
             <AppenderRef ref="ConsoleAppender"/>
-            <AppenderRef ref="WarnAppender"/>
 
             <!--
               Uncomment the section below if you need extended diagnostics.
               WARNING: consumes a lot of disk space.
              -->
             <AppenderRef ref="DebugAppender"/>
+
+            <AppenderRef ref="InfoAppender"/>
+            <AppenderRef ref="WarnAppender"/>
+
         </Root>
     </Loggers>
 </Configuration>
