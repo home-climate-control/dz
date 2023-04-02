@@ -56,7 +56,7 @@ public class NullSwitch extends AbstractSwitch<String> {
     @Override
     protected void setStateSync(boolean state) throws IOException {
         long delayMillis = getDelayMillis();
-        logger.info("setState({})={} delay={}ms", getAddress(), state, delayMillis);
+        logger.debug("setState({})={} delay={}ms", getAddress(), state, delayMillis);
 
         delay(delayMillis);
 
@@ -72,7 +72,7 @@ public class NullSwitch extends AbstractSwitch<String> {
     @Override
     protected boolean getStateSync() throws IOException {
         long delayMillis = getDelayMillis();
-        logger.info("getState({})={} delay={}ms", getAddress(), state, delayMillis);
+        logger.debug("getState({})={} delay={}ms", getAddress(), state, delayMillis);
 
         delay(delayMillis);
 
