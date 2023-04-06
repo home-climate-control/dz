@@ -2,6 +2,8 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 
+import java.util.Objects;
+
 /**
  * Zone settings.
  *
@@ -9,7 +11,7 @@ import net.sf.dz3r.signal.hvac.ZoneStatus;
  *
  * @see ZoneStatus
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class ZoneSettings {
 
@@ -98,4 +100,17 @@ public class ZoneSettings {
     @Override
     public int hashCode() {
         return toString().hashCode();
-    }}
+    }
+
+    /**
+     * @param other Settings to compare to. Must not be null.
+     *
+     * @return {@code true} if the user visible settings are the same (hold and dump priority are ignored).
+     */
+    public boolean same(ZoneSettings other) {
+
+        return Objects.equals(enabled, other.enabled)
+                && setpoint.compareTo(other.setpoint) == 0
+                && Objects.equals(voting, other.voting);
+    }
+}
