@@ -78,7 +78,7 @@ public class Scheduler {
         var zone = name2zone.get(zoneName);
 
         if (zone == null) {
-            logger.info("unknown zone '{}', schedule ignored", zoneName);
+            logger.trace("scheduler {} unknown zone '{}', schedule ignored, known zones: {}", Integer.toHexString(hashCode()), zoneName, name2zone.keySet());
             return Flux.empty();
         }
 

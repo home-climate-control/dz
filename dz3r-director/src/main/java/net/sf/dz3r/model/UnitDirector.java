@@ -70,7 +70,7 @@ public class UnitDirector implements Addressable<String> {
 
         feed = connectFeeds(sensorFlux2zone, unitController, hvacDevice, hvacMode);
 
-        Optional.ofNullable(scheduleUpdater).ifPresent(u -> connectScheduler(sensorFlux2zone.values(), u));
+        connectScheduler(sensorFlux2zone.values(), scheduleUpdater);
         Optional.ofNullable(metricsCollectorSet)
                 .ifPresent(collectors -> Flux.fromIterable(collectors)
                         .doOnNext(c -> c.connect(feed))
@@ -151,6 +151,11 @@ public class UnitDirector implements Addressable<String> {
     }
 
     private void connectScheduler(Collection<Zone> zones, ScheduleUpdater scheduleUpdater) {
+
+        if (scheduleUpdater == null) {
+            logger.warn("no scheduler provided, running defaults");
+            return;
+        }
 
         var name2zone = new TreeMap<String, Zone>();
         Flux.fromIterable(zones)
