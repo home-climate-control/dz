@@ -12,9 +12,28 @@
             </Filters>
         </Console>
         <RollingFile
-            name="DebugAppender"
-            fileName="${logDir}/dz-debug.log"
-            filePattern="${logDir}/dz-debug.log.%d{yyyy-MM-dd}.gz">
+            name="TraceAppender"
+            fileName="${logDir}/dz-trace.log"
+            filePattern="${logDir}/dz-trace.log.%d{yyyy-MM-dd}.gz">
+            <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <DefaultRolloverStrategy>
+                <Delete basePath="${logDir}" maxDepth="2">
+                    <IfFileName glob="*/dz-trace.log.*.gz" />
+                    <!-- Trace level logs are HUGE -->
+                    <IfLastModified age="P1D" />
+                </Delete>
+            </DefaultRolloverStrategy>
+            <Filters>
+                <ThresholdFilter level="trace"  onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+        </RollingFile>
+        <RollingFile
+                name="DebugAppender"
+                fileName="${logDir}/dz-debug.log"
+                filePattern="${logDir}/dz-debug.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
@@ -27,8 +46,7 @@
                 </Delete>
             </DefaultRolloverStrategy>
             <Filters>
-                <!-- Set your comfortable debug level for the debug log. Best be left as is.-->
-                <ThresholdFilter level="trace"  onMatch="ACCEPT" onMismatch="DENY"/>
+                <ThresholdFilter level="debug"  onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
         </RollingFile>
         <RollingFile
@@ -48,7 +66,7 @@
             </DefaultRolloverStrategy>
             <Filters>
                 <!-- Set your comfortable debug level for the debug log. Best be left as is.-->
-                <ThresholdFilter level="trace"  onMatch="ACCEPT" onMismatch="DENY"/>
+                <ThresholdFilter level="info"  onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
         </RollingFile>
         <RollingFile
@@ -89,7 +107,7 @@
 
         <!-- Reactive classes -->
 
-        <Logger name="net.sf.dz3r" level="debug" />
+        <Logger name="net.sf.dz3r" level="trace" />
 
         <Root level="INFO">
 
@@ -99,6 +117,7 @@
               Uncomment the section below if you need extended diagnostics.
               WARNING: consumes a lot of disk space.
              -->
+            <AppenderRef ref="TraceAppender"/>
             <AppenderRef ref="DebugAppender"/>
 
             <AppenderRef ref="InfoAppender"/>
