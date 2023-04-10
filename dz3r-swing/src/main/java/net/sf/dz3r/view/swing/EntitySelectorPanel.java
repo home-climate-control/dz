@@ -24,7 +24,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class EntitySelectorPanel extends JPanel implements KeyListener {
 
@@ -85,10 +87,26 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
         var unitPair = createUnitPair(source.getAddress(), feed.hvacDeviceFlux);
         var zonePairs = Flux
-                .fromIterable(feed.sensorFlux2zone.entrySet())
-                .map(kv -> createZonePair(kv.getValue(), kv.getKey(), feed.aggregateZoneFlux, feed.hvacDeviceFlux));
+                .fromIterable(flip(feed.sensorFlux2zone).entrySet())
+                .map(kv -> createZonePair(kv.getKey(), kv.getValue(), feed.aggregateZoneFlux, feed.hvacDeviceFlux));
 
         return Flux.concat(Flux.just(unitPair), zonePairs);
+    }
+
+    private Map<Zone, Flux<Signal<Double, Void>>> flip(Map<Flux<Signal<Double, Void>>, Zone> source) {
+
+        // feed.sensorFlux2zone is not sorted. Since we need zones sorted on the console, and zone names are
+        // guaranteed to be unique, we can safely flip them here.
+
+        // VT: NOTE: Why was the sensor flux the key, again? Any chance to flip it there to begin with?
+
+        var result = new TreeMap<Zone, Flux<Signal<Double, Void>>>();
+
+        for (var kv : source.entrySet()) {
+            result.put(kv.getValue(), kv.getKey());
+        }
+
+        return result;
     }
 
     private CellAndPanel<HvacDeviceStatus, Void> createUnitPair(String address, Flux<Signal<HvacDeviceStatus, Void>> source) {
