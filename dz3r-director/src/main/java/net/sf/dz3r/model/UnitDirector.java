@@ -70,7 +70,9 @@ public class UnitDirector implements Addressable<String> {
 
         feed = connectFeeds(sensorFlux2zone, unitController, hvacDevice, hvacMode);
 
-        connectScheduler(sensorFlux2zone.values(), scheduleUpdater);
+        var zones = sensorFlux2zone.values();
+
+        connectScheduler(zones, scheduleUpdater);
         Optional.ofNullable(metricsCollectorSet)
                 .ifPresent(collectors -> Flux.fromIterable(collectors)
                         .doOnNext(c -> c.connect(feed))
@@ -89,9 +91,9 @@ public class UnitDirector implements Addressable<String> {
             ThreadContext.push("shutdownHook");
             try {
 
-                logger.warn("Received termination signal");
+                logger.warn("Received termination signal {}", getAddress());
                 sigTerm.countDown();
-                logger.warn("Shutting down: {}", getAddress() );
+                logger.warn("Shutting down: {}", getAddress());
                 try {
                     shutdownComplete.await();
                 } catch (InterruptedException ex) {
@@ -105,7 +107,14 @@ public class UnitDirector implements Addressable<String> {
             }
         }));
 
-        logger.info("Configured");
+        logger.info("Configured: {} ({} zones: {})",
+                name,
+                zones.size(),
+                Flux.fromIterable(zones)
+                        .map(z -> z.getAddress())
+                        .sort()
+                        .collectList()
+                        .block());
 
         Flux.just(Instant.now())
                 .publishOn(Schedulers.boundedElastic())
@@ -199,7 +208,7 @@ public class UnitDirector implements Addressable<String> {
         ThreadContext.push("run");
         try {
 
-            logger.info("Starting the pipeline");
+            logger.info("Starting the pipeline: {}", getAddress());
             var theEnd = feed.hvacDeviceFlux
                     .publishOn(Schedulers.boundedElastic())
                     .subscribe(
@@ -255,5 +264,10 @@ public class UnitDirector implements Addressable<String> {
             this.unitControllerFlux = unitControllerFlux;
             this.hvacDeviceFlux = hvacDeviceFlux;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "UnitDirector(" + getAddress() + ")";
     }
 }
