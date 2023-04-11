@@ -12,6 +12,7 @@ import reactor.core.publisher.Flux;
  * @see net.sf.dz3.controller.ProcessController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
+@FunctionalInterface
 public interface SignalProcessor<I, O, P> {
 
     /**
