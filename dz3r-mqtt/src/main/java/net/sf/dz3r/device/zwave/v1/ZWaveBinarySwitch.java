@@ -11,6 +11,7 @@ import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Scheduler;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
 
@@ -44,12 +45,16 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
                                 boolean reconnect,
                                 String deviceRootTopic,
                                 Scheduler scheduler) {
+
+        // Z-Wave seems suffer from buffer overflow; let's not allow to pound it more often than once in 30 seconds
         super(new MqttMessageAddress(
                 new MqttEndpoint(host, port), deviceRootTopic),
                 username, password,
                 reconnect,
                 true,
-                scheduler);
+                scheduler,
+                Duration.ofSeconds(30),
+                null);
 
         this.deviceRootTopic = deviceRootTopic;
 

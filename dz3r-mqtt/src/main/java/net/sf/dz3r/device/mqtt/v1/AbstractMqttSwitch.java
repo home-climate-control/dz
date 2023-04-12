@@ -8,6 +8,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.ZoneId;
 
 public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddress> {
@@ -18,16 +20,18 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
     protected Signal<Boolean, Void> lastKnownState;
 
     protected AbstractMqttSwitch(MqttMessageAddress address) {
-        this(address, null, null, false, true, null);
+        this(address, null, null, false, true, null, null, null);
     }
 
     protected AbstractMqttSwitch(MqttMessageAddress address,
                                  String username, String password,
                                  boolean reconnect,
                                  boolean includeSubtopics,
-                                 Scheduler scheduler) {
+                                 Scheduler scheduler,
+                                 Duration minDelay,
+                                 Clock clock) {
 
-        super(address, scheduler);
+        super(address, scheduler, minDelay, clock);
         mqttAdapter = new MqttAdapter(getAddress().endpoint, username, password, reconnect, includeSubtopics);
     }
 
