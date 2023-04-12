@@ -2,6 +2,7 @@ package net.sf.dz3r.device.mqtt.v1;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.nio.charset.StandardCharsets;
 
@@ -28,14 +29,24 @@ public class MqttAdapter extends AbstractMqttAdapter {
 
     public void publish(String topic, String payload, MqttQos qos, boolean retain) {
 
-        var message = Mqtt3Publish
-                .builder()
-                .topic(topic)
-                .payload(payload == null ? null : payload.getBytes(StandardCharsets.UTF_8))
-                .qos(qos)
-                .retain(retain)
-                .build();
+        ThreadContext.push("publish");
 
-        getClient().publish(message);
+        try {
+
+            logger.trace("topic={}, payload={}, qos={}, retain={}", topic, payload, qos, retain);
+
+            var message = Mqtt3Publish
+                    .builder()
+                    .topic(topic)
+                    .payload(payload == null ? null : payload.getBytes(StandardCharsets.UTF_8))
+                    .qos(qos)
+                    .retain(retain)
+                    .build();
+
+            getClient().publish(message);
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }

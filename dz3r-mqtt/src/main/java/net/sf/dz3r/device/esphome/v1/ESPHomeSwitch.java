@@ -58,12 +58,16 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
                             String deviceRootTopic,
                             Scheduler scheduler) {
 
+        // VT: NOTE: ESPHome appears to not suffer from buffer overruns like Zigbee and Z-Wave do,
+        // so not providing the delay
         super(new MqttMessageAddress(
                 new MqttEndpoint(host, port), deviceRootTopic),
                 username, password,
                 reconnect,
                 true,
-                scheduler);
+                scheduler,
+                null,
+                null);
 
         this.deviceRootTopic = deviceRootTopic;
 

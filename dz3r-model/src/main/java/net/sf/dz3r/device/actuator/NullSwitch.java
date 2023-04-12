@@ -43,7 +43,7 @@ public class NullSwitch extends AbstractSwitch<String> {
      * @param maxDelayMillis Max delay. Total delay is calculated as {@code minDelay + rg.nextInt(maxDelay)}.
      */
     public NullSwitch(String address, long minDelayMillis, int maxDelayMillis, Scheduler scheduler) {
-        super(address, scheduler);
+        super(address, scheduler, null, null);
 
         if (minDelayMillis < 0 || maxDelayMillis < 0 || (maxDelayMillis > 0 && (minDelayMillis >= maxDelayMillis))) {
             throw new IllegalArgumentException("invalid delays min=" + minDelayMillis + ", max=" + maxDelayMillis);

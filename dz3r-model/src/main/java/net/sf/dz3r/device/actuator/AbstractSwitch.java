@@ -9,8 +9,12 @@ import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.annotation.NonNull;
+import reactor.util.annotation.Nullable;
 
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 
 /**
@@ -27,17 +31,34 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     private final A address;
     private final Scheduler scheduler;
 
+    /**
+     * Minimum delay between two subsequent calls to {@link #setStateSync(boolean)} if the value hasn't changed.
+     * See <a href="https://github.com/home-climate-control/dz/issues/253">Pipeline overrun with slow actuators</a>.
+     */
+    private final Duration minDelay;
+
+    /**
+     * Clock to use. Doesn't make sense to use a non-default clock other than for testing purposes.
+     */
+    private final Clock clock;
+
     private Flux<Signal<State, String>> stateFlux;
     private FluxSink<Signal<State, String>> stateSink;
     private Boolean lastKnownState;
+
+    /**
+     * Ugly hack to counter the manipulations of {@link #lastKnownState} by some subclasses. That needs to be redone.
+     */
+    private Boolean lastSetState;
+    private Instant lastSetAt;
 
     /**
      * Create an instance with a default scheduler.
      *
      * @param address Switch address.
      */
-    protected AbstractSwitch(A address) {
-        this(address, null);
+    protected AbstractSwitch(@NonNull A address) {
+        this(address, null, null, null);
     }
 
     /**
@@ -45,15 +66,22 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      *
      * @param address Switch address.
      * @param scheduler Scheduler to use. {@code null} means using {@link Schedulers#newSingle(String, boolean)}.
+     * @param minDelay Minimum delay between sending identical commands to hardware.
+     * @param clock Clock to use. Pass {@code null} except when testing.
      */
-    protected AbstractSwitch(A address, Scheduler scheduler) {
+    protected AbstractSwitch(@NonNull A address, @Nullable Scheduler scheduler, @Nullable Duration minDelay, @Nullable Clock clock) {
 
+        // VT: NOTE: @NonNull seems to have no effect, what enforces it?
         if (address == null) {
             throw new IllegalArgumentException("address can't be null");
         }
 
         this.address = address;
         this.scheduler = scheduler == null ? Schedulers.newSingle("switch:" + address, true) : scheduler;
+        this.minDelay = minDelay;
+        this.clock = clock == null ? Clock.systemUTC() : clock;
+
+        logger.info("{}: created AbstractSwitch({}) with minDelay={}", Integer.toHexString(hashCode()), getAddress(), minDelay);
     }
 
     @Override
@@ -68,7 +96,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
             return stateFlux;
         }
 
-        logger.debug("Creating stateFlux:{}", address);
+        logger.debug("{}: creating stateFlux:{}", Integer.toHexString(hashCode()), address);
 
         stateFlux = Flux
                 .create(this::connect)
@@ -90,14 +118,57 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
         ThreadContext.push("setState");
         try {
 
+            var cached = limitRate(state);
+
+            if (cached != null) {
+                return Mono.just(cached);
+            }
+
             reportState(new Signal<>(Instant.now(), new State(state, lastKnownState)));
             setStateSync(state);
+
+            lastSetAt = clock.instant();
 
             return getState();
 
         } catch (IOException e) {
             return Mono.create(sink -> sink.error(e));
         } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private Boolean limitRate(boolean state) {
+
+        ThreadContext.push("limitRate");
+
+        try {
+
+            if (minDelay == null) {
+                return null;
+            }
+
+            if (lastSetState == null) {
+                return null;
+            }
+
+            if (lastSetState != state) {
+                return null;
+            }
+
+
+            var delay = Duration.between(lastSetAt, clock.instant());
+
+            if (delay.compareTo(minDelay) < 0) {
+                logger.debug("{}: skipping setState({}), too close ({} of {})", Integer.toHexString(hashCode()), state, delay, minDelay);
+                return lastSetState;
+            }
+
+            return null;
+
+        } finally {
+
+            lastSetState = state;
             ThreadContext.pop();
         }
     }
