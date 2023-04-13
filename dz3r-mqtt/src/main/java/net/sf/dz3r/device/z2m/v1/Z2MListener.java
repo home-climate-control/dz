@@ -65,7 +65,7 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
     @Override
     public Flux<Signal<String, Void>> getFlux(String address) {
 
-        logger.info("getFlux: {}", address);
+        logger.info("getFlux: {} on {}", address, mqttRootTopicSub);
 
         return new TimeoutGuard<String, Void>(timeout)
                 .compute(mqttListener

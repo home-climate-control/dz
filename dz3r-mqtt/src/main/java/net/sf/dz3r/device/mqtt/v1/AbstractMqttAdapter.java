@@ -52,7 +52,7 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
         this.autoReconnect = autoReconnect;
         this.includeSubtopics = includeSubtopics;
 
-        logger.info("Endpoint: {}", address);
+        logger.info("created endpoint={}, autoReconnect={}, includeSubtopics={}", address, autoReconnect, includeSubtopics);
     }
 
     protected synchronized Mqtt3AsyncClient getClient() {
