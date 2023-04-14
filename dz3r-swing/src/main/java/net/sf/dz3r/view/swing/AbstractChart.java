@@ -64,16 +64,14 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
     /**
      * Horizontal grid spacing.
      *
-     * Vertical grid lines will be painted every <code>timeSpacing</code>
-     * milliseconds. Default is 30 minutes.
+     * Vertical grid lines will be painted every {@code timeSpacing} milliseconds. Default is 30 minutes.
      */
     protected static final Duration SPACING_TIME = Duration.of(30, ChronoUnit.MINUTES);
 
     /**
      * Vertical grid spacing.
      *
-     * Horizontal grid lines will be painted every <code>valueSpacing</code>
-     * units. Default is 1.0.
+     * Horizontal grid lines will be painted every {@code valueSpacing} units. Default is 1.0.
      */
     protected static final double SPACING_VALUE = 1.0;
 
@@ -100,8 +98,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
     private Long minmaxTime = null;
 
     /**
-     * Amount of extra time to wait before {@link #recalculateVerticalLimits()
-     * recalculating} the limits.
+     * Amount of extra time to wait before {@link #recalculateVerticalLimits() recalculating} the limits.
      *
      * Chances are, new min/max values will be pretty close to old, so unless
      * this value is used, recalculation will be happening more often than
