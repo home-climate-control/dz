@@ -92,8 +92,6 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     @Override
     public Flux<Signal<ZoneStatus, String>> compute(Flux<Signal<Double, String>> in) {
 
-        logger.debug("compute()");
-
         var source = Optional.ofNullable(economizer)
                 .map(eco -> eco.compute(in))
                 .orElse(in);
