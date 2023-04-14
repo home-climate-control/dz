@@ -163,8 +163,9 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
      */
     private float transform(double signal, float start, float end) {
 
-        assert(signal <= 1);
-        assert(signal >= -1);
+        if (signal < -1.0 || signal > 1.0) {
+            throw new IllegalArgumentException("signal (" + signal + ") is outside of -1...1 range ");
+        }
 
         return (float) (start + signal * (end - start));
     }
@@ -252,7 +253,7 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
                 count++;
                 valueAccumulator += signal.getValue().value;
                 tintAccumulator += signal.getValue().tint;
-                emphasizeAccumulator += signal.getValue().emphasize ? 1 : 0;
+                emphasizeAccumulator += signal.getValue().emphasize ? 1.0 : 0.0;
 
                 return null;
             }
