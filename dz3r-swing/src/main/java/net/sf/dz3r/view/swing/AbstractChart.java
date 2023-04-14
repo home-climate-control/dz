@@ -182,11 +182,11 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
             paintTimeGrid(g2d, boundary, insets, now, xScale, xOffset);
 
-            checkWidth(boundary);
-
             if (!isDataAvailable()) {
                 return;
             }
+
+            checkWidth(boundary);
 
             var yScale = (boundary.height - insets.bottom - insets.top) / (dataMax - dataMin + PADDING * 2);
             var yOffset = dataMax + PADDING;
