@@ -21,7 +21,7 @@
             </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${logDir}" maxDepth="2">
-                    <IfFileName glob="*/dz-trace.log.*.gz" />
+                    <IfFileName glob="dz-trace.log.*.gz" />
                     <!-- Trace level logs are HUGE -->
                     <IfLastModified age="P1D" />
                 </Delete>
@@ -40,7 +40,7 @@
             </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${logDir}" maxDepth="2">
-                    <IfFileName glob="*/dz-debug.log.*.gz" />
+                    <IfFileName glob="dz-debug.log.*.gz" />
                     <!-- Debug level logs are BIG -->
                     <IfLastModified age="P7D" />
                 </Delete>
@@ -59,7 +59,7 @@
             </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${logDir}" maxDepth="2">
-                    <IfFileName glob="*/dz-info.log.*.gz" />
+                    <IfFileName glob="dz-info.log.*.gz" />
                     <!-- Debug level logs are BIG -->
                     <IfLastModified age="P7D" />
                 </Delete>
@@ -79,7 +79,7 @@
             </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${logDir}" maxDepth="2">
-                    <IfFileName glob="*/dz-warn.log.*.gz" />
+                    <IfFileName glob="dz-warn.log.*.gz" />
                     <IfLastModified age="P30D" />
                 </Delete>
             </DefaultRolloverStrategy>
