@@ -236,19 +236,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             var indoorTemperature = pair.getLeft().getValue();
             var ambientTemperature = pair.getRight().getValue();
 
-            logger.debug("valid indoor={}, ambient={}", indoorTemperature, ambientTemperature);
-
-            // Adjusted for mode
-            var ambientDelta = getAmbientDelta(indoorTemperature, ambientTemperature);
-            var targetDelta = getTargetDelta(indoorTemperature);
-
-            // Negative target data indicates indoor temperature beyond threshold; ambient is irrelevant at this point,
-            // economizer needs to be shut off
-            var signal = targetDelta > 0
-                    ? ambientDelta
-                    : targetDelta;
-
-            logger.debug("ambientD={}, targetD={}, signal={}", ambientDelta, targetDelta, signal);
+            var signal = computeCombined(indoorTemperature, ambientTemperature);
 
             // The latter one wins
             var timestamp = indoor.timestamp.isAfter(ambient.timestamp) ? indoor.timestamp : ambient.timestamp;
@@ -258,6 +246,37 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    protected double computeCombined(Double indoorTemperature, Double ambientTemperature) {
+
+        logger.debug("valid indoor={}, ambient={}", indoorTemperature, ambientTemperature);
+
+        // Adjusted for mode
+        var ambientDelta = getAmbientDelta(indoorTemperature, ambientTemperature);
+        var targetDelta = getTargetDelta(indoorTemperature);
+
+        double targetAdjustment;
+
+        if (targetDelta > settings.changeoverDelta) {
+
+            targetAdjustment = 0.0;
+
+        } else {
+
+            // As the indoor temperature is approaching the target, need to take corrective measures
+            var k = (1.0 / settings.changeoverDelta) * (settings.changeoverDelta - targetDelta);
+
+            targetAdjustment = ambientDelta * k;
+
+            logger.debug("k={}, targetAdjustment={}", k, targetAdjustment);
+        }
+
+        var signal = ambientDelta - targetAdjustment;
+
+        logger.debug("ambientD={}, targetD={}, signal={}", ambientDelta, targetDelta, signal);
+
+        return signal;
     }
 
     /**
