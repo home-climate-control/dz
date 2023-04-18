@@ -8,8 +8,10 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
 
 public class ZoneChart2021 extends AbstractZoneChart {
 
@@ -65,7 +67,13 @@ public class ZoneChart2021 extends AbstractZoneChart {
             return false;
         }
 
-        dsValues.append(signal.timestamp.toEpochMilli(), tintedValue, true);
+        lockValues.writeLock().lock();
+        try {
+            dsValues.append(signal.timestamp.toEpochMilli(), tintedValue, true);
+        } finally {
+            lockValues.writeLock().unlock();
+        }
+
         dsSetpoints.append(signal.timestamp.toEpochMilli(), signal.getValue().setpoint, true);
 
         return true;
@@ -74,75 +82,85 @@ public class ZoneChart2021 extends AbstractZoneChart {
     @Override
     protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
                               long now, double xScale, long xOffset, double yScale, double yOffset,
-                              DataSet<TintedValue> dsValues, DataSet<Double> dsSetpoints) {
+                              DataSet<TintedValue> dsValues, ReadWriteLock lockValues, DataSet<Double> dsSetpoints) {
 
         // Setpoint history is rendered over the value history
-        paintValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues);
+        paintValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lockValues);
         paintSetpoints(g2d, insets, xScale, xOffset, yScale, yOffset, dsSetpoints);
     }
 
     @SuppressWarnings("squid:S107")
     private void paintValues(Graphics2D g2d, Insets insets,
                              long now, double xScale, long xOffset, double yScale, double yOffset,
-                             DataSet<TintedValue> ds) {
+                             DataSet<TintedValue> ds, ReadWriteLock lockValues) {
 
-        Long timeTrailer = null;
-        TintedValue trailer = null;
+        var lockNow = Instant.now().toEpochMilli();
 
-        for (Iterator<Map.Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext();) {
+        lockValues.readLock().lock();
+        try {
 
-            var entry = di.next();
-            var timeNow = entry.getKey();
-            var cursor = entry.getValue();
+            logger.debug("read lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
 
-            if (timeTrailer != null) {
+            Long timeTrailer = null;
+            TintedValue trailer = null;
 
-                var x0 = (timeTrailer - xOffset) * xScale + insets.left;
-                var y0 = (yOffset - trailer.value) * yScale + insets.top;
+            for (Iterator<Map.Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext(); ) {
 
-                var x1 = (timeNow - xOffset) * xScale + insets.left;
-                var y1 = (yOffset - cursor.value) * yScale + insets.top;
+                var entry = di.next();
+                var timeNow = entry.getKey();
+                var cursor = entry.getValue();
 
-                // Decide whether the line is alive or dead
+                if (timeTrailer != null) {
 
-                if (timeNow - timeTrailer > DEAD_TIMEOUT.toMillis()) {
+                    var x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                    var y0 = (yOffset - trailer.value) * yScale + insets.top;
 
-                    // It's dead, all right
-                    // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
+                    var x1 = (timeNow - xOffset) * xScale + insets.left;
+                    var y1 = (yOffset - cursor.value) * yScale + insets.top;
+
+                    // Decide whether the line is alive or dead
+
+                    if (timeNow - timeTrailer > DEAD_TIMEOUT.toMillis()) {
+
+                        // It's dead, all right
+                        // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
+                        var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+
+                        // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
+                        // Even though this is a memory allocation, it won't affect performance since [hopefully]
+                        // there'll be just a few dead drops
+                        var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
+
+                        drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
+
+                        x0 = x1;
+                    }
+
                     var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                    var endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
 
-                    // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
-                    // Even though this is a memory allocation, it won't affect performance since [hopefully]
-                    // there'll be just a few dead drops
-                    var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
-
-                    drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
-
-                    x0 = x1;
+                    drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, cursor.emphasize);
                 }
 
-                var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
-                var endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
-
-                drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, cursor.emphasize);
+                timeTrailer = timeNow;
+                trailer = cursor;
             }
 
-            timeTrailer = timeNow;
-            trailer = cursor;
-        }
+            if (timeTrailer != null && now - timeTrailer > DEAD_TIMEOUT.toMillis()) {
 
-        if (timeTrailer != null && now - timeTrailer > DEAD_TIMEOUT.toMillis()) {
+                // There's a gap on the right, let's fill it
 
-            // There's a gap on the right, let's fill it
+                var x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                var x1 = (now - xOffset) * xScale + insets.left;
+                var y = (yOffset - trailer.value) * yScale + insets.top;
 
-            var x0 = (timeTrailer - xOffset) * xScale + insets.left;
-            var x1 = (now - xOffset) * xScale + insets.left;
-            var y = (yOffset - trailer.value) * yScale + insets.top;
+                var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                var endColor = getBackground();
 
-            var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
-            var endColor = getBackground();
-
-            drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
+                drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
+            }
+        } finally {
+            lockValues.readLock().unlock();
         }
     }
 

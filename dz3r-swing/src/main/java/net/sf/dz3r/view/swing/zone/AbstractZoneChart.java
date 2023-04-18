@@ -13,6 +13,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Base class for zone chart implementations.
@@ -25,6 +27,8 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
 
     protected final transient DataSet<TintedValue> dsValues = new DataSet<>(chartLengthMillis);
     protected final transient DataSet<Double> dsSetpoints = new DataSet<>(chartLengthMillis);
+
+    protected final transient ReadWriteLock lockValues = new ReentrantReadWriteLock();
 
     protected static final Color SIGNAL_COLOR_LOW = Color.GREEN;
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
@@ -45,14 +49,15 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
             double xScale, long xOffset, double yScale, double yOffset) {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, dsSetpoints);
+        paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lockValues, dsSetpoints);
     }
 
     @SuppressWarnings("squid:S107")
     protected abstract void paintChart(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
             double xScale, long xOffset, double yScale, double yOffset,
-            DataSet<TintedValue> dsValues, DataSet<Double> dsSetpoints);
+            DataSet<TintedValue> dsValues, ReadWriteLock lockValues,
+            DataSet<Double> dsSetpoints);
 
     private static final Color[] signalCache = new Color[256];
 
