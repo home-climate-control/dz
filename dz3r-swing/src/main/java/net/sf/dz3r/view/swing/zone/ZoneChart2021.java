@@ -67,9 +67,14 @@ public class ZoneChart2021 extends AbstractZoneChart {
             return false;
         }
 
+        var lockNow = Instant.now().toEpochMilli();
         lockValues.writeLock().lock();
+
         try {
+
+            logger.debug("write lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
             dsValues.append(signal.timestamp.toEpochMilli(), tintedValue, true);
+
         } finally {
             lockValues.writeLock().unlock();
         }
