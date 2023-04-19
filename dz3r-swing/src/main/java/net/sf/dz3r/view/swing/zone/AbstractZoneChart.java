@@ -23,7 +23,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetpoint, Void> {
+public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint, Void> {
 
     protected final transient DataSet<TintedValue> dsValues = new DataSet<>(chartLengthMillis);
     protected final transient DataSet<Double> dsSetpoints = new DataSet<>(chartLengthMillis);

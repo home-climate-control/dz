@@ -1,11 +1,11 @@
 package net.sf.dz3r.view.swing.zone;
 
 /**
- * Intended to hold a data sample for the {@link AbstractZoneChart variable color chart}.
+ * {@link AbstractZoneChart} data point wrapper.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class TintedValueAndSetpoint extends TintedValue {
+public class ZoneChartDataPoint extends TintedValue {
 
     /**
      * Setpoint Y coordinate on the chart.
@@ -14,7 +14,7 @@ public class TintedValueAndSetpoint extends TintedValue {
      */
     public final double setpoint;
 
-    public TintedValueAndSetpoint(double value, double tint, boolean emphasize, double setpoint) {
+    public ZoneChartDataPoint(double value, double tint, boolean emphasize, double setpoint) {
 
         super(value, tint, emphasize);
 
