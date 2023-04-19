@@ -15,7 +15,7 @@ public class DataSet<T> {
     /**
      * The data set. The key is sampling time, the value is sample value.
      */
-    private final LinkedHashMap<Long, T> samples = new LinkedHashMap<>();
+    private final Map<Long, T> samples = new LinkedHashMap<>();
 
     /**
      * The expiration interval. Values older than the last key by this many
