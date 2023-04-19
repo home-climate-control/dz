@@ -103,10 +103,13 @@ public class ZoneChart2021 extends AbstractZoneChart {
     @Override
     protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
                               long now, double xScale, long xOffset, double yScale, double yOffset,
-                              DataSet<ThermostatTintedValue> dsValues, ReadWriteLock lock, DataSet<Double> dsSetpoints) {
+                              DataSet<ThermostatTintedValue> dsValues, ReadWriteLock lock, DataSet<Double> dsTargets, DataSet<Double> dsSetpoints) {
 
-        // Setpoint history is rendered over the value history
+        // Layer order: economizer, thermostat, economizer target, setpoint
+
         paintValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock);
+
+        paintTargets(g2d, insets, xScale, xOffset, yScale, yOffset, dsTargets);
         paintSetpoints(g2d, insets, xScale, xOffset, yScale, yOffset, dsSetpoints);
     }
 
@@ -189,15 +192,27 @@ public class ZoneChart2021 extends AbstractZoneChart {
                                 double xScale, long xOffset, double yScale, double yOffset,
                                 DataSet<Double> ds) {
 
-        var startColor = new Color(SETPOINT_COLOR.getRed(), SETPOINT_COLOR.getGreen(), SETPOINT_COLOR.getBlue(), 64);
-        var endColor = SETPOINT_COLOR; // NOSONAR Retained for clarity
+        paintSetpointLines(g2d, insets, xScale, xOffset, yScale, yOffset, ds, SETPOINT_COLOR);
+    }
+    private void paintTargets(Graphics2D g2d, Insets insets,
+                              double xScale, long xOffset, double yScale, double yOffset,
+                              DataSet<Double> ds) {
+
+        paintSetpointLines(g2d, insets, xScale, xOffset, yScale, yOffset, ds, TARGET_COLOR);
+    }
+    private void paintSetpointLines(Graphics2D g2d, Insets insets,
+                                    double xScale, long xOffset, double yScale, double yOffset,
+                                    DataSet<Double> ds,
+                                    Color baseColor) {
+
+        var startColor = new Color(baseColor.getRed(), baseColor.getGreen(), baseColor.getBlue(), 64);
 
         Long timeTrailer = null;
 
         // VT: NOTE: This iterator is not protected by the read lock, the probability of concurrent access is much lower.
         // If it starts blowing up, though...
 
-        for (Iterator<Map.Entry<Long, Double>> di = ds.entryIterator(); di.hasNext();) {
+        for (var di = ds.entryIterator(); di.hasNext();) {
 
             var entry = di.next();
             var timeNow = entry.getKey();
@@ -216,7 +231,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
                 x1 = (timeNow - xOffset) * xScale + insets.left;
             }
 
-            drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
+            drawGradientLine(g2d, x0, y, x1, y, startColor, baseColor, false);
 
             timeTrailer = timeNow;
         }

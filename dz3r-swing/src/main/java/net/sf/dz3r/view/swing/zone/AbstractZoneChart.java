@@ -52,6 +52,8 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
 
     protected static final Color SIGNAL_COLOR_LOW = Color.GREEN;
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
+    protected static final Color TARGET_COLOR = Color.GREEN;
+
     protected static final Color SETPOINT_COLOR = Color.YELLOW;
 
     protected AbstractZoneChart(Clock clock, long chartLengthMillis, boolean needFahrenheit) {
@@ -69,7 +71,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
             double xScale, long xOffset, double yScale, double yOffset) {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock, dsSetpoints);
+        paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock, dsTargets, dsSetpoints);
     }
 
     @SuppressWarnings("squid:S107")
@@ -77,6 +79,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
             double xScale, long xOffset, double yScale, double yOffset,
             DataSet<ThermostatTintedValue> dsValues, ReadWriteLock lock,
+            DataSet<Double> dsTargets,
             DataSet<Double> dsSetpoints);
 
     private static final Color[] signalCache = new Color[256];
