@@ -258,7 +258,7 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
                 return null;
             }
 
-            logger.debug("RingBuffer: flushing at {}", () -> Duration.ofMillis(age));
+            logger.trace("RingBuffer: flushing at {}", () -> Duration.ofMillis(age));
 
             var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 
