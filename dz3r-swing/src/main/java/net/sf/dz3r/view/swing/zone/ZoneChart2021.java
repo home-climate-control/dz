@@ -68,18 +68,21 @@ public class ZoneChart2021 extends AbstractZoneChart {
         }
 
         var lockNow = Instant.now().toEpochMilli();
-        lockValues.writeLock().lock();
+        lock.writeLock().lock();
 
         try {
 
+            // VT: NOTE: Write lock is acquired once per all sets, it's a short operation
+
             logger.debug("write lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
+
             dsValues.append(signal.timestamp.toEpochMilli(), tintedValue, true);
+            dsSetpoints.append(signal.timestamp.toEpochMilli(), signal.getValue().setpoint, true);
 
         } finally {
-            lockValues.writeLock().unlock();
+            lock.writeLock().unlock();
         }
 
-        dsSetpoints.append(signal.timestamp.toEpochMilli(), signal.getValue().setpoint, true);
 
         return true;
     }
@@ -87,24 +90,24 @@ public class ZoneChart2021 extends AbstractZoneChart {
     @Override
     protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
                               long now, double xScale, long xOffset, double yScale, double yOffset,
-                              DataSet<TintedValue> dsValues, ReadWriteLock lockValues, DataSet<Double> dsSetpoints) {
+                              DataSet<TintedValue> dsValues, ReadWriteLock lock, DataSet<Double> dsSetpoints) {
 
         // Setpoint history is rendered over the value history
-        paintValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lockValues);
+        paintValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock);
         paintSetpoints(g2d, insets, xScale, xOffset, yScale, yOffset, dsSetpoints);
     }
 
     @SuppressWarnings("squid:S107")
     private void paintValues(Graphics2D g2d, Insets insets,
                              long now, double xScale, long xOffset, double yScale, double yOffset,
-                             DataSet<TintedValue> ds, ReadWriteLock lockValues) {
+                             DataSet<TintedValue> ds, ReadWriteLock lock) {
 
         var lockNow = Instant.now().toEpochMilli();
 
-        lockValues.readLock().lock();
+        lock.readLock().lock();
         try {
 
-            logger.debug("read lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
+            logger.debug("read/values lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
 
             Long timeTrailer = null;
             TintedValue trailer = null;
@@ -165,7 +168,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
                 drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
             }
         } finally {
-            lockValues.readLock().unlock();
+            lock.readLock().unlock();
         }
     }
 
@@ -177,6 +180,9 @@ public class ZoneChart2021 extends AbstractZoneChart {
         var endColor = SETPOINT_COLOR; // NOSONAR Retained for clarity
 
         Long timeTrailer = null;
+
+        // VT: NOTE: This iterator is not protected by the read lock, the probability of concurrent access is much lower.
+        // If it starts blowing up, though...
 
         for (Iterator<Map.Entry<Long, Double>> di = ds.entryIterator(); di.hasNext();) {
 

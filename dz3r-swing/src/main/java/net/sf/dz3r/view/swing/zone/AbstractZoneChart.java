@@ -28,7 +28,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
     protected final transient DataSet<TintedValue> dsValues = new DataSet<>(chartLengthMillis);
     protected final transient DataSet<Double> dsSetpoints = new DataSet<>(chartLengthMillis);
 
-    protected final transient ReadWriteLock lockValues = new ReentrantReadWriteLock();
+    protected final transient ReadWriteLock lock = new ReentrantReadWriteLock();
 
     protected static final Color SIGNAL_COLOR_LOW = Color.GREEN;
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
@@ -49,14 +49,14 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
             double xScale, long xOffset, double yScale, double yOffset) {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lockValues, dsSetpoints);
+        paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock, dsSetpoints);
     }
 
     @SuppressWarnings("squid:S107")
     protected abstract void paintChart(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
             double xScale, long xOffset, double yScale, double yOffset,
-            DataSet<TintedValue> dsValues, ReadWriteLock lockValues,
+            DataSet<TintedValue> dsValues, ReadWriteLock lock,
             DataSet<Double> dsSetpoints);
 
     private static final Color[] signalCache = new Color[256];
