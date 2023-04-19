@@ -9,7 +9,7 @@ import net.sf.dz3r.signal.hvac.EconomizerStatus;
  */
 public class ZoneChartDataPoint {
 
-    public final TintedValue tintedValue;
+    public final ThermostatTintedValue tintedValue;
 
     /**
      * Setpoint Y coordinate on the chart.
@@ -21,7 +21,7 @@ public class ZoneChartDataPoint {
     public final EconomizerStatus economizerStatus;
 
     public ZoneChartDataPoint(
-            TintedValue tintedValue,
+            ThermostatTintedValue tintedValue,
             double setpoint,
             EconomizerStatus economizerStatus) {
 

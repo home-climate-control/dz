@@ -90,7 +90,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
     @Override
     protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
                               long now, double xScale, long xOffset, double yScale, double yOffset,
-                              DataSet<TintedValue> dsValues, ReadWriteLock lock, DataSet<Double> dsSetpoints) {
+                              DataSet<ThermostatTintedValue> dsValues, ReadWriteLock lock, DataSet<Double> dsSetpoints) {
 
         // Setpoint history is rendered over the value history
         paintValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock);
@@ -100,7 +100,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
     @SuppressWarnings("squid:S107")
     private void paintValues(Graphics2D g2d, Insets insets,
                              long now, double xScale, long xOffset, double yScale, double yOffset,
-                             DataSet<TintedValue> ds, ReadWriteLock lock) {
+                             DataSet<ThermostatTintedValue> ds, ReadWriteLock lock) {
 
         var lockNow = Instant.now().toEpochMilli();
 
@@ -110,9 +110,9 @@ public class ZoneChart2021 extends AbstractZoneChart {
             logger.debug("read/values lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
 
             Long timeTrailer = null;
-            TintedValue trailer = null;
+            ThermostatTintedValue trailer = null;
 
-            for (Iterator<Map.Entry<Long, TintedValue>> di = ds.entryIterator(); di.hasNext(); ) {
+            for (Iterator<Map.Entry<Long, ThermostatTintedValue>> di = ds.entryIterator(); di.hasNext(); ) {
 
                 var entry = di.next();
                 var timeNow = entry.getKey();

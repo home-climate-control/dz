@@ -5,7 +5,7 @@ package net.sf.dz3r.view.swing.zone;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class TintedValue {
+public class ThermostatTintedValue {
 
     /**
      * Value Y coordinate on the chart.
@@ -25,7 +25,7 @@ public class TintedValue {
      */
     public final boolean emphasize;
 
-    public TintedValue(double value, double tint, boolean emphasize) {
+    public ThermostatTintedValue(double value, double tint, boolean emphasize) {
 
         this.value = value;
         this.tint = tint;

@@ -25,7 +25,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint, Void> {
 
-    protected final transient DataSet<TintedValue> dsValues = new DataSet<>(chartLengthMillis);
+    protected final transient DataSet<ThermostatTintedValue> dsValues = new DataSet<>(chartLengthMillis);
     protected final transient DataSet<Double> dsSetpoints = new DataSet<>(chartLengthMillis);
 
     protected final transient ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -56,7 +56,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
     protected abstract void paintChart(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
             double xScale, long xOffset, double yScale, double yOffset,
-            DataSet<TintedValue> dsValues, ReadWriteLock lock,
+            DataSet<ThermostatTintedValue> dsValues, ReadWriteLock lock,
             DataSet<Double> dsSetpoints);
 
     private static final Color[] signalCache = new Color[256];
@@ -182,7 +182,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
         Double max = null;
         Long minmaxTime = null;
 
-        for (Iterator<Map.Entry<Long, TintedValue>> i2 = dsValues.entryIterator(); i2.hasNext(); ) {
+        for (Iterator<Map.Entry<Long, ThermostatTintedValue>> i2 = dsValues.entryIterator(); i2.hasNext(); ) {
 
             var entry = i2.next();
             var timestamp = entry.getKey();
@@ -268,7 +268,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
         protected abstract O complete(I value, int count);
     }
 
-    protected class ThermostatAverager extends Averager<ZoneChartDataPoint, TintedValue> {
+    protected class ThermostatAverager extends Averager<ZoneChartDataPoint, ThermostatTintedValue> {
 
         private double valueAccumulator = 0;
         private double tintAccumulator = 0;
@@ -287,9 +287,9 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
         }
 
         @Override
-        protected TintedValue complete(ZoneChartDataPoint value, int count) {
+        protected ThermostatTintedValue complete(ZoneChartDataPoint value, int count) {
 
-            var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
+            var result = new ThermostatTintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 
             valueAccumulator = value.tintedValue.value;
             tintAccumulator = value.tintedValue.tint;

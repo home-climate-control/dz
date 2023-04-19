@@ -536,7 +536,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         }
 
         var dataPoint = new ZoneChartDataPoint(
-                new TintedValue(
+                new ThermostatTintedValue(
                         sensorSignal.getValue(),
                         zoneStatus.callingStatus.demand * 2,
                         zoneStatus.callingStatus.calling),
