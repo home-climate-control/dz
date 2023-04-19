@@ -31,7 +31,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
     private boolean append(Signal<ZoneChartDataPoint, Void> signal) {
 
-        adjustVerticalLimits(signal.timestamp.toEpochMilli(), signal.getValue().value, signal.getValue().setpoint);
+        adjustVerticalLimits(signal.timestamp.toEpochMilli(), signal.getValue().tintedValue.value, signal.getValue().setpoint);
 
         synchronized (AbstractZoneChart.class) {
 

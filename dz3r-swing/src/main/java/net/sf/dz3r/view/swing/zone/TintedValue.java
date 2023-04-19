@@ -31,4 +31,10 @@ public class TintedValue {
         this.tint = tint;
         this.emphasize = emphasize;
     }
+
+    @Override
+    public String toString() {
+
+        return "{value=" + value + ",tint=" + tint + ",emphasize=" + emphasize + "}";
+    }
 }

@@ -210,7 +210,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
     /**
      * Averaging tool.
      */
-    protected abstract class Averager<T> {
+    protected abstract class Averager<I, O> {
 
         /**
          * The expiration interval. Values older than the last key by this many
@@ -237,7 +237,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
          * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
          * away from the first sample stored, {@code null} otherwise.
          */
-        public final T append(Signal<? extends T, Void> signal) {
+        public final O append(Signal<I, Void> signal) {
 
             if (oldestTimestamp == null) {
                 oldestTimestamp = signal.timestamp.toEpochMilli();
@@ -264,11 +264,11 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
             return result;
         }
 
-        protected abstract void accumulate(T value);
-        protected abstract T complete(T value, int count);
+        protected abstract void accumulate(I value);
+        protected abstract O complete(I value, int count);
     }
 
-    protected class ThermostatAverager extends Averager<TintedValue> {
+    protected class ThermostatAverager extends Averager<ZoneChartDataPoint, TintedValue> {
 
         private double valueAccumulator = 0;
         private double tintAccumulator = 0;
@@ -279,20 +279,20 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
         }
 
         @Override
-        protected void accumulate(TintedValue value) {
+        protected void accumulate(ZoneChartDataPoint value) {
 
-            valueAccumulator += value.value;
-            tintAccumulator += value.tint;
-            emphasizeAccumulator += value.emphasize ? 1.0 : 0.0;
+            valueAccumulator += value.tintedValue.value;
+            tintAccumulator += value.tintedValue.tint;
+            emphasizeAccumulator += value.tintedValue.emphasize ? 1.0 : 0.0;
         }
 
         @Override
-        protected TintedValue complete(TintedValue value, int count) {
+        protected TintedValue complete(ZoneChartDataPoint value, int count) {
 
             var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
 
-            valueAccumulator = value.value;
-            tintAccumulator = value.tint;
+            valueAccumulator = value.tintedValue.value;
+            tintAccumulator = value.tintedValue.tint;
             emphasizeAccumulator = 0;
 
             return result;

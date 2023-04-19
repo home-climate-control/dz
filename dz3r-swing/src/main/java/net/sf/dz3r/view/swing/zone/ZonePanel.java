@@ -535,14 +535,15 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return;
         }
 
-        var tint = new ZoneChartDataPoint(
-                sensorSignal.getValue(),
-                zoneStatus.callingStatus.demand * 2,
-                zoneStatus.callingStatus.calling,
+        var dataPoint = new ZoneChartDataPoint(
+                new TintedValue(
+                        sensorSignal.getValue(),
+                        zoneStatus.callingStatus.demand * 2,
+                        zoneStatus.callingStatus.calling),
                 zoneStatus.settings.setpoint);
 
         // VT: FIXME: This must be driven via Flux
-        chart.consumeSignal(new Signal<>(getSignal().timestamp, tint));
+        chart.consumeSignal(new Signal<>(getSignal().timestamp, dataPoint));
     }
 
     private HvacMode getMode() {

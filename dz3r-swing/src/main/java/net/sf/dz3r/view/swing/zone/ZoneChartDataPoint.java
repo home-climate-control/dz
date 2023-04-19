@@ -5,7 +5,9 @@ package net.sf.dz3r.view.swing.zone;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class ZoneChartDataPoint extends TintedValue {
+public class ZoneChartDataPoint {
+
+    public final TintedValue tintedValue;
 
     /**
      * Setpoint Y coordinate on the chart.
@@ -14,21 +16,15 @@ public class ZoneChartDataPoint extends TintedValue {
      */
     public final double setpoint;
 
-    public ZoneChartDataPoint(double value, double tint, boolean emphasize, double setpoint) {
+    public ZoneChartDataPoint(TintedValue tintedValue, double setpoint) {
 
-        super(value, tint, emphasize);
-
+        this.tintedValue = tintedValue;
         this.setpoint = setpoint;
     }
 
     @Override
     public String toString() {
 
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("TintedValue(").append(value).append(", ").append(tint).append(", ").append(emphasize).append(", ").append(setpoint);
-        sb.append(")");
-
-        return sb.toString();
+        return "{tintedValue=" + tintedValue + ",setpoint=" + setpoint + "}";
     }
 }
