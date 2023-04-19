@@ -127,7 +127,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
         var zoneStatusFeed = new ZoneMetricsConverter(config.instance, feed.unit).compute(feed.aggregateZoneFlux);
         var zoneControllerFeed = new ZoneControllerMetricsConverter(config.instance, feed.unit).compute(feed.zoneControllerFlux);
         var unitControllerFeed = new UnitControllerMetricsConverter(config.instance, feed.unit).compute(feed.unitControllerFlux);
-        var hvacDeficeFeed = new HvacDeviceMetricsConverter(config.instance, feed.unit).compute(feed.hvacDeviceFlux);
+        var hvacDeviceFeed = new HvacDeviceMetricsConverter(config.instance, feed.unit).compute(feed.hvacDeviceFlux);
 
         var all = Flux.merge(
                 sensorFeeds,
@@ -135,7 +135,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
                 zoneStatusFeed,
                 zoneControllerFeed,
                 unitControllerFeed,
-                hvacDeficeFeed);
+                hvacDeviceFeed);
 
         all.publishOn(Schedulers.boundedElastic()).subscribe(this);
     }
