@@ -248,7 +248,7 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
 
             var age = signal.timestamp.toEpochMilli() - timestamp;
 
-            if ( age < expirationInterval) {
+            if (age < expirationInterval) {
 
                 count++;
                 valueAccumulator += signal.getValue().value;
