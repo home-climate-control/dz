@@ -15,7 +15,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 
 public class ZoneChart2021 extends AbstractZoneChart {
 
-    private transient Averager averager;
+    private transient ThermostatAverager thermostatAverager;
 
     protected ZoneChart2021(Clock clock, long chartLengthMillis, boolean needFahrenheit) {
         super(clock, chartLengthMillis, needFahrenheit);
@@ -45,7 +45,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
                 logger.info("new width {}, {}ms per pixel", localWidth, step);
 
                 // We lose one sample this way, might want to improve it later, for now, no big deal
-                averager = new Averager(step);
+                thermostatAverager = new ThermostatAverager(step);
 
                 return true;
             }
@@ -60,7 +60,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
             return true;
         }
 
-        var tintedValue = averager.append(signal);
+        var tintedValue = thermostatAverager.append(signal);
 
         if (tintedValue == null) {
             // The average is still being calculated, nothing to do

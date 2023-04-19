@@ -210,7 +210,7 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
     /**
      * Averaging tool.
      */
-    protected class Averager {
+    protected abstract class Averager<T> {
 
         /**
          * The expiration interval. Values older than the last key by this many
@@ -221,14 +221,11 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
         /**
          * The timestamp of the oldest recorded sample.
          */
-        private Long timestamp;
+        protected Long oldestTimestamp;
 
         private int count;
-        private double valueAccumulator = 0;
-        private double tintAccumulator = 0;
-        private double emphasizeAccumulator = 0;
 
-        public Averager(long expirationInterval) {
+        protected Averager(long expirationInterval) {
             this.expirationInterval = expirationInterval;
         }
 
@@ -240,33 +237,63 @@ public abstract class AbstractZoneChart extends AbstractChart<TintedValueAndSetp
          * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
          * away from the first sample stored, {@code null} otherwise.
          */
-        public TintedValue append(Signal<? extends TintedValue, Void> signal) {
+        public final T append(Signal<? extends T, Void> signal) {
 
-            if (timestamp == null) {
-                timestamp = signal.timestamp.toEpochMilli();
+            if (oldestTimestamp == null) {
+                oldestTimestamp = signal.timestamp.toEpochMilli();
             }
 
-            var age = signal.timestamp.toEpochMilli() - timestamp;
+            var age = signal.timestamp.toEpochMilli() - oldestTimestamp;
 
             if (age < expirationInterval) {
 
                 count++;
-                valueAccumulator += signal.getValue().value;
-                tintAccumulator += signal.getValue().tint;
-                emphasizeAccumulator += signal.getValue().emphasize ? 1.0 : 0.0;
+
+                accumulate(signal.getValue());
 
                 return null;
             }
 
             logger.trace("RingBuffer: flushing at {}", () -> Duration.ofMillis(age));
 
-            var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
+            var result = complete(signal.getValue(), count);
 
             count = 1;
-            valueAccumulator = signal.getValue().value;
-            tintAccumulator = signal.getValue().tint;
+            oldestTimestamp = signal.timestamp.toEpochMilli();
+
+            return result;
+        }
+
+        protected abstract void accumulate(T value);
+        protected abstract T complete(T value, int count);
+    }
+
+    protected class ThermostatAverager extends Averager<TintedValue> {
+
+        private double valueAccumulator = 0;
+        private double tintAccumulator = 0;
+        private double emphasizeAccumulator = 0;
+
+        public ThermostatAverager(long expirationInterval) {
+            super(expirationInterval);
+        }
+
+        @Override
+        protected void accumulate(TintedValue value) {
+
+            valueAccumulator += value.value;
+            tintAccumulator += value.tint;
+            emphasizeAccumulator += value.emphasize ? 1.0 : 0.0;
+        }
+
+        @Override
+        protected TintedValue complete(TintedValue value, int count) {
+
+            var result = new TintedValue(valueAccumulator / count, tintAccumulator / count, emphasizeAccumulator > 0);
+
+            valueAccumulator = value.value;
+            tintAccumulator = value.tint;
             emphasizeAccumulator = 0;
-            timestamp = signal.timestamp.toEpochMilli();
 
             return result;
         }
