@@ -4,6 +4,8 @@ package net.sf.dz3r.view.swing.zone;
  * Intended to hold a thermostat data sample for the {@link AbstractZoneChart variable color chart}.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ *
+ * @see EconomizerTintedValue
  */
 public class ThermostatTintedValue {
 

@@ -298,4 +298,32 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
             return result;
         }
     }
+
+    protected class EconomizerAverager extends Averager<ZoneChartDataPoint, EconomizerTintedValue> {
+
+        private double ambientAccumulator = 0;
+        private double signalAccumulator = 0;
+
+        public EconomizerAverager(long expirationInterval) {
+            super(expirationInterval);
+        }
+
+        @Override
+        protected void accumulate(ZoneChartDataPoint value) {
+
+            ambientAccumulator += value.tintedValue.value;
+            signalAccumulator += value.tintedValue.tint;
+        }
+
+        @Override
+        protected EconomizerTintedValue complete(ZoneChartDataPoint value, int count) {
+
+            var result = new EconomizerTintedValue(ambientAccumulator / count, signalAccumulator / count);
+
+            ambientAccumulator = value.economizerStatus.ambient.getValue();
+            signalAccumulator = value.economizerStatus.callingStatus.sample;
+
+            return result;
+        }
+    }
 }
