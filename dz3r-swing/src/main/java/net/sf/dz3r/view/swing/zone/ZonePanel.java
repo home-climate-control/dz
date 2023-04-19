@@ -540,7 +540,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         sensorSignal.getValue(),
                         zoneStatus.callingStatus.demand * 2,
                         zoneStatus.callingStatus.calling),
-                zoneStatus.settings.setpoint);
+                zoneStatus.settings.setpoint,
+                zoneStatus.economizerStatus);
 
         // VT: FIXME: This must be driven via Flux
         chart.consumeSignal(new Signal<>(getSignal().timestamp, dataPoint));

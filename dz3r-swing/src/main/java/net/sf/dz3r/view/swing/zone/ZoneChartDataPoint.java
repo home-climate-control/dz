@@ -1,5 +1,7 @@
 package net.sf.dz3r.view.swing.zone;
 
+import net.sf.dz3r.signal.hvac.EconomizerStatus;
+
 /**
  * {@link AbstractZoneChart} data point wrapper.
  *
@@ -16,15 +18,21 @@ public class ZoneChartDataPoint {
      */
     public final double setpoint;
 
-    public ZoneChartDataPoint(TintedValue tintedValue, double setpoint) {
+    public final EconomizerStatus economizerStatus;
+
+    public ZoneChartDataPoint(
+            TintedValue tintedValue,
+            double setpoint,
+            EconomizerStatus economizerStatus) {
 
         this.tintedValue = tintedValue;
         this.setpoint = setpoint;
+        this.economizerStatus = economizerStatus;
     }
 
     @Override
     public String toString() {
 
-        return "{tintedValue=" + tintedValue + ",setpoint=" + setpoint + "}";
+        return "{tintedValue=" + tintedValue + ",setpoint=" + setpoint + ",economizer=" + economizerStatus + "}";
     }
 }
