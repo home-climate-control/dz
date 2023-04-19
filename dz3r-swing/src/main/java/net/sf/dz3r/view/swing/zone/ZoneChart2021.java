@@ -63,7 +63,9 @@ public class ZoneChart2021 extends AbstractZoneChart {
         }
 
         var thermostatTintedValue = thermostatAverager.append(signal);
-        var economizerTintedValue = economizerAverager.append(signal);
+        var economizerTintedValue = (signal.getValue().economizerStatus == null || signal.getValue().economizerStatus.ambient == null)
+                ? null
+                : economizerAverager.append(signal);
 
         if (thermostatTintedValue == null) {
             // The average is still being calculated, nothing to do
@@ -84,8 +86,11 @@ public class ZoneChart2021 extends AbstractZoneChart {
             dsValues.append(timestamp, thermostatTintedValue, true);
             dsSetpoints.append(timestamp, signal.getValue().setpoint, true);
 
-            dsEconomizer.append(timestamp, economizerTintedValue, true);
-            dsTargets.append(timestamp, signal.getValue().economizerStatus.settings.targetTemperature, true);
+            if (economizerTintedValue != null) {
+
+                dsEconomizer.append(timestamp, economizerTintedValue, true);
+                dsTargets.append(timestamp, signal.getValue().economizerStatus.settings.targetTemperature, true);
+            }
 
         } finally {
             lock.writeLock().unlock();

@@ -331,8 +331,8 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
         @Override
         protected void accumulate(ZoneChartDataPoint value) {
 
-            ambientAccumulator += value.tintedValue.value;
-            signalAccumulator += value.tintedValue.tint;
+            ambientAccumulator += value.economizerStatus.ambient.getValue();
+            signalAccumulator += value.economizerStatus.callingStatus.sample;
         }
 
         @Override
