@@ -25,9 +25,29 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint, Void> {
 
+    /**
+     * Thermostat output signals.
+     */
     protected final transient DataSet<ThermostatTintedValue> dsValues = new DataSet<>(chartLengthMillis);
+
+    /**
+     * Thermostat setpoints.
+     */
     protected final transient DataSet<Double> dsSetpoints = new DataSet<>(chartLengthMillis);
 
+    /**
+     * Economizer status signals.
+     */
+    protected final transient DataSet<EconomizerTintedValue> dsEconomizer = new DataSet<>(chartLengthMillis);
+
+    /**
+     * Economizer target temperatures.
+     */
+    protected final transient DataSet<Double> dsTargets = new DataSet<>(chartLengthMillis);
+
+    /**
+     * Lock common for all the data sets. Suboptimal, but not a bottleneck.
+     */
     protected final transient ReadWriteLock lock = new ReentrantReadWriteLock();
 
     protected static final Color SIGNAL_COLOR_LOW = Color.GREEN;

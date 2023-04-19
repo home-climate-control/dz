@@ -16,6 +16,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 public class ZoneChart2021 extends AbstractZoneChart {
 
     private transient ThermostatAverager thermostatAverager;
+    private transient EconomizerAverager economizerAverager;
 
     protected ZoneChart2021(Clock clock, long chartLengthMillis, boolean needFahrenheit) {
         super(clock, chartLengthMillis, needFahrenheit);
@@ -46,6 +47,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
                 // We lose one sample this way, might want to improve it later, for now, no big deal
                 thermostatAverager = new ThermostatAverager(step);
+                economizerAverager = new EconomizerAverager(step);
 
                 return true;
             }
@@ -60,9 +62,10 @@ public class ZoneChart2021 extends AbstractZoneChart {
             return true;
         }
 
-        var tintedValue = thermostatAverager.append(signal);
+        var thermostatTintedValue = thermostatAverager.append(signal);
+        var economizerTintedValue = economizerAverager.append(signal);
 
-        if (tintedValue == null) {
+        if (thermostatTintedValue == null) {
             // The average is still being calculated, nothing to do
             return false;
         }
@@ -76,8 +79,13 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
             logger.debug("write lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
 
-            dsValues.append(signal.timestamp.toEpochMilli(), tintedValue, true);
-            dsSetpoints.append(signal.timestamp.toEpochMilli(), signal.getValue().setpoint, true);
+            var timestamp = signal.timestamp.toEpochMilli();
+
+            dsValues.append(timestamp, thermostatTintedValue, true);
+            dsSetpoints.append(timestamp, signal.getValue().setpoint, true);
+
+            dsEconomizer.append(timestamp, economizerTintedValue, true);
+            dsTargets.append(timestamp, signal.getValue().economizerStatus.settings.targetTemperature, true);
 
         } finally {
             lock.writeLock().unlock();
