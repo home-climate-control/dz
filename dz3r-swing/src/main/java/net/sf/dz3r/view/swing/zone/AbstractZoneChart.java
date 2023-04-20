@@ -11,8 +11,6 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.time.Clock;
 import java.time.Duration;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -52,6 +50,8 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
 
     protected static final Color SIGNAL_COLOR_LOW = Color.GREEN;
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
+    protected static final Color ECO_COLOR_LOW = new Color(0x0C, 0xC3, 0xFA);
+    protected static final Color ECO_COLOR_HIGH = new Color(0xFF, 0xBC, 0x1C);
     protected static final Color TARGET_COLOR = Color.GREEN;
 
     protected static final Color SETPOINT_COLOR = Color.YELLOW;
@@ -71,14 +71,16 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
             double xScale, long xOffset, double yScale, double yOffset) {
 
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock, dsTargets, dsSetpoints);
+        paintChart(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset, dsValues, dsEconomizer, lock, dsTargets, dsSetpoints);
     }
 
     @SuppressWarnings("squid:S107")
     protected abstract void paintChart(
             Graphics2D g2d, Dimension boundary, Insets insets, long now,
             double xScale, long xOffset, double yScale, double yOffset,
-            DataSet<ThermostatTintedValue> dsValues, ReadWriteLock lock,
+            DataSet<ThermostatTintedValue> dsValues,
+            DataSet<EconomizerTintedValue> dsEconomizer,
+            ReadWriteLock lock,
             DataSet<Double> dsTargets,
             DataSet<Double> dsSetpoints);
 
@@ -205,9 +207,9 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
         Double max = null;
         Long minmaxTime = null;
 
-        for (Iterator<Map.Entry<Long, ThermostatTintedValue>> i2 = dsValues.entryIterator(); i2.hasNext(); ) {
+        for (var i = dsValues.entryIterator(); i.hasNext(); ) {
 
-            var entry = i2.next();
+            var entry = i.next();
             var timestamp = entry.getKey();
             var tv = entry.getValue();
 
@@ -221,6 +223,27 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
                 minmaxTime = timestamp;
             }
         }
+
+        logger.info("minmax/thermostat set to {}/{}", min, max);
+
+        for (var i = dsEconomizer.entryIterator(); i.hasNext(); ) {
+
+            var entry = i.next();
+            var timestamp = entry.getKey();
+            var tv = entry.getValue();
+
+            if (max == null || tv.ambient > max) {
+                max = tv.ambient;
+                minmaxTime = timestamp;
+            }
+
+            if (min == null || tv.ambient < min) {
+                min = tv.ambient;
+                minmaxTime = timestamp;
+            }
+        }
+
+        logger.info("minmax/eco adjusted to   {}/{}", min, max);
 
         var result = new Limits(min, max, minmaxTime);
 

@@ -9,8 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 
 public class ZoneChart2021 extends AbstractZoneChart {
@@ -32,7 +30,33 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
     private boolean append(Signal<ZoneChartDataPoint, Void> signal) {
 
-        adjustVerticalLimits(signal.timestamp.toEpochMilli(), signal.getValue().tintedValue.value, signal.getValue().setpoint);
+        // Economizer signal may be unavailable, either yet, or at all
+
+        Double ambient;
+        Double target;
+
+        if (signal.getValue().economizerStatus == null) {
+
+            ambient = null;
+            target = null;
+
+        } else {
+
+            logger.debug("eco: {}", signal.getValue().economizerStatus);
+
+            ambient = signal.getValue().economizerStatus.ambient == null
+                    ? null
+                    : signal.getValue().economizerStatus.ambient.getValue();
+
+            target = signal.getValue().economizerStatus.settings.targetTemperature;
+        }
+
+        adjustVerticalLimits(
+                signal.timestamp.toEpochMilli(),
+                signal.getValue().tintedValue.value,
+                signal.getValue().setpoint,
+                ambient,
+                target);
 
         synchronized (AbstractZoneChart.class) {
 
@@ -103,20 +127,98 @@ public class ZoneChart2021 extends AbstractZoneChart {
     @Override
     protected void paintChart(Graphics2D g2d, Dimension boundary, Insets insets,
                               long now, double xScale, long xOffset, double yScale, double yOffset,
-                              DataSet<ThermostatTintedValue> dsValues, ReadWriteLock lock, DataSet<Double> dsTargets, DataSet<Double> dsSetpoints) {
+                              DataSet<ThermostatTintedValue> dsValues, DataSet<EconomizerTintedValue> dsEconomizer, ReadWriteLock lock,
+                              DataSet<Double> dsTargets, DataSet<Double> dsSetpoints) {
 
         // Layer order: economizer, thermostat, economizer target, setpoint
 
-        paintValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock);
+        paintEconomizerValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsEconomizer, lock);
+        paintThermostatValues(g2d, insets, now, xScale, xOffset, yScale, yOffset, dsValues, lock);
 
         paintTargets(g2d, insets, xScale, xOffset, yScale, yOffset, dsTargets);
         paintSetpoints(g2d, insets, xScale, xOffset, yScale, yOffset, dsSetpoints);
     }
 
     @SuppressWarnings("squid:S107")
-    private void paintValues(Graphics2D g2d, Insets insets,
-                             long now, double xScale, long xOffset, double yScale, double yOffset,
-                             DataSet<ThermostatTintedValue> ds, ReadWriteLock lock) {
+    private void paintEconomizerValues(Graphics2D g2d, Insets insets,
+                                       long now, double xScale, long xOffset, double yScale, double yOffset,
+                                       DataSet<EconomizerTintedValue> ds, ReadWriteLock lock) {
+
+        var lockNow = Instant.now().toEpochMilli();
+
+        lock.readLock().lock();
+        try {
+
+            logger.debug("read/eco lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
+
+            Long timeTrailer = null;
+            EconomizerTintedValue trailer = null;
+
+            for (var di = ds.entryIterator(); di.hasNext(); ) {
+
+                var entry = di.next();
+                var timeNow = entry.getKey();
+                var cursor = entry.getValue();
+
+                if (timeTrailer != null) {
+
+                    var x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                    var y0 = (yOffset - trailer.ambient) * yScale + insets.top;
+
+                    var x1 = (timeNow - xOffset) * xScale + insets.left;
+                    var y1 = (yOffset - cursor.ambient) * yScale + insets.top;
+
+                    // Decide whether the line is alive or dead
+
+                    if (timeNow - timeTrailer > DEAD_TIMEOUT.toMillis()) {
+
+                        // It's dead, all right
+                        // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
+                        var startColor = signal2color(trailer.signal - 1, ECO_COLOR_LOW, ECO_COLOR_HIGH);
+//                        startColor = Color.MAGENTA;
+
+                        // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
+                        // Even though this is a memory allocation, it won't affect performance since [hopefully]
+                        // there'll be just a few dead drops
+                        var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
+
+                        drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, false);
+
+                        x0 = x1;
+                    }
+
+                    var startColor = signal2color(trailer.signal - 1, ECO_COLOR_LOW, ECO_COLOR_HIGH);
+                    var endColor = signal2color(cursor.signal - 1, ECO_COLOR_LOW, ECO_COLOR_HIGH);
+
+                    drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, false);
+//                    drawGradientLine(g2d, x0, y0, x1, y1, Color.MAGENTA, Color.MAGENTA, false);
+                }
+
+                timeTrailer = timeNow;
+                trailer = cursor;
+            }
+
+            if (timeTrailer != null && now - timeTrailer > DEAD_TIMEOUT.toMillis()) {
+
+                // There's a gap on the right, let's fill it
+
+                var x0 = (timeTrailer - xOffset) * xScale + insets.left;
+                var x1 = (now - xOffset) * xScale + insets.left;
+                var y = (yOffset - trailer.ambient) * yScale + insets.top;
+
+                var startColor = signal2color(trailer.signal - 1, ECO_COLOR_LOW, ECO_COLOR_HIGH);
+                var endColor = getBackground();
+
+                drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
+            }
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    private void paintThermostatValues(Graphics2D g2d, Insets insets,
+                                       long now, double xScale, long xOffset, double yScale, double yOffset,
+                                       DataSet<ThermostatTintedValue> ds, ReadWriteLock lock) {
 
         var lockNow = Instant.now().toEpochMilli();
 
@@ -128,7 +230,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
             Long timeTrailer = null;
             ThermostatTintedValue trailer = null;
 
-            for (Iterator<Map.Entry<Long, ThermostatTintedValue>> di = ds.entryIterator(); di.hasNext(); ) {
+            for (var di = ds.entryIterator(); di.hasNext(); ) {
 
                 var entry = di.next();
                 var timeNow = entry.getKey();

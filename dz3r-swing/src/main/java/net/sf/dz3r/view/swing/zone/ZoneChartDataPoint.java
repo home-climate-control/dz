@@ -33,6 +33,6 @@ public class ZoneChartDataPoint {
     @Override
     public String toString() {
 
-        return "{tintedValue=" + tintedValue + ",setpoint=" + setpoint + ",economizer=" + economizerStatus + "}";
+        return "{tintedValue=" + tintedValue + ", setpoint=" + setpoint + ", economizer=" + economizerStatus + "}";
     }
 }

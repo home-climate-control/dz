@@ -37,6 +37,6 @@ public class ThermostatTintedValue {
     @Override
     public String toString() {
 
-        return "{value=" + value + ",tint=" + tint + ",emphasize=" + emphasize + "}";
+        return "{value=" + value + ", tint=" + tint + ", emphasize=" + emphasize + "}";
     }
 }

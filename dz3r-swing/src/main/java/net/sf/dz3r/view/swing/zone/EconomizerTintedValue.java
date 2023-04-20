@@ -28,6 +28,6 @@ public class EconomizerTintedValue {
     @Override
     public String toString() {
 
-        return "{ambient=" + ambient + ",signal=" + signal + "}";
+        return "{ambient=" + ambient + ", signal=" + signal + "}";
     }
 }

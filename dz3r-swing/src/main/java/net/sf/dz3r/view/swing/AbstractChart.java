@@ -366,13 +366,24 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
      * @param timestamp Value timestamp.
      * @param value Incoming data element.
      * @param setpoint Incoming setpoint.
+     * @param ambient Ambient temperature, {@code null} if unavailable.
+     * @param target Incoming economizer target temperature, {@code null} if unavailable.
      *
      * @see #dataMax
      * @see #dataMin
      */
-    protected final void adjustVerticalLimits(long timestamp, double value, double setpoint) {
+    protected final void adjustVerticalLimits(long timestamp, double value, double setpoint, Double ambient, Double target) {
+
         adjustVerticalLimits(timestamp, value);
         adjustVerticalLimitsExt(timestamp, setpoint);
+
+        if (ambient != null) {
+            adjustVerticalLimits(timestamp, ambient);
+        }
+
+        if (target != null) {
+            adjustVerticalLimitsExt(timestamp, target);
+        }
     }
 
     protected final void adjustVerticalLimits(long timestamp, double value) {
