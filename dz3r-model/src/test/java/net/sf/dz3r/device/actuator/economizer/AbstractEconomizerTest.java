@@ -15,9 +15,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class AbstractEconomizerTest {
 
+    /**
+     * Make sure that control signal is computed properly as the indoor temperature is approaching the {@link EconomizerSettings#targetTemperature}.
+     */
     @ParameterizedTest
     @MethodSource("targetAdjustmentProvider")
-    void targetAdjustmentTest(TestData source) {
+    void targetAdjustmentTest(TargetAdjustmentTestData source) {
 
         var settings = new EconomizerSettings(
                 source.mode,
@@ -41,8 +44,6 @@ class AbstractEconomizerTest {
          * <p>
          * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
          *
-         * @param name
-         * @param settings
          * @param ambientFlux  Flux from the ambient temperature sensor.
          * @param targetDevice Switch to control the economizer actuator.
          */
@@ -62,7 +63,7 @@ class AbstractEconomizerTest {
             return super.computeCombined(indoorTemperature, ambientTemperature);
         }
     }
-    private static final class TestData {
+    private static final class TargetAdjustmentTestData {
 
         public final HvacMode mode;
         public final double changeoverDelta;
@@ -71,7 +72,7 @@ class AbstractEconomizerTest {
         public final double ambientTemperature;
         public final double expectedSignal;
 
-        private TestData(HvacMode mode, double changeoverDelta, double targetTemperature, double indoorTemperature, double ambientTemperature, double expectedSignal) {
+        private TargetAdjustmentTestData(HvacMode mode, double changeoverDelta, double targetTemperature, double indoorTemperature, double ambientTemperature, double expectedSignal) {
             this.mode = mode;
             this.changeoverDelta = changeoverDelta;
             this.targetTemperature = targetTemperature;
@@ -82,16 +83,16 @@ class AbstractEconomizerTest {
     }
 
     /**
-     * @return Stream of {@link TestData} for {@link #targetAdjustmentTest(TestData)}.
+     * @return Stream of {@link TargetAdjustmentTestData} for {@link #targetAdjustmentTest(TargetAdjustmentTestData)}.
      */
-    private static Stream<TestData> targetAdjustmentProvider() {
+    private static Stream<TargetAdjustmentTestData> targetAdjustmentProvider() {
 
         return Stream.of(
-                new TestData(HvacMode.COOLING, 1.0, 22.0, 25.0, 10.0, 14.0),
-                new TestData(HvacMode.COOLING, 1.0, 22.0, 23.0, 10.0, 12.0),
-                new TestData(HvacMode.COOLING, 1.0, 22.0, 22.5, 10.0, 5.75),
-                new TestData(HvacMode.COOLING, 1.0, 22.0, 22.0, 10.0, 0.0),
-                new TestData(HvacMode.COOLING, 1.0, 22.0, 21.0, 10.0, -10.0)
+                new TargetAdjustmentTestData(HvacMode.COOLING, 1.0, 22.0, 25.0, 10.0, 14.0),
+                new TargetAdjustmentTestData(HvacMode.COOLING, 1.0, 22.0, 23.0, 10.0, 12.0),
+                new TargetAdjustmentTestData(HvacMode.COOLING, 1.0, 22.0, 22.5, 10.0, 5.75),
+                new TargetAdjustmentTestData(HvacMode.COOLING, 1.0, 22.0, 22.0, 10.0, 0.0),
+                new TargetAdjustmentTestData(HvacMode.COOLING, 1.0, 22.0, 21.0, 10.0, -10.0)
         );
 
     }
