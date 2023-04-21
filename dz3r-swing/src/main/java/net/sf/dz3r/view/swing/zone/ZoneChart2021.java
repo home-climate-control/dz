@@ -26,6 +26,8 @@ public class ZoneChart2021 extends AbstractZoneChart {
      */
     private final transient SignalColorCache economizerSignalCache = new SignalColorCache(ECO_COLOR_HIGH, ECO_COLOR_LOW);
 
+    private final static int ECO_ALPHA = 0x80;
+
     protected ZoneChart2021(Clock clock, long chartLengthMillis, boolean needFahrenheit) {
         super(clock, chartLengthMillis, needFahrenheit);
     }
@@ -206,7 +208,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
                         // It's dead, all right
                         // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
-                        var startColor = economizerSignalCache.signal2color(trailer.signal - 1);
+                        var startColor = economizerSignalCache.signal2color(trailer.signal - 1, ECO_ALPHA);
 
                         // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
                         // Even though this is a memory allocation, it won't affect performance since [hopefully]
@@ -218,8 +220,8 @@ public class ZoneChart2021 extends AbstractZoneChart {
                         x0 = x1;
                     }
 
-                    var startColor = economizerSignalCache.signal2color(trailer.signal - 1);
-                    var endColor = economizerSignalCache.signal2color(cursor.signal - 1);
+                    var startColor = economizerSignalCache.signal2color(trailer.signal - 1, ECO_ALPHA);
+                    var endColor = economizerSignalCache.signal2color(cursor.signal - 1, ECO_ALPHA);
 
                     drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, false);
                 }
@@ -236,7 +238,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
                 var x1 = (now - xOffset) * xScale + insets.left;
                 var y = (yOffset - trailer.ambient) * yScale + insets.top;
 
-                var startColor = economizerSignalCache.signal2color(trailer.signal - 1);
+                var startColor = economizerSignalCache.signal2color(trailer.signal - 1, ECO_ALPHA);
                 var endColor = getBackground();
 
                 drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);

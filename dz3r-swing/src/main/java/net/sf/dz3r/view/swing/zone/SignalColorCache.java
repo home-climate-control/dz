@@ -41,6 +41,18 @@ public class SignalColorCache {
      * @return Color resolved from the incoming signal.
      */
     public Color signal2color(double signal) {
+        return signal2color(signal, 0xFF);
+    }
+
+    /**
+     * Convert signal from -1 to +1 to color from low color to high color with a given alpha channel value.
+     *
+     * @param signal Signal to convert to color.
+     * @param alpha Alpha channel value to apply.
+     *
+     * @return Color resolved from the incoming signal and alpha channel.
+     */
+    public Color signal2color(double signal, int alpha) {
 
         var limited = signal > 1 ? 1: signal;
         limited = limited < -1 ? -1 : limited;
@@ -61,7 +73,7 @@ public class SignalColorCache {
                 float s = transform(centered, hsbLow[1], hsbHigh[1]);
                 float b = transform(centered, hsbLow[2], hsbHigh[2]);
 
-                result = new Color(Color.HSBtoRGB(h, s, b));
+                result = new Color(((alpha & 0xFF) << 24) | Color.HSBtoRGB(h, s, b));
                 signalCache[index] = result;
 
                 logger.debug("signal2color({}, {}): {} -> {}",
