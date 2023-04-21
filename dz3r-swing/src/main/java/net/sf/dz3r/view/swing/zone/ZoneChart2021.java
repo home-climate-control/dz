@@ -16,6 +16,16 @@ public class ZoneChart2021 extends AbstractZoneChart {
     private transient ThermostatAverager thermostatAverager;
     private transient EconomizerAverager economizerAverager;
 
+    /**
+     * Thermostat signal to color cache.
+     */
+    private final transient SignalColorCache thermostatSignalCache = new SignalColorCache(SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+
+    /**
+     * Economizer signal to color cache. Note that low and high colors are reversed due to economizer logic
+     */
+    private final transient SignalColorCache economizerSignalCache = new SignalColorCache(ECO_COLOR_HIGH, ECO_COLOR_LOW);
+
     protected ZoneChart2021(Clock clock, long chartLengthMillis, boolean needFahrenheit) {
         super(clock, chartLengthMillis, needFahrenheit);
     }
@@ -42,7 +52,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
         } else {
 
-            logger.debug("eco: {}", signal.getValue().economizerStatus);
+            logger.trace("eco: {}", signal.getValue().economizerStatus);
 
             ambient = signal.getValue().economizerStatus.ambient == null
                     ? null
@@ -82,44 +92,66 @@ public class ZoneChart2021 extends AbstractZoneChart {
             // There's nothing we can do before the width is set.
             // It's not even worth it to record the value.
 
-            logger.info("please repaint");
+            // VT: NOTE: This used to be a pretty often encountered race condition. Nowadays, it's a sign of a programming error.
+
+            logger.info("please repaint (is everything all right?)");
             return true;
         }
 
+        // VT: NOTE: Imperative code sucks here, it would be nice to rewrite the averagers as reactive
+        // and flatmap the hell out of null values
+
+        // These two may be non-null at different times, must analyze them separately
         var thermostatTintedValue = thermostatAverager.append(signal);
         var economizerTintedValue = (signal.getValue().economizerStatus == null || signal.getValue().economizerStatus.ambient == null)
                 ? null
                 : economizerAverager.append(signal);
+
+        logger.trace("thermostatTintedValue={}", thermostatTintedValue);
+        logger.trace("economizerTintedValue={}", economizerTintedValue);
+
+        var timestamp = signal.timestamp.toEpochMilli();
+
+        // VT: NOTE: Write lock is acquired once per all sets, it's a short operation
+        var lockNow = Instant.now().toEpochMilli();
+        lock.writeLock().lock();
+
+        try {
+
+            logger.debug("write lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
+
+            var thermostatChange = capture(timestamp, thermostatTintedValue, signal.getValue().setpoint);
+            var economizerChange =capture(timestamp, economizerTintedValue, signal.getValue().economizerStatus.settings.targetTemperature);
+
+            return thermostatChange || economizerChange;
+
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    private boolean capture(long timestamp, ThermostatTintedValue thermostatTintedValue, double setpoint) {
 
         if (thermostatTintedValue == null) {
             // The average is still being calculated, nothing to do
             return false;
         }
 
-        var lockNow = Instant.now().toEpochMilli();
-        lock.writeLock().lock();
+        dsValues.append(timestamp, thermostatTintedValue, true);
+        dsSetpoints.append(timestamp, setpoint, true);
 
-        try {
+        return true;
+    }
 
-            // VT: NOTE: Write lock is acquired once per all sets, it's a short operation
+    private boolean capture(long timestamp, EconomizerTintedValue economizerTintedValue, double target) {
 
-            logger.debug("write lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
-
-            var timestamp = signal.timestamp.toEpochMilli();
-
-            dsValues.append(timestamp, thermostatTintedValue, true);
-            dsSetpoints.append(timestamp, signal.getValue().setpoint, true);
-
-            if (economizerTintedValue != null) {
-
-                dsEconomizer.append(timestamp, economizerTintedValue, true);
-                dsTargets.append(timestamp, signal.getValue().economizerStatus.settings.targetTemperature, true);
-            }
-
-        } finally {
-            lock.writeLock().unlock();
+        if (economizerTintedValue == null) {
+            // The average is still being calculated, nothing to do
+            return false;
         }
 
+        dsEconomizer.append(timestamp, economizerTintedValue, true);
+        dsTargets.append(timestamp, target, true);
 
         return true;
     }
@@ -174,24 +206,22 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
                         // It's dead, all right
                         // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
-                        var startColor = signal2color(trailer.signal - 1, ECO_COLOR_LOW, ECO_COLOR_HIGH);
-//                        startColor = Color.MAGENTA;
+                        var startColor = economizerSignalCache.signal2color(trailer.signal - 1);
 
                         // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
                         // Even though this is a memory allocation, it won't affect performance since [hopefully]
                         // there'll be just a few dead drops
-                        var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
+                        var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 0x40);
 
                         drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, false);
 
                         x0 = x1;
                     }
 
-                    var startColor = signal2color(trailer.signal - 1, ECO_COLOR_LOW, ECO_COLOR_HIGH);
-                    var endColor = signal2color(cursor.signal - 1, ECO_COLOR_LOW, ECO_COLOR_HIGH);
+                    var startColor = economizerSignalCache.signal2color(trailer.signal - 1);
+                    var endColor = economizerSignalCache.signal2color(cursor.signal - 1);
 
                     drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, false);
-//                    drawGradientLine(g2d, x0, y0, x1, y1, Color.MAGENTA, Color.MAGENTA, false);
                 }
 
                 timeTrailer = timeNow;
@@ -206,7 +236,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
                 var x1 = (now - xOffset) * xScale + insets.left;
                 var y = (yOffset - trailer.ambient) * yScale + insets.top;
 
-                var startColor = signal2color(trailer.signal - 1, ECO_COLOR_LOW, ECO_COLOR_HIGH);
+                var startColor = economizerSignalCache.signal2color(trailer.signal - 1);
                 var endColor = getBackground();
 
                 drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
@@ -250,20 +280,20 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
                         // It's dead, all right
                         // Paint the horizontal line in dead color and skew the x0 so the next part will be painted vertical
-                        var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                        var startColor = thermostatSignalCache.signal2color(trailer.tint - 1);
 
                         // End color differs from the start in alpha, not hue - this plays nicer with backgrounds
                         // Even though this is a memory allocation, it won't affect performance since [hopefully]
                         // there'll be just a few dead drops
-                        var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 64);
+                        var endColor = new Color(startColor.getRed(), startColor.getGreen(), startColor.getBlue(), 0x40);
 
                         drawGradientLine(g2d, x0, y0, x1, y0, startColor, endColor, cursor.emphasize);
 
                         x0 = x1;
                     }
 
-                    var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
-                    var endColor = signal2color(cursor.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                    var startColor = thermostatSignalCache.signal2color(trailer.tint - 1);
+                    var endColor = thermostatSignalCache.signal2color(cursor.tint - 1);
 
                     drawGradientLine(g2d, x0, y0, x1, y1, startColor, endColor, cursor.emphasize);
                 }
@@ -280,7 +310,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
                 var x1 = (now - xOffset) * xScale + insets.left;
                 var y = (yOffset - trailer.value) * yScale + insets.top;
 
-                var startColor = signal2color(trailer.tint - 1, SIGNAL_COLOR_LOW, SIGNAL_COLOR_HIGH);
+                var startColor = thermostatSignalCache.signal2color(trailer.tint - 1);
                 var endColor = getBackground();
 
                 drawGradientLine(g2d, x0, y, x1, y, startColor, endColor, false);
