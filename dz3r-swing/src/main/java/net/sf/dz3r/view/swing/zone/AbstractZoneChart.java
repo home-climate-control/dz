@@ -3,6 +3,7 @@ package net.sf.dz3r.view.swing.zone;
 import net.sf.dz3r.common.DataSet;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.swing.AbstractChart;
+import net.sf.dz3r.view.swing.ColorScheme;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -50,9 +51,9 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
 
     protected static final Color SIGNAL_COLOR_LOW = Color.GREEN;
     protected static final Color SIGNAL_COLOR_HIGH = Color.RED;
-    protected static final Color ECO_COLOR_LOW = new Color(0x0C, 0xC3, 0xFA);
-    protected static final Color ECO_COLOR_HIGH = new Color(0xFF, 0xA5, 0x00);
-    protected static final Color TARGET_COLOR = Color.GREEN;
+    protected static final Color ECO_COLOR_LOW = ColorScheme.coolingMap.setpoint.darker();
+    protected static final Color ECO_COLOR_HIGH = ColorScheme.heatingMap.setpoint.darker();
+    protected static final Color TARGET_COLOR = Color.GREEN.darker();
 
     protected static final Color SETPOINT_COLOR = Color.YELLOW;
 
