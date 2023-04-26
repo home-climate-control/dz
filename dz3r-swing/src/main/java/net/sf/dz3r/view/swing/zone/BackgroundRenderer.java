@@ -71,7 +71,7 @@ public class BackgroundRenderer {
 
                 g2d.setPaint(bgColor);
 
-                Rectangle2D.Double background = new Rectangle2D.Double(boundary.x, boundary.y, boundary.width, boundary.height);
+                var background = new Rectangle2D.Double(boundary.x, boundary.y, boundary.width, boundary.height);
 
                 g2d.fill(background);
                 return;
@@ -91,19 +91,19 @@ public class BackgroundRenderer {
             scale /= 2;
         }
 
-        int startHeight = (int)(boundary.height * scale);
+        var startHeight = (int)(boundary.height * scale);
         startHeight = startHeight > 0 ? startHeight : 1;
 
-        Color startColor = getBottomColor(state, mode);
-        Color endColor = ColorScheme.getScheme(mode).background;
+        var startColor = getBottomColor(state, mode);
+        var endColor = ColorScheme.getScheme(mode).background;
 
-        GradientPaint gp = new GradientPaint(
+        var gp = new GradientPaint(
                 boundary.x, startHeight, endColor,
                 boundary.x, boundary.height, startColor);
 
         g2d.setPaint(gp);
 
-        Rectangle2D.Double gradient = new Rectangle2D.Double(
+        var gradient = new Rectangle2D.Double(
                 boundary.x, boundary.y,
                 boundary.width, boundary.height);
 

@@ -25,6 +25,6 @@ public class CallingStatus {
 
     @Override
     public String toString() {
-        return "{sample=" + sample + ",demand=" + demand + ", calling=" + calling + "}";
+        return "{sample=" + sample + ", demand=" + demand + ", calling=" + calling + "}";
     }
 }

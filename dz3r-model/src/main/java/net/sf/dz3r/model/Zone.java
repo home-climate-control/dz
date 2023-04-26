@@ -92,8 +92,6 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     @Override
     public Flux<Signal<ZoneStatus, String>> compute(Flux<Signal<Double, String>> in) {
 
-        logger.debug("compute()");
-
         var source = Optional.ofNullable(economizer)
                 .map(eco -> eco.compute(in))
                 .orElse(in);
@@ -106,16 +104,16 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         // regardless of whether the zone is enabled
         var stage1 = ts
                 .compute(stage0)
-                .doOnNext(e -> logger.trace("ts/{}: {}", getAddress(), e));
+                .doOnNext(e -> logger.trace("compute {}/ts: {}", getAddress(), e));
 
         // Now, need to translate into a form that is easier manipulated
         var stage2 = stage1.map(this::translate)
-                .doOnNext(e -> logger.debug("translated/{}: {}", getAddress(), e));
+                .doOnNext(e -> logger.debug("compute {}/translated: {}", getAddress(), e));
 
         // Now, dampen the signal if the zone is disabled
         var stage3 = stage2
                 .map(this::suppressIfNotEnabled)
-                .doOnNext(e -> logger.debug("isOn/{}: {} {}", getAddress(), settings.enabled ? "enabled" : "DISABLED", e));
+                .doOnNext(e -> logger.debug("compute {}/isOn: {} {}", getAddress(), settings.enabled ? "enabled" : "DISABLED", e));
 
         // And finally, suppress if the economizer says so
         return stage3.map(this::suppressEconomizer);

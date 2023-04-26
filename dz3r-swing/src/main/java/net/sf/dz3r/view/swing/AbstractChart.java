@@ -64,16 +64,14 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
     /**
      * Horizontal grid spacing.
      *
-     * Vertical grid lines will be painted every <code>timeSpacing</code>
-     * milliseconds. Default is 30 minutes.
+     * Vertical grid lines will be painted every {@code timeSpacing} milliseconds. Default is 30 minutes.
      */
     protected static final Duration SPACING_TIME = Duration.of(30, ChronoUnit.MINUTES);
 
     /**
      * Vertical grid spacing.
      *
-     * Horizontal grid lines will be painted every <code>valueSpacing</code>
-     * units. Default is 1.0.
+     * Horizontal grid lines will be painted every {@code valueSpacing} units. Default is 1.0.
      */
     protected static final double SPACING_VALUE = 1.0;
 
@@ -85,23 +83,22 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
     /**
      * Maximum known data value.
      */
-    protected Double dataMax = null;
+    protected Double dataMax;
 
     /**
      * Minimum known data value.
      */
-    protected Double dataMin = null;
+    protected Double dataMin ;
 
     /**
      * Timestamp on {@link #dataMin} or {@link #dataMax}, whichever is younger.
      *
      * @see #adjustVerticalLimits(long, double, double)
      */
-    private Long minmaxTime = null;
+    private Long minmaxTime ;
 
     /**
-     * Amount of extra time to wait before {@link #recalculateVerticalLimits()
-     * recalculating} the limits.
+     * Amount of extra time to wait before {@link #recalculateVerticalLimits() recalculating} the limits.
      *
      * Chances are, new min/max values will be pretty close to old, so unless
      * this value is used, recalculation will be happening more often than
@@ -169,7 +166,6 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
         try {
 
-
             // Draw background
             super.paintComponent(g);
 
@@ -197,10 +193,10 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
             paintValueGrid(g2d, boundary, insets, yScale, yOffset);
             paintCharts(g2d, boundary, insets, now, xScale, xOffset, yScale, yOffset);
 
-            logger.debug("Painted in {}ms", (clock.instant().toEpochMilli() - startTime));
+            logger.debug("Painted in {}ms", clock.instant().toEpochMilli() - startTime);
 
         } catch (Exception ex) {
-            logger.warn("Painted in {}ms (FAIL)", (clock.instant().toEpochMilli() - startTime));
+            logger.warn("Painted in {}ms (FAIL)", clock.instant().toEpochMilli() - startTime);
             logger.warn("Unexpected exception, ignored", ex);
         } finally {
             ThreadContext.pop();
@@ -239,7 +235,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
     private void paintTimeGrid(Graphics2D g2d, double top, double bottom, Insets insets, long now, double xScale, long xOffset, Duration spacingTime) {
 
-        var originalStroke = (BasicStroke) g2d.getStroke();
+        var originalStroke = g2d.getStroke();
         var gridStroke = setGridStroke(g2d);
 
         g2d.setStroke(gridStroke);
@@ -279,7 +275,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
         // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
-        var originalStroke = (BasicStroke) g2d.getStroke();
+        var originalStroke = g2d.getStroke();
         var gridStroke = setGridStroke(g2d);
 
         // The zero line gets painted with the default stroke
@@ -288,7 +284,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
         var gridY = yOffset * yScale + insets.top;
 
-        Line2D gridLine = new Line2D.Double(
+        var gridLine = new Line2D.Double(
                 insets.left,
                 gridY,
                 (double)boundary.width - insets.right - 1,
@@ -300,7 +296,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
         g2d.setStroke(gridStroke);
 
-        var halfWidth = (boundary.width - insets.right - 1) / 2d;
+        var halfWidth = (boundary.width - insets.right - 1) / 2.0;
 
         for (var valueOffset = SPACING_VALUE; valueOffset < dataMax + PADDING; valueOffset += SPACING_VALUE) {
 
@@ -355,9 +351,9 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
         // VT: NOTE: squid:S107 - following this rule will hurt performance, so no.
 
         var gp = new GradientPaint(
-                (int) x0, (int) y0, startColor,
-                (int) x1, (int) y1, endColor);
-        Line2D line = new Line2D.Double(x0, y0, x1, y1);
+                (float) x0, (float) y0, startColor,
+                (float) x1, (float) y1, endColor);
+        var line = new Line2D.Double(x0, y0, x1, y1);
 
         g2d.setPaint(gp);
         g2d.setStroke(emphasize ? strokeDouble : strokeSingle);
@@ -370,13 +366,24 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
      * @param timestamp Value timestamp.
      * @param value Incoming data element.
      * @param setpoint Incoming setpoint.
+     * @param ambient Ambient temperature, {@code null} if unavailable.
+     * @param target Incoming economizer target temperature, {@code null} if unavailable.
      *
      * @see #dataMax
      * @see #dataMin
      */
-    protected final void adjustVerticalLimits(long timestamp, double value, double setpoint) {
+    protected final void adjustVerticalLimits(long timestamp, double value, double setpoint, Double ambient, Double target) {
+
         adjustVerticalLimits(timestamp, value);
         adjustVerticalLimitsExt(timestamp, setpoint);
+
+        if (ambient != null) {
+            adjustVerticalLimits(timestamp, ambient);
+        }
+
+        if (target != null) {
+            adjustVerticalLimitsExt(timestamp, target);
+        }
     }
 
     protected final void adjustVerticalLimits(long timestamp, double value) {

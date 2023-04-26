@@ -1,11 +1,13 @@
 package net.sf.dz3r.view.swing.zone;
 
 /**
- * Intended to hold a data sample for the {@link AbstractZoneChart variable color chart}.
+ * Intended to hold a thermostat data sample for the {@link AbstractZoneChart variable color chart}.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ *
+ * @see EconomizerTintedValue
  */
-public class TintedValue {
+public class ThermostatTintedValue {
 
     /**
      * Value Y coordinate on the chart.
@@ -25,10 +27,16 @@ public class TintedValue {
      */
     public final boolean emphasize;
 
-    public TintedValue(double value, double tint, boolean emphasize) {
+    public ThermostatTintedValue(double value, double tint, boolean emphasize) {
 
         this.value = value;
         this.tint = tint;
         this.emphasize = emphasize;
+    }
+
+    @Override
+    public String toString() {
+
+        return "{value=" + value + ", tint=" + tint + ", emphasize=" + emphasize + "}";
     }
 }
