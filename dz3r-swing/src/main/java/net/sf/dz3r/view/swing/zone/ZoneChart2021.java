@@ -65,7 +65,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
             target = signal.getValue().economizerStatus.settings.targetTemperature;
         }
 
-        logger.debug("ambient={}, target={}", ambient, target);
+        logger.trace("ambient={}, target={}", ambient, target);
 
         adjustVerticalLimits(
                 signal.timestamp.toEpochMilli(),
