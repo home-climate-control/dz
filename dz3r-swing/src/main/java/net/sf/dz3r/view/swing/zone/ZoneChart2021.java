@@ -49,6 +49,8 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
         if (signal.getValue().economizerStatus == null) {
 
+            logger.trace("eco: null");
+
             ambient = null;
             target = null;
 
@@ -62,6 +64,8 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
             target = signal.getValue().economizerStatus.settings.targetTemperature;
         }
+
+        logger.debug("ambient={}, target={}", ambient, target);
 
         adjustVerticalLimits(
                 signal.timestamp.toEpochMilli(),
@@ -123,7 +127,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
             logger.debug("write lock acquired in {}ms", Instant.now().toEpochMilli() - lockNow);
 
             var thermostatChange = capture(timestamp, thermostatTintedValue, signal.getValue().setpoint);
-            var economizerChange =capture(timestamp, economizerTintedValue, signal.getValue().economizerStatus.settings.targetTemperature);
+            var economizerChange = capture(timestamp, economizerTintedValue, target);
 
             return thermostatChange || economizerChange;
 
@@ -145,7 +149,12 @@ public class ZoneChart2021 extends AbstractZoneChart {
         return true;
     }
 
-    private boolean capture(long timestamp, EconomizerTintedValue economizerTintedValue, double target) {
+    private boolean capture(long timestamp, EconomizerTintedValue economizerTintedValue, Double target) {
+
+        if (target == null) {
+            // There is no economizer in this zone
+            return false;
+        }
 
         if (economizerTintedValue == null) {
             // The average is still being calculated, nothing to do
