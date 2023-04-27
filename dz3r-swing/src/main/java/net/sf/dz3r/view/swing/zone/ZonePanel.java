@@ -388,7 +388,17 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     }
 
     private void activateSchedule() {
-        logger.error("activateSchedule(): Not Implemented", new UnsupportedOperationException());
+
+        if (period2settings == null) {
+            logger.error("{} activateSchedule(): no schedule data yet, how did we end up here?", zone.getAddress());
+            return;
+        }
+
+        var settings = period2settings.getValue();
+
+        logger.info("returning to settings: {}", settings);
+
+        zone.setSettings(settings);
     }
 
     private void refresh() {
