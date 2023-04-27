@@ -61,7 +61,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     private static final double SETPOINT_DELTA = 0.1d;
 
     private final JLabel currentLabel = new JLabel(UNDEFINED, SwingConstants.RIGHT);
-    private final JLabel setpointLabel = new JLabel(UNDEFINED + "\u00b0", SwingConstants.RIGHT);
+    private final JLabel setpointLabel = new JLabel(UNDEFINED + "°", SwingConstants.RIGHT);
     private final JLabel votingLabel = new JLabel(VOTING, SwingConstants.RIGHT);
     private final JLabel holdLabel = new JLabel(HOLD, SwingConstants.RIGHT);
     private final JLabel periodLabel = new JLabel("", SwingConstants.LEFT);
@@ -98,6 +98,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      * @see #consumeSensorSignal(Signal)
      */
     private transient Signal<Double, Void> sensorSignal;
+
+    private transient Map.Entry<SchedulePeriod, ZoneSettings> period2settings;
 
     /**
      * @see #consumeMode(Signal)
@@ -148,6 +150,9 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             controls.add(periodLabel);
 
             periodLabel.setForeground(Color.GRAY);
+
+            // No text is set to distinguish the situation when the zone schedule is not yet initialized
+            // from "no period is active"
         }
 
         {
@@ -458,6 +463,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         }
 
         this.zoneStatus = zoneStatus;
+
+        renderPeriod();
     }
 
     /**
@@ -589,6 +596,32 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     private void consumeSchedule(Map.Entry<SchedulePeriod, ZoneSettings> period2settings) {
 
         logger.info("consumeSchedule: {} = ({}, {})", zone.getAddress(), period2settings.getKey(), period2settings.getValue());
+
+        this.period2settings = period2settings;
+
+        renderPeriod();
+    }
+
+    private void renderPeriod() {
+
+        if (period2settings == null) {
+            logger.warn("{} renderPeriod(): no schedule data yet", zone.getAddress());
+            return;
+        }
+
+        if (zoneStatus == null) {
+            logger.warn("{} renderPeriod(): no zone status yet", zone.getAddress());
+            return;
+        }
+
+        periodLabel.setText(period2settings.getKey().name + (isOnSchedule() ? "" : "*"));
+    }
+
+    /**
+     * @return {@code true} if the zone settings are identical to those of the current schedule period, {@code false} otherwise.
+     */
+    private boolean isOnSchedule() {
+        return zoneStatus.settings.same(period2settings.getValue());
     }
 
     /**
