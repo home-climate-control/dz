@@ -3,6 +3,8 @@ package net.sf.dz3r.view.swing;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.model.ZoneSettings;
+import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
@@ -88,7 +90,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         var unitPair = createUnitPair(source.getAddress(), feed.hvacDeviceFlux);
         var zonePairs = Flux
                 .fromIterable(flip(feed.sensorFlux2zone).entrySet())
-                .map(kv -> createZonePair(kv.getKey(), kv.getValue(), feed.aggregateZoneFlux, feed.hvacDeviceFlux));
+                .map(kv -> createZonePair(kv.getKey(), kv.getValue(), feed.aggregateZoneFlux, feed.hvacDeviceFlux, feed.scheduleFlux));
 
         return Flux.concat(Flux.just(unitPair), zonePairs);
     }
@@ -124,7 +126,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
             Zone zone,
             Flux<Signal<Double, Void>> sensorFlux,
             Flux<Signal<ZoneStatus, String>> aggregateZoneFlux,
-            Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux) {
+            Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux,
+            Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> scheduleFlux) {
 
         var zoneName = zone.getAddress();
         var cell = new ZoneCell(zoneName);
@@ -136,6 +139,9 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         var modeFlux = hvacDeviceFlux
                 .filter(s -> s.getValue().requested.mode != null)
                 .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().requested.mode, null, s.status, s.error));
+        var thisScheduleFlux = scheduleFlux
+                .filter(s -> zoneName.equals(s.getKey()))
+                .map(s -> s.getValue());
 
         cell.subscribe(thisZoneFlux);
         panel.subscribe(thisZoneFlux);
@@ -146,6 +152,9 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         // Zones and zone controller have no business knowing about HVAC mode; inject it
         cell.subscribeMode(modeFlux);
         panel.subscribeMode(modeFlux);
+
+        // Need to display schedule period and deviation, inject it
+        panel.subscribeSchedule(thisScheduleFlux);
 
         return new CellAndPanel<>(cell, panel);
     }

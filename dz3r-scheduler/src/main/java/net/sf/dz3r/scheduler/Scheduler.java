@@ -4,6 +4,7 @@ import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -54,21 +55,25 @@ public class Scheduler {
                 .subscribe(kv -> logger.info("  {}", kv.getKey()));
     }
 
-    public void connect(Flux<Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>>> source) {
+    public Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> connect(Flux<Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>>> source) {
 
         // Observe
-        source
+        var observe = source
                 .flatMap(this::updateSchedule)
-                .doOnNext(this::applySchedule)
-                .subscribeOn(Schedulers.boundedElastic())
-                .subscribe();
+                .flatMap(this::applySchedule)
+                .doOnNext(s -> logger.info("scheduleObserve: {}", s))
+                .subscribeOn(Schedulers.boundedElastic());
 
         // Execute
-        Flux.interval(scheduleGranularity, Schedulers.boundedElastic())
+        var execute = Flux.interval(scheduleGranularity, Schedulers.boundedElastic())
                 .flatMap(s -> Flux.fromIterable(zone2schedule.entrySet()))
-                .doOnNext(this::applySchedule)
-                .subscribeOn(Schedulers.boundedElastic())
-                .subscribe();
+                .flatMap(this::applySchedule)
+                .doOnNext(s -> logger.info("scheduleExecute: {}", s))
+                .subscribeOn(Schedulers.boundedElastic());
+
+        return Flux
+                .merge(observe, execute)
+                .doOnNext(s -> logger.info("scheduleFlux: {}", s));
     }
 
     private Flux<Map.Entry<Zone, SortedMap<SchedulePeriod, ZoneSettings>>> updateSchedule(Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> source) {
@@ -86,42 +91,56 @@ public class Scheduler {
         return Flux.just(new AbstractMap.SimpleEntry<>(zone, schedule));
     }
 
-    private synchronized void applySchedule(Map.Entry<Zone, SortedMap<SchedulePeriod, ZoneSettings>> source) {
+    private synchronized Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> applySchedule(Map.Entry<Zone, SortedMap<SchedulePeriod, ZoneSettings>> source) {
 
-        var zone = source.getKey();
-        var zoneName = zone.getAddress();
+        ThreadContext.push("applySchedule");
 
-        if (zone.getSettings().hold) {
-            logger.debug("{}: on hold, left alone", zoneName);
-            return;
-        }
+        try {
 
-        var schedule = source.getValue();
+            var zone = source.getKey();
+            var zoneName = zone.getAddress();
 
-        logger.debug("{} schedule ({} entries)", zoneName, schedule.size());
+            if (Boolean.TRUE.equals(zone.getSettings().hold)) {
+                logger.debug("{}: on hold, left alone", zoneName);
 
-        Flux.fromIterable(schedule.keySet())
-                .subscribe(s -> logger.debug("  {}", s));
+                // This and below:
+                // Whatever was displayed at the console previously, will stay.
+                // May be problematic for HCC Remote and generally look weird, need to confirm that UX is right.
+                return Flux.empty();
+            }
 
-        var now = LocalDateTime.now(clock);
-        var period = periodMatcher.match(schedule, now);
-        var currentPeriod = zone2period.get(zone);
+            var schedule = source.getValue();
 
-        logger.debug("{}: matched time={} period={}", zoneName, now, period);
+            logger.debug("{} schedule ({} entries)", zoneName, schedule.size());
 
-        if (same(currentPeriod, period)) {
-            logger.debug("{}: already at {}", zoneName, period);
-            return;
-        }
+            Flux.fromIterable(schedule.keySet())
+                    .subscribe(s -> logger.debug("  {}", s));
 
-        zone2period.put(zone, period);
+            var now = LocalDateTime.now(clock);
+            var period = periodMatcher.match(schedule, now);
+            var currentPeriod = zone2period.get(zone);
 
-        if (period != null) {
-            var settings = source.getValue().get(period);
-            logger.info("{}: settings applied: {}", zoneName, settings);
-            zone.setSettings(settings);
-        } else {
-            logger.info("{}: no active period, settings left as they were", zoneName);
+            logger.debug("{}: matched time={} period={}", zoneName, now, period);
+
+            if (same(currentPeriod, period)) {
+                logger.debug("{}: already at {}", zoneName, period);
+                return Flux.empty();
+            }
+
+            zone2period.put(zone, period);
+
+            if (period != null) {
+                var settings = source.getValue().get(period);
+                logger.info("{}: settings applied: {}", zoneName, settings);
+                zone.setSettings(settings);
+                return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, new AbstractMap.SimpleEntry<>(period, settings)));
+            } else {
+                logger.info("{}: no active period, settings left as they were", zoneName);
+                return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, null));
+            }
+
+        } finally {
+            ThreadContext.pop();
         }
     }
 
