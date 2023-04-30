@@ -32,13 +32,16 @@ subprojects {
     group = "net.sf.dz3"
     version = "3.6.8-SNAPSHOT"
 
-
-
     jacoco {
         toolVersion = "0.8.8"
     }
 
+    tasks.test {
+        finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+    }
+
     tasks.jacocoTestReport {
+        dependsOn(tasks.test) // tests are required to run before generating the report
         reports {
             xml.required.set(true)
             html.required.set(true)
@@ -56,7 +59,6 @@ subprojects {
  */
 
     repositories {
-
         mavenCentral()
         mavenLocal()
     }
@@ -64,7 +66,6 @@ subprojects {
     dependencies {
 
         implementation("org.apache.logging.log4j:log4j-api:2.20.0")
-
         implementation("org.apache.logging.log4j:log4j-core:2.20.0")
 
         implementation("io.projectreactor:reactor-core:3.5.5")
