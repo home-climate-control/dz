@@ -1,4 +1,4 @@
 dependencies {
 
-    implementation project(':dz3r-director')
+    implementation project(":dz3r-director")
 }
