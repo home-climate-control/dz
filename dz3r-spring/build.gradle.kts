@@ -12,7 +12,7 @@ application {
 
 dependencies {
 
-    implementation("org.springframework:spring-context:5.3.19")
+    implementation("org.springframework:spring-context:5.3.27")
 
     implementation(project(":dz3r-common"))
     implementation(project(":dz3r-director"))

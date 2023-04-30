@@ -1,7 +1,7 @@
 pluginManagement {
     plugins {
-        id("com.github.spotbugs") version "4.0.5"
-        id("net.ltgt.errorprone") version "3.0.1"
+        id("com.github.spotbugs") version "5.0.14"
+        id("net.ltgt.errorprone") version "3.1.0"
         id("org.sonarqube") version "4.0.0.2929"
         id("com.gorylenko.gradle-git-properties") version "2.4.1"
     }
