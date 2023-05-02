@@ -181,7 +181,9 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         var newState = stateSignal.getValue();
 
-        if ((actuatorState == null && newState != null) || newState.compareTo(actuatorState) != 0) {
+        // newState can't possibly be null at this point
+
+        if (actuatorState == null || newState.compareTo(actuatorState) != 0) {
 
             logger.info("{}: state change: {} => {}", getAddress(), actuatorState, newState);
             actuatorState = newState;
