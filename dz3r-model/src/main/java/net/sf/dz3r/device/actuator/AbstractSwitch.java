@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.common.Objects;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -72,11 +73,8 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     protected AbstractSwitch(@NonNull A address, @Nullable Scheduler scheduler, @Nullable Duration minDelay, @Nullable Clock clock) {
 
         // VT: NOTE: @NonNull seems to have no effect, what enforces it?
-        if (address == null) {
-            throw new IllegalArgumentException("address can't be null");
-        }
+        this.address = Objects.requireNonNull(address,"address can't be null");
 
-        this.address = address;
         this.scheduler = scheduler == null ? Schedulers.newSingle("switch:" + address, true) : scheduler;
         this.minDelay = minDelay;
         this.clock = clock == null ? Clock.systemUTC() : clock;
