@@ -1,6 +1,6 @@
 package net.sf.dz3r.common;
 
-public class Objects {
+public class HCCObjects {
 
     /**
      * Unlike {@link java.util.Objects#requireNonNull(Object, String)}, throws an {@link IllegalArgumentException}.
