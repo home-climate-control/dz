@@ -262,6 +262,15 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         if (targetDelta > settings.changeoverDelta) {
 
+            // We're still above the target
+            targetAdjustment = 0.0;
+
+        } else if (ambientDelta < 0) {
+
+            // We're below the target, but the mode adjusted ambient is too high - this is an abnormal situation,
+            // either the target is misconfigured, or someone pulled the setpoint too far
+
+            logger.warn("economizer abnormal, indoor={}, ambient={}, settings={}", indoorTemperature, ambientTemperature, settings);
             targetAdjustment = 0.0;
 
         } else {
