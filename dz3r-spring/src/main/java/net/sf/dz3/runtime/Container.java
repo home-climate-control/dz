@@ -1,5 +1,17 @@
 package net.sf.dz3.runtime;
 
+import io.micrometer.core.instrument.Clock;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmHeapPressureMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
+import io.micrometer.core.instrument.binder.logging.Log4j2Metrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
+import io.micrometer.core.instrument.binder.system.UptimeMetrics;
+import io.micrometer.influx.InfluxConfig;
+import io.micrometer.influx.InfluxMeterRegistry;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,10 +23,12 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
+import java.time.Duration;
+
 /**
  * Entry point into DZ Core.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2023
  */
 public class Container {
 
@@ -57,6 +71,9 @@ public class Container {
 
         try {
             ReactorDebugAgent.init();
+
+            // Start early so that we have a hint of what is going on
+            startMicrometerRegistry();
 
             var configFound = false;
 
@@ -102,6 +119,68 @@ public class Container {
             logger.fatal("Shutting down");
             ThreadContext.pop();
         }
+    }
+
+    private void startMicrometerRegistry() {
+
+        ThreadContext.push("startMicrometerRegistry");
+
+        try {
+
+            // Different from whatever is used by InfluxDbLogger
+            final var dbName = getSystemProperty("HCC_MICROMETER_INFLUXDB_DB", "database name", "hcc-micrometer");
+            final var uri = getSystemProperty("HCC_MICROMETER_INFLUXDB_URI", "uri", "http://localhost:8086");
+
+            InfluxConfig config = new InfluxConfig() {
+                @Override
+                public Duration step() {
+                    return Duration.ofSeconds(10);
+                }
+
+                @Override
+                public String db() {
+                    return dbName;
+                }
+
+                @Override
+                public String uri() {
+                    return uri;
+                }
+
+                @Override
+                public String get(String key) {
+                    return null; // accept the rest of the defaults
+                }
+            };
+
+            MeterRegistry registry = new InfluxMeterRegistry(config, Clock.SYSTEM);
+            Metrics.addRegistry(registry);
+
+            new JvmGcMetrics().bindTo(registry);
+            new JvmHeapPressureMetrics().bindTo(registry);
+            new JvmMemoryMetrics().bindTo(registry);
+            new JvmThreadMetrics().bindTo(registry);
+            new Log4j2Metrics().bindTo(registry);
+            new ProcessorMetrics().bindTo(registry);
+            new UptimeMetrics().bindTo(registry);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private String getSystemProperty(String key, String description, String defaultValue) {
+
+        var value = System.getProperty(key);
+
+        if (value == null) {
+            logger.warn("Default Micrometer InfluxDB {} ({}) is used, override with system property {}=<value>", description, defaultValue, key);
+            return defaultValue;
+        }
+
+        logger.info("Micrometer InfluxDB {description}={}", value);
+
+        return value;
     }
 
     /**

@@ -44,4 +44,7 @@ dependencies {
 
     // Enable Raspberry Pi specific hardware integration
     runtimeOnly(project(":dz3r-raspberry-pi"))
+
+    // Enable Micrometer integration via InfluxDB
+    implementation("io.micrometer:micrometer-registry-influx:1.11.0")
 }
