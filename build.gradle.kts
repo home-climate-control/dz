@@ -6,6 +6,8 @@ plugins {
     id("net.ltgt.errorprone")
     id("org.sonarqube")
     id("com.gorylenko.gradle-git-properties") apply false
+    id("org.springframework.boot") apply false
+    id("io.spring.dependency-management") apply false
 }
 
 sonarqube {
@@ -25,8 +27,8 @@ subprojects {
     apply(plugin = "net.ltgt.errorprone")
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     group = "net.sf.dz3"
