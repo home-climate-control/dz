@@ -27,3 +27,7 @@ management:
 logging:
   level:
     io.micrometer: INFO
+
+home-climate-control:
+  # From this point on, your custom configuration starts. Use a custom configuration file (application-${PROFILE}.yaml),
+  # and don't commit it to source control, that's a privacy leak.
