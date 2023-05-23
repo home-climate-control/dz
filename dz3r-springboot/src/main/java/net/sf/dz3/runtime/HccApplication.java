@@ -1,6 +1,6 @@
 package net.sf.dz3.runtime;
 
-import net.sf.dz3.runtime.config.HccConfiguration;
+import net.sf.dz3.runtime.config.HccRawConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
@@ -9,13 +9,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 @SpringBootApplication
-@EnableConfigurationProperties(HccConfiguration.class)
+@EnableConfigurationProperties(HccRawConfig.class)
 public class HccApplication implements CommandLineRunner {
 
-    private final HccConfiguration config;
+    private final HccRawConfig config;
 
     private static final Logger logger = LogManager.getLogger(HccApplication.class);
-    public HccApplication(HccConfiguration config) {
+    public HccApplication(HccRawConfig config) {
         this.config = config;
     }
 
@@ -29,5 +29,7 @@ public class HccApplication implements CommandLineRunner {
         logger.info("configuration: {}", config);
         logger.info("");
         logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
+
+
     }
 }
