@@ -34,12 +34,13 @@ public class HccApplication implements CommandLineRunner {
         try {
             logger.info("command line arguments: {}", (Object[]) args);
             logger.info("configuration: {}", config);
-            logger.info("");
-            logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
 
             new ConfigurationParser().parse(config).start().block();
 
             logger.info("run complete");
+
+            logger.info("");
+            logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
         } finally {
             ThreadContext.pop();
         }
