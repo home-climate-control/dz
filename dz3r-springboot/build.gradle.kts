@@ -47,10 +47,12 @@ dependencies {
     runtimeOnly(project(":dz3r-raspberry-pi"))
 
     // SpringBoot additions
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     runtimeOnly("io.micrometer:micrometer-registry-influx")
     runtimeOnly("io.micrometer:micrometer-registry-jmx")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
 }
