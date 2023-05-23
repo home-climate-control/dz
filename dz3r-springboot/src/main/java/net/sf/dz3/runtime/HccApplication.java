@@ -1,8 +1,10 @@
 package net.sf.dz3.runtime;
 
+import net.sf.dz3.runtime.config.ConfigurationParser;
 import net.sf.dz3.runtime.config.HccRawConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,15 +23,25 @@ public class HccApplication implements CommandLineRunner {
 
     public static void main(String[] args) {
 
+        // VT: NOTE: call close() or exit() on this when all the kinks are ironed out, to support a controlled lifecycle
         SpringApplication.run(HccApplication.class, args);
     }
 
     @Override
     public void run(String... args) {
-        logger.info("configuration: {}", config);
-        logger.info("");
-        logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
+        ThreadContext.push("run");
 
+        try {
+            logger.info("command line arguments: {}", (Object[]) args);
+            logger.info("configuration: {}", config);
+            logger.info("");
+            logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
 
+            new ConfigurationParser().parse(config).start().block();
+
+            logger.info("run complete");
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }
