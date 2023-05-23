@@ -24,7 +24,7 @@ import java.util.List;
  * @param instance HCC instance, to distinguish in metrics.
  * @param esphome ESPHome based devices.
  * @param zigbee2mqtt Zigbee devices, accessed via {@code zigbee2mqtt}
- * @param zwave Z-Wave devices, accessed via {@code zwave2mqtt}.
+ * @param zwave2mqtt Z-Wave devices, accessed via {@code zwave2mqtt}.
  * @param onewire 1-Wire devices.
  * @param mock Mock devices, to emulate missing features while in development.
  * @param filters Signal filters.
@@ -43,7 +43,7 @@ public record HccRawConfig(
         String instance,
         List<ESPHomeListenerConfig> esphome,
         List<Z2MJsonListenerConfig> zigbee2mqtt,
-        List<ZWaveListenerConfig> zwave,
+        List<ZWaveListenerConfig> zwave2mqtt,
         List<OnewireBusConfig> onewire,
         List<MockConfig> mock,
         List<FilterConfig> filters,
