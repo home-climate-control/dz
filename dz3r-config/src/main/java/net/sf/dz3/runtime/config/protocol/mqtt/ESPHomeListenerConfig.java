@@ -1,4 +1,7 @@
-package net.sf.dz3.runtime.config.hardware;
+package net.sf.dz3.runtime.config.protocol.mqtt;
+
+import net.sf.dz3.runtime.config.hardware.SensorConfig;
+import net.sf.dz3.runtime.config.hardware.SwitchConfig;
 
 import java.util.List;
 
@@ -19,7 +22,8 @@ public record ESPHomeListenerConfig(
         String username,
         String password,
         String rootTopic,
+        boolean reconnect,
         List<SensorConfig> sensors,
         List<SwitchConfig> switches
-) {
+) implements MqttGateway {
 }

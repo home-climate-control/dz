@@ -32,7 +32,7 @@ dependencies {
     runtimeOnly(project(":dz3r-xbee"))
 
     // Enable MQTT
-    runtimeOnly(project(":dz3r-mqtt"))
+    implementation(project(":dz3r-mqtt"))
 
     // Enable remote control over HTTP
     runtimeOnly(project(":dz3r-http"))

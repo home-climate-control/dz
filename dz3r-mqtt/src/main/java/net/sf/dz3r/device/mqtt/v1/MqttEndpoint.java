@@ -35,9 +35,9 @@ public class MqttEndpoint implements Comparable<MqttEndpoint> {
     @Override
     public boolean equals(Object other) {
 
-        return other instanceof MqttEndpoint
-                && host.equals(((MqttEndpoint) other).host)
-                && port == ((MqttEndpoint) other).port;
+        return other instanceof MqttEndpoint endpoint
+                && host.equals(endpoint.host)
+                && port == endpoint.port;
     }
 
     @Override
