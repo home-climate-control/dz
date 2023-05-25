@@ -18,6 +18,7 @@ include("xbee-api-reactive:xbee-api")
 // Modules
 
 include("dz3r-common")
+include("dz3r-config")
 include("dz3r-director")
 include("dz3r-driver")
 include("dz3r-http")
