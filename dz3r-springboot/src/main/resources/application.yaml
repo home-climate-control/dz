@@ -27,8 +27,6 @@ management:
 logging:
   level:
     io.micrometer: INFO
-    net.sf.dz3r.device.mqtt.v1: DEBUG
-    net.sf.dz3r.device.esphome.v1: DEBUG
 
 home-climate-control:
   # From this point on, your custom configuration starts. Use a custom configuration file (application-${PROFILE}.yaml),
