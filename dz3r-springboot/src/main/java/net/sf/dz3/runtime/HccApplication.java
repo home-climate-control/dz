@@ -9,6 +9,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import reactor.tools.agent.ReactorDebugAgent;
 
 @SpringBootApplication
 @EnableConfigurationProperties(HccRawConfig.class)
@@ -32,6 +33,8 @@ public class HccApplication implements CommandLineRunner {
         ThreadContext.push("run");
 
         try {
+            ReactorDebugAgent.init();
+
             logger.info("command line arguments: {}", (Object[]) args);
             logger.info("configuration: {}", config);
 

@@ -1,16 +1,29 @@
 package net.sf.dz3.runtime.config;
 
-import net.sf.dz3.runtime.config.hardware.ESPHomeListenerConfig;
-import net.sf.dz3.runtime.config.hardware.OnewireBusConfig;
-import net.sf.dz3.runtime.config.hardware.Z2MJsonListenerConfig;
-import net.sf.dz3.runtime.config.hardware.ZWaveListenerConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.ESPHomeListenerConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
+import net.sf.dz3.runtime.config.protocol.mqtt.Z2MJsonListenerConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.ZWaveListenerConfig;
+import net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig;
+import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
+import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.signal.Signal;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Parses {@link HccRawConfig} into {@link HccParsedConfig}.
@@ -19,6 +32,11 @@ import java.util.Map;
  */
 public class ConfigurationParser {
     private final Logger logger = LogManager.getLogger();
+
+    /**
+     * Mapping from (host, port) to {@link ESPHomeListener} instance for that endpoint.
+     */
+    private Map<String, ESPHomeListener> esphomeMapping = new LinkedHashMap<>();
 
     public HccParsedConfig parse(HccRawConfig source) {
 
@@ -59,6 +77,17 @@ public class ConfigurationParser {
         }
     }
 
+    /**
+     * Render MQTT URL out of configuration parameters. Only used as a key to distinguish different connections.
+     */
+    String renderMqttUrl(MqttEndpointSpec source) {
+        return "mqtt://"
+                + Optional.ofNullable(source.host()).orElse("localhost")
+                + ":"
+                + Optional.ofNullable(source.port()).orElse(MqttEndpoint.DEFAULT_PORT)
+                + "/" + Optional.ofNullable(source.rootTopic()).orElse("");
+    }
+
     private class EspSensorFluxResolver extends SensorFluxResolver<ESPHomeListenerConfig> {
 
         protected EspSensorFluxResolver(List<ESPHomeListenerConfig> source) {
@@ -67,6 +96,78 @@ public class ConfigurationParser {
 
         @Override
         protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<ESPHomeListenerConfig> source) {
+
+            var collector = new TreeMap<String, Set<MqttGateway>>();
+
+            var endpoints = Flux
+                    .fromIterable(source)
+
+                    // Collect items from possibly different profile configurations into a single packet
+                    .map(item -> new ImmutablePair<>(renderMqttUrl(item), item))
+                    .doOnNext(item -> collector
+                            .computeIfAbsent(item.getKey(), k -> new LinkedHashSet<>())
+                            .add(item.getValue()))
+                    .subscribe();
+
+            Flux
+                    .fromIterable(collector.entrySet())
+                    .doOnNext(kv -> {
+                        logger.info("endpoint: {}", kv.getKey());
+                        for (var spec: kv.getValue()) {
+                            logger.info("  {}", spec);
+                        }
+                    })
+                    .subscribe();
+
+            endpoints.dispose();
+
+            Flux
+                    .fromIterable(collector.entrySet())
+
+                    // We don't need the keys anymore, they played their role
+                    .flatMap(kv -> Flux.fromIterable(kv.getValue()))
+
+                    // From now on, entries point to distinctly different MQTT sources
+                    // Let's start them in parallel to speed up execution
+
+                    .parallel()
+                    .runOn(Schedulers.boundedElastic())
+
+                    .map(spec -> new ImmutableTriple<>(
+                            new ESPHomeListener(
+                                    spec.host(),
+                                    Optional.ofNullable(spec.port()).orElse(MqttEndpoint.DEFAULT_PORT),
+                                    spec.username(),
+                                    spec.password(),
+                                    spec.reconnect(),
+                                    spec.rootTopic()),
+                            spec.sensors(),
+                            spec.switches()))
+                    .flatMap(triple -> {
+                        // VT: FIXME: Ignoring switches for now
+                        var listener = triple.getLeft();
+
+                        Flux<Pair<ESPHomeListener, String>> result =  Flux.create(sink -> {
+                            for (var address : triple.getMiddle()) {
+                                sink.next(new ImmutablePair<>(listener, address.address()));
+                            }
+                            sink.complete();
+                        });
+
+                        return result;
+                    })
+
+                    // Reshuffle, the cadence is different here
+                    .sequential()
+                    .parallel()
+                    .runOn(Schedulers.boundedElastic())
+
+                    .map(kv -> kv.getKey().getFlux(kv.getValue()))
+                    .map(flux -> flux.subscribe(s -> logger.info("signal: {}", s)))
+                    .sequential()
+
+                    .blockLast();
+
             return Map.of();
         }
     }
