@@ -12,10 +12,16 @@ import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> {
 
@@ -27,6 +33,8 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
     public final boolean autoReconnect;
 
     public final boolean includeSubtopics;
+
+    private final Map<String, ReadWriteLock> topic2lock = new LinkedHashMap<>();
 
     /**
      * MQTT client.
@@ -131,8 +139,36 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
                 .just(topic)
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(t -> logger.info("getFlux: {}", t))
-                .map(t -> topic2flux.computeIfAbsent(t, k -> createFlux(t)))
-                .blockFirst();
+                .flatMap(t -> {
+
+                    // Simply calling computeIfAbsent() on MQTT flux will cause race conditions because createFlux()
+                    // takes over 150ms.
+
+                    // This is somewhat uncool, but a) we can't block() here, but b) must ensure exclusivity, so
+                    // the interim solution would be a lock. Good thing is, this is being called in parallel threads
+                    // and is not going to matter much.
+
+                    var start = Instant.now();
+                    var lock = getLock(t);
+
+                    lock.lock();
+                    try {
+                        logger.debug("acquired lock on topic={} in {}ms", t, Duration.between(start, Instant.now()).toMillis());
+                        return topic2flux.computeIfAbsent(t, k -> createFlux(t));
+                    } finally {
+                        lock.unlock();
+                        logger.debug("released lock on topic={} in {}ms", t, Duration.between(start, Instant.now()).toMillis());
+                    }
+                });
+    }
+
+    private synchronized Lock getLock(String topic) {
+
+        // An attempt to simply call computeIfAbsent() will cause the same problem that was originally encountered:
+        // ConcurrentModificationException. Overhead here is much smaller, though.
+
+        logger.debug("acquiring lock on topic={}...", topic);
+        return topic2lock.computeIfAbsent(topic, k -> new ReentrantReadWriteLock()).writeLock();
     }
 
     private final Map<String, Receiver> topic2receiver = new TreeMap<>();
@@ -152,6 +188,7 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
      */
     private Flux<MqttSignal> createFlux(String topic) {
 
+        var start = Instant.now();
         logger.info("createFlux: topic={}", topic);
 
         Flux<MqttSignal> flux = Flux.create(sink -> {
@@ -187,12 +224,12 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
 
                 })
                 .send();
-        logger.info("Subscribing...");
+        logger.info("Subscribing to {}...", topic);
 
         try {
 
             var ack = ackFuture.get();
-            logger.info("Subscribed: {}", ack.getReturnCodes());
+            logger.info("Subscribed to {}: {} (took {}ms)", topic, ack.getReturnCodes(), Duration.between(start, Instant.now()).toMillis());
 
             return result;
 
