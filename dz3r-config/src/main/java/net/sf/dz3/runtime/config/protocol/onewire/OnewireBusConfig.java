@@ -1,4 +1,7 @@
-package net.sf.dz3.runtime.config.hardware;
+package net.sf.dz3.runtime.config.protocol.onewire;
+
+import net.sf.dz3.runtime.config.hardware.SensorConfig;
+import net.sf.dz3.runtime.config.hardware.SwitchConfig;
 
 import java.util.List;
 
