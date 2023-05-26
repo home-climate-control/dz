@@ -6,5 +6,4 @@ package net.sf.dz3.runtime.config.protocol.mqtt;
 public interface MqttBrokerSpec extends MqttEndpointSpec {
     String username();
     String password();
-    boolean reconnect();
 }
