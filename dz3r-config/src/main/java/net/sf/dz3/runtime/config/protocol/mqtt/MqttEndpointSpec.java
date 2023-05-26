@@ -28,4 +28,8 @@ public interface MqttEndpointSpec {
                 + ",port=" + (port() == null ? "1883" : port())
                 + ",autoReconnect=" + autoReconnect();
     }
+
+    String username();
+
+    String password();
 }
