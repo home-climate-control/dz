@@ -30,7 +30,7 @@ class MqttListenerTest {
 
         assertThatCode(() -> {
             new MqttListener(new MqttEndpoint("localhost"))
-                    .getFlux("")
+                    .getFlux("", true)
                     .doOnNext(v -> logger.info("message: {} {}", v.topic, v.message))
                     .take(Duration.ofSeconds(1))
                     .blockLast();

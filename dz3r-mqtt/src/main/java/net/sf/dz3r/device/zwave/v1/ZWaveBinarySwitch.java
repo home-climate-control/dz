@@ -70,7 +70,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
                                 Scheduler scheduler) {
 
         this(
-                new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect, true),
+                new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect),
                 deviceRootTopic,
                 scheduler);
     }
@@ -90,10 +90,6 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
                 Duration.ofSeconds(30),
                 null);
 
-        if (!mqttAdapter.includeSubtopics) {
-            throw new IllegalArgumentException("mqttAdapter should have includeSubtopics=true here");
-        }
-
         this.deviceRootTopic = deviceRootTopic;
 
         // Z-Wave JS UI produces multiple MQTT messages per targetValue/set message, must drain them proactively
@@ -104,6 +100,11 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
                 .map(this::getState)
                 .doOnNext(state -> lastKnownState = state)
                 .subscribe();
+    }
+
+    @Override
+    protected boolean includeSubtopics() {
+        return true;
     }
 
     @Override

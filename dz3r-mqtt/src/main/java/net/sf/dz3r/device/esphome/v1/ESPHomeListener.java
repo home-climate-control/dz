@@ -28,10 +28,6 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
 
     public ESPHomeListener(MqttListener mqttListener, String mqttRootTopicSub) {
 
-        if (!mqttListener.includeSubtopics) {
-            throw new IllegalArgumentException("mqttListener should have includeSubtopics=true here");
-        }
-
         this.mqttListener = mqttListener;
         this.mqttRootTopicSub = mqttRootTopicSub;
     }
@@ -63,7 +59,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
                            boolean autoReconnect,
                            String mqttRootTopicSub) {
 
-        mqttListener = new MqttListener(new MqttEndpoint(host, port), username, password, autoReconnect, true);
+        mqttListener = new MqttListener(new MqttEndpoint(host, port), username, password, autoReconnect);
         this.mqttRootTopicSub = mqttRootTopicSub;
     }
 
@@ -86,7 +82,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
 
         return new TimeoutGuard<Double, Void>(timeout)
                 .compute(mqttListener
-                        .getFlux(mqttRootTopicSub)
+                        .getFlux(mqttRootTopicSub, true)
                         .filter(e -> matchSensorAddress(e, address))
                         .doOnNext(s -> logger.debug("matched: {} {}", s.topic, s.message))
                         .map(this::mqtt2sensor));

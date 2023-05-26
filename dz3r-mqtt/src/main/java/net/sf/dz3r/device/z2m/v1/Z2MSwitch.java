@@ -73,7 +73,7 @@ public class Z2MSwitch extends AbstractMqttSwitch {
                         Scheduler scheduler) {
 
         this(
-                new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect, false),
+                new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect),
                 deviceRootTopic,
                 scheduler);
     }
@@ -101,6 +101,11 @@ public class Z2MSwitch extends AbstractMqttSwitch {
                 .map(this::getState)
                 .doOnNext(state -> lastKnownState = state)
                 .subscribe();
+    }
+
+    @Override
+    protected boolean includeSubtopics() {
+        return false;
     }
 
     @Override

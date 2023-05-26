@@ -73,7 +73,7 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
 
         // VT: NOTE: ESPHome appears to not suffer from buffer overruns like Zigbee and Z-Wave do,
         // so not providing the delay
-        this(new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect, true),
+        this(new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect),
                 deviceRootTopic,
                 scheduler);
     }
@@ -98,10 +98,6 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
                 null,
                 null);
 
-        if (!mqttAdapter.includeSubtopics) {
-            throw new IllegalArgumentException("mqttAdapter should have includeSubtopics=true here");
-        }
-
         this.deviceRootTopic = deviceRootTopic;
 
         // Must proactively retrieve the state because otherwise it will be lost ("no subscriptions, dropped")
@@ -110,6 +106,11 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
                 .map(this::getState)
                 .doOnNext(state -> lastKnownState = state)
                 .subscribe();
+    }
+
+    @Override
+    protected boolean includeSubtopics() {
+        return true;
     }
 
     @Override

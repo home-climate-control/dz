@@ -18,10 +18,10 @@ public class MqttListener extends AbstractMqttAdapter {
      * @param address MQTT broker endpoint.
      */
     public MqttListener(MqttEndpoint address) {
-        this(address, null, null, false, true);
+        this(address, null, null, false);
     }
 
-    public MqttListener(MqttEndpoint address, String username, String password, boolean autoReconnect, boolean includeSubtopics) {
-        super(address, username, password, autoReconnect, includeSubtopics);
+    public MqttListener(MqttEndpoint address, String username, String password, boolean autoReconnect) {
+        super(address, username, password, autoReconnect);
     }
 }

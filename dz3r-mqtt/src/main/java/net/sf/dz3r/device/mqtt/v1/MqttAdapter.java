@@ -20,11 +20,11 @@ public class MqttAdapter extends AbstractMqttAdapter {
      * @param address MQTT broker endpoint.
      */
     public MqttAdapter(MqttEndpoint address) {
-        this(address, null, null, false, true);
+        this(address, null, null, false);
     }
 
-    public MqttAdapter(MqttEndpoint address, String username, String password, boolean autoReconnect, boolean includeSubtopics) {
-        super(address, username, password, autoReconnect, includeSubtopics);
+    public MqttAdapter(MqttEndpoint address, String username, String password, boolean autoReconnect) {
+        super(address, username, password, autoReconnect);
     }
 
     public void publish(String topic, String payload, MqttQos qos, boolean retain) {
