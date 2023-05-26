@@ -7,12 +7,6 @@ public interface MqttEndpointSpec {
     String host();
     Integer port();
 
-    /**
-     * @deprecated Move to {@link MqttBrokerSpec} as soon as {@code ESPHomeListener} is refactored to open one connection to one endpoint.
-     */
-    @Deprecated(forRemoval = false)
-    String rootTopic();
-
     boolean autoReconnect();
 
     /**
@@ -24,8 +18,8 @@ public interface MqttEndpointSpec {
      * @return A unique signature of (host, port, autoReconnect).
      */
     default String signature() {
-        return "host=" + (host() == null ? "localhost" : host())
-                + ",port=" + (port() == null ? "1883" : port())
+        return "mqtt://" + (host() == null ? "localhost" : host())
+                + ":" + (port() == null ? "1883" : port())
                 + ",autoReconnect=" + autoReconnect();
     }
 
