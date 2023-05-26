@@ -139,7 +139,7 @@ public class ConfigurationParser {
                                     Optional.ofNullable(spec.port()).orElse(MqttEndpoint.DEFAULT_PORT),
                                     spec.username(),
                                     spec.password(),
-                                    spec.reconnect(),
+                                    spec.autoReconnect(),
                                     spec.rootTopic()),
                             spec.sensors(),
                             spec.switches()))

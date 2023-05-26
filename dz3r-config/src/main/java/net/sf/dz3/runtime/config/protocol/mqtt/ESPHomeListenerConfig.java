@@ -22,7 +22,7 @@ public record ESPHomeListenerConfig(
         String username,
         String password,
         String rootTopic,
-        boolean reconnect,
+        boolean autoReconnect,
         List<SensorConfig> sensors,
         List<SwitchConfig> switches
 ) implements MqttGateway {

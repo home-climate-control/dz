@@ -12,4 +12,6 @@ public interface MqttEndpointSpec {
      */
     @Deprecated(forRemoval = false)
     String rootTopic();
+
+    boolean autoReconnect();
 }
