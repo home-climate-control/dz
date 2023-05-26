@@ -12,37 +12,34 @@ class ConfigurationParserTest {
 
 
     @ParameterizedTest
-    @MethodSource("hostPortTopicProvider")
-    void testHostPort(HostPortTopic source) {
+    @MethodSource("mqttEndpointExpectedProvider")
+    void testHostPort(MqttEndpointExpected source) {
 
-        var parser = new ConfigurationParser();
-
-        var result = parser.renderMqttUrl(
-                new ESPHomeListenerConfig(
+        var spec = new ESPHomeListenerConfig(
                         null,
                         source.host,
                         source.port,
                         null,
                         null,
-                        source.topic,
-                        true,
+                        "none",
+                        source.autoReconnect,
                         null,
-                        null));
+                        null);
 
-        assertThat(result).isEqualTo(source.expected);
+        assertThat(spec.signature()).isEqualTo(source.expected);
 
     }
 
-    public static Stream<HostPortTopic> hostPortTopicProvider() {
+    public static Stream<MqttEndpointExpected> mqttEndpointExpectedProvider() {
 
         return Stream.of(
-                new HostPortTopic("a", 1, "/", "mqtt://a:1//"),
-                new HostPortTopic("b", null, "#", "mqtt://b:1883/#"),
-                new HostPortTopic(null, 2, null, "mqtt://localhost:2/"),
-                new HostPortTopic(null, null, null, "mqtt://localhost:1883/")
+                new MqttEndpointExpected("a", 1, true, "mqtt://a:1,autoReconnect=true"),
+                new MqttEndpointExpected("b", null, false, "mqtt://b:1883,autoReconnect=false"),
+                new MqttEndpointExpected(null, 2, true, "mqtt://localhost:2,autoReconnect=true"),
+                new MqttEndpointExpected(null, null, false, "mqtt://localhost:1883,autoReconnect=false")
         );
     }
 
-    public record HostPortTopic(String host, Integer port, String topic, String expected) {
+    public record MqttEndpointExpected(String host, Integer port, boolean autoReconnect, String expected) {
     }
 }

@@ -1,7 +1,6 @@
 package net.sf.dz3.runtime.config;
 
 import net.sf.dz3.runtime.config.protocol.mqtt.ESPHomeListenerConfig;
-import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
 import net.sf.dz3.runtime.config.protocol.mqtt.Z2MJsonListenerConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.ZWaveListenerConfig;
@@ -77,17 +76,6 @@ public class ConfigurationParser {
         }
     }
 
-    /**
-     * Render MQTT URL out of configuration parameters. Only used as a key to distinguish different connections.
-     */
-    String renderMqttUrl(MqttEndpointSpec source) {
-        return "mqtt://"
-                + Optional.ofNullable(source.host()).orElse("localhost")
-                + ":"
-                + Optional.ofNullable(source.port()).orElse(MqttEndpoint.DEFAULT_PORT)
-                + "/" + Optional.ofNullable(source.rootTopic()).orElse("");
-    }
-
     private class EspSensorFluxResolver extends SensorFluxResolver<ESPHomeListenerConfig> {
 
         protected EspSensorFluxResolver(List<ESPHomeListenerConfig> source) {
@@ -103,7 +91,7 @@ public class ConfigurationParser {
                     .fromIterable(source)
 
                     // Collect items from possibly different profile configurations into a single packet
-                    .map(item -> new ImmutablePair<>(renderMqttUrl(item), item))
+                    .map(item -> new ImmutablePair<>(item.signature(), item))
                     .doOnNext(item -> collector
                             .computeIfAbsent(item.getKey(), k -> new LinkedHashSet<>())
                             .add(item.getValue()))
