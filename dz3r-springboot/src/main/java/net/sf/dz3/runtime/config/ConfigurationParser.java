@@ -1,6 +1,7 @@
 package net.sf.dz3.runtime.config;
 
 import net.sf.dz3.runtime.config.protocol.mqtt.ESPHomeListenerConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
 import net.sf.dz3.runtime.config.protocol.mqtt.Z2MJsonListenerConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.ZWaveListenerConfig;
@@ -39,14 +40,35 @@ public class ConfigurationParser {
 
     public HccParsedConfig parse(HccRawConfig source) {
 
+        // VT: FIXME: Leaving 1-Wire in the dust for now
+
+        // Step 1: collect all MQTT endpoints and get their configurations
+
+        var endpoints = Flux
+                .just(
+                        new EspSensorSwitchResolver(source.esphome()),
+                        new ZigbeeSensorSwitchResolver(source.zigbee2mqtt()),
+                        new ZWaveSensorSwitchResolver(source.zwave2mqtt())
+                )
+                .flatMap(MqttSensorSwitchResolver::getEndpoints)
+                .doOnNext(endpoint -> logger.info("endpoint found: {}", endpoint.signature()))
+                .collectList()
+                .block();
+
+        logger.info("all endpoints: {}", endpoints);
+
+        // Step 2: for all the endpoints, materialize their brokers
+
+        // Step 2: for all the brokers, collect all their sensors and switches, in parallel
+
         var sensors = Flux
                 .just(
-                        new EspSensorFluxResolver(source.esphome()),
-                        new OnewireSensorFluxResolver(source.onewire()),
-                        new ZigbeeSensorFluxResolver(source.zigbee2mqtt()),
-                        new ZWaveSensorFluxResolver(source.zwave2mqtt())
+                        new EspSensorSwitchResolver(source.esphome()),
+                        new OnewireSensorSwitchResolver(source.onewire()),
+                        new ZigbeeSensorSwitchResolver(source.zigbee2mqtt()),
+                        new ZWaveSensorSwitchResolver(source.zwave2mqtt())
                 )
-                .map(SensorFluxResolver::getSensorFluxes)
+                .map(SensorSwitchResolver::getSensorFluxes)
                 .blockLast();
 
 
@@ -55,11 +77,16 @@ public class ConfigurationParser {
         return new HccParsedConfig();
     }
 
-    private abstract class SensorFluxResolver<T> {
+    /**
+     * Resolves switches and sensors from configuration elements.
+     *
+     * @param <T> Configuration element type.
+     */
+    private abstract class SensorSwitchResolver<T> {
 
         protected final List<T> source;
 
-        protected SensorFluxResolver(List<T> source) {
+        protected SensorSwitchResolver(List<T> source) {
             this.source = source;
         }
 
@@ -76,9 +103,73 @@ public class ConfigurationParser {
         }
     }
 
-    private class EspSensorFluxResolver extends SensorFluxResolver<ESPHomeListenerConfig> {
+    private abstract class MqttSensorSwitchResolver<T extends MqttGateway> extends SensorSwitchResolver<T> {
 
-        protected EspSensorFluxResolver(List<ESPHomeListenerConfig> source) {
+        protected MqttSensorSwitchResolver(List<T> source) {
+            super(source);
+        }
+
+        public final Flux<MqttEndpointSpec> getEndpoints() {
+
+            var endpoints = new LinkedHashSet<String>();
+
+            Flux<MqttEndpointSpec> result = Flux.create(sink -> {
+
+                var sequence = Flux
+                        .fromIterable(source)
+
+                        .map(item -> new ImmutablePair<>(item.signature(), item))
+                        .doOnNext(kv -> {
+
+                            var key = kv.getKey();
+                            if (!endpoints.contains(key)) {
+                                sink.next(parse(kv.getValue()));
+                                endpoints.add(key);
+                            }
+                        })
+                        .subscribe();
+
+                sink.complete();
+
+                sequence.dispose();
+            });
+
+            return result;
+        }
+
+        private MqttEndpointSpec parse(MqttGateway source) {
+            return new MqttEndpointSpec() {
+                @Override
+                public String host() {
+                    return source.host();
+                }
+
+                @Override
+                public Integer port() {
+                    return source.port();
+                }
+
+                @Override
+                public boolean autoReconnect() {
+                    return source.autoReconnect();
+                }
+
+                @Override
+                public String username() {
+                    return source.username();
+                }
+
+                @Override
+                public String password() {
+                    return source.password();
+                }
+            };
+        }
+    }
+
+    private class EspSensorSwitchResolver extends MqttSensorSwitchResolver<ESPHomeListenerConfig> {
+
+        protected EspSensorSwitchResolver(List<ESPHomeListenerConfig> source) {
             super(source);
         }
 
@@ -160,20 +251,9 @@ public class ConfigurationParser {
         }
     }
 
-    private class OnewireSensorFluxResolver extends SensorFluxResolver<OnewireBusConfig> {
+    private class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<Z2MJsonListenerConfig> {
 
-        private OnewireSensorFluxResolver(List<OnewireBusConfig> source) {
-            super(source);
-        }
-
-        @Override
-        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<OnewireBusConfig> source) {
-            return Map.of();
-        }
-    }
-    private class ZigbeeSensorFluxResolver extends SensorFluxResolver<Z2MJsonListenerConfig> {
-
-        private ZigbeeSensorFluxResolver(List<Z2MJsonListenerConfig> source) {
+        private ZigbeeSensorSwitchResolver(List<Z2MJsonListenerConfig> source) {
             super(source);
         }
 
@@ -183,14 +263,26 @@ public class ConfigurationParser {
         }
     }
 
-    private class ZWaveSensorFluxResolver extends SensorFluxResolver<ZWaveListenerConfig> {
+    private class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<ZWaveListenerConfig> {
 
-        private ZWaveSensorFluxResolver(List<ZWaveListenerConfig> source) {
+        private ZWaveSensorSwitchResolver(List<ZWaveListenerConfig> source) {
             super(source);
         }
 
         @Override
         protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<ZWaveListenerConfig> source) {
+            return Map.of();
+        }
+    }
+
+    private class OnewireSensorSwitchResolver extends SensorSwitchResolver<OnewireBusConfig> {
+
+        private OnewireSensorSwitchResolver(List<OnewireBusConfig> source) {
+            super(source);
+        }
+
+        @Override
+        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<OnewireBusConfig> source) {
             return Map.of();
         }
     }
