@@ -19,25 +19,6 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
 
     protected Signal<Boolean, Void> lastKnownState;
 
-    /**
-     * Create an instance.
-     *
-     * @deprecated Use the constructor with {@link MqttAdapter} instead.
-     */
-    @Deprecated
-    protected AbstractMqttSwitch(
-            MqttMessageAddress address,
-            String username, String password,
-            boolean reconnect,
-            boolean includeSubtopics,
-            Scheduler scheduler,
-            Duration minDelay,
-            Clock clock) {
-
-        super(address, scheduler, minDelay, clock);
-        mqttAdapter = new MqttAdapter(getAddress().endpoint, username, password, reconnect, includeSubtopics);
-    }
-
     protected AbstractMqttSwitch(
             MqttAdapter mqttAdapter,
             MqttMessageAddress address,

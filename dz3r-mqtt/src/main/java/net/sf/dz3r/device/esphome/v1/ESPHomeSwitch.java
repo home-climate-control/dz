@@ -2,6 +2,7 @@ package net.sf.dz3r.device.esphome.v1;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.signal.Signal;
@@ -31,16 +32,22 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
      * @param deviceRootTopic Switch root topic. See the doc link at the top for the configuration reference.
      *
      */
-    protected ESPHomeSwitch(String host, String deviceRootTopic) {
+    public ESPHomeSwitch(String host, String deviceRootTopic) {
         this(host, MqttEndpoint.DEFAULT_PORT, null, null, false, deviceRootTopic, null);
     }
 
     /**
      * Create a fully configured instance with default scheduler.
      *
+     * Even though deprecated, left intact not to disrupt existing configurations until
+     * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
+     *
      * @param deviceRootTopic Switch root topic. See the doc link at the top for the configuration reference.
+     *
+     * @deprecated Use {@link ESPHomeSwitch#ESPHomeSwitch(MqttAdapter, String, Scheduler)} instead.
      */
-    protected ESPHomeSwitch(String host, int port,
+    @Deprecated(forRemoval = false)
+    public ESPHomeSwitch(String host, int port,
                             String username, String password,
                             boolean reconnect,
                             String deviceRootTopic) {
@@ -50,9 +57,15 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
     /**
      * Create a fully configured instance.
      *
+     * Even though deprecated, left intact not to disrupt existing configurations until
+     * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
+     *
      * @param deviceRootTopic Switch root topic. See the doc link at the top for the configuration reference.
+     *
+     * @deprecated Use {@link ESPHomeSwitch#ESPHomeSwitch(MqttAdapter, String, Scheduler)} instead.
      */
-    protected ESPHomeSwitch(String host, int port,
+    @Deprecated(forRemoval = false)
+    public ESPHomeSwitch(String host, int port,
                             String username, String password,
                             boolean reconnect,
                             String deviceRootTopic,
@@ -60,14 +73,34 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
 
         // VT: NOTE: ESPHome appears to not suffer from buffer overruns like Zigbee and Z-Wave do,
         // so not providing the delay
-        super(new MqttMessageAddress(
-                new MqttEndpoint(host, port), deviceRootTopic),
-                username, password,
-                reconnect,
-                true,
+        this(new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect, true),
+                deviceRootTopic,
+                scheduler);
+    }
+
+    /**
+     *
+     * Create a fully configured instance.
+     */
+    public ESPHomeSwitch(
+            MqttAdapter mqttAdapter,
+            String deviceRootTopic,
+            Scheduler scheduler) {
+
+        // VT: NOTE: ESPHome appears to not suffer from buffer overruns like Zigbee and Z-Wave do,
+        // so not providing the delay
+        super(
+                mqttAdapter,
+                new MqttMessageAddress(
+                        mqttAdapter.address,
+                        deviceRootTopic),
                 scheduler,
                 null,
                 null);
+
+        if (!mqttAdapter.includeSubtopics) {
+            throw new IllegalArgumentException("mqttAdapter should have includeSubtopics=true here");
+        }
 
         this.deviceRootTopic = deviceRootTopic;
 
