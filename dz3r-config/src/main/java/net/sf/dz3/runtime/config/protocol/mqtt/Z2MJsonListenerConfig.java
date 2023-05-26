@@ -12,7 +12,7 @@ import java.util.List;
  * @param host MQTT broker host.
  * @param port MQTT broker port. Defaults to 1883 if absent.
  * @param rootTopic MQTT root topic. Mandatory.
- * @param reconnect Attempt to automatically reconnect if {@code true}.
+ * @param autoReconnect Attempt to automatically autoReconnect if {@code true}.
  * @param sensors List of sensors, optional.
  * @param switches List of switches, optional.
  */
@@ -23,7 +23,7 @@ public record Z2MJsonListenerConfig(
     String username,
     String password,
     String rootTopic,
-    boolean reconnect,
+    boolean autoReconnect,
     List<SensorConfig> sensors,
     List<SwitchConfig> switches) implements MqttGateway {
 }
