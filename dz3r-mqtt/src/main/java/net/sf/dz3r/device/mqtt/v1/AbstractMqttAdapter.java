@@ -32,8 +32,6 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
     private final String password;
     public final boolean autoReconnect;
 
-    public final boolean includeSubtopics;
-
     private final Map<String, ReadWriteLock> topic2lock = new LinkedHashMap<>();
 
     /**
@@ -51,16 +49,14 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
     protected AbstractMqttAdapter(
             MqttEndpoint address,
             String username, String password,
-            boolean autoReconnect,
-            boolean includeSubtopics) {
+            boolean autoReconnect) {
 
         this.address = address;
         this.username = username;
         this.password = password;
         this.autoReconnect = autoReconnect;
-        this.includeSubtopics = includeSubtopics;
 
-        logger.info("created endpoint={}, autoReconnect={}, includeSubtopics={}", address, autoReconnect, includeSubtopics);
+        logger.info("created endpoint={}, autoReconnect={}", address, autoReconnect);
     }
 
     protected synchronized Mqtt3AsyncClient getClient() {
@@ -130,15 +126,15 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
      *
      * @return Topic flux. Contains everything in subtopics as well.
      *
-     * @see #createFlux(String)
+     * @see #createFlux(String, boolean)
      */
-    public Flux<MqttSignal> getFlux(String topic) {
+    public Flux<MqttSignal> getFlux(String topic, boolean includeSubtopics) {
 
         // Move into a different thread
         return Flux
                 .just(topic)
                 .publishOn(Schedulers.boundedElastic())
-                .doOnNext(t -> logger.info("getFlux: {}", t))
+                .doOnNext(t -> logger.info("getFlux: {}{}", t, includeSubtopics ? "/..." : ""))
                 .flatMap(t -> {
 
                     // Simply calling computeIfAbsent() on MQTT flux will cause race conditions because createFlux()
@@ -154,7 +150,7 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
                     lock.lock();
                     try {
                         logger.debug("acquired lock on topic={} in {}ms", t, Duration.between(start, Instant.now()).toMillis());
-                        return topic2flux.computeIfAbsent(t, k -> createFlux(t));
+                        return topic2flux.computeIfAbsent(t, k -> createFlux(t, includeSubtopics));
                     } finally {
                         lock.unlock();
                         logger.debug("released lock on topic={} in {}ms", t, Duration.between(start, Instant.now()).toMillis());
@@ -184,12 +180,12 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
      *
      * @return Topic flux. Contains everything in subtopics as well.
      *
-     * @see #getFlux(String)
+     * @see #getFlux(String, boolean)
      */
-    private Flux<MqttSignal> createFlux(String topic) {
+    private Flux<MqttSignal> createFlux(String topic, boolean includeSubtopics) {
 
         var start = Instant.now();
-        logger.info("createFlux: topic={}", topic);
+        logger.info("createFlux: topic={}{}", topic, includeSubtopics ? "/..." : "");
 
         Flux<MqttSignal> flux = Flux.create(sink -> {
             logger.debug("New receiver, topic={}", topic);

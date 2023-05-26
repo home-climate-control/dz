@@ -29,6 +29,8 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
         super(address, scheduler, minDelay, clock);
         this.mqttAdapter = mqttAdapter;
     }
+
+    protected abstract boolean includeSubtopics();
     protected abstract String getGetStateTopic();
 
     protected abstract String getSetStateTopic();
@@ -43,7 +45,7 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
             return mqttStateFlux;
         }
 
-        mqttStateFlux = mqttAdapter.getFlux(getGetStateTopic());
+        mqttStateFlux = mqttAdapter.getFlux(getGetStateTopic(), includeSubtopics());
 
         return mqttStateFlux;
     }

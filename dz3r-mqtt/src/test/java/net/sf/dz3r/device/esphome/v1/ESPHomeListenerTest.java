@@ -22,7 +22,7 @@ class ESPHomeListenerTest {
     @Test
     void constructor() {
 
-        var mqttListener = new MqttListener(new MqttEndpoint("localhost"), null, null, false, false);
+        var mqttListener = new MqttListener(new MqttEndpoint("localhost"), null, null, false);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> {
@@ -34,7 +34,7 @@ class ESPHomeListenerTest {
     void sensorFlux() throws InterruptedException {
 
         assertThatCode(() -> {
-            var mqttListener = new MqttListener(new MqttEndpoint("localhost"), null, null, false, true);
+            var mqttListener = new MqttListener(new MqttEndpoint("localhost"), null, null, false);
             var esphomeListener = new ESPHomeListener(mqttListener, "/esphome");
 
             var subscription = esphomeListener.getFlux("dining-room")

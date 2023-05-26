@@ -46,7 +46,7 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
                        boolean reconnect,
                        String mqttRootTopicSub) {
 
-        mqttListener = new MqttListener(new MqttEndpoint(host, port), username, password, reconnect, true);
+        mqttListener = new MqttListener(new MqttEndpoint(host, port), username, password, reconnect);
         this.mqttRootTopicSub = mqttRootTopicSub;
     }
 
@@ -69,7 +69,7 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
 
         return new TimeoutGuard<String, Void>(timeout)
                 .compute(mqttListener
-                        .getFlux(mqttRootTopicSub)
+                        .getFlux(mqttRootTopicSub, true)
                         .filter(e -> matchSensorAddress(e, address))
                         .doOnNext(s -> logger.debug("matched: {} {}", s.topic, s.message))
                         .map(this::mqtt2sensor));
