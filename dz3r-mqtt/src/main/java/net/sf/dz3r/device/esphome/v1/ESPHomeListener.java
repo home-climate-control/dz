@@ -26,10 +26,38 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
     private final MqttListener mqttListener;
     private final String mqttRootTopicSub;
 
+    public ESPHomeListener(MqttListener mqttListener, String mqttRootTopicSub) {
+
+        if (!mqttListener.includeSubtopics) {
+            throw new IllegalArgumentException("mqttListener should have includeSubtopics=true here");
+        }
+
+        this.mqttListener = mqttListener;
+        this.mqttRootTopicSub = mqttRootTopicSub;
+    }
+
+    /**
+     * Create an instance.
+     *
+     * Even though deprecated, left intact not to disrupt existing configurations until
+     * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
+     *
+     * @deprecated Use {@link ESPHomeListener#ESPHomeListener(MqttListener, String)} instead.
+     */
+    @Deprecated(forRemoval = false)
     public ESPHomeListener(String host, String mqttRootTopicSub) {
         this(host, MqttEndpoint.DEFAULT_PORT, null, null, false, mqttRootTopicSub);
     }
 
+    /**
+     * Create an instance.
+     *
+     * Even though deprecated, left intact not to disrupt existing configurations until
+     * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
+     *
+     * @deprecated Use {@link ESPHomeListener#ESPHomeListener(MqttListener, String)} instead.
+     */
+    @Deprecated(forRemoval = false)
     public ESPHomeListener(String host, int port,
                            String username, String password,
                            boolean autoReconnect,
