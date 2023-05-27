@@ -1,6 +1,6 @@
 package net.sf.dz3.runtime.config;
 
-import net.sf.dz3.runtime.config.protocol.mqtt.ESPHomeListenerConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -15,7 +15,7 @@ class ConfigurationParserTest {
     @MethodSource("mqttEndpointExpectedProvider")
     void testHostPort(MqttEndpointExpected source) {
 
-        var spec = new ESPHomeListenerConfig(
+        var spec = new MqttDeviceConfig(
                         null,
                         source.host,
                         source.port,
