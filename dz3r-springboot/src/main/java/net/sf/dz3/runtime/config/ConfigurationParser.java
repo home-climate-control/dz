@@ -1,10 +1,8 @@
 package net.sf.dz3.runtime.config;
 
-import net.sf.dz3.runtime.config.protocol.mqtt.ESPHomeListenerConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
-import net.sf.dz3.runtime.config.protocol.mqtt.Z2MJsonListenerConfig;
-import net.sf.dz3.runtime.config.protocol.mqtt.ZWaveListenerConfig;
 import net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig;
 import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
@@ -167,14 +165,14 @@ public class ConfigurationParser {
         }
     }
 
-    private class EspSensorSwitchResolver extends MqttSensorSwitchResolver<ESPHomeListenerConfig> {
+    private class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig> {
 
-        protected EspSensorSwitchResolver(List<ESPHomeListenerConfig> source) {
+        protected EspSensorSwitchResolver(List<MqttDeviceConfig> source) {
             super(source);
         }
 
         @Override
-        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<ESPHomeListenerConfig> source) {
+        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<MqttDeviceConfig> source) {
 
             var collector = new TreeMap<String, Set<MqttGateway>>();
 
@@ -251,26 +249,26 @@ public class ConfigurationParser {
         }
     }
 
-    private class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<Z2MJsonListenerConfig> {
+    private class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig> {
 
-        private ZigbeeSensorSwitchResolver(List<Z2MJsonListenerConfig> source) {
+        private ZigbeeSensorSwitchResolver(List<MqttDeviceConfig> source) {
             super(source);
         }
 
         @Override
-        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<Z2MJsonListenerConfig> source) {
+        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<MqttDeviceConfig> source) {
             return Map.of();
         }
     }
 
-    private class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<ZWaveListenerConfig> {
+    private class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig> {
 
-        private ZWaveSensorSwitchResolver(List<ZWaveListenerConfig> source) {
+        private ZWaveSensorSwitchResolver(List<MqttDeviceConfig> source) {
             super(source);
         }
 
         @Override
-        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<ZWaveListenerConfig> source) {
+        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<MqttDeviceConfig> source) {
             return Map.of();
         }
     }
