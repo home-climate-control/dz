@@ -33,10 +33,10 @@ class ConfigurationParserTest {
     public static Stream<MqttEndpointExpected> mqttEndpointExpectedProvider() {
 
         return Stream.of(
-                new MqttEndpointExpected("a", 1, true, "mqtt://a:1,autoReconnect=true"),
-                new MqttEndpointExpected("b", null, false, "mqtt://b:1883,autoReconnect=false"),
-                new MqttEndpointExpected(null, 2, true, "mqtt://localhost:2,autoReconnect=true"),
-                new MqttEndpointExpected(null, null, false, "mqtt://localhost:1883,autoReconnect=false")
+                new MqttEndpointExpected("a", 1, true, "mqtt://a:1,autoReconnect=true,rootTopic=none"),
+                new MqttEndpointExpected("b", null, false, "mqtt://b:1883,autoReconnect=false,rootTopic=none"),
+                new MqttEndpointExpected(null, 2, true, "mqtt://localhost:2,autoReconnect=true,rootTopic=none"),
+                new MqttEndpointExpected(null, null, false, "mqtt://localhost:1883,autoReconnect=false,rootTopic=none")
         );
     }
 
