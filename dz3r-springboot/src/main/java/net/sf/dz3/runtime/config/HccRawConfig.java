@@ -8,9 +8,7 @@ import net.sf.dz3.runtime.config.model.ConsoleConfig;
 import net.sf.dz3.runtime.config.model.UnitDirectorConfig;
 import net.sf.dz3.runtime.config.model.WebUiConfig;
 import net.sf.dz3.runtime.config.model.ZoneConfig;
-import net.sf.dz3.runtime.config.protocol.mqtt.ESPHomeListenerConfig;
-import net.sf.dz3.runtime.config.protocol.mqtt.Z2MJsonListenerConfig;
-import net.sf.dz3.runtime.config.protocol.mqtt.ZWaveListenerConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -41,9 +39,9 @@ import java.util.List;
 @ConfigurationProperties(prefix = "home-climate-control")
 public record HccRawConfig(
         String instance,
-        List<ESPHomeListenerConfig> esphome,
-        List<Z2MJsonListenerConfig> zigbee2mqtt,
-        List<ZWaveListenerConfig> zwave2mqtt,
+        List<MqttDeviceConfig> esphome,
+        List<MqttDeviceConfig> zigbee2mqtt,
+        List<MqttDeviceConfig> zwave2mqtt,
         List<OnewireBusConfig> onewire,
         List<MockConfig> mock,
         List<FilterConfig> filters,
