@@ -1,5 +1,7 @@
 package net.sf.dz3.runtime.config.protocol.mqtt;
 
+import java.util.Optional;
+
 /**
  * Defines a unique MQTT broker connection.
  */
@@ -18,8 +20,8 @@ public interface MqttEndpointSpec {
      * @return A unique signature of (host, port, autoReconnect).
      */
     default String signature() {
-        return "mqtt://" + (host() == null ? "localhost" : host())
-                + ":" + (port() == null ? "1883" : port())
+        return "mqtt://" + Optional.ofNullable(host()).orElse("localhost")
+                + ":" + Optional.ofNullable(port()).orElse(1883)
                 + ",autoReconnect=" + autoReconnect();
     }
 
