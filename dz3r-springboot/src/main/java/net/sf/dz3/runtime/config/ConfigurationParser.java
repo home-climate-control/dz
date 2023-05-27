@@ -1,10 +1,13 @@
 package net.sf.dz3.runtime.config;
 
+import net.sf.dz3.runtime.config.hardware.SensorConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
 import net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig;
 import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.signal.Signal;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -15,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,41 +33,50 @@ import java.util.TreeMap;
 public class ConfigurationParser {
     private final Logger logger = LogManager.getLogger();
 
-    /**
-     * Mapping from (host, port) to {@link ESPHomeListener} instance for that endpoint.
-     */
-    private Map<String, ESPHomeListener> esphomeMapping = new LinkedHashMap<>();
-
     public HccParsedConfig parse(HccRawConfig source) {
 
         // VT: FIXME: Leaving 1-Wire in the dust for now
 
-        // Step 1: collect all MQTT endpoints and get their configurations
+        // Step 1: Collect all MQTT configs into one place
 
-        var endpoints = Flux
+        var mqttConfigs = Flux
                 .just(
                         new EspSensorSwitchResolver(source.esphome()),
                         new ZigbeeSensorSwitchResolver(source.zigbee2mqtt()),
                         new ZWaveSensorSwitchResolver(source.zwave2mqtt())
                 )
+                .share();
+
+        // Step 2: collect all MQTT endpoints and get their configurations
+
+        var endpoint2adapter = mqttConfigs
                 .flatMap(MqttSensorSwitchResolver::getEndpoints)
                 .doOnNext(endpoint -> logger.info("endpoint found: {}", endpoint.signature()))
-                .collectList()
-                .block();
 
-        logger.info("all endpoints: {}", endpoints);
+        // Step 3: for all the endpoints, materialize their brokers in parallel
 
-        // Step 2: for all the endpoints, materialize their brokers
+                .parallel()
+                .runOn(Schedulers.boundedElastic())
+                .map(e -> new ImmutablePair(
+                        e,
+                        new MqttAdapter(
+                                new MqttEndpoint(e.host(), e.port()),
+                                e.username(),
+                                e.password(),
+                                e.autoReconnect())))
 
-        // Step 2: for all the brokers, collect all their sensors and switches, in parallel
+                // Now that they've all been created, let's leave this hanging for consumption below
+                .sequential()
+                .share();
 
-        var sensors = Flux
-                .just(
-                        new EspSensorSwitchResolver(source.esphome()),
-                        new OnewireSensorSwitchResolver(source.onewire()),
-                        new ZigbeeSensorSwitchResolver(source.zigbee2mqtt()),
-                        new ZWaveSensorSwitchResolver(source.zwave2mqtt())
-                )
+        // Step 4: for all the brokers, collect all their sensors and switches, in parallel
+
+        var broker2sensor = mqttConfigs
+                .flatMap(MqttSensorSwitchResolver::getSensorConfigs)
+                .doOnNext(kv -> logger.warn("{} {} : {}", kv.getKey().signature(), kv.getKey().rootTopic(), kv.getValue()))
+                .blockLast();
+
+        var sensors = mqttConfigs
                 .map(SensorSwitchResolver::getSensorFluxes)
                 .blockLast();
 
@@ -111,7 +122,7 @@ public class ConfigurationParser {
 
             var endpoints = new LinkedHashSet<String>();
 
-            Flux<MqttEndpointSpec> result = Flux.create(sink -> {
+            return Flux.<MqttEndpointSpec>create(sink -> {
 
                 var sequence = Flux
                         .fromIterable(source)
@@ -121,47 +132,40 @@ public class ConfigurationParser {
 
                             var key = kv.getKey();
                             if (!endpoints.contains(key)) {
-                                sink.next(parse(kv.getValue()));
+                                sink.next(parseEndpoint(kv.getValue()));
                                 endpoints.add(key);
                             }
                         })
                         .subscribe();
 
                 sink.complete();
-
                 sequence.dispose();
             });
-
-            return result;
         }
 
-        private MqttEndpointSpec parse(MqttGateway source) {
-            return new MqttEndpointSpec() {
-                @Override
-                public String host() {
-                    return source.host();
-                }
+        /**
+         * Parse the configuration into the mapping from their broker (not endpoint) to sensor configuration.
+         *
+         * @return Map of (broker spec, sensor configuration) for all the given sources.
+         */
+        public final Flux<Pair<MqttBrokerSpec, SensorConfig>> getSensorConfigs() {
 
-                @Override
-                public Integer port() {
-                    return source.port();
-                }
+            return Flux.<Pair<MqttBrokerSpec, SensorConfig>>create(sink -> {
+                var sequence = Flux
+                        .fromIterable(source)
+                        .doOnNext(s -> {
+                            var endpoint = parseBroker(s);
+                            Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
+                                for (var spec : s.sensors()) {
+                                    sink.next(new ImmutablePair<>(endpoint, spec));
+                                }
+                            });
+                        })
+                        .subscribe();
 
-                @Override
-                public boolean autoReconnect() {
-                    return source.autoReconnect();
-                }
-
-                @Override
-                public String username() {
-                    return source.username();
-                }
-
-                @Override
-                public String password() {
-                    return source.password();
-                }
-            };
+                sink.complete();
+                sequence.dispose();
+            });
         }
     }
 
@@ -224,14 +228,12 @@ public class ConfigurationParser {
                         // VT: FIXME: Ignoring switches for now
                         var listener = triple.getLeft();
 
-                        Flux<Pair<ESPHomeListener, String>> result =  Flux.create(sink -> {
+                        return Flux.<Pair<ESPHomeListener, String>>create(sink -> {
                             for (var address : triple.getMiddle()) {
                                 sink.next(new ImmutablePair<>(listener, address.address()));
                             }
                             sink.complete();
                         });
-
-                        return result;
                     })
 
                     // Reshuffle, the cadence is different here
@@ -283,5 +285,68 @@ public class ConfigurationParser {
         protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<OnewireBusConfig> source) {
             return Map.of();
         }
+    }
+
+    private MqttEndpointSpec parseEndpoint(MqttGateway source) {
+        return new MqttEndpointSpec() {
+            @Override
+            public String host() {
+                return source.host();
+            }
+
+            @Override
+            public Integer port() {
+                return source.port();
+            }
+
+            @Override
+            public boolean autoReconnect() {
+                return source.autoReconnect();
+            }
+
+            @Override
+            public String username() {
+                return source.username();
+            }
+
+            @Override
+            public String password() {
+                return source.password();
+            }
+        };
+    }
+
+    private MqttBrokerSpec parseBroker(MqttGateway source) {
+        return new MqttBrokerSpec() {
+            @Override
+            public String host() {
+                return source.host();
+            }
+
+            @Override
+            public Integer port() {
+                return source.port();
+            }
+
+            @Override
+            public boolean autoReconnect() {
+                return source.autoReconnect();
+            }
+
+            @Override
+            public String username() {
+                return source.username();
+            }
+
+            @Override
+            public String password() {
+                return source.password();
+            }
+
+            @Override
+            public String rootTopic() {
+                return source.rootTopic();
+            }
+        };
     }
 }
