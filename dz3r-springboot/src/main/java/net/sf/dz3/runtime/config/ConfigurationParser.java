@@ -1,6 +1,7 @@
 package net.sf.dz3.runtime.config;
 
 import net.sf.dz3.runtime.config.hardware.SensorConfig;
+import net.sf.dz3.runtime.config.hardware.SwitchConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
@@ -60,21 +61,28 @@ public class ConfigurationParser {
                 .map(e -> new ImmutablePair(
                         e,
                         new MqttAdapter(
-                                new MqttEndpoint(e.host(), e.port()),
+                                new MqttEndpoint(e.host(), Optional.ofNullable(e.port()).orElse(MqttEndpoint.DEFAULT_PORT)),
                                 e.username(),
                                 e.password(),
                                 e.autoReconnect())))
 
                 // Now that they've all been created, let's leave this hanging for consumption below
                 .sequential()
-                .share();
+                .blockLast();
 
-        // Step 4: for all the brokers, collect all their sensors and switches, in parallel
+        // Step 4: for all the brokers, collect all their sensors and switches
 
         var broker2sensor = mqttConfigs
                 .flatMap(MqttSensorSwitchResolver::getSensorConfigs)
                 .doOnNext(kv -> logger.warn("{} {} : {}", kv.getKey().signature(), kv.getKey().rootTopic(), kv.getValue()))
                 .blockLast();
+
+        var broker2switch = mqttConfigs
+                .flatMap(MqttSensorSwitchResolver::getSwitchConfigs)
+                .doOnNext(kv -> logger.warn("{} {} : {}", kv.getKey().signature(), kv.getKey().rootTopic(), kv.getValue()))
+                .blockLast();
+
+        // Step 5: now combine all of those into a single stream of sensors, and another of switches
 
         var sensors = mqttConfigs
                 .map(SensorSwitchResolver::getSensorFluxes)
@@ -157,6 +165,31 @@ public class ConfigurationParser {
                             var endpoint = parseBroker(s);
                             Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
                                 for (var spec : s.sensors()) {
+                                    sink.next(new ImmutablePair<>(endpoint, spec));
+                                }
+                            });
+                        })
+                        .subscribe();
+
+                sink.complete();
+                sequence.dispose();
+            });
+        }
+
+        /**
+         * Parse the configuration into the mapping from their broker (not endpoint) to switch configuration.
+         *
+         * @return Map of (broker spec, switch configuration) for all the given sources.
+         */
+        public final Flux<Pair<MqttBrokerSpec, SwitchConfig>> getSwitchConfigs() {
+
+            return Flux.<Pair<MqttBrokerSpec, SwitchConfig>>create(sink -> {
+                var sequence = Flux
+                        .fromIterable(source)
+                        .doOnNext(s -> {
+                            var endpoint = parseBroker(s);
+                            Optional.ofNullable(s.switches()).ifPresent(sensors -> {
+                                for (var spec : s.switches()) {
                                     sink.next(new ImmutablePair<>(endpoint, spec));
                                 }
                             });
