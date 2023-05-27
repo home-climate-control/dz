@@ -74,12 +74,12 @@ public class ConfigurationParser {
 
         var broker2sensor = mqttConfigs
                 .flatMap(MqttSensorSwitchResolver::getSensorConfigs)
-                .doOnNext(kv -> logger.warn("{} {} : {}", kv.getKey().signature(), kv.getKey().rootTopic(), kv.getValue()))
+                .doOnNext(kv -> logger.warn("{} : {}", kv.getKey().signature(), kv.getValue()))
                 .blockLast();
 
         var broker2switch = mqttConfigs
                 .flatMap(MqttSensorSwitchResolver::getSwitchConfigs)
-                .doOnNext(kv -> logger.warn("{} {} : {}", kv.getKey().signature(), kv.getKey().rootTopic(), kv.getValue()))
+                .doOnNext(kv -> logger.warn("{} : {}", kv.getKey().signature(), kv.getValue()))
                 .blockLast();
 
         // Step 5: now combine all of those into a single stream of sensors, and another of switches
