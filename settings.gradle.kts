@@ -3,8 +3,11 @@ pluginManagement {
         id("net.ltgt.errorprone") version "3.1.0"
         id("org.sonarqube") version "4.0.0.2929"
         id("com.gorylenko.gradle-git-properties") version "2.4.1"
+
         id("org.springframework.boot") version "3.1.0"
         id("io.spring.dependency-management") version "1.1.0"
+
+        id("io.quarkus") version "3.0.1.Final"
     }
 }
 
@@ -39,5 +42,7 @@ include("dz3r-spring")
 
 // One ring to find^Wrun them all... with SpringBoot :O
 include("dz3r-springboot")
+// ...and with Quarkus
+include("dz3r-quarkus")
 
 rootProject.name = "dz3-master"
