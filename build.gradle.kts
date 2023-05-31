@@ -5,8 +5,11 @@ plugins {
     id("net.ltgt.errorprone")
     id("org.sonarqube")
     id("com.gorylenko.gradle-git-properties") apply false
+
     id("org.springframework.boot") apply false
     id("io.spring.dependency-management") apply false
+
+    id("io.quarkus") apply false
 }
 
 sonarqube {

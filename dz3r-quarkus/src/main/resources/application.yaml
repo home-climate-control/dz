@@ -1,0 +1,17 @@
+quarkus:
+  log:
+    category:
+      "net.sf.dz3":
+        level: DEBUG
+    min-level: TRACE
+  application:
+    name: home-climate-control
+    ui-header: Home Climate Control
+  banner:
+      enabled: false
+  http:
+    port: 4939
+
+home-climate-control:
+# From this point on, your custom configuration starts. Use a custom configuration file (application-${PROFILE}.yaml),
+# and don't commit it to source control, that's a privacy leak.

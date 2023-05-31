@@ -1,0 +1,55 @@
+package net.sf.dz3.runtime.config;
+
+import net.sf.dz3.runtime.config.connector.ConnectorConfig;
+import net.sf.dz3.runtime.config.hardware.HvacDeviceConfig;
+import net.sf.dz3.runtime.config.hardware.MockConfig;
+import net.sf.dz3.runtime.config.hardware.UnitControllerConfig;
+import net.sf.dz3.runtime.config.model.ConsoleConfig;
+import net.sf.dz3.runtime.config.model.UnitDirectorConfig;
+import net.sf.dz3.runtime.config.model.WebUiConfig;
+import net.sf.dz3.runtime.config.model.ZoneConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
+import net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import java.util.List;
+
+/**
+ * Raw Home Climate Control configuration, as written in {@code application.yaml}.
+ *
+ * This configuration needs to be parsed, validated, and materialized to be usable.
+ *
+ * @param instance HCC instance, to distinguish in metrics.
+ * @param esphome ESPHome based devices.
+ * @param zigbee2mqtt Zigbee devices, accessed via {@code zigbee2mqtt}
+ * @param zwave2mqtt Z-Wave devices, accessed via {@code zwave2mqtt}.
+ * @param onewire 1-Wire devices.
+ * @param mock Mock devices, to emulate missing features while in development.
+ * @param filters Signal filters.
+ * @param zones Zone configurations.
+ * @param connectors Incoming and outgoing connectors.
+ * @param hvac HVAC hardware devices.
+ * @param units HVAC unit abstractions.
+ * @param directors Entities tying configuration details together.
+ * @param webUi WebUI representation of the whole system.
+ * @param console Console representation of the whole system.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ */
+@ConfigProperty(name = "home-climate-control")
+public record HccRawConfig(
+        String instance,
+        List<MqttDeviceConfig> esphome,
+        List<MqttDeviceConfig> zigbee2mqtt,
+        List<MqttDeviceConfig> zwave2mqtt,
+        List<OnewireBusConfig> onewire,
+        List<MockConfig> mock,
+        List<FilterConfig> filters,
+        List<ZoneConfig> zones,
+        List<ConnectorConfig> connectors,
+        List<HvacDeviceConfig> hvac,
+        List<UnitControllerConfig> units,
+        List<UnitDirectorConfig> directors,
+        WebUiConfig webUi,
+        ConsoleConfig console) {
+}
