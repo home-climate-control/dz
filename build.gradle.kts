@@ -2,7 +2,6 @@ plugins {
     java
     id("maven-publish")
     jacoco
-    id("com.github.spotbugs")
     id("net.ltgt.errorprone")
     id("org.sonarqube")
     id("com.gorylenko.gradle-git-properties") apply false
@@ -47,16 +46,6 @@ subprojects {
             html.required.set(true)
         }
     }
-
-/*
-    apply plugin: "findbugs"
-
-    findbugs {
-
-        excludeFilter = file("$rootProject.projectDir/findbugs-exclude.xml")
-        ignoreFailures = true
-    }
- */
 
     repositories {
         mavenCentral()
