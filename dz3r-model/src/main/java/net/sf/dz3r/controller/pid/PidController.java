@@ -1,7 +1,7 @@
 package net.sf.dz3r.controller.pid;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
 import net.sf.dz3r.controller.ProcessController;
+import net.sf.dz3r.jmx.JmxAttribute;
 
 /**
  * A reactive PID controller abstraction.

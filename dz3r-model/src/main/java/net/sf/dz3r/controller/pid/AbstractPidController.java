@@ -1,8 +1,8 @@
 package net.sf.dz3r.controller.pid;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3r.controller.AbstractProcessController;
+import net.sf.dz3r.jmx.JmxAttribute;
+import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.signal.Signal;
 
 /**

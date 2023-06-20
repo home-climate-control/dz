@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxAware;
 import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.jmx.JmxAware;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;

@@ -1,9 +1,9 @@
 package net.sf.dz3r.device.actuator.pi.autohat;
 
 import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3r.device.actuator.HeatPump;
+import net.sf.dz3r.jmx.JmxAttribute;
+import net.sf.dz3r.jmx.JmxDescriptor;
 
 import java.io.IOException;
 

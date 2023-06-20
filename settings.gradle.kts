@@ -9,7 +9,6 @@ pluginManagement {
 // External dependencies
 
 include("automation-hat-driver")
-include("jukebox:jukebox-jmx")
 include("owapi-reborn")
 include("servomaster:servomaster-common")
 include("xbee-api-reactive:xbee-api")

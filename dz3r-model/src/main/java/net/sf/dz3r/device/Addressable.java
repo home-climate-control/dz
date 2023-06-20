@@ -1,6 +1,6 @@
 package net.sf.dz3r.device;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxAttribute;
+import net.sf.dz3r.jmx.JmxAttribute;
 
 /**
  * An addressable entity.
