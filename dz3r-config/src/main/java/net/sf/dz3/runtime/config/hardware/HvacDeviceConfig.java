@@ -1,10 +1,10 @@
 package net.sf.dz3.runtime.config.hardware;
 
-import java.util.List;
+import java.util.Set;
 
 public record HvacDeviceConfig(
-        List<SwitchableHvacDeviceConfig> switchable,
-        List<HeatpumpHATConfig> heatpumpHat,
-        List<HeatpumpConfig> heatpump
+        Set<SwitchableHvacDeviceConfig> switchable,
+        Set<HeatpumpHATConfig> heatpumpHat,
+        Set<HeatpumpConfig> heatpump
 ) {
 }

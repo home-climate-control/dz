@@ -1,6 +1,6 @@
 package net.sf.dz3.runtime.config;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Signal filter configuration.
@@ -12,6 +12,6 @@ import java.util.List;
 public record FilterConfig(
         String id,
         String type,
-        List<String> sources
+        Set<String> sources
 ) {
 }
