@@ -20,7 +20,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -101,9 +100,9 @@ public class ConfigurationParser {
      */
     private abstract class SensorSwitchResolver<T> {
 
-        protected final List<T> source;
+        protected final Set<T> source;
 
-        protected SensorSwitchResolver(List<T> source) {
+        protected SensorSwitchResolver(Set<T> source) {
             this.source = source;
         }
 
@@ -112,7 +111,7 @@ public class ConfigurationParser {
          *
          * @return Map of (flux ID, flux) for all the given sources.
          */
-        protected abstract Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<T> source);
+        protected abstract Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Set<T> source);
 
         public final Map<String, Flux<Signal<Double, Void>>> getSensorFluxes() {
             logger.error("NOT IMPLEMENTED: {}#getSensorFluxes()", getClass().getName());
@@ -122,7 +121,7 @@ public class ConfigurationParser {
 
     private abstract class MqttSensorSwitchResolver<T extends MqttGateway> extends SensorSwitchResolver<T> {
 
-        protected MqttSensorSwitchResolver(List<T> source) {
+        protected MqttSensorSwitchResolver(Set<T> source) {
             super(source);
         }
 
@@ -204,12 +203,12 @@ public class ConfigurationParser {
 
     private class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig> {
 
-        protected EspSensorSwitchResolver(List<MqttDeviceConfig> source) {
+        protected EspSensorSwitchResolver(Set<MqttDeviceConfig> source) {
             super(source);
         }
 
         @Override
-        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<MqttDeviceConfig> source) {
+        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Set<MqttDeviceConfig> source) {
 
             var collector = new TreeMap<String, Set<MqttGateway>>();
 
@@ -286,36 +285,36 @@ public class ConfigurationParser {
 
     private class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig> {
 
-        private ZigbeeSensorSwitchResolver(List<MqttDeviceConfig> source) {
+        private ZigbeeSensorSwitchResolver(Set<MqttDeviceConfig> source) {
             super(source);
         }
 
         @Override
-        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<MqttDeviceConfig> source) {
+        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Set<MqttDeviceConfig> source) {
             return Map.of();
         }
     }
 
     private class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig> {
 
-        private ZWaveSensorSwitchResolver(List<MqttDeviceConfig> source) {
+        private ZWaveSensorSwitchResolver(Set<MqttDeviceConfig> source) {
             super(source);
         }
 
         @Override
-        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<MqttDeviceConfig> source) {
+        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Set<MqttDeviceConfig> source) {
             return Map.of();
         }
     }
 
     private class OnewireSensorSwitchResolver extends SensorSwitchResolver<OnewireBusConfig> {
 
-        private OnewireSensorSwitchResolver(List<OnewireBusConfig> source) {
+        private OnewireSensorSwitchResolver(Set<OnewireBusConfig> source) {
             super(source);
         }
 
         @Override
-        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(List<OnewireBusConfig> source) {
+        protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Set<OnewireBusConfig> source) {
             return Map.of();
         }
     }

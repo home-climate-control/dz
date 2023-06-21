@@ -3,6 +3,7 @@ package net.sf.dz3.runtime.config.model;
 import net.sf.dz3r.model.HvacMode;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Configuration for {@link net.sf.dz3r.model.UnitDirector}.
@@ -12,7 +13,7 @@ import java.util.Map;
  */
 public record UnitDirectorConfig(
         String id,
-        String connectors,
+        Set<String> connectors,
         Map<String, String> sensorFeedMapping,
         String unit,
         String hvac,

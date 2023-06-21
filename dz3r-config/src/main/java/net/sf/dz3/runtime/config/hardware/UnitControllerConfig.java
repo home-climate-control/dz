@@ -1,9 +1,9 @@
 package net.sf.dz3.runtime.config.hardware;
 
-import java.util.List;
+import java.util.Set;
 
 public record UnitControllerConfig(
-        List<SingleStageUnitControllerConfig> singleStage,
-        List<MultiStageUnitControllerConfig> multiStage
+        Set<SingleStageUnitControllerConfig> singleStage,
+        Set<MultiStageUnitControllerConfig> multiStage
 ) {
 }

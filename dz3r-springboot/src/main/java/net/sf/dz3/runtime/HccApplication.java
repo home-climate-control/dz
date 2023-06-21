@@ -1,5 +1,7 @@
 package net.sf.dz3.runtime;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3.runtime.config.ConfigurationParser;
 import net.sf.dz3.runtime.config.HccRawConfig;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +38,7 @@ public class HccApplication implements CommandLineRunner {
             ReactorDebugAgent.init();
 
             logger.info("command line arguments: {}", (Object[]) args);
-            logger.info("configuration: {}", config);
+            logger.info("configuration: {}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(config));
 
             new ConfigurationParser().parse(config).start().block();
 
@@ -44,6 +46,8 @@ public class HccApplication implements CommandLineRunner {
 
             logger.info("");
             logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         } finally {
             ThreadContext.pop();
         }

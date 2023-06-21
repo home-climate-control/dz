@@ -12,7 +12,7 @@ import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Raw Home Climate Control configuration, as written in {@code application.yaml}.
@@ -39,17 +39,17 @@ import java.util.List;
 @ConfigurationProperties(prefix = "home-climate-control")
 public record HccRawConfig(
         String instance,
-        List<MqttDeviceConfig> esphome,
-        List<MqttDeviceConfig> zigbee2mqtt,
-        List<MqttDeviceConfig> zwave2mqtt,
-        List<OnewireBusConfig> onewire,
-        List<MockConfig> mock,
-        List<FilterConfig> filters,
-        List<ZoneConfig> zones,
-        List<ConnectorConfig> connectors,
-        List<HvacDeviceConfig> hvac,
-        List<UnitControllerConfig> units,
-        List<UnitDirectorConfig> directors,
+        Set<MqttDeviceConfig> esphome,
+        Set<MqttDeviceConfig> zigbee2mqtt,
+        Set<MqttDeviceConfig> zwave2mqtt,
+        Set<OnewireBusConfig> onewire,
+        Set<MockConfig> mock,
+        Set<FilterConfig> filters,
+        Set<ZoneConfig> zones,
+        Set<ConnectorConfig> connectors,
+        Set<HvacDeviceConfig> hvac,
+        Set<UnitControllerConfig> units,
+        Set<UnitDirectorConfig> directors,
         WebUiConfig webUi,
         ConsoleConfig console) {
 }
