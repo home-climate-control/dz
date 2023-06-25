@@ -11,7 +11,9 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
-import net.sf.dz3.runtime.config.quarkus.HccRawConfig;
+import net.sf.dz3.runtime.config.HccRawConfig;
+import net.sf.dz3.runtime.config.quarkus.HccRawInterfaceConfig;
+import net.sf.dz3.runtime.mapper.InterfaceRecordMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -19,9 +21,10 @@ import org.apache.logging.log4j.ThreadContext;
 @ApplicationScoped
 public class HccApplication {
     private final Logger logger = LogManager.getLogger();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Context
-    HccRawConfig config;
+    HccRawInterfaceConfig config;
 
     void onStart(@Observes StartupEvent e) {
 
@@ -30,6 +33,7 @@ public class HccApplication {
             logger.warn("Starting up");
 
             printConfiguration();
+            mapConfiguration(config);
             // VT: FIXME: Nothing to do now, need to materialize the app first, stay tuned
 
         } finally {
@@ -39,17 +43,29 @@ public class HccApplication {
 
     private void printConfiguration() {
         try {
-            var mapper = new ObjectMapper();
 
             // Necessary to print Optionals in a sane way
-            mapper.registerModule(new Jdk8Module());
-            mapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+            objectMapper.registerModule(new Jdk8Module());
+            objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
 
-            logger.info("configuration: {}",
-                    mapper.writerWithDefaultPrettyPrinter().writeValueAsString(config));
+            logger.info("configuration/interface: {}",
+                    objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config));
 
         } catch (JsonProcessingException ex) {
-            throw new IllegalStateException("Failed to convert materialized YAML configuration to JSON", ex);
+            throw new IllegalStateException("Failed to convert materialized interface configuration to JSON", ex);
+        }
+    }
+
+    private HccRawConfig mapConfiguration(HccRawInterfaceConfig config) {
+
+
+        try {
+            var recordConfig = InterfaceRecordMapper.INSTANCE.rawConfig(config);
+            logger.info("configurations/record: {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(recordConfig));
+            return recordConfig;
+
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
         }
     }
 

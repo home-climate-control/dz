@@ -3,7 +3,7 @@ package net.sf.dz3.runtime;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3.runtime.config.ConfigurationParser;
-import net.sf.dz3.runtime.config.HccRawConfig;
+import net.sf.dz3.runtime.config.HccRawRecordConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -14,13 +14,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import reactor.tools.agent.ReactorDebugAgent;
 
 @SpringBootApplication
-@EnableConfigurationProperties(HccRawConfig.class)
+@EnableConfigurationProperties(HccRawRecordConfig.class)
 public class HccApplication implements CommandLineRunner {
 
-    private final HccRawConfig config;
+    private final HccRawRecordConfig config;
 
     private static final Logger logger = LogManager.getLogger(HccApplication.class);
-    public HccApplication(HccRawConfig config) {
+    public HccApplication(HccRawRecordConfig config) {
         this.config = config;
     }
 
