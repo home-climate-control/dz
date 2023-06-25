@@ -23,7 +23,7 @@ import java.util.Set;
  * @param zigbee2mqtt Zigbee devices, accessed via {@code zigbee2mqtt}
  * @param zwave2mqtt Z-Wave devices, accessed via {@code zwave2mqtt}.
  * @param onewire 1-Wire devices.
- * @param mock Mock devices, to emulate missing features while in development.
+ * @param mocks Mock devices, to emulate missing features while in development.
  * @param filters Signal filters.
  * @param zones Zone configurations.
  * @param connectors Incoming and outgoing connectors.
@@ -41,7 +41,7 @@ public record HccRawConfig(
         Set<MqttDeviceConfig> zigbee2mqtt,
         Set<MqttDeviceConfig> zwave2mqtt,
         Set<OnewireBusConfig> onewire,
-        Set<MockConfig> mock,
+        Set<MockConfig> mocks,
         Set<FilterConfig> filters,
         Set<ZoneConfig> zones,
         Set<ConnectorConfig> connectors,

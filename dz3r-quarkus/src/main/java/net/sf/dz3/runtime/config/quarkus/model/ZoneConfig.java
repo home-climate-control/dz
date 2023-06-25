@@ -5,8 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Optional;
 
 public interface ZoneConfig {
-    @JsonProperty("zone-id")
-    String zoneId();
+    @JsonProperty("id")
+    String id();
     @JsonProperty("name")
     String name();
     @JsonProperty("controller")

@@ -35,8 +35,8 @@ public interface HccRawInterfaceConfig {
     Set<MqttDeviceConfig> zwave2mqtt();
     @JsonProperty("onewire")
     Set<OnewireBusConfig> onewire();
-    @JsonProperty("mock")
-    Set<MockConfig> mock();
+    @JsonProperty("mocks")
+    Set<MockConfig> mocks();
     @JsonProperty("filters")
     Set<FilterConfig> filters();
     @JsonProperty("zones")

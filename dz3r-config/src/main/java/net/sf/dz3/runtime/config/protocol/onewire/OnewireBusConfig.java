@@ -3,7 +3,7 @@ package net.sf.dz3.runtime.config.protocol.onewire;
 import net.sf.dz3.runtime.config.hardware.SensorConfig;
 import net.sf.dz3.runtime.config.hardware.SwitchConfig;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * 1-Wire bus adapter descriptor.
@@ -14,6 +14,6 @@ import java.util.List;
  */
 public record OnewireBusConfig(
         String serialPort,
-        List<SensorConfig> sensors,
-        List<SwitchConfig> switches) {
+        Set<SensorConfig> sensors,
+        Set<SwitchConfig> switches) {
 }
