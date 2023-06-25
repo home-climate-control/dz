@@ -10,7 +10,6 @@ import net.sf.dz3.runtime.config.model.WebUiConfig;
 import net.sf.dz3.runtime.config.model.ZoneConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.util.Set;
 
@@ -36,7 +35,6 @@ import java.util.Set;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-@ConfigurationProperties(prefix = "home-climate-control")
 public record HccRawConfig(
         String instance,
         Set<MqttDeviceConfig> esphome,

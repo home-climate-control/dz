@@ -55,4 +55,9 @@ dependencies {
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
 
+    // Mapstruct - may be gone after the dust settles
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+
+    testImplementation("org.assertj:assertj-core:3.21.0")
 }

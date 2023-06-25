@@ -2,6 +2,7 @@ package net.sf.dz3.runtime.config.quarkus;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.smallrye.config.ConfigMapping;
+import net.sf.dz3.runtime.config.HccRawConfig;
 import net.sf.dz3.runtime.config.quarkus.connector.ConnectorConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.HvacDeviceConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.MockConfig;
@@ -18,12 +19,12 @@ import java.util.Set;
 /**
  * Raw Home Climate Control configuration, as written in {@code application.yaml}.
  *
- * This configuration needs to be parsed, validated, and materialized to be usable.
+ * This configuration mirrors {@link HccRawConfig}, and {@code HccRawRecordConfig}, only in a Quarkus compatible way.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 @ConfigMapping(prefix = "home-climate-control")
-public interface HccRawConfig {
+public interface HccRawInterfaceConfig {
     @JsonProperty("instance")
     String instance();
     @JsonProperty("esphome")

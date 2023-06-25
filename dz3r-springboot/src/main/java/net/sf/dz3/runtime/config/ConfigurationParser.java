@@ -26,14 +26,14 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * Parses {@link HccRawConfig} into {@link HccParsedConfig}.
+ * Parses {@link HccRawRecordConfig} into {@link HccParsedConfig}.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class ConfigurationParser {
     private final Logger logger = LogManager.getLogger();
 
-    public HccParsedConfig parse(HccRawConfig source) {
+    public HccParsedConfig parse(HccRawRecordConfig source) {
 
         // VT: FIXME: Leaving 1-Wire in the dust for now
 
