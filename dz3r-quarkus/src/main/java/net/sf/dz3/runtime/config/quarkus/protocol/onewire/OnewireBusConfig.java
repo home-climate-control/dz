@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import net.sf.dz3.runtime.config.quarkus.hardware.SensorConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.SwitchConfig;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * 1-Wire bus adapter descriptor.
@@ -15,7 +15,7 @@ public interface OnewireBusConfig {
     @JsonProperty("serial-port")
     String serialPort();
     @JsonProperty("sensors")
-    List<SensorConfig> sensors();
+    Set<SensorConfig> sensors();
     @JsonProperty("switches")
-    List<SwitchConfig> switches();
+    Set<SwitchConfig> switches();
 }
