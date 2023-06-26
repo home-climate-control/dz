@@ -41,6 +41,8 @@ include("dz3r-xbee")
 // One ring to find^Wrun them all
 include("dz3r-spring")
 
+include("dz3r-app-minimal")
+
 // One ring to find^Wrun them all... with SpringBoot :O
 include("dz3r-app-springboot")
 // ...and with Quarkus
