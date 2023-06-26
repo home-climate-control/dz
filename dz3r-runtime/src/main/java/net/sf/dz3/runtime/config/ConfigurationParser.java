@@ -139,7 +139,7 @@ public class ConfigurationParser {
 
                             var key = kv.getKey();
                             if (!endpoints.contains(key)) {
-                                sink.next(parseEndpoint(kv.getValue()));
+                                sink.next(ConfigurationMapper.INSTANCE.parseEndpoint(kv.getValue()));
                                 endpoints.add(key);
                             }
                         })
@@ -161,7 +161,7 @@ public class ConfigurationParser {
                 var sequence = Flux
                         .fromIterable(source)
                         .doOnNext(s -> {
-                            var endpoint = parseBroker(s);
+                            var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
                             Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
                                 for (var spec : s.sensors()) {
                                     sink.next(new ImmutablePair<>(endpoint, spec));
@@ -186,7 +186,7 @@ public class ConfigurationParser {
                 var sequence = Flux
                         .fromIterable(source)
                         .doOnNext(s -> {
-                            var endpoint = parseBroker(s);
+                            var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
                             Optional.ofNullable(s.switches()).ifPresent(sensors -> {
                                 for (var spec : s.switches()) {
                                     sink.next(new ImmutablePair<>(endpoint, spec));
@@ -317,68 +317,5 @@ public class ConfigurationParser {
         protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Set<OnewireBusConfig> source) {
             return Map.of();
         }
-    }
-
-    private MqttEndpointSpec parseEndpoint(MqttGateway source) {
-        return new MqttEndpointSpec() {
-            @Override
-            public String host() {
-                return source.host();
-            }
-
-            @Override
-            public Integer port() {
-                return source.port();
-            }
-
-            @Override
-            public boolean autoReconnect() {
-                return source.autoReconnect();
-            }
-
-            @Override
-            public String username() {
-                return source.username();
-            }
-
-            @Override
-            public String password() {
-                return source.password();
-            }
-        };
-    }
-
-    private MqttBrokerSpec parseBroker(MqttGateway source) {
-        return new MqttBrokerSpec() {
-            @Override
-            public String host() {
-                return source.host();
-            }
-
-            @Override
-            public Integer port() {
-                return source.port();
-            }
-
-            @Override
-            public boolean autoReconnect() {
-                return source.autoReconnect();
-            }
-
-            @Override
-            public String username() {
-                return source.username();
-            }
-
-            @Override
-            public String password() {
-                return source.password();
-            }
-
-            @Override
-            public String rootTopic() {
-                return source.rootTopic();
-            }
-        };
     }
 }
