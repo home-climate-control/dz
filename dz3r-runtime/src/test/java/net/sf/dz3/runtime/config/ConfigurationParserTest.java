@@ -27,7 +27,6 @@ class ConfigurationParserTest {
                         null);
 
         assertThat(spec.signature()).isEqualTo(source.expected);
-
     }
 
     public static Stream<MqttEndpointExpected> mqttEndpointExpectedProvider() {
