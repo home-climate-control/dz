@@ -39,16 +39,21 @@ public class HccApplication implements CommandLineRunner {
             ReactorDebugAgent.init();
 
             logger.info("command line arguments: {}", (Object[]) args);
-            logger.info("configuration: {}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(config));
+            logger.info("configuration: {}", () -> {
+                try {
+                    return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(config);
+                } catch (JsonProcessingException ex) {
+                    throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
+                }
+            });
 
             new ConfigurationParser().parse(map(config)).start().block();
 
-            logger.info("run complete");
+            logger.warn("run complete");
 
             logger.info("");
             logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+
         } finally {
             ThreadContext.pop();
         }
