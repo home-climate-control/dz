@@ -43,5 +43,9 @@ dependencies {
     // Enable Raspberry Pi specific hardware integration
     runtimeOnly(project(":dz3r-raspberry-pi"))
 
+    // Mapstruct
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+
     testImplementation("org.assertj:assertj-core:3.21.0")
 }
