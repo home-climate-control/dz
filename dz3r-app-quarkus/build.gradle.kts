@@ -13,8 +13,7 @@ val quarkusPlatformVersion = "3.0.1.Final"
 
 dependencies {
 
-    implementation(project(":dz3r-common"))
-    implementation(project(":dz3r-config"))
+    implementation(project(":dz3r-bootstrap"))
     implementation(project(":dz3r-director"))
     implementation("com.fasterxml.jackson.core:jackson-databind:2.12.7.1")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.7.1")

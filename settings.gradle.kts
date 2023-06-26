@@ -20,6 +20,7 @@ include("xbee-api-reactive:xbee-api")
 
 // Modules
 
+include("dz3r-bootstrap")
 include("dz3r-common")
 include("dz3r-config")
 include("dz3r-director")
@@ -30,7 +31,6 @@ include("dz3r-influxdb")
 include("dz3r-model")
 include("dz3r-mqtt")
 include("dz3r-raspberry-pi")
-include("dz3r-runtime")
 include("dz3r-owapi")
 include("dz3r-scheduler")
 include("dz3r-scheduler-gcal-v3")
@@ -42,8 +42,8 @@ include("dz3r-xbee")
 include("dz3r-spring")
 
 // One ring to find^Wrun them all... with SpringBoot :O
-include("dz3r-springboot")
+include("dz3r-app-springboot")
 // ...and with Quarkus
-include("dz3r-quarkus")
+include("dz3r-app-quarkus")
 
 rootProject.name = "dz3-master"
