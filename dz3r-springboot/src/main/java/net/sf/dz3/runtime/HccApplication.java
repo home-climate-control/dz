@@ -3,6 +3,7 @@ package net.sf.dz3.runtime;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3.runtime.config.ConfigurationParser;
+import net.sf.dz3.runtime.config.HccRawConfig;
 import net.sf.dz3.runtime.config.HccRawRecordConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,7 +41,7 @@ public class HccApplication implements CommandLineRunner {
             logger.info("command line arguments: {}", (Object[]) args);
             logger.info("configuration: {}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(config));
 
-            new ConfigurationParser().parse(config).start().block();
+            new ConfigurationParser().parse(map(config)).start().block();
 
             logger.info("run complete");
 
@@ -51,5 +52,30 @@ public class HccApplication implements CommandLineRunner {
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    /**
+     * Map the Spring annotation tainted configuration into framework independent.
+     *
+     * @param source Configuration with Spring annotation on it.
+     * @return Configuration without any annotations.
+     */
+    private HccRawConfig map(HccRawRecordConfig source) {
+        return new HccRawConfig(
+                source.instance(),
+                source.esphome(),
+                source.zigbee2mqtt(),
+                source.zwave2mqtt(),
+                source.onewire(),
+                source.mocks(),
+                source.filters(),
+                source.zones(),
+                source.connectors(),
+                source.hvac(),
+                source.units(),
+                source.directors(),
+                source.webUi(),
+                source.console()
+        );
     }
 }
