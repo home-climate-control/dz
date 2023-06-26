@@ -4,20 +4,16 @@ plugins {
     id("com.gorylenko.gradle-git-properties")
 
     java
-    id("io.quarkus")
 }
-
-val quarkusPlatformGroupId = "io.quarkus.platform"
-val quarkusPlatformArtifactId = "quarkus-bom"
-val quarkusPlatformVersion = "3.0.1.Final"
 
 dependencies {
 
-    implementation(project(":dz3r-common"))
-    implementation(project(":dz3r-config"))
+    api(project(":dz3r-common"))
+    api(project(":dz3r-config"))
     implementation(project(":dz3r-director"))
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.7.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.7.1")
+
+    // VTL NOTE: "implementation()" dependencies will migrate to
+    // "runtimeOnly" after the annotation based instantiation is introduced
 
     // Enable the Swing console
     runtimeOnly(project(":dz3r-swing"))
@@ -46,14 +42,6 @@ dependencies {
 
     // Enable Raspberry Pi specific hardware integration
     runtimeOnly(project(":dz3r-raspberry-pi"))
-
-    // Quarkus additions
-    implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
-    implementation("io.quarkus:quarkus-arc")
-    implementation("io.quarkus:quarkus-config-yaml")
-    implementation("io.quarkus:quarkus-resteasy-reactive")
-    testImplementation("io.quarkus:quarkus-junit5")
-    testImplementation("io.rest-assured:rest-assured")
 
     // Mapstruct
     implementation("org.mapstruct:mapstruct:1.5.5.Final")

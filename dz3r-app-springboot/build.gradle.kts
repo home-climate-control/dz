@@ -9,7 +9,7 @@ plugins {
 
 dependencies {
 
-    implementation(project(":dz3r-runtime"))
+    implementation(project(":dz3r-bootstrap"))
 
     // SpringBoot additions
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
