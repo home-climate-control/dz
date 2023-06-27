@@ -40,7 +40,7 @@ import java.util.concurrent.CountDownLatch;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-abstract public class AbstractMqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxAware {
+public abstract class AbstractMqttDeviceFactory implements DeviceFactory2020, AutoCloseable, JmxAware {
 
     protected final Logger logger = LogManager.getLogger(getClass());
     private final MqttContext mqtt;
@@ -59,7 +59,7 @@ abstract public class AbstractMqttDeviceFactory implements DeviceFactory2020, Au
      */
     protected final Map<String, Device<?>> deviceMap = new TreeMap<>();
 
-    public AbstractMqttDeviceFactory(
+    protected AbstractMqttDeviceFactory(
             String mqttBrokerHost, int mqttBrokerPort,
             String mqttBrokerUsername, String mqttBrokerPassword,
             String mqttRootTopicPub, String mqttRootTopicSub) throws MqttException {
@@ -80,7 +80,7 @@ abstract public class AbstractMqttDeviceFactory implements DeviceFactory2020, Au
 
     @Override
     public AnalogSensor getSensor(String address) {
-        return new ESPHomeDeviceFactory.Sensor(address);
+        return new Sensor(address);
     }
 
     @Override
@@ -123,7 +123,7 @@ abstract public class AbstractMqttDeviceFactory implements DeviceFactory2020, Au
             logger.warn("powering off");
             close();
             logger.info("shut down.");
-        } catch (Throwable t) {
+        } catch (Exception t) {
             logger.fatal("failed to shut down cleanly, better check your hardware", t);
         } finally {
             ThreadContext.pop();
@@ -210,7 +210,7 @@ abstract public class AbstractMqttDeviceFactory implements DeviceFactory2020, Au
         private final String address;
         private DataSample<E> status;
 
-        public Device(String address) {
+        protected Device(String address) {
 
             this.address = address;
 
@@ -278,5 +278,5 @@ abstract public class AbstractMqttDeviceFactory implements DeviceFactory2020, Au
         }
     }
 
-    abstract protected MqttCallback createCallback();
+    protected abstract MqttCallback createCallback();
 }

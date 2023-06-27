@@ -174,7 +174,7 @@ public class ESPHomeDeviceFactory extends AbstractMqttDeviceFactory {
 
             Sensor s = (Sensor) d;
             double v = signal.doubleValue();
-            s.inject(new DataSample<Double>(timestamp, s.getAddress(), deviceId + "/" + signature, v, null));
+            s.inject(new DataSample<>(timestamp, s.getAddress(), deviceId + "/" + signature, v, null));
 
         } finally {
             ThreadContext.pop();
@@ -189,7 +189,7 @@ public class ESPHomeDeviceFactory extends AbstractMqttDeviceFactory {
         }
 
         @Override
-        public void messageArrived(String topic, MqttMessage message) throws Exception {
+        public void messageArrived(String topic, MqttMessage message) {
             ThreadContext.push("MQTT/messageArrived");
 
             try {
@@ -202,7 +202,7 @@ public class ESPHomeDeviceFactory extends AbstractMqttDeviceFactory {
 
                 process(topic, message.getPayload());
 
-            } catch (Throwable t) {
+            } catch (Exception t) {
 
                 // VT: NOTE: According to the docs, throwing an exception here will shut down the client - can't afford that,
                 // so we'll just complain loudly

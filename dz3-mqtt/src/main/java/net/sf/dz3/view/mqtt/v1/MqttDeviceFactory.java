@@ -194,7 +194,7 @@ public class MqttDeviceFactory extends AbstractMqttDeviceFactory {
 
             Sensor s = (Sensor) d;
             double v = signal.doubleValue();
-            s.inject(new DataSample<Double>(s.getAddress(), s.getAddress(), v, null));
+            s.inject(new DataSample<>(s.getAddress(), s.getAddress(), v, null));
 
         } finally {
             ThreadContext.pop();
@@ -209,7 +209,7 @@ public class MqttDeviceFactory extends AbstractMqttDeviceFactory {
         }
 
         @Override
-        public void messageArrived(String topic, MqttMessage message) throws Exception {
+        public void messageArrived(String topic, MqttMessage message) {
             ThreadContext.push("MQTT/messageArrived");
 
             try {
@@ -219,12 +219,12 @@ public class MqttDeviceFactory extends AbstractMqttDeviceFactory {
 
                 process(message.getPayload());
 
-            } catch (Throwable t) {
+            } catch (Exception t) {
 
                 // VT: NOTE: According to the docs, throwing an exception here will shut down the client - can't afford that,
                 // so we'll just complain loudly
 
-                logger.error("MQTT message caused an exception: " + message, t);
+                logger.error("MQTT message caused an exception: {}", message, t);
 
             } finally {
                 watchdog.release();

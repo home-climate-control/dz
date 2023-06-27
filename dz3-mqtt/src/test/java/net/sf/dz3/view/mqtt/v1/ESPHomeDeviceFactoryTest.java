@@ -14,7 +14,7 @@ class ESPHomeDeviceFactoryTest {
     private final String source = deviceId + "/sensor/" + sensorName + "/state";
 
     @Test
-    public void parseTopic() {
+    void parseTopic() {
 
         Pattern p = Pattern.compile("(.*)/sensor/(.*)/state");
         Matcher m = p.matcher(source);
@@ -26,7 +26,7 @@ class ESPHomeDeviceFactoryTest {
     }
 
     @Test
-    public void parseTopicNamed() {
+    void parseTopicNamed() {
 
         Pattern p = Pattern.compile("(?<deviceId>.*)/sensor/(?<sensorName>.*)/state");
         Matcher m = p.matcher(source);

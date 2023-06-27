@@ -35,7 +35,7 @@ class MqttDeviceFactoryTestSlow extends MqttDeviceFactoryTestBase {
 
     @Test
     @SuppressWarnings("squid:S2925")
-    public void testStale() throws InterruptedException {
+    void testStale() throws InterruptedException {
 
         // VT: NOTE: This test runs for about a minute - inconvenient during development.
         final String enabler = "MQTT_DEVICE_FACTORY";
