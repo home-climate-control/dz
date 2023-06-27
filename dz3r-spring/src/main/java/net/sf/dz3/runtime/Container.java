@@ -1,7 +1,6 @@
 package net.sf.dz3.runtime;
 
 import io.micrometer.core.instrument.Clock;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmHeapPressureMetrics;
@@ -12,6 +11,9 @@ import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.binder.system.UptimeMetrics;
 import io.micrometer.influx.InfluxConfig;
 import io.micrometer.influx.InfluxMeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import net.sf.dz3.runtime.metrics.prometheus.Endpoint;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,6 +46,8 @@ public class Container {
      */
     public static final String CF_PI = "raspberry-pi.xml";
 
+    private Endpoint endpoint;
+
     /**
      * Run the application.
      * @param args Configuration location.
@@ -74,6 +78,8 @@ public class Container {
 
             // Start early so that we have a hint of what is going on
             startMicrometerRegistry();
+            startPrometheusRegistry();
+            bindRegistries();
 
             var configFound = false;
 
@@ -121,6 +127,7 @@ public class Container {
         }
     }
 
+
     private void startMicrometerRegistry() {
 
         ThreadContext.push("startMicrometerRegistry");
@@ -128,8 +135,8 @@ public class Container {
         try {
 
             // Different from whatever is used by InfluxDbLogger
-            final var dbName = getSystemProperty("HCC_MICROMETER_INFLUXDB_DB", "database name", "hcc-micrometer");
-            final var uri = getSystemProperty("HCC_MICROMETER_INFLUXDB_URI", "uri", "http://localhost:8086");
+            final var dbName = getSystemProperty("HCC_MICROMETER_INFLUXDB_DB", "Micrometer InfluxDB database name", "hcc-micrometer");
+            final var uri = getSystemProperty("HCC_MICROMETER_INFLUXDB_URI", "Micrometer InfluxDB uri", "http://localhost:8086");
 
             InfluxConfig config = new InfluxConfig() {
                 @Override
@@ -153,32 +160,44 @@ public class Container {
                 }
             };
 
-            MeterRegistry registry = new InfluxMeterRegistry(config, Clock.SYSTEM);
-            Metrics.addRegistry(registry);
-
-            new JvmGcMetrics().bindTo(registry);
-            new JvmHeapPressureMetrics().bindTo(registry);
-            new JvmMemoryMetrics().bindTo(registry);
-            new JvmThreadMetrics().bindTo(registry);
-            new Log4j2Metrics().bindTo(registry);
-            new ProcessorMetrics().bindTo(registry);
-            new UptimeMetrics().bindTo(registry);
+            Metrics.addRegistry(new InfluxMeterRegistry(config, Clock.SYSTEM));
 
         } finally {
             ThreadContext.pop();
         }
     }
 
+    private void startPrometheusRegistry() {
+
+        var registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+
+        Metrics.addRegistry(registry);
+
+        endpoint = new Endpoint(registry);
+    }
+
+    private void bindRegistries() {
+
+        var registry = Metrics.globalRegistry;
+
+        new JvmGcMetrics().bindTo(registry);
+        new JvmHeapPressureMetrics().bindTo(registry);
+        new JvmMemoryMetrics().bindTo(registry);
+        new JvmThreadMetrics().bindTo(registry);
+        new Log4j2Metrics().bindTo(registry);
+        new ProcessorMetrics().bindTo(registry);
+        new UptimeMetrics().bindTo(registry);
+    }
     private String getSystemProperty(String key, String description, String defaultValue) {
 
         var value = System.getProperty(key);
 
         if (value == null) {
-            logger.warn("Default Micrometer InfluxDB {} ({}) is used, override with system property {}=<value>", description, defaultValue, key);
+            logger.warn("Default system property for {} ({}) is used, override with system property {}=<value>", description, defaultValue, key);
             return defaultValue;
         }
 
-        logger.info("Micrometer InfluxDB {description}={}", value);
+        logger.info("{}={}", description, value);
 
         return value;
     }

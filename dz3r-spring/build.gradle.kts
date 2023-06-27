@@ -45,6 +45,9 @@ dependencies {
     // Enable Raspberry Pi specific hardware integration
     runtimeOnly(project(":dz3r-raspberry-pi"))
 
-    // Enable Micrometer integration via InfluxDB
+    // Enable Micrometer integration
     implementation("io.micrometer:micrometer-registry-influx:1.11.0")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.11.0")
+    implementation("org.springframework:spring-webflux:5.3.27")
+    implementation("io.projectreactor.netty:reactor-netty:1.1.6")
 }
