@@ -61,7 +61,7 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     private static final String MQTT_MESSAGE_SWITCH = "{\"entity_type\":\"switch\",\"name\":\"switch\",\"signature\":\"Sswitch\",\"signal\":23.50,\"device_id\":\"ESP8266-00621CC5\"}";
 
     @Test
-    public void instantiate5args() throws MqttException, Exception {
+    void instantiate5args() throws MqttException, Exception {
         try (MqttDeviceFactory unused = new MqttDeviceFactory(
                 "localhost",
                 null, null,
@@ -71,7 +71,7 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     }
 
     @Test
-    public void instantiate6args() throws MqttException, Exception {
+    void instantiate6args() throws MqttException, Exception {
         try (MqttDeviceFactory unused = new MqttDeviceFactory(
                 "localhost",
                 MqttContext.DEFAULT_PORT,
@@ -82,48 +82,48 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     }
 
     @Test
-    public void processPass() {
+    void processPass() {
         mdf.process(MQTT_MESSAGE_ACTUAL.getBytes());
         // This is a simple pass test
         assertThat(true).isTrue();
     }
 
     @Test
-    public void processNoEntity() {
+    void processNoEntity() {
         mdf.process(MQTT_MESSAGE_NO_ENTITY.getBytes());
         // This is a simple pass test
         assertThat(true).isTrue();
     }
 
     @Test
-    public void processUnknown() {
+    void processUnknown() {
         mdf.process(MQTT_MESSAGE_SWITCH.getBytes());
         // This is a simple pass test
         assertThat(true).isTrue();
     }
 
     @Test
-    public void allMandatoryPresent() {
+    void allMandatoryPresent() {
         assertThat(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_ACTUAL))).isTrue();
     }
 
     @Test
-    public void missingEntityType() {
+    void missingEntityType() {
         assertThat(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_ENTITY))).isFalse();
     }
 
     @Test
-    public void missingName() {
+    void missingName() {
         assertThat(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_NAME))).isFalse();
     }
 
     @Test
-    public void missingSignal() {
+    void missingSignal() {
         assertThat(mdf.checkFields("mandatory", Level.ERROR, MqttDeviceFactory.MANDATORY_JSON_FIELDS, getMandatoryFields(MQTT_MESSAGE_NO_SIGNAL))).isFalse();
     }
 
     @Test
-    public void allOptionalPresent() {
+    void allOptionalPresent() {
         assertThat(mdf.checkFields("optional", Level.WARN, MqttDeviceFactory.OPTIONAL_JSON_FIELDS, getOptionalFields(MQTT_MESSAGE_OPTIONAL))).isTrue();
     }
 
@@ -164,28 +164,28 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     }
 
     @Test
-    public void notJson() {
+    void notJson() {
 
         assertThatExceptionOfType(JsonParsingException.class)
                 .isThrownBy(() -> mdf.process("28C06879A20003CE: 23.5C".getBytes()));
     }
 
     @Test
-    public void getSwitch() {
+    void getSwitch() {
 
         assertThatExceptionOfType(UnsupportedOperationException.class)
                 .isThrownBy(() -> mdf.getSwitch("address"));
     }
 
     @Test
-    public void getSensor() {
+    void getSensor() {
 
         assertThat(mdf.getSensor("mqtt-sensor")).isNotNull();
     }
 
     @Test
     @java.lang.SuppressWarnings("squid:S2925")
-    public void getProcessSensorInput() throws InterruptedException {
+    void getProcessSensorInput() throws InterruptedException {
 
         AnalogSensor s = mdf.getSensor("mqtt-sensor");
         assertThat(s).isNotNull();
@@ -206,7 +206,7 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
         assertThat(s.getSignal().sample.intValue()).as("sensor status").isEqualTo(42);
     }
 
-    private class SensorListener implements DataSink<Double> {
+    private static class SensorListener implements DataSink<Double> {
 
         private final AtomicInteger receiver;
 
@@ -222,19 +222,18 @@ public class MqttDeviceFactoryTest extends MqttDeviceFactoryTestBase {
     }
 
     @Test
-    public void jmxDescriptorFactory() {
+    void jmxDescriptorFactory() {
         logDescriptor("jmxDescriptorFactory", mdf.getJmxDescriptor());
     }
 
     @Test
-    public void jmxDescriptorSensor() {
+    void jmxDescriptorSensor() {
         logDescriptor("jmxDescriptorSensor", mdf.getSensor("sensor").getJmxDescriptor());
     }
 
     private void logDescriptor(String marker, JmxDescriptor descriptor) {
 
         ThreadContext.push(marker);
-
 
         logger.info("description: {}", descriptor.description);
         logger.info("domainName: {}", descriptor.domainName);
