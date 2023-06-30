@@ -1,8 +1,10 @@
 package net.sf.dz3.runtime.config.mqtt;
 
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
+import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
 import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.signal.Signal;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -19,8 +21,8 @@ import java.util.TreeMap;
 
 public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig> {
 
-    public EspSensorSwitchResolver(Set<MqttDeviceConfig> source) {
-        super(source);
+    public EspSensorSwitchResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
+        super(source, endpoint2adapter);
     }
 
     @Override

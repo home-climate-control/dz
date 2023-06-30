@@ -7,18 +7,24 @@ import net.sf.dz3.runtime.config.hardware.SwitchConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import reactor.core.publisher.Flux;
 
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
 public abstract class MqttSensorSwitchResolver<T extends MqttGateway> extends SensorSwitchResolver<T> {
 
-    protected MqttSensorSwitchResolver(Set<T> source) {
+    protected final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
+
+    protected MqttSensorSwitchResolver(Set<T> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source);
+
+        this.endpoint2adapter = endpoint2adapter;
     }
 
     public final Flux<MqttEndpointSpec> getEndpoints() {
