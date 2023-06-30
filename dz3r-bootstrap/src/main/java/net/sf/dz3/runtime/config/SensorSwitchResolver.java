@@ -23,14 +23,5 @@ public abstract class SensorSwitchResolver<T> {
         this.source = source;
     }
 
-    /**
-     * Parse the configuration into the mapping from the flux ID to the flux.
-     *
-     * @return Map of (flux ID, flux) for all the given sources.
-     */
-    protected abstract Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Set<T> source);
-
-    public final Map<String, Flux<Signal<Double, Void>>> getSensorFluxes() {
-        return getSensorFluxes(source);
-    }
+    public abstract Map<String, Flux<Signal<Double, Void>>> getSensorFluxes();
 }

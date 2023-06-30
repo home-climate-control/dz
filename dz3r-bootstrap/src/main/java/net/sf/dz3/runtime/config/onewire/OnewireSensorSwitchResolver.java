@@ -15,7 +15,8 @@ public class OnewireSensorSwitchResolver extends SensorSwitchResolver<OnewireBus
     }
 
     @Override
-    protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Set<OnewireBusConfig> source) {
+    public Map<String, Flux<Signal<Double, Void>>> getSensorFluxes() {
+        logger.error("NOT IMPLEMENTED: {}#getSensorFluxes()", getClass().getName());
         return Map.of();
     }
 }

@@ -28,6 +28,14 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
 
     public ESPHomeListener(MqttListener mqttListener, String mqttRootTopicSub) {
 
+        if (mqttListener == null) {
+            throw new IllegalArgumentException("mqttListener can't be null");
+        }
+
+        if (mqttRootTopicSub == null) {
+            throw new IllegalArgumentException("mqttRootTopicSub can't be null");
+        }
+
         this.mqttListener = mqttListener;
         this.mqttRootTopicSub = mqttRootTopicSub;
     }

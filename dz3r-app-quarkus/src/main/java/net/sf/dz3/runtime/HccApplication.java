@@ -19,6 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import reactor.tools.agent.ReactorDebugAgent;
 
 @ApplicationScoped
 public class HccApplication {
@@ -38,6 +39,7 @@ public class HccApplication {
 
         ThreadContext.push("onStart");
         try {
+            ReactorDebugAgent.init();
             logger.warn("Starting up");
 
             printConfigurationFromInterface();

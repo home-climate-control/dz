@@ -20,9 +20,10 @@ public interface ConfigurationMapper {
 
     ConfigurationMapper INSTANCE = Mappers.getMapper(ConfigurationMapper.class);
 
-    default MqttEndpointSpec parseEndpoint(MqttGateway source) {
+    default MqttEndpointSpec parseEndpoint(MqttBrokerSpec source) {
 
         return new MqttEndpointSpec() {
+
             @Override
             public String host() {
                 return source.host();
@@ -46,6 +47,21 @@ public interface ConfigurationMapper {
             @Override
             public String password() {
                 return source.password();
+            }
+
+            @Override
+            public boolean equals(Object other) {
+
+                if (!(other instanceof MqttEndpointSpec)) {
+                    return false;
+                }
+
+                return signature().equals(((MqttEndpointSpec) other).signature());
+            }
+
+            @Override
+            public int hashCode() {
+                return signature().hashCode();
             }
         };
     }
@@ -80,6 +96,21 @@ public interface ConfigurationMapper {
             @Override
             public String rootTopic() {
                 return source.rootTopic();
+            }
+
+            @Override
+            public boolean equals(Object other) {
+
+                if (!(other instanceof MqttEndpointSpec)) {
+                    return false;
+                }
+
+                return signature().equals(((MqttEndpointSpec) other).signature());
+            }
+
+            @Override
+            public int hashCode() {
+                return signature().hashCode();
             }
         };
     }

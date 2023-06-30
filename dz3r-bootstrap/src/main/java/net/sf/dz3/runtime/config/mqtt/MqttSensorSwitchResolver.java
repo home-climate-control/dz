@@ -8,8 +8,8 @@ import net.sf.dz3.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.signal.Signal;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import reactor.core.publisher.Flux;
 
 import java.util.LinkedHashSet;
@@ -17,35 +17,48 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class MqttSensorSwitchResolver<T extends MqttGateway> extends SensorSwitchResolver<T> {
+/**
+ *
+ * @param <A> Address type.
+ * @param <L> Sensor adapter type.
+ * @param <S> Switch adapter type.
+ */
+public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L, S> extends SensorSwitchResolver<A> {
 
-    protected final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
+    private final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
+    private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
+    private final Set<MqttSwitchConfig> switchConfigs = new LinkedHashSet<>();
 
-    protected MqttSensorSwitchResolver(Set<T> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
+    protected MqttSensorSwitchResolver(Set<A> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source);
-
         this.endpoint2adapter = endpoint2adapter;
     }
 
+    @Override
+    public final Map<String, Flux<Signal<Double, Void>>> getSensorFluxes() {
+
+        return getSensorFluxes(endpoint2adapter, sensorConfigs);
+    }
+
+    protected abstract Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source);
+
     public final Flux<MqttEndpointSpec> getEndpoints() {
 
-        var endpoints = new LinkedHashSet<String>();
+        var endpoints = new LinkedHashSet<MqttEndpointSpec>();
 
         return Flux.create(sink -> {
 
             var sequence = Flux
                     .fromIterable(source)
 
-                    .map(item -> new ImmutablePair<>(item.signature(), item))
-                    .doOnNext(kv -> {
-
+                    .map(item -> new ImmutablePair<>(ConfigurationMapper.INSTANCE.parseEndpoint(item), item))
+                    .subscribe(kv -> {
                         var key = kv.getKey();
                         if (!endpoints.contains(key)) {
                             sink.next(ConfigurationMapper.INSTANCE.parseEndpoint(kv.getValue()));
                             endpoints.add(key);
                         }
-                    })
-                    .subscribe();
+                    });
 
             sink.complete();
             sequence.dispose();
@@ -54,51 +67,48 @@ public abstract class MqttSensorSwitchResolver<T extends MqttGateway> extends Se
 
     /**
      * Parse the configuration into the mapping from their broker (not endpoint) to sensor configuration.
-     *
-     * @return Map of (broker spec, sensor configuration) for all the given sources.
      */
-    public final Flux<Pair<MqttBrokerSpec, SensorConfig>> getSensorConfigs() {
+    public final void getSensorConfigs() {
 
-        return Flux.create(sink -> {
-            var sequence = Flux
-                    .fromIterable(source)
-                    .doOnNext(s -> {
-                        var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
-                        Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
-                            for (var spec : s.sensors()) {
-                                sink.next(new ImmutablePair<>(endpoint, spec));
-                            }
-                        });
-                    })
-                    .subscribe();
-
-            sink.complete();
-            sequence.dispose();
-        });
+        Flux
+                .fromIterable(source)
+                .subscribe(s -> {
+                    var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
+                    Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
+                        for (var spec : s.sensors()) {
+                            sensorConfigs.add(new MqttSensorConfig(endpoint, spec));
+                        }
+                    });
+                });
     }
 
     /**
      * Parse the configuration into the mapping from their broker (not endpoint) to switch configuration.
-     *
-     * @return Map of (broker spec, switch configuration) for all the given sources.
      */
-    public final Flux<Pair<MqttBrokerSpec, SwitchConfig>> getSwitchConfigs() {
+    public final void getSwitchConfigs() {
 
-        return Flux.create(sink -> {
-            var sequence = Flux
-                    .fromIterable(source)
-                    .doOnNext(s -> {
-                        var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
-                        Optional.ofNullable(s.switches()).ifPresent(sensors -> {
-                            for (var spec : s.switches()) {
-                                sink.next(new ImmutablePair<>(endpoint, spec));
-                            }
-                        });
-                    })
-                    .subscribe();
+        Flux
+                .fromIterable(source)
+                .subscribe(s -> {
+                    var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
+                    Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
+                        for (var spec : s.switches()) {
+                            switchConfigs.add(new MqttSwitchConfig(endpoint, spec));
+                        }
+                    });
+                });
+    }
 
-            sink.complete();
-            sequence.dispose();
-        });
+    protected abstract L createSensorListener(MqttAdapter adapter, String rootTopic);
+    public record MqttSensorConfig(
+            MqttBrokerSpec mqttBrokerSpec,
+            SensorConfig sensorConfig) {
+
+    }
+
+    public record MqttSwitchConfig(
+            MqttBrokerSpec mqttBrokerSpec,
+            SwitchConfig switchConfig) {
+
     }
 }
