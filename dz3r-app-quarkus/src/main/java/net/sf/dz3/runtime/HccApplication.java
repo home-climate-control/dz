@@ -18,19 +18,12 @@ import net.sf.dz3.runtime.mapper.InterfaceRecordMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import reactor.tools.agent.ReactorDebugAgent;
 
 @ApplicationScoped
 public class HccApplication {
     private final Logger logger = LogManager.getLogger();
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @ConfigProperty(name = "hcc.debug.config.from-interface", defaultValue = "false")
-    boolean printConfigFromInterface;
-
-    @ConfigProperty(name = "hcc.debug.config.from-record", defaultValue = "true")
-    boolean printConfigFromRecord;
 
     @Context
     HccRawInterfaceConfig config;
@@ -60,16 +53,11 @@ public class HccApplication {
      */
     private void printConfigurationFromInterface() {
 
-        if (!printConfigFromInterface) {
-            logger.info("configured not to print config instantiated from interface");
-            return;
-        }
-
         // Necessary to print Optionals in a sane way
         objectMapper.registerModule(new Jdk8Module());
         objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
 
-        logger.info("configuration/interface: {}", () -> {
+        logger.debug("configuration/interface: {}", () -> {
             try {
                 return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
             } catch (JsonProcessingException ex) {
@@ -82,17 +70,13 @@ public class HccApplication {
 
         var recordConfig = InterfaceRecordMapper.INSTANCE.rawConfig(config);
 
-        if (printConfigFromRecord) {
-            logger.info("configurations/record: {}", () -> {
-                try {
-                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(recordConfig);
-                } catch (JsonProcessingException ex) {
-                    throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
-                }
-            });
-        } else {
-            logger.info("configured not to print config instantiated from record");
-        }
+        logger.debug("configurations/record: {}", () -> {
+            try {
+                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(recordConfig);
+            } catch (JsonProcessingException ex) {
+                throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
+            }
+        });
 
         return recordConfig;
     }
