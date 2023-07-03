@@ -12,6 +12,7 @@ import net.sf.dz3r.signal.Signal;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L, S> exte
     private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
     private final Set<MqttSwitchConfig> switchConfigs = new LinkedHashSet<>();
 
+    private final Map<MqttBrokerSpec, L> address2sensor = new LinkedHashMap<>();
     protected MqttSensorSwitchResolver(Set<A> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source);
         this.endpoint2adapter = endpoint2adapter;
@@ -99,16 +101,18 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L, S> exte
                 });
     }
 
+    protected final L resolveListener(MqttBrokerSpec address, MqttAdapter adapter) {
+        return address2sensor.computeIfAbsent(address, k -> createSensorListener(adapter, address.rootTopic()));
+    }
+
     protected abstract L createSensorListener(MqttAdapter adapter, String rootTopic);
     public record MqttSensorConfig(
             MqttBrokerSpec mqttBrokerSpec,
             SensorConfig sensorConfig) {
-
     }
 
     public record MqttSwitchConfig(
             MqttBrokerSpec mqttBrokerSpec,
             SwitchConfig switchConfig) {
-
     }
 }

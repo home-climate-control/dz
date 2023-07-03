@@ -1,7 +1,6 @@
 package net.sf.dz3.runtime.config.mqtt;
 
 import net.sf.dz3.runtime.config.ConfigurationMapper;
-import net.sf.dz3.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
@@ -12,20 +11,13 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig, ESPHomeListener, ESPHomeSwitch> {
 
-    private final Map<MqttBrokerSpec, ESPHomeListener> address2sensor = new LinkedHashMap<>();
-
     public EspSensorSwitchResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
-    }
-
-    private ESPHomeListener resolveListener(MqttBrokerSpec address, MqttAdapter adapter) {
-        return address2sensor.computeIfAbsent(address, k -> createSensorListener(adapter, address.rootTopic()));
     }
 
     @Override
@@ -40,15 +32,15 @@ public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevice
                     var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
                     var listener = resolveListener(c.mqttBrokerSpec(), adapter);
 
-                    return new MqttSensorConfigWithListener(c, listener);
+                    return new ImmutablePair<>(c, listener);
                 })
 
                 // This is where things get hairy
                 .parallel()
                 .runOn(Schedulers.boundedElastic())
                 .map(kv -> {
-                    var address = kv.sensorConfig.sensorConfig().address();
-                    var flux = kv.listener.getFlux(address);
+                    var address = kv.getKey().sensorConfig().address();
+                    var flux = kv.getValue().getFlux(address);
 
                     return new ImmutablePair<>(address, flux);
                 })
@@ -60,11 +52,5 @@ public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevice
     @Override
     protected ESPHomeListener createSensorListener(MqttAdapter adapter, String rootTopic) {
         return new ESPHomeListener(adapter, rootTopic);
-    }
-
-    private record MqttSensorConfigWithListener(
-            MqttSensorConfig sensorConfig,
-            ESPHomeListener listener
-    ) {
     }
 }

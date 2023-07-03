@@ -50,6 +50,11 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
         this.mqttRootTopicSub = mqttRootTopicSub;
     }
 
+    public Z2MListener(MqttListener mqttListener, String mqttRootTopicSub) {
+        this.mqttListener = mqttListener;
+        this.mqttRootTopicSub = mqttRootTopicSub;
+    }
+
     @Override
     public MqttEndpoint getAddress() {
         return mqttListener.address;
