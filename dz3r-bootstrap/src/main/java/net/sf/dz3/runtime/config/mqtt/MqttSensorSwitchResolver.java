@@ -9,8 +9,10 @@ import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.SignalSource;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -24,7 +26,7 @@ import java.util.Set;
  * @param <L> Sensor adapter type.
  * @param <S> Switch adapter type.
  */
-public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L, S> extends SensorSwitchResolver<A> {
+public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S> extends SensorSwitchResolver<A> {
 
     private final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
     private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
@@ -38,11 +40,36 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L, S> exte
 
     @Override
     public final Map<String, Flux<Signal<Double, Void>>> getSensorFluxes() {
-
         return getSensorFluxes(endpoint2adapter, sensorConfigs);
     }
 
-    protected abstract Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source);
+    protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source) {
+
+        return Flux
+                .fromIterable(source)
+                .doOnNext(c -> logger.info("sensor: {}", c.sensorConfig().address()))
+                .doOnNext(c -> logger.info("  broker: {}", c.mqttBrokerSpec().signature()))
+                .doOnNext(c -> logger.info("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
+                .map(c -> {
+                    var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
+                    var listener = resolveListener(c.mqttBrokerSpec(), adapter);
+
+                    return new ImmutablePair<>(c, listener);
+                })
+
+                // This is where things get hairy
+                .parallel()
+                .runOn(Schedulers.boundedElastic())
+                .map(kv -> {
+                    var address = kv.getKey().sensorConfig().address();
+                    var flux = kv.getValue().getFlux(address);
+
+                    return new ImmutablePair<>(address, flux);
+                })
+                .sequential()
+                .collectMap(Map.Entry::getKey, Map.Entry::getValue)
+                .block();
+    }
 
     public final Flux<MqttEndpointSpec> getEndpoints() {
 
