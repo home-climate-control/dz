@@ -2,6 +2,7 @@ package net.sf.dz3.runtime.config;
 
 import net.sf.dz3.runtime.config.mqtt.MqttConfgurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
+import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,15 +16,20 @@ public class ConfigurationParser {
 
     public HccParsedConfig parse(HccRawConfig source) {
 
-        new MqttConfgurationParser().parse(
-                source.esphome(),
-                source.zigbee2mqtt(),
-                source.zwave2mqtt());
+        Marker m = new Marker(getClass().getSimpleName() + "#parse");
+        try {
+            new MqttConfgurationParser().parse(
+                    source.esphome(),
+                    source.zigbee2mqtt(),
+                    source.zwave2mqtt());
 
-        new OnewireConfigurationParser().parse(source.onewire());
+            new OnewireConfigurationParser().parse(source.onewire());
 
-        logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
-        return new HccParsedConfig();
+            logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
+            return new HccParsedConfig();
+        } finally {
+            m.close();
+        }
     }
 
 }
