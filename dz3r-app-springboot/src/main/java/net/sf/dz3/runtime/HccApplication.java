@@ -37,6 +37,7 @@ public class HccApplication implements CommandLineRunner {
 
         try {
             ReactorDebugAgent.init();
+            logger.warn("Starting up");
 
             logger.info("command line arguments: {}", (Object[]) args);
             logger.debug("configuration: {}", () -> {
