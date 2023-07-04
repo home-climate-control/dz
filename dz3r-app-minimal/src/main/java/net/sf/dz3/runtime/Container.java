@@ -1,13 +1,13 @@
 package net.sf.dz3.runtime;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import net.sf.dz3.runtime.config.HccRawConfig;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.scanner.ScannerException;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
@@ -27,8 +27,6 @@ public class Container {
      * Logger to use.
      */
     private static final Logger logger = LogManager.getLogger(Container.class);
-
-    private final Yaml yaml = new Yaml();
 
     /**
      * Name of the file this class expects to find the configuration in.
@@ -152,13 +150,15 @@ public class Container {
                 source = "file:" + source;
             }
 
-            HccRawConfig config = yaml.loadAs(getStream(source), HccRawConfig.class);
-            logger.info("configuration: {}", new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(config));
+            var objectMapper = new ObjectMapper(new YAMLFactory());
+            objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
+
+            HccRawConfig config = objectMapper.readValue(getStream(source), HccRawConfig.class);
+
+            logger.debug("configuration: {}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config));
 
             return true;
 
-        } catch (ScannerException ex) {
-            throw new IllegalArgumentException("Malformed YAML while parsing " + source, ex);
         } catch (Exception ex) {
             throw new IllegalArgumentException("Unexpected exception while parsing " + source,  ex);
         }

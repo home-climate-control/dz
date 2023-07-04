@@ -1,5 +1,8 @@
 package net.sf.dz3.runtime.config;
 
+import com.fasterxml.jackson.annotation.JsonRootName;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3.runtime.config.connector.ConnectorConfig;
 import net.sf.dz3.runtime.config.hardware.HvacDeviceConfig;
 import net.sf.dz3.runtime.config.hardware.MockConfig;
@@ -35,6 +38,8 @@ import java.util.Set;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
+@JsonRootName("home-climate-control")
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record HccRawConfig(
         String instance,
         Set<MqttDeviceConfig> esphome,
