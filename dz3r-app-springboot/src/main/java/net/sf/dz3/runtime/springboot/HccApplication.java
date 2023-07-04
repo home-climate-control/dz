@@ -1,4 +1,4 @@
-package net.sf.dz3.runtime;
+package net.sf.dz3.runtime.springboot;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
 @SpringBootApplication
@@ -37,7 +38,14 @@ public class HccApplication implements CommandLineRunner {
 
         try {
             ReactorDebugAgent.init();
+
+            // WARN level so that it shows up in a shorter log and is faster to find on a slow box
             logger.warn("Starting up");
+
+            logger.debug("CPU count reported: {}", Runtime.getRuntime().availableProcessors());
+            logger.debug("reactor-core default pool size: {}", Schedulers.DEFAULT_POOL_SIZE);
+            logger.debug("reactor-core default bounded elastic size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_SIZE);
+            logger.debug("reactor-core default bounded elastic queue size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_QUEUESIZE);
 
             logger.info("command line arguments: {}", (Object[]) args);
             logger.debug("configuration: {}", () -> {
@@ -56,6 +64,7 @@ public class HccApplication implements CommandLineRunner {
             logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
 
         } finally {
+            logger.fatal("Shutting down");
             ThreadContext.pop();
         }
     }

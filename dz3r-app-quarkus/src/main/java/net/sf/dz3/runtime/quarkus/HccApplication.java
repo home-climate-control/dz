@@ -1,4 +1,4 @@
-package net.sf.dz3.runtime;
+package net.sf.dz3.runtime.quarkus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +18,7 @@ import net.sf.dz3.runtime.mapper.InterfaceRecordMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
 @ApplicationScoped
@@ -33,7 +34,14 @@ public class HccApplication {
         ThreadContext.push("onStart");
         try {
             ReactorDebugAgent.init();
+
+            // WARN level so that it shows up in a shorter log and is faster to find on a slow box
             logger.warn("Starting up");
+
+            logger.debug("CPU count reported: {}", Runtime.getRuntime().availableProcessors());
+            logger.debug("reactor-core default pool size: {}", Schedulers.DEFAULT_POOL_SIZE);
+            logger.debug("reactor-core default bounded elastic size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_SIZE);
+            logger.debug("reactor-core default bounded elastic queue size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_QUEUESIZE);
 
             printConfigurationFromInterface();
             new ConfigurationParser().parse(map(config)).start().block();
@@ -44,6 +52,7 @@ public class HccApplication {
             logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
 
         } finally {
+            logger.fatal("Shutting down");
             ThreadContext.pop();
         }
     }
