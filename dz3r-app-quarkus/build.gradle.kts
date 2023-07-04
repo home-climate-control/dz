@@ -15,8 +15,8 @@ dependencies {
 
     implementation(project(":dz3r-bootstrap"))
     implementation(project(":dz3r-director"))
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.12.7.1")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.7.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2")
 
     // Enable the Swing console
     runtimeOnly(project(":dz3r-swing"))

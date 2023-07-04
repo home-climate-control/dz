@@ -54,7 +54,7 @@ include("dz3r-spring")
 // to experiment with.
 
 // VT: FIXME: Coming up
-//include("dz3r-app-minimal")
+include("dz3r-app-minimal")
 
 // This is the SpringBoot application, with all SpringBoot bells and
 // whistles (including emitting metrics) included. See application.xml for

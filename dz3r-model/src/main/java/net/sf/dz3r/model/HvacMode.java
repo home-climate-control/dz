@@ -1,5 +1,7 @@
 package net.sf.dz3r.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * HVAC device mode.
  *
@@ -10,7 +12,9 @@ package net.sf.dz3r.model;
  */
 public enum HvacMode {
 
+    @JsonProperty("cooling")
     COOLING(-1, "Cooling"),
+    @JsonProperty("heating")
     HEATING(1, "Heating");
 
     public final int mode;
