@@ -104,7 +104,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                 .subscribe(s -> {
                     var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
                     Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
-                        for (var spec : s.sensors()) {
+                        for (var spec : sensors) {
                             sensorConfigs.add(new MqttSensorConfig(endpoint, spec));
                         }
                     });
@@ -120,8 +120,8 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                 .fromIterable(source)
                 .subscribe(s -> {
                     var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
-                    Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
-                        for (var spec : s.switches()) {
+                    Optional.ofNullable(s.switches()).ifPresent(switches -> {
+                        for (var spec : switches) {
                             switchConfigs.add(new MqttSwitchConfig(endpoint, spec));
                         }
                     });
