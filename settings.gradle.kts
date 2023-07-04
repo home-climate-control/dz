@@ -57,7 +57,7 @@ include("dz3r-spring")
 include("dz3r-app-minimal")
 
 // This is the SpringBoot application, with all SpringBoot bells and
-// whistles (including emitting metrics) included. See application.xml for
+// whistles (including emitting metrics) included. See application.yaml for
 // details.
 
 // Run with:
@@ -67,7 +67,7 @@ include("dz3r-app-minimal")
 include("dz3r-app-springboot")
 
 // This is the Quarkus application, with all Quarkus bells and
-// whistles (including emitting metrics) included. See application.xml for
+// whistles (including emitting metrics) included. See application.yaml for
 // details.
 
 // Run with (for starters; native app instructions coming):
