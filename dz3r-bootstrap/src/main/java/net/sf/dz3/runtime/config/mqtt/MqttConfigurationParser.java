@@ -15,9 +15,22 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MqttConfgurationParser {
+/**
+ * Parser for all MQTT based device configurations (that'll be ESPHome, Zigbee, Z-Wave at the moment).
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ */
+public class MqttConfigurationParser {
 
     private final Logger logger = LogManager.getLogger();
+
+    /**
+     * Take configurations; produce device fluxes.
+     *
+     * @param esphome Set of ESPHome device configurations.
+     * @param zigbee2mqtt Set of Zigbee2MQTT device configurations.
+     * @param zwave2mqtt Set of ZWave2MQTT device configurations.
+     */
     public void parse(Set<MqttDeviceConfig> esphome, Set<MqttDeviceConfig> zigbee2mqtt, Set<MqttDeviceConfig> zwave2mqtt) {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse");
@@ -64,6 +77,8 @@ public class MqttConfgurationParser {
 
             // Step 4: now combine all of those into a single stream of sensors, and another of switches.
             // Each of resolvers knows exact listener or adapter configuration for a specific device type.
+
+            // VT: FIXME: These will be returned as a flux when the whole config parser is stitched together.
 
             var sensors = mqttConfigs
                     .map(MqttSensorSwitchResolver::getSensorFluxes)

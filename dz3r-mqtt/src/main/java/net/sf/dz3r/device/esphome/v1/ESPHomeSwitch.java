@@ -20,6 +20,8 @@ import java.time.Instant;
  *
  * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch
  * @see net.sf.dz3r.device.z2m.v1.Z2MSwitch
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class ESPHomeSwitch extends AbstractMqttSwitch {
 

@@ -1,6 +1,6 @@
 package net.sf.dz3.runtime.config;
 
-import net.sf.dz3.runtime.config.mqtt.MqttConfgurationParser;
+import net.sf.dz3.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +18,7 @@ public class ConfigurationParser {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse");
         try {
-            new MqttConfgurationParser().parse(
+            new MqttConfigurationParser().parse(
                     source.esphome(),
                     source.zigbee2mqtt(),
                     source.zwave2mqtt());

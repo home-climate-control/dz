@@ -12,6 +12,11 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.ZoneId;
 
+/**
+ * Common abstraction for all MQTT based switches (that'll be ESPHome, Zigbee, Z-Wave at the moment).
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ */
 public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddress> {
 
     protected final MqttAdapter mqttAdapter;

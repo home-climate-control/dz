@@ -21,10 +21,13 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
+ * Common implementations for resolving MQTT sensor and switch instances from their configurations.
  *
  * @param <A> Address type.
  * @param <L> Sensor adapter type.
  * @param <S> Switch adapter type.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S> extends SensorSwitchResolver<A> {
 
@@ -43,7 +46,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
         return getSensorFluxes(endpoint2adapter, sensorConfigs);
     }
 
-    protected Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source) {
+    private Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source) {
 
         return Flux
                 .fromIterable(source)
