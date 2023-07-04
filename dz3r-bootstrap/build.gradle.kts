@@ -12,6 +12,8 @@ dependencies {
     api(project(":dz3r-config"))
     implementation(project(":dz3r-director"))
 
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+
     // VTL NOTE: "implementation()" dependencies will migrate to
     // "runtimeOnly" after the annotation based instantiation is introduced
 

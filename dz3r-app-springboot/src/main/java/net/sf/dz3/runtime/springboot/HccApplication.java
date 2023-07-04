@@ -1,27 +1,28 @@
 package net.sf.dz3.runtime.springboot;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sf.dz3.runtime.config.ConfigurationParser;
+import net.sf.dz3.runtime.ApplicationBase;
 import net.sf.dz3.runtime.config.HccRawConfig;
 import net.sf.dz3.runtime.config.HccRawRecordConfig;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import reactor.core.scheduler.Schedulers;
-import reactor.tools.agent.ReactorDebugAgent;
 
+/**
+ * SpringBoot entry point into HCC Core.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2023
+ */
 @SpringBootApplication
 @EnableConfigurationProperties(HccRawRecordConfig.class)
-public class HccApplication implements CommandLineRunner {
+public class HccApplication extends ApplicationBase<HccRawRecordConfig> implements CommandLineRunner {
 
+    /**
+     * Injected configuration.
+     */
     private final HccRawRecordConfig config;
 
-    private static final Logger logger = LogManager.getLogger(HccApplication.class);
     public HccApplication(HccRawRecordConfig config) {
         this.config = config;
     }
@@ -37,31 +38,17 @@ public class HccApplication implements CommandLineRunner {
         ThreadContext.push("run");
 
         try {
-            ReactorDebugAgent.init();
+            init();
 
-            // WARN level so that it shows up in a shorter log and is faster to find on a slow box
-            logger.warn("Starting up");
-
-            logger.debug("CPU count reported: {}", Runtime.getRuntime().availableProcessors());
-            logger.debug("reactor-core default pool size: {}", Schedulers.DEFAULT_POOL_SIZE);
-            logger.debug("reactor-core default bounded elastic size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_SIZE);
-            logger.debug("reactor-core default bounded elastic queue size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_QUEUESIZE);
-
+            // VT: NOTE: Do we really use any here?
             logger.info("command line arguments: {}", (Object[]) args);
-            logger.debug("configuration: {}", () -> {
-                try {
-                    return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(config);
-                } catch (JsonProcessingException ex) {
-                    throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
-                }
-            });
 
-            new ConfigurationParser().parse(map(config)).start().block();
+            run(config);
 
-            logger.warn("run complete");
+        } catch (Exception ex) {
 
-            logger.info("");
-            logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
+            logger.fatal("Unexpected exception: ", ex);
+            Thread.currentThread().interrupt();
 
         } finally {
             logger.fatal("Shutting down");
@@ -75,7 +62,8 @@ public class HccApplication implements CommandLineRunner {
      * @param source Configuration with Spring annotation on it.
      * @return Configuration without any annotations.
      */
-    private HccRawConfig map(HccRawRecordConfig source) {
+    @Override
+    protected HccRawConfig mapConfiguration(HccRawRecordConfig source) {
         return new HccRawConfig(
                 source.instance(),
                 source.esphome(),

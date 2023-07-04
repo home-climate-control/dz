@@ -11,45 +11,42 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
-import net.sf.dz3.runtime.config.ConfigurationParser;
+import net.sf.dz3.runtime.ApplicationBase;
 import net.sf.dz3.runtime.config.HccRawConfig;
 import net.sf.dz3.runtime.config.quarkus.HccRawInterfaceConfig;
 import net.sf.dz3.runtime.mapper.InterfaceRecordMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import reactor.core.scheduler.Schedulers;
-import reactor.tools.agent.ReactorDebugAgent;
 
+/**
+ * Quarkus entry point into HCC Core.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2023
+ */
 @ApplicationScoped
-public class HccApplication {
-    private final Logger logger = LogManager.getLogger();
+public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    /**
+     * Injected configuration.
+     */
     @Context
     HccRawInterfaceConfig config;
 
     void onStart(@Observes StartupEvent e) {
-
         ThreadContext.push("onStart");
+
         try {
-            ReactorDebugAgent.init();
+            init();
 
-            // WARN level so that it shows up in a shorter log and is faster to find on a slow box
-            logger.warn("Starting up");
-
-            logger.debug("CPU count reported: {}", Runtime.getRuntime().availableProcessors());
-            logger.debug("reactor-core default pool size: {}", Schedulers.DEFAULT_POOL_SIZE);
-            logger.debug("reactor-core default bounded elastic size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_SIZE);
-            logger.debug("reactor-core default bounded elastic queue size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_QUEUESIZE);
-
+            // Quarkus quirk; its configuration is quite different from others
             printConfigurationFromInterface();
-            new ConfigurationParser().parse(map(config)).start().block();
 
-            logger.warn("run complete");
+            run(config);
 
-            logger.info("");
-            logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
+        } catch (Exception ex) {
+
+            logger.fatal("Unexpected exception: ", ex);
+            Thread.currentThread().interrupt();
 
         } finally {
             logger.fatal("Shutting down");
@@ -75,19 +72,9 @@ public class HccApplication {
         });
     }
 
-    private HccRawConfig map(HccRawInterfaceConfig config) {
-
-        var recordConfig = InterfaceRecordMapper.INSTANCE.rawConfig(config);
-
-        logger.debug("configurations/record: {}", () -> {
-            try {
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(recordConfig);
-            } catch (JsonProcessingException ex) {
-                throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
-            }
-        });
-
-        return recordConfig;
+    @Override
+    protected HccRawConfig mapConfiguration(HccRawInterfaceConfig config) {
+        return InterfaceRecordMapper.INSTANCE.rawConfig(config);
     }
 
     @GET
