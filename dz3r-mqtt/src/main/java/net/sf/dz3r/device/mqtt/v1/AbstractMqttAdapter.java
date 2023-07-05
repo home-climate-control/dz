@@ -154,7 +154,17 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
                         var now = Instant.now();
                         acquiredAt.set(now.toEpochMilli());
                         logger.debug("acquired lock on topic={} in {}ms", t, Duration.between(start, now).toMillis());
-                        return topic2flux.computeIfAbsent(t, k -> createFlux(t, includeSubtopics));
+
+                        // VT: NOTE: ...and after all this trouble it'll still blow up if requests for *different* topics
+                        // came at the same time.
+                        //
+                        // Let's leave it as is for now, it looks like delays are mostly "all or nothing", with rare exceptions.
+                        // Need to get back to this someday with a lockless solution, though.
+
+                        synchronized (topic2flux) {
+                            return topic2flux.computeIfAbsent(t, k -> createFlux(t, includeSubtopics));
+                        }
+
                     } finally {
                         lock.unlock();
                         logger.debug("released lock on topic={} in {}ms (roundtrip of {}ms)",
