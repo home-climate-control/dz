@@ -1,6 +1,7 @@
 package net.sf.dz3.runtime.config;
 
 import net.sf.dz3.runtime.config.connector.ConnectorConfig;
+import net.sf.dz3.runtime.config.filter.FilterConfig;
 import net.sf.dz3.runtime.config.hardware.HvacDeviceConfig;
 import net.sf.dz3.runtime.config.hardware.MockConfig;
 import net.sf.dz3.runtime.config.hardware.UnitControllerConfig;

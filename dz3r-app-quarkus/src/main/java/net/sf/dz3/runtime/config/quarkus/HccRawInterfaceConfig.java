@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.smallrye.config.ConfigMapping;
 import net.sf.dz3.runtime.config.HccRawConfig;
 import net.sf.dz3.runtime.config.quarkus.connector.ConnectorConfig;
+import net.sf.dz3.runtime.config.quarkus.filter.FilterConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.HvacDeviceConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.MockConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.UnitControllerConfig;

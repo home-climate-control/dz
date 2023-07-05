@@ -1,11 +1,13 @@
 package net.sf.dz3.runtime.mapper;
 
 import net.sf.dz3.runtime.config.HccRawConfig;
-import net.sf.dz3.runtime.config.quarkus.FilterConfig;
 import net.sf.dz3.runtime.config.quarkus.HccRawInterfaceConfig;
 import net.sf.dz3.runtime.config.quarkus.connector.ConnectorConfig;
 import net.sf.dz3.runtime.config.quarkus.connector.HttpConnectorConfig;
 import net.sf.dz3.runtime.config.quarkus.connector.InfluxCollectorConfig;
+import net.sf.dz3.runtime.config.quarkus.filter.FilterConfig;
+import net.sf.dz3.runtime.config.quarkus.filter.MedianFilterConfig;
+import net.sf.dz3.runtime.config.quarkus.filter.MedianSetFilterConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.HeatpumpConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.HeatpumpHATConfig;
 import net.sf.dz3.runtime.config.quarkus.hardware.HvacDeviceConfig;
@@ -90,10 +92,18 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switches(source.switches()))", target = "switches")
     net.sf.dz3.runtime.config.hardware.MockConfig mock(MockConfig source);
 
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.median(source.median()))", target = "median")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.medianSet(source.medianSet()))", target = "medianSet")
+    net.sf.dz3.runtime.config.filter.FilterConfig filter(FilterConfig source);
+
     @Mapping(expression = "java(source.id())", target = "id")
-    @Mapping(expression = "java(source.type())", target = "type")
+    @Mapping(expression = "java(source.depth())", target = "depth")
+    @Mapping(expression = "java(source.source())", target = "source")
+    net.sf.dz3.runtime.config.filter.MedianFilterConfig median(MedianFilterConfig source);
+
+    @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(source.sources())", target = "sources")
-    net.sf.dz3.runtime.config.FilterConfig filter(FilterConfig source);
+    net.sf.dz3.runtime.config.filter.MedianSetFilterConfig medianSet(MedianSetFilterConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(source.name())", target = "name")
@@ -194,7 +204,9 @@ public interface InterfaceRecordMapper {
     Set<net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig> mqtt(Set<MqttDeviceConfig> source);
     Set<net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig> onewire(Set<OnewireBusConfig> source);
     Set<net.sf.dz3.runtime.config.hardware.MockConfig> mocks(Set<MockConfig> source);
-    Set<net.sf.dz3.runtime.config.FilterConfig> filters(Set<FilterConfig> source);
+    Set<net.sf.dz3.runtime.config.filter.FilterConfig> filters(Set<FilterConfig> source);
+    Set<net.sf.dz3.runtime.config.filter.MedianFilterConfig> median(Set<MedianFilterConfig> source);
+    Set<net.sf.dz3.runtime.config.filter.MedianSetFilterConfig> medianSet(Set<MedianSetFilterConfig> source);
     Set<net.sf.dz3.runtime.config.model.ZoneConfig> zones(Set<ZoneConfig> source);
     Set<net.sf.dz3.runtime.config.connector.ConnectorConfig> connectors(Set<ConnectorConfig> source);
     Set<net.sf.dz3.runtime.config.hardware.HvacDeviceConfig> hvac(Set<HvacDeviceConfig> source);

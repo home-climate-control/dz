@@ -1,18 +1,16 @@
-package net.sf.dz3.runtime.config.quarkus;
+package net.sf.dz3.runtime.config.quarkus.filter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
 
 /**
- * Signal filter configuration.
+ * Median set filter configuration.
  *
  */
-public interface FilterConfig {
+public interface MedianSetFilterConfig {
     @JsonProperty("id")
     String id();
-    @JsonProperty("type")
-    String type();
     @JsonProperty("sources")
     Set<String> sources();
 }
