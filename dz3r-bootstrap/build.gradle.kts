@@ -21,7 +21,7 @@ dependencies {
     runtimeOnly(project(":dz3r-swing"))
 
     // Enable InfluxDB logger
-    runtimeOnly(project(":dz3r-influxdb"))
+    implementation(project(":dz3r-influxdb"))
 
     // Enable 1-Wire bus
     runtimeOnly(project(":dz3r-owapi"))
@@ -33,8 +33,8 @@ dependencies {
     implementation(project(":dz3r-mqtt"))
 
     // Enable remote control over HTTP
-    runtimeOnly(project(":dz3r-http"))
-    runtimeOnly(project(":dz3r-http-gae"))
+    implementation(project(":dz3r-http"))
+    implementation(project(":dz3r-http-gae"))
 
     // Enable remote control via WebUI
     runtimeOnly(project(":dz3r-webui"))
