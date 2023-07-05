@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -147,13 +148,19 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
                     var start = Instant.now();
                     var lock = getLock(t);
 
+                    var acquiredAt = new AtomicLong();
                     lock.lock();
                     try {
-                        logger.debug("acquired lock on topic={} in {}ms", t, Duration.between(start, Instant.now()).toMillis());
+                        var now = Instant.now();
+                        acquiredAt.set(now.toEpochMilli());
+                        logger.debug("acquired lock on topic={} in {}ms", t, Duration.between(start, now).toMillis());
                         return topic2flux.computeIfAbsent(t, k -> createFlux(t, includeSubtopics));
                     } finally {
                         lock.unlock();
-                        logger.debug("released lock on topic={} in {}ms", t, Duration.between(start, Instant.now()).toMillis());
+                        logger.debug("released lock on topic={} in {}ms (roundtrip of {}ms)",
+                                t,
+                                Duration.ofMillis(Instant.now().toEpochMilli() - acquiredAt.get()).toMillis(),
+                                Duration.between(start, Instant.now()).toMillis());
                     }
                 });
     }
