@@ -1,5 +1,6 @@
 package net.sf.dz3.runtime.config;
 
+import net.sf.dz3.runtime.config.filter.FilterConfigurationParser;
 import net.sf.dz3.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
 import net.sf.dz3r.instrumentation.Marker;
@@ -26,6 +27,8 @@ public class ConfigurationParser {
             new OnewireConfigurationParser().parse(source.onewire());
 
             new MockConfigurationParser().parse(source.mocks());
+
+            new FilterConfigurationParser().parse(source.filters());
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
             return new HccParsedConfig();
