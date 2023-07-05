@@ -18,7 +18,7 @@ dependencies {
     // "runtimeOnly" after the annotation based instantiation is introduced
 
     // Enable the Swing console
-    runtimeOnly(project(":dz3r-swing"))
+    implementation(project(":dz3r-swing"))
 
     // Enable InfluxDB logger
     implementation(project(":dz3r-influxdb"))
@@ -37,13 +37,13 @@ dependencies {
     implementation(project(":dz3r-http-gae"))
 
     // Enable remote control via WebUI
-    runtimeOnly(project(":dz3r-webui"))
+    implementation(project(":dz3r-webui"))
 
     // Enable Google Calendar integration
-    runtimeOnly(project(":dz3r-scheduler-gcal-v3"))
+    implementation(project(":dz3r-scheduler-gcal-v3"))
 
     // Enable Raspberry Pi specific hardware integration
-    runtimeOnly(project(":dz3r-raspberry-pi"))
+    implementation(project(":dz3r-raspberry-pi"))
 
     // Mapstruct
     implementation("org.mapstruct:mapstruct:1.5.5.Final")

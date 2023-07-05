@@ -163,7 +163,7 @@ public interface InterfaceRecordMapper {
     net.sf.dz3.runtime.config.hardware.HvacDeviceConfig hvac(HvacDeviceConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
-    @Mapping(expression = "java(source.mode().orElse(null))", target = "mode")
+    @Mapping(expression = "java(source.mode())", target = "mode")
     @Mapping(expression = "java(source.switchAddress())", target = "switchAddress")
     net.sf.dz3.runtime.config.hardware.SwitchableHvacDeviceConfig switchable(SwitchableHvacDeviceConfig source);
 
