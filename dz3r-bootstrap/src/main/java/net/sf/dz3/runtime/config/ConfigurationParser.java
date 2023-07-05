@@ -25,6 +25,8 @@ public class ConfigurationParser {
 
             new OnewireConfigurationParser().parse(source.onewire());
 
+            new MockConfigurationParser().parse(source.mocks());
+
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
             return new HccParsedConfig();
         } finally {
