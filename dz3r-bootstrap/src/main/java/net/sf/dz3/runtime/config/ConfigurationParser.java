@@ -1,6 +1,7 @@
 package net.sf.dz3.runtime.config;
 
 import net.sf.dz3.runtime.config.filter.FilterConfigurationParser;
+import net.sf.dz3.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
 import net.sf.dz3r.instrumentation.Marker;
@@ -13,6 +14,7 @@ import org.apache.logging.log4j.Logger;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class ConfigurationParser {
+
     private final Logger logger = LogManager.getLogger();
 
     public HccParsedConfig parse(HccRawConfig source) {
@@ -30,7 +32,10 @@ public class ConfigurationParser {
 
             new FilterConfigurationParser().parse(source.filters());
 
+            new ZoneConfigurationParser().parse(source.zones());
+
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
+
             return new HccParsedConfig();
         } finally {
             m.close();
