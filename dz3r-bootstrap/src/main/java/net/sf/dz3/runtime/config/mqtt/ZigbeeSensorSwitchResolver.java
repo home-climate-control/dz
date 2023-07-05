@@ -19,4 +19,9 @@ public class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDev
     protected Z2MJsonListener createSensorListener(MqttAdapter adapter, String rootTopic) {
         return new Z2MJsonListener(adapter, rootTopic);
     }
+
+    @Override
+    protected Z2MSwitch createSwitch(MqttAdapter adapter, String rootTopic) {
+        return new Z2MSwitch(adapter, rootTopic, null);
+    }
 }

@@ -134,7 +134,7 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
         return Flux
                 .just(topic)
                 .publishOn(Schedulers.boundedElastic())
-                .doOnNext(t -> logger.info("getFlux: {}{}", t, includeSubtopics ? "/..." : ""))
+                .doOnNext(t -> logger.info("getFlux: {}{}", t, includeSubtopics ? " +subtopics" : ""))
                 .flatMap(t -> {
 
                     // Simply calling computeIfAbsent() on MQTT flux will cause race conditions because createFlux()
@@ -163,7 +163,7 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
         // An attempt to simply call computeIfAbsent() will cause the same problem that was originally encountered:
         // ConcurrentModificationException. Overhead here is much smaller, though.
 
-        logger.debug("acquiring lock on topic={}...", topic);
+        logger.debug("acquiring lock on topic={} ...", topic);
         return topic2lock.computeIfAbsent(topic, k -> new ReentrantReadWriteLock()).writeLock();
     }
 
@@ -197,9 +197,11 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
 
         var result = flux.publish().autoConnect();
 
+        var topicFilter = topic + (includeSubtopics ? "/#" : "");
+
         var ackFuture = getClient()
                 .subscribeWith()
-                .topicFilter(topic + (includeSubtopics ? "/#" : ""))
+                .topicFilter(topicFilter)
                 .callback(p -> {
 
                     // This will be null until someone calls subscribe() on the flux
@@ -220,12 +222,12 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
 
                 })
                 .send();
-        logger.info("Subscribing to {}...", topic);
+        logger.info("Subscribing to {} ...", topicFilter);
 
         try {
 
             var ack = ackFuture.get();
-            logger.info("Subscribed to {}: {} (took {}ms)", topic, ack.getReturnCodes(), Duration.between(start, Instant.now()).toMillis());
+            logger.info("Subscribed to {}: {} (took {}ms)", topicFilter, ack.getReturnCodes(), Duration.between(start, Instant.now()).toMillis());
 
             return result;
 

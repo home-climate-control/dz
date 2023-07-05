@@ -20,4 +20,9 @@ public class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevi
     protected SignalSource<String, Double, Void> createSensorListener(MqttAdapter adapter, String rootTopic) {
         return new ZWaveSensorListener(adapter.getAddress());
     }
+
+    @Override
+    protected ZWaveBinarySwitch createSwitch(MqttAdapter adapter, String rootTopic) {
+        return new ZWaveBinarySwitch(adapter, rootTopic, null);
+    }
 }

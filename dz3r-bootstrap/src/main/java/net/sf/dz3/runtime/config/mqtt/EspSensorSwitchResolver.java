@@ -19,4 +19,9 @@ public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevice
     protected ESPHomeListener createSensorListener(MqttAdapter adapter, String rootTopic) {
         return new ESPHomeListener(adapter, rootTopic);
     }
+
+    @Override
+    protected ESPHomeSwitch createSwitch(MqttAdapter adapter, String rootTopic) {
+        return new ESPHomeSwitch(adapter, rootTopic, null);
+    }
 }

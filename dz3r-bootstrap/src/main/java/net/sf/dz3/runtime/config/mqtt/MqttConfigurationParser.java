@@ -92,6 +92,13 @@ public class MqttConfigurationParser {
                     .blockLast();
 //                .collectList()
 //                .block();
+
+            var switches = mqttConfigs
+                    .flatMap(MqttSensorSwitchResolver::getSwitches)
+                    .doOnNext(s -> {
+                        logger.info("switch: {}", s.getAddress());
+                    })
+                    .blockLast();
         } finally {
             m.close();
         }

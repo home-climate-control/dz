@@ -36,6 +36,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
     private final Set<MqttSwitchConfig> switchConfigs = new LinkedHashSet<>();
 
     private final Map<MqttBrokerSpec, L> address2sensor = new LinkedHashMap<>();
+
     protected MqttSensorSwitchResolver(Set<A> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source);
         this.endpoint2adapter = endpoint2adapter;
@@ -50,9 +51,9 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
 
         return Flux
                 .fromIterable(source)
-                .doOnNext(c -> logger.info("sensor: {}", c.sensorConfig().address()))
-                .doOnNext(c -> logger.info("  broker: {}", c.mqttBrokerSpec().signature()))
-                .doOnNext(c -> logger.info("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
+                .doOnNext(c -> logger.debug("sensor: {}", c.sensorConfig().address()))
+                .doOnNext(c -> logger.debug("  broker: {}", c.mqttBrokerSpec().signature()))
+                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
                 .map(c -> {
                     var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
                     var listener = resolveListener(c.mqttBrokerSpec(), adapter);
@@ -131,11 +132,32 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                 });
     }
 
-    protected final L resolveListener(MqttBrokerSpec address, MqttAdapter adapter) {
+    private final L resolveListener(MqttBrokerSpec address, MqttAdapter adapter) {
         return address2sensor.computeIfAbsent(address, k -> createSensorListener(adapter, address.rootTopic()));
     }
 
     protected abstract L createSensorListener(MqttAdapter adapter, String rootTopic);
+
+    public Flux<S> getSwitches() {
+        return getSwitches(endpoint2adapter, switchConfigs);
+    }
+
+    private Flux<S> getSwitches(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSwitchConfig> source) {
+
+        return Flux
+                .fromIterable(source)
+                .doOnNext(c -> logger.debug("switch: {}", c.switchConfig().address()))
+                .doOnNext(c -> logger.debug("  broker: {}", c.mqttBrokerSpec().signature()))
+                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
+                .map(c -> {
+                    var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
+                    return createSwitch(adapter, c.switchConfig().address());
+                });
+    }
+
+    protected abstract S createSwitch(MqttAdapter adapter, String rootTopic);
+
+
     public record MqttSensorConfig(
             MqttBrokerSpec mqttBrokerSpec,
             SensorConfig sensorConfig) {
