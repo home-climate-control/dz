@@ -194,6 +194,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.hvac())", target = "hvac")
     @Mapping(expression = "java(source.mode())", target = "mode")
     net.sf.dz3.runtime.config.model.UnitDirectorConfig director(UnitDirectorConfig source);
+    @Mapping(expression = "java(source.port().orElse(null))", target = "port")
     @Mapping(expression = "java(source.directors())", target = "directors")
     net.sf.dz3.runtime.config.model.WebUiConfig webUi(WebUiConfig source);
 

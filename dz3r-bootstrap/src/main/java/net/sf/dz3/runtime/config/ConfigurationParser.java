@@ -5,6 +5,7 @@ import net.sf.dz3.runtime.config.filter.FilterConfigurationParser;
 import net.sf.dz3.runtime.config.hardware.HvacConfigurationParser;
 import net.sf.dz3.runtime.config.hardware.UnitConfigurationParser;
 import net.sf.dz3.runtime.config.model.DirectorConfigurationParser;
+import net.sf.dz3.runtime.config.model.WebUiConfigurationParser;
 import net.sf.dz3.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
@@ -45,6 +46,8 @@ public class ConfigurationParser {
             new UnitConfigurationParser().parse(source.units());
 
             new DirectorConfigurationParser().parse(source.directors());
+
+            new WebUiConfigurationParser().parse(source.webUi());
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
 
