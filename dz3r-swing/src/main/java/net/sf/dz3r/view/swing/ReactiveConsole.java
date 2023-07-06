@@ -77,6 +77,11 @@ public class ReactiveConsole {
 
         try {
 
+            if (initSet.isEmpty()) {
+                logger.warn("empty init set, not creating mainFrame, what's the point?");
+                return;
+            }
+
             createFrame();
 
             mainFrame.setSize(screenSizes[screenSizeOffset].displaySize);

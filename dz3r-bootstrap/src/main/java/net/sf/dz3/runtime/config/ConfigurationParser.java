@@ -4,6 +4,7 @@ import net.sf.dz3.runtime.config.connector.ConnectorConfigurationParser;
 import net.sf.dz3.runtime.config.filter.FilterConfigurationParser;
 import net.sf.dz3.runtime.config.hardware.HvacConfigurationParser;
 import net.sf.dz3.runtime.config.hardware.UnitConfigurationParser;
+import net.sf.dz3.runtime.config.model.ConsoleConfigurationParser;
 import net.sf.dz3.runtime.config.model.DirectorConfigurationParser;
 import net.sf.dz3.runtime.config.model.WebUiConfigurationParser;
 import net.sf.dz3.runtime.config.model.ZoneConfigurationParser;
@@ -48,6 +49,8 @@ public class ConfigurationParser {
             new DirectorConfigurationParser().parse(source.directors());
 
             new WebUiConfigurationParser().parse(source.webUi());
+
+            new ConsoleConfigurationParser().parse(source.console());
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
 
