@@ -184,6 +184,7 @@ public interface InterfaceRecordMapper {
     net.sf.dz3.runtime.config.hardware.SingleStageUnitControllerConfig singleStage(SingleStageUnitControllerConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
+    @Mapping(expression = "java(source.stages())", target = "stages")
     net.sf.dz3.runtime.config.hardware.MultiStageUnitControllerConfig singleStage(MultiStageUnitControllerConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
