@@ -4,6 +4,7 @@ import net.sf.dz3.runtime.config.connector.ConnectorConfigurationParser;
 import net.sf.dz3.runtime.config.filter.FilterConfigurationParser;
 import net.sf.dz3.runtime.config.hardware.HvacConfigurationParser;
 import net.sf.dz3.runtime.config.hardware.UnitConfigurationParser;
+import net.sf.dz3.runtime.config.model.DirectorConfigurationParser;
 import net.sf.dz3.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
@@ -42,6 +43,8 @@ public class ConfigurationParser {
             new HvacConfigurationParser().parse(source.hvac());
 
             new UnitConfigurationParser().parse(source.units());
+
+            new DirectorConfigurationParser().parse(source.directors());
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
 
