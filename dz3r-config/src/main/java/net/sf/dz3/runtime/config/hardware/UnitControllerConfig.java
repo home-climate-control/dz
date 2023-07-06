@@ -1,9 +1,13 @@
 package net.sf.dz3.runtime.config.hardware;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import java.util.Set;
+
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record UnitControllerConfig(
-        List<SingleStageUnitControllerConfig> singleStage,
-        List<MultiStageUnitControllerConfig> multiStage
+        Set<SingleStageUnitControllerConfig> singleStage,
+        Set<MultiStageUnitControllerConfig> multiStage
 ) {
 }

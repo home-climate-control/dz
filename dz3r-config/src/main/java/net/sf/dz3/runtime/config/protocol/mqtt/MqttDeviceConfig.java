@@ -1,9 +1,11 @@
 package net.sf.dz3.runtime.config.protocol.mqtt;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3.runtime.config.hardware.SensorConfig;
 import net.sf.dz3.runtime.config.hardware.SwitchConfig;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * Configuration entry for MQTT devices.
@@ -12,9 +14,10 @@ import java.util.List;
  * @param host MQTT broker host.
  * @param port MQTT broker port. Defaults to 1883 if absent.
  * @param rootTopic MQTT root topic. Mandatory.
- * @param sensors List of sensors, optional.
- * @param switches List of switches, optional.
+ * @param sensors Set of sensors, optional.
+ * @param switches Set of switches, optional.
  */
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record MqttDeviceConfig(
         String id,
         String host,
@@ -23,7 +26,7 @@ public record MqttDeviceConfig(
         String password,
         String rootTopic,
         boolean autoReconnect,
-        List<SensorConfig> sensors,
-        List<SwitchConfig> switches
+        Set<SensorConfig> sensors,
+        Set<SwitchConfig> switches
 ) implements MqttGateway {
 }

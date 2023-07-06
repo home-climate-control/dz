@@ -1,6 +1,6 @@
 package net.sf.dz3r.controller;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxAware;
+import net.sf.dz3r.jmx.JmxAware;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

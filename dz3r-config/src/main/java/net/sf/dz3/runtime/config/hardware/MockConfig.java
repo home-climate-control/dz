@@ -1,8 +1,8 @@
 package net.sf.dz3.runtime.config.hardware;
 
-import java.util.List;
+import java.util.Set;
 
 public record MockConfig(
-        List<SwitchConfig> switches
+        Set<SwitchConfig> switches
 ) {
 }

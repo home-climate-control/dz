@@ -1,10 +1,14 @@
 package net.sf.dz3.runtime.config.hardware;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import java.util.Set;
+
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record HvacDeviceConfig(
-        List<SwitchableHvacDeviceConfig> switchable,
-        List<HeatpumpHATConfig> heatpumpHat,
-        List<HeatpumpConfig> heatpump
+        Set<SwitchableHvacDeviceConfig> switchable,
+        Set<HeatpumpHATConfig> heatpumpHat,
+        Set<HeatpumpConfig> heatpump
 ) {
 }

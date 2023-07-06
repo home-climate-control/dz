@@ -3,6 +3,7 @@ package net.sf.dz3r.device.z2m.v1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
@@ -39,6 +40,8 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
     private final Logger logger = LogManager.getLogger();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final String DEFAULT_MEASUREMENT = "temperature";
+
     public final String measurement;
 
     private final Z2MListener z2m;
@@ -53,6 +56,22 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
         this.measurement = measurement;
         this.z2m = new Z2MListener(host, port, username, password, reconnect, mqttRootTopicSub);
+    }
+
+    public Z2MJsonListener(MqttAdapter mqttAdapter, String mqttRootTopicSub) {
+        this(mqttAdapter, mqttRootTopicSub, null);
+    }
+
+    public Z2MJsonListener(MqttAdapter mqttAdapter, String mqttRootTopicSub, String measurement) {
+
+        if (measurement == null) {
+            logger.warn("{} {} created with default measurement of {}", mqttAdapter.address, mqttRootTopicSub, DEFAULT_MEASUREMENT);
+            measurement = DEFAULT_MEASUREMENT;
+        }
+
+        this.measurement = measurement;
+
+        this.z2m = new Z2MListener(mqttAdapter, mqttRootTopicSub);
     }
 
     @Override

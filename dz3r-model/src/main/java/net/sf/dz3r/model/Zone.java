@@ -1,12 +1,12 @@
 package net.sf.dz3r.model;
 
-import com.homeclimatecontrol.jukebox.jmx.JmxAware;
-import com.homeclimatecontrol.jukebox.jmx.JmxDescriptor;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer;
+import net.sf.dz3r.jmx.JmxAware;
+import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.CallingStatus;

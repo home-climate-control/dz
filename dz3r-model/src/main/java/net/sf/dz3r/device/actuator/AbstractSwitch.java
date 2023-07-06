@@ -23,7 +23,7 @@ import java.time.Instant;
  *
  * @param <A> Address type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
 public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<A> {
 
@@ -153,7 +153,6 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
             if (lastSetState != state) {
                 return null;
             }
-
 
             var delay = Duration.between(lastSetAt, clock.instant());
 

@@ -21,6 +21,8 @@ import java.util.Map;
  *
  * @see net.sf.dz3r.device.esphome.v1.ESPHomeSwitch
  * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class Z2MSwitch extends AbstractMqttSwitch {
 

@@ -1,5 +1,19 @@
 package net.sf.dz3.runtime;
 
+import io.micrometer.core.instrument.Clock;
+import io.micrometer.core.instrument.Metrics;
+import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmHeapPressureMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
+import io.micrometer.core.instrument.binder.logging.Log4j2Metrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
+import io.micrometer.core.instrument.binder.system.UptimeMetrics;
+import io.micrometer.influx.InfluxConfig;
+import io.micrometer.influx.InfluxMeterRegistry;
+import io.micrometer.prometheus.PrometheusConfig;
+import io.micrometer.prometheus.PrometheusMeterRegistry;
+import net.sf.dz3.runtime.metrics.prometheus.Endpoint;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,10 +25,12 @@ import org.springframework.context.support.FileSystemXmlApplicationContext;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
+import java.time.Duration;
+
 /**
  * Entry point into DZ Core.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2023
  */
 public class Container {
 
@@ -29,6 +45,8 @@ public class Container {
      * Must be on the root of the classpath.
      */
     public static final String CF_PI = "raspberry-pi.xml";
+
+    private Endpoint endpoint;
 
     /**
      * Run the application.
@@ -57,6 +75,11 @@ public class Container {
 
         try {
             ReactorDebugAgent.init();
+
+            // Start early so that we have a hint of what is going on
+            startMicrometerRegistry();
+            startPrometheusRegistry();
+            bindRegistries();
 
             var configFound = false;
 
@@ -102,6 +125,81 @@ public class Container {
             logger.fatal("Shutting down");
             ThreadContext.pop();
         }
+    }
+
+
+    private void startMicrometerRegistry() {
+
+        ThreadContext.push("startMicrometerRegistry");
+
+        try {
+
+            // Different from whatever is used by InfluxDbLogger
+            final var dbName = getSystemProperty("HCC_MICROMETER_INFLUXDB_DB", "Micrometer InfluxDB database name", "hcc-micrometer");
+            final var uri = getSystemProperty("HCC_MICROMETER_INFLUXDB_URI", "Micrometer InfluxDB uri", "http://localhost:8086");
+
+            InfluxConfig config = new InfluxConfig() {
+                @Override
+                public Duration step() {
+                    return Duration.ofSeconds(10);
+                }
+
+                @Override
+                public String db() {
+                    return dbName;
+                }
+
+                @Override
+                public String uri() {
+                    return uri;
+                }
+
+                @Override
+                public String get(String key) {
+                    return null; // accept the rest of the defaults
+                }
+            };
+
+            Metrics.addRegistry(new InfluxMeterRegistry(config, Clock.SYSTEM));
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void startPrometheusRegistry() {
+
+        var registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+
+        Metrics.addRegistry(registry);
+
+        endpoint = new Endpoint(registry);
+    }
+
+    private void bindRegistries() {
+
+        var registry = Metrics.globalRegistry;
+
+        new JvmGcMetrics().bindTo(registry);
+        new JvmHeapPressureMetrics().bindTo(registry);
+        new JvmMemoryMetrics().bindTo(registry);
+        new JvmThreadMetrics().bindTo(registry);
+        new Log4j2Metrics().bindTo(registry);
+        new ProcessorMetrics().bindTo(registry);
+        new UptimeMetrics().bindTo(registry);
+    }
+    private String getSystemProperty(String key, String description, String defaultValue) {
+
+        var value = System.getProperty(key);
+
+        if (value == null) {
+            logger.warn("Default system property for {} ({}) is used, override with system property {}=<value>", description, defaultValue, key);
+            return defaultValue;
+        }
+
+        logger.info("{}={}", description, value);
+
+        return value;
     }
 
     /**

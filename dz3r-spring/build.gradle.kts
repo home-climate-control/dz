@@ -12,7 +12,7 @@ application {
 
 dependencies {
 
-    implementation("org.springframework:spring-context:5.3.27")
+    implementation("org.springframework:spring-context:5.3.28")
 
     implementation(project(":dz3r-common"))
     implementation(project(":dz3r-director"))
@@ -44,4 +44,10 @@ dependencies {
 
     // Enable Raspberry Pi specific hardware integration
     runtimeOnly(project(":dz3r-raspberry-pi"))
+
+    // Enable Micrometer integration
+    implementation("io.micrometer:micrometer-registry-influx:1.11.0")
+    implementation("io.micrometer:micrometer-registry-prometheus:1.11.0")
+    implementation("org.springframework:spring-webflux:5.3.27")
+    implementation("io.projectreactor.netty:reactor-netty:1.1.6")
 }

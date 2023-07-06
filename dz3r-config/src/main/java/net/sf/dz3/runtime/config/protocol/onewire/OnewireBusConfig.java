@@ -1,9 +1,11 @@
 package net.sf.dz3.runtime.config.protocol.onewire;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3.runtime.config.hardware.SensorConfig;
 import net.sf.dz3.runtime.config.hardware.SwitchConfig;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * 1-Wire bus adapter descriptor.
@@ -12,8 +14,9 @@ import java.util.List;
  * @param sensors List of sensors, optional.
  * @param switches List of switches, optional.
  */
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record OnewireBusConfig(
         String serialPort,
-        List<SensorConfig> sensors,
-        List<SwitchConfig> switches) {
+        Set<SensorConfig> sensors,
+        Set<SwitchConfig> switches) {
 }

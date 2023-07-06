@@ -2,8 +2,8 @@ package net.sf.dz3.runtime.config;
 
 import net.sf.dz3.runtime.config.hardware.SensorConfig;
 
-import java.util.List;
+import java.util.Set;
 
 public interface SensorConfigProvider {
-    List<SensorConfig> sensors();
+    Set<SensorConfig> sensors();
 }
