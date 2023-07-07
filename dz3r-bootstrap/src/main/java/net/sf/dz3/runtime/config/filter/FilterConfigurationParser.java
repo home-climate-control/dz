@@ -1,15 +1,17 @@
 package net.sf.dz3.runtime.config.filter;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.sf.dz3.runtime.config.ConfigurationContext;
+import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import reactor.core.publisher.Flux;
 
 import java.util.Optional;
 import java.util.Set;
 
-public class FilterConfigurationParser {
+public class FilterConfigurationParser extends ConfigurationContextAware {
 
-    private final Logger logger = LogManager.getLogger();
+    public FilterConfigurationParser(ConfigurationContext context) {
+        super(context);
+    }
 
     public void parse(Set<FilterConfig> source) {
 

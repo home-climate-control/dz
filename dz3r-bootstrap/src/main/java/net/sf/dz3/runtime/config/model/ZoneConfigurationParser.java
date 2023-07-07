@@ -1,20 +1,23 @@
 package net.sf.dz3.runtime.config.model;
 
+import net.sf.dz3.runtime.config.ConfigurationContext;
+import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.model.Range;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.util.Optional;
 import java.util.Set;
 
-public class ZoneConfigurationParser {
+public class ZoneConfigurationParser extends ConfigurationContextAware {
 
-    private final Logger logger = LogManager.getLogger();
+    public ZoneConfigurationParser(ConfigurationContext context) {
+        super(context);
+    }
+
     public void parse(Set<ZoneConfig> source) {
 
         Flux

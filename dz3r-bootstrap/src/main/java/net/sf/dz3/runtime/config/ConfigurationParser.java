@@ -27,30 +27,33 @@ public class ConfigurationParser {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse");
         try {
-            new MqttConfigurationParser().parse(
+
+            var ctx = new ConfigurationContext();
+
+            new MqttConfigurationParser(ctx).parse(
                     source.esphome(),
                     source.zigbee2mqtt(),
                     source.zwave2mqtt());
 
-            new OnewireConfigurationParser().parse(source.onewire());
+            new OnewireConfigurationParser(ctx).parse(source.onewire());
 
-            new MockConfigurationParser().parse(source.mocks());
+            new MockConfigurationParser(ctx).parse(source.mocks());
 
-            new FilterConfigurationParser().parse(source.filters());
+            new FilterConfigurationParser(ctx).parse(source.filters());
 
-            new ZoneConfigurationParser().parse(source.zones());
+            new ZoneConfigurationParser(ctx).parse(source.zones());
 
-            new ConnectorConfigurationParser().parse(source.connectors());
+            new ConnectorConfigurationParser(ctx).parse(source.connectors());
 
-            new HvacConfigurationParser().parse(source.hvac());
+            new HvacConfigurationParser(ctx).parse(source.hvac());
 
-            new UnitConfigurationParser().parse(source.units());
+            new UnitConfigurationParser(ctx).parse(source.units());
 
-            new DirectorConfigurationParser().parse(source.directors());
+            new DirectorConfigurationParser(ctx).parse(source.directors());
 
-            new WebUiConfigurationParser().parse(source.webUi());
+            new WebUiConfigurationParser(ctx).parse(source.webUi());
 
-            new ConsoleConfigurationParser().parse(source.console());
+            new ConsoleConfigurationParser(ctx).parse(source.console());
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
 

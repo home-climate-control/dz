@@ -3,15 +3,15 @@ package net.sf.dz3.runtime.config;
 import net.sf.dz3.runtime.config.hardware.MockConfig;
 import net.sf.dz3r.device.actuator.NullSwitch;
 import net.sf.dz3r.device.actuator.Switch;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.util.Set;
 
-public class MockConfigurationParser {
+public class MockConfigurationParser extends ConfigurationContextAware {
 
-    private final Logger logger = LogManager.getLogger();
+    protected MockConfigurationParser(ConfigurationContext context) {
+        super(context);
+    }
 
     public void parse(Set<MockConfig> source) {
 

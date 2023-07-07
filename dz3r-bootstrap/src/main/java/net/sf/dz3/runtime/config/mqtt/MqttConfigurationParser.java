@@ -1,12 +1,12 @@
 package net.sf.dz3.runtime.config.mqtt;
 
+import net.sf.dz3.runtime.config.ConfigurationContext;
+import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.instrumentation.Marker;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -20,9 +20,11 @@ import java.util.stream.Collectors;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class MqttConfigurationParser {
+public class MqttConfigurationParser extends ConfigurationContextAware {
 
-    private final Logger logger = LogManager.getLogger();
+    public MqttConfigurationParser(ConfigurationContext context) {
+        super(context);
+    }
 
     /**
      * Take configurations; produce device fluxes.
