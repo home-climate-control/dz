@@ -8,7 +8,6 @@ import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.instrumentation.Marker;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.LinkedHashMap;
 import java.util.Optional;
@@ -84,23 +83,12 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
 
             var sensors = mqttConfigs
                     .map(MqttSensorSwitchResolver::getSensorFluxes)
-                    .doOnNext(e -> {
-                        logger.info("sensorFlux: {}", e.keySet());
-                        Flux
-                                .fromIterable(e.values())
-                                .doOnNext(f -> f.subscribeOn(Schedulers.boundedElastic()).subscribe())
-                                .subscribe();
-                    })
-                    .blockLast();
-//                .collectList()
-//                .block();
+                    .flatMap(kv -> Flux.fromIterable(kv.entrySet()))
+                    .subscribe(context::registerSensorFlux);
 
             var switches = mqttConfigs
                     .flatMap(MqttSensorSwitchResolver::getSwitches)
-                    .doOnNext(s -> {
-                        logger.info("switch: {}", s.getAddress());
-                    })
-                    .blockLast();
+                    .subscribe(context::registerSwitch);
         } finally {
             m.close();
         }
