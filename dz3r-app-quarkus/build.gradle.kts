@@ -9,7 +9,7 @@ plugins {
 
 val quarkusPlatformGroupId = "io.quarkus.platform"
 val quarkusPlatformArtifactId = "quarkus-bom"
-val quarkusPlatformVersion = "3.0.1.Final"
+val quarkusPlatformVersion = "3.2.0.Final"
 
 dependencies {
 
