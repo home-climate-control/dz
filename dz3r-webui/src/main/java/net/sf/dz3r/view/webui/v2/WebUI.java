@@ -63,13 +63,13 @@ public class WebUI {
 
         Flux.just(Instant.now())
                 .publishOn(Schedulers.boundedElastic())
-                .doOnNext(this::start)
+                .doOnNext(this::run)
                 .subscribe();
     }
 
-    private void start(Instant startedAt) {
+    private void run(Instant startedAt) {
 
-        ThreadContext.push("start");
+        ThreadContext.push("run");
 
         try {
 
