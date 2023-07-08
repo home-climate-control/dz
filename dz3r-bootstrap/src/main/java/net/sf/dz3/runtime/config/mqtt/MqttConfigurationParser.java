@@ -56,7 +56,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
                     .block();
 
             // Step 2: for all the endpoints, materialize their adapters - brokers will be created later
-            // Need to inject the resolved pairs into resolvers so they don't have to do it again
+            // Need to inject the resolved pairs into resolvers, so they don't have to do it again
 
             Flux.fromIterable(Optional.ofNullable(endpoints).orElseThrow(() -> new IllegalStateException("Impossible")))
                     .subscribe(endpoint -> endpoint2adapter.put(endpoint,
@@ -79,14 +79,12 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             // Step 4: now combine all of those into a single stream of sensors, and another of switches.
             // Each of resolvers knows exact listener or adapter configuration for a specific device type.
 
-            // VT: FIXME: These will be returned as a flux when the whole config parser is stitched together.
-
-            var sensors = mqttConfigs
+            mqttConfigs
                     .map(MqttSensorSwitchResolver::getSensorFluxes)
                     .flatMap(kv -> Flux.fromIterable(kv.entrySet()))
                     .subscribe(context::registerSensorFlux);
 
-            var switches = mqttConfigs
+            mqttConfigs
                     .flatMap(MqttSensorSwitchResolver::getSwitches)
                     .subscribe(context::registerSwitch);
         } finally {
