@@ -4,6 +4,7 @@ import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.view.swing.ReactiveConsole;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class ConsoleConfigurationParser extends ConfigurationContextAware {
@@ -15,6 +16,6 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
     public ReactiveConsole parse(ConsoleConfig cf) {
 
         // VT: FIXME: Need the directors here, they're not yet exposed
-        return new ReactiveConsole(Set.of());
+        return new ReactiveConsole(Set.of(), Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
     }
 }

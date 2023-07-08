@@ -198,6 +198,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.directors())", target = "directors")
     net.sf.dz3.runtime.config.model.WebUiConfig webUi(WebUiConfig source);
 
+    @Mapping(expression = "java(source.units().orElse(null))", target = "units")
     @Mapping(expression = "java(source.directors())", target = "directors")
     net.sf.dz3.runtime.config.model.ConsoleConfig console(ConsoleConfig source);
 

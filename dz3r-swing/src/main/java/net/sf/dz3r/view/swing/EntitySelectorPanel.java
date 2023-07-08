@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing;
 
+import net.sf.dz3.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
@@ -34,6 +35,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     private final transient Logger logger = LogManager.getLogger();
 
+    private TemperatureUnit unit;
+
     private int currentEntityOffset = 0;
     private final transient List<CellAndPanel<?, ?>> entities = new ArrayList<>();
 
@@ -54,7 +57,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
      */
     private final transient ScreenDescriptor initialScreenDescriptor;
 
-    public EntitySelectorPanel(Set<Object> initSet, ScreenDescriptor screenDescriptor) {
+    public EntitySelectorPanel(Set<Object> initSet, TemperatureUnit unit, ScreenDescriptor screenDescriptor) {
+        this.unit = unit;
         this.initialScreenDescriptor = screenDescriptor;
         init(initSet);
     }
@@ -131,7 +135,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
         var zoneName = zone.getAddress();
         var cell = new ZoneCell(zoneName);
-        var panel = new ZonePanel(zone, initialScreenDescriptor, TemperatureUnit.C);
+        var panel = new ZonePanel(zone, initialScreenDescriptor, unit);
 
         var thisZoneFlux = aggregateZoneFlux
                 .filter(s -> zoneName.equals(s.payload))

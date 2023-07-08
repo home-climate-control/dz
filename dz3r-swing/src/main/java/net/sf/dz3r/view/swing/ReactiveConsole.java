@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing;
 
+import net.sf.dz3.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
@@ -116,7 +117,7 @@ public class ReactiveConsole {
 
             display.setLayout(layout);
 
-            entitySelectorPanel = new EntitySelectorPanel(initSet, screenSizes[screenSizeOffset]);
+            entitySelectorPanel = new EntitySelectorPanel(initSet, defaultUnit, screenSizes[screenSizeOffset]);
 
             cs.fill = GridBagConstraints.BOTH;
             cs.gridx = 0;

@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing.zone;
 
+import net.sf.dz3.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
@@ -10,7 +11,6 @@ import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
 import net.sf.dz3r.view.swing.EntitySelectorPanel;
 import net.sf.dz3r.view.swing.ScreenDescriptor;
-import net.sf.dz3r.view.swing.TemperatureUnit;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
