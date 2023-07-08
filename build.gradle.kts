@@ -10,6 +10,8 @@ plugins {
     id("io.spring.dependency-management") apply false
 
     id("io.quarkus") apply false
+
+    id("com.github.ben-manes.versions")
 }
 
 sonarqube {
