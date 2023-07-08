@@ -31,8 +31,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
         try {
 
-            var connector = new HttpConnectorGAE(new URL(cf.uri()), cf.zones());
-            logger.info("connector: {}", connector);
+            context.registerConnector(cf.id(), new HttpConnectorGAE(new URL(cf.uri()), cf.zones()));
 
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid URL: '" + cf.uri() + "'");
@@ -42,16 +41,15 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
     private void parseInflux(InfluxCollectorConfig cf) {
 
-        var connector = new InfluxDbLogger(
-                cf.db(),
-                cf.instance(),
-                cf.uri(),
-                cf.username(),
-                cf.password(),
-                mapSensorFeed(cf.sensorFeedMapping())
-        );
-        logger.info("connector: {}", connector);
-
+        context.registerCollector(
+                cf.id(),
+                new InfluxDbLogger(
+                        cf.db(),
+                        cf.instance(),
+                        cf.uri(),
+                        cf.username(),
+                        cf.password(),
+                        mapSensorFeed(cf.sensorFeedMapping())));
     }
 
     private Map<Flux<Signal<Double, Void>>, String> mapSensorFeed(Map<String, String> source) {

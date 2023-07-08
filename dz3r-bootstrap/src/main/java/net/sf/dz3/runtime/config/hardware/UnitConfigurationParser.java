@@ -24,7 +24,7 @@ public class UnitConfigurationParser extends ConfigurationContextAware {
                             .ofNullable(entry.singleStage())
                             .orElse(Set.of()))
                     .map(this::parseSingleStage)
-                    .blockLast();
+                    .subscribe(context::registerUnit);
 
             Flux
                     .fromIterable(Optional

@@ -23,7 +23,7 @@ public class DirectorConfigurationParser extends ConfigurationContextAware {
         Flux
                 .fromIterable(source)
                 .map(this::parse)
-                .blockLast();
+                .subscribe(context::registerDirector);
     }
 
     private UnitDirector parse(UnitDirectorConfig cf) {
