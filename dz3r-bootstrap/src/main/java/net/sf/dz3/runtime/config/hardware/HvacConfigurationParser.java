@@ -53,8 +53,12 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         return new HeatPump(
                 cf.id(),
                 new NullSwitch(cf.id() + "mode"),
+                Optional.ofNullable(cf.switchModeReverse()).orElse(false),
                 new NullSwitch(cf.id() + "running"),
-                new NullSwitch(cf.id() + "fan"));
+                Optional.ofNullable(cf.switchRunningReverse()).orElse(false),
+                new NullSwitch(cf.id() + "fan"),
+                Optional.ofNullable(cf.switchFanReverse()).orElse(false),
+                cf.modeChangeDelay());
     }
 
     private HvacDevice parseHeatpumpHAT(HeatpumpHATConfig cf) {

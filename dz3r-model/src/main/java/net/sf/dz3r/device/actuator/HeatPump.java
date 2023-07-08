@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -49,7 +50,6 @@ public class HeatPump extends AbstractHvacDevice {
     private final boolean reverseMode;
     private final boolean reverseRunning;
     private final boolean reverseFan;
-
     private final Duration modeChangeDelay;
 
     /**
@@ -87,7 +87,7 @@ public class HeatPump extends AbstractHvacDevice {
      * @param switchFan Switch to pull to turn on the air handler.
      * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
      */
-    protected HeatPump(
+    public HeatPump(
             String name,
             Switch<?> switchMode, boolean reverseMode,
             Switch<?> switchRunning, boolean reverseRunning,
@@ -110,7 +110,7 @@ public class HeatPump extends AbstractHvacDevice {
      * @param switchFan Switch to pull to turn on the air handler.
      * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
      */
-    protected HeatPump(
+    public HeatPump(
             String name,
             Switch<?> switchMode, boolean reverseMode,
             Switch<?> switchRunning, boolean reverseRunning,
@@ -138,7 +138,10 @@ public class HeatPump extends AbstractHvacDevice {
         this.reverseRunning = reverseRunning;
         this.reverseFan = reverseFan;
 
-        this.modeChangeDelay = changeModeDelay;
+        this.modeChangeDelay = Optional.ofNullable(changeModeDelay).orElseGet(() -> {
+            logger.warn("using default mode change delay of {}", DEFAULT_MODE_CHANGE_DELAY);
+            return DEFAULT_MODE_CHANGE_DELAY;
+        });
     }
 
     @Override

@@ -165,6 +165,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(source.mode())", target = "mode")
     @Mapping(expression = "java(source.switchAddress())", target = "switchAddress")
+    @Mapping(expression = "java(source.switchReverse().orElse(null))", target = "switchReverse")
     net.sf.dz3.runtime.config.hardware.SwitchableHvacDeviceConfig switchable(SwitchableHvacDeviceConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
@@ -172,8 +173,12 @@ public interface InterfaceRecordMapper {
 
     @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(source.switchMode())", target = "switchMode")
+    @Mapping(expression = "java(source.switchModeReverse().orElse(null))", target = "switchModeReverse")
     @Mapping(expression = "java(source.switchRunning())", target = "switchRunning")
+    @Mapping(expression = "java(source.switchRunningReverse().orElse(null))", target = "switchRunningReverse")
     @Mapping(expression = "java(source.switchFan())", target = "switchFan")
+    @Mapping(expression = "java(source.switchFanReverse().orElse(null))", target = "switchFanReverse")
+    @Mapping(expression = "java(source.modeChangeDelay().orElse(null))", target = "modeChangeDelay")
     net.sf.dz3.runtime.config.hardware.HeatpumpConfig heatpump(HeatpumpConfig source);
 
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.singleStage(source.singleStage()))", target = "singleStage")

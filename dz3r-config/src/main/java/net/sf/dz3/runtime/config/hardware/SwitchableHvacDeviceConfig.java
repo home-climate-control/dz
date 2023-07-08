@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 public record SwitchableHvacDeviceConfig(
         String id,
         String mode,
-        String switchAddress
+        String switchAddress,
+        Boolean switchReverse
 ) {
 }

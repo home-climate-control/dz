@@ -13,7 +13,6 @@ application {
 dependencies {
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2")
 
     implementation(project(":dz3r-bootstrap"))
     implementation(project(":dz3r-common"))

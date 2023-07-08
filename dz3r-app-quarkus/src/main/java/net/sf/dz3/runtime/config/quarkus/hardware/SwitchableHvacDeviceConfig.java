@@ -2,6 +2,8 @@ package net.sf.dz3.runtime.config.quarkus.hardware;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Optional;
+
 public interface SwitchableHvacDeviceConfig {
     @JsonProperty("id")
     String id();
@@ -9,4 +11,6 @@ public interface SwitchableHvacDeviceConfig {
     String mode();
     @JsonProperty("switch-address")
     String switchAddress();
+    @JsonProperty("switch-reverse")
+    Optional<Boolean> switchReverse();
 }

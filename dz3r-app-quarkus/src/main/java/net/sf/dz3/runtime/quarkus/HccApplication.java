@@ -1,9 +1,6 @@
 package net.sf.dz3.runtime.quarkus;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -24,7 +21,6 @@ import org.apache.logging.log4j.ThreadContext;
  */
 @ApplicationScoped
 public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Injected configuration.
@@ -58,10 +54,6 @@ public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {
      * Print the configuration rooted in {@link HccRawInterfaceConfig}.
      */
     private void printConfigurationFromInterface() {
-
-        // Necessary to print Optionals in a sane way
-        objectMapper.registerModule(new Jdk8Module());
-        objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
 
         logger.debug("configuration/interface: {}", () -> {
             try {

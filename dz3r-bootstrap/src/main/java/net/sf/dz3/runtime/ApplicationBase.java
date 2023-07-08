@@ -1,7 +1,12 @@
 package net.sf.dz3.runtime;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.sf.dz3.runtime.config.ConfigurationParser;
 import net.sf.dz3.runtime.config.HccRawConfig;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +23,24 @@ import reactor.tools.agent.ReactorDebugAgent;
  */
 public abstract class ApplicationBase<C> {
     protected final Logger logger = LogManager.getLogger();
+    protected final ObjectMapper objectMapper;
+
+    protected ApplicationBase() {
+
+        objectMapper = new ObjectMapper(new YAMLFactory());
+
+        // Necessary to print Optionals in a sane way
+        objectMapper.registerModule(new Jdk8Module());
+
+        // Necessary to deal with Duration
+        objectMapper.registerModule(new JavaTimeModule());
+
+        // For Quarkus to deal with interfaces nicer
+        objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+
+        // For standalone to allow to ignore the root element
+        objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
+    }
 
     protected final void init() {
         ReactorDebugAgent.init();
@@ -45,7 +68,7 @@ public abstract class ApplicationBase<C> {
 
         logger.debug("configuration: {}", () -> {
             try {
-                return new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(config);
+                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
             } catch (JsonProcessingException ex) {
                 throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
             }

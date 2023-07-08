@@ -1,8 +1,6 @@
 package net.sf.dz3.runtime.standalone;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import net.sf.dz3.runtime.ApplicationBase;
 import net.sf.dz3.runtime.config.HccRawConfig;
 import net.sf.dz3r.instrumentation.Marker;
@@ -72,12 +70,19 @@ public class HccApplication extends ApplicationBase<HccRawConfig> {
                     source = "file:" + source;
                 }
 
-                var objectMapper = new ObjectMapper(new YAMLFactory());
-                objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
-
                 return objectMapper.readValue(getStream(source), HccRawConfig.class);
 
             } catch (IOException ex) {
+
+                var message = ex.getMessage();
+
+                // VT: NOTE: Both Quarkus and Spring use a trick to bypass this; would be nice to figure out what it is.
+                // For now, using the format documented at the link will yield a working configuration.
+
+                if (ex instanceof InvalidFormatException && message != null && message.startsWith("Cannot deserialize value of type `java.time.Duration` from String")) {
+                    throw new IllegalArgumentException("Try to use duration format specified in https://en.wikipedia.org/wiki/ISO_8601#Durations", ex);
+                }
+
                 throw new IllegalArgumentException("Unexpected exception while parsing " + source,  ex);
             }
 
