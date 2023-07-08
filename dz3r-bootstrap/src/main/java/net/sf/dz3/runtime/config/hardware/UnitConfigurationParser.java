@@ -24,14 +24,14 @@ public class UnitConfigurationParser extends ConfigurationContextAware {
                             .ofNullable(entry.singleStage())
                             .orElse(Set.of()))
                     .map(this::parseSingleStage)
-                    .subscribe(context::registerUnit);
+                    .subscribe(u -> context.units.register(u.getAddress(), u));
 
             Flux
                     .fromIterable(Optional
                             .ofNullable(entry.multiStage())
                             .orElse(Set.of()))
                     .map(this::parseMultiStage)
-                    .blockLast();
+                    .subscribe(u -> context.units.register(u.getAddress(), u));
         }
     }
 

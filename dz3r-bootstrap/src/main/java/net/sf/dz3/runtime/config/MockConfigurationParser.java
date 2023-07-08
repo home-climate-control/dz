@@ -20,6 +20,6 @@ public class MockConfigurationParser extends ConfigurationContextAware {
                 .flatMap(c -> Flux.fromIterable(c.switches()))
                 .map(SwitchConfig::address)
                 .map(NullSwitch::new)
-                .subscribe(context::registerSwitch);
+                .subscribe(s -> context.switches.register(s.getAddress(), s));
     }
 }

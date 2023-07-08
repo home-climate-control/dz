@@ -41,15 +41,24 @@ public class ConfigurationParser {
 
             new FilterConfigurationParser(ctx).parse(source.filters());
 
+            // There will be no more sensors and switches coming after this
+            ctx.sensors.close();
+            ctx.switches.close();
+
             new ZoneConfigurationParser(ctx).parse(source.zones());
+            ctx.zones.close();
 
             new ConnectorConfigurationParser(ctx).parse(source.connectors());
+            ctx.connectors.close();
 
             new HvacConfigurationParser(ctx).parse(source.hvac());
+            ctx.hvacDevices.close();
 
             new UnitConfigurationParser(ctx).parse(source.units());
+            ctx.units.close();
 
             new DirectorConfigurationParser(ctx).parse(source.directors());
+            ctx.directors.close();
 
             new WebUiConfigurationParser(ctx).parse(source.webUi());
 

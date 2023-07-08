@@ -23,7 +23,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         Flux
                 .fromIterable(source)
                 .map(this::createZone)
-                .subscribe(context::registerZone);
+                .subscribe(z -> context.zones.register(z.getAddress(), z));
     }
 
     private Zone createZone(ZoneConfig cf) {

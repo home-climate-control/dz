@@ -82,11 +82,11 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             mqttConfigs
                     .map(MqttSensorSwitchResolver::getSensorFluxes)
                     .flatMap(kv -> Flux.fromIterable(kv.entrySet()))
-                    .subscribe(context::registerSensorFlux);
+                    .subscribe(kv -> context.sensors.register(kv.getKey(), kv.getValue()));
 
             mqttConfigs
                     .flatMap(MqttSensorSwitchResolver::getSwitches)
-                    .subscribe(context::registerSwitch);
+                    .subscribe(s -> context.switches.register(s.getAddress().toString(), s));
         } finally {
             m.close();
         }

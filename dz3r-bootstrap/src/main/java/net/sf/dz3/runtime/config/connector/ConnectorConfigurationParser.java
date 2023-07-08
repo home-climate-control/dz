@@ -31,17 +31,16 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
         try {
 
-            context.registerConnector(cf.id(), new HttpConnectorGAE(new URL(cf.uri()), cf.zones()));
+            context.connectors.register(cf.id(), new HttpConnectorGAE(new URL(cf.uri()), cf.zones()));
 
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid URL: '" + cf.uri() + "'");
         }
-
     }
 
     private void parseInflux(InfluxCollectorConfig cf) {
 
-        context.registerCollector(
+        context.collectors.register(
                 cf.id(),
                 new InfluxDbLogger(
                         cf.db(),

@@ -28,21 +28,21 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
                             .ofNullable(entry.heatpump())
                             .orElse(Set.of()))
                     .map(this::parseHeatpump)
-                    .subscribe(context::registerHVAC);
+                    .subscribe(h -> context.hvacDevices.register(h.getAddress(), h));
 
             Flux
                     .fromIterable(Optional
                             .ofNullable(entry.heatpumpHat())
                             .orElse(Set.of()))
                     .map(this::parseHeatpumpHAT)
-                    .subscribe(context::registerHVAC);
+                    .subscribe(h -> context.hvacDevices.register(h.getAddress(), h));
 
             Flux
                     .fromIterable(Optional
                             .ofNullable(entry.switchable())
                             .orElse(Set.of()))
                     .map(this::parseSwitchable)
-                    .subscribe(context::registerHVAC);
+                    .subscribe(h -> context.hvacDevices.register(h.getAddress(), h));
         }
     }
 

@@ -1,5 +1,6 @@
 package net.sf.dz3.runtime.config;
 
+import net.sf.dz3.runtime.config.onewire.EntityProvider;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.model.UnitController;
@@ -12,12 +13,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
-
 /**
  * Common space for all the objects emitted and consumed by configurators.
+ *
+ * Some components (notably MQTT, 1-Wire, XBee, GAE and Calendar) are heavy on startup, and can yield transient errors
+ * long after their fluxes can be resolved, hence, all components are exposed as fluxes, for uniformity and just-in-time delivery.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
@@ -25,52 +25,12 @@ public class ConfigurationContext {
 
     protected final Logger logger = LogManager.getLogger();
 
-    private final Map<String, Flux<Signal<Double, Void>>> sensors = new TreeMap<>();
-    private final Map<Object, Switch<?>> switches = new LinkedHashMap<>();
-    private final Map<String, Zone> zones = new TreeMap<>();
-    private final Map<String, Connector> connectors = new TreeMap<>();
-    private final Map<String, MetricsCollector> collectors = new TreeMap<>();
-    private final Map<String, HvacDevice> hvacDevices = new TreeMap<>();
-    private final Map<String, UnitController> units = new TreeMap<>();
-    private final Map<String, UnitDirector> directors = new TreeMap<>();
-
-    public void registerSensorFlux(Map.Entry<String, Flux<Signal<Double, Void>>> source) {
-        logger.info("sensor available: {}", source.getKey());
-        sensors.put(source.getKey(), source.getValue());
-    }
-
-    public void registerSwitch(Switch<?> s) {
-        logger.info("switch available: {}", s.getAddress());
-        switches.put(s.getAddress(), s);
-    }
-
-    public void registerZone(Zone zone) {
-        logger.info("zone available: {}", zone.getAddress());
-        zones.put(zone.getAddress(), zone);
-    }
-
-    public void registerConnector(String id, Connector c) {
-        logger.info("connector available: {}", id);
-        connectors.put(id, c);
-    }
-
-    public void registerCollector(String id, MetricsCollector c) {
-        logger.info("collector available: {}", id);
-        collectors.put(id, c);
-    }
-
-    public void registerHVAC(HvacDevice hvacDevice) {
-        logger.info("HVAC device available: {}", hvacDevice.getAddress());
-        hvacDevices.put(hvacDevice.getAddress(), hvacDevice);
-    }
-
-    public void registerUnit(UnitController unit) {
-        logger.info("Unit controller available: {}", unit.getAddress());
-        units.put(unit.getAddress(), unit);
-    }
-
-    public void registerDirector(UnitDirector d) {
-        logger.info("Unit director available: {}", d.getAddress());
-        directors.put(d.getAddress(), d);
-    }
+    public final EntityProvider<Flux<Signal<Double, Void>>> sensors = new EntityProvider<>("sensor");
+    public final EntityProvider<Switch<?>> switches = new EntityProvider<>("switch");
+    public final EntityProvider<Zone> zones = new EntityProvider<>("zone");
+    public final EntityProvider<Connector> connectors = new EntityProvider<>("connector");
+    public final EntityProvider<MetricsCollector> collectors = new EntityProvider<>("collector");
+    public final EntityProvider<HvacDevice> hvacDevices = new EntityProvider<>("HVAC device");
+    public final EntityProvider<UnitController> units = new EntityProvider<>("unit controller");
+    public final EntityProvider<UnitDirector> directors = new EntityProvider<>("unit director");
 }
