@@ -615,7 +615,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     private void renderPeriod() {
 
         if (period2settings == null) {
-            logger.warn("{} renderPeriod(): no schedule data yet", zone.getAddress());
+            logger.trace("{} renderPeriod(): no schedule data yet", zone.getAddress());
             return;
         }
 
