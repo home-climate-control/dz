@@ -5,8 +5,8 @@ import net.sf.dz3.runtime.config.HccRawConfig;
 import net.sf.dz3.runtime.config.HccRawRecordConfig;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
@@ -29,8 +29,12 @@ public class HccApplication extends ApplicationBase<HccRawRecordConfig> implemen
 
     public static void main(String[] args) {
 
+        var builder = new SpringApplicationBuilder(HccApplication.class);
+
+        builder.headless(false);
+
         // VT: NOTE: call close() or exit() on this when all the kinks are ironed out, to support a controlled lifecycle
-        SpringApplication.run(HccApplication.class, args);
+        builder.run(args);
     }
 
     @Override
