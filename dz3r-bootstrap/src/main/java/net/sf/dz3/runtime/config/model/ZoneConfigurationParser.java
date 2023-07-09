@@ -8,8 +8,10 @@ import net.sf.dz3r.model.Range;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,14 +26,16 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         Flux
                 .fromIterable(source)
                 .map(this::createZone)
-                .subscribe(z -> context.zones.register(z.getAddress(), z));
+                .subscribe(kv -> context.zones.register(kv.getKey(), kv.getValue()));
     }
 
-    private Zone createZone(ZoneConfig cf) {
+    private Map.Entry<String, Zone> createZone(ZoneConfig cf) {
 
         var ts = createThermostat(cf.name(), cf.settings().setpoint(), cf.settings().setpointRange(), cf.controller());
         var eco = createEconomizer(cf.economizer());
-        return new Zone(ts, map(cf.settings()), eco);
+        var zone = new Zone(ts, map(cf.settings()), eco);
+
+        return new ImmutablePair<>(cf.id(), zone);
     }
 
     private EconomizerContext<?> createEconomizer(EconomizerConfig cf) {
