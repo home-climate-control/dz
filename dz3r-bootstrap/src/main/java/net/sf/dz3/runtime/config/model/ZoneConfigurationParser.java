@@ -3,6 +3,7 @@ package net.sf.dz3.runtime.config.model;
 import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
+import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Range;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
@@ -35,12 +36,19 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
 
     private EconomizerContext<?> createEconomizer(EconomizerConfig cf) {
 
-        if (cf != null) {
-            // VT: FIXME: Need sensor feeds at this point, don't have them exposed yet
-            logger.error("FIXME: createEconomizer() not implemented for switch={}", cf.switchAddress());
+        if (cf == null) {
+
+            return null;
         }
 
-        return null;
+        return new EconomizerContext<>(
+                new EconomizerSettings(
+                        cf.mode(),
+                        cf.keepHvacOn(),
+                        cf.changeoverDelta(),
+                        cf.targetTemperature()),
+                getSensor(cf.ambientSensor()),
+                getSwitch(cf.switchAddress()));
     }
 
     private Thermostat createThermostat(String name, Double setpoint, RangeConfig rangeConfig, PidControllerConfig cf) {
