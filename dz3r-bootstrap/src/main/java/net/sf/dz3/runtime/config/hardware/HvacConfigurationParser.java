@@ -4,7 +4,6 @@ import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.device.actuator.HeatPump;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.NullSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.pi.autohat.HeatPumpHAT;
 import net.sf.dz3r.model.HvacMode;
@@ -48,15 +47,13 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
 
     private HvacDevice parseHeatpump(HeatpumpConfig cf) {
 
-        // VT: FIXME: Need to have the switches available here, but they haven't been exposed yet
-
         return new HeatPump(
                 cf.id(),
-                new NullSwitch(cf.id() + "mode"),
+                getSwitch(cf.switchMode()),
                 Optional.ofNullable(cf.switchModeReverse()).orElse(false),
-                new NullSwitch(cf.id() + "running"),
+                getSwitch(cf.switchRunning()),
                 Optional.ofNullable(cf.switchRunningReverse()).orElse(false),
-                new NullSwitch(cf.id() + "fan"),
+                getSwitch(cf.switchFan()),
                 Optional.ofNullable(cf.switchFanReverse()).orElse(false),
                 cf.modeChangeDelay());
     }
@@ -72,11 +69,9 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
 
     private HvacDevice parseSwitchable(SwitchableHvacDeviceConfig cf) {
 
-        // VT: FIXME: Need to have the switches available here, but they haven't been exposed yet
-
         return new SwitchableHvacDevice(
                 cf.id(),
                 HvacMode.valueOf(cf.mode().toUpperCase()),
-                new NullSwitch(cf.switchAddress()));
+                getSwitch(cf.switchAddress()));
     }
 }
