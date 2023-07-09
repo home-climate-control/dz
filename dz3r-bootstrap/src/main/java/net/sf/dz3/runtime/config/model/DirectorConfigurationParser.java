@@ -5,7 +5,6 @@ import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.model.UnitDirector;
 import reactor.core.publisher.Flux;
 
-import java.util.Map;
 import java.util.Set;
 
 public class DirectorConfigurationParser extends ConfigurationContextAware {
@@ -33,7 +32,7 @@ public class DirectorConfigurationParser extends ConfigurationContextAware {
                 null,
                 Set.of(),
                 Set.of(),
-                Map.of(),
+                getSensorFeedMapping(cf.sensorFeedMapping()),
                 getUnitController(cf.unit()),
                 getHvacDevice(cf.hvac()),
                 cf.mode());

@@ -3,7 +3,10 @@ package net.sf.dz3.runtime.config;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.model.UnitController;
+import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -51,6 +54,38 @@ public abstract class ConfigurationContextAware {
 
         logger.debug("getSwitch({}) = {}", address, result);
         return result;
+    }
+
+    protected final Zone getZone(String address) {
+        var result = context
+                .zones
+                .getFlux()
+                .filter(s -> s.getKey().equals(address))
+                .map(Map.Entry::getValue)
+                .take(1)
+                .blockFirst();
+
+        if (result == null) {
+            throw new IllegalArgumentException("Couldn't resolve zone for id '" + address + "'");
+        }
+
+        logger.debug("getZone({}) = {}", address, result);
+        return result;
+    }
+
+    protected final Map<Flux<Signal<Double, Void>>, Zone> getSensorFeedMapping(Map<String, String> source) {
+
+        return Flux
+                .fromIterable(source.entrySet())
+                .map(kv -> {
+
+                    var flux = getSensor(kv.getKey());
+                    var zone = getZone(kv.getValue());
+
+                    return new ImmutablePair<>(flux, zone);
+                })
+                .collectMap(Pair::getKey, Pair::getValue)
+                .block();
     }
 
     protected final HvacDevice getHvacDevice(String address) {

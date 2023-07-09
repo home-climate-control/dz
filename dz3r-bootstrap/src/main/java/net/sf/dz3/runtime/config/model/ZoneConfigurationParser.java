@@ -41,7 +41,6 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
     private EconomizerContext<?> createEconomizer(EconomizerConfig cf) {
 
         if (cf == null) {
-
             return null;
         }
 
@@ -62,7 +61,13 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
     }
 
     private ZoneSettings map(ZoneSettingsConfig source) {
-        return new ZoneSettings(source.enabled(), source.setpoint(), source.voting(), source.hold(), source.dumpPriority());
+
+        return new ZoneSettings(
+                Optional.ofNullable(source.enabled()).orElse(true),
+                source.setpoint(),
+                Optional.ofNullable(source.voting()).orElse(true),
+                Optional.ofNullable(source.hold()).orElse(false),
+                source.dumpPriority());
     }
 
     private Range<Double> map(RangeConfig cf) {

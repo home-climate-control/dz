@@ -9,7 +9,7 @@ public record ZoneSettingsConfig(
         Double setpoint,
         RangeConfig setpointRange,
         Boolean voting,
-        boolean hold,
+        Boolean hold,
         Integer dumpPriority
 ) {
 }
