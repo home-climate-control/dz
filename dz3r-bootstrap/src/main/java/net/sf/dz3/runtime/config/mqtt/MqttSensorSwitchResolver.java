@@ -65,10 +65,14 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                 .parallel()
                 .runOn(Schedulers.boundedElastic())
                 .map(kv -> {
+                    var id = kv.getKey().sensorConfig().id();
                     var address = kv.getKey().sensorConfig().address();
                     var flux = kv.getValue().getFlux(address);
 
-                    return new ImmutablePair<>(address, flux);
+                    // ID takes precedence over address
+                    var key = id == null ? address : id;
+
+                    return new ImmutablePair<>(key, flux);
                 })
                 .sequential()
                 .collectMap(Map.Entry::getKey, Map.Entry::getValue)
@@ -138,11 +142,11 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
 
     protected abstract L createSensorListener(MqttAdapter adapter, String rootTopic);
 
-    public Flux<S> getSwitches() {
+    public Flux<Map.Entry<String, S>> getSwitches() {
         return getSwitches(endpoint2adapter, switchConfigs);
     }
 
-    private Flux<S> getSwitches(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSwitchConfig> source) {
+    private Flux<Map.Entry<String, S>> getSwitches(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSwitchConfig> source) {
 
         return Flux
                 .fromIterable(source)
@@ -151,7 +155,15 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                 .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
                 .map(c -> {
                     var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
-                    return createSwitch(adapter, c.switchConfig().address());
+
+                    var id = c.switchConfig().id();
+                    var address = c.switchConfig.address();
+                    var s = createSwitch(adapter, address);
+
+                    // ID takes precedence over address
+                    var key = id == null ? address : id;
+
+                    return new ImmutablePair<>(key, s);
                 });
     }
 

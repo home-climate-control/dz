@@ -27,7 +27,7 @@ public abstract class ConfigurationContextAware {
                 .blockFirst();
 
         if (result == null) {
-            throw new IllegalArgumentException("Couldn't resolve sensor flux for address=" + address);
+            throw new IllegalArgumentException("Couldn't resolve sensor flux for id or address '" + address + "'");
         }
 
         logger.debug("getSensor({}) = {}", address, result);
@@ -44,7 +44,7 @@ public abstract class ConfigurationContextAware {
                 .blockFirst();
 
         if (result == null) {
-            throw new IllegalArgumentException("Couldn't resolve switch for address=" + address);
+            throw new IllegalArgumentException("Couldn't resolve switch for id or address '" + address + "'");
         }
 
         logger.debug("getSwitch({}) = {}", address, result);
