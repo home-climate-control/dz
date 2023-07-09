@@ -73,7 +73,7 @@ public abstract class ConfigurationContextAware {
         return result;
     }
 
-    protected final Map<Flux<Signal<Double, Void>>, Zone> getSensorFeedMapping(Map<String, String> source) {
+    protected final Map<Flux<Signal<Double, Void>>, Zone> getSensorFeed2ZoneMapping(Map<String, String> source) {
 
         return Flux
                 .fromIterable(source.entrySet())

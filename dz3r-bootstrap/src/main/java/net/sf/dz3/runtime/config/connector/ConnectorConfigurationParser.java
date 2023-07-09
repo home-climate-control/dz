@@ -5,6 +5,8 @@ import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.http.gae.v3.HttpConnectorGAE;
 import net.sf.dz3r.view.influxdb.v3.InfluxDbLogger;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import reactor.core.publisher.Flux;
 
 import java.net.MalformedURLException;
@@ -48,13 +50,24 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
                         cf.uri(),
                         cf.username(),
                         cf.password(),
-                        mapSensorFeed(cf.sensorFeedMapping())));
+                        getSensorFeed2IdMapping(cf.sensorFeedMapping())));
     }
 
-    private Map<Flux<Signal<Double, Void>>, String> mapSensorFeed(Map<String, String> source) {
+    /**
+     * Unlike {@link #getSensorFeed2ZoneMapping(Map)}, this returns the mapping from the feed
+     * to simply the ID it will be reported as.
+     *
+     * @param source Mapping from the sensor feed ID to "reported as" ID.
+     */
+    private Map<Flux<Signal<Double, Void>>, String> getSensorFeed2IdMapping(Map<String, String> source) {
 
-        logger.error("FIXME: mapSensorFeed() not implemented, empty InfluxDB feed for {}", source.keySet());
-
-        return Map.of();
+        return Flux
+                .fromIterable(source.entrySet())
+                .map(kv -> new ImmutablePair<>(
+                        getSensor(kv.getKey()),
+                        kv.getValue()
+                ))
+                .collectMap(Pair::getKey, Pair::getValue)
+                .block();
     }
 }
