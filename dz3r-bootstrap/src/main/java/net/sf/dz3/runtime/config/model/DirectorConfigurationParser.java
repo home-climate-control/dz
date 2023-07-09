@@ -2,10 +2,6 @@ package net.sf.dz3.runtime.config.model;
 
 import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
-import net.sf.dz3r.device.actuator.NullSwitch;
-import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
-import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.model.SingleStageUnitController;
 import net.sf.dz3r.model.UnitDirector;
 import reactor.core.publisher.Flux;
 
@@ -38,8 +34,8 @@ public class DirectorConfigurationParser extends ConfigurationContextAware {
                 Set.of(),
                 Set.of(),
                 Map.of(),
-                new SingleStageUnitController(cf.unit()),
-                new SwitchableHvacDevice(cf.id() + "-hvac", HvacMode.COOLING, new NullSwitch(cf.id() + "-null-switch")),
+                getUnitController(cf.unit()),
+                getHvacDevice(cf.hvac()),
                 cf.mode());
     }
 }

@@ -1,6 +1,8 @@
 package net.sf.dz3.runtime.config;
 
+import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +50,40 @@ public abstract class ConfigurationContextAware {
         }
 
         logger.debug("getSwitch({}) = {}", address, result);
+        return result;
+    }
+
+    protected final HvacDevice getHvacDevice(String address) {
+        var result = context
+                .hvacDevices
+                .getFlux()
+                .filter(s -> s.getKey().equals(address))
+                .map(Map.Entry::getValue)
+                .take(1)
+                .blockFirst();
+
+        if (result == null) {
+            throw new IllegalArgumentException("Couldn't resolve HVAC device for id '" + address + "'");
+        }
+
+        logger.debug("getHvacDevice({}) = {}", address, result);
+        return result;
+    }
+
+    protected final UnitController getUnitController(String address) {
+        var result = context
+                .units
+                .getFlux()
+                .filter(s -> s.getKey().equals(address))
+                .map(Map.Entry::getValue)
+                .take(1)
+                .blockFirst();
+
+        if (result == null) {
+            throw new IllegalArgumentException("Couldn't resolve unit controller for id '" + address + "'");
+        }
+
+        logger.debug("getUnitController({}) = {}", address, result);
         return result;
     }
 }
