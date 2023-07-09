@@ -49,6 +49,7 @@ public class ConfigurationParser {
             ctx.zones.close();
 
             new ConnectorConfigurationParser(ctx).parse(source.connectors());
+            ctx.collectors.close();
             ctx.connectors.close();
 
             new HvacConfigurationParser(ctx).parse(source.hvac());
@@ -71,5 +72,4 @@ public class ConfigurationParser {
             m.close();
         }
     }
-
 }

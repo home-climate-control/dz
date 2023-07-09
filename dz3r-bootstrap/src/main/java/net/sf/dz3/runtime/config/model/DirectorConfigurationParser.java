@@ -3,9 +3,13 @@ package net.sf.dz3.runtime.config.model;
 import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.view.Connector;
+import net.sf.dz3r.view.MetricsCollector;
 import reactor.core.publisher.Flux;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DirectorConfigurationParser extends ConfigurationContextAware {
 
@@ -23,18 +27,32 @@ public class DirectorConfigurationParser extends ConfigurationContextAware {
 
     private UnitDirector parse(UnitDirectorConfig cf) {
 
-        logger.error("FIXME: UnitDirector({}) creation is TOTALLY WRONG", cf.id());
-
-        // VT: FIXME: Dummy data except for the name to get the stub out and then return with necessary arguments
-
         return new UnitDirector(
                 cf.id(),
                 null,
-                Set.of(),
-                Set.of(),
+                getCollectors(),
+                getConnectors(),
                 getSensorFeed2ZoneMapping(cf.sensorFeedMapping()),
                 getUnitController(cf.unit()),
                 getHvacDevice(cf.hvac()),
                 cf.mode());
+    }
+
+    private Set<MetricsCollector> getCollectors() {
+        return context
+                .collectors
+                .getFlux()
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toSet())
+                .block();
+    }
+
+    private Set<Connector> getConnectors() {
+        return context
+                .connectors
+                .getFlux()
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toSet())
+                .block();
     }
 }
