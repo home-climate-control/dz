@@ -3,6 +3,7 @@ package net.sf.dz3.runtime.config.onewire;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -41,10 +42,15 @@ public class EntityProvider<T> implements AutoCloseable {
      */
     public void register(String key, T entity) {
 
-        logger.info("{} available: {}", kind, key);
+        ThreadContext.push(kind + "#" + Integer.toHexString(hashCode()));
+        try {
+            logger.info("{} available: {}", kind, key);
 
-        address2entity.put(key, entity);
-        sink.next(new ImmutablePair<>(key, entity));
+            address2entity.put(key, entity);
+            sink.next(new ImmutablePair<>(key, entity));
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     /**
@@ -56,7 +62,19 @@ public class EntityProvider<T> implements AutoCloseable {
         sink.complete();
         tracker.dispose();
 
-        logger.debug("closed: {}", kind);
+        ThreadContext.push(kind + "#" + Integer.toHexString(hashCode()));
+        try {
+
+            logger.debug("{} collected", address2entity.size());
+
+            for (var address : address2entity.keySet()) {
+                logger.debug("  {}", address);
+            }
+
+            logger.debug("closed: {}", kind);
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     public synchronized Flux<Map.Entry<String, T>> getFlux() {
