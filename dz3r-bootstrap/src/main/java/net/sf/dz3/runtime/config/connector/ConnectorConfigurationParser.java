@@ -64,7 +64,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
         return Flux
                 .fromIterable(source.entrySet())
                 .map(kv -> new ImmutablePair<>(
-                        getSensor(kv.getKey()),
+                        getSensorBlocking(kv.getKey()),
                         kv.getValue()
                 ))
                 .collectMap(Pair::getKey, Pair::getValue)

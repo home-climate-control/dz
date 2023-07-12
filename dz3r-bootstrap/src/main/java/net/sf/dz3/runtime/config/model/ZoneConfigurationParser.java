@@ -50,7 +50,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                         cf.keepHvacOn(),
                         cf.changeoverDelta(),
                         cf.targetTemperature()),
-                getSensor(cf.ambientSensor()),
+                getSensorBlocking(cf.ambientSensor()),
                 getSwitch(cf.switchAddress()));
     }
 

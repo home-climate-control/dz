@@ -10,8 +10,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class ConfigurationContextAware {
 
@@ -22,21 +24,19 @@ public abstract class ConfigurationContextAware {
         this.context = context;
     }
 
-    protected final Flux<Signal<Double, Void>> getSensor(String address) {
-        var result = context
+    protected final Flux<Signal<Double, Void>> getSensorBlocking(String address) {
+        return Optional
+                .ofNullable(getSensor(address).block())
+                .orElse(Flux.error(new IllegalArgumentException("Couldn't resolve sensor flux for id or address '" + address + "'")));
+    }
+    protected final Mono<Flux<Signal<Double, Void>>> getSensor(String address) {
+        return context
                 .sensors
                 .getFlux()
                 .filter(s -> s.getKey().equals(address))
                 .map(Map.Entry::getValue)
-                .take(1)
-                .blockFirst();
-
-        if (result == null) {
-            throw new IllegalArgumentException("Couldn't resolve sensor flux for id or address '" + address + "'");
-        }
-
-        logger.debug("getSensor({}) = {}", address, result);
-        return result;
+                .doOnNext(s -> logger.debug("getSensor({}) = {}", address, s))
+                .next();
     }
 
     protected final Switch<?> getSwitch(String address) {
@@ -79,7 +79,7 @@ public abstract class ConfigurationContextAware {
                 .fromIterable(source.entrySet())
                 .map(kv -> {
 
-                    var flux = getSensor(kv.getKey());
+                    var flux = getSensorBlocking(kv.getKey());
                     var zone = getZone(kv.getValue());
 
                     return new ImmutablePair<>(flux, zone);
