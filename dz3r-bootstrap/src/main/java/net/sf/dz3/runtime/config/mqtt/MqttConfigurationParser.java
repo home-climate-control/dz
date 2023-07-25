@@ -4,12 +4,20 @@ import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
+import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.instrumentation.Marker;
+import net.sf.dz3r.signal.Signal;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
 
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,8 +39,14 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
      * @param esphome Set of ESPHome device configurations.
      * @param zigbee2mqtt Set of Zigbee2MQTT device configurations.
      * @param zwave2mqtt Set of ZWave2MQTT device configurations.
+     *
+     * @return a {@link Mono} that gets completed when every sensor and switch configuration is resolved. Payload is irrelevant
+     * and is to be used for informational purposes and flow control only, {@link #context} is where the useful information
+     * is gathered.
      */
-    public void parse(Set<MqttDeviceConfig> esphome, Set<MqttDeviceConfig> zigbee2mqtt, Set<MqttDeviceConfig> zwave2mqtt) {
+    public Mono<Tuple2<
+            List<Map.Entry<String, Flux<Signal<Double, Void>>>>,
+            List<Map.Entry<String, AbstractMqttSwitch>>>> parse(Set<MqttDeviceConfig> esphome, Set<MqttDeviceConfig> zigbee2mqtt, Set<MqttDeviceConfig> zwave2mqtt) {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse");
         try {
@@ -79,13 +93,33 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             // Step 4: now combine all of those into a single stream of sensors, and another of switches.
             // Each of resolvers knows exact listener or adapter configuration for a specific device type.
 
-            mqttConfigs
+            var m2 = new Marker(getClass().getSimpleName() + "#gate");
+            var sensors = mqttConfigs
+                    .publishOn(Schedulers.boundedElastic())
                     .flatMap(MqttSensorSwitchResolver::getSensorFluxes)
-                    .subscribe(kv -> context.sensors.register(kv.getKey(), kv.getValue()));
+                    .doOnNext(kv -> context.sensors.register(kv.getKey(), kv.getValue()))
+                    .collectList();
 
-            mqttConfigs
+            var switches = mqttConfigs
+                    .publishOn(Schedulers.boundedElastic())
                     .flatMap(MqttSensorSwitchResolver::getSwitches)
-                    .subscribe(kv -> context.switches.register(kv.getKey(), kv.getValue()));
+                    .doOnNext(kv -> context.switches.register(kv.getKey(), kv.getValue()))
+                    .map(kv -> ((Map.Entry<String, AbstractMqttSwitch>) new ImmutablePair<>(kv.getKey(), kv.getValue())))
+                    .collectList();
+
+            logger.debug("waiting at the gate");
+
+            return Mono.create(sink -> {
+                var result = Mono
+                        .zip(sensors, switches)
+                        .block();
+
+                logger.debug("passed the gate");
+                m2.close();
+
+                sink.success(result);
+            });
+
         } finally {
             m.close();
         }

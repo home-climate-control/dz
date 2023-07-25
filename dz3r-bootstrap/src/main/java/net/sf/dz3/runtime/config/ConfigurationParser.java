@@ -11,8 +11,10 @@ import net.sf.dz3.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
 import net.sf.dz3r.instrumentation.Marker;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import reactor.core.publisher.Flux;
 
 /**
  * Parses {@link HccRawConfig} into {@link HccParsedConfig}.
@@ -25,45 +27,74 @@ public class ConfigurationParser {
 
     public HccParsedConfig parse(HccRawConfig source) {
 
-        Marker m = new Marker(getClass().getSimpleName() + "#parse");
+        Marker m = new Marker(getClass().getSimpleName() + "#parse", Level.INFO);
         try {
 
             var ctx = new ConfigurationContext();
 
-            new MqttConfigurationParser(ctx).parse(
-                    source.esphome(),
-                    source.zigbee2mqtt(),
-                    source.zwave2mqtt());
+            var mqtt = new MqttConfigurationParser(ctx)
+                    .parse(
+                            source.esphome(),
+                            source.zigbee2mqtt(),
+                            source.zwave2mqtt());
 
-            new OnewireConfigurationParser(ctx).parse(source.onewire());
+            // VT: FIXME: Add this to the gate when 1-Wire configuration is actually read and parsed
+            new OnewireConfigurationParser(ctx).parse(source.onewire()).block();
 
-            new MockConfigurationParser(ctx).parse(source.mocks());
+            // VT: FIXME: Need to resolve XBee sensors and switches
 
+            var mocks = new MockConfigurationParser(ctx).parse(source.mocks());
+
+            var gate = Flux.zip(mqtt, mocks);
+
+            gate.blockFirst();
+            m.checkpoint("configured sensors and switches");
+
+            // There will be no more switches coming after this
+            ctx.switches.close();
+
+            // Need to have all raw sensor feeds resolved by now
             new FilterConfigurationParser(ctx).parse(source.filters());
 
-            // There will be no more sensors and switches coming after this
+            // There will be no more sensors coming after this (filters are also "is a" sensors)
             ctx.sensors.close();
-            ctx.switches.close();
+            m.checkpoint("configured filters");
+
+            // Need all sensors resolved by now
 
             new ZoneConfigurationParser(ctx).parse(source.zones());
             ctx.zones.close();
+            m.checkpoint("configured zones");
 
+            // VT: NOTE: This phase takes a lot of time now, improvement possible?
             new ConnectorConfigurationParser(ctx).parse(source.connectors());
             ctx.collectors.close();
             ctx.connectors.close();
+            m.checkpoint("configured connectors");
+
+            // Need all switches resolved by now
 
             new HvacConfigurationParser(ctx).parse(source.hvac());
             ctx.hvacDevices.close();
+            m.checkpoint("configured HVAC devices");
 
             new UnitConfigurationParser(ctx).parse(source.units());
             ctx.units.close();
+            m.checkpoint("configured units");
+
+            // Need just about everything resolved by now
 
             new DirectorConfigurationParser(ctx).parse(source.directors());
             ctx.directors.close();
+            m.checkpoint("configured directors");
+
+            // Need directors resolved by now
 
             new WebUiConfigurationParser(ctx).parse(source.webUi());
+            m.checkpoint("configured WebUI");
 
             new ConsoleConfigurationParser(ctx).parse(source.console());
+            m.checkpoint("configured console");
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
 

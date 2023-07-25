@@ -7,6 +7,7 @@ import net.sf.dz3.runtime.config.hardware.SwitchConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttGateway;
+import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
@@ -29,7 +30,7 @@ import java.util.Set;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S> extends SensorSwitchResolver<A> {
+public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S extends AbstractMqttSwitch> extends SensorSwitchResolver<A> {
 
     private final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
     private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
