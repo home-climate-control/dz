@@ -43,11 +43,11 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
     }
 
     @Override
-    public final Map<String, Flux<Signal<Double, Void>>> getSensorFluxes() {
+    public final Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> getSensorFluxes() {
         return getSensorFluxes(endpoint2adapter, sensorConfigs);
     }
 
-    private Map<String, Flux<Signal<Double, Void>>> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source) {
+    private Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source) {
 
         return Flux
                 .fromIterable(source)
@@ -72,11 +72,9 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                     // ID takes precedence over address
                     var key = id == null ? address : id;
 
-                    return new ImmutablePair<>(key, flux);
+                    return (Map.Entry<String, Flux<Signal<Double, Void>>>) new ImmutablePair<>(key, flux);
                 })
-                .sequential()
-                .collectMap(Map.Entry::getKey, Map.Entry::getValue)
-                .block();
+                .sequential();
     }
 
     public final Flux<MqttEndpointSpec> getEndpoints() {

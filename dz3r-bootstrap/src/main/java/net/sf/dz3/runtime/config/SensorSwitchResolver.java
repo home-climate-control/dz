@@ -23,5 +23,5 @@ public abstract class SensorSwitchResolver<T> {
         this.source = source;
     }
 
-    public abstract Map<String, Flux<Signal<Double, Void>>> getSensorFluxes();
+    public abstract Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> getSensorFluxes();
 }

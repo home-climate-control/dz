@@ -80,8 +80,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             // Each of resolvers knows exact listener or adapter configuration for a specific device type.
 
             mqttConfigs
-                    .map(MqttSensorSwitchResolver::getSensorFluxes)
-                    .flatMap(kv -> Flux.fromIterable(kv.entrySet()))
+                    .flatMap(MqttSensorSwitchResolver::getSensorFluxes)
                     .subscribe(kv -> context.sensors.register(kv.getKey(), kv.getValue()));
 
             mqttConfigs
