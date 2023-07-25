@@ -4,10 +4,8 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.publisher.Sinks;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,24 +15,15 @@ public class EntityProvider<T> implements AutoCloseable {
     protected final Logger logger = LogManager.getLogger();
     private final String kind;
     private final Map<String, T> address2entity = new LinkedHashMap<>();
+    private final Sinks.Many<Map.Entry<String, T>> sink;
     private final Flux<Map.Entry<String, T>> flux;
-    private FluxSink<Map.Entry<String, T>> sink;
-    private final Disposable tracker;
 
     public EntityProvider(String kind) {
 
         this.kind = kind;
 
-        flux = Flux
-                .create(this::connect)
-                .cache();
-        tracker = flux
-                .subscribeOn(Schedulers.newSingle("tracker:" + kind, false))
-                .subscribe();
-    }
-
-    private void connect(FluxSink<Map.Entry<String, T>> sink) {
-        this.sink = sink;
+        sink = Sinks.many().replay().all();
+        flux = sink.asFlux();
     }
 
     /**
@@ -47,7 +36,7 @@ public class EntityProvider<T> implements AutoCloseable {
             logger.info("{} available: {}", kind, key);
 
             address2entity.put(key, entity);
-            sink.next(new ImmutablePair<>(key, entity));
+            sink.tryEmitNext(new ImmutablePair<>(key, entity));
         } finally {
             ThreadContext.pop();
         }
@@ -59,8 +48,7 @@ public class EntityProvider<T> implements AutoCloseable {
     @Override
     public void close() {
 
-        sink.complete();
-        tracker.dispose();
+        sink.tryEmitComplete();
 
         ThreadContext.push(kind + "#" + Integer.toHexString(hashCode()));
         try {
