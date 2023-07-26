@@ -4,7 +4,6 @@ import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.signal.filter.DoubleMedianFilter;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.Optional;
 import java.util.Set;
@@ -30,8 +29,6 @@ public class FilterConfigurationParser extends ConfigurationContextAware {
 
         Flux
                 .fromIterable(Optional.ofNullable(source).orElse(Set.of()))
-                .subscribeOn(Schedulers.boundedElastic())
-                .parallel()
                 .subscribe(c -> {
 
                     var sensorFlux = getSensorBlocking(c.source());
