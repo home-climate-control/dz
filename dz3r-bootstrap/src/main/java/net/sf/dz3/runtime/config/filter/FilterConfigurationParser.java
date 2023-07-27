@@ -3,10 +3,12 @@ package net.sf.dz3.runtime.config.filter;
 import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.signal.filter.DoubleMedianFilter;
+import net.sf.dz3r.signal.filter.DoubleMedianSetFilter;
 import reactor.core.publisher.Flux;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class FilterConfigurationParser extends ConfigurationContextAware {
 
@@ -39,10 +41,22 @@ public class FilterConfigurationParser extends ConfigurationContextAware {
     }
 
     private void parseMedianSet(Set<MedianSetFilterConfig> source) {
+
         Flux
                 .fromIterable(Optional.ofNullable(source).orElse(Set.of()))
-                .doOnNext(c -> logger.error("FIXME: NOT IMPLEMENTED: median set filter: id={}, sources={}", c.id(), c.sources()))
-                .blockLast();
-    }
+                .subscribe(c -> {
 
+                    // VT: FIXME: This construct will get stuck and get mum if a requested sensor flux is not available
+
+                    var sources = Flux
+                            .fromIterable(c.sources())
+                            .map(this::getSensorBlocking)
+                            .collect(Collectors.toSet())
+                            .block();
+
+                    var filter = new DoubleMedianSetFilter<String>(sources.size());
+
+                    context.sensors.register(c.id(), filter.compute(sources));
+                });
+    }
 }
