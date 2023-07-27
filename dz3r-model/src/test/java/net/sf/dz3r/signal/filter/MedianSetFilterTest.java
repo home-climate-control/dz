@@ -85,6 +85,7 @@ class MedianSetFilterTest {
     @Disabled("Too capricious and fragile; not worth getting straight - the point is made already")
     void wrapper() {
 
+        DoubleMedianSetFilter<Integer> filter3 = new DoubleMedianSetFilter<>(3);
         // Need to stagger the signals so that they get to the verifier in the right order
 
         var s1a = Flux.just(1d);
@@ -111,7 +112,7 @@ class MedianSetFilterTest {
                 .merge(s3a, s3b, s3c)
                 .map(d -> new Signal<Double, Void>(Instant.now(), d));
 
-        var result = DoubleMedianSetFilter
+        var result = filter3
                 .compute(Set.of(f1, f2, f3))
                 .doOnNext(s -> logger.info("signal: {}", s.getValue()));
 
