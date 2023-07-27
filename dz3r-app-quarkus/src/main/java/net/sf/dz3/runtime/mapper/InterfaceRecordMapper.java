@@ -204,7 +204,8 @@ public interface InterfaceRecordMapper {
     net.sf.dz3.runtime.config.model.WebUiConfig webUi(WebUiConfig source);
 
     @Mapping(expression = "java(source.units().orElse(null))", target = "units")
-    @Mapping(expression = "java(source.directors())", target = "directors")
+    @Mapping(expression = "java(source.directors().orElse(Set.of()))", target = "directors")
+    @Mapping(expression = "java(source.sensors().orElse(Set.of()))", target = "sensors")
     net.sf.dz3.runtime.config.model.ConsoleConfig console(ConsoleConfig source);
 
     Set<net.sf.dz3.runtime.config.hardware.SensorConfig> sensors(Set<SensorConfig> source);

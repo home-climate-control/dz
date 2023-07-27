@@ -57,30 +57,28 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
      */
     private final transient ScreenDescriptor initialScreenDescriptor;
 
-    public EntitySelectorPanel(Set<Object> initSet, TemperatureUnit unit, ScreenDescriptor screenDescriptor) {
-        this.unit = unit;
+    public EntitySelectorPanel(ReactiveConsole.Config config, ScreenDescriptor screenDescriptor) {
+        this.unit = config.initialUnit();
         this.initialScreenDescriptor = screenDescriptor;
-        init(initSet);
+        init(config);
     }
 
-    private void init(Set<Object> initSet) {
+    private void init(ReactiveConsole.Config config) {
 
-        initUnits(initSet);
-        initSensors(initSet);
+        initDirectors(config.directors());
+        initSensors(config.sensors());
 
-        logger.info("Configured {} pairs out of {} init entries", entities.size(), initSet.size());
+        logger.info("Configured {} pairs out of {} directors and {} sensors", entities.size(), config.directors().size(), config.sensors().size());
 
         initGraphics();
     }
 
-    private void initUnits(Set<Object> initSet) {
+    private void initDirectors(Set<UnitDirector> initSet) {
 
         // VT: NOTE: sort() the units
 
         Flux.fromIterable(initSet)
                 .sort()
-                .filter(UnitDirector.class::isInstance)
-                .map(UnitDirector.class::cast)
                 .flatMap(this::initUnit)
                 .doOnNext(entities::add)
                 .subscribe()
@@ -163,20 +161,18 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         return new CellAndPanel<>(cell, panel);
     }
 
-    private void initSensors(Set<Object> initSet) {
+    private void initSensors(Map<String, Flux<Signal<Double, Void>>> initSet) {
 
         // VT: NOTE: sort() sensor panels, signals are not sortable
 
-        Flux.fromIterable(initSet)
-                .filter(Flux.class::isInstance)
-                .map(Flux.class::cast)
+        Flux.fromIterable(initSet.entrySet())
                 .flatMap(this::initSensor)
                 .sort()
                 .subscribe()
                 .dispose();
     }
 
-    private Flux<CellAndPanel<?, ?>> initSensor(Flux<?> source) {
+    private Flux<CellAndPanel<?, ?>> initSensor(Map.Entry<String, Flux<Signal<Double, Void>>> source) {
         logger.warn("NOT IMPLEMENTED: initSensor({})", source);
         return Flux.empty();
     }

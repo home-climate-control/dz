@@ -12,5 +12,8 @@ public interface ConsoleConfig {
     Optional<TemperatureUnit> units();
 
     @JsonProperty("directors")
-    Set<String> directors();
+    Optional<Set<String>> directors();
+
+    @JsonProperty("sensors")
+    Optional<Set<String>> sensors();
 }
