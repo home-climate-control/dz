@@ -1,6 +1,5 @@
 package net.sf.dz3r.view.swing;
 
-import net.sf.dz3.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
@@ -35,7 +34,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     private final transient Logger logger = LogManager.getLogger();
 
-    private TemperatureUnit unit;
+    private final transient Config config;
 
     private int currentEntityOffset = 0;
     private final transient List<CellAndPanel<?, ?>> entities = new ArrayList<>();
@@ -50,17 +49,12 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
      */
     private final CardLayout cardLayout = new CardLayout();
 
-    /**
-     * Screen descriptor at start.
-     *
-     * Ugly hack, need to remove it someday.
-     */
-    private final transient ScreenDescriptor initialScreenDescriptor;
 
-    public EntitySelectorPanel(ReactiveConsole.Config config, ScreenDescriptor screenDescriptor) {
-        this.unit = config.initialUnit();
-        this.initialScreenDescriptor = screenDescriptor;
-        init(config);
+    public EntitySelectorPanel(ReactiveConsole.Config consoleConfig, ScreenDescriptor screenDescriptor) {
+
+        this.config = new Config(consoleConfig, screenDescriptor);
+
+        init(consoleConfig);
     }
 
     private void init(ReactiveConsole.Config config) {
@@ -116,7 +110,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
     private CellAndPanel<HvacDeviceStatus, Void> createUnitPair(String address, Flux<Signal<HvacDeviceStatus, Void>> source) {
 
         var cell = new UnitCell();
-        var panel = new UnitPanel(address, initialScreenDescriptor);
+        var panel = new UnitPanel(address, config.screen);
 
         cell.subscribe(source);
         panel.subscribe(source);
@@ -133,7 +127,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
         var zoneName = zone.getAddress();
         var cell = new ZoneCell(zoneName);
-        var panel = new ZonePanel(zone, initialScreenDescriptor, unit);
+        var panel = new ZonePanel(zone, config.screen, config.console().initialUnit());
 
         var thisZoneFlux = aggregateZoneFlux
                 .filter(s -> zoneName.equals(s.payload))
@@ -143,7 +137,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().requested.mode, null, s.status, s.error));
         var thisScheduleFlux = scheduleFlux
                 .filter(s -> zoneName.equals(s.getKey()))
-                .map(s -> s.getValue());
+                .map(Map.Entry::getValue);
 
         cell.subscribe(thisZoneFlux);
         panel.subscribe(thisZoneFlux);
@@ -225,7 +219,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         var offset = 0;
         for (var pair : entities) {
             selectorBar.add(pair.cell);
-            selectorPanel.add(pair.panel, "" + offset++);
+            selectorPanel.add(pair.panel, String.valueOf(offset++));
         }
 
         setCurrentEntity(0);
@@ -252,68 +246,36 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
             logger.info("{}", e::toString);
 
-            switch (e.getKeyChar()) {
+            switch (Character.toLowerCase(e.getKeyChar())) {
 
-                case 'c':
-                case 'C':
-                case 'f':
-                case 'F':
+                case 'c', 'f' -> {
 
                     // Toggle between Celsius and Fahrenheit
 
-                    // This must work for all entities
                     for (var entity : entities) {
                         entity.panel.keyPressed(e);
                     }
+                }
 
-                    break;
+                case 'h', 'v', 'o', 's', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
 
-                case 'h':
-                case 'H':
-
-                    // Toggle hold status
-
-                case 'v':
-                case 'V':
-
-                    // Toggle voting status
-
-                case 'o':
-                case 'O':
-
-                    // Toggle off status
-
-                case 's':
-                case 'S':
-
-                    // Go back to schedule
-
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-
-                    // Change dump priority
+                    // H: toggle hold status
+                    // V: toggle voting status
+                    // O: toggle off status
+                    // S: go back to schedule
+                    // Digits: change dump priority
 
                     entities.get(currentEntityOffset).panel.keyPressed(e);
-                    break;
+                }
 
-                case KeyEvent.CHAR_UNDEFINED:
+                case KeyEvent.CHAR_UNDEFINED -> {
 
                     switch (e.getKeyCode()) {
 
-                        case KeyEvent.VK_KP_LEFT:
-                        case KeyEvent.VK_LEFT:
+                        case KeyEvent.VK_KP_LEFT, KeyEvent.VK_LEFT -> {
 
                             // Cycle displayed entity to the left
 
-                        {
                             int entityOffset = currentEntityOffset - 1;
 
                             entityOffset = entityOffset < 0 ? entities.size() - 1 : entityOffset;
@@ -321,14 +283,10 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                             setCurrentEntity(entityOffset);
                         }
 
-                        break;
-
-                        case KeyEvent.VK_KP_RIGHT:
-                        case KeyEvent.VK_RIGHT:
+                        case KeyEvent.VK_KP_RIGHT, KeyEvent.VK_RIGHT -> {
 
                             // Cycle displayed entity to the right
 
-                        {
                             int entityOffset = currentEntityOffset + 1;
 
                             entityOffset = entityOffset >= entities.size() ? 0 : entityOffset;
@@ -336,31 +294,23 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                             setCurrentEntity(entityOffset);
                         }
 
-                        break;
 
-                        case KeyEvent.VK_KP_UP:
-                        case KeyEvent.VK_UP:
+                        case KeyEvent.VK_KP_UP, KeyEvent.VK_UP, KeyEvent.VK_KP_DOWN, KeyEvent.VK_DOWN -> {
 
-                            // Raise setpoint for currently selected zone (if it is a zone)
-
-                        case KeyEvent.VK_KP_DOWN:
-                        case KeyEvent.VK_DOWN:
-
-                            // Lower setpoint for currently selected zone (if it is a zone)
+                            // Raise or lower setpoint for currently selected zone (if it is a zone)
 
                             entities.get(currentEntityOffset).panel.keyPressed(e);
+                        }
 
-                            break;
-
-                        default:
-
+                        default -> {
                             // Do nothing
+                        }
+
                     }
-                    break;
-
-                default:
-
+                }
+                default -> {
                     // Do nothing
+                }
             }
 
         } finally {
@@ -383,7 +333,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         entities.get(currentEntityOffset).cell.setSelected(false);
         entities.get(entityOffset).cell.setSelected(true);
 
-        cardLayout.show(selectorPanel, "" + entityOffset);
+        cardLayout.show(selectorPanel, String.valueOf(entityOffset));
 
         currentEntityOffset = entityOffset;
     }
@@ -393,5 +343,12 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         for (var entity : entities) {
             entity.panel.setFontSize(screenDescriptor);
         }
+    }
+
+    private record Config(
+            ReactiveConsole.Config console,
+            ScreenDescriptor screen
+    ) {
+
     }
 }

@@ -46,41 +46,19 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
 
         var mode = getMode();
 
-        switch (getState()) {
-
-            case HAPPY:
-
-                return ColorScheme.getScheme(mode).green;
-
-            case ERROR:
-
-                return ColorScheme.getScheme(mode).error;
-
-            case OFF:
-
-                return ColorScheme.getScheme(mode).off;
-
-            default:
-
-                return ColorScheme.getScheme(mode).bottom;
-        }
+        return switch (getState()) {
+            case HAPPY -> ColorScheme.getScheme(mode).green;
+            case ERROR -> ColorScheme.getScheme(mode).error;
+            case OFF -> ColorScheme.getScheme(mode).off;
+            default -> ColorScheme.getScheme(mode).bottom;
+        };
     }
 
     private void paintGradient(Zone.State state, HvacMode mode, Double signal, Graphics2D g2d, Rectangle boundary) {
 
         switch (state) {
-
-            case CALLING:
-            case ERROR:
-            case OFF:
-
-                BackgroundRenderer.drawBottom(state, mode, signal, g2d, boundary, false);
-                break;
-
-            case HAPPY:
-
-                BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
-                break;
+            case CALLING, ERROR, OFF -> BackgroundRenderer.drawBottom(state, mode, signal, g2d, boundary, false);
+            case HAPPY -> BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
         }
     }
 
@@ -111,7 +89,7 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
             return Zone.State.ERROR;
         }
 
-        if (!zoneStatus.settings.enabled) {
+        if (Boolean.FALSE.equals(zoneStatus.settings.enabled)) {
             return Zone.State.OFF;
         }
 

@@ -247,22 +247,13 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                 return;
             }
 
-            switch (e.getKeyChar()) {
-
-                case 'c':
-                case 'C':
-                case 'f':
-                case 'F':
-
+            switch (Character.toLowerCase(e.getKeyChar())) {
+                case 'c', 'f' -> {
                     needFahrenheit = !needFahrenheit;
                     refresh();
-
                     logger.info("Displaying temperature in {}", (needFahrenheit ? "Fahrenheit" : "Celsius"));
-
-                    break;
-
-                case 'h':
-                case 'H':
+                }
+                case 'h' -> {
 
                     // Toggle hold status
 
@@ -273,15 +264,10 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                             !zoneStatus.settings.hold,
                             null
                     )));
-
                     refresh();
-
                     logger.info("Hold status for {} is now {}", zone.getAddress(), zone.getSettings().hold);
-
-                    break;
-
-                case 'v':
-                case 'V':
+                }
+                case 'v' -> {
 
                     // Toggle voting status
 
@@ -292,27 +278,18 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                             null,
                             null
                     )));
-
                     refresh();
-
                     logger.info("Voting status for {} is now {}", zone.getAddress(), zone.getSettings().voting);
-
-                    break;
-
-                case 'o':
-                case 'O':
+                }
+                case 'o' -> {
 
                     // Toggle off status
 
                     zone.setSettings(new ZoneSettings(zone.getSettings(), !zoneStatus.settings.enabled));
                     refresh();
-
                     logger.info("On status for {} is now {}", zone.getAddress(), zone.getSettings().enabled);
-
-                    break;
-
-                case 's':
-                case 'S':
+                }
+                case 's' -> {
 
                     // Go back to schedule
 
@@ -324,22 +301,10 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                             false,
                             null
                     )));
-
                     activateSchedule();
                     refresh();
-
-                    break;
-
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
+                }
+                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
 
                     // Change dump priority
 
@@ -350,36 +315,23 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                             null,
                             e.getKeyChar() - '0'
                     )));
-
                     refresh();
-
                     logger.info("Dump priority for{} is now {}", zone.getAddress(), zone.getSettings().dumpPriority);
-
-                    break;
-
-                case KeyEvent.CHAR_UNDEFINED:
-
+                }
+                case KeyEvent.CHAR_UNDEFINED -> {
                     switch (e.getKeyCode()) {
-
-                        case KeyEvent.VK_KP_UP:
-                        case KeyEvent.VK_UP:
-
-                            raiseSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
-                            break;
-
-                        case KeyEvent.VK_KP_DOWN:
-                        case KeyEvent.VK_DOWN:
-
-                            lowerSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
-                            break;
-
-                        default:
+                        case KeyEvent.VK_KP_UP, KeyEvent.VK_UP ->
+                                raiseSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
+                        case KeyEvent.VK_KP_DOWN, KeyEvent.VK_DOWN ->
+                                lowerSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
+                        default -> {
                             // Do nothing
+                        }
                     }
-                    break;
-
-                default:
+                }
+                default -> {
                     // Do nothing
+                }
             }
 
         } finally {
@@ -494,16 +446,16 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var voting = Optional.ofNullable(zoneStatus.settings.voting);
         var hold = Optional.ofNullable(zoneStatus.settings.hold);
 
-        setpoint.ifPresent(s -> setpointLabel.setText(String.format(Locale.getDefault(), "%.1f\u00b0", getDisplayValue(s))));
+        setpoint.ifPresent(s -> setpointLabel.setText(String.format(Locale.getDefault(), "%.1f°", getDisplayValue(s))));
 
         voting.ifPresent(v -> {
-            votingLabel.setText(v ? VOTING : NOT_VOTING);
-            votingLabel.setForeground(v ? ColorScheme.getScheme(getMode()).noticeDefault : ColorScheme.getScheme(getMode()).noticeActive);
+            votingLabel.setText(Boolean.TRUE.equals(v) ? VOTING : NOT_VOTING);
+            votingLabel.setForeground(Boolean.TRUE.equals(v) ? ColorScheme.getScheme(getMode()).noticeDefault : ColorScheme.getScheme(getMode()).noticeActive);
         });
 
         hold.ifPresent(h -> {
-            holdLabel.setText(h ? ON_HOLD : HOLD);
-            holdLabel.setForeground(h ? ColorScheme.getScheme(getMode()).noticeActive : ColorScheme.getScheme(getMode()).noticeDefault);
+            holdLabel.setText(Boolean.TRUE.equals(h) ? ON_HOLD : HOLD);
+            holdLabel.setForeground(Boolean.TRUE.equals(h) ? ColorScheme.getScheme(getMode()).noticeActive : ColorScheme.getScheme(getMode()).noticeDefault);
         });
 
         repaint();
@@ -675,18 +627,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var boundary = new Rectangle(0, 0, d.width, d.height);
 
         switch (state) {
-
-            case CALLING:
-            case ERROR:
-            case OFF:
-
-                BackgroundRenderer.drawBottom(state, mode, signal, g2d, boundary, true);
-                break;
-
-            case HAPPY:
-
-                BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
-                break;
+            case CALLING, ERROR, OFF -> BackgroundRenderer.drawBottom(state, mode, signal, g2d, boundary, true);
+            case HAPPY -> BackgroundRenderer.drawTop(mode, signal, g2d, boundary);
         }
     }
 
@@ -696,7 +638,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return Zone.State.ERROR;
         }
 
-        if (!zoneStatus.settings.enabled) {
+        if (Boolean.FALSE.equals(zoneStatus.settings.enabled)) {
             return Zone.State.OFF;
         }
 
