@@ -5,6 +5,8 @@ import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.scheduler.SchedulePeriod;
+import net.sf.dz3r.sensor.SensorCell;
+import net.sf.dz3r.sensor.SensorPanel;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
@@ -157,18 +159,27 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     private void initSensors(Map<String, Flux<Signal<Double, Void>>> initSet) {
 
-        // VT: NOTE: sort() sensor panels, signals are not sortable
-
         Flux.fromIterable(initSet.entrySet())
-                .flatMap(this::initSensor)
-                .sort()
+                .map(this::initSensor)
+                .doOnNext(entities::add)
                 .subscribe()
                 .dispose();
     }
 
-    private Flux<CellAndPanel<?, ?>> initSensor(Map.Entry<String, Flux<Signal<Double, Void>>> source) {
-        logger.warn("NOT IMPLEMENTED: initSensor({})", source);
-        return Flux.empty();
+    private CellAndPanel<?, ?> initSensor(Map.Entry<String, Flux<Signal<Double, Void>>> source) {
+
+        var name = source.getKey();
+        var signal = source.getValue();
+
+        logger.debug("initSensor: {} => {}", name, signal);
+
+        var cell = new SensorCell(name);
+        var panel = new SensorPanel(name, config.screen);
+
+        cell.subscribe(signal);
+        panel.subscribe(signal);
+
+        return new CellAndPanel<>(cell, panel);
     }
 
     private void initGraphics() {
