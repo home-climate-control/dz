@@ -1,4 +1,4 @@
-package net.sf.dz3r.signal.sensor;
+package net.sf.dz3r.device.sensor;
 
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
