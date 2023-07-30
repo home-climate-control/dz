@@ -1,4 +1,4 @@
-package net.sf.dz3r.sensor;
+package net.sf.dz3r.view.swing.sensor;
 
 
 import net.sf.dz3r.view.swing.ColorScheme;
