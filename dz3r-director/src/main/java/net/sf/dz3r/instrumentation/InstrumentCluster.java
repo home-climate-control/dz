@@ -47,7 +47,7 @@ public class InstrumentCluster {
      * @return System status flux. A new item is emitted every time a particular entity's status is updated,
      * the item can and must be treated as an incremental update.
      */
-    public Flux<SystemStatus> getFlux() {
+    public Flux<Signal<SystemStatus, Void>> getFlux() {
 
         logger.error("FIXME: NOT IMPLEMENTED: getFlux(SystemStatus)");
 
