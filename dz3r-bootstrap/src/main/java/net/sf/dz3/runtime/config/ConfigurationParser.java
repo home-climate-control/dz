@@ -10,6 +10,7 @@ import net.sf.dz3.runtime.config.model.WebUiConfigurationParser;
 import net.sf.dz3.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
+import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -88,12 +89,19 @@ public class ConfigurationParser {
             ctx.directors.close();
             m.checkpoint("configured directors");
 
+            var ic = new InstrumentCluster(
+                    ctx.sensors.getFlux(),
+                    ctx.switches.getFlux(),
+                    ctx.connectors.getFlux(),
+                    ctx.collectors.getFlux(),
+                    ctx.hvacDevices.getFlux());
+
             // Need directors resolved by now
 
-            new WebUiConfigurationParser(ctx).parse(source.webUi());
+            new WebUiConfigurationParser(ctx, ic).parse(source.webUi());
             m.checkpoint("configured WebUI");
 
-            new ConsoleConfigurationParser(ctx).parse(source.console());
+            new ConsoleConfigurationParser(ctx, ic).parse(source.console());
             m.checkpoint("configured console");
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");

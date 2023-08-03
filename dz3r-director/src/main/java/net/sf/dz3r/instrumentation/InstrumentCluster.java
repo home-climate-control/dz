@@ -1,16 +1,17 @@
 package net.sf.dz3r.instrumentation;
 
-import com.sun.jdi.connect.Connector;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.health.SystemStatus;
+import net.sf.dz3r.view.Connector;
+import net.sf.dz3r.view.MetricsCollector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
-import java.util.stream.Collector;
+
 
 /**
  * Collection of all raw signal processors emitting a coherent "at a glance" system status.
@@ -24,14 +25,14 @@ public class InstrumentCluster {
     private final Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> sensors;
     private final Flux<Map.Entry<String, Switch<?>>> switches;
     private final Flux<Map.Entry<String, Connector>> connectors;
-    private final Flux<Map.Entry<String, Collector<?, ?, ?>>> collectors;
+    private final Flux<Map.Entry<String, MetricsCollector>> collectors;
     private final Flux<Map.Entry<String, HvacDevice>> hvacDevices;
 
     public InstrumentCluster(
             Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> sensors,
             Flux<Map.Entry<String, Switch<?>>> switches,
             Flux<Map.Entry<String, Connector>> connectors,
-            Flux<Map.Entry<String, Collector<?,?,?>>> collectors,
+            Flux<Map.Entry<String, MetricsCollector>> collectors,
             Flux<Map.Entry<String, HvacDevice>> hvacDevices
             ) {
 
