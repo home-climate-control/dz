@@ -17,9 +17,11 @@ import java.util.TreeSet;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
-public class SensorProcessor implements SignalProcessor<Double, SensorStatus, Void> {
+public class SensorStatusProcessor implements SignalProcessor<Double, SensorStatus, Void> {
 
     private final Logger logger = LogManager.getLogger();
+
+    private final String id;
     private final SortedSet<Double> diffs = new TreeSet<>();
 
     /**
@@ -31,6 +33,12 @@ public class SensorProcessor implements SignalProcessor<Double, SensorStatus, Vo
      * Calculated resolution. Is not affected by error signals, but may need to be adjusted for time windows at some point.
      */
     private Double resolution = null;
+
+    public SensorStatusProcessor(String id) {
+        this.id = id;
+
+        logger.info("created sensor status processor for id={}", id);
+    }
 
     @Override
     public Flux<Signal<SensorStatus, Void>> compute(Flux<Signal<Double, Void>> in) {
@@ -58,7 +66,7 @@ public class SensorProcessor implements SignalProcessor<Double, SensorStatus, Vo
 
     private Double computeResolution(Double value) {
 
-        ThreadContext.push("computeResolution");
+        ThreadContext.push("computeResolution#" + id);
 
         try {
 

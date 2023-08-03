@@ -9,8 +9,13 @@ import net.sf.dz3r.view.MetricsCollector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
+import java.time.Instant;
+import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 
 /**
@@ -27,6 +32,22 @@ public class InstrumentCluster {
     private final Flux<Map.Entry<String, Connector>> connectors;
     private final Flux<Map.Entry<String, MetricsCollector>> collectors;
     private final Flux<Map.Entry<String, HvacDevice>> hvacDevices;
+
+    private final Map<String, SensorStatusProcessor> sensorProcessors = new HashMap<>();
+
+    /**
+     * Status accumulator.
+     *
+     * This object gets updated and then emitted every time an update comes.
+     */
+    private final SystemStatus currentStatus = new SystemStatus(
+            new TreeMap<>(),
+            new TreeMap<>(),
+            new TreeMap<>(),
+            new TreeMap<>(),
+            new TreeMap<>());
+
+    private final Sinks.Many<Signal<SystemStatus, Void>> statusSink = Sinks.many().multicast().onBackpressureBuffer();
 
     public InstrumentCluster(
             Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> sensors,
@@ -45,12 +66,35 @@ public class InstrumentCluster {
 
     /**
      * @return System status flux. A new item is emitted every time a particular entity's status is updated,
-     * the item can and must be treated as an incremental update.
+     * the item can and must be treated as an incremental update, though it may at times represent full system status.
      */
     public Flux<Signal<SystemStatus, Void>> getFlux() {
 
+        sensors
+                .map(kv -> {
+                    var id = kv.getKey();
+                    var p = sensorProcessors.computeIfAbsent(id, SensorStatusProcessor::new);
+
+                    return new AbstractMap.SimpleEntry<>(id, p.compute(kv.getValue()));
+                })
+                .subscribe(kv -> {
+
+                    var id = kv.getKey();
+                    var status = kv.getValue();
+
+                    status
+                            .subscribe(s -> {
+
+                                logger.info("update: id={}, status={}", id, s);
+                                currentStatus.sensors().put(String.valueOf(id), s.getValue());
+
+                                statusSink.tryEmitNext(new Signal<>(Instant.now(), currentStatus));
+                            });
+
+                });
+
         logger.error("FIXME: NOT IMPLEMENTED: getFlux(SystemStatus)");
 
-        return Flux.empty();
+        return statusSink.asFlux();
     }
 }

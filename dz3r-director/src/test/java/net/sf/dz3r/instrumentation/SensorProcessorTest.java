@@ -20,7 +20,7 @@ class SensorProcessorTest {
                 new Signal<Double, Void>(start.plusMillis(2000), 1.75)
         );
 
-        var sp = new SensorProcessor();
+        var sp = new SensorStatusProcessor("");
         var result = sp.compute(source).blockLast();
 
         assertThat(result).isNotNull();
@@ -35,7 +35,7 @@ class SensorProcessorTest {
                 new Signal<Double, Void>(start, null, null, Signal.Status.FAILURE_TOTAL, new Throwable("oops"))
         );
 
-        var sp = new SensorProcessor();
+        var sp = new SensorStatusProcessor("");
         var result = sp.compute(source).blockLast();
 
         assertThat(result).isNotNull();
@@ -52,7 +52,7 @@ class SensorProcessorTest {
                 new Signal<Double, Void>(start, 1.00)
         );
 
-        var sp = new SensorProcessor();
+        var sp = new SensorStatusProcessor("");
         var result = sp.compute(source).blockLast();
 
         assertThat(result).isNotNull();
