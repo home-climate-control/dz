@@ -8,6 +8,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -74,11 +76,22 @@ public class SensorStatusProcessor implements SignalProcessor<Double, SensorStat
 
                 // Stored as a set and not as a value to possibly improve the algorithm in the future,
                 // including detecting noisy analog signals (might want to return NaN instead of null for that case)
-                diffs.add(Math.abs(value - lastKnown));
+
+                var diff = round(Math.abs(value - lastKnown));
+
+                if (Double.compare(diff, 0.0) == 0) {
+                    // Sorry, no cigar
+                    return resolution;
+                }
+
+                diffs.add(diff);
 
                 if (diffs.size() > 50) {
                     logger.warn("Noisy signal? Trimming the tail: {}", diffs);
-                    ((TreeSet<?>) diffs).descendingIterator().remove();
+
+                    var i = ((TreeSet<?>) diffs).descendingIterator();
+                    i.next();
+                    i.remove();
                 }
             }
 
@@ -92,6 +105,13 @@ public class SensorStatusProcessor implements SignalProcessor<Double, SensorStat
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    private double round(Double d) {
+        return
+                BigDecimal.valueOf(d)
+                        .setScale(3, RoundingMode.HALF_UP)
+                        .doubleValue();
     }
 
     private Double computeResolution(SortedSet<Double> source) {
