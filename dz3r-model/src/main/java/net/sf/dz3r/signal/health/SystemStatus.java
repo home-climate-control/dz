@@ -1,5 +1,7 @@
 package net.sf.dz3r.signal.health;
 
+import net.sf.dz3r.signal.Signal;
+
 import java.util.Map;
 
 /**
@@ -10,7 +12,7 @@ import java.util.Map;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
 public record SystemStatus(
-        Map<String, SensorStatus> sensors,
+        Map<String, Signal<SensorStatus, Void>> sensors,
         Map<String, SwitchStatus> switches,
         Map<String, HvacDeviceStatus> hvacDevices,
         Map<String, ConnectorStatus> connectors,

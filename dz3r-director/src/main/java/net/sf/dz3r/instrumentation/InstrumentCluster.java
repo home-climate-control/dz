@@ -83,11 +83,11 @@ public class InstrumentCluster {
                                 logger.info("update: id={}, status={}", id, s);
 
                                 // Update the accumulated status
-                                currentStatus.sensors().put(id, s.getValue());
+                                currentStatus.sensors().put(id, s);
 
                                 // Send an incremental update
                                 var incrementalStatus = createEmptyStatus();
-                                incrementalStatus.sensors().put(id, s.getValue());
+                                incrementalStatus.sensors().put(id, s);
 
                                 statusSink.tryEmitNext(new Signal<>(Instant.now(), incrementalStatus));
                             });
