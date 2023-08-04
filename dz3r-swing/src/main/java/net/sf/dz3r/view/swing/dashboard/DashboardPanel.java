@@ -1,12 +1,15 @@
 package net.sf.dz3r.view.swing.dashboard;
 
 import net.sf.dz3r.instrumentation.InstrumentCluster;
+import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.health.SensorStatus;
 import net.sf.dz3r.signal.health.SystemStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
 import net.sf.dz3r.view.swing.ScreenDescriptor;
 import reactor.core.publisher.Flux;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
@@ -14,6 +17,9 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
 
@@ -24,6 +30,20 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     private final JPanel connectorPanel = new JPanel();
     private final JPanel collectorPanel = new JPanel();
     private final JPanel hvacDevicePanel = new JPanel();
+
+    private final Map<String, JPanel> sensors = new TreeMap<>();
+
+    /**
+     * Status accumulator.
+     *
+     * This object gets updated and then rendered every time an {@link #update()} comes.
+     */
+    private final SystemStatus currentStatus = new SystemStatus(
+            new TreeMap<>(),
+            new TreeMap<>(),
+            new TreeMap<>(),
+            new TreeMap<>(),
+            new TreeMap<>());
 
     public DashboardPanel(InstrumentCluster ic, ScreenDescriptor screenDescriptor) {
 
@@ -45,6 +65,12 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         connectorPanel.setBorder(new TitledBorder("Connectors"));
         collectorPanel.setBorder(new TitledBorder("Collectors"));
         hvacDevicePanel.setBorder(new TitledBorder("HVAC Devices"));
+
+        sensorPanel.setLayout(new BoxLayout(sensorPanel, BoxLayout.X_AXIS));
+//        switchPanel.setLayout(new BoxLayout(switchPanel, BoxLayout.X_AXIS));
+//        connectorPanel.setLayout(new BoxLayout(connectorPanel, BoxLayout.X_AXIS));
+//        collectorPanel.setLayout(new BoxLayout(collectorPanel, BoxLayout.X_AXIS));
+//        hvacDevicePanel.setLayout(new BoxLayout(hvacDevicePanel, BoxLayout.X_AXIS));
 
         Flux
                 .just(
@@ -83,6 +109,84 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     protected void update() {
 
         var signal = getSignal();
+
+        switch (signal.status) {
+            case OK -> setTitleColor(Color.WHITE);
+            case FAILURE_PARTIAL -> setTitleColor(Color.ORANGE);
+            case FAILURE_TOTAL -> setTitleColor(Color.RED);
+        }
+
+        if (signal.isError()) {
+            logger.warn("don't know how to handle: {}", signal);
+            return;
+        }
+
+        renderSensors(signal.getValue().sensors());
+    }
+
+    private void renderSensors(Map<String, Signal<SensorStatus, Void>> source) {
+
+        var currentCount = sensors.size();
+
+        // There is likely just one entry, but let's be generic
+
+        for (var kv: source.entrySet()) {
+            render(
+                    sensors.computeIfAbsent(kv.getKey(), k -> createSensorBox(kv.getKey())),
+                    kv.getKey(),
+                    kv.getValue());
+        }
+
+        var newCount = sensors.size();
+
+        if (newCount != currentCount) {
+            // Looks like new sensor has just woken up
+            sensorPanel.removeAll();
+
+            for (var kv: sensors.entrySet()) {
+                sensorPanel.add(kv.getValue());
+            }
+        }
+    }
+
+    private JPanel createSensorBox(String id) {
+
+        var result = new JPanel();
+
+        result.setBackground(ColorScheme.offMap.background);
+        result.setToolTipText(id);
+        result.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
+
+        return result;
+    }
+
+    private void render(JPanel p, String id, Signal<SensorStatus, Void> signal) {
+
+        if (signal.isError()) {
+            p.setBackground(ColorScheme.offMap.error);
+            p.setToolTipText("<html>" + id + "<hr>" + signal.getError().getClass().getCanonicalName() + "<br>" + signal.getError().getMessage());
+            return;
+        }
+
+        p.setBackground(ColorScheme.offMap.green);
+        p.setToolTipText("<html>"
+                + id
+                + "<hr>" + Optional.ofNullable(signal.getValue().resolution())
+                .map(r -> "Resolution: " + r)
+                .orElse(""));
+    }
+
+    private void setTitleColor(Color c) {
+
+        Flux
+                .just(
+                        sensorPanel,
+                        switchPanel,
+                        connectorPanel,
+                        collectorPanel,
+                        hvacDevicePanel)
+                .doOnNext(panel -> ((TitledBorder) panel.getBorder()).setTitleColor(c))
+                .subscribe();
     }
 
     @Override
