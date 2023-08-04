@@ -40,12 +40,7 @@ public class InstrumentCluster {
      *
      * This object gets updated and then emitted every time an update comes.
      */
-    private final SystemStatus currentStatus = new SystemStatus(
-            new TreeMap<>(),
-            new TreeMap<>(),
-            new TreeMap<>(),
-            new TreeMap<>(),
-            new TreeMap<>());
+    private final SystemStatus currentStatus = createEmptyStatus();
 
     private final Sinks.Many<Signal<SystemStatus, Void>> statusSink = Sinks.many().multicast().onBackpressureBuffer();
 
@@ -79,16 +74,22 @@ public class InstrumentCluster {
                 })
                 .subscribe(kv -> {
 
-                    var id = kv.getKey();
+                    String id = kv.getKey();
                     var status = kv.getValue();
 
                     status
                             .subscribe(s -> {
 
                                 logger.info("update: id={}, status={}", id, s);
-                                currentStatus.sensors().put(String.valueOf(id), s.getValue());
 
-                                statusSink.tryEmitNext(new Signal<>(Instant.now(), currentStatus));
+                                // Update the accumulated status
+                                currentStatus.sensors().put(id, s.getValue());
+
+                                // Send an incremental update
+                                var incrementalStatus = createEmptyStatus();
+                                incrementalStatus.sensors().put(id, s.getValue());
+
+                                statusSink.tryEmitNext(new Signal<>(Instant.now(), incrementalStatus));
                             });
 
                 });
@@ -96,5 +97,14 @@ public class InstrumentCluster {
         logger.error("FIXME: NOT IMPLEMENTED: getFlux(SystemStatus)");
 
         return statusSink.asFlux();
+    }
+
+    private SystemStatus createEmptyStatus() {
+        return new SystemStatus(
+                new TreeMap<>(),
+                new TreeMap<>(),
+                new TreeMap<>(),
+                new TreeMap<>(),
+                new TreeMap<>());
     }
 }
