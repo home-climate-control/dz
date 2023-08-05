@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public record SystemStatus(
         Map<String, Signal<SensorStatus, Void>> sensors,
-        Map<String, SwitchStatus> switches,
+        Map<String, Signal<SwitchStatus, String>> switches,
         Map<String, HvacDeviceStatus> hvacDevices,
         Map<String, ConnectorStatus> connectors,
         Map<String, ConnectorStatus> collectors

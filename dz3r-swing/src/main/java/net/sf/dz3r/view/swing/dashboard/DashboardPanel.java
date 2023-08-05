@@ -3,6 +3,7 @@ package net.sf.dz3r.view.swing.dashboard;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.health.SensorStatus;
+import net.sf.dz3r.signal.health.SwitchStatus;
 import net.sf.dz3r.signal.health.SystemStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
@@ -32,6 +33,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     private final JPanel hvacDevicePanel = new JPanel();
 
     private final Map<String, JPanel> sensors = new TreeMap<>();
+    private final Map<String, JPanel> switches = new TreeMap<>();
 
     /**
      * Status accumulator.
@@ -67,7 +69,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         hvacDevicePanel.setBorder(new TitledBorder("HVAC Devices"));
 
         sensorPanel.setLayout(new BoxLayout(sensorPanel, BoxLayout.X_AXIS));
-//        switchPanel.setLayout(new BoxLayout(switchPanel, BoxLayout.X_AXIS));
+        switchPanel.setLayout(new BoxLayout(switchPanel, BoxLayout.X_AXIS));
 //        connectorPanel.setLayout(new BoxLayout(connectorPanel, BoxLayout.X_AXIS));
 //        collectorPanel.setLayout(new BoxLayout(collectorPanel, BoxLayout.X_AXIS));
 //        hvacDevicePanel.setLayout(new BoxLayout(hvacDevicePanel, BoxLayout.X_AXIS));
@@ -122,6 +124,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         }
 
         renderSensors(signal.getValue().sensors());
+        renderSwitches(signal.getValue().switches());
     }
 
     private void renderSensors(Map<String, Signal<SensorStatus, Void>> source) {
@@ -131,7 +134,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         // There is likely just one entry, but let's be generic
 
         for (var kv: source.entrySet()) {
-            render(
+            renderSensor(
                     sensors.computeIfAbsent(kv.getKey(), k -> createSensorBox(kv.getKey())),
                     kv.getKey(),
                     kv.getValue());
@@ -149,6 +152,31 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         }
     }
 
+    private void renderSwitches(Map<String, Signal<SwitchStatus, String>> source) {
+
+        var currentCount = switches.size();
+
+        // There is likely just one entry, but let's be generic
+
+        for (var kv: source.entrySet()) {
+            renderSwitch(
+                    switches.computeIfAbsent(kv.getKey(), k -> createSensorBox(kv.getKey())),
+                    kv.getKey(),
+                    kv.getValue());
+        }
+
+        var newCount = switches.size();
+
+        if (newCount != currentCount) {
+            // Looks like new sensor has just woken up
+            switchPanel.removeAll();
+
+            for (var kv: switches.entrySet()) {
+                switchPanel.add(kv.getValue());
+            }
+        }
+    }
+
     private JPanel createSensorBox(String id) {
 
         var result = new JPanel();
@@ -160,11 +188,16 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         return result;
     }
 
-    private void render(JPanel p, String id, Signal<SensorStatus, Void> signal) {
+    private void renderError(JPanel p, String id, Throwable t) {
+
+        p.setBackground(ColorScheme.offMap.error);
+        p.setToolTipText("<html>" + id + "<hr>" + t.getClass().getCanonicalName() + "<br>" + t.getMessage() + "</html>");
+    }
+
+    private void renderSensor(JPanel p, String id, Signal<SensorStatus, Void> signal) {
 
         if (signal.isError()) {
-            p.setBackground(ColorScheme.offMap.error);
-            p.setToolTipText("<html>" + id + "<hr>" + signal.getError().getClass().getCanonicalName() + "<br>" + signal.getError().getMessage());
+            renderError(p, id, signal.error);
             return;
         }
 
@@ -173,7 +206,19 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
                 + id
                 + "<hr>" + Optional.ofNullable(signal.getValue().resolution())
                 .map(r -> "Resolution: " + r)
-                .orElse(""));
+                .orElse("")
+                + "</html>");
+    }
+
+    private void renderSwitch(JPanel p, String id, Signal<SwitchStatus, String> signal) {
+
+        if (signal.isError()) {
+            renderError(p, id, signal.error);
+            return;
+        }
+
+        p.setBackground(ColorScheme.offMap.green);
+        p.setToolTipText("<html>" + id + "</html>");
     }
 
     private void setTitleColor(Color c) {

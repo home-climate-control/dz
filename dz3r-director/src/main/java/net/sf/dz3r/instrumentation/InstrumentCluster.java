@@ -34,6 +34,7 @@ public class InstrumentCluster {
     private final Flux<Map.Entry<String, HvacDevice>> hvacDevices;
 
     private final Map<String, SensorStatusProcessor> sensorProcessors = new HashMap<>();
+    private final Map<String, SwitchStatusProcessor> switchProcessors = new HashMap<>();
 
     /**
      * Status accumulator.
@@ -65,6 +66,15 @@ public class InstrumentCluster {
      */
     public Flux<Signal<SystemStatus, Void>> getFlux() {
 
+        connectSensors();
+        connectSwitches();
+
+        logger.error("FIXME: NOT IMPLEMENTED: getFlux(SystemStatus)");
+
+        return statusSink.asFlux();
+    }
+
+    private void connectSensors() {
         sensors
                 .map(kv -> {
                     var id = kv.getKey();
@@ -80,7 +90,7 @@ public class InstrumentCluster {
                     status
                             .subscribe(s -> {
 
-                                logger.info("update: id={}, status={}", id, s);
+                                logger.debug("update: id={}, status={}", id, s);
 
                                 // Update the accumulated status
                                 currentStatus.sensors().put(id, s);
@@ -93,10 +103,37 @@ public class InstrumentCluster {
                             });
 
                 });
+    }
 
-        logger.error("FIXME: NOT IMPLEMENTED: getFlux(SystemStatus)");
+    private void connectSwitches() {
 
-        return statusSink.asFlux();
+        switches
+                .map(kv -> {
+                    var id = kv.getKey();
+                    var p = switchProcessors.computeIfAbsent(id, SwitchStatusProcessor::new);
+
+                    return new AbstractMap.SimpleEntry<>(id, p.compute(kv.getValue().getFlux()));
+                })
+                .subscribe(kv -> {
+
+                    String id = kv.getKey();
+                    var status = kv.getValue();
+
+                    status
+                            .subscribe(s -> {
+
+                                logger.debug("update: id={}, status={}", id, s);
+
+                                // Update the accumulated status
+                                currentStatus.switches().put(id, s);
+
+                                // Send an incremental update
+                                var incrementalStatus = createEmptyStatus();
+                                incrementalStatus.switches().put(id, s);
+
+                                statusSink.tryEmitNext(new Signal<>(Instant.now(), incrementalStatus));
+                            });
+                });
     }
 
     private SystemStatus createEmptyStatus() {
