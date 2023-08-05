@@ -59,8 +59,9 @@ public class SensorChart extends AbstractChart<Double, Void> {
 
             // There's nothing we can do before the width is set.
             // It's not even worth it to record the value.
+            // VT: NOTE: See the similar comment in ZoneChart2021
 
-            logger.info("please repaint");
+            logger.debug("please repaint (need to leave the dashboard for that)");
             return true;
         }
 
