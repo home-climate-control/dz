@@ -8,6 +8,7 @@ public record SwitchableHvacDeviceConfig(
         String id,
         String mode,
         String switchAddress,
-        Boolean switchReverse
+        Boolean switchReverse,
+        FilterConfig filter
 ) {
 }

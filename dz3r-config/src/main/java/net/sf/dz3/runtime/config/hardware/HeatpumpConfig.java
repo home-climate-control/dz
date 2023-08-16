@@ -14,6 +14,7 @@ public record HeatpumpConfig(
         Boolean switchRunningReverse,
         String switchFan,
         Boolean switchFanReverse,
-        Duration modeChangeDelay
+        Duration modeChangeDelay,
+        FilterConfig filter
 ) {
 }
