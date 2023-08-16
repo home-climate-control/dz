@@ -13,4 +13,6 @@ public interface SwitchableHvacDeviceConfig {
     String switchAddress();
     @JsonProperty("switch-reverse")
     Optional<Boolean> switchReverse();
+    @JsonProperty("filter")
+    Optional<FilterConfig> filter();
 }

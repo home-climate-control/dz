@@ -162,13 +162,18 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.heatpump(source.heatpump()))", target = "heatpump")
     net.sf.dz3.runtime.config.hardware.HvacDeviceConfig hvac(HvacDeviceConfig source);
 
+    @Mapping(expression = "java(source.lifetime())", target = "lifetime")
+    net.sf.dz3.runtime.config.hardware.FilterConfig filter(net.sf.dz3.runtime.config.quarkus.hardware.FilterConfig source);
+
     @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(source.mode())", target = "mode")
     @Mapping(expression = "java(source.switchAddress())", target = "switchAddress")
     @Mapping(expression = "java(source.switchReverse().orElse(null))", target = "switchReverse")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
     net.sf.dz3.runtime.config.hardware.SwitchableHvacDeviceConfig switchable(SwitchableHvacDeviceConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
     net.sf.dz3.runtime.config.hardware.HeatpumpHATConfig heatpumpHat(HeatpumpHATConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
@@ -179,6 +184,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.switchFan())", target = "switchFan")
     @Mapping(expression = "java(source.switchFanReverse().orElse(null))", target = "switchFanReverse")
     @Mapping(expression = "java(source.modeChangeDelay().orElse(null))", target = "modeChangeDelay")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
     net.sf.dz3.runtime.config.hardware.HeatpumpConfig heatpump(HeatpumpConfig source);
 
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.singleStage(source.singleStage()))", target = "singleStage")

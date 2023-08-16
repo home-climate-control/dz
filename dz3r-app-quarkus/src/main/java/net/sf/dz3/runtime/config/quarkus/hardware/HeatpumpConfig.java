@@ -22,4 +22,6 @@ public interface HeatpumpConfig {
     Optional<Boolean> switchFanReverse();
     @JsonProperty("mode-change-delay")
     Optional<Duration> modeChangeDelay();
+    @JsonProperty("filter")
+    Optional<FilterConfig> filter();
 }

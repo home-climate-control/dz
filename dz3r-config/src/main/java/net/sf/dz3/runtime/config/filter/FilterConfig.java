@@ -8,6 +8,8 @@ import java.util.Set;
 /**
  * Signal filter configuration.
  *
+ *  Do not confuse with {@link net.sf.dz3.runtime.config.hardware.FilterConfig}.
+ *
  * @param median Set of median filters.
  * @param medianSet Set of median set filters.
  */
