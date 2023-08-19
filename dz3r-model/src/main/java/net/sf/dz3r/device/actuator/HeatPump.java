@@ -165,7 +165,6 @@ public class HeatPump extends AbstractHvacDevice {
         return setFlux(Flux.concat(init, in, shutdown)
                 .filter(Signal::isOK)
                 .filter(ignored -> !isClosed())
-                .doOnNext(this::checkInitialMode)
                 .flatMap(s -> Flux.create(sink -> process(s, sink))));
     }
 
@@ -175,6 +174,7 @@ public class HeatPump extends AbstractHvacDevice {
 
             logger.debug("process: {}", signal);
 
+            checkInitialMode(signal);
             trySetMode(signal, sink);
             setOthers(signal, sink);
 

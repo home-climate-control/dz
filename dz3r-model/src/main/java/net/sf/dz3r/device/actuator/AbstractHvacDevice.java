@@ -67,12 +67,14 @@ public abstract class AbstractHvacDevice implements HvacDevice {
             }
         }
 
-        return statusFlux;
+        // VT: NOTE: Be careful when refactoring this, need correct sharing option here
+        return statusFlux.publish().autoConnect();
     }
 
     protected final synchronized Flux<Signal<HvacDeviceStatus, Void>> setFlux(Flux<Signal<HvacDeviceStatus, Void>> source) {
         statusFlux = source;
         notifyAll();
+        logger.info("setFlux(): name={} notified", getAddress());
         return source;
     }
 

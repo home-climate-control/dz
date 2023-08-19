@@ -1,6 +1,7 @@
 package net.sf.dz3r.signal.health;
 
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 
 import java.util.Map;
 
@@ -14,7 +15,7 @@ import java.util.Map;
 public record SystemStatus(
         Map<String, Signal<SensorStatus, Void>> sensors,
         Map<String, Signal<SwitchStatus, String>> switches,
-        Map<String, HvacDeviceStatus> hvacDevices,
+        Map<String, Signal<HvacDeviceStatus, Void>> hvacDevices,
         Map<String, ConnectorStatus> connectors,
         Map<String, ConnectorStatus> collectors
 ) {

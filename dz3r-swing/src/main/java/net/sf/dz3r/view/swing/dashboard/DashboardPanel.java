@@ -5,6 +5,7 @@ import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.health.SensorStatus;
 import net.sf.dz3r.signal.health.SwitchStatus;
 import net.sf.dz3r.signal.health.SystemStatus;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
 import net.sf.dz3r.view.swing.ScreenDescriptor;
@@ -34,6 +35,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
 
     private final Map<String, JPanel> sensors = new TreeMap<>();
     private final Map<String, JPanel> switches = new TreeMap<>();
+    private final Map<String, JPanel> hvacDevices = new TreeMap<>();
 
     /**
      * Status accumulator.
@@ -72,7 +74,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         switchPanel.setLayout(new BoxLayout(switchPanel, BoxLayout.X_AXIS));
 //        connectorPanel.setLayout(new BoxLayout(connectorPanel, BoxLayout.X_AXIS));
 //        collectorPanel.setLayout(new BoxLayout(collectorPanel, BoxLayout.X_AXIS));
-//        hvacDevicePanel.setLayout(new BoxLayout(hvacDevicePanel, BoxLayout.X_AXIS));
+        hvacDevicePanel.setLayout(new BoxLayout(hvacDevicePanel, BoxLayout.X_AXIS));
 
         Flux
                 .just(
@@ -123,8 +125,11 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
             return;
         }
 
-        renderSensors(signal.getValue().sensors());
-        renderSwitches(signal.getValue().switches());
+        var status = signal.getValue();
+
+        renderSensors(status.sensors());
+        renderSwitches(status.switches());
+        renderHvacDevices(status.hvacDevices());
     }
 
     private void renderSensors(Map<String, Signal<SensorStatus, Void>> source) {
@@ -160,7 +165,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
 
         for (var kv: source.entrySet()) {
             renderSwitch(
-                    switches.computeIfAbsent(kv.getKey(), k -> createSensorBox(kv.getKey())),
+                    switches.computeIfAbsent(kv.getKey(), k -> createSwitchBox(kv.getKey())),
                     kv.getKey(),
                     kv.getValue());
         }
@@ -177,7 +182,52 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         }
     }
 
+    private void renderHvacDevices(Map<String, Signal<HvacDeviceStatus, Void>> source) {
+
+        var currentCount = hvacDevices.size();
+
+        for (var kv: source.entrySet()) {
+            renderHvacDevice(
+                    hvacDevices.computeIfAbsent(kv.getKey(), k -> createHvacDeviceBox(kv.getKey())),
+                    kv.getKey(),
+                    kv.getValue());
+        }
+
+        var newCount = hvacDevices.size();
+
+        if (newCount != currentCount) {
+            // Looks like new sensor has just woken up
+            hvacDevicePanel.removeAll();
+
+            for (var kv: hvacDevices.entrySet()) {
+                hvacDevicePanel.add(kv.getValue());
+            }
+        }
+    }
+
     private JPanel createSensorBox(String id) {
+
+        var result = new JPanel();
+
+        result.setBackground(ColorScheme.offMap.background);
+        result.setToolTipText(id);
+        result.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
+
+        return result;
+    }
+
+    private JPanel createSwitchBox(String id) {
+
+        var result = new JPanel();
+
+        result.setBackground(ColorScheme.offMap.background);
+        result.setToolTipText(id);
+        result.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
+
+        return result;
+    }
+
+    private JPanel createHvacDeviceBox(String id) {
 
         var result = new JPanel();
 
@@ -211,6 +261,17 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     }
 
     private void renderSwitch(JPanel p, String id, Signal<SwitchStatus, String> signal) {
+
+        if (signal.isError()) {
+            renderError(p, id, signal.error);
+            return;
+        }
+
+        p.setBackground(ColorScheme.offMap.green);
+        p.setToolTipText("<html>" + id + "</html>");
+    }
+
+    private void renderHvacDevice(JPanel p, String id, Signal<HvacDeviceStatus, Void> signal) {
 
         if (signal.isError()) {
             renderError(p, id, signal.error);

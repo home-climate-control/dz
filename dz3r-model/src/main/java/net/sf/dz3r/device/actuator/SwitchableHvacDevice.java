@@ -88,10 +88,10 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
     @Override
     public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
 
-        return in
+        return setFlux(in
                 .filter(Signal::isOK)
                 .flatMap(signal -> {
-                    return setFlux(Flux
+                    return Flux
                             .create(sink -> {
 
                                 try {
@@ -127,8 +127,8 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     sink.complete();
                                 }
 
-                            }));
-                });
+                            });
+                }));
     }
 
     private boolean isModeOnly(HvacCommand command) {

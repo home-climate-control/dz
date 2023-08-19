@@ -10,6 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Instant;
 import java.util.AbstractMap;
@@ -68,6 +69,7 @@ public class InstrumentCluster {
 
         connectSensors();
         connectSwitches();
+        connectHvacDevices();
 
         logger.error("FIXME: NOT IMPLEMENTED: getFlux(SystemStatus)");
 
@@ -90,7 +92,7 @@ public class InstrumentCluster {
                     status
                             .subscribe(s -> {
 
-                                logger.debug("update: id={}, status={}", id, s);
+                                logger.debug("update/sensor: id={}, status={}", id, s);
 
                                 // Update the accumulated status
                                 currentStatus.sensors().put(id, s);
@@ -122,7 +124,7 @@ public class InstrumentCluster {
                     status
                             .subscribe(s -> {
 
-                                logger.debug("update: id={}, status={}", id, s);
+                                logger.debug("update/switch: id={}, status={}", id, s);
 
                                 // Update the accumulated status
                                 currentStatus.switches().put(id, s);
@@ -134,6 +136,45 @@ public class InstrumentCluster {
                                 statusSink.tryEmitNext(new Signal<>(Instant.now(), incrementalStatus));
                             });
                 });
+    }
+
+    private void connectHvacDevices() {
+
+        // Unlike others, this status object gets passed directly without transformation
+
+        hvacDevices
+
+                // VT: FIXME: Ugly. This should not have been needed if the rest of the framework was put together correctly.
+                // + bucket list for https://github.com/home-climate-control/dz/issues/271
+
+                // PS: ... and it still doesn't work right, not all HVAC devices are displayed
+                // but only those for which updates are being sent.
+
+                .parallel()
+                .runOn(Schedulers.boundedElastic())
+
+                .map(kv -> new AbstractMap.SimpleEntry<>(kv.getKey(), kv.getValue().getFlux()))
+                .subscribe(kv -> {
+
+                    String id = kv.getKey();
+                    var status = kv.getValue();
+
+                    status
+                            .subscribe(s -> {
+
+                                logger.debug("update/hvacDevice: id={}, status={}", id, s);
+
+                                // Update the accumulated status
+                                currentStatus.hvacDevices().put(id, s);
+
+                                // Send an incremental update
+                                var incrementalStatus = createEmptyStatus();
+                                incrementalStatus.hvacDevices().put(id, s);
+
+                                statusSink.tryEmitNext(new Signal<>(Instant.now(), incrementalStatus));
+                            });
+                });
+
     }
 
     private SystemStatus createEmptyStatus() {
