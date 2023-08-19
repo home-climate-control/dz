@@ -136,8 +136,6 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
 
         var currentCount = sensors.size();
 
-        // There is likely just one entry, but let's be generic
-
         for (var kv: source.entrySet()) {
             renderSensor(
                     sensors.computeIfAbsent(kv.getKey(), k -> createSensorBox(kv.getKey())),
@@ -148,10 +146,13 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         var newCount = sensors.size();
 
         if (newCount != currentCount) {
-            // Looks like new sensor has just woken up
+
+            // Looks like new sensor has just arrived
+            logger.debug("sensor panel: {} devices", newCount);
             sensorPanel.removeAll();
 
             for (var kv: sensors.entrySet()) {
+                logger.debug("  sensor panel: {}", kv.getKey());
                 sensorPanel.add(kv.getValue());
             }
         }
@@ -160,8 +161,6 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     private void renderSwitches(Map<String, Signal<SwitchStatus, String>> source) {
 
         var currentCount = switches.size();
-
-        // There is likely just one entry, but let's be generic
 
         for (var kv: source.entrySet()) {
             renderSwitch(
@@ -173,10 +172,13 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         var newCount = switches.size();
 
         if (newCount != currentCount) {
-            // Looks like new sensor has just woken up
+
+            logger.debug("switch panel: {} devices", newCount);
+            // Looks like new switch has just arrived
             switchPanel.removeAll();
 
             for (var kv: switches.entrySet()) {
+                logger.debug("  switch panel: {}", kv.getKey());
                 switchPanel.add(kv.getValue());
             }
         }
@@ -196,10 +198,13 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         var newCount = hvacDevices.size();
 
         if (newCount != currentCount) {
-            // Looks like new sensor has just woken up
+
+            // Looks like new HVAC device has just arrived
+            logger.debug("HVAC device panel: {} devices", newCount);
             hvacDevicePanel.removeAll();
 
             for (var kv: hvacDevices.entrySet()) {
+                logger.debug("  HVAC device panel: {}", kv.getKey());
                 hvacDevicePanel.add(kv.getValue());
             }
         }
