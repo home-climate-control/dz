@@ -165,6 +165,7 @@ public class HeatPump extends AbstractHvacDevice {
         return Flux.concat(init, in, shutdown)
                 .filter(Signal::isOK)
                 .filter(ignored -> !isClosed())
+                .doOnNext(this::checkInitialMode)
                 .flatMap(s -> Flux.create(sink -> process(s, sink)));
     }
 
@@ -174,7 +175,6 @@ public class HeatPump extends AbstractHvacDevice {
 
             logger.debug("process: {}", signal);
 
-            checkInitialMode(signal);
             trySetMode(signal, sink);
             setOthers(signal, sink);
 
@@ -195,7 +195,7 @@ public class HeatPump extends AbstractHvacDevice {
                 && signal.getValue().mode == null
                 && signal.getValue().demand > 0) {
 
-            throw new IllegalStateException("Can't accept demand > 0 before setting the operating mode");
+            throw new IllegalStateException("Can't accept demand > 0 before setting the operating mode, signal: " + signal);
         }
     }
 
