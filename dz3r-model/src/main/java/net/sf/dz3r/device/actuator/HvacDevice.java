@@ -37,4 +37,11 @@ public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatu
      */
     @Override
     Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in);
+
+    /**
+     * Get the stream of status updates.
+     *
+     * @return The mirror of the flux issued by {@link #compute(Flux)}.
+     */
+    Flux<Signal<HvacDeviceStatus, Void>> getFlux();
 }

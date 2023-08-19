@@ -162,11 +162,11 @@ public class HeatPump extends AbstractHvacDevice {
                 new Signal<>(clock.instant(), new HvacCommand(null, 0.0, 0.0))
         );
 
-        return Flux.concat(init, in, shutdown)
+        return setFlux(Flux.concat(init, in, shutdown)
                 .filter(Signal::isOK)
                 .filter(ignored -> !isClosed())
                 .doOnNext(this::checkInitialMode)
-                .flatMap(s -> Flux.create(sink -> process(s, sink)));
+                .flatMap(s -> Flux.create(sink -> process(s, sink))));
     }
 
     private void process(Signal<HvacCommand, Void> signal, FluxSink<Signal<HvacDeviceStatus, Void>> sink) {

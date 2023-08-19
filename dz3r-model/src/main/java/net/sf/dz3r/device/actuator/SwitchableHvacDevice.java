@@ -91,7 +91,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
         return in
                 .filter(Signal::isOK)
                 .flatMap(signal -> {
-                    return Flux
+                    return setFlux(Flux
                             .create(sink -> {
 
                                 try {
@@ -127,7 +127,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     sink.complete();
                                 }
 
-                            });
+                            }));
                 });
     }
 
