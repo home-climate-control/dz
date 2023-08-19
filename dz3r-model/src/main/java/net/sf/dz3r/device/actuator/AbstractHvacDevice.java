@@ -19,7 +19,6 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     protected final Logger logger = LogManager.getLogger();
     protected final Clock clock;
 
-
     private final String name;
 
     /**
@@ -44,7 +43,6 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     }
 
     protected void check(Switch<?> s, String purpose) {
-
         if (s == null) {
             throw new IllegalArgumentException("'" + purpose + "' switch can't be null");
         }
