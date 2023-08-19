@@ -101,7 +101,7 @@ public class ConfigurationParser {
             new WebUiConfigurationParser(ctx, ic).parse(source.webUi());
             m.checkpoint("configured WebUI");
 
-            new ConsoleConfigurationParser(ctx, ic).parse(source.console());
+            new ConsoleConfigurationParser(ctx, ic).parse(source.instance(), source.console());
             m.checkpoint("configured console");
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");

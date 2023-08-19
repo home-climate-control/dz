@@ -53,7 +53,8 @@ public class ReactiveConsole {
      *
      * @param initSet Objects to display. Only {@link UnitDirector} instances are recognized by this constructor.
      *
-     * @deprecated This constructor is only used from {@link net.sf.dz3.runtime.Container}. Use {@link #ReactiveConsole(Set, Map, InstrumentCluster, TemperatureUnit)} instead.
+     * @deprecated This constructor is only used from {@link net.sf.dz3.runtime.Container}. Use
+     * {@link #ReactiveConsole(String, Set, Map, InstrumentCluster, TemperatureUnit)} instead.
      */
     @Deprecated(since = "2024-01-01")
     public ReactiveConsole(Set<Object> initSet) {
@@ -66,12 +67,12 @@ public class ReactiveConsole {
      * @param initSet Objects to display.
      * @param unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
      *
-     * @deprecated Use {@link #ReactiveConsole(Set, Map, InstrumentCluster, TemperatureUnit)} instead.
+     * @deprecated Use {@link #ReactiveConsole(String, Set, Map, InstrumentCluster, TemperatureUnit)} instead.
      */
     @Deprecated(since = "2024-01-01")
     public ReactiveConsole(Set<Object> initSet, TemperatureUnit unit) {
 
-        this.config = new Config(convert(initSet), Map.of(), null, unit);
+        this.config = new Config("unnamed", convert(initSet), Map.of(), null, unit);
 
         Flux.just(config)
                 .publishOn(Schedulers.boundedElastic())
@@ -96,12 +97,13 @@ public class ReactiveConsole {
     }
 
     public ReactiveConsole(
+            String instance,
             Set<UnitDirector> directors,
             Map<String, Flux<Signal<Double, Void>>> sensors,
             InstrumentCluster ic,
             TemperatureUnit temperatureUnit) {
 
-        this.config = new Config(directors, sensors, ic, temperatureUnit);
+        this.config = new Config(instance, directors, sensors, ic, temperatureUnit);
 
         logger.error("FIXME: sensors are ignored for now: {}", sensors);
 
@@ -144,7 +146,7 @@ public class ReactiveConsole {
 
         try {
 
-            mainFrame = new JFrame("DIY Zoning Console");
+            mainFrame = new JFrame("Home Climate Control: " + config.instance);
             mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
             var display = mainFrame.getContentPane();
@@ -295,6 +297,7 @@ public class ReactiveConsole {
     }
 
     public record Config(
+            String instance,
             Set<UnitDirector> directors,
             Map<String, Flux<Signal<Double, Void>>> sensors,
             InstrumentCluster ic,

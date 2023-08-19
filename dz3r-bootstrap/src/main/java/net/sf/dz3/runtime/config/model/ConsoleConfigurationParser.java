@@ -22,7 +22,7 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
         this.ic = ic;
     }
 
-    public ReactiveConsole parse(ConsoleConfig cf) {
+    public ReactiveConsole parse(String instance, ConsoleConfig cf) {
 
         var directors = context
                 .directors
@@ -40,7 +40,7 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
 
         // VT: NOTE: next step - just remove block() and make the constructor consume the fluxes, it iterates through them anyway
 
-        return new ReactiveConsole(directors, sensors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
+        return new ReactiveConsole(instance, directors, sensors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
     }
 
     private boolean isConfigured(Set<String> sensors, Map.Entry<String, Flux<Signal<Double, Void>>> s) {
