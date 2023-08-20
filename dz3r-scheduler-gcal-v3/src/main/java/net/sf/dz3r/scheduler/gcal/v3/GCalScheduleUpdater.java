@@ -44,6 +44,7 @@ import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -56,6 +57,8 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
     private static final String LITERAL_APP_NAME = "Home Climate Control-DZ-3.5";
     private static final String STORED_CREDENTIALS = ".dz/calendar";
     private static final String CLIENT_SECRETS = "/client_secrets.json";
+
+    public static final Duration DEFAULT_POLL_INTERVAL = Duration.of(1, ChronoUnit.MINUTES);
 
     private static final DateTimeFormatter RFC3339DateTimeFormatter = new DateTimeFormatterBuilder()
             .appendPattern("yyyy-MM-dd'T'HH:mm:ssZZZZZ")
@@ -73,7 +76,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
      * @param name2calendar The key is the zone name, the value is the calendar name for this zone's schedule.
      */
     public GCalScheduleUpdater(Map<String, String> name2calendar) {
-        this(name2calendar, Duration.of(1, ChronoUnit.MINUTES));
+        this(name2calendar, DEFAULT_POLL_INTERVAL);
     }
 
     /**
@@ -84,7 +87,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
      */
     public GCalScheduleUpdater(Map<String, String> name2calendar, Duration pollInterval) {
         this.name2calendar = name2calendar;
-        this.pollInterval = pollInterval;
+        this.pollInterval = Optional.ofNullable(pollInterval).orElse(DEFAULT_POLL_INTERVAL);
         timeZoneId = TimeZone.getDefault().toZoneId();
     }
 
