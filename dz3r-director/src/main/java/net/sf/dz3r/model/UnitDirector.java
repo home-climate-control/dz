@@ -76,7 +76,6 @@ public class UnitDirector implements Addressable<String> {
 
         var zones = sensorFlux2zone.values();
 
-        connectScheduler(zones, scheduleUpdater);
         Optional.ofNullable(metricsCollectorSet)
                 .ifPresent(collectors -> Flux.fromIterable(collectors)
                         .doOnNext(c -> c.connect(feed))
