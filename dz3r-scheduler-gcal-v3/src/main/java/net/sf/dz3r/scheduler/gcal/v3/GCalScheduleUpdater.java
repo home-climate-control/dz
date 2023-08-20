@@ -70,6 +70,8 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
     private final Duration pollInterval;
     private final ZoneId timeZoneId;
 
+    private Flux<Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>>> updateFlux = null;
+
     /**
      * Create an instance with a poll interval of 1 minute.
      *
@@ -92,11 +94,23 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
     }
 
     @Override
-    public Flux<Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>>> update() {
+    public synchronized Flux<Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>>> update() {
+
+        if (updateFlux != null) {
+
+            // This is normal; there is one instance of Google Calendar updated per JVM,
+            // but several directors may use this instance for their purposes.
+
+            // Future improvement is possible when there is an adapter with a limited set of calendars per director,
+            // but that's too far down the priority list.
+
+            logger.info("redundant update(), reusing existing flux");
+            return updateFlux;
+        }
 
         logger.info("Starting updates every {}", pollInterval);
 
-        return Flux
+        updateFlux = Flux
                 .interval(Duration.ZERO, pollInterval)
                 .doOnNext(v -> logger.debug("heartbeat: {}", v))
                 .map(this::getCalendars)
@@ -114,6 +128,8 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
                 .sequential()
                 .map(this::convertEvents)
                 .flatMap(this::convertZoneName);
+
+        return updateFlux;
     }
 
     private Map.Entry<Calendar, List<CalendarListEntry>> getCalendars(Long ignore) {
