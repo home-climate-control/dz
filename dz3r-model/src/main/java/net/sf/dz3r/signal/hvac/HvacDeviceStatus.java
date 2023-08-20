@@ -1,7 +1,14 @@
 package net.sf.dz3r.signal.hvac;
 
+import net.sf.dz3r.device.actuator.HvacDevice;
+
 import java.time.Duration;
 
+/**
+ * Hierarchy base for the status of any {@link HvacDevice}.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
+ */
 public abstract class HvacDeviceStatus {
     public enum Kind {
         REQUESTED,

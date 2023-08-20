@@ -162,10 +162,10 @@ public class HeatPump extends AbstractHvacDevice {
                 new Signal<>(clock.instant(), new HvacCommand(null, 0.0, 0.0))
         );
 
-        return Flux.concat(init, in, shutdown)
+        return setFlux(Flux.concat(init, in, shutdown)
                 .filter(Signal::isOK)
                 .filter(ignored -> !isClosed())
-                .flatMap(s -> Flux.create(sink -> process(s, sink)));
+                .flatMap(s -> Flux.create(sink -> process(s, sink))));
     }
 
     private void process(Signal<HvacCommand, Void> signal, FluxSink<Signal<HvacDeviceStatus, Void>> sink) {
@@ -195,7 +195,7 @@ public class HeatPump extends AbstractHvacDevice {
                 && signal.getValue().mode == null
                 && signal.getValue().demand > 0) {
 
-            throw new IllegalStateException("Can't accept demand > 0 before setting the operating mode");
+            throw new IllegalStateException("Can't accept demand > 0 before setting the operating mode, signal: " + signal);
         }
     }
 

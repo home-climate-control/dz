@@ -16,7 +16,7 @@ import java.awt.event.KeyListener;
  * @param <T> Signal value type.
  * @param <P> Extra payload type.
  * @see EntityCell
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class EntityPanel<T, P> extends SwingSink<T, P> implements KeyListener {
 

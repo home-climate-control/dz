@@ -99,8 +99,10 @@ public class ZoneChart2021 extends AbstractZoneChart {
             // It's not even worth it to record the value.
 
             // VT: NOTE: This used to be a pretty often encountered race condition. Nowadays, it's a sign of a programming error.
+            // VT: NOTE: ...or a design change. With arrival of InstrumentCluster, this panel may not see the light of day
+            // for a long time. For now, down to DEBUG level, will figure out a better solution... in another decade or so.
 
-            logger.info("please repaint (is everything all right?)");
+            logger.debug("please repaint (is everything all right? did we leave the dashboard yet?)");
             return true;
         }
 

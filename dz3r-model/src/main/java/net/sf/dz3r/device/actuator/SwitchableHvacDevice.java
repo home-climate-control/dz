@@ -11,6 +11,9 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
+import static net.sf.dz3r.signal.hvac.HvacDeviceStatus.Kind.ACTUAL;
+import static net.sf.dz3r.signal.hvac.HvacDeviceStatus.Kind.REQUESTED;
+
 /**
  * A device with just one switch acting as an HVAC device that just supports one mode (either heating or cooling).
  *
@@ -85,7 +88,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
     @Override
     public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
 
-        return in
+        return setFlux(in
                 .filter(Signal::isOK)
                 .flatMap(signal -> {
                     return Flux
@@ -103,7 +106,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
                                     logger.debug("State: {}", state);
 
-                                    sink.next(new Signal<>(clock.instant(), new SwitchStatus(SwitchStatus.Kind.REQUESTED, command, actual, uptime())));
+                                    sink.next(new Signal<>(clock.instant(), new SwitchStatus(REQUESTED, command, actual, uptime())));
 
                                     // By this time, the command has been verified to be valid
                                     requested = command;
@@ -112,7 +115,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     actual = state;
                                     updateUptime(clock.instant(), state);
 
-                                    var complete = new SwitchStatus(SwitchStatus.Kind.ACTUAL, command, actual, uptime());
+                                    var complete = new SwitchStatus(ACTUAL, command, actual, uptime());
                                     sink.next(new Signal<>(clock.instant(), complete));
 
                                 } catch (Throwable t) { // NOSONAR Consequences have been considered
@@ -125,7 +128,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                 }
 
                             });
-                });
+                }));
     }
 
     private boolean isModeOnly(HvacCommand command) {

@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing;
 
+import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
@@ -8,6 +9,8 @@ import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
+import net.sf.dz3r.view.swing.dashboard.DashboardCell;
+import net.sf.dz3r.view.swing.dashboard.DashboardPanel;
 import net.sf.dz3r.view.swing.sensor.SensorCell;
 import net.sf.dz3r.view.swing.sensor.SensorPanel;
 import net.sf.dz3r.view.swing.unit.UnitCell;
@@ -61,12 +64,28 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     private void init(ReactiveConsole.Config config) {
 
+        initDashboard(config.ic());
         initDirectors(config.directors());
         initSensors(config.sensors());
 
         logger.info("Configured {} pairs out of {} directors and {} sensors", entities.size(), config.directors().size(), config.sensors().size());
 
         initGraphics();
+    }
+
+    private void initDashboard(InstrumentCluster ic) {
+        entities.add(createDashboardPair(ic));
+    }
+
+    private CellAndPanel<?,?> createDashboardPair(InstrumentCluster ic) {
+
+        var cell = new DashboardCell();
+        var panel = new DashboardPanel(ic, config.screen);
+
+        cell.subscribe(ic.getFlux());
+        panel.subscribe(ic.getFlux());
+
+        return new CellAndPanel<>(cell, panel);
     }
 
     private void initDirectors(Set<UnitDirector> initSet) {

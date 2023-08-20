@@ -1,7 +1,11 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -19,8 +23,9 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     protected final Logger logger = LogManager.getLogger();
     protected final Clock clock;
 
-
     private final String name;
+
+    private Flux<Signal<HvacDeviceStatus, Void>> statusFlux;
 
     /**
      * The moment this device turned on, {@code null} if currently off.
@@ -44,9 +49,53 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     }
 
     protected void check(Switch<?> s, String purpose) {
-
         if (s == null) {
             throw new IllegalArgumentException("'" + purpose + "' switch can't be null");
+        }
+    }
+
+    @Override
+    public final synchronized Flux<Signal<HvacDeviceStatus, Void>> getFlux() {
+
+        // VT: NOTE: This whole synchronized thing must be eliminated. + bucket list.
+
+        ThreadContext.push("getFlux#" + Integer.toHexString(hashCode()));
+
+        try {
+            logger.debug("getFlux(): name={} waiting...", getAddress());
+
+            while (statusFlux == null) {
+                try {
+                    wait();
+                    logger.debug("getFlux(): name={} flux={}", getAddress(), statusFlux);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("This shouldn't have happened", ex);
+                }
+            }
+
+            logger.debug("getFlux(): name={} DONE", getAddress());
+
+            // VT: NOTE: Be careful when refactoring this, need correct sharing option here
+            return statusFlux;
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    protected final synchronized Flux<Signal<HvacDeviceStatus, Void>> setFlux(Flux<Signal<HvacDeviceStatus, Void>> source) {
+
+        // VT: NOTE: This whole synchronized thing must be eliminated. + bucket list.
+
+        ThreadContext.push("getFlux#" + Integer.toHexString(hashCode()));
+        try {
+            statusFlux = source;
+            notifyAll();
+            logger.debug("setFlux(): name={} notified", getAddress());
+            return source;
+        } finally {
+            ThreadContext.pop();
         }
     }
 

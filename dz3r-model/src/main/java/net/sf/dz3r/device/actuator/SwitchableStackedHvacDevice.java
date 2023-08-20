@@ -69,6 +69,7 @@ public class SwitchableStackedHvacDevice extends AbstractHvacDevice {
 
     @Override
     public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
+        // VT: NOTE: Don't forget to setFlux() here
         throw new UnsupportedOperationException("Not Implemented");
     }
 

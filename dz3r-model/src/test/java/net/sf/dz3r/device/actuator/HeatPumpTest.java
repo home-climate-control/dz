@@ -67,7 +67,7 @@ class HeatPumpTest {
                     assertThat(e.isError()).isTrue();
                     assertThat(e.error)
                             .isInstanceOf(IllegalStateException.class)
-                            .hasMessage("Can't accept demand > 0 before setting the operating mode");
+                            .hasMessageStartingWith("Can't accept demand > 0 before setting the operating mode, signal: ");
                 })
                 // --
                 // ...but this will
