@@ -44,6 +44,8 @@ public class ConfigurationParser {
 
             // VT: FIXME: Need to resolve XBee sensors and switches
 
+            // VT: FIXME: Need to resolve shell sensors and switches
+
             var mocks = new MockConfigurationParser(ctx).parse(source.mocks());
 
             var gate = Flux.zip(mqtt, mocks);
@@ -61,19 +63,23 @@ public class ConfigurationParser {
             ctx.sensors.close();
             m.checkpoint("configured filters");
 
-            // Need all sensors resolved by now
+            // Need all sensors and switches resolved by now
+
+            // VT: FIXME: Need to resolve dampers and damper multiplexers
 
             new ZoneConfigurationParser(ctx).parse(source.zones());
             ctx.zones.close();
             m.checkpoint("configured zones");
+
+            // VT: FIXME: Need to resolve damper controllers, everything is ready for them
+
+            // VT: FIXME: Need to resolve the schedule updater here
 
             // VT: NOTE: This phase takes a lot of time now, improvement possible?
             new ConnectorConfigurationParser(ctx).parse(source.connectors());
             ctx.collectors.close();
             ctx.connectors.close();
             m.checkpoint("configured connectors");
-
-            // Need all switches resolved by now
 
             new HvacConfigurationParser(ctx).parse(source.hvac());
             ctx.hvacDevices.close();
