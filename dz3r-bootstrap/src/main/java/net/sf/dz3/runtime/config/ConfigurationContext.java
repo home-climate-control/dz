@@ -6,6 +6,7 @@ import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
@@ -28,6 +29,7 @@ public class ConfigurationContext {
     public final EntityProvider<Flux<Signal<Double, Void>>> sensors = new EntityProvider<>("sensor");
     public final EntityProvider<Switch<?>> switches = new EntityProvider<>("switch");
     public final EntityProvider<Zone> zones = new EntityProvider<>("zone");
+    public final EntityProvider<ScheduleUpdater> schedule = new EntityProvider<>("schedule");
     public final EntityProvider<Connector> connectors = new EntityProvider<>("connector");
     public final EntityProvider<MetricsCollector> collectors = new EntityProvider<>("collector");
     public final EntityProvider<HvacDevice> hvacDevices = new EntityProvider<>("HVAC device");

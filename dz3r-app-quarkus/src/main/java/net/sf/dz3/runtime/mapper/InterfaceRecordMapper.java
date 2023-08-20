@@ -28,6 +28,8 @@ import net.sf.dz3.runtime.config.quarkus.model.ZoneConfig;
 import net.sf.dz3.runtime.config.quarkus.model.ZoneSettingsConfig;
 import net.sf.dz3.runtime.config.quarkus.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.quarkus.protocol.onewire.OnewireBusConfig;
+import net.sf.dz3.runtime.config.quarkus.schedule.CalendarConfigEntry;
+import net.sf.dz3.runtime.config.quarkus.schedule.ScheduleConfig;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
@@ -52,6 +54,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.mocks(source.mocks()))", target = "mocks")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filters(source.filters()))", target = "filters")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.zones(source.zones()))", target = "zones")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.schedule(source.schedule()))", target = "schedule")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connectors(source.connectors()))", target = "connectors")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.hvac(source.hvac()))", target = "hvac")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.units(source.units()))", target = "units")
@@ -139,6 +142,13 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.max())", target = "max")
     net.sf.dz3.runtime.config.model.RangeConfig range(RangeConfig source);
 
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.googleCalendar(source.googleCalendar()))", target = "googleCalendar")
+    net.sf.dz3.runtime.config.schedule.ScheduleConfig schedule(ScheduleConfig source);
+
+    @Mapping(expression = "java(source.zone())", target = "zone")
+    @Mapping(expression = "java(source.calendar())", target = "calendar")
+    net.sf.dz3.runtime.config.schedule.CalendarConfigEntry calendarConfigEntry(CalendarConfigEntry source);
+
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connector(source.http().orElse(null)))", target = "http")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connector(source.influx().orElse(null)))", target = "influx")
     net.sf.dz3.runtime.config.connector.ConnectorConfig connector(ConnectorConfig source);
@@ -223,6 +233,7 @@ public interface InterfaceRecordMapper {
     Set<net.sf.dz3.runtime.config.filter.MedianFilterConfig> median(Set<MedianFilterConfig> source);
     Set<net.sf.dz3.runtime.config.filter.MedianSetFilterConfig> medianSet(Set<MedianSetFilterConfig> source);
     Set<net.sf.dz3.runtime.config.model.ZoneConfig> zones(Set<ZoneConfig> source);
+    Set<net.sf.dz3.runtime.config.schedule.CalendarConfigEntry> googleCalendar(Set<CalendarConfigEntry> source);
     Set<net.sf.dz3.runtime.config.connector.ConnectorConfig> connectors(Set<ConnectorConfig> source);
     Set<net.sf.dz3.runtime.config.hardware.HvacDeviceConfig> hvac(Set<HvacDeviceConfig> source);
     Set<net.sf.dz3.runtime.config.hardware.SwitchableHvacDeviceConfig> switchable(Set<SwitchableHvacDeviceConfig> source);

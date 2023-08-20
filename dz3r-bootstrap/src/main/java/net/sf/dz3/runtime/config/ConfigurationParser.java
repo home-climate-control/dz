@@ -10,6 +10,7 @@ import net.sf.dz3.runtime.config.model.WebUiConfigurationParser;
 import net.sf.dz3.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3.runtime.config.onewire.OnewireConfigurationParser;
+import net.sf.dz3.runtime.config.schedule.ScheduleConfigurationParser;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.Level;
@@ -73,9 +74,11 @@ public class ConfigurationParser {
 
             // VT: FIXME: Need to resolve damper controllers, everything is ready for them
 
-            // VT: FIXME: Need to resolve the schedule updater here
+            // This may potentially take a long time, we'll close it later right before it's needed
+            new ScheduleConfigurationParser(ctx).parse(source.schedule());
 
             // VT: NOTE: This phase takes a lot of time now, improvement possible?
+            // VT: FIXME: See if close() can be moved down below, and configuration parsed in parallel
             new ConnectorConfigurationParser(ctx).parse(source.connectors());
             ctx.collectors.close();
             ctx.connectors.close();
@@ -88,6 +91,8 @@ public class ConfigurationParser {
             new UnitConfigurationParser(ctx).parse(source.units());
             ctx.units.close();
             m.checkpoint("configured units");
+
+            ctx.schedule.close();
 
             // Need just about everything resolved by now
 

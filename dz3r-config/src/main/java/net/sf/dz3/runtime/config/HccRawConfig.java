@@ -14,6 +14,7 @@ import net.sf.dz3.runtime.config.model.WebUiConfig;
 import net.sf.dz3.runtime.config.model.ZoneConfig;
 import net.sf.dz3.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.protocol.onewire.OnewireBusConfig;
+import net.sf.dz3.runtime.config.schedule.ScheduleConfig;
 
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import java.util.Set;
  * @param mocks Mock devices, to emulate missing features while in development.
  * @param filters Signal filters.
  * @param zones Zone configurations.
+ * @param schedule Schedule configuration.
  * @param connectors Incoming and outgoing connectors.
  * @param hvac HVAC hardware devices.
  * @param units HVAC unit abstractions.
@@ -50,6 +52,7 @@ public record HccRawConfig(
         Set<MockConfig> mocks,
         Set<FilterConfig> filters,
         Set<ZoneConfig> zones,
+        ScheduleConfig schedule,
         Set<ConnectorConfig> connectors,
         Set<HvacDeviceConfig> hvac,
         Set<UnitControllerConfig> units,

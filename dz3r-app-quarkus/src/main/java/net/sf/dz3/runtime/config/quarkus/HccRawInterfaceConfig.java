@@ -14,6 +14,7 @@ import net.sf.dz3.runtime.config.quarkus.model.WebUiConfig;
 import net.sf.dz3.runtime.config.quarkus.model.ZoneConfig;
 import net.sf.dz3.runtime.config.quarkus.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.quarkus.protocol.onewire.OnewireBusConfig;
+import net.sf.dz3.runtime.config.quarkus.schedule.ScheduleConfig;
 
 import java.util.Set;
 
@@ -42,6 +43,8 @@ public interface HccRawInterfaceConfig {
     Set<FilterConfig> filters();
     @JsonProperty("zones")
     Set<ZoneConfig> zones();
+    @JsonProperty("schedule")
+    ScheduleConfig schedule();
     @JsonProperty("connectors")
     Set<ConnectorConfig> connectors();
     @JsonProperty("hvac")

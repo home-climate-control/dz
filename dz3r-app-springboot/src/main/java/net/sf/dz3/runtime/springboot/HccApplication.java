@@ -77,6 +77,7 @@ public class HccApplication extends ApplicationBase<HccRawRecordConfig> implemen
                 source.mocks(),
                 source.filters(),
                 source.zones(),
+                source.schedule(),
                 source.connectors(),
                 source.hvac(),
                 source.units(),

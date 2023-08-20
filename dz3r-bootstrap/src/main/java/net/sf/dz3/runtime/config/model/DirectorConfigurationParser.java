@@ -3,6 +3,7 @@ package net.sf.dz3.runtime.config.model;
 import net.sf.dz3.runtime.config.ConfigurationContext;
 import net.sf.dz3.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
 import reactor.core.publisher.Flux;
@@ -27,15 +28,25 @@ public class DirectorConfigurationParser extends ConfigurationContextAware {
 
     private UnitDirector parse(UnitDirectorConfig cf) {
 
+        // VT: FIXME: See if Flux.zip() provides any benefit here
+
         return new UnitDirector(
                 cf.id(),
-                null,
+                getSchedule(),
                 getCollectors(),
                 getConnectors(),
                 getSensorFeed2ZoneMapping(cf.sensorFeedMapping()),
                 getUnitController(cf.unit()),
                 getHvacDevice(cf.hvac()),
                 cf.mode());
+    }
+
+    private ScheduleUpdater getSchedule() {
+        return context
+                .schedule
+                .getFlux()
+                .map(Map.Entry::getValue)
+                .blockFirst();
     }
 
     private Set<MetricsCollector> getCollectors() {
