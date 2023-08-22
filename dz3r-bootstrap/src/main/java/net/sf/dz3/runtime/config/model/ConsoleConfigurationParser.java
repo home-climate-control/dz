@@ -24,6 +24,11 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
 
     public ReactiveConsole parse(String instance, ConsoleConfig cf) {
 
+        if (cf == null) {
+            logger.warn("Console is not configured");
+            return null;
+        }
+
         var directors = context
                 .directors
                 .getFlux()

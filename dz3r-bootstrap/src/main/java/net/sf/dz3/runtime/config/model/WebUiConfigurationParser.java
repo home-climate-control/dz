@@ -17,6 +17,11 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
 
     public WebUI parse(WebUiConfig cf) {
 
+        if (cf == null) {
+            logger.warn("WebUI is not configured");
+            return null;
+        }
+
         var port = Optional.ofNullable(cf.port()).orElse(WebUI.DEFAULT_PORT);
         var directors = context
                 .directors

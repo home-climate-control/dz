@@ -110,11 +110,15 @@ public class ConfigurationParser {
 
             // Need directors resolved by now
 
-            new WebUiConfigurationParser(ctx, ic).parse(source.webUi());
+            var webUi = new WebUiConfigurationParser(ctx, ic).parse(source.webUi());
             m.checkpoint("configured WebUI");
 
-            new ConsoleConfigurationParser(ctx, ic).parse(source.instance(), source.console());
+            var console = new ConsoleConfigurationParser(ctx, ic).parse(source.instance(), source.console());
             m.checkpoint("configured console");
+
+            if (webUi == null && console == null) {
+                logger.error("Neither WebUI nor console are configured, how are you going to control this? Starting anyway");
+            }
 
             logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
 
