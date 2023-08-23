@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath("com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0")
+    }
+}
+
 plugins {
     // See https://github.com/home-climate-control/dz/issues/230
     // Should that bug be fixed, this goes to the parent
@@ -42,9 +48,29 @@ jib {
         image = "climategadgets/hcc-springboot-experimental"
     }
 
+    pluginExtensions {
+        pluginExtension {
+            implementation = "com.google.cloud.tools.jib.gradle.extension.layerfilter.JibLayerFilterExtension"
+            configuration(Action<com.google.cloud.tools.jib.gradle.extension.layerfilter.Configuration> {
+                filters {
+                    filter {
+                        // Filter out all custom configurations that may be present in the source tree protected by .gitignore
+                        glob = "**/application-*.yaml"
+                    }
+                    filter {
+                        // ...but retain the Docker specific configuration
+                        glob = "**/application-docker.yaml"
+                        toLayer = "Docker profile"
+                    }
+                }
+            })
+        }
+    }
+
     container {
         // Whatever profiles that are provided on the command line will be added to this one
         args = listOf("--spring.profiles.active=docker")
         workingDirectory = "${jib.container.appRoot}/app/"
     }
+
 }
