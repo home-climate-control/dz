@@ -1,32 +1,6 @@
-
-# /actuator/metrics endpoint
-
-management:
-  endpoints:
-    jmx:
-      exposure:
-        include: '*'
-    web:
-      exposure:
-        include: '*'
-
-  influx:
-    metrics:
-      export:
-        enabled: true
-        db: hcc-micrometer
-        step: 10s
-        uri: http://localhost:8086
-  jmx:
-    metrics:
-      export:
-        enabled: true
-        domain: net.sf.dz3.springboot
-
-
-logging:
-  level:
-    io.micrometer: INFO
+# Barebones configuration.
+#
+# Use application-localhost.yaml as a template to create the configuration you want. Don't forget to secure it.
 
 home-climate-control:
   # From this point on, your custom configuration starts. Use a custom configuration file (application-${PROFILE}.yaml),

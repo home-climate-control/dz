@@ -5,6 +5,8 @@ plugins {
 
     id("org.springframework.boot")
     id("io.spring.dependency-management")
+
+    id("com.google.cloud.tools.jib") version "3.3.2"
 }
 
 dependencies {
@@ -25,5 +27,23 @@ dependencies {
 configurations {
     all {
         exclude("org.springframework.boot", "spring-boot-starter-logging")
+    }
+}
+
+jib {
+
+    from {
+        image = "eclipse-temurin:17-jdk"
+    }
+
+    to {
+        // Final name when the dust settles: "climategadgets/home-climate-control-springboot
+        image = "climategadgets/hcc-springboot-experimental"
+    }
+
+    container {
+        // Whatever profiles that are provided on the command line will be added to this one
+        args = listOf("--spring.profiles.active=docker")
+        workingDirectory = "${jib.container.appRoot}/app/"
     }
 }
