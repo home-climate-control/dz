@@ -44,8 +44,10 @@ public class ConfigurationParser {
             new OnewireConfigurationParser(ctx).parse(source.onewire()).block();
 
             // VT: FIXME: Need to resolve XBee sensors and switches
+            logger.error("FIXME: NOT IMPLEMENTED: XBee");
 
             // VT: FIXME: Need to resolve shell sensors and switches
+            logger.error("FIXME: NOT IMPLEMENTED: Shell sensors and switches");
 
             var mocks = new MockConfigurationParser(ctx).parse(source.mocks());
 
@@ -119,8 +121,6 @@ public class ConfigurationParser {
             if (webUi == null && console == null) {
                 logger.error("Neither WebUI nor console are configured, how are you going to control this? Starting anyway");
             }
-
-            logger.error("ConfigurationParser::parse(): NOT IMPLEMENTED");
 
             return new HccParsedConfig();
         } finally {

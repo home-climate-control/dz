@@ -23,7 +23,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
     public void parse(Set<ConnectorConfig> source) {
 
-        for (var entry : source) {
+        for (var entry : Optional.ofNullable(source).orElse(Set.of())) {
             Optional.ofNullable(entry.http()).ifPresent(this::parseHttp);
             Optional.ofNullable(entry.influx()).ifPresent(this::parseInflux);
         }

@@ -21,7 +21,7 @@ public class FilterConfigurationParser extends ConfigurationContextAware {
         // VT: NOTE: Some trickery might need to be required if a feed from one filter is fed as an input
         // into another; have to be smart about dependency resolution here
 
-        for (var s: source) {
+        for (var s: Optional.ofNullable(source).orElse(Set.of())) {
             parseMedian(s.median());
             parseMedianSet(s.medianSet());
         }

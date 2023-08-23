@@ -18,7 +18,7 @@ public class UnitConfigurationParser extends ConfigurationContextAware {
 
     public void parse(Set<UnitControllerConfig> source) {
 
-        for (var entry : source) {
+        for (var entry : Optional.ofNullable(source).orElse(Set.of())) {
             Flux
                     .fromIterable(Optional
                             .ofNullable(entry.singleStage())

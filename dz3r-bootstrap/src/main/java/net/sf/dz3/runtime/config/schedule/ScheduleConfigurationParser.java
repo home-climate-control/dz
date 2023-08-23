@@ -17,9 +17,12 @@ public class ScheduleConfigurationParser extends ConfigurationContextAware {
 
     public void parse(ScheduleConfig cf) {
 
+        if (cf == null || cf.googleCalendar() == null) {
+            logger.warn("No calendar integration, proceeding anyway");
+            return;
+        }
+
         parseGCal(cf.googleCalendar());
-
-
     }
 
     private void parseGCal(Set<CalendarConfigEntry> source) {

@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class MockConfigurationParser extends ConfigurationContextAware {
@@ -20,7 +21,7 @@ public class MockConfigurationParser extends ConfigurationContextAware {
 
         // Trivial operation, no need to bother with parallelizing
         return Flux
-                .fromIterable(source)
+                .fromIterable(Optional.ofNullable(source).orElse(Set.of()))
                 .flatMap(c -> Flux.fromIterable(c.switches()))
                 .map(SwitchConfig::address)
                 .map(NullSwitch::new)

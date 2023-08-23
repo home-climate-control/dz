@@ -21,7 +21,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
 
     public void parse(Set<HvacDeviceConfig> source) {
 
-        for (var entry : source) {
+        for (var entry : Optional.ofNullable(source).orElse(Set.of())) {
             Flux
                     .fromIterable(Optional
                             .ofNullable(entry.heatpump())
