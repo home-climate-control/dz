@@ -33,8 +33,10 @@ public class HccApplication extends ApplicationBase<HccRawRecordConfig> implemen
 
         builder.headless(false);
 
-        // VT: NOTE: call close() or exit() on this when all the kinks are ironed out, to support a controlled lifecycle
-        builder.run(args);
+        var context = builder.run(args);
+
+        // VT: NOTE: this gets ignored by loose ends, need to fix them *and* the workflow, then we're golden
+        context.close();
     }
 
     @Override

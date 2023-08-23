@@ -33,6 +33,7 @@ configurations {
 jib {
 
     from {
+        // JDK, not JRE (which is the default). Necessary to support sane exception traces for Project Reactor.
         image = "eclipse-temurin:17-jdk"
     }
 

@@ -77,8 +77,5 @@ public abstract class ApplicationBase<C> {
         new ConfigurationParser().parse(config).start().block();
 
         logger.warn("run complete");
-
-        logger.info("");
-        logger.fatal("DON'T YOU EVER HOPE THIS WORKS. MORE WORK UNDERWAY, STAY TUNED");
     }
 }
