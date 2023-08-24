@@ -45,7 +45,14 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
 
         // VT: NOTE: next step - just remove block() and make the constructor consume the fluxes, it iterates through them anyway
 
-        return new ReactiveConsole(instance, directors, sensors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
+        try {
+            return new ReactiveConsole(instance, directors, sensors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
+        } catch (UnsatisfiedLinkError ex) {
+            // Not really an actionable message, more like noise. No big deal, we just skip instantiation
+            logger.error("Did you by chance configure the Swing Console for headless environment? See debug log for details");
+            logger.debug("Original exception trace", ex);
+            return null;
+        }
     }
 
     private boolean isConfigured(Set<String> sensors, Map.Entry<String, Flux<Signal<Double, Void>>> s) {
