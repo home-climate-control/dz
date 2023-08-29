@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -20,7 +21,7 @@ public abstract class SensorSwitchResolver<T> {
     protected final Set<T> source;
 
     protected SensorSwitchResolver(Set<T> source) {
-        this.source = source;
+        this.source = Optional.ofNullable(source).orElse(Set.of());
     }
 
     public abstract Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> getSensorFluxes();

@@ -9,6 +9,7 @@ import net.sf.dz3r.view.MetricsCollector;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ public class DirectorConfigurationParser extends ConfigurationContextAware {
     public void parse(Set<UnitDirectorConfig> source) {
 
         Flux
-                .fromIterable(source)
+                .fromIterable(Optional.ofNullable(source).orElse(Set.of()))
                 .map(this::parse)
                 .subscribe(d -> context.directors.register(d.getAddress(), d));
     }

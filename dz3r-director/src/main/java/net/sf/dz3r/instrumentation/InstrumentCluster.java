@@ -69,9 +69,12 @@ public class InstrumentCluster {
 
         connectSensors();
         connectSwitches();
-        connectHvacDevices();
 
-        logger.error("FIXME: NOT IMPLEMENTED: getFlux(SystemStatus)");
+        logger.error("FIXME: NOT IMPLEMENTED: getFlux(dampers)");
+        logger.error("FIXME: NOT IMPLEMENTED: getFlux(collectors)");
+        logger.error("FIXME: NOT IMPLEMENTED: getFlux(connectors)");
+
+        connectHvacDevices();
 
         return statusSink.asFlux();
     }

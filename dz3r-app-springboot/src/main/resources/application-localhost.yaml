@@ -1,0 +1,35 @@
+# The "localhost" profile.
+#
+# This profile is intended for development, it assumes all companion services to be either running locally,
+# or at well known or reasonably default locations.
+#
+# Do NOT use this anywhere where unauthorized access is possible.
+# Don't forget to include this profile when running locally.
+
+# VT: Note to self: don't forget the /actuator/metrics endpoint
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: '*'
+    web:
+      exposure:
+        include: '*'
+
+  influx:
+    metrics:
+      export:
+        enabled: true
+        db: hcc-micrometer
+        step: 10s
+        uri: http://localhost:8086
+  jmx:
+    metrics:
+      export:
+        enabled: true
+        domain: net.sf.dz3.springboot
+
+logging:
+  level:
+    io.micrometer: INFO

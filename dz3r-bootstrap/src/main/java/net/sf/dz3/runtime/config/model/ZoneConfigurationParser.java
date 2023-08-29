@@ -23,8 +23,16 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
 
     public void parse(Set<ZoneConfig> source) {
 
+        var nonNullSource = Optional.ofNullable(source).orElse(Set.of());
+
+        if (nonNullSource.isEmpty()) {
+
+            // There's a slight chance that they wanted to have just the sensors, let them be
+            logger.warn("No zones configured, are you sure?");
+        }
+
         Flux
-                .fromIterable(source)
+                .fromIterable(nonNullSource)
                 .map(this::createZone)
                 .subscribe(kv -> context.zones.register(kv.getKey(), kv.getValue()));
     }
