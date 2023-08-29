@@ -90,31 +90,11 @@ public class UnitDirector implements Addressable<String> {
                         .subscribeOn(Schedulers.boundedElastic())
                         .subscribe());
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            ThreadContext.push("shutdownHook");
-            try {
-
-                logger.warn("Received termination signal {}", getAddress());
-                sigTerm.countDown();
-                logger.warn("Shutting down: {}", getAddress());
-                try {
-                    shutdownComplete.await();
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    logger.error("Interrupted, can do nothing about it", ex);
-                }
-                logger.info("Shut down: {}", getAddress());
-
-            } finally {
-                ThreadContext.pop();
-            }
-        }));
-
         logger.info("Configured: {} ({} zones: {})",
                 name,
                 zones.size(),
                 Flux.fromIterable(zones)
-                        .map(z -> z.getAddress())
+                        .map(Zone::getAddress)
                         .sort()
                         .collectList()
                         .block());
