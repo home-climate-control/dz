@@ -57,7 +57,7 @@ public class HccApplication extends ApplicationBase<HccRawRecordConfig> implemen
             Thread.currentThread().interrupt();
 
         } finally {
-            logger.fatal("Shutting down");
+            logger.fatal("done");
             ThreadContext.pop();
         }
     }

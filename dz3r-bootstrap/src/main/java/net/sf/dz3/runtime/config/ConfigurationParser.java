@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 /**
- * Parses {@link HccRawConfig} into {@link HccParsedConfig}.
+ * Parses {@link HccRawConfig} into a live {@link ConfigurationContext}.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
@@ -27,7 +27,7 @@ public class ConfigurationParser {
 
     private final Logger logger = LogManager.getLogger();
 
-    public HccParsedConfig parse(HccRawConfig source) {
+    public ConfigurationContext parse(HccRawConfig source) {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse", Level.INFO);
         try {
@@ -39,6 +39,9 @@ public class ConfigurationParser {
                             source.esphome(),
                             source.zigbee2mqtt(),
                             source.zwave2mqtt());
+
+            // There will be no more MQTT adapters after this
+            ctx.mqtt.close();
 
             // VT: FIXME: Add this to the gate when 1-Wire configuration is actually read and parsed
             new OnewireConfigurationParser(ctx).parse(source.onewire()).block();
@@ -122,7 +125,8 @@ public class ConfigurationParser {
                 logger.error("Neither WebUI nor console are configured, how are you going to control this? Starting anyway");
             }
 
-            return new HccParsedConfig();
+            return ctx;
+
         } finally {
             m.close();
         }

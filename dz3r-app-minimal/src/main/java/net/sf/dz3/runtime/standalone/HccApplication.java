@@ -46,7 +46,7 @@ public class HccApplication extends ApplicationBase<HccRawConfig> {
             Thread.currentThread().interrupt();
 
         } finally {
-            logger.fatal("Shutting down");
+            logger.fatal("done");
             ThreadContext.pop();
         }
     }

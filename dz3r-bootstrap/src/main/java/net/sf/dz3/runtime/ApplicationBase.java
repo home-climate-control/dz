@@ -9,8 +9,12 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.sf.dz3.runtime.config.ConfigurationParser;
 import net.sf.dz3.runtime.config.HccRawConfig;
+import net.sf.dz3.runtime.config.ShutdownHandler;
+import net.sf.dz3r.instrumentation.Marker;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
@@ -62,20 +66,57 @@ public abstract class ApplicationBase<C> {
      */
     protected abstract HccRawConfig mapConfiguration(C source);
 
-    protected final void run(C rawConfig) {
+    protected final void run(C rawConfig) throws InterruptedException {
 
-        var config = mapConfiguration(rawConfig);
+        Marker m = new Marker("run", Level.INFO);
+        try {
 
-        logger.debug("configuration: {}", () -> {
-            try {
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
-            } catch (JsonProcessingException ex) {
-                throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
-            }
-        });
+            var config = mapConfiguration(rawConfig);
 
-        new ConfigurationParser().parse(config).start().block();
+            logger.debug("configuration: {}", () -> {
+                try {
+                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+                } catch (JsonProcessingException ex) {
+                    throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
+                }
+            });
 
-        logger.warn("run complete");
+            m.checkpoint("read configuration");
+            var context = new ConfigurationParser().parse(config);
+            m.checkpoint("started");
+
+            var shutdownHandler = new ShutdownHandler(context);
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                ThreadContext.push("shutdownHook");
+                try {
+
+                    logger.warn("Received termination signal");
+
+                    try {
+                        shutdownHandler.close();
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        logger.error("Interrupted, can do nothing about it", ex);
+                    } catch (Exception ex) {
+                        logger.error("Unexpected exception, can do nothing about it", ex);
+                    }
+
+                    logger.fatal("Shut down");
+
+                } finally {
+                    ThreadContext.pop();
+                }
+            }));
+
+            logger.info("sleeping until killed");
+
+            shutdownHandler.await();
+
+            logger.warn("run complete");
+
+        } finally {
+            m.close();
+        }
     }
 }

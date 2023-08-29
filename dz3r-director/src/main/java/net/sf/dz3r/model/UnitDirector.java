@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class UnitDirector implements Addressable<String> {
+public class UnitDirector implements Addressable<String>, AutoCloseable {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -223,6 +223,12 @@ public class UnitDirector implements Addressable<String> {
 
     public Feed getFeed() {
         return feed;
+    }
+
+    @Override
+    public void close() throws Exception {
+        logger.warn("Shutting down {}", getAddress());
+        logger.error("FIXME: close()");
     }
 
     public static class Feed {

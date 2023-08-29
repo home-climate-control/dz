@@ -24,7 +24,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> {
+public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint>, AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -259,6 +259,14 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint> 
             // Oops. No flux.
             return Flux.error(ex);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+
+        logger.warn("disconnecting {}...", getAddress());
+        client.disconnect().get();
+        logger.info("disconnected {}", getAddress());
     }
 
     private interface Receiver {
