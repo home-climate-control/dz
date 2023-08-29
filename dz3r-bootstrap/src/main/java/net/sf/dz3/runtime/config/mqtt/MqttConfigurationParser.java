@@ -73,12 +73,17 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             // Need to inject the resolved pairs into resolvers, so they don't have to do it again
 
             Flux.fromIterable(Optional.ofNullable(endpoints).orElseThrow(() -> new IllegalStateException("Impossible")))
-                    .subscribe(endpoint -> endpoint2adapter.put(endpoint,
-                            new MqttAdapter(
-                                    new MqttEndpoint(endpoint.host(), Optional.ofNullable(endpoint.port()).orElse(MqttEndpoint.DEFAULT_PORT)),
-                                    endpoint.username(),
-                                    endpoint.password(),
-                                    endpoint.autoReconnect())));
+                    .subscribe(endpoint -> {
+
+                        var adapter = new MqttAdapter(
+                                new MqttEndpoint(endpoint.host(), Optional.ofNullable(endpoint.port()).orElse(MqttEndpoint.DEFAULT_PORT)),
+                                endpoint.username(),
+                                endpoint.password(),
+                                endpoint.autoReconnect());
+
+                        context.mqtt.register(endpoint.signature(), adapter);
+                        endpoint2adapter.put(endpoint, adapter);
+                    });
 
             // Step 3: for all the brokers, collect all their sensors and switches
 

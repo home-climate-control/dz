@@ -3,6 +3,7 @@ package net.sf.dz3.runtime.config;
 import net.sf.dz3.runtime.config.onewire.EntityProvider;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
@@ -26,6 +27,7 @@ public class ConfigurationContext {
 
     protected final Logger logger = LogManager.getLogger();
 
+    public final EntityProvider<MqttAdapter> mqtt = new EntityProvider<>("mqtt");
     public final EntityProvider<Flux<Signal<Double, Void>>> sensors = new EntityProvider<>("sensor");
     public final EntityProvider<Switch<?>> switches = new EntityProvider<>("switch");
     public final EntityProvider<Zone> zones = new EntityProvider<>("zone");
