@@ -33,4 +33,5 @@ Home Climate Control: Docs
 
 # Getting Deeper
 * [Build](./build/index.md)
-* [Configuration](./configuration/index.md)
+* [Configuration Reference](./configuration/index.md)
+* [Instrument Cluster](./instrument-cluster/index.md)
