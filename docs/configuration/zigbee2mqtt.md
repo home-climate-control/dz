@@ -1,7 +1,7 @@
 zigbee2mqtt
 ==
 
-[Zigbee2MQTT](https://www.zigbee2mqtt.io/) based devices, controlled over [MQTT](https://mqtt.org/)
+Integration with [Zigbee2MQTT](https://www.zigbee2mqtt.io/) based devices, controlled over [MQTT](https://mqtt.org/)
 
 See [MQTT Connectors](./mqtt.md) for configuration details.
 

@@ -1,7 +1,7 @@
 zwave2mqtt
 ==
 
-ZWave2MQTT, or, rather, [Z-Wave JS UI](https://github.com/zwave-js/zwave-js-ui) based devices, controlled over [MQTT](https://mqtt.org/)
+Integration with ZWave2MQTT, or, rather, [Z-Wave JS UI](https://github.com/zwave-js/zwave-js-ui) based devices, controlled over [MQTT](https://mqtt.org/)
 
 See [MQTT Connectors](./mqtt.md) for configuration details.
 

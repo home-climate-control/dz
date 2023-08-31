@@ -1,7 +1,7 @@
 esphome
 ==
 
-[ESPHome](https://esphome.io/) based devices, controlled over [MQTT](https://mqtt.org/)
+Integration with [ESPHome](https://esphome.io/) based devices, controlled over [MQTT](https://mqtt.org/)
 
 See [MQTT Connectors](./mqtt.md) for configuration details.
 

@@ -1,6 +1,17 @@
 hvac
 ==
 
+Integration with common HVAC devices. Supported kinds of devices are, loosely:
+
+* Heat pumps (a.k.a. "reversible A/C")
+* Furnaces (either as a `heatpump` in fixed heating mode, or as a `switchable` device)
+* Pure A/C
+* Heater Fans
+* Radiant Heater
+* Oil Heater 
+* Motorized Shade
+* Economizer
+
 Best explained by example:
 
 ```yaml

@@ -1,9 +1,9 @@
 directors
 ==
 
-Best explained by example:
-
 Director is an entity that brings everything together.
+
+Best explained by example:
 
 ```yaml
   directors:
