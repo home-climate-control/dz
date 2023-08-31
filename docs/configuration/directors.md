@@ -28,7 +28,7 @@ Best explained by example:
       mode: cooling
 ```
 
-* `id`: Unique director identifier.
+* `id`: Unique identifier this entity will be known as to the rest of the system.
 * `connectors`: List of references to [connectors](./connectors.md). Optional.
 * `sensor-feed-mapping`: List of relation from the sensor reference (on the left) to the zone it is serving (on the right).
 * `unit`: Unit abstraction to use.

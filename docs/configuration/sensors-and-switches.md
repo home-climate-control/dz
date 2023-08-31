@@ -68,5 +68,5 @@ Send the same command to hardware no more often that this. Some bridges (notably
 * [mocks](./mocks.md)
 
 ---
-[^^^ Configuration](./index.md)
+[^^^ Configuration](./index.md)  
 [^^^MQTT Connectors](./mqtt.md)

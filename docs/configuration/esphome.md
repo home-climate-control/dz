@@ -9,5 +9,5 @@ See [MQTT Connectors](./mqtt.md) for configuration details.
 * [home-climate-control](./home-climate-control.md)
 
 ---
-[^^^ Configuration](./index.md)
+[^^^ Configuration](./index.md)  
 [^^^MQTT Connectors](./mqtt.md)
