@@ -48,8 +48,6 @@ home-climate-control:
 ```
 ### Details
 
-**FAIR WARNING:** work in progress, details may be missing. Please rely on code assist until all the docs are written.
-
 * [home-climate-control](./home-climate-control.md)
   * [MQTT connectors](./mqtt.md)
     * [esphome](./esphome.md)
@@ -69,3 +67,115 @@ home-climate-control:
   * [directors](./directors.md)
   * [web-ui](./web-ui.md)
   * [console](./console.md)
+
+### Example Configuration
+
+No-frills, one heatpump, three zones configuration. With traces of some lessons learned, though - note the naming conventions. This system grows much faster than one would expect.
+
+> **NOTE:** Calendar integration turned out to be one of the most usable features. Take your time to configure it.
+
+```yaml
+home-climate-control:
+  instance: bootstrap
+  esphome:
+    - host: mqtt-esphome
+      root-topic: /esphome
+      sensors:
+        - address: air-ambient-north
+        - address: air-ambient-south
+        - address: air-bedroom-master
+        - address: air-bedroom-kids
+        - address: air-family-room
+      switches:
+        - address: switch-heatpump-mode
+        - address: switch-heatpump-running
+        - address: switch-heatpump-fan
+  zones:
+    - id: bedroom-master
+      name: Master Bedroom
+      controller:
+        p: 0.7
+        i: 0.000002
+        limit: 1.1
+      settings:
+        setpoint: 31
+        setpoint-range:
+          min: 25.5
+          max: 33
+    - id: bedroom-kids
+      name: Kids' Bedroom
+      controller:
+        p: 1
+        i: 0.000002
+        limit: 1.1
+      settings:
+        setpoint: 31
+        setpoint-range:
+          min: 25.5
+          max: 33
+    - id: room-family
+      name: Family Room
+      controller:
+        p: 0.85
+        i: 0.0000008
+        limit: 1.1
+      settings:
+        setpoint: 31
+        setpoint-range:
+          min: 26
+          max: 33
+  schedule:
+    google-calendar:
+      - zone: bedroom-master
+        calendar: "HCC Schedule: Master Bedroom"
+      - zone: bedroom-kids
+        calendar: "HCC Schedule: Kids' Bedroom"
+      - zone: room-family
+        calendar: "HCC Schedule: Family Room"
+  connectors:
+    - influx:
+        id: influxdb-connector-house
+        instance: house
+        db: hcc
+        uri: http://dx:8086
+        sensor-feed-mapping:
+          air-ambient: air-ambient-temperature
+          air-bedroom-master: air-bedroom-master-temperature
+          air-bedroom-kids: air-bedroom-kids-temperature
+          air-family-room: air-family-room-temperature
+  hvac:
+    - heatpump:
+        - id: heatpump-main
+          switch-mode: switch-heatpump-mode
+          switch-mode-reverse: true
+          switch-running: switch-heatpump-running
+          switch-fan: switch-heatpump-fan
+          filter:
+            lifetime: 200H
+  units:
+    - single-stage:
+        - id: heatpump
+  directors:
+    - id: house
+      connectors:
+        - influxdb-connector-house
+      sensor-feed-mapping:
+        air-bedroom-master: bedroom-master
+        air-bedroom-kids: bedroom-kids
+        air-family-room: room-family
+      unit: heatpump
+      hvac: heatpump-main
+      mode: cooling
+  web-ui:
+    directors:
+      - house
+    sensors:
+      - air-ambient-north
+      - air-ambient-south
+  console:
+    directors:
+      - house
+    sensors:
+      - air-ambient-north
+      - air-ambient-south
+```
