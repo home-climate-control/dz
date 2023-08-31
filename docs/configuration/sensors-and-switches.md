@@ -69,4 +69,4 @@ Send the same command to hardware no more often that this. Some bridges (notably
 
 ---
 [^^^ Configuration](./index.md)
-[^^^mqtt](./mqtt.md)
+[^^^MQTT Connectors](./mqtt.md)
