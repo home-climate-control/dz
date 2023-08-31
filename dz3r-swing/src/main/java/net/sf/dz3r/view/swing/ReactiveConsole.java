@@ -105,8 +105,6 @@ public class ReactiveConsole {
 
         this.config = new Config(instance, directors, sensors, ic, temperatureUnit);
 
-        logger.error("FIXME: sensors are ignored for now: {}", sensors);
-
         Flux.just(config)
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(this::start)
