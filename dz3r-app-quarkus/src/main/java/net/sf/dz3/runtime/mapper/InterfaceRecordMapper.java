@@ -59,8 +59,8 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.hvac(source.hvac()))", target = "hvac")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.units(source.units()))", target = "units")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.directors(source.directors()))", target = "directors")
-    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.webUi(source.webUi()))", target = "webUi")
-    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.console(source.console()))", target = "console")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.webUi(source.webUi().orElse(null)))", target = "webUi")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.console(source.console().orElse(null)))", target = "console")
     HccRawConfig rawConfig(HccRawInterfaceConfig source);
 
     @Mapping(expression = "java(source.id().orElse(null))", target = "id")

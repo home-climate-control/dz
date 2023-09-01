@@ -16,6 +16,7 @@ import net.sf.dz3.runtime.config.quarkus.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3.runtime.config.quarkus.protocol.onewire.OnewireBusConfig;
 import net.sf.dz3.runtime.config.quarkus.schedule.ScheduleConfig;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -54,7 +55,7 @@ public interface HccRawInterfaceConfig {
     @JsonProperty("directors")
     Set<UnitDirectorConfig> directors();
     @JsonProperty("web-ui")
-    WebUiConfig webUi();
+    Optional<WebUiConfig> webUi();
     @JsonProperty("console")
-    ConsoleConfig console();
+    Optional<ConsoleConfig> console();
 }

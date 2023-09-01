@@ -122,6 +122,7 @@ public class ConfigurationParser {
             m.checkpoint("configured console");
 
             if (webUi == null && console == null) {
+                // VT: FIXME: Check if an HTTP connector is configured and include that into analysis
                 logger.error("Neither WebUI nor console are configured, how are you going to control this? Starting anyway");
             }
 
