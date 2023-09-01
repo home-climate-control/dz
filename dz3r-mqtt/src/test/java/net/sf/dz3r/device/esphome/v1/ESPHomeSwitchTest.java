@@ -26,7 +26,7 @@ class ESPHomeSwitchTest {
 
     private final String MQTT_BROKER = "mqtt-esphome";
 
-    private final String ZWAVE_SWITCH_TOPIC = "/esphome/7B13B1/switch/fan_panel_1";
+    private final String ESPHOME_SWITCH_TOPIC = "/esphome/0156AC/switch/t-relay-2-r3";
 
     @BeforeAll
     static void init() {
@@ -37,7 +37,7 @@ class ESPHomeSwitchTest {
 
         assertThatCode(() -> {
 
-            var esphomeSwitch = new ESPHomeSwitchTest.SwitchWrapper(MQTT_BROKER, ZWAVE_SWITCH_TOPIC);
+            var esphomeSwitch = new ESPHomeSwitchTest.SwitchWrapper(MQTT_BROKER, ESPHOME_SWITCH_TOPIC);
 
             // VT: NOTE: This switch doesn't control anything critical now, does it?
 
@@ -66,11 +66,12 @@ class ESPHomeSwitchTest {
     @Test
     void testFlux1010() {
 
-        var esphomeSwitch = new ESPHomeSwitch(MQTT_BROKER, ZWAVE_SWITCH_TOPIC);
+        var esphomeSwitch = new ESPHomeSwitch(MQTT_BROKER, ESPHOME_SWITCH_TOPIC);
 
         assertThatCode(() -> {
             Flux
                     .just(true, false, true, false)
+                    .delayElements(Duration.ofSeconds(1))
                     .flatMap(esphomeSwitch::setState)
                     .doOnNext(state -> logger.info("state: {}", state))
                     .blockLast();
