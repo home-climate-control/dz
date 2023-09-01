@@ -243,7 +243,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             logger.debug("{}", e::toString);
 
             if (zoneStatus == null) {
-                logger.warn("zoneStatus unset, blowups likely, ignored");
+                logger.warn("{}: zoneStatus unset, blowups likely, ignored", zone.getAddress());
                 return;
             }
 
@@ -251,7 +251,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                 case 'c', 'f' -> {
                     needFahrenheit = !needFahrenheit;
                     refresh();
-                    logger.info("Displaying temperature in {}", (needFahrenheit ? "Fahrenheit" : "Celsius"));
+                    logger.info("{}: displaying temperature in {}", zone.getAddress(), (needFahrenheit ? "Fahrenheit" : "Celsius"));
                 }
                 case 'h' -> {
 
@@ -265,7 +265,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                             null
                     )));
                     refresh();
-                    logger.info("Hold status for {} is now {}", zone.getAddress(), zone.getSettings().hold);
+                    logger.info("{}: hold status is now {}", zone.getAddress(), zone.getSettings().hold);
                 }
                 case 'v' -> {
 
@@ -279,7 +279,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                             null
                     )));
                     refresh();
-                    logger.info("Voting status for {} is now {}", zone.getAddress(), zone.getSettings().voting);
+                    logger.info("{}: voting status is now {}", zone.getAddress(), zone.getSettings().voting);
                 }
                 case 'o' -> {
 
@@ -287,7 +287,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
                     zone.setSettings(new ZoneSettings(zone.getSettings(), !zoneStatus.settings.enabled));
                     refresh();
-                    logger.info("On status for {} is now {}", zone.getAddress(), zone.getSettings().enabled);
+                    logger.info("{}: on status is now {}", zone.getAddress(), zone.getSettings().enabled);
                 }
                 case 's' -> {
 
@@ -316,7 +316,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                             e.getKeyChar() - '0'
                     )));
                     refresh();
-                    logger.info("Dump priority for{} is now {}", zone.getAddress(), zone.getSettings().dumpPriority);
+                    logger.info("{}: dump priority is now {}", zone.getAddress(), zone.getSettings().dumpPriority);
                 }
                 case KeyEvent.CHAR_UNDEFINED -> {
                     switch (e.getKeyCode()) {
@@ -348,13 +348,13 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
         var settings = period2settings.getValue();
 
-        logger.info("returning to settings: {}", settings);
+        logger.info("{}: returning to settings: {}", zone.getAddress(), settings);
 
         zone.setSettings(settings);
     }
 
     private void refresh() {
-        logger.warn("refresh(): NOP?");
+        logger.warn("{}: refresh(): NOP?", zone.getAddress());
     }
 
     private int getSetpointDeltaModifier(boolean shift, boolean ctrl) {
@@ -420,7 +420,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     protected void consumeSignalValue(ZoneStatus zoneStatus) {
 
         if (zoneStatus == null) {
-            logger.warn("null zoneStatus update, ignored");
+            logger.warn("{}: null zoneStatus update, ignored", zone.getAddress());
             return;
         }
 
@@ -438,7 +438,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var signal = getSignal();
 
         if (signal.isError()) {
-            logger.error("Not Implemented: processing error signal: {}", signal, new UnsupportedOperationException());
+            logger.error("{}: not implemented: processing error signal: {}", zone.getAddress(), signal, new UnsupportedOperationException());
             return;
         }
 
@@ -467,7 +467,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private void consumeSensorSignal(Signal<Double, Void> sensorSignal) {
         this.sensorSignal = sensorSignal;
-        logger.debug("sensorSignal: {}", sensorSignal);
+        logger.debug("{}: sensorSignal: {}", zone.getAddress(), sensorSignal);
         updateSensorSignal();
     }
 
@@ -502,7 +502,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         // Current temperature is guaranteed to be available at this point, but control signal may not be
 
         if (zoneStatus == null) {
-            logger.warn("zoneStatus null, not updating the chart");
+            logger.warn("{}: zoneStatus null, not updating the chart", zone.getAddress());
             return;
         }
 
@@ -538,7 +538,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         }
 
         this.hvacMode = hvacMode;
-        logger.debug("hvacMode: {}", hvacMode);
+        logger.debug("{}: hvacMode: {}", zone.getAddress(), hvacMode);
 
         // The way the lifecycle is built, the only updates are the setpoint and current temperature colors,
         // and only from "unknown" to "mode specific".
@@ -557,7 +557,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private void consumeSchedule(Map.Entry<SchedulePeriod, ZoneSettings> period2settings) {
 
-        logger.info("consumeSchedule: {} = ({}, {})", zone.getAddress(), period2settings.getKey(), period2settings.getValue());
+        logger.info("{}: consumeSchedule: ({}, {})", zone.getAddress(), period2settings.getKey(), period2settings.getValue());
 
         this.period2settings = period2settings;
 
