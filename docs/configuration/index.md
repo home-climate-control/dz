@@ -87,9 +87,12 @@ home-climate-control:
         - address: air-bedroom-kids
         - address: air-family-room
       switches:
-        - address: switch-heatpump-mode
-        - address: switch-heatpump-running
-        - address: switch-heatpump-fan
+        - id: switch-heatpump-mode
+          address: /esphome/board-MAC/switch-heatpump-mode
+        - id: switch-heatpump-running
+          address: /esphome/board-MAC/switch-heatpump-running
+        - id: switch-heatpump-fan
+          address: /esphome/board-MAC/switch-heatpump-fan
   zones:
     - id: bedroom-master
       name: Master Bedroom

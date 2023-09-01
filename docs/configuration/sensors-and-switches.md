@@ -44,12 +44,11 @@ If no `measurement` is provided in the configuration, the default measurement of
 Same as above, but with more attributes:
 ```yaml
 switches:
-  id: zw096-blue
-  address: zwave/Workshop/ZW096-blue
-  reversed: <boolean flag>
-  heartbeat: <Duration>
-  pace: <Duration>
-
+  - id: zw096-blue
+    address: zwave/Workshop/ZW096-blue
+    reversed: <boolean flag>
+    heartbeat: <Duration>
+    pace: <Duration>
 ```
 
 #### reversed
