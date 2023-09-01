@@ -183,6 +183,7 @@ public interface InterfaceRecordMapper {
     net.sf.dz3.runtime.config.hardware.SwitchableHvacDeviceConfig switchable(SwitchableHvacDeviceConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
+    @Mapping(expression = "java(source.modeChangeDelay().orElse(null))", target = "modeChangeDelay")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
     net.sf.dz3.runtime.config.hardware.HeatpumpHATConfig heatpumpHat(HeatpumpHATConfig source);
 
