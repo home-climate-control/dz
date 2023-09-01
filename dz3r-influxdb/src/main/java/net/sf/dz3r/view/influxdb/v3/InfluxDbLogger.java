@@ -65,7 +65,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
         }
 
         if (config.username == null || "".equals(config.username) || config.password == null || "".equals(config.password)) {
-            logger.warn("one of (username, password) is null or missing, connecting unauthenticated - THIS IS A BAD IDEA");
+            logger.warn("{}: one of (username, password) is null or missing, connecting unauthenticated - THIS IS A BAD IDEA", config.dbURL);
             logger.warn("see https://docs.influxdata.com/influxdb/v1.7/administration/authentication_and_authorization/");
             logger.warn("(username, password) = ({}, {})", config.username, config.password);
 
