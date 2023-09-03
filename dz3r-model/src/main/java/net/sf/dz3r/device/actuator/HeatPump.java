@@ -5,21 +5,24 @@ import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
+import org.apache.logging.log4j.LogManager;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
+import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
+
 /**
  * Single stage heatpump, energize to heat.
  *
  * Use the reversed {@link #switchMode} for "energize to cool" heat pumps.
  *
- * Initial mode is undefined and must be set by control logic, until that is done, any other commands are refused.
+ * Initial mode is undefined and must be set by control logic; until that is done, any other commands are refused.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
@@ -29,6 +32,7 @@ public class HeatPump extends AbstractHvacDevice {
      * Default mode change delay.
      */
     private static final Duration DEFAULT_MODE_CHANGE_DELAY = Duration.ofSeconds(10);
+    private static final Reconciler reconciler = new Reconciler();
 
     private final Switch<?> switchMode;
     private final Switch<?> switchRunning;
@@ -56,13 +60,11 @@ public class HeatPump extends AbstractHvacDevice {
      * Requested device state.
      *
      * All commands fed into {@link #compute(Flux)} will result in error signals until the operating {@link HvacMode} is set.
+     * All decisions about the device state are made based on this state only - the actual state would be much deferred
+     * against the requested, and cannot be relied upon. Necessary changes are applied against this variable immediately
+     * so that subsequent commands in the stream know what they are dealing with.
      */
-    private HvacCommand requested = new HvacCommand(null, null, null);
-
-    /**
-     * Actual device state.
-     */
-    private HvacCommand actual = new HvacCommand(null, null, null);
+    private HvacCommand requestedState = new HvacCommand(null, null, null);
 
     /**
      * Create an instance with all straight switches.
@@ -153,189 +155,203 @@ public class HeatPump extends AbstractHvacDevice {
     public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
 
         // Shut off the condenser, let the fan be as is
-        Flux<Signal<HvacCommand, Void>> init = Flux.just(
-                new Signal<>(clock.instant(), new HvacCommand(null, 0.0, null))
-        );
+        var init = Flux.just(new HvacCommand(null, 0.0, null));
+
+        var commands = in
+                .filter(Signal::isOK)
+                .map(Signal::getValue)
+                // We will only ignore incoming commands, but not shutdown
+                .filter(ignored -> !isClosed());
 
         // Shut off everything
-        Flux<Signal<HvacCommand, Void>> shutdown = Flux.just(
-                new Signal<>(clock.instant(), new HvacCommand(null, 0.0, 0.0))
-        );
+        var shutdown = Flux.just(new HvacCommand(null, 0d, 0d));
 
-        return setFlux(Flux.concat(init, in, shutdown)
-                .filter(Signal::isOK)
-                .filter(ignored -> !isClosed())
-                .flatMap(s -> Flux.create(sink -> process(s, sink))));
+        return Flux
+                .concat(init, commands, shutdown)
+                .publishOn(Schedulers.newSingle("HeatPump(" + getAddress() + ")"))
+                .flatMap(this::process)
+                .doOnNext(this::broadcast);
     }
 
-    private void process(Signal<HvacCommand, Void> signal, FluxSink<Signal<HvacDeviceStatus, Void>> sink) {
+    private Flux<Signal<HvacDeviceStatus, Void>> process(HvacCommand command) {
 
-        try {
+        logger.debug("{}: process: {}", getAddress(), command);
 
-            logger.debug("process: {}", signal);
+        // This is the only condition that gets checked before the requested state is updated -
+        // this is an invalid update and must be discarded
 
-            checkInitialMode(signal);
-            trySetMode(signal, sink);
-            setOthers(signal, sink);
-
-        } catch (Throwable t) { // NOSONAR Consequences have been considered
-
-            logger.error("Failed to compute {}", signal, t);
-            sink.next(new Signal<>(clock.instant(), null, null, Signal.Status.FAILURE_TOTAL, t));
-
-        } finally {
-            sink.complete();
+        if (!isModeSet(command)) {
+            return Flux.just(
+                    new Signal<>(
+                            clock.instant(),
+                            null,
+                            null,
+                            FAILURE_TOTAL,
+                            new IllegalStateException("Demand command issued before mode is set (likely programming error): " + command))
+            );
         }
 
-    }
+        var change = reconciler.reconcile(getAddress(), requestedState, command);
 
-    private void checkInitialMode(Signal<HvacCommand, Void> signal) {
+        // This is the only time we touch requested state, otherwise side effects will explode the command pipeline
+        requestedState = change.command;
 
-        if (requested.mode == null
-                && signal.getValue().mode == null
-                && signal.getValue().demand > 0) {
+        Flux<Signal<HvacDeviceStatus, Void>> modeFlux = change.modeChangeRequired ? setMode(command.mode, change.delayRequired) : Flux.empty();
+        var stateFlux = setState(command);
 
-            throw new IllegalStateException("Can't accept demand > 0 before setting the operating mode, signal: " + signal);
-        }
-    }
-
-    private void trySetMode(Signal<HvacCommand, Void> signal, FluxSink<Signal<HvacDeviceStatus, Void>> sink) throws IOException {
-
-        var newMode = signal.getValue().mode;
-
-        if (signal.getValue().mode == null) {
-            return;
-        }
-
-        if (newMode == requested.mode) {
-            logger.debug("Mode unchanged: {}", newMode);
-            return;
-        }
-
-        logger.info("Mode changing to: {}", signal.getValue().mode);
-
-        // Now careful, need to shut off the condenser (don't care about the fan) and wait to avoid damaging the hardware
-        // ... but only if it is already running
-
-        if (actual.demand != null && actual.demand > 0) {
-
-            logger.info("Shutting off the condenser");
-
-            var requestedDemand = reconcile(actual, new HvacCommand(null, 0.0, null));
-            sink.next(
-                    new Signal<>(clock.instant(),
-                            new HeatpumpStatus(
-                                    HvacDeviceStatus.Kind.REQUESTED,
-                                    requestedDemand,
-                                    actual,
-                                    uptime())));
-
-            setRunning(reverseRunning);
-            updateUptime(clock.instant(), false);
-
-            // Note, #requested is not set - this is a transition
-            actual = reconcile(actual, requestedDemand);
-
-            sink.next(
-                    new Signal<>(clock.instant(),
-                            new HeatpumpStatus(
-                                    HvacDeviceStatus.Kind.ACTUAL,
-                                    requestedDemand,
-                                    actual,
-                                    uptime())));
-            logger.warn("Letting the hardware settle for modeChangeDelay={}", modeChangeDelay);
-            Mono.delay(modeChangeDelay).block();
-
-        } else {
-            logger.debug("Condenser is not running, skipping the pause");
-        }
-
-        requested = reconcile(
-                actual,
-                new HvacCommand(newMode, null, null));
-        sink.next(
-                new Signal<>(clock.instant(),
-                        new HeatpumpStatus(
-                                HvacDeviceStatus.Kind.REQUESTED,
-                                requested,
-                                actual,
-                                uptime())));
-        setMode((newMode == HvacMode.HEATING) != reverseMode);
-        actual = reconcile(actual, requested);
-        sink.next(
-                new Signal<>(clock.instant(),
-                        new HeatpumpStatus(
-                                HvacDeviceStatus.Kind.ACTUAL,
-                                requested,
-                                actual,
-                                uptime())));
-        logger.info("Mode changed to: {}", signal.getValue().mode);
+        return Flux.concat(modeFlux, stateFlux);
     }
 
     /**
-     * Reconcile the incoming command with the current state.
+     * Check if the initial mode set.
      *
-     *
-     * @param previous Previous command.
-     * @param next Incoming command.
-     *
-     * @return Command that will actually be executed.
-     *
-     * @throws IllegalArgumentException if the command indicates an unsupported mode, or illegal fan state.
+     * @param command Incoming command.
+     * @return {@code true} if the mode is set and we can proceed, {@code false} otherwise
      */
-    private HvacCommand reconcile(HvacCommand previous, HvacCommand next) {
+    private boolean isModeSet(HvacCommand command) {
+        return requestedState.mode != null || command.mode != null || command.demand <= 0;
+    }
 
-        var result = new HvacCommand(
-                next.mode == null? previous.mode : next.mode,
-                next.demand == null ? previous.demand : next.demand,
-                next.fanSpeed == null ? previous.fanSpeed : next.fanSpeed
-        );
+    /**
+     * Issue a command sequence to change the operating mode. No sanity checking is performed.
+     *
+     *
+     * @param mode New mode to set
+     * @param needDelay {@code true} if a delay before setting the new mode is required.
+     *
+     * @return Flux of commands to change the operating mode.
+     */
+    private Flux<Signal<HvacDeviceStatus, Void>> setMode(HvacMode mode, boolean needDelay) {
 
-        logger.debug("Reconcile: {} + {} => {}", previous, next, result);
+        // May or may not be empty, see comments inside
+        Flux<Signal<HvacDeviceStatus, Void>>  condenserOff = needDelay
+                ? stopCondenser().doOnSubscribe(ignore -> logger.info("{}: mode changing to: {}", getAddress(), mode))
+                : Flux.empty();
+        var forceMode = forceMode(mode);
 
-        return result;
+        return Flux
+                .concat(condenserOff, forceMode)
+                .doOnComplete(() -> logger.info("{}: mode changed to: {}", getAddress(), mode));
+    }
+
+    /**
+     * Stop the condenser, then sleep for {@link #modeChangeDelay}.
+     */
+    private Flux<Signal<HvacDeviceStatus, Void>> stopCondenser() {
+
+        return Flux
+                .just(new StateCommand(switchRunning, reverseRunning))
+                .doOnNext(ignore -> logger.info("{}: stopping the condenser", getAddress()))
+                .flatMap(this::setState)
+                .flatMap(ignore -> Mono.create(sink -> {
+                    // Can't afford to just call delayElement() of Flux or Mono, that will change the scheduler
+                    logger.warn("{}: letting the hardware settle for modeChangeDelay={}", getAddress(), modeChangeDelay);
+                    try {
+                        // VT: FIXME: Need to find a lasting solution for this
+                        // For now, this should be fine as long as the output from this flux is used in a sane way.
+                        logger.warn("{}: BLOCKING WAIT FOR {}", getAddress(), modeChangeDelay);
+                        Thread.sleep(modeChangeDelay.toMillis());
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        logger.warn("interrupted, nothing we can do about it", ex);
+                    } finally {
+                        // Ah, screw it
+                        sink.success(true);
+                    }
+                }))
+                .map(ignore ->
+                        // If we're here, this means that the operation was carried out successfully
+                        new Signal<>(clock.instant(),
+                                new HvacDeviceStatus(
+                                        // Informational only, but still verifiable
+                                        reconciler.reconcile(
+                                                getAddress(),
+                                                requestedState,
+                                                new HvacCommand(null, 0.0, null)).command,
+                                        uptime()))
+                );
+    }
+
+    /**
+     * Set the mode, unconditionally. It is expected that all precautions have already been taken.
+     *
+     * @param mode Mode to set.
+     * @return The flux of commands to set the mode.
+     */
+    private Flux<Signal<HvacDeviceStatus, Void>> forceMode(HvacMode mode) {
+
+        return Flux
+                .just(new StateCommand(switchMode, (mode == HvacMode.HEATING) != reverseMode))
+                .doOnNext(command -> logger.debug("{}: setting mode={}", getAddress(), command))
+                .flatMap(this::setState)
+                .map(ignore ->
+                        // If we're here, this means that the operation was carried out successfully
+                        new Signal<>(clock.instant(),
+                                new HvacDeviceStatus(
+                                        reconciler.reconcile(
+                                                getAddress(),
+                                                requestedState,
+                                                new HvacCommand(mode, null, null))
+                                                .command,
+                                        uptime()))
+                );
+    }
+
+    private Mono<Boolean> setState(StateCommand command) {
+        logger.debug("{}: setState({})={}", getAddress(), command.target, command.state);
+        return command.target.setState(command.state);
     }
 
     /**
      * Set the condenser and fan switches to proper positions.
      *
      * Note that the fan switch is only set if {@link HvacCommand#fanSpeed} is not {@code null},
-     * but {@link HvacCommand#demand} is expected to have a valida value.
+     * but {@link HvacCommand#demand} is expected to have a valid value.
      *
-     * @param signal Signal to set the state according to.
-     * @param sink Sink to report hardware status to.
-     * @throws IOException if there was a problem talking to switch hardware.
+     * @param command Command to execute.
      */
-    private void setOthers(Signal<HvacCommand, Void> signal, FluxSink<Signal<HvacDeviceStatus, Void>> sink) throws IOException {
+    private Flux<Signal<HvacDeviceStatus, Void>> setState(HvacCommand command) {
 
-        var command = signal.getValue();
-        var requestedOperation = reconcile(
-                actual,
-                new HvacCommand(null, command.demand, command.fanSpeed));
-        sink.next(
-                new Signal<>(clock.instant(),
-                        new HeatpumpStatus(
-                                HvacDeviceStatus.Kind.REQUESTED,
-                                requestedOperation,
-                                actual,
-                                uptime())));
+        var requestedOperation = reconciler.reconcile(
+                getAddress(),
+                requestedState,
+                new HvacCommand(null, command.demand, command.fanSpeed))
+                .command;
 
-        setRunning((requestedOperation.demand > 0) != reverseRunning);
-        updateUptime(clock.instant(), requestedOperation.demand > 0);
+        Flux<Boolean> runningFlux;
+        if (requestedOperation.demand != null) {
+            var running = (requestedOperation.demand > 0) != reverseRunning;
+            runningFlux = Flux
+                    .just(new StateCommand(switchRunning, running))
+                    .flatMap(this::setState)
+                    .doOnComplete(() -> updateUptime(clock.instant(), requestedOperation.demand > 0));
+        } else {
+            // This will cause no action, but will prompt zip() to do what it is expected to
+            runningFlux = Flux.just(false);
+        }
+
+        Flux<Boolean> fanFlux;
 
         if (requestedOperation.fanSpeed != null) {
-            setFan((requestedOperation.fanSpeed > 0) != reverseFan);
-            updateUptime(clock.instant(), requestedOperation.fanSpeed > 0);
+            var fan =(requestedOperation.fanSpeed > 0) != reverseFan;
+            fanFlux = Flux
+                    .just(new StateCommand(switchFan, fan))
+                    .flatMap(this::setState)
+                    .doOnComplete(() -> updateUptime(clock.instant(), requestedOperation.fanSpeed > 0));
+        } else {
+            // This will cause no action, but will prompt zip() to do what it is expected to
+            fanFlux = Flux.just(false);
         }
-        actual = reconcile(actual, requestedOperation);
 
-        sink.next(
-                new Signal<>(clock.instant(),
-                        new HeatpumpStatus(
-                                HvacDeviceStatus.Kind.ACTUAL,
-                                requestedOperation,
-                                actual,
-                                uptime())));
+        return Flux
+                .zip(runningFlux, fanFlux)
+                .map(pair ->
+                    // If we're here, this means that the operation was carried out successfully
+                    new Signal<>(clock.instant(),
+                            new HvacDeviceStatus(
+                                    requestedOperation,
+                                    uptime()))
+                );
     }
 
     @Override
@@ -353,36 +369,80 @@ public class HeatPump extends AbstractHvacDevice {
 
         logger.warn("Shutting down: {}", getAddress());
 
+        Flux.just(
+                        switchRunning,
+                        switchFan,
+                        switchMode)
+                .flatMap(s -> s.setState(false))
+                .blockLast();
+
         switchRunning.setState(false).block();
         switchFan.setState(false).block();
         switchMode.setState(false).block();
         logger.info("Shut down: {}", getAddress());
     }
 
-    public static class HeatpumpStatus extends HvacDeviceStatus {
+    @Deprecated
+    protected Mono<Boolean> setMode(boolean state) {
+        return switchMode.setState(state);
+    }
 
-        public final HvacCommand actual;
+    @Deprecated
+    protected Mono<Boolean> setRunning(boolean state) {
+        return switchRunning.setState(state);
+    }
 
-        protected HeatpumpStatus(Kind kind, HvacCommand requested, HvacCommand actual, Duration uptime) {
-            super(kind, requested, uptime);
-            this.actual = actual;
+    @Deprecated
+    protected Mono<Boolean> setFan(boolean state) {
+        return switchFanStack.getSwitch("demand").setState(state);
+    }
+
+    static class Reconciler {
+
+        record Result(
+                HvacCommand command,
+                boolean modeChangeRequired,
+                boolean delayRequired
+        ) {}
+
+        /**
+         * Reconcile the incoming command with the current state.
+         *
+         * It is expected that the result will always take place of the {@code previous} argument.
+         *
+         * @param name Heat pump name.
+         * @param previous Previous command.
+         * @param next Incoming command.
+         *
+         * @return Command that will actually be executed, along with mode change flags.
+         *
+         * @throws IllegalArgumentException if the command indicates an unsupported mode, or illegal fan state.
+         */
+        public Result reconcile(String name, HvacCommand previous, HvacCommand next) {
+
+            var result = new HvacCommand(
+                    next.mode == null? previous.mode : next.mode,
+                    next.demand == null ? previous.demand : next.demand,
+                    next.fanSpeed == null ? previous.fanSpeed : next.fanSpeed
+            );
+
+            var modeChangeRequired = previous.mode != result.mode;
+            var delayRequired = previous.mode != null && previous.mode != result.mode;
+
+            LogManager.getLogger(HeatPump.class).debug("{}: reconcile: {} + {} => {}", name, previous, next, result);
+
+            // Once set, mode will never go null again if the calling conventions are honored
+
+            if (result.mode == null && result.demand != null && result.demand > 0) {
+                throw new IllegalArgumentException("positive demand with no mode, programming error: " + result);
+            }
+
+            return new Result(result, modeChangeRequired, delayRequired);
         }
-
-        @Override
-        public String toString() {
-            return "{kind=" + kind + ", requested=" + requested + ", actual=" + actual + ", uptime=" + uptime + "}";
-        }
     }
 
-    protected void setMode(boolean state) throws IOException { // NOSONAR Subclass throws this exception
-        switchMode.setState(state).block();
-    }
-
-    protected void setRunning(boolean state) throws IOException { // NOSONAR Subclass throws this exception
-        switchRunning.setState(state).block();
-    }
-
-    protected void setFan(boolean state) throws IOException { // NOSONAR Subclass throws this exception
-        switchFanStack.getSwitch("demand").setState(state).block();
-    }
+    private record StateCommand(
+            Switch<?> target,
+            boolean state
+    ) {}
 }

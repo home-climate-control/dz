@@ -76,12 +76,12 @@ public class HttpConnectorGAE extends HttpConnector {
         // Zones and zone controller have no business knowing about HVAC mode; inject it
         var modeFlux = feed.hvacDeviceFlux
                 .doOnNext(s -> {
-                    if (s.getValue().requested.mode == null) {
+                    if (s.getValue().command.mode == null) {
                         logger.debug("null hvacMode (normal on startup): {}", s);
                     }
                 })
-                .filter(s -> s.getValue().requested.mode != null)
-                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().requested.mode, null, s.status, s.error));
+                .filter(s -> s.getValue().command.mode != null)
+                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command.mode, null, s.status, s.error));
         zoneRenderer.subscribeMode(modeFlux);
 
         // Zone ("thermostat" in its terminology) status feed is the only one supported

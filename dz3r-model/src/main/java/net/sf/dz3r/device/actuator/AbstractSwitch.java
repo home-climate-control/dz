@@ -6,8 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.annotation.NonNull;
@@ -43,8 +43,8 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      */
     private final Clock clock;
 
+    private Sinks.Many<Signal<State, String>> stateSink;
     private Flux<Signal<State, String>> stateFlux;
-    private FluxSink<Signal<State, String>> stateSink;
     private Boolean lastKnownState;
 
     /**
@@ -79,6 +79,9 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
         this.minDelay = minDelay;
         this.clock = clock == null ? Clock.systemUTC() : clock;
 
+        stateSink = Sinks.many().multicast().onBackpressureBuffer();
+        stateFlux = stateSink.asFlux();
+
         logger.info("{}: created AbstractSwitch({}) with minDelay={}", Integer.toHexString(hashCode()), getAddress(), minDelay);
     }
 
@@ -89,25 +92,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
 
     @Override
     public final synchronized Flux<Signal<State, String>> getFlux() {
-
-        if (stateFlux != null) {
-            return stateFlux;
-        }
-
-        logger.debug("{}: creating stateFlux:{}", Integer.toHexString(hashCode()), address);
-
-        stateFlux = Flux
-                .create(this::connect)
-                .doOnSubscribe(s -> logger.debug("stateFlux:{} subscribed", address))
-                .publishOn(Schedulers.boundedElastic())
-                .publish()
-                .autoConnect();
-
         return stateFlux;
-    }
-
-    private void connect(FluxSink<Signal<State, String>> sink) {
-        this.stateSink = sink;
     }
 
     @Override
@@ -171,17 +156,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     }
 
     private void reportState(Signal<State, String> signal) {
-
-        if (stateSink == null) {
-
-            // Unless something subscribes, this will be flooding the log - enable for troubleshooting
-            // logger.warn("stateSink:{} is still null, skipping: {}", address, signal); // NOSONAR
-
-            getFlux();
-            return;
-        }
-
-        stateSink.next(signal);
+        stateSink.tryEmitNext(signal);
     }
 
     @Override

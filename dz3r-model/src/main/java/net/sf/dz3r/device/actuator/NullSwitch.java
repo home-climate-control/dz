@@ -112,4 +112,8 @@ public class NullSwitch extends AbstractSwitch<String> {
         }
     }
 
+    @Override
+    public String toString() {
+        return "NullSwitch(" + getAddress() + ")";
+    }
 }

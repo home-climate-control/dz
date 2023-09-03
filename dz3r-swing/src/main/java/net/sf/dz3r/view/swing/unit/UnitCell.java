@@ -26,7 +26,7 @@ public class UnitCell extends EntityCell<HvacDeviceStatus, Void> {
 
     @Override
     protected Color getBorderColor() {
-        return ColorScheme.getScheme(getSignal() == null ? null : getSignal().getValue().requested.mode).setpoint;
+        return ColorScheme.getScheme(getSignal() == null ? null : getSignal().getValue().command.mode).setpoint;
     }
 
     @Override
@@ -35,8 +35,8 @@ public class UnitCell extends EntityCell<HvacDeviceStatus, Void> {
             return ColorScheme.offMap.error;
         }
 
-        var mode = getSignal().getValue().requested.mode;
-        return getSignal().getValue().requested.demand > 0 ? ColorScheme.getScheme(mode).setpoint : ColorScheme.getScheme(mode).setpoint.darker().darker();
+        var mode = getSignal().getValue().command.mode;
+        return getSignal().getValue().command.demand > 0 ? ColorScheme.getScheme(mode).setpoint : ColorScheme.getScheme(mode).setpoint.darker().darker();
     }
 
     @Override

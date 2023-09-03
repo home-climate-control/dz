@@ -3,7 +3,6 @@ package net.sf.dz3r.device.actuator;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -22,14 +21,59 @@ class HeatPumpTest {
         ReactorDebugAgent.init();
     }
 
+    /**
+     * Verify that empty command sequence is executed (implementation will issue initialization and shutdown commands).
+     */
     @Test
-    void initialMode() { // NOSONAR It's not complex, it's just mundane
+    void empty() { // NOSONAR It's not complex, it's just mundane
 
         var switchMode = new NullSwitch("mode");
         var switchRunning = new NullSwitch("running");
         var switchFan = new NullSwitch("fan");
 
-        var d = new HeatPump("hp", switchMode, switchRunning, switchFan);
+        var d = new HeatPump("hp-empty",
+                switchMode, false,
+                switchRunning, false,
+                switchFan, false,
+                Duration.ofSeconds(1));
+        Flux<Signal<HvacCommand, Void>> sequence = Flux.empty();
+
+        var result = d.compute(sequence).log();
+
+        StepVerifier
+                .create(result)
+                // --
+                // Init sequence
+                .assertNext(e -> {
+                    assertThat(e.getValue().command.mode).isNull();
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
+                })
+                // --
+                // Shutdown sequence
+                .assertNext(e -> {
+                    assertThat(e.getValue().command.mode).isNull();
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isZero();
+                })
+                .verifyComplete();
+    }
+
+    /**
+     * Verify that an attempt to set non-zero demand before the mode is set fails.
+     */
+    @Test
+    void demandBeforeMode() { // NOSONAR It's not complex, it's just mundane
+
+        var switchMode = new NullSwitch("mode");
+        var switchRunning = new NullSwitch("running");
+        var switchFan = new NullSwitch("fan");
+
+        var d = new HeatPump("hp-initial-mode",
+                switchMode, false,
+                switchRunning, false,
+                switchFan, false,
+                Duration.ofSeconds(1));
         var sequence = Flux.just(
                 // This will fail
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.8, null)),
@@ -44,22 +88,9 @@ class HeatPumpTest {
                 // --
                 // Init sequence
                 .assertNext(e -> {
-                    // Set demand to zero command - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isNull();
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    // Set demand to zero command - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isNull();
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isNull();
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
                 // This shall not pass...
@@ -67,63 +98,82 @@ class HeatPumpTest {
                     assertThat(e.isError()).isTrue();
                     assertThat(e.error)
                             .isInstanceOf(IllegalStateException.class)
-                            .hasMessageStartingWith("Can't accept demand > 0 before setting the operating mode, signal: ");
+                            .hasMessageStartingWith("Demand command issued before mode is set (likely programming error)");
                 })
                 // --
                 // ...but this will
                 .assertNext(e -> {
-                    // Mode change command - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    // Mode change command - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isEqualTo(0.7);
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
+                // Demand change command - requested
                 .assertNext(e -> {
-                    // Demand change command - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isEqualTo(0.7);
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    // Demand change command - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.demand).isEqualTo(0.7);
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isEqualTo(0.7);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isEqualTo(0.7);
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
+                // Shutdown sequence
                 .assertNext(e -> {
-                    // Shutdown - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isEqualTo(0.7);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isZero();
                 })
+                .verifyComplete();
+    }
+
+    /**
+     * Verify that a single mode change command executes as expected.
+     */
+    @Test
+    void setMode() { // NOSONAR It's not complex, it's just mundane
+
+        var switchMode = new NullSwitch("mode");
+        var switchRunning = new NullSwitch("running");
+        var switchFan = new NullSwitch("fan");
+
+        var d = new HeatPump("hp-change-mode",
+                switchMode, false,
+                switchRunning, false,
+                switchFan, false,
+                Duration.ofSeconds(1));
+        var sequence = Flux.just(
+                new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null))
+        );
+
+        var result = d.compute(sequence).log();
+
+        StepVerifier
+                .create(result)
+                // --
+                // Init sequence
                 .assertNext(e -> {
-                    // Shutdown - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isZero();
+                    assertThat(e.getValue().command.mode).isNull();
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
+                })
+                // --
+                // Set mode to HEATING
+                .assertNext(e -> {
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command.demand).isEqualTo(0.8);
+                    assertThat(e.getValue().command.fanSpeed).isNull();
+                })
+                // --
+                // Turn on the condenser
+                .assertNext(e -> {
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command.demand).isEqualTo(0.8);
+                    assertThat(e.getValue().command.fanSpeed).isNull();
+                })
+                // --
+                // Shutdown sequence
+                .assertNext(e -> {
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isZero();
                 })
                 .verifyComplete();
     }
@@ -135,11 +185,11 @@ class HeatPumpTest {
         var switchRunning = new NullSwitch("running");
         var switchFan = new NullSwitch("fan");
 
-        var d = new HeatPump("hp",
+        var d = new HeatPump("hp-change-mode",
                 switchMode, false,
                 switchRunning, false,
                 switchFan, false,
-                Duration.ofMillis(5));
+                Duration.ofSeconds(1));
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null)),
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.COOLING, 0.7, null))
@@ -152,112 +202,51 @@ class HeatPumpTest {
                 // --
                 // Init sequence
                 .assertNext(e -> {
-                    // ...
-                })
-                .assertNext(e -> {
-                    // ...
-                })
-                // --
-                .assertNext(e -> {
-                    // Mode change to heating command, shutting off the condenser - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    // Mode change to heating command, shutting off the condenser - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isNull();
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
+                // (heating, 0.8, null)
                 .assertNext(e -> {
-                    // Setting the demand after the delay - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().requested.demand).isEqualTo(0.8);
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    // Setting the demand after the delay - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().requested.demand).isEqualTo(0.8);
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isEqualTo(0.8);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command.demand).isEqualTo(0.8);
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
+                // VT: FIXME: Why twice?
+                .assertNext(e -> {
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command.demand).isEqualTo(0.8);
+                    assertThat(e.getValue().command.fanSpeed).isNull();
+                })
+                // --
+                // (cooling, 0.7, null)
                 .assertNext(e -> {
                     // Mode change to cooling command, shutting off the condenser - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    // Still heating...
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.HEATING);
-                    // ...but zero demand
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isEqualTo(0.8);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    // Mode change to cooling command, shutting off the condenser - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
                 .assertNext(e -> {
-                    // The actual mode change to cooling command - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    // ... and set the demand
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isEqualTo(0.7);
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 .assertNext(e -> {
-                    // The actual mode change to cooling command - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    // VT: FIXME: Why twice?
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isEqualTo(0.7);
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
+                // Shutdown sequence
                 .assertNext(e -> {
-                    // Cooling demand - requested
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isEqualTo(0.7);
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    // Cooling demand - actual
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.demand).isEqualTo(0.7);
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isEqualTo(0.7);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                // --
-                // Shutdown
-                .assertNext(e -> {
-                    // ...
-                })
-                .assertNext(e -> {
-                    // ...
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isZero();
                 })
                 .verifyComplete();
     }
@@ -272,11 +261,15 @@ class HeatPumpTest {
         var switchRunning = new NullSwitch("running");
         var switchFan = new NullSwitch("fan");
 
-        var d = new HeatPump("hp", switchMode, switchRunning, switchFan);
+        var d = new HeatPump("hp-boot",
+                switchMode, false,
+                switchRunning, false,
+                switchFan, false,
+                Duration.ofSeconds(1));
         var sequence = Flux.just(
-                new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.0, null)),
+                new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0d, null)),
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.COOLING, null, null)),
-                new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 1.0, 1.0))
+                new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 1d, 1d))
         );
 
         var result = d.compute(sequence).log();
@@ -284,108 +277,45 @@ class HeatPumpTest {
         StepVerifier
                 .create(result)
                 // --
-                // Shut off the condenser
+                // Init sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isNull();
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isNull();
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isNull();
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
-                // Switch the mode to COOLING
+                // (null, 0d, null)
                 .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isNull();
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isNull();
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isNull();
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
-                // Start working
+                // (cooling, null, null) => (cooling, 0d, null) because reconcile()
+                // Switch the mode to COOLING without delays
                 .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
+                // VT: FIXME: Why twice?
                 .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isNull();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isEqualTo(1.0);
-                    assertThat(e.getValue().requested.fanSpeed).isEqualTo(1.0);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isEqualTo(1.0);
-                    assertThat(e.getValue().requested.fanSpeed).isEqualTo(1.0);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isEqualTo(1.0);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isEqualTo(1.0);
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isNull();
                 })
                 // --
-                // Shut down
                 .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.REQUESTED);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isEqualTo(1.0);
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isEqualTo(1.0);
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isEqualTo(1.0);
+                    assertThat(e.getValue().command.fanSpeed).isEqualTo(1.0);
                 })
+                // --
+                // Shutdown sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().kind).isEqualTo(HvacDeviceStatus.Kind.ACTUAL);
-                    assertThat(e.getValue().requested.mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().requested.demand).isZero();
-                    assertThat(e.getValue().requested.fanSpeed).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.demand).isZero();
-                    assertThat(((HeatPump.HeatpumpStatus)e.getValue()).actual.fanSpeed).isZero();
+                    assertThat(e.getValue().command.mode).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command.demand).isZero();
+                    assertThat(e.getValue().command.fanSpeed).isZero();
                 })
                 .verifyComplete();
     }
