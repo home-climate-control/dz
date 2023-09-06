@@ -177,8 +177,12 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
                     } finally {
                         ThreadContext.pop();
                     }
-                })
-                .subscribeOn(scheduler);
+                });
+
+                // VT: NOTE: Having this here breaks stuff, but now that it's gone,
+                // need a thorough review because likely something else is now broken.
+                // More: https://github.com/home-climate-control/dz/issues/271
+                // .subscribeOn(scheduler);
     }
 
     protected Scheduler getScheduler() {
