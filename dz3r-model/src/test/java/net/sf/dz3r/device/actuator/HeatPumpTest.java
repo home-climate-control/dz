@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import reactor.tools.agent.ReactorDebugAgent;
@@ -23,9 +24,21 @@ class HeatPumpTest {
     private final Logger logger = LogManager.getLogger();
     private final Duration delay = Duration.ofMillis(500);
 
+    private final Scheduler scheduler = Schedulers.newSingle("heatpump-test-single");
+
     @BeforeAll
     static void init() {
         ReactorDebugAgent.init();
+    }
+
+    private SwitchPack getSwitchPack() {
+
+        // VT: NOTE: Might need to use this for running parameterized tests with different schedulers
+        return new SwitchPack(
+                new NullSwitch("mode", scheduler),
+                new NullSwitch("running", scheduler),
+                new NullSwitch("fan", scheduler)
+        );
     }
 
     /**
@@ -34,15 +47,13 @@ class HeatPumpTest {
     @Test
     void empty() { // NOSONAR It's not complex, it's just mundane
 
-        var switchMode = new NullSwitch("mode");
-        var switchRunning = new NullSwitch("running");
-        var switchFan = new NullSwitch("fan");
-
+        var switchPack = getSwitchPack();
         var d = new HeatPump("hp-empty",
-                switchMode, false,
-                switchRunning, false,
-                switchFan, false,
-                delay);
+                switchPack.mode, false,
+                switchPack.running, false,
+                switchPack.fan, false,
+                delay,
+                scheduler);
         Flux<Signal<HvacCommand, Void>> sequence = Flux.empty();
 
         var result = d.compute(sequence).log();
@@ -72,15 +83,13 @@ class HeatPumpTest {
     @Test
     void demandBeforeMode() { // NOSONAR It's not complex, it's just mundane
 
-        var switchMode = new NullSwitch("mode");
-        var switchRunning = new NullSwitch("running");
-        var switchFan = new NullSwitch("fan");
-
+        var switchPack = getSwitchPack();
         var d = new HeatPump("hp-initial-mode",
-                switchMode, false,
-                switchRunning, false,
-                switchFan, false,
-                delay);
+                switchPack.mode, false,
+                switchPack.running, false,
+                switchPack.fan, false,
+                delay,
+                scheduler);
         var sequence = Flux.just(
                 // This will fail
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.8, null)),
@@ -137,15 +146,13 @@ class HeatPumpTest {
     @Test
     void setMode() { // NOSONAR It's not complex, it's just mundane
 
-        var switchMode = new NullSwitch("mode");
-        var switchRunning = new NullSwitch("running");
-        var switchFan = new NullSwitch("fan");
-
+        var switchPack = getSwitchPack();
         var d = new HeatPump("hp-change-mode",
-                switchMode, false,
-                switchRunning, false,
-                switchFan, false,
-                delay);
+                switchPack.mode, false,
+                switchPack.running, false,
+                switchPack.fan, false,
+                delay,
+                scheduler);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null))
         );
@@ -188,15 +195,13 @@ class HeatPumpTest {
     @Test
     void changeMode() { // NOSONAR It's not complex, it's just mundane
 
-        var switchMode = new NullSwitch("mode");
-        var switchRunning = new NullSwitch("running");
-        var switchFan = new NullSwitch("fan");
-
+        var switchPack = getSwitchPack();
         var d = new HeatPump("hp-change-mode",
-                switchMode, false,
-                switchRunning, false,
-                switchFan, false,
-                delay);
+                switchPack.mode, false,
+                switchPack.running, false,
+                switchPack.fan, false,
+                delay,
+                scheduler);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null)),
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.COOLING, 0.7, null))
@@ -264,15 +269,13 @@ class HeatPumpTest {
     @Test
     void boot() { // NOSONAR It's not complex, it's just mundane
 
-        var switchMode = new NullSwitch("mode");
-        var switchRunning = new NullSwitch("running");
-        var switchFan = new NullSwitch("fan");
-
+        var switchPack = getSwitchPack();
         var d = new HeatPump("hp-boot",
-                switchMode, false,
-                switchRunning, false,
-                switchFan, false,
-                delay);
+                switchPack.mode, false,
+                switchPack.running, false,
+                switchPack.fan, false,
+                delay,
+                scheduler);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0d, null)),
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.COOLING, null, null)),
@@ -424,4 +427,10 @@ class HeatPumpTest {
                 .assertNext(e -> assertThat(e).isEqualTo(5))
                 .verifyComplete();
     }
+
+    private record SwitchPack(
+            Switch<?> mode,
+            Switch<?> running,
+            Switch<?> fan
+            ) {}
 }

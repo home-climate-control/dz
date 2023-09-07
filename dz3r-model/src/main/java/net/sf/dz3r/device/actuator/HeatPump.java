@@ -70,18 +70,6 @@ public class HeatPump extends AbstractHvacDevice {
     private HvacCommand requestedState = new HvacCommand(null, null, null);
 
     /**
-     * Create an instance with all straight switches.
-     *
-     * @param name JMX name.
-     * @param switchMode Switch to pull to change the operating mode.
-     * @param switchRunning Switch to pull to turn on the compressor.
-     * @param switchFan Switch to pull to turn on the air handler.
-     */
-    public HeatPump(String name, Switch<?> switchMode, Switch<?> switchRunning, Switch<?> switchFan) {
-        this(name, switchMode, false, switchRunning, false, switchFan, false);
-    }
-
-    /**
      * Create an instance with some switches possibly reverse.
      *
      * @param name JMX name.
@@ -114,6 +102,7 @@ public class HeatPump extends AbstractHvacDevice {
      * @param reverseRunning {@code true} if the "off" running position corresponds to logical one.
      * @param switchFan Switch to pull to turn on the air handler.
      * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
+     * @param changeModeDelay Delay to observe while changing the {@link HvacMode operating mode}.
      */
     public HeatPump(
             String name,
@@ -121,6 +110,20 @@ public class HeatPump extends AbstractHvacDevice {
             Switch<?> switchRunning, boolean reverseRunning,
             Switch<?> switchFan, boolean reverseFan,
             Duration changeModeDelay) {
+        this(name,
+                switchMode, reverseMode,
+                switchRunning, reverseRunning,
+                switchFan, reverseFan,
+                changeModeDelay,
+                Schedulers.newSingle("HeatPump(" + name + ")"));
+    }
+    public HeatPump(
+            String name,
+            Switch<?> switchMode, boolean reverseMode,
+            Switch<?> switchRunning, boolean reverseRunning,
+            Switch<?> switchFan, boolean reverseFan,
+            Duration changeModeDelay,
+            Scheduler scheduler) {
 
         super(name);
 
@@ -148,7 +151,7 @@ public class HeatPump extends AbstractHvacDevice {
             return DEFAULT_MODE_CHANGE_DELAY;
         });
 
-        scheduler = Schedulers.newSingle("HeatPump(" + getAddress() + ")");
+        this.scheduler = scheduler;
     }
 
     @Override
