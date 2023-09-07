@@ -36,6 +36,15 @@ public class NullSwitch extends AbstractSwitch<String> {
     }
 
     /**
+     * Create an instance without delay running on the provided scheduler.
+     *
+     * @param address Address to use.
+     * @param scheduler Scheduler to use.
+     */
+    public NullSwitch(String address, Scheduler scheduler) {
+        this(address, 0, 0, scheduler);
+    }
+    /**
      * Create an instance with delay.
      *
      * @param address Address to use.
@@ -91,7 +100,7 @@ public class NullSwitch extends AbstractSwitch<String> {
 
         if (delayMillis > 0) {
             try {
-                Mono.delay(Duration.ofMillis(delayMillis), getScheduler()).block();
+                Mono.delay(Duration.ofMillis(delayMillis), getDelayScheduler()).block();
             } catch (IllegalStateException ex) {
                 if (ex.getMessage().contains("block()/blockFirst()/blockLast() are blocking, which is not supported in thread")) {
                     logger.warn("{}: delay() on non-blocking thread (name={}, group={}), using Thread.sleep() workaround",
@@ -112,5 +121,33 @@ public class NullSwitch extends AbstractSwitch<String> {
     @Override
     public String toString() {
         return "NullSwitch(" + getAddress() + ")";
+    }
+
+    /**
+     * @return A scheduler used only for {@link Mono#delayElement(Duration)}.
+     */
+    private Scheduler getDelayScheduler() {
+
+        // Parallel scheduler is the default for delayElement() anyway
+        return getScheduler() == null
+                ? Schedulers.parallel()
+                : getScheduler();
+    }
+
+    @Override
+    public Mono<Boolean> getState() {
+
+        if (true) { // NOSONAR Shut up. I know.
+            return super.getState();
+        }
+
+        // VT: NOTE: While this is the Reactive compliant solution, currently it breaks at least the HeatPump.
+        // More: https://github.com/home-climate-control/dz/issues/279
+
+        if (state == null) {
+            return Mono.error(new IOException("setStateSync() hasn't been called yet on " + getAddress()));
+        }
+
+        return Mono.just(state).delayElement(Duration.ofMillis(getDelayMillis()), getDelayScheduler());
     }
 }

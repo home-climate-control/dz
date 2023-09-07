@@ -59,7 +59,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      * @param address Switch address.
      */
     protected AbstractSwitch(@NonNull A address) {
-        this(address, null, null, null);
+        this(address, Schedulers.newSingle("switch:" + address, true), null, null);
     }
 
     /**
@@ -75,7 +75,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
         // VT: NOTE: @NonNull seems to have no effect, what enforces it?
         this.address = HCCObjects.requireNonNull(address,"address can't be null");
 
-        this.scheduler = scheduler == null ? Schedulers.newSingle("switch:" + address, true) : scheduler;
+        this.scheduler = scheduler;
         this.minDelay = minDelay;
         this.clock = clock == null ? Clock.systemUTC() : clock;
 
