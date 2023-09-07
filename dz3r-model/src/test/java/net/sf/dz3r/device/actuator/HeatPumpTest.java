@@ -3,9 +3,13 @@ package net.sf.dz3r.device.actuator;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import reactor.tools.agent.ReactorDebugAgent;
 
@@ -15,6 +19,9 @@ import java.time.Instant;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HeatPumpTest {
+
+    private final Logger logger = LogManager.getLogger();
+    private final Duration delay = Duration.ofMillis(500);
 
     @BeforeAll
     static void init() {
@@ -35,7 +42,7 @@ class HeatPumpTest {
                 switchMode, false,
                 switchRunning, false,
                 switchFan, false,
-                Duration.ofSeconds(1));
+                delay);
         Flux<Signal<HvacCommand, Void>> sequence = Flux.empty();
 
         var result = d.compute(sequence).log();
@@ -73,7 +80,7 @@ class HeatPumpTest {
                 switchMode, false,
                 switchRunning, false,
                 switchFan, false,
-                Duration.ofSeconds(1));
+                delay);
         var sequence = Flux.just(
                 // This will fail
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.8, null)),
@@ -138,7 +145,7 @@ class HeatPumpTest {
                 switchMode, false,
                 switchRunning, false,
                 switchFan, false,
-                Duration.ofSeconds(1));
+                delay);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null))
         );
@@ -189,7 +196,7 @@ class HeatPumpTest {
                 switchMode, false,
                 switchRunning, false,
                 switchFan, false,
-                Duration.ofSeconds(1));
+                delay);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null)),
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.COOLING, 0.7, null))
@@ -265,7 +272,7 @@ class HeatPumpTest {
                 switchMode, false,
                 switchRunning, false,
                 switchFan, false,
-                Duration.ofSeconds(1));
+                delay);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0d, null)),
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.COOLING, null, null)),
@@ -317,6 +324,104 @@ class HeatPumpTest {
                     assertThat(e.getValue().command.demand).isZero();
                     assertThat(e.getValue().command.fanSpeed).isZero();
                 })
+                .verifyComplete();
+    }
+
+    @Test
+    void delayElementsFromFlux1() {
+
+        var s = Schedulers.newSingle("single");
+        var head = Flux.range(0, 3).publishOn(s);
+        var detour = Flux.just(42).delayElements(delay, s);
+        var tail = Flux.range(3, 3);
+
+        var result = Flux.concat(
+                        head,
+                        detour.flatMap(Flux::just),
+                        tail)
+                .doOnNext(e -> logger.info("{}", e));
+
+        StepVerifier
+                .create(result)
+                .assertNext(e -> assertThat(e).isZero())
+                .assertNext(e -> assertThat(e).isEqualTo(1))
+                .assertNext(e -> assertThat(e).isEqualTo(2))
+                .assertNext(e -> assertThat(e).isEqualTo(42))
+                .assertNext(e -> assertThat(e).isEqualTo(3))
+                .assertNext(e -> assertThat(e).isEqualTo(4))
+                .assertNext(e -> assertThat(e).isEqualTo(5))
+                .verifyComplete();
+    }
+
+    @Test
+    void delayElementsFromFlux2() {
+
+        var s = Schedulers.newSingle("single");
+        var head = Flux.range(0, 3).publishOn(s);
+        var detour = Flux.just(42).delayElements(delay);
+        var tail = Flux.range(3, 3);
+
+        var result = Flux.concat(
+                        head,
+                        detour.flatMap(Flux::just).publishOn(s),
+                        tail)
+                .doOnNext(e -> logger.info("{}", e));
+
+        StepVerifier
+                .create(result)
+                .assertNext(e -> assertThat(e).isZero())
+                .assertNext(e -> assertThat(e).isEqualTo(1))
+                .assertNext(e -> assertThat(e).isEqualTo(2))
+                .assertNext(e -> assertThat(e).isEqualTo(42))
+                .assertNext(e -> assertThat(e).isEqualTo(3))
+                .assertNext(e -> assertThat(e).isEqualTo(4))
+                .assertNext(e -> assertThat(e).isEqualTo(5))
+                .verifyComplete();
+    }
+
+    @Test
+    void delayElementsFromMono1() {
+
+        var s = Schedulers.newSingle("single");
+        var head = Flux.range(0, 3).publishOn(s);
+        var detour = Flux.just(-1).flatMap(ignore -> Mono.just(42)).delayElements(delay, s);
+        var tail = Flux.range(3, 3);
+
+        var result = Flux.concat(head, detour, tail)
+                .doOnNext(e -> logger.info("{}", e));
+
+        StepVerifier
+                .create(result)
+                .assertNext(e -> assertThat(e).isZero())
+                .assertNext(e -> assertThat(e).isEqualTo(1))
+                .assertNext(e -> assertThat(e).isEqualTo(2))
+                .assertNext(e -> assertThat(e).isEqualTo(42))
+                .assertNext(e -> assertThat(e).isEqualTo(3))
+                .assertNext(e -> assertThat(e).isEqualTo(4))
+                .assertNext(e -> assertThat(e).isEqualTo(5))
+                .verifyComplete();
+    }
+
+    @Test
+    void delayElementsFromMono2() {
+
+        var s = Schedulers.newSingle("single");
+        var head = Flux.range(0, 3).publishOn(s);
+        var detour = Flux.just(-1).flatMap(ignore -> Mono.just(42).delayElement(delay)).publishOn(s);
+        var tail = Flux.range(3, 3);
+
+        var result = Flux.concat(head, detour, tail)
+                .doOnNext(e -> logger.info("{}", e));
+
+        StepVerifier
+                .create(result)
+                .assertNext(e -> assertThat(e).isZero())
+                .assertNext(e -> assertThat(e).isEqualTo(1))
+                .assertNext(e -> assertThat(e).isEqualTo(2))
+                .assertNext(e -> assertThat(e).isEqualTo(42))
+                .assertNext(e -> assertThat(e).isEqualTo(3))
+                .assertNext(e -> assertThat(e).isEqualTo(4))
+                .assertNext(e -> assertThat(e).isEqualTo(5))
                 .verifyComplete();
     }
 }

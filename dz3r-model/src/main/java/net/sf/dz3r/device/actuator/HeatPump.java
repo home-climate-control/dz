@@ -8,6 +8,7 @@ import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
@@ -55,6 +56,8 @@ public class HeatPump extends AbstractHvacDevice {
     private final boolean reverseRunning;
     private final boolean reverseFan;
     private final Duration modeChangeDelay;
+
+    private final Scheduler scheduler;
 
     /**
      * Requested device state.
@@ -144,6 +147,8 @@ public class HeatPump extends AbstractHvacDevice {
             logger.warn("using default mode change delay of {}", DEFAULT_MODE_CHANGE_DELAY);
             return DEFAULT_MODE_CHANGE_DELAY;
         });
+
+        scheduler = Schedulers.newSingle("HeatPump(" + getAddress() + ")");
     }
 
     @Override
@@ -168,7 +173,7 @@ public class HeatPump extends AbstractHvacDevice {
 
         return Flux
                 .concat(init, commands, shutdown)
-                .publishOn(Schedulers.newSingle("HeatPump(" + getAddress() + ")"))
+                .publishOn(scheduler)
                 .flatMap(this::process)
                 .doOnNext(this::broadcast);
     }
@@ -231,6 +236,7 @@ public class HeatPump extends AbstractHvacDevice {
 
         return Flux
                 .concat(condenserOff, forceMode)
+                .doOnNext(s -> logger.debug("{}: setMode: {}", getAddress(), s.getValue().command))
                 .doOnComplete(() -> logger.info("{}: mode changed to: {}", getAddress(), mode));
     }
 
@@ -243,14 +249,20 @@ public class HeatPump extends AbstractHvacDevice {
                 .just(new StateCommand(switchRunning, reverseRunning))
                 .doOnNext(ignore -> logger.info("{}: stopping the condenser", getAddress()))
                 .flatMap(this::setState)
+                .doOnNext(ignore -> logger.warn("{}: letting the hardware settle for modeChangeDelay={}", getAddress(), modeChangeDelay))
+
+                // VT: FIXME: This doesn't work where as it should (see test cases) and allows the next main sequence element to jump ahead, why?
+//                .delayElements(modeChangeDelay, scheduler)
+//                .publishOn(scheduler)
+
                 .flatMap(ignore -> Mono.create(sink -> {
-                    // Can't afford to just call delayElement() of Flux or Mono, that will change the scheduler
-                    logger.warn("{}: letting the hardware settle for modeChangeDelay={}", getAddress(), modeChangeDelay);
+                    // VT: NOTE: Calling delayElement() of Flux or Mono breaks things, need to figure out why
                     try {
                         // VT: FIXME: Need to find a lasting solution for this
                         // For now, this should be fine as long as the output from this flux is used in a sane way.
                         logger.warn("{}: BLOCKING WAIT FOR {}", getAddress(), modeChangeDelay);
                         Thread.sleep(modeChangeDelay.toMillis());
+                        logger.warn("{}: blocking wait for {} DONE", getAddress(), modeChangeDelay);
                     } catch (InterruptedException ex) {
                         Thread.currentThread().interrupt();
                         logger.warn("interrupted, nothing we can do about it", ex);
@@ -345,6 +357,7 @@ public class HeatPump extends AbstractHvacDevice {
 
         return Flux
                 .zip(runningFlux, fanFlux)
+                .doOnNext(z -> logger.debug("{}: zip(running, fan) received: ({}, {})", getAddress(), z.getT1(), z.getT2()))
                 .map(pair ->
                     // If we're here, this means that the operation was carried out successfully
                     new Signal<>(clock.instant(),

@@ -28,6 +28,6 @@ public class HvacDeviceStatus {
 
     @Override
     public String toString() {
-        return "{requested=" + command + ", uptime=" + uptime + "}";
+        return "{command=" + command + ", uptime=" + uptime + "}";
     }
 }
