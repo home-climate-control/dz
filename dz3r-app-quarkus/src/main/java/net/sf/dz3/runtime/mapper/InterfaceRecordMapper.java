@@ -85,6 +85,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.reversed().orElse(false))", target = "reversed")
     @Mapping(expression = "java(source.heartbeat().orElse(null))", target = "heartbeat")
     @Mapping(expression = "java(source.pace().orElse(null))", target = "pace")
+    @Mapping(expression = "java(source.optimistic().orElse(null))", target = "optimistic")
     net.sf.dz3.runtime.config.hardware.SwitchConfig switchConfig(SwitchConfig source);
 
     @Mapping(expression = "java(source.serialPort())", target = "serialPort")

@@ -29,9 +29,10 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
             MqttMessageAddress address,
             Scheduler scheduler,
             Duration pace,
+            boolean optimistic,
             Clock clock) {
 
-        super(address, scheduler, pace, clock);
+        super(address, optimistic, scheduler, pace, clock);
         this.mqttAdapter = mqttAdapter;
     }
 

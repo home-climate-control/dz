@@ -7,6 +7,7 @@ import net.sf.dz3r.device.z2m.v1.Z2MJsonListener;
 import net.sf.dz3r.device.z2m.v1.Z2MSwitch;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig, Z2MJsonListener, Z2MSwitch> {
@@ -21,7 +22,11 @@ public class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDev
     }
 
     @Override
-    protected Z2MSwitch createSwitch(MqttAdapter adapter, String rootTopic) {
-        return new Z2MSwitch(adapter, rootTopic, null);
+    protected Z2MSwitch createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic) {
+        return new Z2MSwitch(
+                adapter,
+                rootTopic,
+                Optional.ofNullable(optimistic).orElse(false),
+                null);
     }
 }
