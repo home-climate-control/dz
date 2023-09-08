@@ -7,6 +7,7 @@ import net.sf.dz3r.device.esphome.v1.ESPHomeSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig, ESPHomeListener, ESPHomeSwitch> {
@@ -21,7 +22,15 @@ public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevice
     }
 
     @Override
-    protected ESPHomeSwitch createSwitch(MqttAdapter adapter, String rootTopic) {
-        return new ESPHomeSwitch(adapter, rootTopic, null);
+    protected ESPHomeSwitch createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic) {
+
+        // Optimistic defaults to true for this switch only
+        // https://github.com/home-climate-control/dz/issues/280
+
+        return new ESPHomeSwitch(
+                adapter,
+                rootTopic,
+                Optional.ofNullable(optimistic).orElse(true),
+                null);
     }
 }

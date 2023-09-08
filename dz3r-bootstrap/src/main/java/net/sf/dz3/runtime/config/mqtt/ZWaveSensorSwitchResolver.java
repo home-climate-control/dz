@@ -8,6 +8,7 @@ import net.sf.dz3r.device.zwave.v1.ZWaveSensorListener;
 import net.sf.dz3r.signal.SignalSource;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig, SignalSource<String, Double, Void>, ZWaveBinarySwitch> {
@@ -22,7 +23,11 @@ public class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevi
     }
 
     @Override
-    protected ZWaveBinarySwitch createSwitch(MqttAdapter adapter, String rootTopic) {
-        return new ZWaveBinarySwitch(adapter, rootTopic, null);
+    protected ZWaveBinarySwitch createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic) {
+        return new ZWaveBinarySwitch(
+                adapter,
+                rootTopic,
+                Optional.ofNullable(optimistic).orElse(false),
+                null);
     }
 }

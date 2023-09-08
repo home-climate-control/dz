@@ -27,12 +27,32 @@ public class NullSwitch extends AbstractSwitch<String> {
     private Boolean state;
 
     /**
-     * Create an instance without delay running on the default scheduler.
+     * Create a pessimistic instance without delay running on the default scheduler.
      *
      * @param address Address to use.
      */
     public NullSwitch(String address) {
-        this(address, 0, 0, Schedulers.newSingle("NullSwitch:" + address, true));
+        this(address, false, 0, 0, Schedulers.newSingle("NullSwitch:" + address, true));
+    }
+
+    /**
+     * Create an instance without delay running on the default scheduler.
+     *
+     * @param address Address to use.
+     * @param optimistic See <a href="https://github.com/home-climate-control/dz/issues/280">issue 280</a>.
+     */
+    public NullSwitch(String address, boolean optimistic) {
+        this(address, optimistic, 0, 0, Schedulers.newSingle("NullSwitch:" + address, true));
+    }
+
+    /**
+     * Create a pessimistic instance without delay running on the provided scheduler.
+     *
+     * @param address Address to use.
+     * @param scheduler Scheduler to use.
+     */
+    public NullSwitch(String address, Scheduler scheduler) {
+        this(address, false, 0, 0, scheduler);
     }
 
     /**
@@ -41,9 +61,10 @@ public class NullSwitch extends AbstractSwitch<String> {
      * @param address Address to use.
      * @param scheduler Scheduler to use.
      */
-    public NullSwitch(String address, Scheduler scheduler) {
-        this(address, 0, 0, scheduler);
+    public NullSwitch(String address, boolean optimistic, Scheduler scheduler) {
+        this(address, optimistic, 0, 0, scheduler);
     }
+
     /**
      * Create an instance with delay.
      *
@@ -51,8 +72,8 @@ public class NullSwitch extends AbstractSwitch<String> {
      * @param minDelayMillis Minimim switch deley, milliseconds.
      * @param maxDelayMillis Max delay. Total delay is calculated as {@code minDelay + rg.nextInt(maxDelay)}.
      */
-    public NullSwitch(String address, long minDelayMillis, int maxDelayMillis, Scheduler scheduler) {
-        super(address, scheduler, null, null);
+    public NullSwitch(String address, boolean optimistic, long minDelayMillis, int maxDelayMillis, Scheduler scheduler) {
+        super(address, optimistic, scheduler, null, null);
 
         if (minDelayMillis < 0 || maxDelayMillis < 0 || (maxDelayMillis > 0 && (minDelayMillis >= maxDelayMillis))) {
             throw new IllegalArgumentException("invalid delays min=" + minDelayMillis + ", max=" + maxDelayMillis);

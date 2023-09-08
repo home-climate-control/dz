@@ -22,7 +22,7 @@ class SwitchableHvacDeviceTest {
         var now = Instant.now();
         var minDelayMillis = 50;
         var maxDelayMillis = 200;
-        var s = new NullSwitch("a", minDelayMillis, maxDelayMillis, null);
+        var s = new NullSwitch("a", false, minDelayMillis, maxDelayMillis, null);
         var d = new SwitchableHvacDevice("d", HvacMode.COOLING, s);
 
         var sequence = Flux.just(

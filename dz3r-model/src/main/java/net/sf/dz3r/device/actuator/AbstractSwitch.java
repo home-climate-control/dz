@@ -43,8 +43,13 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      */
     private final Clock clock;
 
-    private Sinks.Many<Signal<State, String>> stateSink;
-    private Flux<Signal<State, String>> stateFlux;
+    /**
+     * Assume that {@link #setState(boolean)} always worked without checking if it did. Caveat emptor.
+     */
+    protected final boolean optimistic;
+
+    private final Sinks.Many<Signal<State, String>> stateSink;
+    private final Flux<Signal<State, String>> stateFlux;
     private Boolean lastKnownState;
 
     /**
@@ -59,7 +64,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      * @param address Switch address.
      */
     protected AbstractSwitch(@NonNull A address) {
-        this(address, Schedulers.newSingle("switch:" + address, true), null, null);
+        this(address, false, Schedulers.newSingle("switch:" + address, true), null, null);
     }
 
     /**
@@ -70,10 +75,11 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      * @param pace Issue identical control commands to this switch at most this often.
      * @param clock Clock to use. Pass {@code null} except when testing.
      */
-    protected AbstractSwitch(@NonNull A address, @Nullable Scheduler scheduler, @Nullable Duration pace, @Nullable Clock clock) {
+    protected AbstractSwitch(@NonNull A address, boolean optimistic, @Nullable Scheduler scheduler, @Nullable Duration pace, @Nullable Clock clock) {
 
         // VT: NOTE: @NonNull seems to have no effect, what enforces it?
         this.address = HCCObjects.requireNonNull(address,"address can't be null");
+        this.optimistic = optimistic;
 
         this.scheduler = scheduler;
         this.pace = pace;
@@ -82,7 +88,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
         stateSink = Sinks.many().multicast().onBackpressureBuffer();
         stateFlux = stateSink.asFlux();
 
-        logger.info("{}: created AbstractSwitch({}) with pace={}", Integer.toHexString(hashCode()), getAddress(), pace);
+        logger.info("{}: created AbstractSwitch({}) with optimistic={}, pace={}", Integer.toHexString(hashCode()), getAddress(), optimistic, pace);
     }
 
     @Override
@@ -112,7 +118,9 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
 
             lastSetAt = clock.instant();
 
-            return getState();
+            return optimistic
+                    ? Mono.just(state)
+                    : getState();
 
         } catch (IOException e) {
             return Mono.create(sink -> sink.error(e));

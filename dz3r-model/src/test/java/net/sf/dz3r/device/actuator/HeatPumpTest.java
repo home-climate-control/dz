@@ -35,9 +35,9 @@ class HeatPumpTest {
 
         // VT: NOTE: Might need to use this for running parameterized tests with different schedulers
         return new SwitchPack(
-                new NullSwitch("mode", scheduler),
-                new NullSwitch("running", scheduler),
-                new NullSwitch("fan", scheduler)
+                new NullSwitch("mode", true, scheduler),
+                new NullSwitch("running", true, scheduler),
+                new NullSwitch("fan", true, scheduler)
         );
     }
 

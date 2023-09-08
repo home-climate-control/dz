@@ -157,7 +157,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
 
                     var id = c.switchConfig().id();
                     var address = c.switchConfig.address();
-                    var s = createSwitch(adapter, address);
+                    var s = createSwitch(adapter, address, c.switchConfig.optimistic());
 
                     // ID takes precedence over address
                     var key = id == null ? address : id;
@@ -166,8 +166,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                 });
     }
 
-    protected abstract S createSwitch(MqttAdapter adapter, String rootTopic);
-
+    protected abstract S createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic);
 
     public record MqttSensorConfig(
             MqttBrokerSpec mqttBrokerSpec,
