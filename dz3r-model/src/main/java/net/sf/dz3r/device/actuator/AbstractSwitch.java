@@ -6,8 +6,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.annotation.NonNull;
@@ -36,15 +36,15 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      * Minimum delay between two subsequent calls to {@link #setStateSync(boolean)} if the value hasn't changed.
      * See <a href="https://github.com/home-climate-control/dz/issues/253">Pipeline overrun with slow actuators</a>.
      */
-    private final Duration minDelay;
+    private final Duration pace;
 
     /**
      * Clock to use. Doesn't make sense to use a non-default clock other than for testing purposes.
      */
     private final Clock clock;
 
+    private Sinks.Many<Signal<State, String>> stateSink;
     private Flux<Signal<State, String>> stateFlux;
-    private FluxSink<Signal<State, String>> stateSink;
     private Boolean lastKnownState;
 
     /**
@@ -59,7 +59,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      * @param address Switch address.
      */
     protected AbstractSwitch(@NonNull A address) {
-        this(address, null, null, null);
+        this(address, Schedulers.newSingle("switch:" + address, true), null, null);
     }
 
     /**
@@ -67,19 +67,22 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      *
      * @param address Switch address.
      * @param scheduler Scheduler to use. {@code null} means using {@link Schedulers#newSingle(String, boolean)}.
-     * @param minDelay Minimum delay between sending identical commands to hardware.
+     * @param pace Issue identical control commands to this switch at most this often.
      * @param clock Clock to use. Pass {@code null} except when testing.
      */
-    protected AbstractSwitch(@NonNull A address, @Nullable Scheduler scheduler, @Nullable Duration minDelay, @Nullable Clock clock) {
+    protected AbstractSwitch(@NonNull A address, @Nullable Scheduler scheduler, @Nullable Duration pace, @Nullable Clock clock) {
 
         // VT: NOTE: @NonNull seems to have no effect, what enforces it?
         this.address = HCCObjects.requireNonNull(address,"address can't be null");
 
-        this.scheduler = scheduler == null ? Schedulers.newSingle("switch:" + address, true) : scheduler;
-        this.minDelay = minDelay;
+        this.scheduler = scheduler;
+        this.pace = pace;
         this.clock = clock == null ? Clock.systemUTC() : clock;
 
-        logger.info("{}: created AbstractSwitch({}) with minDelay={}", Integer.toHexString(hashCode()), getAddress(), minDelay);
+        stateSink = Sinks.many().multicast().onBackpressureBuffer();
+        stateFlux = stateSink.asFlux();
+
+        logger.info("{}: created AbstractSwitch({}) with pace={}", Integer.toHexString(hashCode()), getAddress(), pace);
     }
 
     @Override
@@ -89,25 +92,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
 
     @Override
     public final synchronized Flux<Signal<State, String>> getFlux() {
-
-        if (stateFlux != null) {
-            return stateFlux;
-        }
-
-        logger.debug("{}: creating stateFlux:{}", Integer.toHexString(hashCode()), address);
-
-        stateFlux = Flux
-                .create(this::connect)
-                .doOnSubscribe(s -> logger.debug("stateFlux:{} subscribed", address))
-                .publishOn(Schedulers.boundedElastic())
-                .publish()
-                .autoConnect();
-
         return stateFlux;
-    }
-
-    private void connect(FluxSink<Signal<State, String>> sink) {
-        this.stateSink = sink;
     }
 
     @Override
@@ -142,7 +127,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
 
         try {
 
-            if (minDelay == null) {
+            if (pace == null) {
                 return null;
             }
 
@@ -156,8 +141,8 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
 
             var delay = Duration.between(lastSetAt, clock.instant());
 
-            if (delay.compareTo(minDelay) < 0) {
-                logger.debug("{}: skipping setState({}), too close ({} of {})", Integer.toHexString(hashCode()), state, delay, minDelay);
+            if (delay.compareTo(pace) < 0) {
+                logger.debug("{}: skipping setState({}), too close ({} of {})", Integer.toHexString(hashCode()), state, delay, pace);
                 return lastSetState;
             }
 
@@ -171,17 +156,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
     }
 
     private void reportState(Signal<State, String> signal) {
-
-        if (stateSink == null) {
-
-            // Unless something subscribes, this will be flooding the log - enable for troubleshooting
-            // logger.warn("stateSink:{} is still null, skipping: {}", address, signal); // NOSONAR
-
-            getFlux();
-            return;
-        }
-
-        stateSink.next(signal);
+        stateSink.tryEmitNext(signal);
     }
 
     @Override
@@ -202,8 +177,12 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
                     } finally {
                         ThreadContext.pop();
                     }
-                })
-                .subscribeOn(scheduler);
+                });
+
+                // VT: NOTE: Having this here breaks stuff, but now that it's gone,
+                // need a thorough review because likely something else is now broken.
+                // More: https://github.com/home-climate-control/dz/issues/271
+                // .subscribeOn(scheduler);
     }
 
     protected Scheduler getScheduler() {

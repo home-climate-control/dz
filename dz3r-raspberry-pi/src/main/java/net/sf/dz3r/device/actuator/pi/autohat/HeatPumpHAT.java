@@ -4,6 +4,7 @@ import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
 import net.sf.dz3r.device.actuator.HeatPump;
 import net.sf.dz3r.jmx.JmxAttribute;
 import net.sf.dz3r.jmx.JmxDescriptor;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 
@@ -122,25 +123,50 @@ public class HeatPumpHAT extends HeatPump {
     }
 
     @Override
-    protected void setMode(boolean state) throws IOException {
-        super.setMode(state);
-        PimoroniAutomationHAT.getInstance().status().warn().intensity().write(statusLightsIntensity);
-        PimoroniAutomationHAT.getInstance().status().warn().write(state);
-        logger.debug("mode={}", state);
+    protected Mono<Boolean> setMode(boolean state) {
+
+        var result = super.setMode(state);
+
+        // VT: FIXME: Temporary solution, let's eat this elephant one bite at a time
+        try {
+            PimoroniAutomationHAT.getInstance().status().warn().intensity().write(statusLightsIntensity);
+            PimoroniAutomationHAT.getInstance().status().warn().write(state);
+            logger.warn("mode={} - unconfirmed, Mono returned", state);
+        } catch (IOException ex) {
+            logger.error("Error setting status lights, ignored", ex);
+        }
+
+        return result;
     }
 
     @Override
-    protected void setRunning(boolean state) throws IOException {
-        super.setRunning(state);
-        PimoroniAutomationHAT.getInstance().status().comms().write(state);
-        logger.debug("running={}", state);
+    protected Mono<Boolean> setRunning(boolean state) {
+        var result = super.setRunning(state);
+
+        // VT: FIXME: Temporary solution, let's eat this elephant one bite at a time
+        try {
+            PimoroniAutomationHAT.getInstance().status().comms().write(state);
+            logger.debug("running={} - unconfirmed, Mono returned", state);
+        } catch (IOException ex) {
+            logger.error("Error setting status lights, ignored", ex);
+        }
+
+        return result;
     }
 
     @Override
-    protected void setFan(boolean state) throws IOException {
-        super.setFan(state);
+    protected Mono<Boolean> setFan(boolean state) {
+        var result = super.setFan(state);
+
+        // VT: FIXME: Temporary solution, let's eat this elephant one bite at a time
+        try {
         PimoroniAutomationHAT.getInstance().status().power().write(state);
-        logger.debug("fan={}", state);
+        logger.debug("fan={} - unconfirmed, Mono returned", state);
+        } catch (IOException ex) {
+            logger.error("Error setting status lights, ignored", ex);
+        }
+
+        return result;
     }
 
     @Override

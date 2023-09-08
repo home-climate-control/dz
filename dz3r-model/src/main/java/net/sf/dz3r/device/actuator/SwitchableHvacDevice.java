@@ -7,12 +7,8 @@ import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
-import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
-
-import static net.sf.dz3r.signal.hvac.HvacDeviceStatus.Kind.ACTUAL;
-import static net.sf.dz3r.signal.hvac.HvacDeviceStatus.Kind.REQUESTED;
 
 /**
  * A device with just one switch acting as an HVAC device that just supports one mode (either heating or cooling).
@@ -88,11 +84,11 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
     @Override
     public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
 
-        return setFlux(in
+        return in
                 .filter(Signal::isOK)
                 .flatMap(signal -> {
                     return Flux
-                            .create(sink -> {
+                            .<Signal<HvacDeviceStatus, Void>>create(sink -> {
 
                                 try {
 
@@ -106,7 +102,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
                                     logger.debug("State: {}", state);
 
-                                    sink.next(new Signal<>(clock.instant(), new SwitchStatus(REQUESTED, command, actual, uptime())));
+                                    sink.next(new Signal<>(clock.instant(), new HvacDeviceStatus(command, uptime())));
 
                                     // By this time, the command has been verified to be valid
                                     requested = command;
@@ -115,7 +111,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     actual = state;
                                     updateUptime(clock.instant(), state);
 
-                                    var complete = new SwitchStatus(ACTUAL, command, actual, uptime());
+                                    var complete = new HvacDeviceStatus(command, uptime());
                                     sink.next(new Signal<>(clock.instant(), complete));
 
                                 } catch (Throwable t) { // NOSONAR Consequences have been considered
@@ -128,7 +124,8 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                 }
 
                             });
-                }));
+                })
+                .doOnNext(this::broadcast);
     }
 
     private boolean isModeOnly(HvacCommand command) {
@@ -200,20 +197,5 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
         logger.warn("close(): setting {} to off", theSwitch.getAddress());
         theSwitch.setState(inverted).block();
         logger.info("Shut down: {}", getAddress());
-    }
-
-    public static class SwitchStatus extends HvacDeviceStatus {
-
-        public final Boolean actual;
-
-        protected SwitchStatus(Kind kind, HvacCommand requested, Boolean actual, Duration uptime) {
-            super(kind, requested, uptime);
-            this.actual = actual;
-        }
-
-        @Override
-        public String toString() {
-            return "{kind=" + kind + ", requested=" + requested + ", actual=" + actual + ", uptime=" + uptime + "}";
-        }
     }
 }
