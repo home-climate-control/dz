@@ -109,8 +109,8 @@ class AbstractSwitchTest {
         private Boolean state;
         public final AtomicInteger counter = new AtomicInteger(0);
 
-        protected TestSwitch(String address, Scheduler scheduler, Duration minDelay, Clock clock) {
-            super(address, scheduler, minDelay, clock);
+        protected TestSwitch(String address, Scheduler scheduler, Duration pace, Clock clock) {
+            super(address, scheduler, pace, clock);
         }
 
         @Override
