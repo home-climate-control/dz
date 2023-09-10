@@ -5,7 +5,7 @@ Best explained by example:
 
 ```yaml
   zones:
-    - id: bedroom-master
+    - id: &bedroom-master bedroom-master
       name: Master Bedroom
       controller:
         p: 0.7
@@ -42,7 +42,7 @@ Best explained by example:
 ```
 
 ### id
-Unique identifier this zone will be known to the system as.
+Unique identifier this zone will be known to the system as. Using a YAML anchor here (as in the first entry above) would be a good idea.
 
 ### name
 Human readable zone name

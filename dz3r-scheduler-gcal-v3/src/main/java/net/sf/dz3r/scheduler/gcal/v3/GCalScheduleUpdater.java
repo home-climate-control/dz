@@ -108,6 +108,10 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             return updateFlux;
         }
 
+        logger.info("{} zone[s] considered for scheduling:", name2calendar.size());
+        Flux.fromIterable(name2calendar.entrySet())
+                .subscribe(kv -> logger.info("  name={}, calendar={}", kv.getKey(), kv.getValue()));
+
         logger.info("Starting updates every {}", pollInterval);
 
         updateFlux = Flux
