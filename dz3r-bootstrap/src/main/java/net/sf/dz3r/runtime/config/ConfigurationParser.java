@@ -99,6 +99,7 @@ public class ConfigurationParser {
             m.checkpoint("configured units");
 
             ctx.schedule.close();
+            m.checkpoint("configured schedule");
 
             // Need just about everything resolved by now
 

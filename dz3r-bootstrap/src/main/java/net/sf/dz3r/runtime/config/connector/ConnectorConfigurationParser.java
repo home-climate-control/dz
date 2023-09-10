@@ -43,6 +43,11 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
                     .collect(Collectors.toSet())
                     .block();
 
+            if (zones.isEmpty()) {
+                logger.warn("connectors.http.{}: no reportable zones found, not creating the connector", cf.id());
+                return;
+            }
+
             context.connectors.register(cf.id(), new HttpConnectorGAE(new URL(cf.uri()), zones));
 
         } catch (MalformedURLException e) {

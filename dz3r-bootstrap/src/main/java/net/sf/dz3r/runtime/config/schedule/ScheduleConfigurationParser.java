@@ -33,7 +33,7 @@ public class ScheduleConfigurationParser extends ConfigurationContextAware {
             return;
         }
 
-        Flux
+        var mapping = Flux
                 .fromIterable(source)
                 // This will not be fast
                 .publishOn(Schedulers.boundedElastic())
@@ -45,6 +45,14 @@ public class ScheduleConfigurationParser extends ConfigurationContextAware {
                             : Flux.empty();
                 })
                 .collectMap(CalendarConfigEntry::zone, CalendarConfigEntry::calendar)
+                .block();
+
+        if (mapping.isEmpty()) {
+            logger.warn("schedule.google-calendar: no mappable zones found, not creating the updater");
+            return;
+        }
+
+        Flux.just(mapping)
                 .map(this::createUpdater)
                 .subscribe(this::register);
     }
