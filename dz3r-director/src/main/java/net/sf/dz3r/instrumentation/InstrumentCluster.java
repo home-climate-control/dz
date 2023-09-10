@@ -2,6 +2,7 @@ package net.sf.dz3r.instrumentation;
 
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.health.SystemStatus;
 import net.sf.dz3r.view.Connector;
@@ -30,6 +31,7 @@ public class InstrumentCluster {
 
     private final Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> sensors;
     private final Flux<Map.Entry<String, Switch<?>>> switches;
+    private final Flux<Map.Entry<String, ScheduleUpdater>> schedule;
     private final Flux<Map.Entry<String, Connector>> connectors;
     private final Flux<Map.Entry<String, MetricsCollector>> collectors;
     private final Flux<Map.Entry<String, HvacDevice>> hvacDevices;
@@ -49,6 +51,7 @@ public class InstrumentCluster {
     public InstrumentCluster(
             Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> sensors,
             Flux<Map.Entry<String, Switch<?>>> switches,
+            Flux<Map.Entry<String, ScheduleUpdater>> schedule,
             Flux<Map.Entry<String, Connector>> connectors,
             Flux<Map.Entry<String, MetricsCollector>> collectors,
             Flux<Map.Entry<String, HvacDevice>> hvacDevices
@@ -56,6 +59,7 @@ public class InstrumentCluster {
 
         this.sensors = sensors;
         this.switches = switches;
+        this.schedule = schedule;
         this.connectors = connectors;
         this.collectors = collectors;
         this.hvacDevices = hvacDevices;
@@ -71,6 +75,7 @@ public class InstrumentCluster {
         connectSwitches();
 
         logger.error("FIXME: NOT IMPLEMENTED: getFlux(dampers)");
+        logger.error("FIXME: NOT IMPLEMENTED: getFlux(schedule)");
         logger.error("FIXME: NOT IMPLEMENTED: getFlux(collectors)");
         logger.error("FIXME: NOT IMPLEMENTED: getFlux(connectors)");
 

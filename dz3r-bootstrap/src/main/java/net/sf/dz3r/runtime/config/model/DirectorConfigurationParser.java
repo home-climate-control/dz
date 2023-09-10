@@ -1,8 +1,8 @@
 package net.sf.dz3r.runtime.config.model;
 
+import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
-import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;

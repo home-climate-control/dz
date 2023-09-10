@@ -1,5 +1,7 @@
 package net.sf.dz3r.runtime.config;
 
+import net.sf.dz3r.instrumentation.InstrumentCluster;
+import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.config.connector.ConnectorConfigurationParser;
 import net.sf.dz3r.runtime.config.filter.FilterConfigurationParser;
 import net.sf.dz3r.runtime.config.hardware.HvacConfigurationParser;
@@ -11,8 +13,6 @@ import net.sf.dz3r.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3r.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3r.runtime.config.onewire.OnewireConfigurationParser;
 import net.sf.dz3r.runtime.config.schedule.ScheduleConfigurationParser;
-import net.sf.dz3r.instrumentation.InstrumentCluster;
-import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -109,6 +109,7 @@ public class ConfigurationParser {
             var ic = new InstrumentCluster(
                     ctx.sensors.getFlux(),
                     ctx.switches.getFlux(),
+                    ctx.schedule.getFlux(),
                     ctx.connectors.getFlux(),
                     ctx.collectors.getFlux(),
                     ctx.hvacDevices.getFlux());
