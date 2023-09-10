@@ -1,9 +1,9 @@
 package net.sf.dz3r.view.swing;
 
-import net.sf.dz3.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -53,7 +53,7 @@ public class ReactiveConsole {
      *
      * @param initSet Objects to display. Only {@link UnitDirector} instances are recognized by this constructor.
      *
-     * @deprecated This constructor is only used from {@link net.sf.dz3.runtime.Container}. Use
+     * @deprecated This constructor is only used from {@link net.sf.dz3r.runtime.Container}. Use
      * {@link #ReactiveConsole(String, Set, Map, InstrumentCluster, TemperatureUnit)} instead.
      */
     @Deprecated(since = "2024-01-01")

@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.swing.zone;
 
-import net.sf.dz3.runtime.config.model.TemperatureUnit;
+import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;

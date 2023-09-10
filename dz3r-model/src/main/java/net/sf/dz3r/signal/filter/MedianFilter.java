@@ -23,8 +23,8 @@ import java.util.List;
  * @param <T> Filtered object type.
  *
  * @see MedianSetFilter
- * @see net.sf.dz3.device.sensor.impl.MedianFilter
- * @see net.sf.dz3.device.sensor.impl.MedianSetFilter
+ * @see net.sf.dz3r.device.sensor.impl.MedianFilter
+ * @see net.sf.dz3r.device.sensor.impl.MedianSetFilter
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
