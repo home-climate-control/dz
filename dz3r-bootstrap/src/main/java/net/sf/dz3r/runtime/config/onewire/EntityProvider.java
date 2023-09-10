@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config.onewire;
 
+import net.sf.dz3r.device.Addressable;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,7 +66,32 @@ public class EntityProvider<T> implements AutoCloseable {
         }
     }
 
-    public synchronized Flux<Map.Entry<String, T>> getFlux() {
+    public Flux<Map.Entry<String, T>> getFlux() {
         return flux;
+    }
+
+    public T getById(String id) {
+
+        var found = getFlux()
+                .filter(kv -> kv.getKey().equals(id))
+                .blockFirst();
+
+        if (found != null) {
+            return found.getValue();
+        }
+
+        logger.error("\"{}\" not found among configured {} IDs; existing mappings follow:", id, kind);
+        getFlux()
+                .subscribe(entry -> logger.error(
+                        "  id={}, {}={}",
+                        entry.getKey(),
+                        kind,
+                        entry.getValue() instanceof Addressable<?> a
+                                ? a.getAddress()
+                                : entry.getValue()));
+
+        logger.error("{}: skipping to proceed with the rest of the configuration", id);
+
+        return null;
     }
 }
