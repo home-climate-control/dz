@@ -38,7 +38,7 @@ public class ScheduleConfigurationParser extends ConfigurationContextAware {
                 // This will not be fast
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(kv -> {
-                    var zone = context.zones.getById(kv.zone());
+                    var zone = context.zones.getById("schedule.google-calendar", kv.zone());
 
                     return zone != null
                             ? Flux.just(new CalendarConfigEntry(zone.getAddress(), kv.calendar()))

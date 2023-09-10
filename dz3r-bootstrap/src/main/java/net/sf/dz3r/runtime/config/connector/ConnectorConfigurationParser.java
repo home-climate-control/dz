@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config.connector;
 
+import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.signal.Signal;
@@ -14,6 +15,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
@@ -33,7 +35,15 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
         try {
 
-            context.connectors.register(cf.id(), new HttpConnectorGAE(new URL(cf.uri()), cf.zones()));
+            // Configuration contains IDs, connector doesn't know and doesn't care
+            var zones = Flux
+                    .fromIterable(cf.zones())
+                    .flatMap(name -> context.zones.getMonoById("connectors.http", name))
+                    .map(Zone::getAddress)
+                    .collect(Collectors.toSet())
+                    .block();
+
+            context.connectors.register(cf.id(), new HttpConnectorGAE(new URL(cf.uri()), zones));
 
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid URL: '" + cf.uri() + "'");

@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import java.util.LinkedHashMap;
@@ -70,7 +71,7 @@ public class EntityProvider<T> implements AutoCloseable {
         return flux;
     }
 
-    public T getById(String id) {
+    public T getById(String consumer, String id) {
 
         var found = getFlux()
                 .filter(kv -> kv.getKey().equals(id))
@@ -80,7 +81,7 @@ public class EntityProvider<T> implements AutoCloseable {
             return found.getValue();
         }
 
-        logger.error("\"{}\" not found among configured {} IDs; existing mappings follow:", id, kind);
+        logger.error("{}: \"{}\" not found among configured {} IDs; existing mappings follow:", consumer, id, kind);
         getFlux()
                 .subscribe(entry -> logger.error(
                         "  id={}, {}={}",
@@ -90,8 +91,16 @@ public class EntityProvider<T> implements AutoCloseable {
                                 ? a.getAddress()
                                 : entry.getValue()));
 
-        logger.error("{}: skipping to proceed with the rest of the configuration", id);
+        logger.error("{}: {}: skipping to proceed with the rest of the configuration", consumer, id);
 
         return null;
+    }
+
+    public Mono<T> getMonoById(String consumer, String id) {
+        var found = getById(consumer, id);
+
+        return found == null
+                ? Mono.empty()
+                : Mono.just(found);
     }
 }
