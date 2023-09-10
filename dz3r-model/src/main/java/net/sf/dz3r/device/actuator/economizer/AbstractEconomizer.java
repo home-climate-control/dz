@@ -107,7 +107,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         this.settings = this.settings == null ? settings : this.settings.merge(settings);
 
-        logger.info("setSettings({}): {}", getAddress(), settings);
+        logger.info("{}: setSettings(): {}", getAddress(), settings);
     }
 
     @Override
@@ -120,7 +120,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         var stage1 = Flux
                 .create(this::connectCombined)
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext(pair -> logger.debug("raw indoor={}, ambient={}", pair.getLeft(), pair.getRight()))
+                .doOnNext(pair -> logger.debug("{}: raw indoor={}, ambient={}", getAddress(), pair.getLeft(), pair.getRight()))
                 .filter(pair -> pair.getLeft() != null && pair.getRight() != null)
                 .filter(pair -> !pair.getLeft().isError() && !pair.getRight().isError())
                 .map(this::computeCombined);
@@ -164,7 +164,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     private void connectCombined(FluxSink<Pair<Signal<Double, String>, Signal<Double, Void>>> sink) {
         combinedSink = sink;
         combinedReady.countDown();
-        logger.debug("combined sink ready");
+        logger.debug("{}: combined sink ready", getAddress());
     }
 
     private Boolean recordDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
@@ -214,7 +214,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     private void acquireCombinedSink() {
 
-        logger.debug("awaiting combined sink...");
+        logger.debug("{}: awaiting combined sink...", getAddress());
         try {
 
             combinedReady.await();
@@ -225,7 +225,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             throw new IllegalStateException("failed to acquire combined sink", ex);
         }
 
-        logger.debug("acquired combined sink");
+        logger.debug("{}: acquired combined sink", getAddress());
     }
 
     private Signal<Double, Void> computeCombined(Pair<Signal<Double, String>, Signal<Double, Void>> pair) {
@@ -252,7 +252,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     protected double computeCombined(Double indoorTemperature, Double ambientTemperature) {
 
-        logger.debug("valid indoor={}, ambient={}", indoorTemperature, ambientTemperature);
+        logger.debug("{}: valid indoor={}, ambient={}", getAddress(), indoorTemperature, ambientTemperature);
 
         // Adjusted for mode
         var ambientDelta = getAmbientDelta(indoorTemperature, ambientTemperature);
@@ -270,7 +270,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             // We're below the target, but the mode adjusted ambient is too high - this is an abnormal situation,
             // either the target is misconfigured, or someone pulled the setpoint too far
 
-            logger.warn("economizer abnormal, indoor={}, ambient={}, settings={}", indoorTemperature, ambientTemperature, settings);
+            logger.warn("{}: economizer abnormal, indoor={}, ambient={}, settings={}", getAddress(), indoorTemperature, ambientTemperature, settings);
             targetAdjustment = 0.0;
 
         } else {
@@ -280,12 +280,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
             targetAdjustment = ambientDelta * k;
 
-            logger.debug("k={}, targetAdjustment={}", k, targetAdjustment);
+            logger.debug("{}: k={}, targetAdjustment={}", getAddress(), k, targetAdjustment);
         }
 
         var signal = ambientDelta - targetAdjustment;
 
-        logger.debug("ambientD={}, targetD={}, signal={}", ambientDelta, targetDelta, signal);
+        logger.debug("{}: ambientD={}, targetD={}, signal={}", getAddress(), ambientDelta, targetDelta, signal);
 
         return signal;
     }
@@ -324,7 +324,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         if (source.isError()) {
 
             // How did it get here? This log message is likely a dupe, need to keep an eye on it
-            logger.warn("error signal in economizer pipeline? {}", source);
+            logger.warn("{}: error signal in economizer pipeline? {}", getAddress(), source);
 
             // Can't do anything meaningful with it here
             return source;
