@@ -19,7 +19,7 @@ Best explained by example:
 
 * `id`: Unique identifier this entity will be known as to the rest of the system.
 * `uri`: Proxy URL
-* `zones`: list of [zone](./zones.md) **names** for the moment, soon to be replaced with zone **identifiers** for improved configuration stability. Keep an eye on [issue #278](https://github.com/home-climate-control/dz/issues/278) not to miss this.
+* `zones`: list of [zone.id](./zones.md#id)s to report and accept commands for.
 
 ### Property of
 * [connectors](./connectors.md)
