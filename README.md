@@ -27,6 +27,7 @@ Summary of changes from imperative code:
 * New devices: [switchable](./docs/configuration/hvac.md#switchable) and [heatpump-hat](./docs/configuration/hvac.md#heatpump-hat) are now available along with the [heatpump](./docs/configuration/hvac.md#heatpump).
 * New access mechanism: [web-ui](./docs/configuration/web-ui.md) is now being developed as a first class interface.
 * New functionality: [console](./docs/configuration/console.md) now supports the [economizer](./docs/configuration/zones.md#economizer), [instrument cluster](./docs/instrument-cluster/index.md) ("system status at a glance"), and individual entries for additional sensors.
+* Last, but not least, can now be run in a [Docker container](./docs/build/index.md#docker).
 
 ## Psst!
 
