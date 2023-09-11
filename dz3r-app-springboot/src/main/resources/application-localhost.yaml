@@ -28,7 +28,7 @@ management:
     metrics:
       export:
         enabled: true
-        domain: net.sf.dz3.springboot
+        domain: net.sf.dz3r.springboot
 
 logging:
   level:
