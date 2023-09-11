@@ -37,13 +37,15 @@ public class WebUI {
 
     protected final Logger logger = LogManager.getLogger();
 
+    public static final int DEFAULT_PORT = 3939;
+
     private final int port; // NOSONAR We'll get to it
     private final Set<Object> initSet = new HashSet<>(); // NOSONAR We'll get to it
 
     private final Map<UnitDirector, UnitObserver> unit2observer = new TreeMap<>();
 
     public WebUI(Set<Object> initSet) {
-        this(3939, initSet);
+        this(DEFAULT_PORT, initSet);
     }
 
     public WebUI(int port, Set<Object> initSet) {
@@ -51,17 +53,23 @@ public class WebUI {
         this.port = port;
         this.initSet.addAll(initSet);
 
-        logger.info("init set: {}", initSet);
+        logger.info("port: {}", port);
+
+        if (initSet.isEmpty()) {
+            logger.warn("empty init set, only diagnostic URLs will be available");
+        } else {
+            logger.info("init set: {}", initSet);
+        }
 
         Flux.just(Instant.now())
                 .publishOn(Schedulers.boundedElastic())
-                .doOnNext(this::start)
+                .doOnNext(this::run)
                 .subscribe();
     }
 
-    private void start(Instant startedAt) {
+    private void run(Instant startedAt) {
 
-        ThreadContext.push("start");
+        ThreadContext.push("run");
 
         try {
 

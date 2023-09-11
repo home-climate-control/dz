@@ -9,7 +9,7 @@ import reactor.core.publisher.Flux;
  * @param <O> Output type.
  * @param <P> Signal payload type.
  *
- * @see net.sf.dz3.controller.ProcessController
+ * @see net.sf.dz3r.controller.ProcessController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 @FunctionalInterface

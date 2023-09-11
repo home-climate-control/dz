@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 /**
  * Assembles all the components related to one hardware HVAC unit, connects them, and manages their lifecycles.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class UnitDirector implements Addressable<String> {
+public class UnitDirector implements Addressable<String>, AutoCloseable {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -70,13 +70,25 @@ public class UnitDirector implements Addressable<String> {
 
         var scheduleFlux = Optional.ofNullable(scheduleUpdater)
                 .map(u -> connectScheduler(sensorFlux2zone.values(), u))
-                .orElse(Flux.empty());
+                .orElseGet(() -> {
+                    logger.warn("{}: no scheduler provided, running defaults", getAddress());
+                    return Flux.empty();
+                });
+
+        // This is necessary because... <facepalm> the architecture is screwed up and applying the schedule to the zone
+        // is a side effect of consuming this flux. No wonder the schedule was only applied when the console was up,
+        // it was the only consumer until now.
+        // See https://github.com/home-climate-control/dz/issues/281
+
+        scheduleFlux
+                .publishOn(Schedulers.newSingle("schedule-watcher-" + name))
+                .doOnNext(s -> logger.debug("{}: zone={}, event={}", name, s.getKey(), s.getValue()))
+                .subscribe();
 
         feed = connectFeeds(sensorFlux2zone, unitController, hvacDevice, hvacMode, scheduleFlux);
 
         var zones = sensorFlux2zone.values();
 
-        connectScheduler(zones, scheduleUpdater);
         Optional.ofNullable(metricsCollectorSet)
                 .ifPresent(collectors -> Flux.fromIterable(collectors)
                         .doOnNext(c -> c.connect(feed))
@@ -91,31 +103,11 @@ public class UnitDirector implements Addressable<String> {
                         .subscribeOn(Schedulers.boundedElastic())
                         .subscribe());
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            ThreadContext.push("shutdownHook");
-            try {
-
-                logger.warn("Received termination signal {}", getAddress());
-                sigTerm.countDown();
-                logger.warn("Shutting down: {}", getAddress());
-                try {
-                    shutdownComplete.await();
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    logger.error("Interrupted, can do nothing about it", ex);
-                }
-                logger.info("Shut down: {}", getAddress());
-
-            } finally {
-                ThreadContext.pop();
-            }
-        }));
-
         logger.info("Configured: {} ({} zones: {})",
                 name,
                 zones.size(),
                 Flux.fromIterable(zones)
-                        .map(z -> z.getAddress())
+                        .map(Zone::getAddress)
                         .sort()
                         .collectList()
                         .block());
@@ -167,15 +159,14 @@ public class UnitDirector implements Addressable<String> {
 
     private Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> connectScheduler(Collection<Zone> zones, ScheduleUpdater scheduleUpdater) {
 
-        if (scheduleUpdater == null) {
-            logger.warn("no scheduler provided, running defaults");
-            return Flux.empty();
-        }
+        net.sf.dz3r.common.HCCObjects.requireNonNull(scheduleUpdater, "programming error, this should've been resolved up the call stack");
 
         var name2zone = Flux.fromIterable(zones)
                 .map(z -> new AbstractMap.SimpleEntry<>(z.getAddress(), z))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
                 .block();
+
+        logger.info("{}: connected schedules: {}", getAddress(), name2zone);
 
         var scheduler = new Scheduler(name2zone);
 
@@ -244,6 +235,12 @@ public class UnitDirector implements Addressable<String> {
 
     public Feed getFeed() {
         return feed;
+    }
+
+    @Override
+    public void close() throws Exception {
+        logger.warn("Shutting down {}", getAddress());
+        logger.error("FIXME: close()");
     }
 
     public static class Feed {

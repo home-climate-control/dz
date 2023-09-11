@@ -22,7 +22,7 @@ import java.util.TreeMap;
  * Listens to the schedule event feed coming from {@link ScheduleUpdater}, and
  * passes the commands down to {@link net.sf.dz3r.model.Zone}s.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class Scheduler {
 
@@ -59,17 +59,17 @@ public class Scheduler {
 
         // Observe
         var observe = source
+                .publishOn(Schedulers.newSingle("schedule-observe"))
                 .flatMap(this::updateSchedule)
                 .flatMap(this::applySchedule)
-                .doOnNext(s -> logger.info("scheduleObserve: {}", s))
-                .subscribeOn(Schedulers.boundedElastic());
+                .doOnNext(s -> logger.info("scheduleObserve: {}", s));
 
         // Execute
         var execute = Flux.interval(scheduleGranularity, Schedulers.boundedElastic())
+                .publishOn(Schedulers.newSingle("schedule-execute"))
                 .flatMap(s -> Flux.fromIterable(zone2schedule.entrySet()))
                 .flatMap(this::applySchedule)
-                .doOnNext(s -> logger.info("scheduleExecute: {}", s))
-                .subscribeOn(Schedulers.boundedElastic());
+                .doOnNext(s -> logger.info("scheduleExecute: {}", s));
 
         return Flux
                 .merge(observe, execute)
@@ -91,6 +91,22 @@ public class Scheduler {
         return Flux.just(new AbstractMap.SimpleEntry<>(zone, schedule));
     }
 
+    /**
+     * Apply a period to a zone, possibly.
+     *
+     * @param source Mapping from a zone to a set of their periods.
+     *
+     * @return Status update. Values are as follows:
+     *
+     * <ul>
+     *     <li>Nothing if the zone is on hold;</li>
+     *     <li>Nothing if the zone is already at current period;</li>
+     *     <li>Mapping of the zone name to period and settings upon a change;</li>
+     *     <li>Mapping of the zone name to {@code null} if there is no active period.</li>
+     * </ul>
+     *
+     * VT: FIXME: The above looks weird, need refactoring.
+     */
     private synchronized Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> applySchedule(Map.Entry<Zone, SortedMap<SchedulePeriod, ZoneSettings>> source) {
 
         ThreadContext.push("applySchedule");

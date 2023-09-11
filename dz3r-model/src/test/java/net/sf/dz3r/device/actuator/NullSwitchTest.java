@@ -99,22 +99,38 @@ class NullSwitchTest {
     }
 
     @Test
-    void passSetStateWithBlockDelaySingleScheduler() {
+    void passSetStateWithBlockDelaySingleSchedulerPessimistic() {
 
         assertThatCode(() -> {
-            delay(null);
+            delay(null, false);
         }).doesNotThrowAnyException();
     }
 
     @Test
-    void passSetStateWithBlockDelayElasticScheduler() {
+    void passSetStateWithBlockDelaySingleSchedulerOptimistic() {
 
         assertThatCode(() -> {
-            delay(Schedulers.newBoundedElastic(1, 10, "e-single"));
+            delay(null, true);
         }).doesNotThrowAnyException();
     }
 
-    private void delay(Scheduler scheduler) {
-        assertThat(new NullSwitch("D", 10, 50, scheduler).setState(true).block()).isTrue();
+    @Test
+    void passSetStateWithBlockDelayElasticSchedulerPessimistic() {
+
+        assertThatCode(() -> {
+            delay(Schedulers.newBoundedElastic(1, 10, "e-single"), false);
+        }).doesNotThrowAnyException();
+    }
+
+    @Test
+    void passSetStateWithBlockDelayElasticSchedulerOptimistic() {
+
+        assertThatCode(() -> {
+            delay(Schedulers.newBoundedElastic(1, 10, "e-single"), true);
+        }).doesNotThrowAnyException();
+    }
+
+    private void delay(Scheduler scheduler, boolean optimistic) {
+        assertThat(new NullSwitch("D", optimistic, 10, 50, scheduler).setState(true).block()).isTrue();
     }
 }

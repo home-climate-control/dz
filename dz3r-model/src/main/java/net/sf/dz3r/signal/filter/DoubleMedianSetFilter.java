@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class DoubleMedianSetFilter<P> extends MedianSetFilter<Double, P> {
 
-    protected DoubleMedianSetFilter(int depth) {
+    public DoubleMedianSetFilter(int depth) {
         super(depth);
     }
 
@@ -17,7 +17,7 @@ public class DoubleMedianSetFilter<P> extends MedianSetFilter<Double, P> {
         return (d1 + d2) / 2;
     }
 
-    public static Flux<Signal<Double, Void>> compute(Set<Flux<Signal<Double, Void>>> sourceSet) {
+    public Flux<Signal<Double, Void>> compute(Set<Flux<Signal<Double, Void>>> sourceSet) {
 
         var filter = new DoubleMedianSetFilter<Integer>(sourceSet.size());
         var filterSet = new HashSet<Flux<Signal<Double, Integer>>>();

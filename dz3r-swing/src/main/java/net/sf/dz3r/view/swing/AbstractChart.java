@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing;
 
+import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.swing.zone.AbstractZoneChart;
 import org.apache.logging.log4j.ThreadContext;
 
@@ -23,7 +24,7 @@ import java.time.temporal.ChronoUnit;
  * @param <T> Signal value type.
  * @param <P> Extra payload type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
@@ -471,5 +472,66 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
             this.minmaxTime = minmaxTime;
         }
 
+    }
+
+    /**
+     * Averaging tool.
+     */
+    protected abstract class Averager<I, O> {
+
+        /**
+         * The expiration interval. Values older than the last key by this many
+         * milliseconds are expired.
+         */
+        private final long expirationInterval;
+
+        /**
+         * The timestamp of the oldest recorded sample.
+         */
+        protected Long oldestTimestamp;
+
+        private int count;
+
+        protected Averager(long expirationInterval) {
+            this.expirationInterval = expirationInterval;
+        }
+
+        /**
+         * Record a value.
+         *
+         * @param signal Signal to record.
+         *
+         * @return The average of all data stored in the buffer if this sample is more than {@link #expirationInterval}
+         * away from the first sample stored, {@code null} otherwise.
+         */
+        public final O append(Signal<I, Void> signal) {
+
+            if (oldestTimestamp == null) {
+                oldestTimestamp = signal.timestamp.toEpochMilli();
+            }
+
+            var age = signal.timestamp.toEpochMilli() - oldestTimestamp;
+
+            if (age < expirationInterval) {
+
+                count++;
+
+                accumulate(signal.getValue());
+
+                return null;
+            }
+
+            logger.trace("RingBuffer: flushing {} elements at {}", () -> count, () -> Duration.ofMillis(age));
+
+            var result = complete(signal.getValue(), count);
+
+            count = 1;
+            oldestTimestamp = signal.timestamp.toEpochMilli();
+
+            return result;
+        }
+
+        protected abstract void accumulate(I value);
+        protected abstract O complete(I value, int count);
     }
 }

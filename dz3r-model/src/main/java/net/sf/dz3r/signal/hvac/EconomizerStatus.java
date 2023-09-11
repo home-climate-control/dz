@@ -7,7 +7,8 @@ import net.sf.dz3r.signal.Signal;
  * Economiser status.
  *
  * @see net.sf.dz3r.device.actuator.economizer.AbstractEconomizer
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ * @see net.sf.dz3r.signal.health.EconomizerStatus
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class EconomizerStatus {
 

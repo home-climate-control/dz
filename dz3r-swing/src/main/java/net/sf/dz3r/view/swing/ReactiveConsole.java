@@ -1,7 +1,11 @@
 package net.sf.dz3r.view.swing;
 
+import net.sf.dz3r.instrumentation.InstrumentCluster;
+import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -16,8 +20,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.time.Duration;
-import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -38,8 +42,7 @@ public class ReactiveConsole {
 
     private final Logger logger = LogManager.getLogger();
 
-    private final Set<Object> initSet;
-    private final TemperatureUnit defaultUnit;
+    private final Config config;
 
     private JFrame mainFrame;
 
@@ -48,8 +51,12 @@ public class ReactiveConsole {
     /**
      * Create an instance and fill it up with objects to display, default temperature unit being Celsius.
      *
-     * @param initSet Objects to display.
+     * @param initSet Objects to display. Only {@link UnitDirector} instances are recognized by this constructor.
+     *
+     * @deprecated This constructor is only used from {@link net.sf.dz3r.runtime.Container}. Use
+     * {@link #ReactiveConsole(String, Set, Map, InstrumentCluster, TemperatureUnit)} instead.
      */
+    @Deprecated(since = "2024-01-01")
     public ReactiveConsole(Set<Object> initSet) {
         this(initSet, TemperatureUnit.C);
     }
@@ -59,32 +66,70 @@ public class ReactiveConsole {
      *
      * @param initSet Objects to display.
      * @param unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
+     *
+     * @deprecated Use {@link #ReactiveConsole(String, Set, Map, InstrumentCluster, TemperatureUnit)} instead.
      */
+    @Deprecated(since = "2024-01-01")
     public ReactiveConsole(Set<Object> initSet, TemperatureUnit unit) {
 
-        this.initSet = initSet;
-        this.defaultUnit = unit;
+        this.config = new Config("unnamed", convert(initSet), Map.of(), null, unit);
 
-        Flux.just(Instant.now())
+        Flux.just(config)
                 .publishOn(Schedulers.boundedElastic())
                 .doOnNext(this::start)
                 .subscribe();
     }
 
-    private void start(Instant startedAt) {
+    private Set<UnitDirector> convert(Set<Object> source) {
 
+        var result = new LinkedHashSet<UnitDirector>();
+
+        for (var o: source) {
+
+            if (o instanceof UnitDirector u) {
+                result.add(u);
+            } else {
+                logger.warn("Obsolete constructor; this will be ignored: {}", o);
+            }
+        }
+
+        return result;
+    }
+
+    public ReactiveConsole(
+            String instance,
+            Set<UnitDirector> directors,
+            Map<String, Flux<Signal<Double, Void>>> sensors,
+            InstrumentCluster ic,
+            TemperatureUnit temperatureUnit) {
+
+        this.config = new Config(instance, directors, sensors, ic, temperatureUnit);
+
+        Flux.just(config)
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(this::start)
+                .subscribe();
+    }
+
+    private void start(Config config) {
+
+        Marker m = new Marker("ReactiveConsole#start", Level.INFO);
         ThreadContext.push("start");
 
         try {
+
+            if (config.directors.isEmpty() && config.sensors.isEmpty()) {
+                logger.warn("empty director and sensor sets, not creating mainFrame, what's the point?");
+                return;
+            }
 
             createFrame();
 
             mainFrame.setSize(screenSizes[screenSizeOffset].displaySize);
             mainFrame.setVisible(true);
 
-            logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
-
         } finally {
+            m.close();
             ThreadContext.pop();
         }
     }
@@ -99,7 +144,7 @@ public class ReactiveConsole {
 
         try {
 
-            mainFrame = new JFrame("DIY Zoning Console");
+            mainFrame = new JFrame("Home Climate Control: " + config.instance);
             mainFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
             var display = mainFrame.getContentPane();
@@ -111,7 +156,7 @@ public class ReactiveConsole {
 
             display.setLayout(layout);
 
-            entitySelectorPanel = new EntitySelectorPanel(initSet, screenSizes[screenSizeOffset]);
+            entitySelectorPanel = new EntitySelectorPanel(config, screenSizes[screenSizeOffset]);
 
             cs.fill = GridBagConstraints.BOTH;
             cs.gridx = 0;
@@ -246,6 +291,16 @@ public class ReactiveConsole {
                 ThreadContext.pop();
             }
         }
+
+    }
+
+    public record Config(
+            String instance,
+            Set<UnitDirector> directors,
+            Map<String, Flux<Signal<Double, Void>>> sensors,
+            InstrumentCluster ic,
+            TemperatureUnit initialUnit
+    ) {
 
     }
 }

@@ -16,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +43,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
      * @param dbURL InfluxDB URL to connect to.
      * @param username InfluxDB username. Use {@code null} for unauthenticated access}.
      * @param password InfluxDB password. Use {@code null} for unauthenticated access}.
+     * @param sensorFeed2name Mapping from the sensor feed to the name it will be reported as.
      */
     public InfluxDbLogger(
             String dbName,
@@ -63,7 +65,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
         }
 
         if (config.username == null || "".equals(config.username) || config.password == null || "".equals(config.password)) {
-            logger.warn("one of (username, password) is null or missing, connecting unauthenticated - THIS IS A BAD IDEA");
+            logger.warn("{}: one of (username, password) is null or missing, connecting unauthenticated - THIS IS A BAD IDEA", config.dbURL);
             logger.warn("see https://docs.influxdata.com/influxdb/v1.7/administration/authentication_and_authorization/");
             logger.warn("(username, password) = ({}, {})", config.username, config.password);
 
@@ -113,16 +115,23 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
     public void connect(UnitDirector.Feed feed) {
 
         var sensorFeeds = Flux.merge(
-                Flux.fromIterable(sensorFeed2name.entrySet())
-                        .map(kv -> new SensorConverter(config.instance, kv.getValue()).compute(kv.getKey()))
-                        .collect(Collectors.toList())
-                        .block());
+                Objects.requireNonNull(
+                        Flux.fromIterable(sensorFeed2name.entrySet())
+                                .map(kv -> new SensorConverter(
+                                        config.instance,
+                                        kv.getValue()).compute(kv.getKey()))
+                                .collect(Collectors.toList())
+                                .block()));
 
         var zoneSensorFeeds = Flux.merge(
-                Flux.fromIterable(feed.sensorFlux2zone.entrySet())
-                .map(kv -> new ZoneSensorConverter(config.instance, feed.unit, kv.getValue().getAddress()).compute(kv.getKey()))
-                .collect(Collectors.toList())
-                .block());
+                Objects.requireNonNull(
+                        Flux.fromIterable(feed.sensorFlux2zone.entrySet())
+                                .map(kv -> new ZoneSensorConverter(
+                                        config.instance,
+                                        feed.unit,
+                                        kv.getValue().getAddress()).compute(kv.getKey()))
+                                .collect(Collectors.toList())
+                                .block()));
 
         var zoneStatusFeed = new ZoneMetricsConverter(config.instance, feed.unit).compute(feed.aggregateZoneFlux);
         var zoneControllerFeed = new ZoneControllerMetricsConverter(config.instance, feed.unit).compute(feed.zoneControllerFlux);

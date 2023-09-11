@@ -11,11 +11,11 @@ import reactor.core.publisher.Flux;
  *
  * It's either on, or off.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class SingleStageUnitController extends AbstractUnitController {
 
-    protected SingleStageUnitController(String name) {
+    public SingleStageUnitController(String name) {
         super(name);
     }
 

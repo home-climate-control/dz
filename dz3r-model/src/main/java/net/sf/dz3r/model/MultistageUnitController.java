@@ -9,7 +9,6 @@ import reactor.core.publisher.Flux;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Multistage unit controller.
@@ -25,7 +24,7 @@ public class MultistageUnitController extends AbstractUnitController {
      */
     private final List<Double> stages = new ArrayList<>();
 
-    protected MultistageUnitController(String name, List<Double> stages) {
+    public MultistageUnitController(String name, List<Double> stages) {
         super(name);
         setStages(stages);
     }
@@ -50,7 +49,7 @@ public class MultistageUnitController extends AbstractUnitController {
         }
 
         this.stages.clear();
-        this.stages.addAll(stages.stream().sorted().collect(Collectors.toList()));
+        this.stages.addAll(stages.stream().sorted().toList());
 
         return Collections.unmodifiableList(this.stages);
     }

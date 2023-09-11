@@ -1,7 +1,11 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -19,8 +23,10 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     protected final Logger logger = LogManager.getLogger();
     protected final Clock clock;
 
-
     private final String name;
+
+    private final Sinks.Many<Signal<HvacDeviceStatus, Void>> statusSink;
+    private final Flux<Signal<HvacDeviceStatus, Void>> statusFlux;
 
     /**
      * The moment this device turned on, {@code null} if currently off.
@@ -36,6 +42,9 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     protected AbstractHvacDevice(Clock clock, String name) {
         this.clock = clock;
         this.name = name;
+
+        statusSink = Sinks.many().multicast().onBackpressureBuffer();
+        statusFlux = statusSink.asFlux();
     }
 
     @Override
@@ -44,10 +53,19 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     }
 
     protected void check(Switch<?> s, String purpose) {
-
         if (s == null) {
             throw new IllegalArgumentException("'" + purpose + "' switch can't be null");
         }
+    }
+
+    @Override
+    public final Flux<Signal<HvacDeviceStatus, Void>> getFlux() {
+        return statusFlux;
+    }
+
+    protected final void broadcast(Signal<HvacDeviceStatus, Void> signal) {
+        logger.debug("{}: broadcast: {}", getAddress(), signal);
+        statusSink.tryEmitNext(signal);
     }
 
     /**

@@ -1,29 +1,33 @@
 package net.sf.dz3r.signal.hvac;
 
+import net.sf.dz3r.device.actuator.HvacDevice;
+
 import java.time.Duration;
 
-public abstract class HvacDeviceStatus {
-    public enum Kind {
-        REQUESTED,
-        ACTUAL
-    }
+/**
+ * Hierarchy base for the status of any {@link HvacDevice}.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
+ */
+public class HvacDeviceStatus {
 
-    public final Kind kind;
-    public final HvacCommand requested;
+    /**
+     * The state requested by the last incoming command that resulted in this update.
+     */
+    public final HvacCommand command;
 
     /**
      * Duration since the device turned on this time, {@code null} if it is currently off.
      */
     public final Duration uptime;
 
-    protected HvacDeviceStatus(Kind kind, HvacCommand requested, Duration uptime) {
-        this.kind = kind;
-        this.requested = requested;
+    public HvacDeviceStatus(HvacCommand command, Duration uptime) {
+        this.command = command;
         this.uptime = uptime;
     }
 
     @Override
     public String toString() {
-        return "{kind=" + kind + ", requested=" + requested + ", uptime=" + uptime + "}";
+        return "{command=" + command + ", uptime=" + uptime + "}";
     }
 }

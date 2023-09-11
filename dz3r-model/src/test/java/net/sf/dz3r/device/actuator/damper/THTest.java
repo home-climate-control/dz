@@ -100,11 +100,11 @@ class THTest {
 
             Scheduler switchScheduler = Schedulers.newSingle("switch scheduler", true);
 
-            var switchLivingRoom = new NullSwitch("switch_livingroom_damper", minDelay, maxDelay, switchScheduler);
-            var switchKitchen = new NullSwitch("switch_kitchen_damper", minDelay, maxDelay, switchScheduler);
-            var switchWestBathroom = new NullSwitch("switch_west_bathroom_damper", minDelay, maxDelay, switchScheduler);
-            var switchWestDamper = new NullSwitch("switch_west_damper", minDelay, maxDelay, switchScheduler);
-            var switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", minDelay, maxDelay, switchScheduler);
+            var switchLivingRoom = new NullSwitch("switch_livingroom_damper", false, minDelay, maxDelay, switchScheduler);
+            var switchKitchen = new NullSwitch("switch_kitchen_damper", false, minDelay, maxDelay, switchScheduler);
+            var switchWestBathroom = new NullSwitch("switch_west_bathroom_damper", false, minDelay, maxDelay, switchScheduler);
+            var switchWestDamper = new NullSwitch("switch_west_damper", false, minDelay, maxDelay, switchScheduler);
+            var switchWestBoosterFan = new NullSwitch("switch_west_boosterfan", false, minDelay, maxDelay, switchScheduler);
 
             var damperLivingRoom = new SwitchDamper<>("damper_livingroom", switchLivingRoom, 0.8, 1.0);
             var damperKitchen = new SwitchDamper<>("damper_kitchen", switchKitchen, 0.8, 1.0);

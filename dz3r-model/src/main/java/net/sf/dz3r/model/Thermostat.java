@@ -24,7 +24,7 @@ import reactor.core.publisher.Flux;
  *
  * VT: FIXME: Provide the means to change the PID controller settings.
  *
- * @see net.sf.dz3.device.model.Thermostat
+ * @see net.sf.dz3r.device.model.Thermostat
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */

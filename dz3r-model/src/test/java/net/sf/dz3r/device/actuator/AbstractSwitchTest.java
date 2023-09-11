@@ -19,7 +19,7 @@ class AbstractSwitchTest {
     void testFirst() {
 
 
-        var s = new TestSwitch("A", null, null, null);
+        var s = new TestSwitch("A", false, null, null, null);
 
         var state = s.setState(true).block();
 
@@ -30,7 +30,7 @@ class AbstractSwitchTest {
     void testNullDelay() {
 
 
-        var s = new TestSwitch("A", null, null, null);
+        var s = new TestSwitch("A", false, null, null, null);
 
         s.setState(true).block();
         s.setState(true).block();
@@ -44,7 +44,7 @@ class AbstractSwitchTest {
         var clock = new TestClock(Clock.fixed(Instant.now(), ZoneId.systemDefault()));
         var rateAllowed = Duration.ofSeconds(1);
 
-        var s = new TestSwitch("A", null, rateAllowed, clock);
+        var s = new TestSwitch("A", false, null, rateAllowed, clock);
 
         s.setState(true).block();
 
@@ -60,7 +60,7 @@ class AbstractSwitchTest {
         var clock = new TestClock(Clock.fixed(Instant.now(), ZoneId.systemDefault()));
         var rateAllowed = Duration.ofSeconds(1);
 
-        var s = new TestSwitch("A", null, rateAllowed, clock);
+        var s = new TestSwitch("A", false, null, rateAllowed, clock);
 
         var state1 = s.setState(true).block();
         assertThat(state1).isTrue();
@@ -77,7 +77,7 @@ class AbstractSwitchTest {
         var clock = new TestClock(Clock.fixed(Instant.now(), ZoneId.systemDefault()));
         var rateAllowed = Duration.ofSeconds(1);
 
-        var s = new TestSwitch("A", null, rateAllowed, clock);
+        var s = new TestSwitch("A", false, null, rateAllowed, clock);
 
         var state1 = s.setState(true).block();
 
@@ -93,7 +93,7 @@ class AbstractSwitchTest {
         var clock = new TestClock(Clock.fixed(Instant.now(), ZoneId.systemDefault()));
         var rateAllowed = Duration.ofSeconds(1);
 
-        var s = new TestSwitch("A", null, rateAllowed, clock);
+        var s = new TestSwitch("A", false, null, rateAllowed, clock);
 
         var state1 = s.setState(true).block();
 
@@ -109,8 +109,8 @@ class AbstractSwitchTest {
         private Boolean state;
         public final AtomicInteger counter = new AtomicInteger(0);
 
-        protected TestSwitch(String address, Scheduler scheduler, Duration minDelay, Clock clock) {
-            super(address, scheduler, minDelay, clock);
+        protected TestSwitch(String address, boolean optimistic, Scheduler scheduler, Duration pace, Clock clock) {
+            super(address, optimistic, scheduler, pace, clock);
         }
 
         @Override

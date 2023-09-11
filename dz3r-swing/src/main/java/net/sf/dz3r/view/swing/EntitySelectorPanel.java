@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing;
 
+import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
@@ -8,6 +9,10 @@ import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
+import net.sf.dz3r.view.swing.dashboard.DashboardCell;
+import net.sf.dz3r.view.swing.dashboard.DashboardPanel;
+import net.sf.dz3r.view.swing.sensor.SensorCell;
+import net.sf.dz3r.view.swing.sensor.SensorPanel;
 import net.sf.dz3r.view.swing.unit.UnitCell;
 import net.sf.dz3r.view.swing.unit.UnitPanel;
 import net.sf.dz3r.view.swing.zone.ZoneCell;
@@ -34,6 +39,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     private final transient Logger logger = LogManager.getLogger();
 
+    private final transient Config config;
+
     private int currentEntityOffset = 0;
     private final transient List<CellAndPanel<?, ?>> entities = new ArrayList<>();
 
@@ -47,36 +54,46 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
      */
     private final CardLayout cardLayout = new CardLayout();
 
-    /**
-     * Screen descriptor at start.
-     *
-     * Ugly hack, need to remove it someday.
-     */
-    private final transient ScreenDescriptor initialScreenDescriptor;
 
-    public EntitySelectorPanel(Set<Object> initSet, ScreenDescriptor screenDescriptor) {
-        this.initialScreenDescriptor = screenDescriptor;
-        init(initSet);
+    public EntitySelectorPanel(ReactiveConsole.Config consoleConfig, ScreenDescriptor screenDescriptor) {
+
+        this.config = new Config(consoleConfig, screenDescriptor);
+
+        init(consoleConfig);
     }
 
-    private void init(Set<Object> initSet) {
+    private void init(ReactiveConsole.Config config) {
 
-        initUnits(initSet);
-        initSensors(initSet);
+        initDashboard(config.ic());
+        initDirectors(config.directors());
+        initSensors(config.sensors());
 
-        logger.info("Configured {} pairs out of {} init entries", entities.size(), initSet.size());
+        logger.info("Configured {} pairs out of {} directors and {} sensors", entities.size(), config.directors().size(), config.sensors().size());
 
         initGraphics();
     }
 
-    private void initUnits(Set<Object> initSet) {
+    private void initDashboard(InstrumentCluster ic) {
+        entities.add(createDashboardPair(ic));
+    }
+
+    private CellAndPanel<?,?> createDashboardPair(InstrumentCluster ic) {
+
+        var cell = new DashboardCell();
+        var panel = new DashboardPanel(ic, config.screen);
+
+        cell.subscribe(ic.getFlux());
+        panel.subscribe(ic.getFlux());
+
+        return new CellAndPanel<>(cell, panel);
+    }
+
+    private void initDirectors(Set<UnitDirector> initSet) {
 
         // VT: NOTE: sort() the units
 
         Flux.fromIterable(initSet)
                 .sort()
-                .filter(UnitDirector.class::isInstance)
-                .map(UnitDirector.class::cast)
                 .flatMap(this::initUnit)
                 .doOnNext(entities::add)
                 .subscribe()
@@ -114,7 +131,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
     private CellAndPanel<HvacDeviceStatus, Void> createUnitPair(String address, Flux<Signal<HvacDeviceStatus, Void>> source) {
 
         var cell = new UnitCell();
-        var panel = new UnitPanel(address, initialScreenDescriptor);
+        var panel = new UnitPanel(address, config.screen);
 
         cell.subscribe(source);
         panel.subscribe(source);
@@ -131,17 +148,17 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
         var zoneName = zone.getAddress();
         var cell = new ZoneCell(zoneName);
-        var panel = new ZonePanel(zone, initialScreenDescriptor, TemperatureUnit.C);
+        var panel = new ZonePanel(zone, config.screen, config.console().initialUnit());
 
         var thisZoneFlux = aggregateZoneFlux
                 .filter(s -> zoneName.equals(s.payload))
                 .map(s -> new Signal<ZoneStatus, Void>(s.timestamp, s.getValue(), null, s.status, s.error));
         var modeFlux = hvacDeviceFlux
-                .filter(s -> s.getValue().requested.mode != null)
-                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().requested.mode, null, s.status, s.error));
+                .filter(s -> s.getValue().command.mode != null)
+                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command.mode, null, s.status, s.error));
         var thisScheduleFlux = scheduleFlux
                 .filter(s -> zoneName.equals(s.getKey()))
-                .map(s -> s.getValue());
+                .map(Map.Entry::getValue);
 
         cell.subscribe(thisZoneFlux);
         panel.subscribe(thisZoneFlux);
@@ -159,22 +176,29 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         return new CellAndPanel<>(cell, panel);
     }
 
-    private void initSensors(Set<Object> initSet) {
+    private void initSensors(Map<String, Flux<Signal<Double, Void>>> initSet) {
 
-        // VT: NOTE: sort() sensor panels, signals are not sortable
-
-        Flux.fromIterable(initSet)
-                .filter(Flux.class::isInstance)
-                .map(Flux.class::cast)
-                .flatMap(this::initSensor)
-                .sort()
+        Flux.fromIterable(initSet.entrySet())
+                .map(this::initSensor)
+                .doOnNext(entities::add)
                 .subscribe()
                 .dispose();
     }
 
-    private Flux<CellAndPanel<?, ?>> initSensor(Flux<?> source) {
-        logger.warn("NOT IMPLEMENTED: initSensor({})", source);
-        return Flux.empty();
+    private CellAndPanel<?, ?> initSensor(Map.Entry<String, Flux<Signal<Double, Void>>> source) {
+
+        var name = source.getKey();
+        var signal = source.getValue();
+
+        logger.debug("initSensor: {} => {}", name, signal);
+
+        var cell = new SensorCell(name);
+        var panel = new SensorPanel(name, config.screen);
+
+        cell.subscribe(signal);
+        panel.subscribe(signal);
+
+        return new CellAndPanel<>(cell, panel);
     }
 
     private void initGraphics() {
@@ -225,7 +249,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         var offset = 0;
         for (var pair : entities) {
             selectorBar.add(pair.cell);
-            selectorPanel.add(pair.panel, "" + offset++);
+            selectorPanel.add(pair.panel, String.valueOf(offset++));
         }
 
         setCurrentEntity(0);
@@ -252,68 +276,36 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
             logger.info("{}", e::toString);
 
-            switch (e.getKeyChar()) {
+            switch (Character.toLowerCase(e.getKeyChar())) {
 
-                case 'c':
-                case 'C':
-                case 'f':
-                case 'F':
+                case 'c', 'f' -> {
 
                     // Toggle between Celsius and Fahrenheit
 
-                    // This must work for all entities
                     for (var entity : entities) {
                         entity.panel.keyPressed(e);
                     }
+                }
 
-                    break;
+                case 'h', 'v', 'o', 's', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
 
-                case 'h':
-                case 'H':
-
-                    // Toggle hold status
-
-                case 'v':
-                case 'V':
-
-                    // Toggle voting status
-
-                case 'o':
-                case 'O':
-
-                    // Toggle off status
-
-                case 's':
-                case 'S':
-
-                    // Go back to schedule
-
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-
-                    // Change dump priority
+                    // H: toggle hold status
+                    // V: toggle voting status
+                    // O: toggle off status
+                    // S: go back to schedule
+                    // Digits: change dump priority
 
                     entities.get(currentEntityOffset).panel.keyPressed(e);
-                    break;
+                }
 
-                case KeyEvent.CHAR_UNDEFINED:
+                case KeyEvent.CHAR_UNDEFINED -> {
 
                     switch (e.getKeyCode()) {
 
-                        case KeyEvent.VK_KP_LEFT:
-                        case KeyEvent.VK_LEFT:
+                        case KeyEvent.VK_KP_LEFT, KeyEvent.VK_LEFT -> {
 
                             // Cycle displayed entity to the left
 
-                        {
                             int entityOffset = currentEntityOffset - 1;
 
                             entityOffset = entityOffset < 0 ? entities.size() - 1 : entityOffset;
@@ -321,14 +313,10 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                             setCurrentEntity(entityOffset);
                         }
 
-                        break;
-
-                        case KeyEvent.VK_KP_RIGHT:
-                        case KeyEvent.VK_RIGHT:
+                        case KeyEvent.VK_KP_RIGHT, KeyEvent.VK_RIGHT -> {
 
                             // Cycle displayed entity to the right
 
-                        {
                             int entityOffset = currentEntityOffset + 1;
 
                             entityOffset = entityOffset >= entities.size() ? 0 : entityOffset;
@@ -336,31 +324,23 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                             setCurrentEntity(entityOffset);
                         }
 
-                        break;
 
-                        case KeyEvent.VK_KP_UP:
-                        case KeyEvent.VK_UP:
+                        case KeyEvent.VK_KP_UP, KeyEvent.VK_UP, KeyEvent.VK_KP_DOWN, KeyEvent.VK_DOWN -> {
 
-                            // Raise setpoint for currently selected zone (if it is a zone)
-
-                        case KeyEvent.VK_KP_DOWN:
-                        case KeyEvent.VK_DOWN:
-
-                            // Lower setpoint for currently selected zone (if it is a zone)
+                            // Raise or lower setpoint for currently selected zone (if it is a zone)
 
                             entities.get(currentEntityOffset).panel.keyPressed(e);
+                        }
 
-                            break;
-
-                        default:
-
+                        default -> {
                             // Do nothing
+                        }
+
                     }
-                    break;
-
-                default:
-
+                }
+                default -> {
                     // Do nothing
+                }
             }
 
         } finally {
@@ -383,7 +363,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         entities.get(currentEntityOffset).cell.setSelected(false);
         entities.get(entityOffset).cell.setSelected(true);
 
-        cardLayout.show(selectorPanel, "" + entityOffset);
+        cardLayout.show(selectorPanel, String.valueOf(entityOffset));
 
         currentEntityOffset = entityOffset;
     }
@@ -393,5 +373,12 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         for (var entity : entities) {
             entity.panel.setFontSize(screenDescriptor);
         }
+    }
+
+    private record Config(
+            ReactiveConsole.Config console,
+            ScreenDescriptor screen
+    ) {
+
     }
 }

@@ -21,6 +21,8 @@ import java.util.Map;
  *
  * @see net.sf.dz3r.device.esphome.v1.ESPHomeSwitch
  * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class Z2MSwitch extends AbstractMqttSwitch {
 
@@ -34,11 +36,11 @@ public class Z2MSwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, Scheduler)} instead.
+     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public Z2MSwitch(String host, String deviceRootTopic) {
-        this(host, MqttEndpoint.DEFAULT_PORT, null, null, false, deviceRootTopic, null);
+        this(host, MqttEndpoint.DEFAULT_PORT, null, null, false, deviceRootTopic, false, null);
     }
 
     /**
@@ -47,14 +49,14 @@ public class Z2MSwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, Scheduler)} instead.
+     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public Z2MSwitch(String host, int port,
-                        String username, String password,
-                        boolean reconnect,
-                        String deviceRootTopic) {
-        this(host, port, username, password, reconnect, deviceRootTopic, null);
+                     String username, String password,
+                     boolean reconnect,
+                     String deviceRootTopic) {
+        this(host, port, username, password, reconnect, deviceRootTopic, false, null);
     }
 
     /**
@@ -63,24 +65,27 @@ public class Z2MSwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, Scheduler)} instead.
+     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public Z2MSwitch(String host, int port,
-                        String username, String password,
-                        boolean reconnect,
-                        String deviceRootTopic,
-                        Scheduler scheduler) {
+                     String username, String password,
+                     boolean reconnect,
+                     String deviceRootTopic,
+                     boolean optimistic,
+                     Scheduler scheduler) {
 
         this(
                 new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect),
                 deviceRootTopic,
+                optimistic,
                 scheduler);
     }
 
     public Z2MSwitch(
             MqttAdapter mqttAdapter,
             String deviceRootTopic,
+            boolean optimistic,
             Scheduler scheduler) {
 
         // Zigbee seems to suffer from buffer overflow; let's not allow to pound it more often than once in 30 seconds
@@ -90,9 +95,14 @@ public class Z2MSwitch extends AbstractMqttSwitch {
                         mqttAdapter.address, deviceRootTopic),
                 scheduler,
                 Duration.ofSeconds(30),
+                optimistic,
                 null);
 
         this.deviceRootTopic = deviceRootTopic;
+
+        if (optimistic) {
+            logger.warn("{}: configured optimistic, you must realize the risks", getAddress());
+        }
 
         // VT: NOTE: Do we need to sync here like we do in Z-Wave?
 

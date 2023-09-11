@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
  * Unlike {@link MqttListener} which just listens to an MQTT stream, this class supports sending MQTT messages.
  *
  */
-public class MqttAdapter extends AbstractMqttAdapter {
+public class MqttAdapter extends MqttListener {
 
     /**
      * Create an unauthenticated instance that will NOT automatically reconnect.

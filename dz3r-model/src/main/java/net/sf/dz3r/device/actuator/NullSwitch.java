@@ -27,12 +27,42 @@ public class NullSwitch extends AbstractSwitch<String> {
     private Boolean state;
 
     /**
-     * Create an instance without delay running on the default scheduler.
+     * Create a pessimistic instance without delay running on the default scheduler.
      *
      * @param address Address to use.
      */
     public NullSwitch(String address) {
-        this(address, 0, 0, Schedulers.newSingle("NullSwitch:" + address, true));
+        this(address, false, 0, 0, Schedulers.newSingle("NullSwitch:" + address, true));
+    }
+
+    /**
+     * Create an instance without delay running on the default scheduler.
+     *
+     * @param address Address to use.
+     * @param optimistic See <a href="https://github.com/home-climate-control/dz/issues/280">issue 280</a>.
+     */
+    public NullSwitch(String address, boolean optimistic) {
+        this(address, optimistic, 0, 0, Schedulers.newSingle("NullSwitch:" + address, true));
+    }
+
+    /**
+     * Create a pessimistic instance without delay running on the provided scheduler.
+     *
+     * @param address Address to use.
+     * @param scheduler Scheduler to use.
+     */
+    public NullSwitch(String address, Scheduler scheduler) {
+        this(address, false, 0, 0, scheduler);
+    }
+
+    /**
+     * Create an instance without delay running on the provided scheduler.
+     *
+     * @param address Address to use.
+     * @param scheduler Scheduler to use.
+     */
+    public NullSwitch(String address, boolean optimistic, Scheduler scheduler) {
+        this(address, optimistic, 0, 0, scheduler);
     }
 
     /**
@@ -42,8 +72,8 @@ public class NullSwitch extends AbstractSwitch<String> {
      * @param minDelayMillis Minimim switch deley, milliseconds.
      * @param maxDelayMillis Max delay. Total delay is calculated as {@code minDelay + rg.nextInt(maxDelay)}.
      */
-    public NullSwitch(String address, long minDelayMillis, int maxDelayMillis, Scheduler scheduler) {
-        super(address, scheduler, null, null);
+    public NullSwitch(String address, boolean optimistic, long minDelayMillis, int maxDelayMillis, Scheduler scheduler) {
+        super(address, optimistic, scheduler, null, null);
 
         if (minDelayMillis < 0 || maxDelayMillis < 0 || (maxDelayMillis > 0 && (minDelayMillis >= maxDelayMillis))) {
             throw new IllegalArgumentException("invalid delays min=" + minDelayMillis + ", max=" + maxDelayMillis);
@@ -91,10 +121,7 @@ public class NullSwitch extends AbstractSwitch<String> {
 
         if (delayMillis > 0) {
             try {
-                // This cannot be happening on the main scheduler - it may get blocked under some circumstances.
-                // The point of using a single scheduler by default is to have the *action* single threaded,
-                // and this is a delay, not action, so using a different scheduler is fine
-                Mono.delay(Duration.ofMillis(delayMillis)).subscribeOn(Schedulers.boundedElastic()).block();
+                Mono.delay(Duration.ofMillis(delayMillis), getDelayScheduler()).block();
             } catch (IllegalStateException ex) {
                 if (ex.getMessage().contains("block()/blockFirst()/blockLast() are blocking, which is not supported in thread")) {
                     logger.warn("{}: delay() on non-blocking thread (name={}, group={}), using Thread.sleep() workaround",
@@ -112,4 +139,36 @@ public class NullSwitch extends AbstractSwitch<String> {
         }
     }
 
+    @Override
+    public String toString() {
+        return "NullSwitch(" + getAddress() + ")";
+    }
+
+    /**
+     * @return A scheduler used only for {@link Mono#delayElement(Duration)}.
+     */
+    private Scheduler getDelayScheduler() {
+
+        // Parallel scheduler is the default for delayElement() anyway
+        return getScheduler() == null
+                ? Schedulers.parallel()
+                : getScheduler();
+    }
+
+    @Override
+    public Mono<Boolean> getState() {
+
+        if (true) { // NOSONAR Shut up. I know.
+            return super.getState();
+        }
+
+        // VT: NOTE: While this is the Reactive compliant solution, currently it breaks at least the HeatPump.
+        // More: https://github.com/home-climate-control/dz/issues/279
+
+        if (state == null) {
+            return Mono.error(new IOException("setStateSync() hasn't been called yet on " + getAddress()));
+        }
+
+        return Mono.just(state).delayElement(Duration.ofMillis(getDelayMillis()), getDelayScheduler());
+    }
 }

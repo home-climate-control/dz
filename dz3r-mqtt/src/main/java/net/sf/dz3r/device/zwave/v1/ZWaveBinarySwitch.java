@@ -23,6 +23,8 @@ import java.util.Map;
  *
  * @see net.sf.dz3r.device.esphome.v1.ESPHomeSwitch
  * @see net.sf.dz3r.device.z2m.v1.Z2MSwitch
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class ZWaveBinarySwitch extends AbstractMqttSwitch {
 
@@ -36,7 +38,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, Scheduler)} instead.
+     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public ZWaveBinarySwitch(String host, String deviceRootTopic) {
@@ -49,35 +51,37 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, Scheduler)} instead.
+     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public ZWaveBinarySwitch(String host, int port,
-                                String username, String password,
-                                boolean reconnect,
-                                String deviceRootTopic) {
+                             String username, String password,
+                             boolean reconnect,
+                             String deviceRootTopic) {
         this(host, port, username, password, reconnect, deviceRootTopic, null);
     }
 
     /**
-     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, Scheduler)} instead.
+     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public ZWaveBinarySwitch(String host, int port,
-                                String username, String password,
-                                boolean reconnect,
-                                String deviceRootTopic,
-                                Scheduler scheduler) {
+                             String username, String password,
+                             boolean reconnect,
+                             String deviceRootTopic,
+                             Scheduler scheduler) {
 
         this(
                 new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect),
                 deviceRootTopic,
+                false,
                 scheduler);
     }
 
     public ZWaveBinarySwitch(
             MqttAdapter mqttAdapter,
             String deviceRootTopic,
+            boolean optimistic,
             Scheduler scheduler) {
 
         // Z-Wave seems to suffer from buffer overflow; let's not allow to pound it more often than once in 30 seconds
@@ -88,9 +92,13 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
                         deviceRootTopic),
                 scheduler,
                 Duration.ofSeconds(30),
-                null);
+                optimistic, null);
 
         this.deviceRootTopic = deviceRootTopic;
+
+        if (optimistic) {
+            logger.warn("{}: configured optimistic, you must realize the risks", getAddress());
+        }
 
         // Z-Wave JS UI produces multiple MQTT messages per targetValue/set message, must drain them proactively
         // or we'll run out of sync
