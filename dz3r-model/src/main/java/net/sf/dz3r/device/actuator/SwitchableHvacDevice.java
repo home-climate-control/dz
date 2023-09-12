@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A device with just one switch acting as an HVAC device that just supports one mode (either heating or cooling).
@@ -37,15 +38,6 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
      * {@link HvacCommand#demand} OR {@link HvacCommand#fanSpeed} are positive.
      */
     private HvacCommand requested;
-
-    /**
-     * Actual switch status.
-     *
-     * {@code null} value means the status is unknown.
-     *
-     * VT: FIXME: Associate a timestamp with this value.
-     */
-    private Boolean actual;
 
     /**
      * Create a named instance.
@@ -83,7 +75,48 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
     @Override
     public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
+        return computeNonBlocking(in);
+    }
 
+    private Flux<Signal<HvacDeviceStatus, Void>> computeNonBlocking(Flux<Signal<HvacCommand, Void>> in) {
+
+        return in
+                .filter(Signal::isOK)
+
+                // Can't throw this as a payload like we did in a blocking version, need to complain
+                .doOnNext(signal -> logger.debug("compute signal={}", signal))
+
+                .map(Signal::getValue)
+                .map(this::reconcile)
+                .filter(Predicate.not(this::isModeOnly))
+                .doOnNext(command -> logger.debug("compute command={}", command))
+                .flatMap(command -> {
+
+                    var state = getState(command);
+
+                    logger.debug("state: {}", state);
+
+                    // By this time, the command has been verified to be valid
+                    requested = command;
+
+                    var result = new HvacDeviceStatus(command, uptime());
+
+                    return theSwitch
+                            .setState(state != inverted)
+                            .map(ignore -> {
+                                updateUptime(clock.instant(), state);
+                                return new Signal<>(clock.instant(), result);
+                            });
+                });
+    }
+
+    /**
+     * Retanied for analysis. Should be removed as soon as normal operation is confirmed.
+     *
+     * @deprecated
+     */
+    @Deprecated(forRemoval = true, since = "2023-10-01")
+    Flux<Signal<HvacDeviceStatus, Void>> computeBlocking(Flux<Signal<HvacCommand, Void>> in) {
         return in
                 .filter(Signal::isOK)
                 .flatMap(signal -> {
@@ -108,7 +141,10 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                                     requested = command;
 
                                     theSwitch.setState(state != inverted).block();
-                                    actual = state;
+
+                                    // No longer relevant
+                                    //actual = state;
+
                                     updateUptime(clock.instant(), state);
 
                                     var complete = new HvacDeviceStatus(command, uptime());
