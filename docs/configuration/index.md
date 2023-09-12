@@ -9,6 +9,8 @@ There are currently four ways to run the application (see [build](../build/index
 
 The "minimal" variant is the only one that requires things to be spelled out exactly, the rest follow the usual Spring and Quarkus conventions (splitting configuration into many files, specifying active profiles, using YAML anchors, etc.).
 
+> **NOTE:** YAML merging is not so smart. Verify the effective configuration, it is logged at debug level at the start of the application.
+
 ### YAML Anchors
 
 Configuration file for HCC can be quite big (400+ lines is not unheard of), do take advantage of [YAML Anchors](https://yaml.org/spec/1.2.2/#3222-anchors-and-aliases) to make it stable.
