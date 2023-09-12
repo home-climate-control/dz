@@ -84,17 +84,17 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                 .filter(Signal::isOK)
 
                 // Can't throw this as a payload like we did in a blocking version, need to complain
-                .doOnNext(signal -> logger.debug("compute signal={}", signal))
+                .doOnNext(signal -> logger.debug("{}: compute signal={}", getAddress(), signal))
 
                 .map(Signal::getValue)
                 .map(this::reconcile)
                 .filter(Predicate.not(this::isModeOnly))
-                .doOnNext(command -> logger.debug("compute command={}", command))
+                .doOnNext(command -> logger.debug("{}: compute command={}", getAddress(), command))
                 .flatMap(command -> {
 
                     var state = getState(command);
 
-                    logger.debug("state: {}", state);
+                    logger.debug("{}: state: {}{}", getAddress(), state != inverted, inverted ? " (inverted)" : "");
 
                     // By this time, the command has been verified to be valid
                     requested = command;
@@ -169,7 +169,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
         // A valid situation for the whole system which makes no sense for this particular application
 
         if (command.demand == null && command.fanSpeed == null) {
-            logger.warn("mode only command, ignored: {}", command);
+            logger.warn("{}: mode only command, ignored: {}", getAddress(), command);
             return true;
         }
 
@@ -193,7 +193,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
         if (mode != HvacMode.COOLING && command.fanSpeed != null && command.fanSpeed > 0) {
             // FIXME: https://github.com/home-climate-control/dz/issues/222
-            logger.warn("fanSpeed>0 should not be issued to this device in heating mode, ignored. Kick the maintainer to fix #222 (command={})", command);
+            logger.warn("{}: fanSpeed>0 should not be issued to this device in heating mode, ignored. Kick the maintainer to fix #222 (command={})", getAddress(), command);
         }
 
         var result = new HvacCommand(
@@ -202,7 +202,7 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                 command.fanSpeed == null ? requested.fanSpeed : command.fanSpeed
         );
 
-        logger.debug("Requested: {}", result);
+        logger.debug("{}: requested: {}", getAddress(), result);
 
         return result;
     }
