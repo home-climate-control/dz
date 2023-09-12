@@ -8,3 +8,6 @@ gradlew.bat
 *~
 .idea/
 *.iml
+/logs/
+*.log
+*.diff
