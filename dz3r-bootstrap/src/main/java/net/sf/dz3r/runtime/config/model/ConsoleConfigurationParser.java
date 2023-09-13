@@ -1,15 +1,12 @@
 package net.sf.dz3r.runtime.config.model;
 
+import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
-import net.sf.dz3r.instrumentation.InstrumentCluster;
-import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.swing.ReactiveConsole;
-import reactor.core.publisher.Flux;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ConsoleConfigurationParser extends ConfigurationContextAware {
@@ -32,6 +29,7 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
         var directors = context
                 .directors
                 .getFlux()
+                .filter(d -> isConfigured(cf.directors(), d))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toSet())
                 .block();
@@ -53,9 +51,5 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
             logger.debug("Original exception trace", ex);
             return null;
         }
-    }
-
-    private boolean isConfigured(Set<String> sensors, Map.Entry<String, Flux<Signal<Double, Void>>> s) {
-        return sensors.contains(s.getKey());
     }
 }

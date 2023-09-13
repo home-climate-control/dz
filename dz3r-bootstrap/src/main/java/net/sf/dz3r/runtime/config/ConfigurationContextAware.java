@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public abstract class ConfigurationContextAware {
 
@@ -120,5 +121,9 @@ public abstract class ConfigurationContextAware {
 
         logger.debug("getUnitController({}) = {}", address, result);
         return result;
+    }
+
+    protected final boolean isConfigured(Set<String> names, Map.Entry<String, ?> d) {
+        return names.contains(d.getKey());
     }
 }

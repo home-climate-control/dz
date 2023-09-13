@@ -1,8 +1,8 @@
 package net.sf.dz3r.runtime.config.model;
 
+import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
-import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.view.webui.v2.WebUI;
 
 import java.util.Map;
@@ -26,6 +26,7 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
         var directors = context
                 .directors
                 .getFlux()
+                .filter(d -> isConfigured(cf.directors(), d))
                 .map(Map.Entry::getValue)
                 .map(Object.class::cast)
                 .collect(Collectors.toSet())
