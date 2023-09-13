@@ -123,7 +123,16 @@ public abstract class ConfigurationContextAware {
         return result;
     }
 
-    protected final boolean isConfigured(Set<String> names, Map.Entry<String, ?> d) {
-        return names.contains(d.getKey());
+    protected final boolean isConfigured(String source, Set<String> names, Map.Entry<String, ?> configured) {
+
+        if (names == null || names.isEmpty()) {
+            logger.warn("{} is missing, assuming all configured, returning: {}",
+                    source,
+                    Optional.ofNullable(configured).map(Map.Entry::getKey).orElse(null));
+
+            return true;
+        }
+
+        return names.contains(configured.getKey());
     }
 }

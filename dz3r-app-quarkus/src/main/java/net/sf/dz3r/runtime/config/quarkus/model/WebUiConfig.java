@@ -11,5 +11,5 @@ public interface WebUiConfig {
     Optional<Integer> port();
 
     @JsonProperty("directors")
-    Set<String> directors();
+    Optional<Set<String>> directors();
 }

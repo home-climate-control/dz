@@ -29,7 +29,7 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
         var directors = context
                 .directors
                 .getFlux()
-                .filter(d -> isConfigured(cf.directors(), d))
+                .filter(d -> isConfigured("console.directors", cf.directors(), d))
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toSet())
                 .block();
@@ -37,7 +37,7 @@ public class ConsoleConfigurationParser extends ConfigurationContextAware {
         var sensors = context
                 .sensors
                 .getFlux()
-                .filter(s -> isConfigured(cf.sensors(), s))
+                .filter(s -> isConfigured("console.sensors", cf.sensors(), s))
                 .collectMap(Map.Entry::getKey, Map.Entry::getValue)
                 .block();
 

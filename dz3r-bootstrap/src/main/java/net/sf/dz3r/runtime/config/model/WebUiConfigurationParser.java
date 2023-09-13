@@ -26,7 +26,7 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
         var directors = context
                 .directors
                 .getFlux()
-                .filter(d -> isConfigured(cf.directors(), d))
+                .filter(d -> isConfigured("web-ui.directors", cf.directors(), d))
                 .map(Map.Entry::getValue)
                 .map(Object.class::cast)
                 .collect(Collectors.toSet())
