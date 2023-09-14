@@ -5,5 +5,5 @@ package net.sf.dz3r.view;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public interface Connector extends MetricsCollector, ControlInput {
+public interface Connector extends MetricsCollector, ControlInput, AutoCloseable {
 }

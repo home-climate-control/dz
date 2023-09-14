@@ -179,12 +179,12 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         ThreadContext.push("close");
         try {
 
-            logger.info("Shutting down: {}", getAddress());
+            logger.warn("Shutting down: {}", getAddress());
 
             if (economizer != null) {
                 economizer.close();
-
             }
+
         } finally {
             logger.info("Shut down: {}", getAddress());
             ThreadContext.pop();

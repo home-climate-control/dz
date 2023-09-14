@@ -31,6 +31,24 @@ public class ShutdownHandler implements AutoCloseable {
             // Disable controls - console and WebUI
             logger.error("FIXME: shut off controls");
 
+            // Close connectors
+
+            var connectors = context.connectors
+                    .getFlux()
+                    .parallel()
+                    .runOn(Schedulers.boundedElastic())
+                    .doOnNext(kv -> {
+                        try {
+                            kv.getValue().close();
+                        } catch (Exception ex) {
+                            apologize(ex);
+                        }
+                    })
+                    .sequential()
+                    .blockLast();
+
+            m.checkpoint("stopped connectors");
+
             // Stop directors so they don't interfere with anything anymore
             context.directors
                     .getFlux()
@@ -65,7 +83,6 @@ public class ShutdownHandler implements AutoCloseable {
                         } catch (Exception ex) {
                             apologize(ex);
                         }
-
                     });
 
             m.checkpoint("instructed HVAC devices to shut down");
@@ -73,8 +90,6 @@ public class ShutdownHandler implements AutoCloseable {
             // Move dampers to "safe" position
             logger.error("FIXME: move dampers to safe position");
 
-            // Close connectors
-            logger.error("FIXME: close connectors");
 
             // Must have HVAC devices down by now
 

@@ -21,6 +21,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
@@ -49,6 +50,8 @@ public class HttpConnectorGAE extends HttpConnector {
     private final Map<String, Zone> name2zone = new TreeMap<>();
 
     private final Duration pollInterval = Duration.of(10, ChronoUnit.SECONDS);
+
+    private Disposable zoneStatusSubscription;
 
     /**
      * Create an instance.
@@ -93,7 +96,7 @@ public class HttpConnectorGAE extends HttpConnector {
                                 .doOnNext(z -> logger.debug("Reportable zone: {}", z.payload))
                 );
 
-        zoneStatusFeed
+        zoneStatusSubscription = zoneStatusFeed
                 .publishOn(Schedulers.boundedElastic())
                 .buffer(pollInterval)
                 .doOnNext(this::exchange)
@@ -246,5 +249,17 @@ public class HttpConnectorGAE extends HttpConnector {
         }
 
         return result;
+    }
+
+    @Override
+    public void close() throws Exception {
+        ThreadContext.push("close");
+        try {
+            logger.warn("Shutting down: {}", serverContextRoot);
+            zoneStatusSubscription.dispose();
+            logger.info("Shut down: {}", serverContextRoot);
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }

@@ -371,7 +371,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     public void close() throws Exception {
         ThreadContext.push("close");
         try {
-            logger.info("Shutting down: {}", getAddress());
+            logger.warn("Shutting down: {}", getAddress());
             targetDevice.setState(false).block();
         } finally {
             logger.info("Shut down: {}", getAddress());

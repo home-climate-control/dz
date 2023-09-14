@@ -239,8 +239,24 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        logger.warn("Shutting down {}", getAddress());
-        logger.error("FIXME: close()");
+        logger.warn("Shutting down: {}", getAddress());
+
+        Flux
+                .fromIterable(feed.sensorFlux2zone.values())
+                .parallel()
+                .runOn(Schedulers.boundedElastic())
+                .doOnNext(z -> {
+                    logger.info("shutting down zone: {}", z.getAddress());
+                    try {
+                        z.close();
+                    } catch (Exception ex) {
+                        logger.error("{}: failed to close(), nothing we can do now", z.getAddress(), ex);
+                    }
+                })
+                .sequential()
+                .blockLast();
+
+        logger.info("Shut down: {}", getAddress());
     }
 
     public static class Feed {
