@@ -144,14 +144,14 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
         // No timestamp in the MQTT message, must use real time
         var timestamp = Instant.now();
 
-        switch (message) {
-            case "ON": return new Signal<>(timestamp, Boolean.TRUE);
-            case "OFF" : return new Signal<>(timestamp, Boolean.FALSE);
-
-            default:
+        return switch (message) {
+            case "ON" -> new Signal<>(timestamp, Boolean.TRUE);
+            case "OFF" -> new Signal<>(timestamp, Boolean.FALSE);
+            default -> {
                 logger.warn("malformed payload '{}', returning FALSE", message);
-                return new Signal<>(timestamp, Boolean.FALSE);
-        }
+                yield new Signal<>(timestamp, Boolean.FALSE);
+            }
+        };
     }
 
     @Override

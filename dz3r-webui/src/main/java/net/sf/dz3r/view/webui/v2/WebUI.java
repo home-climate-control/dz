@@ -108,11 +108,8 @@ public class WebUI {
             for (var source : initSet) {
 
                 switch (source.getClass().getSimpleName()) { // NOSONAR More coming
-                    case "UnitDirector":
-                        new UnitDirectorInitializer().init((UnitDirector) source);
-                        break;
-                    default:
-                        logger.warn("Don't know how to handle {}", source.getClass().getName());
+                    case "UnitDirector" -> new UnitDirectorInitializer().init((UnitDirector) source);
+                    default -> logger.warn("Don't know how to handle {}", source.getClass().getName());
                 }
             }
         } finally {

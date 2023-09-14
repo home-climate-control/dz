@@ -146,18 +146,11 @@ public class Z2MSwitch extends AbstractMqttSwitch {
             // There is no timestamp in Z2M message payload
             var timestamp = Instant.now();
             var stateString = String.valueOf(payload.get("state"));
-            boolean state;
-
-            switch (stateString) {
-                case "OFF":
-                    state = false;
-                    break;
-                case "ON":
-                    state = true;
-                    break;
-                default:
-                    throw new IllegalArgumentException("Don't know how to parse state out of: " + message);
-            }
+            boolean state = switch (stateString) {
+                case "OFF" -> false;
+                case "ON" -> true;
+                default -> throw new IllegalArgumentException("Don't know how to parse state out of: " + message);
+            };
 
             return new Signal<>(timestamp, state);
         } catch (JsonProcessingException e) {

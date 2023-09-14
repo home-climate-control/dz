@@ -179,17 +179,11 @@ public class ReactiveConsole {
             try {
 
                 switch (e.getKeyChar()) {
-
-                    case '-':
-                        reduce();
-                        break;
-
-                    case '+':
-                        enlarge();
-                        break;
-
-                    default:
+                    case '-' -> reduce();
+                    case '+' -> enlarge();
+                    default -> {
                         // Not our key, do nothing
+                    }
                 }
 
             } finally {

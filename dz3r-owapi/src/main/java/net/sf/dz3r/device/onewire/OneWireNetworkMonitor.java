@@ -164,17 +164,10 @@ public class OneWireNetworkMonitor extends DriverNetworkMonitor<DSPortAdapter> i
     protected void handleEvent(DriverNetworkEvent event) {
 
         switch (event.getClass().getSimpleName()) {
-            case "OneWireNetworkArrival":
-                handleArrival((OneWireNetworkArrival) event);
-                break;
-            case "OneWireNetworkDeparture":
-                handleDeparture((OneWireNetworkDeparture) event);
-                break;
-            case "OneWireNetworkErrorEvent":
-                handleError((OneWireNetworkErrorEvent<?>) event);
-                break;
-            default:
-                logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
+            case "OneWireNetworkArrival" -> handleArrival((OneWireNetworkArrival) event);
+            case "OneWireNetworkDeparture" -> handleDeparture((OneWireNetworkDeparture) event);
+            case "OneWireNetworkErrorEvent" -> handleError((OneWireNetworkErrorEvent<?>) event);
+            default -> logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
     }
 
