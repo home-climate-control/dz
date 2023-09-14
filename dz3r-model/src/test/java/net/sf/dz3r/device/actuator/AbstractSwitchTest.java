@@ -2,7 +2,6 @@ package net.sf.dz3r.device.actuator;
 
 import org.junit.jupiter.api.Test;
 import reactor.core.scheduler.Scheduler;
-import reactor.util.annotation.NonNull;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -138,7 +137,7 @@ class AbstractSwitchTest {
             this.baseClock = baseClock;
         }
 
-        public void setOffset(@NonNull Duration offset) {
+        public void setOffset(Duration offset) {
             this.offset = offset;
         }
 

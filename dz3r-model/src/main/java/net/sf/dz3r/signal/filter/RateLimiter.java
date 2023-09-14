@@ -3,8 +3,6 @@ package net.sf.dz3r.signal.filter;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import reactor.core.publisher.Flux;
-import reactor.util.annotation.NonNull;
-import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 
@@ -36,14 +34,14 @@ public class RateLimiter<T, P> implements SignalProcessor<T, T, P> {
      * @param delay Minimum gap between signals to keep.
      * @param comparator Comparator to use to compare incoming signals. If {@code null}, then {@link Equals} is used.
      */
-    public RateLimiter(@NonNull Duration delay, @Nullable Comparator<T, P> comparator) {
+    public RateLimiter(Duration delay, Comparator<T, P> comparator) {
 
         this.delay = delay;
         this.comparator = comparator == null ? new Equals<>() : comparator;
     }
 
     @Override
-    public Flux<Signal<T, P>> compute(@NonNull Flux<Signal<T, P>> in) {
+    public Flux<Signal<T, P>> compute(Flux<Signal<T, P>> in) {
 
         return in.flatMap(s -> {
 

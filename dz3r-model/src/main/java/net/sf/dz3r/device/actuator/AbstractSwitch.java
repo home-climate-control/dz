@@ -10,8 +10,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.util.annotation.NonNull;
-import reactor.util.annotation.Nullable;
 
 import java.io.IOException;
 import java.time.Clock;
@@ -63,7 +61,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      *
      * @param address Switch address.
      */
-    protected AbstractSwitch(@NonNull A address) {
+    protected AbstractSwitch(A address) {
         this(address, false, Schedulers.newSingle("switch:" + address, true), null, null);
     }
 
@@ -75,9 +73,8 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
      * @param pace Issue identical control commands to this switch at most this often.
      * @param clock Clock to use. Pass {@code null} except when testing.
      */
-    protected AbstractSwitch(@NonNull A address, boolean optimistic, @Nullable Scheduler scheduler, @Nullable Duration pace, @Nullable Clock clock) {
+    protected AbstractSwitch(A address, boolean optimistic, Scheduler scheduler, Duration pace, Clock clock) {
 
-        // VT: NOTE: @NonNull seems to have no effect, what enforces it?
         this.address = HCCObjects.requireNonNull(address,"address can't be null");
         this.optimistic = optimistic;
 
