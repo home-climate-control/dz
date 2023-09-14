@@ -20,7 +20,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,53 +48,13 @@ public class ReactiveConsole {
     private EntitySelectorPanel entitySelectorPanel;
 
     /**
-     * Create an instance and fill it up with objects to display, default temperature unit being Celsius.
-     *
-     * @param initSet Objects to display. Only {@link UnitDirector} instances are recognized by this constructor.
-     *
-     * @deprecated This constructor is only used from {@link net.sf.dz3r.runtime.Container}. Use
-     * {@link #ReactiveConsole(String, Set, Map, InstrumentCluster, TemperatureUnit)} instead.
-     */
-    @Deprecated(since = "2024-01-01")
-    public ReactiveConsole(Set<Object> initSet) {
-        this(initSet, TemperatureUnit.C);
-    }
-
-    /**
      * Create an instance and fill it up with objects to display.
      *
-     * @param initSet Objects to display.
-     * @param unit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
-     *
-     * @deprecated Use {@link #ReactiveConsole(String, Set, Map, InstrumentCluster, TemperatureUnit)} instead.
+     * @param instance HCC instance name to display on the UI title bar.
+     * @param directors Directors to include into this console.
+     * @param sensors Sensors to include information panels for into this console.
+     * @param temperatureUnit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
      */
-    @Deprecated(since = "2024-01-01")
-    public ReactiveConsole(Set<Object> initSet, TemperatureUnit unit) {
-
-        this.config = new Config("unnamed", convert(initSet), Map.of(), null, unit);
-
-        Flux.just(config)
-                .publishOn(Schedulers.boundedElastic())
-                .doOnNext(this::start)
-                .subscribe();
-    }
-
-    private Set<UnitDirector> convert(Set<Object> source) {
-
-        var result = new LinkedHashSet<UnitDirector>();
-
-        for (var o: source) {
-
-            if (o instanceof UnitDirector u) {
-                result.add(u);
-            } else {
-                logger.warn("Obsolete constructor; this will be ignored: {}", o);
-            }
-        }
-
-        return result;
-    }
-
     public ReactiveConsole(
             String instance,
             Set<UnitDirector> directors,
