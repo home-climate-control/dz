@@ -11,8 +11,12 @@ import java.util.stream.Collectors;
 
 public class WebUiConfigurationParser extends ConfigurationContextAware {
 
+    private final InstrumentCluster ic;
+
     public WebUiConfigurationParser(ConfigurationContext context, InstrumentCluster ic) {
         super(context);
+
+        this.ic = ic;
     }
 
     public WebUI parse(WebUiConfig cf) {
@@ -23,15 +27,15 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
         }
 
         var port = Optional.ofNullable(cf.port()).orElse(WebUI.DEFAULT_PORT);
+        var interfaces = Optional.ofNullable(cf.interfaces()).orElse("0.0.0.0");
         var directors = context
                 .directors
                 .getFlux()
                 .filter(d -> isConfigured("web-ui.directors", cf.directors(), d))
                 .map(Map.Entry::getValue)
-                .map(Object.class::cast)
                 .collect(Collectors.toSet())
                 .block();
 
-        return new WebUI(port, directors);
+        return new WebUI(port, interfaces, directors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
     }
 }

@@ -1,6 +1,8 @@
 package net.sf.dz3r.view.webui.v2;
 
+import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.UnitObserver;
@@ -39,26 +41,27 @@ public class WebUI {
 
     public static final int DEFAULT_PORT = 3939;
 
-    private final int port; // NOSONAR We'll get to it
+    private final Config config;
     private final Set<Object> initSet = new HashSet<>(); // NOSONAR We'll get to it
 
     private final Map<UnitDirector, UnitObserver> unit2observer = new TreeMap<>();
 
-    public WebUI(Set<Object> initSet) {
-        this(DEFAULT_PORT, initSet);
-    }
+    public WebUI(int port,
+                 String interfaces,
+                 Set<UnitDirector> directors,
+                 InstrumentCluster ic,
+                 TemperatureUnit temperatureUnit) {
 
-    public WebUI(int port, Set<Object> initSet) {
+        this.config = new Config(port, interfaces, directors, ic, temperatureUnit);
 
-        this.port = port;
-        this.initSet.addAll(initSet);
+        this.initSet.addAll(directors);
 
         logger.info("port: {}", port);
 
-        if (initSet.isEmpty()) {
+        if (directors.isEmpty()) {
             logger.warn("empty init set, only diagnostic URLs will be available");
         } else {
-            logger.info("init set: {}", initSet);
+            logger.info("init set: {}", directors);
         }
 
         Flux.just(Instant.now())
@@ -80,7 +83,7 @@ public class WebUI {
             var httpHandler = RouterFunctions.toHttpHandler(new RoutingConfiguration().monoRouterFunction(this));
             var adapter = new ReactorHttpHandlerAdapter(httpHandler);
 
-            var server = HttpServer.create().host("0.0.0.0").port(port);
+            var server = HttpServer.create().host(config.interfaces).port(config.port);
             DisposableServer disposableServer = server.handle(adapter).bind().block();
 
             logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
@@ -280,5 +283,14 @@ public class WebUI {
             var observer = new UnitObserver(source);
             unit2observer.put(source, observer);
         }
+    }
+    public record Config(
+            int port,
+            String interfaces,
+            Set<UnitDirector> directors,
+            InstrumentCluster ic,
+            TemperatureUnit initialUnit
+    ) {
+
     }
 }

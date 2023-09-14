@@ -218,7 +218,9 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.mode())", target = "mode")
     net.sf.dz3r.runtime.config.model.UnitDirectorConfig director(UnitDirectorConfig source);
     @Mapping(expression = "java(source.port().orElse(null))", target = "port")
+    @Mapping(expression = "java(source.interfaces().orElse(null))", target = "interfaces")
     @Mapping(expression = "java(source.directors().orElse(null))", target = "directors")
+    @Mapping(expression = "java(source.units().orElse(null))", target = "units")
     net.sf.dz3r.runtime.config.model.WebUiConfig webUi(WebUiConfig source);
 
     @Mapping(expression = "java(source.units().orElse(null))", target = "units")

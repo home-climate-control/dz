@@ -4,5 +4,7 @@ import java.util.Set;
 
 public record WebUiConfig(
         Integer port,
+        String interfaces,
+        TemperatureUnit units,
         Set<String> directors) {
 }

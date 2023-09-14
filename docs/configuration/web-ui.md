@@ -17,6 +17,9 @@ Best explained by example:
 ### port
 Port to listen on. Defaults to 3939.
 
+### interface
+Interfaces to listen on. Defaults to `0.0.0.0`.
+
 ### directors
 Set of references to [directors](./directors.md). If you skip it HCC will assume you want all the directors.
 
@@ -26,6 +29,10 @@ Set of references to [directors](./directors.md). If you skip it HCC will assume
 
 ### sensors
 Unlike the [console](./console.md#sensors), WebUI takes all the configured [sensors](./sensors-and-switches.md) as a part of the implied configuration.
+
+### units
+
+Specifies the _initial_ temperature measurement units. Defaults to C&deg;. Note that this only applies to [zone](./zones.md) display, [instrument cluster](../instrument-cluster/index.md) will display values in [SI units](https://en.wikipedia.org/wiki/International_System_of_Units).
 
 ### Implied Configuration
 
