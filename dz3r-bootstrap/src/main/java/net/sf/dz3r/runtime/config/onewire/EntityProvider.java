@@ -73,6 +73,8 @@ public class EntityProvider<T> implements AutoCloseable {
 
     public T getById(String consumer, String id) {
 
+        // VT: FIXME: Swap getById() and getMonoById() logic so both are more reactive
+
         var found = getFlux()
                 .filter(kv -> kv.getKey().equals(id))
                 .blockFirst();

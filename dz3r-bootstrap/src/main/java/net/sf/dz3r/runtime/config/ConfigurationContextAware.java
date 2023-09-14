@@ -33,45 +33,22 @@ public abstract class ConfigurationContextAware {
     protected final Mono<Flux<Signal<Double, Void>>> getSensor(String address) {
         return context
                 .sensors
-                .getFlux()
-                .filter(s -> s.getKey().equals(address))
-                .map(Map.Entry::getValue)
-                .doOnNext(s -> logger.debug("getSensor({}) = {}", address, s))
-                .next();
+                .getMonoById("sensors", address)
+                .doOnNext(s -> logger.debug("getSensor({}) = {}", address, s));
     }
 
     protected final Switch<?> getSwitch(String address) {
-        var result = context
+        return context
                 .switches
-                .getFlux()
-                .filter(s -> s.getKey().equals(address))
-                .map(Map.Entry::getValue)
-                .take(1)
-                .blockFirst();
-
-        if (result == null) {
-            throw new IllegalArgumentException("Couldn't resolve switch for id or address '" + address + "'");
-        }
-
-        logger.debug("getSwitch({}) = {}", address, result);
-        return result;
+                .getMonoById("switches", address)
+                .block();
     }
 
     protected final Zone getZone(String address) {
-        var result = context
+        return context
                 .zones
-                .getFlux()
-                .filter(s -> s.getKey().equals(address))
-                .map(Map.Entry::getValue)
-                .take(1)
-                .blockFirst();
-
-        if (result == null) {
-            throw new IllegalArgumentException("Couldn't resolve zone for id '" + address + "'");
-        }
-
-        logger.debug("getZone({}) = {}", address, result);
-        return result;
+                .getMonoById("zones", address)
+                .block();
     }
 
     protected final Map<Flux<Signal<Double, Void>>, Zone> getSensorFeed2ZoneMapping(Map<String, String> source) {
@@ -90,37 +67,17 @@ public abstract class ConfigurationContextAware {
     }
 
     protected final HvacDevice getHvacDevice(String address) {
-        var result = context
+        return context
                 .hvacDevices
-                .getFlux()
-                .filter(s -> s.getKey().equals(address))
-                .map(Map.Entry::getValue)
-                .take(1)
-                .blockFirst();
-
-        if (result == null) {
-            throw new IllegalArgumentException("Couldn't resolve HVAC device for id '" + address + "'");
-        }
-
-        logger.debug("getHvacDevice({}) = {}", address, result);
-        return result;
+                .getMonoById("hvac", address)
+                .block();
     }
 
     protected final UnitController getUnitController(String address) {
-        var result = context
+        return context
                 .units
-                .getFlux()
-                .filter(s -> s.getKey().equals(address))
-                .map(Map.Entry::getValue)
-                .take(1)
-                .blockFirst();
-
-        if (result == null) {
-            throw new IllegalArgumentException("Couldn't resolve unit controller for id '" + address + "'");
-        }
-
-        logger.debug("getUnitController({}) = {}", address, result);
-        return result;
+                .getMonoById("units", address)
+                .block();
     }
 
     protected final boolean isConfigured(String source, Set<String> names, Map.Entry<String, ?> configured) {
