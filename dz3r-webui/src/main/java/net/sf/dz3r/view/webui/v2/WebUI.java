@@ -42,7 +42,7 @@ public class WebUI {
     public static final int DEFAULT_PORT = 3939;
 
     private final Config config;
-    private final Set<Object> initSet = new HashSet<>(); // NOSONAR We'll get to it
+    private final Set<UnitDirector> initSet = new HashSet<>();
 
     private final Map<UnitDirector, UnitObserver> unit2observer = new TreeMap<>();
 
@@ -106,11 +106,7 @@ public class WebUI {
         try {
 
             for (var source : initSet) {
-
-                switch (source.getClass().getSimpleName()) { // NOSONAR More coming
-                    case "UnitDirector" -> new UnitDirectorInitializer().init((UnitDirector) source);
-                    default -> logger.warn("Don't know how to handle {}", source.getClass().getName());
-                }
+                new UnitDirectorInitializer().init(source);
             }
         } finally {
             ThreadContext.pop();
