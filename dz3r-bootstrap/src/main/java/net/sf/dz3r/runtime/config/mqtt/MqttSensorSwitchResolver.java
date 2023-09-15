@@ -1,5 +1,7 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
+import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.runtime.config.ConfigurationMapper;
 import net.sf.dz3r.runtime.config.SensorSwitchResolver;
 import net.sf.dz3r.runtime.config.hardware.SensorConfig;
@@ -7,14 +9,14 @@ import net.sf.dz3r.runtime.config.hardware.SwitchConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttGateway;
-import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
+import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -31,6 +33,8 @@ import java.util.Set;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S extends AbstractMqttSwitch> extends SensorSwitchResolver<A> {
+
+    private final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
 
     private final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
     private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
@@ -69,11 +73,18 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                     var id = kv.getKey().sensorConfig().id();
                     var address = kv.getKey().sensorConfig().address();
                     var flux = kv.getValue().getFlux(address);
+                    var timeout = Optional
+                            .ofNullable(kv.getKey().sensorConfig.timeout())
+                            .orElseGet(() -> {
+                                logger.warn("{}: default timeout of {} is used", kv.getKey().sensorConfig(), DEFAULT_TIMEOUT);
+                                return DEFAULT_TIMEOUT;
+                            });
+                    var guard = new TimeoutGuard<Double, Void>(timeout);
 
                     // ID takes precedence over address
                     var key = id == null ? address : id;
 
-                    return (Map.Entry<String, Flux<Signal<Double, Void>>>) new ImmutablePair<>(key, flux);
+                    return (Map.Entry<String, Flux<Signal<Double, Void>>>) new ImmutablePair<>(key, guard.compute(flux));
                 })
                 .sequential();
     }

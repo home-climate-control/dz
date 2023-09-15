@@ -19,4 +19,6 @@ public interface SensorConfig {
     Optional<String> measurement();
     @JsonProperty("step")
     Optional<Duration> step();
+    @JsonProperty("timeout")
+    Optional<Duration> timeout();
 }

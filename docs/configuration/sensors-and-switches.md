@@ -9,6 +9,7 @@ sensors:
   - address: family-room-temperature
   - id: theater-room-temperature
     address: theater-room-temperature-bme280
+    timeout: 45S
 ```
 
 The first entry uses the sensor configured with `family-room-temperature` name, with no translation.
@@ -16,6 +17,9 @@ The second entry translates the hardware dependent sensor name into `theater-roo
 
 The first way will work just fine with [ESPHome](https://esphome.io/) and [zigbee2mqtt](https://www.zigbee2mqtt.io/).
 The second way will be generally required with [zwave2mqtt](https://github.com/zwave-js/zwave-js-ui) as their topic conventions are more complicated.
+
+#### timeout
+This parameter defines maximum allowable interval between measurements. If the signal doesn't come, timeout signal will be issued, and repeated every timeout interval. Default timeout is 30 seconds.
 
 ### sensors - unit of measurement
 

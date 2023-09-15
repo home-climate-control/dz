@@ -78,6 +78,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.address())", target = "address")
     @Mapping(expression = "java(source.measurement().orElse(null))", target = "measurement")
     @Mapping(expression = "java(source.step().orElse(null))", target = "step")
+    @Mapping(expression = "java(source.timeout().orElse(null))", target = "timeout")
     net.sf.dz3r.runtime.config.hardware.SensorConfig sensorConfig(SensorConfig source);
 
     @Mapping(expression = "java(source.id().orElse(null))", target = "id")
