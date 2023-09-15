@@ -29,14 +29,6 @@ public class EconomizerSettings extends EconomizerTransientSettings {
     public final Double saturationLimit;
 
     /**
-     * Primary constructor with just the {@link #mode}, {@link #changeoverDelta}, and {@link #targetTemperature} values provided,
-     * {@link #keepHvacOn} set to {@code false}, and PI controller with default settings.
-     */
-    public EconomizerSettings(HvacMode mode, Boolean enabled, Double changeoverDelta, Double targetTemperature) {
-        this(mode, enabled, changeoverDelta, targetTemperature, false, 1.0, 0.000004, 1.1);
-    }
-
-    /**
      * All except {@code enabled} argument constructor (defaults to {@code true}, for common sense.
      *
      * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.

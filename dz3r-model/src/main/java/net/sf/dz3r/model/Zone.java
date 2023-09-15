@@ -82,7 +82,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         this.settings = this.settings == null ? settings : this.settings.merge(settings);
 
-        logger.info("setSettings({}): {}", getAddress(), settings);
+        logger.info("{}: setSettings(): {}", getAddress(), settings);
     }
 
     public ZoneSettings getSettings() {

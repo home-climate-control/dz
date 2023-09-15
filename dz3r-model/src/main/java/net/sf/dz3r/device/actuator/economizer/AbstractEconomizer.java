@@ -80,7 +80,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             Switch<A> targetDevice) {
 
         this.name = name;
-        this.settings = settings;
+        setSettings(settings);
 
         this.targetDevice = targetDevice;
 

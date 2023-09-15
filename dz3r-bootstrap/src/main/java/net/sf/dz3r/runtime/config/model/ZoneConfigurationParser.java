@@ -1,13 +1,13 @@
 package net.sf.dz3r.runtime.config.model;
 
-import net.sf.dz3r.runtime.config.ConfigurationContext;
-import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Range;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
+import net.sf.dz3r.runtime.config.ConfigurationContext;
+import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
 
@@ -55,9 +55,12 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         return new EconomizerContext<>(
                 new EconomizerSettings(
                         cf.mode(),
-                        cf.keepHvacOn(),
                         cf.changeoverDelta(),
-                        cf.targetTemperature()),
+                        cf.targetTemperature(),
+                        cf.keepHvacOn(),
+                        cf.controller().p(),
+                        cf.controller().i(),
+                        cf.controller().limit()),
                 getSensorBlocking(cf.ambientSensor()),
                 getSwitch(cf.switchAddress()));
     }
