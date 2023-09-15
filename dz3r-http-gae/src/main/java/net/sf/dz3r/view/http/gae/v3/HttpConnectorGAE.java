@@ -204,6 +204,8 @@ public class HttpConnectorGAE extends HttpConnector {
                                     null)
                     ));
 
+        } catch (Exception ex) {
+            logger.error("failed to execute: {}", command, ex);
         } finally {
             ThreadContext.pop();
         }

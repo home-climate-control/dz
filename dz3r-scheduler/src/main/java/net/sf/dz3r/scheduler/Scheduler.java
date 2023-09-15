@@ -143,15 +143,25 @@ public class Scheduler {
                 return Flux.empty();
             }
 
-            zone2period.put(zone, period);
-
             if (period != null) {
                 var settings = source.getValue().get(period);
-                logger.info("{}: settings applied: {}", zoneName, settings);
-                zone.setSettings(settings);
-                return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, new AbstractMap.SimpleEntry<>(period, settings)));
+                try {
+
+                    logger.info("{}: settings applied: {}", zoneName, settings);
+                    zone.setSettings(settings);
+                    zone2period.put(zone, period);
+                    return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, new AbstractMap.SimpleEntry<>(period, settings)));
+
+                } catch (Exception ex) {
+
+                    logger.error("{}: failed to apply settings: {}", zoneName, settings);
+                    zone2period.put(zone, null);
+                    return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, null));
+                }
+
             } else {
                 logger.info("{}: no active period, settings left as they were", zoneName);
+                zone2period.put(zone, null);
                 return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, null));
             }
 
