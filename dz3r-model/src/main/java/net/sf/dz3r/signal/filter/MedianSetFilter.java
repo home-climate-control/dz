@@ -25,10 +25,8 @@ import java.util.Map;
  * @param <P> Signal source identifier.
  *
  * @see MedianFilter
- * @see net.sf.dz3r.device.sensor.impl.MedianFilter
- * @see net.sf.dz3r.device.sensor.impl.MedianSetFilter
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class MedianSetFilter<T extends  Comparable<T>, P> extends AbstractMedianFilter<T, P> {
 
