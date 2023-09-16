@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * Single channel switch.
@@ -106,52 +107,54 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
 
             var cached = limitRate(state);
 
-            if (cached != null) {
-                return Mono.just(cached);
-            }
+            return cached.map(Mono::just).orElseGet(() -> {
 
-            reportState(new Signal<>(Instant.now(), new State(state, lastKnownState)));
-            setStateSync(state);
+                reportState(new Signal<>(Instant.now(), new State(state, lastKnownState)));
 
-            lastSetAt = clock.instant();
+                try {
+                    setStateSync(state);
+                } catch (IOException e) {
+                    return Mono.create(sink -> sink.error(e));
+                }
 
-            return optimistic
-                    ? Mono.just(state)
-                    : getState();
+                lastSetAt = clock.instant();
 
-        } catch (IOException e) {
-            return Mono.create(sink -> sink.error(e));
+                return optimistic
+                        ? Mono.just(state)
+                        : getState();
+            });
+
         } finally {
             ThreadContext.pop();
         }
     }
 
-    private Boolean limitRate(boolean state) {
+    private Optional<Boolean> limitRate(boolean state) {
 
         ThreadContext.push("limitRate");
 
         try {
 
             if (pace == null) {
-                return null;
+                return Optional.empty();
             }
 
             if (lastSetState == null) {
-                return null;
+                return Optional.empty();
             }
 
             if (lastSetState != state) {
-                return null;
+                return Optional.empty();
             }
 
             var delay = Duration.between(lastSetAt, clock.instant());
 
             if (delay.compareTo(pace) < 0) {
                 logger.debug("{}: skipping setState({}), too close ({} of {})", Integer.toHexString(hashCode()), state, delay, pace);
-                return lastSetState;
+                return Optional.of(lastSetState);
             }
 
-            return null;
+            return Optional.empty();
 
         } finally {
 
