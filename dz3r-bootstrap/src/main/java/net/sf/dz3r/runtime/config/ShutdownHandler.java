@@ -7,14 +7,11 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.concurrent.CountDownLatch;
-
 public class ShutdownHandler implements AutoCloseable {
 
     private final Logger logger = LogManager.getLogger();
     private final ConfigurationContext context;
 
-    private final CountDownLatch stopGate = new CountDownLatch(1);
 
     public ShutdownHandler(ConfigurationContext context) {
         this.context = context;
@@ -33,7 +30,7 @@ public class ShutdownHandler implements AutoCloseable {
 
             // Close connectors
 
-            var connectors = context.connectors
+            context.connectors
                     .getFlux()
                     .parallel()
                     .runOn(Schedulers.boundedElastic())
@@ -66,7 +63,7 @@ public class ShutdownHandler implements AutoCloseable {
                     // Need to wait for this, or things might go awry
                     .blockLast();
 
-            m.checkpoint("disconnected directors");
+            m.checkpoint("stopped directors");
 
             // Rest of operations can be done asynchronously until further notice - no need to wait for them,
             // but must wait before returning from this method
@@ -120,16 +117,19 @@ public class ShutdownHandler implements AutoCloseable {
                     .sequential()
                     .blockLast();
 
+            m.checkpoint("stopped MQTT adapters");
+
+            // VT: NOTE: These can be done in parallel with MQTT
+
             logger.error("FIXME: deactivate 1-Wire");
             logger.error("FIXME: deactivate XBee");
 
-        } catch (Throwable t) {
-            apologize(t, Level.FATAL);
+        } catch (Exception ex) {
+            apologize(ex, Level.FATAL);
         } finally {
             logger.warn("done");
             m.close();
             ThreadContext.pop();
-            stopGate.countDown();
         }
     }
 
@@ -139,9 +139,5 @@ public class ShutdownHandler implements AutoCloseable {
 
     private void apologize(Throwable t, Level level) {
         logger.log(level, "Unexpected exception, nothing we can do about it here", t);
-    }
-
-    public void await() throws InterruptedException {
-        stopGate.await();
     }
 }
