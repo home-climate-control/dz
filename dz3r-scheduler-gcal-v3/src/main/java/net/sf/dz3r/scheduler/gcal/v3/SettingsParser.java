@@ -43,44 +43,31 @@ public class SettingsParser {
 
                 logger.trace("Token: '{}'", token);
 
-                if ("on".equals(token) || "enabled".equals(token)) {
-                    enabled = true;
-                    continue;
-                }
+                switch (token) {
+                    case "on", "enabled" -> enabled = true;
+                    case "off", "disabled" -> enabled = false;
+                    case "voting" -> voting = true;
+                    case "non-voting", "not voting" -> voting = false;
+                    default -> {
 
-                if ("off".equals(token) || "disabled".equals(token)) {
-                    enabled = false;
-                    continue;
-                }
+                        if (token.startsWith("setpoint") || token.startsWith("temperature")) {
 
-                if ("voting".equals(token)) {
-                    voting = true;
-                    continue;
-                }
+                            StringTokenizer st2 = new StringTokenizer(token, " =:");
 
-                if ("non-voting".equals(token) || "not voting".equals(token)) {
-                    voting = false;
-                    continue;
-                }
+                            // Result is not needed
+                            st2.nextToken();
 
-                if (token.startsWith("setpoint") || token.startsWith("temperature")) {
+                            try {
+                                setpoint = parseSetpoint(st2.nextToken());
+                            } catch (NoSuchElementException ex) {
 
-                    StringTokenizer st2 = new StringTokenizer(token, " =:");
+                                // This indicates a problem with setpoint syntax
+                                throw new IllegalArgumentException("can't parse '" + arguments + "' (malformed setpoint '" + token + "')", ex);
+                            }
+                        }
 
-                    // Result is not needed
-                    st2.nextToken();
-
-                    try {
-                        setpoint = parseSetpoint(st2.nextToken());
-                    } catch (NoSuchElementException ex) {
-
-                        // This indicates a problem with setpoint syntax
-                        throw new IllegalArgumentException("can't parse '" + arguments + "' (malformed setpoint '" + token + "')", ex);
+                        dumpPriority = tryParseDumpPriority(token);
                     }
-                }
-
-                if (token.startsWith("dump")) {
-                    dumpPriority = parseDumpPriority(token);
                 }
             }
 
@@ -134,7 +121,11 @@ public class SettingsParser {
         }
     }
 
-    private Integer parseDumpPriority(String dumpPriority) {
+    private Integer tryParseDumpPriority(String dumpPriority) {
+
+        if (!dumpPriority.startsWith("dump")) {
+            return null;
+        }
 
         // ["dumpPriority" || "dump priority"] [= : " "] <value>
 
