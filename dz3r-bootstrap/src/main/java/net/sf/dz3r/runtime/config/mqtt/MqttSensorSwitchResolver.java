@@ -73,20 +73,37 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                     var id = kv.getKey().sensorConfig().id();
                     var address = kv.getKey().sensorConfig().address();
                     var flux = kv.getValue().getFlux(address);
-                    var timeout = Optional
-                            .ofNullable(kv.getKey().sensorConfig.timeout())
-                            .orElseGet(() -> {
-                                logger.warn("{}: default timeout of {} is used", kv.getKey().sensorConfig(), DEFAULT_TIMEOUT);
-                                return DEFAULT_TIMEOUT;
-                            });
-                    var guard = new TimeoutGuard<Double, Void>(timeout);
 
                     // ID takes precedence over address
                     var key = id == null ? address : id;
 
-                    return (Map.Entry<String, Flux<Signal<Double, Void>>>) new ImmutablePair<>(key, guard.compute(flux));
+                    return (Map.Entry<String, Flux<Signal<Double, Void>>>) new ImmutablePair<>(key, guarded(flux, kv.getKey().sensorConfig));
                 })
                 .sequential();
+    }
+
+    /**
+     * Read the timeout from the configuration and return the possibly guarded flux.
+     *
+     * @param in Flux to guard.
+     * @param cf Configuration to read values from. The parent object is passed in to provide meaningful diagnostics.
+     *
+     * @return The source flux guarded with either {@link #DEFAULT_TIMEOUT} or provided timeout, or not guarded if the timeout is specified as zero.
+     */
+    Flux<Signal<Double, Void>> guarded(Flux<Signal<Double, Void>> in, SensorConfig cf) {
+        var t = Optional
+                .ofNullable(cf.timeout())
+                .orElseGet(() -> {
+                    logger.warn("{}: default timeout of {} is used", cf, DEFAULT_TIMEOUT);
+                    return DEFAULT_TIMEOUT;
+                });
+
+        if (t.equals(Duration.ZERO)) {
+            logger.warn("{}: no timeout configured, not guarding", cf);
+            return in;
+        }
+
+        return new TimeoutGuard<Double, Void>(t).compute(in);
     }
 
     public final Flux<MqttEndpointSpec> getEndpoints() {
