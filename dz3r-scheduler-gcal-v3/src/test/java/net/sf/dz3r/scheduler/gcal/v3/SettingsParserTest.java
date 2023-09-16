@@ -5,6 +5,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
@@ -17,50 +21,18 @@ class SettingsParserTest {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
-    private final String[] inputs = {
-            "setpoint 18",
-            "setpoint 18C, enabled, voting",
-            "setpoint 18C, on, voting, dump priority = 2",
-            "setpoint 18C, enabled, voting, dump priority: 2",
-            "setpoint = 18C; enabled; voting; dump priority 2",
-            "enabled; not voting; setpoint = 80F",
-            "disabled; non-voting, setpoint: 80F",
-            "off; non-voting, setpoint: 80F"
-    };
-
-    private final ZoneSettings[] outputs = {
-            new ZoneSettings(true, 18.0, true, null, 0),
-            new ZoneSettings(true, 18.0, true, null, 0),
-            new ZoneSettings(true, 18.0, true, null, 2),
-            new ZoneSettings(true, 18.0, true, null, 2),
-            new ZoneSettings(true, 18.0, true, null, 2),
-            new ZoneSettings(true, 26.666666666666668, false, null, 0),
-            new ZoneSettings(false, 26.666666666666668, false, null, 0),
-            new ZoneSettings(false, 26.666666666666668, false, null, 0),
-    };
-
-    @Test
-    void testAllGood() {
+    @ParameterizedTest
+    @MethodSource("testStream")
+    void testAllGood(TestPair pair) {
 
         SettingsParser p = new SettingsParser();
 
-        for (int offset = 0; offset < inputs.length; offset++) {
+        ZoneSettings settings = p.parse(pair.source);
 
-            ThreadContext.push("[" + offset + "]");
+        logger.info("Command:  {}", pair.source);
+        logger.info("Settings: {}", settings);
 
-            try {
-
-                ZoneSettings settings = p.parse(inputs[offset]);
-
-                logger.info("Command:  {}", inputs[offset]);
-                logger.info("Settings: {}", settings);
-
-                assertThat(settings).isEqualTo(outputs[offset]);
-
-            } finally {
-                ThreadContext.pop();
-            }
-        }
+        assertThat(settings).isEqualTo(pair.result);
     }
 
     @Test
@@ -114,5 +86,47 @@ class SettingsParserTest {
         assertThatIllegalArgumentException()
                 .isThrownBy(() -> new SettingsParser().parse("off"))
                 .withMessage("Could not parse setpoint out of 'off'");
+    }
+
+    private record TestPair(
+        String source,
+        ZoneSettings result
+    ) {}
+
+    private static Stream<TestPair> testStream() {
+        return Stream.of(
+                new TestPair(
+                        "setpoint 18",
+                        new ZoneSettings(true, 18.0, true, null, 0)
+                ),
+                new TestPair(
+                        "setpoint 18C, enabled, voting",
+                        new ZoneSettings(true, 18.0, true, null, 0)
+                ),
+                new TestPair(
+                        "setpoint 18C, on, voting, dump priority = 2",
+                        new ZoneSettings(true, 18.0, true, null, 2)
+                ),
+                new TestPair(
+                        "setpoint 18C, enabled, voting, dump priority: 2",
+                        new ZoneSettings(true, 18.0, true, null, 2)
+                ),
+                new TestPair(
+                        "setpoint = 18C; enabled; voting; dump priority 2",
+                        new ZoneSettings(true, 18.0, true, null, 2)
+                ),
+                new TestPair(
+                        "enabled; not voting; setpoint = 80F",
+                        new ZoneSettings(true, 26.666666666666668, false, null, 0)
+                ),
+                new TestPair(
+                        "disabled; non-voting, setpoint: 80F",
+                        new ZoneSettings(false, 26.666666666666668, false, null, 0)
+                ),
+                new TestPair(
+                        "off; non-voting, setpoint: 80F",
+                        new ZoneSettings(false, 26.666666666666668, false, null, 0)
+                )
+        );
     }
 }

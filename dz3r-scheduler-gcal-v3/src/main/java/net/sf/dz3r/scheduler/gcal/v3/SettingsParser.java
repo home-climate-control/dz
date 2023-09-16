@@ -41,7 +41,7 @@ public class SettingsParser {
 
                 String token = st.nextToken().trim();
 
-                logger.trace("Token: '{}'",token);
+                logger.trace("Token: '{}'", token);
 
                 if ("on".equals(token) || "enabled".equals(token)) {
                     enabled = true;
