@@ -75,23 +75,22 @@ public class SettingsParser {
 
     private Double tryParseSetpoint(String token, String arguments) {
 
-        if (token.startsWith("setpoint") || token.startsWith("temperature")) {
-
-            StringTokenizer st2 = new StringTokenizer(token, " =:");
-
-            // Result is not needed
-            st2.nextToken();
-
-            try {
-                return parseSetpoint(st2.nextToken());
-            } catch (NoSuchElementException ex) {
-
-                // This indicates a problem with setpoint syntax
-                throw new IllegalArgumentException("can't parse '" + arguments + "' (malformed setpoint '" + token + "')", ex);
-            }
+        if (!token.startsWith("setpoint") && !token.startsWith("temperature")) {
+            return null;
         }
 
-        return null;
+        StringTokenizer st2 = new StringTokenizer(token, " =:");
+
+        // Result is not needed
+        st2.nextToken();
+
+        try {
+            return parseSetpoint(st2.nextToken());
+        } catch (NoSuchElementException ex) {
+
+            // This indicates a problem with setpoint syntax
+            throw new IllegalArgumentException("can't parse '" + arguments + "' (malformed setpoint '" + token + "')", ex);
+        }
     }
 
     private Double parseSetpoint(String setpoint) {
