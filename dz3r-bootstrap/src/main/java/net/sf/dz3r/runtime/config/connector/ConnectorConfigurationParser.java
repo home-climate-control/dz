@@ -43,7 +43,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
                     .collect(Collectors.toSet())
                     .block();
 
-            if (zones.isEmpty()) {
+            if (zones == null || zones.isEmpty()) {
                 logger.warn("connectors.http.{}: no reportable zones found, not creating the connector", cf.id());
                 return;
             }

@@ -47,7 +47,7 @@ public class ScheduleConfigurationParser extends ConfigurationContextAware {
                 .collectMap(CalendarConfigEntry::zone, CalendarConfigEntry::calendar)
                 .block();
 
-        if (mapping.isEmpty()) {
+        if (mapping == null || mapping.isEmpty()) {
             logger.warn("schedule.google-calendar: no mappable zones found, not creating the updater");
             return;
         }
