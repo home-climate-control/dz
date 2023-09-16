@@ -28,7 +28,7 @@ public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {
     @Context
     HccRawInterfaceConfig config;
 
-    void onStart(@Observes StartupEvent e) {
+    void onStart(@Observes StartupEvent e) { // NOSONAR StartupEvent is useless
         ThreadContext.push("onStart");
 
         try {
