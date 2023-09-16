@@ -154,7 +154,7 @@ public class Scheduler {
 
                 } catch (Exception ex) {
 
-                    logger.error("{}: failed to apply settings: {}", zoneName, settings);
+                    logger.error("{}: failed to apply settings: {}", zoneName, settings, ex);
                     zone2period.put(zone, null);
                     return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, null));
                 }
