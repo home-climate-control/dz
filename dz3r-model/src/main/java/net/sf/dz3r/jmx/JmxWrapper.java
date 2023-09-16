@@ -428,7 +428,7 @@ public final class JmxWrapper {
 
             logger.debug("returns {}", method.getReturnType().getName());
 
-            if (method.getReturnType().getName().equals("void")) {
+            if (method.getReturnType().equals(void.class) || method.getReturnType().equals(Void.class)) {
                 throw new IllegalArgumentException(method.getName() + "() is not an accessor (returns void)");
             }
 
