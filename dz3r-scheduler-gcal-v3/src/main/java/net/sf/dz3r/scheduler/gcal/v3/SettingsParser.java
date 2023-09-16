@@ -8,6 +8,7 @@ import org.apache.logging.log4j.ThreadContext;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.StringTokenizer;
 
 /**
@@ -61,11 +62,11 @@ public class SettingsParser {
             }
 
             return new ZoneSettings(
-                    enabled == null || enabled,
+                    Optional.ofNullable(enabled).orElse(true),
                     setpoint,
-                    voting == null || voting,
+                    Optional.ofNullable(voting).orElse(true),
                     null,
-                    dumpPriority == null ? 0: dumpPriority);
+                    Optional.ofNullable(dumpPriority).orElse(0));
 
         } finally {
             ThreadContext.pop();
