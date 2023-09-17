@@ -34,8 +34,6 @@ import java.util.Set;
  */
 public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S extends AbstractMqttSwitch> extends SensorSwitchResolver<A> {
 
-    private final Duration DEFAULT_TIMEOUT = Duration.ofSeconds(30);
-
     private final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
     private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
     private final Set<MqttSwitchConfig> switchConfigs = new LinkedHashSet<>();
@@ -88,14 +86,14 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
      * @param in Flux to guard.
      * @param cf Configuration to read values from. The parent object is passed in to provide meaningful diagnostics.
      *
-     * @return The source flux guarded with either {@link #DEFAULT_TIMEOUT} or provided timeout, or not guarded if the timeout is specified as zero.
+     * @return The source flux guarded with either {@link #getDefaultTimeout()} or provided timeout, or not guarded if the timeout is specified as zero.
      */
     Flux<Signal<Double, Void>> guarded(Flux<Signal<Double, Void>> in, SensorConfig cf) {
         var t = Optional
                 .ofNullable(cf.timeout())
                 .orElseGet(() -> {
-                    logger.warn("{}: default timeout of {} is used", cf, DEFAULT_TIMEOUT);
-                    return DEFAULT_TIMEOUT;
+                    logger.warn("{}: default timeout of {} is used", cf, getDefaultTimeout());
+                    return getDefaultTimeout();
                 });
 
         if (t.equals(Duration.ZERO)) {
@@ -105,6 +103,13 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
 
         return new TimeoutGuard<Double, Void>(t).compute(in);
     }
+
+    /**
+     * Get the default timeout for the particular kind of the adapter - they are all different.
+     *
+     * @return Timeout for {@link #guarded(Flux, SensorConfig)}.
+     */
+    protected abstract Duration getDefaultTimeout();
 
     public final Flux<MqttEndpointSpec> getEndpoints() {
 

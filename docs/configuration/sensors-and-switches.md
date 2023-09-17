@@ -19,7 +19,15 @@ The first way will work just fine with [ESPHome](https://esphome.io/) and [zigbe
 The second way will be generally required with [zwave2mqtt](https://github.com/zwave-js/zwave-js-ui) as their topic conventions are more complicated.
 
 #### timeout
-This parameter defines maximum allowable interval between measurements. If the signal doesn't come, timeout signal will be issued, and repeated every timeout interval. Default timeout is 30 seconds.
+This parameter defines maximum allowable interval between measurements. If the signal doesn't come, timeout signal will be issued, and repeated every timeout interval. Default timeouts are:
+
+* For [ESPHome](https://esphome.io/) based devices: 30 seconds.
+* For [Z-Wave JS UI](https://github.com/zwave-js/zwave-js-ui#z-wave-js-ui) (formerly [ZWave To MQTT](https://github.com/OpenZWave/Zwave2Mqtt#zwave-to-mqtt)): 90 seconds
+* For [Zigbee2MQTT](https://www.zigbee2mqtt.io/): 90 seconds.
+
+Generally, you want to have sensors to emit measurements every five to ten seconds. 
+Zigbee and Z-Wave devices default to much higher periods and need to be specifically configured to emit faster. 
+This affects battery life, however, at least for the HCC workhorse, [SNZB-02](https://www.zigbee2mqtt.io/devices/SNZB-02.html), setting the reporting interval to 10 seconds still yields many months of battery life.
 
 ### sensors - unit of measurement
 

@@ -1,11 +1,12 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
-import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
-import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
 import net.sf.dz3r.device.esphome.v1.ESPHomeSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
+import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -14,6 +15,12 @@ public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevice
 
     public EspSensorSwitchResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
+    }
+
+    @Override
+    protected Duration getDefaultTimeout() {
+        // Enough for decent control quality
+        return Duration.ofSeconds(30);
     }
 
     @Override
