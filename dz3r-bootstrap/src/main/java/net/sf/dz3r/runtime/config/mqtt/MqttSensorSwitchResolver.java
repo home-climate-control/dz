@@ -40,7 +40,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
     private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
     private final Set<MqttSwitchConfig> switchConfigs = new LinkedHashSet<>();
 
-    private final Map<MqttBrokerSpec, L> address2sensor = new LinkedHashMap<>();
+    private final Map<MqttBrokerSpec, L> broker2listener = new LinkedHashMap<>();
 
     protected MqttSensorSwitchResolver(Set<A> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source);
@@ -164,7 +164,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
     }
 
     private final L resolveListener(MqttBrokerSpec address, MqttAdapter adapter) {
-        return address2sensor.computeIfAbsent(address, k -> createSensorListener(adapter, address.rootTopic()));
+        return broker2listener.computeIfAbsent(address, k -> createSensorListener(adapter, address.rootTopic()));
     }
 
     protected abstract L createSensorListener(MqttAdapter adapter, String rootTopic);
