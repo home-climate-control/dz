@@ -1,74 +1,29 @@
 package net.sf.dz3r.device.esphome.v1;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
-import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
-import java.time.Duration;
 import java.time.Instant;
 
 public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<String, Double, Void> {
 
     protected final Logger logger = LogManager.getLogger();
 
-    /**
-     * How long to wait before reporting a timeout.
-     */
-    private Duration timeout = Duration.ofSeconds(30);
-
     private final MqttListener mqttListener;
     private final String mqttRootTopicSub;
 
     public ESPHomeListener(MqttListener mqttListener, String mqttRootTopicSub) {
 
-        if (mqttListener == null) {
-            throw new IllegalArgumentException("mqttListener can't be null");
-        }
-
-        if (mqttRootTopicSub == null) {
-            throw new IllegalArgumentException("mqttRootTopicSub can't be null");
-        }
-
-        this.mqttListener = mqttListener;
-        this.mqttRootTopicSub = mqttRootTopicSub;
-    }
-
-    /**
-     * Create an instance.
-     *
-     * Even though deprecated, left intact not to disrupt existing configurations until
-     * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
-     *
-     * @deprecated Use {@link ESPHomeListener#ESPHomeListener(MqttListener, String)} instead.
-     */
-    @Deprecated(forRemoval = false)
-    public ESPHomeListener(String host, String mqttRootTopicSub) {
-        this(host, MqttEndpoint.DEFAULT_PORT, null, null, false, mqttRootTopicSub);
-    }
-
-    /**
-     * Create an instance.
-     *
-     * Even though deprecated, left intact not to disrupt existing configurations until
-     * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
-     *
-     * @deprecated Use {@link ESPHomeListener#ESPHomeListener(MqttListener, String)} instead.
-     */
-    @Deprecated(forRemoval = false)
-    public ESPHomeListener(String host, int port,
-                           String username, String password,
-                           boolean autoReconnect,
-                           String mqttRootTopicSub) {
-
-        mqttListener = new MqttListener(new MqttEndpoint(host, port), username, password, autoReconnect);
-        this.mqttRootTopicSub = mqttRootTopicSub;
+        this.mqttListener = HCCObjects.requireNonNull(mqttListener, "mqttListener can't be null");
+        this.mqttRootTopicSub = HCCObjects.requireNonNull(mqttRootTopicSub, "mqttRootTopicSub can't be null");
     }
 
     @Override
@@ -88,12 +43,11 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
 
         logger.info("getFlux: {}", address);
 
-        return new TimeoutGuard<Double, Void>(timeout)
-                .compute(mqttListener
-                        .getFlux(mqttRootTopicSub, true)
-                        .filter(e -> matchSensorAddress(e, address))
-                        .doOnNext(s -> logger.debug("matched: {} {}", s.topic, s.message))
-                        .map(this::mqtt2sensor));
+        return mqttListener
+                .getFlux(mqttRootTopicSub, true)
+                .filter(e -> matchSensorAddress(e, address))
+                .doOnNext(s -> logger.debug("{}: matched: {} {}", address, s.topic, s.message))
+                .map(this::mqtt2sensor);
     }
 
     private boolean matchSensorAddress(MqttSignal signal, String address) {
