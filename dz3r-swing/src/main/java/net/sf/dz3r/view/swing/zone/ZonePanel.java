@@ -1,9 +1,9 @@
 package net.sf.dz3r.view.swing.zone;
 
-import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
+import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
@@ -257,7 +257,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
                     // Toggle hold status
 
-                    zone.setSettings(zone.getSettings().merge(new ZoneSettings(
+                    zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
                             null,
                             null,
                             null,
@@ -271,7 +271,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
                     // Toggle voting status
 
-                    zone.setSettings(zone.getSettings().merge(new ZoneSettings(
+                    zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
                             null,
                             null,
                             !zoneStatus.settings.voting,
@@ -285,7 +285,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
                     // Toggle off status
 
-                    zone.setSettings(new ZoneSettings(zone.getSettings(), !zoneStatus.settings.enabled));
+                    zone.setSettingsSync(new ZoneSettings(zone.getSettings(), !zoneStatus.settings.enabled));
                     refresh();
                     logger.info("{}: on status is now {}", zone.getAddress(), zone.getSettings().enabled);
                 }
@@ -294,7 +294,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                     // Go back to schedule
 
                     // Implies taking the zone off hold
-                    zone.setSettings(zone.getSettings().merge(new ZoneSettings(
+                    zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
                             null,
                             null,
                             null,
@@ -308,7 +308,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
                     // Change dump priority
 
-                    zone.setSettings(zone.getSettings().merge(new ZoneSettings(
+                    zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
                             null,
                             null,
                             null,
@@ -350,7 +350,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
         logger.info("{}: returning to settings: {}", zone.getAddress(), settings);
 
-        zone.setSettings(settings);
+        zone.setSettingsSync(settings);
     }
 
     private void refresh() {
@@ -388,7 +388,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
         // This may blow up if the zone refuses to take the new setpoint because it is out of range
-        zone.setSettings(new ZoneSettings(zone.getSettings(), setpoint));
+        zone.setSettingsSync(new ZoneSettings(zone.getSettings(), setpoint));
 
         refresh();
     }

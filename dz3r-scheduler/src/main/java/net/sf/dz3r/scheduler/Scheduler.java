@@ -148,7 +148,7 @@ public class Scheduler {
                 try {
 
                     logger.info("{}: settings applied: {}", zoneName, settings);
-                    zone.setSettings(settings);
+                    zone.setSettingsSync(settings);
                     zone2period.put(zone, period);
                     return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, new AbstractMap.SimpleEntry<>(period, settings)));
 

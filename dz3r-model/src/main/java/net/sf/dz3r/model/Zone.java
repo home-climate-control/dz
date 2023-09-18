@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
@@ -15,7 +16,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.Optional;
 
 /**
@@ -66,23 +69,56 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      */
     public Zone(Thermostat ts, ZoneSettings settings, EconomizerContext<?> economizerContext) {
         this.ts = ts;
-        setSettings(new ZoneSettings(settings, ts.getSetpoint()));
+        setSettingsSync(new ZoneSettings(settings, ts.getSetpoint()));
 
         economizer = Optional.ofNullable(economizerContext)
                 .map(ctx -> new PidEconomizer<>(ts.getAddress(), ctx.settings, ctx.ambientFlux, ctx.targetDevice))
                 .orElse(null);
     }
 
-    public void setSettings(ZoneSettings settings) {
-        if (settings == null) {
-            throw new IllegalArgumentException("settings can't be null");
-        }
+    /**
+     * Set zone settings immediately.
+     *
+     * This method isn't, and isn't really diligent to deprecate at the moment - however, using {@link #setSettings(ZoneSettings)} would be more diligent.
+     *
+     * @param settings Settings to set zone to.
+     *
+     * @return New settings (result of {@link ZoneSettings#merge(ZoneSettings)}).
+     *
+     * @throws IllegalArgumentException if things go wrong.
+     */
+    public ZoneSettings setSettingsSync(ZoneSettings settings) {
+        HCCObjects.requireNonNull(settings, "settings can't be null");
 
         ts.setSetpoint(settings.setpoint);
 
-        this.settings = this.settings == null ? settings : this.settings.merge(settings);
+        var newSettings = Optional.ofNullable(this.settings)
+                .map(s -> s.merge(settings))
+                .orElse(settings);
 
-        logger.info("{}: setSettings(): {}", getAddress(), settings);
+        logger.info("{}: setSettings(): {} + {} => {}", getAddress(), this.settings, settings, newSettings);
+
+        this.settings = newSettings;
+
+        return this.settings;
+    }
+
+    /**
+     * Set zone settings in a reactive way.
+     *
+     * @param settings Settings to set zone to.
+     *
+     * @return The Mono signal indicating the new status or, possibly, the reason why they can't be set.
+     * This mono will never be an error mono, but the wrapped {@link Signal} may be.
+     */
+    public Mono<Signal<ZoneSettings, String>> setSettings(ZoneSettings settings) {
+        return Mono.create(sink -> {
+            try {
+                sink.success(new Signal<>(Instant.now(), setSettingsSync(settings), getAddress()));
+            } catch (Exception ex) {
+                sink.success(new Signal<>(Instant.now(), null, getAddress(), Signal.Status.FAILURE_TOTAL, ex));
+            }
+        });
     }
 
     public ZoneSettings getSettings() {
@@ -131,7 +167,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
     private Signal<ZoneStatus, String> suppressIfNotEnabled(Signal<ZoneStatus, String> source) {
 
-        if (settings.enabled) {
+        if (Boolean.TRUE.equals(settings.enabled)) {
             return source;
         }
 

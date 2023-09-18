@@ -195,7 +195,7 @@ public class HttpConnectorGAE extends HttpConnector {
             // Input is not sanitized, need to do it here
             Optional
                     .ofNullable(name2zone.get(command.name))
-                    .ifPresent(z -> z.setSettings(
+                    .ifPresent(z -> z.setSettingsSync(
                             new ZoneSettings(
                                     command.enabled,
                                     command.setpointTemperature,

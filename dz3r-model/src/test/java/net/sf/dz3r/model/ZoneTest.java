@@ -92,7 +92,7 @@ class ZoneTest {
         var settings = new ZoneSettings(ts.getSetpoint());
         var z = new Zone(ts, settings);
 
-        z.setSettings(new ZoneSettings(settings, false));
+        z.setSettingsSync(new ZoneSettings(settings, false));
 
         var out = z
                 .compute(sequence)
@@ -130,7 +130,7 @@ class ZoneTest {
         pvSink.next(15.0);
         pvSink.next(25.0);
 
-        z.setSettings(new ZoneSettings(z.getSettings(), 30.0));
+        z.setSettingsSync(new ZoneSettings(z.getSettings(), 30.0));
 
         pvSink.next(35.0);
 
