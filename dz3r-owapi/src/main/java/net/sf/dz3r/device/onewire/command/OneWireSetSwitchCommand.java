@@ -47,14 +47,12 @@ public class OneWireSetSwitchCommand extends OneWireSwitchCommand {
 
             m.checkpoint("path open: " + path);
 
-            if (!(device instanceof SwitchContainer)) {
+            if (!(device instanceof SwitchContainer switchContainer)) {
                 throw new IllegalArgumentException(address + ": (" + device.getName() + ") is not a SwitchContainer");
             }
 
-            var sc = (SwitchContainer) device;
-
-            var writtenState= writeDevice(m, channelAddress, sc, state);
-            var readState = readDevice(m, channelAddress, sc, new State(writtenState));
+            var writtenState= writeDevice(m, channelAddress, switchContainer, state);
+            var readState = readDevice(m, channelAddress, switchContainer, new State(writtenState));
 
             eventSink.next(new OneWireSwitchState(Instant.now(), command.messageId, address, readState.state[channelAddress.channel]));
 

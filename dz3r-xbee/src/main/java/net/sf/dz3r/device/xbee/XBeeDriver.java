@@ -41,11 +41,11 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBe
 
         logger.info("getSensorSignal: {}", event);
 
-        if (!(event instanceof XBeeNetworkIOSample)) {
+        if (!(event instanceof XBeeNetworkIOSample xbeeSample)) {
             return Flux.empty();
         }
 
-        var sample = ((XBeeNetworkIOSample) event).sample;
+        var sample = xbeeSample.sample;
 
         return Flux.create(sink -> {
             // We're only interested in analog data for now, and there's 4 channels of it (plus supply voltage)
@@ -68,11 +68,9 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBe
     @Override
     protected void handleArrival(DriverNetworkEvent event) {
 
-        if (!(event instanceof XBeeNetworkArrival)) {
+        if (!(event instanceof XBeeNetworkArrival arrivalEvent)) {
             return;
         }
-
-        var arrivalEvent = (XBeeNetworkArrival) event;
 
         // This will only add the *device* address, but not individual channel address.
         devicesPresent.add(arrivalEvent.address);
@@ -127,17 +125,11 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBe
      * @throws IllegalArgumentException if the {@code conversion} argument is neither of two supported.
      */
     public final Flux<Signal<Double, String>> getFlux(String address, String conversion) {
-        AnalogConverter converter;
-        switch (conversion.toUpperCase()) {
-            case "LM34":
-                converter = new AnalogConverterLM34();
-                break;
-            case "TMP36":
-                converter = new AnalogConverterTMP36();
-                break;
-            default:
-                throw new IllegalArgumentException("Supported values are: LM34, TMP36");
-        }
+        AnalogConverter converter = switch (conversion.toUpperCase()) {
+            case "LM34" -> new AnalogConverterLM34();
+            case "TMP36" -> new AnalogConverterTMP36();
+            default -> throw new IllegalArgumentException("Supported values are: LM34, TMP36");
+        };
 
         return new ConvertingFilter<String>(converter).compute(getFlux(address));
     }

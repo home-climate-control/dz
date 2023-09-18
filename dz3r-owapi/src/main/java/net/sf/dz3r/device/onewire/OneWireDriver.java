@@ -57,11 +57,9 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String, 
     @Override
     protected Flux<Signal<Double, String>> getSensorSignal(DriverNetworkEvent event) {
 
-        if (!(event instanceof OneWireNetworkTemperatureSample)) {
+        if (!(event instanceof OneWireNetworkTemperatureSample sample)) {
             return Flux.empty();
         }
-
-        var sample = (OneWireNetworkTemperatureSample) event;
 
         return Flux.just(new Signal<>(event.timestamp, sample.sample, sample.address));
     }
@@ -71,11 +69,9 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String, 
 
         // VT: FIXME: Reimplement this as a subscriber
 
-        if (!(event instanceof OneWireNetworkArrival)) {
+        if (!(event instanceof OneWireNetworkArrival arrivalEvent)) {
             return;
         }
-
-        var arrivalEvent = (OneWireNetworkArrival) event;
 
         devicesPresent.add(arrivalEvent.address);
         address2path.put(arrivalEvent.address, arrivalEvent.path);
@@ -85,11 +81,9 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String, 
     protected void handleDeparture(DriverNetworkEvent event) {
 
         // VT: FIXME: Reimplement this as a subscriber
-        if (!(event instanceof OneWireNetworkDeparture)) {
+        if (!(event instanceof OneWireNetworkDeparture departureEvent)) {
             return;
         }
-
-        var departureEvent = (OneWireNetworkDeparture) event;
 
         devicesPresent.remove(departureEvent.address);
         address2path.remove(departureEvent.address);

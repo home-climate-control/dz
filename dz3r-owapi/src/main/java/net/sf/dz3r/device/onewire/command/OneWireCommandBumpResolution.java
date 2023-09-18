@@ -32,21 +32,19 @@ public class OneWireCommandBumpResolution extends OneWireCommand {
             adapter.closeAllPaths();
             path.open();
 
-            if (!(device instanceof TemperatureContainer)) {
+            if (!(device instanceof TemperatureContainer temperatureContainer)) {
                 logger.debug("{} ({}): not a temperature container", address, device.getName());
                 return;
             }
 
-            var tc = (TemperatureContainer) device;
+            var state = temperatureContainer.readDevice();
 
-            var state = tc.readDevice();
-
-            if (!tc.hasSelectableTemperatureResolution()) {
+            if (!temperatureContainer.hasSelectableTemperatureResolution()) {
                 logger.debug("{} ({}): doesn't support selectable resolution", address, device.getName());
                 return;
             }
 
-            var resolutions = tc.getTemperatureResolutions();
+            var resolutions = temperatureContainer.getTemperatureResolutions();
             var sb = new StringBuilder();
 
             for (double v : resolutions) {
@@ -55,8 +53,8 @@ public class OneWireCommandBumpResolution extends OneWireCommand {
 
             logger.debug("{} ({}): temperature resolutions available: {}, setting best", address, device.getName(), sb);
 
-            tc.setTemperatureResolution(resolutions[resolutions.length - 1], state);
-            tc.writeDevice(state);
+            temperatureContainer.setTemperatureResolution(resolutions[resolutions.length - 1], state);
+            temperatureContainer.writeDevice(state);
 
         } finally {
             m.close();
