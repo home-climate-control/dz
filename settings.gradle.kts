@@ -4,7 +4,7 @@ pluginManagement {
         id("org.sonarqube") version "4.0.0.2929"
         id("com.gorylenko.gradle-git-properties") version "2.4.1"
 
-        id("org.springframework.boot") version "3.1.0"
+        id("org.springframework.boot") version "3.1.3"
         id("io.spring.dependency-management") version "1.1.0"
 
         id("io.quarkus") version "3.2.0.Final"
