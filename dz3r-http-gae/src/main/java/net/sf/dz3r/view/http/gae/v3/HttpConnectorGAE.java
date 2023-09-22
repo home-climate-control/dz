@@ -74,7 +74,7 @@ public class HttpConnectorGAE extends HttpConnector {
         var zoneRenderer = new ZoneRenderer();
 
         // Zones and zone controller have no business knowing about the sensor signal, but humans want it; inject it
-        zoneRenderer.subscribeSensor(getAggregateSensorFlux(feed.sensorFlux2zone));
+        getAggregateSensorFlux(feed.sensorFlux2zone).subscribe(zoneRenderer::consumeSensorSignal);
 
         // Zones and zone controller have no business knowing about HVAC mode; inject it
         var modeFlux = feed.hvacDeviceFlux
@@ -85,7 +85,7 @@ public class HttpConnectorGAE extends HttpConnector {
                 })
                 .filter(s -> s.getValue().command.mode != null)
                 .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command.mode, null, s.status, s.error));
-        zoneRenderer.subscribeMode(modeFlux);
+        modeFlux.subscribe(zoneRenderer::consumeMode);
 
         // Zone ("thermostat" in its terminology) status feed is the only one supported
         var zoneStatusFeed =

@@ -92,20 +92,12 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
             HvacMode.HEATING, net.sf.dz3r.view.http.gae.v3.wire.HvacMode.HEATING
     );
 
-    public void subscribeSensor(Flux<Signal<Double, String>> sensorFlux) {
-        sensorFlux.subscribe(this::consumeSensorSignal);
-    }
-
-    private void consumeSensorSignal(Signal<Double, String> sensorSignal) {
+    public void consumeSensorSignal(Signal<Double, String> sensorSignal) {
         this.sensorSignal = sensorSignal;
         logger.debug("sensorSignal: {}", sensorSignal);
     }
 
-    public void subscribeMode(Flux<Signal<HvacMode, Void>> in) {
-        in.doOnNext(this::consumeMode).subscribe();
-    }
-
-    private void consumeMode(Signal<HvacMode, Void> signal) {
+    public void consumeMode(Signal<HvacMode, Void> signal) {
         logger.debug("Mode: {}", signal.getValue());
         this.hvacMode = signal.getValue();
     }
