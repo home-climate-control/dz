@@ -5,6 +5,7 @@ import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
 import net.sf.dz3r.view.swing.ScreenDescriptor;
+import reactor.core.publisher.Flux;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,12 +33,14 @@ public class UnitPanel extends EntityPanel<HvacDeviceStatus, Void> {
 
     private final UnitChart unitChart = new UnitChart(Clock.systemUTC());
 
-    public UnitPanel(String name, ScreenDescriptor screenDescriptor) {
+    public UnitPanel(String name, ScreenDescriptor screenDescriptor, Flux<Signal<HvacDeviceStatus, Void>> signal) {
 
         this.name = name;
 
         setFontSize(screenDescriptor);
         initGraphics();
+
+        signal.subscribe(this::consumeSignal);
     }
 
     @SuppressWarnings("squid:S1199")

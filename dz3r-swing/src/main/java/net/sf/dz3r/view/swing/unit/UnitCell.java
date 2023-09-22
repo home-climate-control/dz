@@ -1,8 +1,10 @@
 package net.sf.dz3r.view.swing.unit;
 
+import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityCell;
+import reactor.core.publisher.Flux;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -11,8 +13,9 @@ import java.awt.Rectangle;
 
 public class UnitCell extends EntityCell<HvacDeviceStatus, Void> {
 
-    public UnitCell() {
+    public UnitCell(Flux<Signal<HvacDeviceStatus, Void>> signal) {
         setPreferredSize(new Dimension(20, 70));
+        signal.subscribe(this::consumeSignal);
     }
 
     @Override

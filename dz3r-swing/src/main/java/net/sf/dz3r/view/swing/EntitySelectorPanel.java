@@ -132,11 +132,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
 
     private CellAndPanel<HvacDeviceStatus, Void> createUnitPair(String address, Flux<Signal<HvacDeviceStatus, Void>> source) {
 
-        var cell = new UnitCell();
-        var panel = new UnitPanel(address, config.screen);
-
-        source.subscribe(cell::consumeSignal);
-        source.subscribe(panel::consumeSignal);
+        var cell = new UnitCell(source);
+        var panel = new UnitPanel(address, config.screen, source);
 
         return new CellAndPanel<>(cell, panel);
     }
@@ -149,8 +146,6 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
             Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> scheduleFlux) {
 
         var zoneName = zone.getAddress();
-        var cell = new ZoneCell(zoneName);
-        var panel = new ZonePanel(zone, config.screen, config.console().initialUnit());
 
         var thisZoneFlux = aggregateZoneFlux
                 .filter(s -> zoneName.equals(s.payload))
@@ -162,18 +157,16 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 .filter(s -> zoneName.equals(s.getKey()))
                 .map(Map.Entry::getValue);
 
-        thisZoneFlux.subscribe(cell::consumeSignal);
-        thisZoneFlux.subscribe(panel::consumeSignal);
-
-        // Zones and zone controller have no business knowing about the sensor signal, but humans want it; inject it
-        sensorFlux.subscribe(panel::consumeSensorSignal);
-
-        // Zones and zone controller have no business knowing about HVAC mode; inject it
-        modeFlux.subscribe(cell::consumeMode);
-        modeFlux.subscribe(panel::consumeMode);
-
-        // Need to display schedule period and deviation, inject it
-        thisScheduleFlux.subscribe(panel::consumeSchedule);
+        var cell = new ZoneCell(
+                zoneName,
+                thisZoneFlux,
+                modeFlux);
+        var panel = new ZonePanel(
+                zone, config.screen, config.console().initialUnit(),
+                thisZoneFlux,
+                sensorFlux,
+                modeFlux,
+                thisScheduleFlux);
 
         return new CellAndPanel<>(cell, panel);
     }

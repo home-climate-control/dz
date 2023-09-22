@@ -107,7 +107,18 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      */
     private HvacMode hvacMode;
 
-    public ZonePanel(Zone zone, ScreenDescriptor screenDescriptor, TemperatureUnit defaultUnit) {
+    /**
+     * Create an instance.
+     *
+     * @param zone Zone to display the status of.
+     * @param defaultUnit Temperature unit at instantiation time.
+     */
+    public ZonePanel(Zone zone, ScreenDescriptor screenDescriptor, TemperatureUnit defaultUnit,
+                     Flux<Signal<ZoneStatus, Void>> zoneFlux,
+                     Flux<Signal<Double, Void>> sensorFlux,
+                     Flux<Signal<HvacMode, Void>> modeFlux,
+                     Flux<Map.Entry<SchedulePeriod, ZoneSettings>> scheduleFlux) {
+
         this.zone = zone;
 
         needFahrenheit = defaultUnit == TemperatureUnit.F;
@@ -116,6 +127,12 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         setFontSize(screenDescriptor);
 
         initGraphics();
+
+        zoneFlux.subscribe(this::consumeSignal);
+        sensorFlux.subscribe(this::consumeSensorSignal);
+        modeFlux.subscribe(this::consumeMode);
+        scheduleFlux.subscribe(this::consumeSchedule);
+
         initKeyStream();
     }
 

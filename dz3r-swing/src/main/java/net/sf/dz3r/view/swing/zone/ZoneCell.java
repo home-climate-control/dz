@@ -6,6 +6,7 @@ import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityCell;
+import reactor.core.publisher.Flux;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -21,9 +22,12 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
 
     private HvacMode hvacMode;
 
-    public ZoneCell(String name) {
+    public ZoneCell(String name, Flux<Signal<ZoneStatus, Void>> zoneFlux, Flux<Signal<HvacMode, Void>> modeFlux) {
         setPreferredSize(new Dimension(20, 70));
         setToolTipText(name);
+
+        zoneFlux.subscribe(this::consumeSignal);
+        modeFlux.subscribe(this::consumeMode);
     }
 
     @Override
