@@ -12,7 +12,6 @@ import javax.swing.SwingConstants;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.time.Clock;
 import java.time.Duration;
@@ -132,21 +131,6 @@ public class UnitPanel extends EntityPanel<HvacDeviceStatus, Void> {
 
         leftLabel.setFont(screenDescriptor.fontSetpoint);
         currentLeftLabel.setFont(screenDescriptor.fontSetpoint);
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // No special handling
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        // No special handling yet
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        // No special handling
     }
 
     @Override

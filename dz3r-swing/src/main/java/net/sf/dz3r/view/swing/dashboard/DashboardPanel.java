@@ -18,7 +18,6 @@ import javax.swing.border.TitledBorder;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.KeyEvent;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -87,21 +86,6 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
                 .doOnNext(panel -> ((TitledBorder) panel.getBorder()).setTitleColor(Color.WHITE))
                 .doOnNext(this::add)
                 .subscribe();
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // No special handling
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        // No special handling yet
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        // No special handling
     }
 
     @Override

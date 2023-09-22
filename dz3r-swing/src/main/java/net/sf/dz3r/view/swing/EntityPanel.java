@@ -5,6 +5,7 @@ import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 /**
@@ -21,6 +22,8 @@ import java.awt.event.KeyListener;
 public abstract class EntityPanel<T, P> extends SwingSink<T, P> implements KeyListener {
 
     protected static final String UNDEFINED = "--";
+
+    protected final KeyFlux keyFlux = new KeyFlux();
 
     @SuppressWarnings("squid:S1199")
     protected final void createLayout(String name, JPanel chart) {
@@ -110,5 +113,20 @@ public abstract class EntityPanel<T, P> extends SwingSink<T, P> implements KeyLi
      */
     protected boolean isBackgroundTransparent() {
         return false;
+    }
+
+    @Override
+    public final void keyTyped(KeyEvent e) {
+        keyFlux.keyTyped(e);
+    }
+
+    @Override
+    public final void keyPressed(KeyEvent e) {
+        keyFlux.keyPressed(e);
+    }
+
+    @Override
+    public final void keyReleased(KeyEvent e) {
+        keyFlux.keyReleased(e);
     }
 }

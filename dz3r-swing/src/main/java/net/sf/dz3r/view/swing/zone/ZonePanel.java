@@ -11,7 +11,6 @@ import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
 import net.sf.dz3r.view.swing.EntitySelectorPanel;
 import net.sf.dz3r.view.swing.ScreenDescriptor;
-import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
 import javax.swing.JLabel;
@@ -32,6 +31,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import static java.awt.event.KeyEvent.KEY_PRESSED;
+
 /**
  * Zone panel.
  *
@@ -39,7 +40,7 @@ import java.util.Optional;
  * but gets event notifications from {@link EntitySelectorPanel} instead.
  * This is done in order not to fiddle with focus changes.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
@@ -115,6 +116,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         setFontSize(screenDescriptor);
 
         initGraphics();
+        initKeyStream();
     }
 
     private void initGraphics() {
@@ -228,115 +230,114 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         return true;
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // No special handling
+
+    private void initKeyStream() {
+        keyFlux
+                .flux
+                .filter(e -> e.getID() == KEY_PRESSED)
+                .flatMap(this::processKeypress)
+                .subscribe(s -> logger.info("{}: {}", zone.getAddress(), s));
     }
 
-    @Override
-    public void keyPressed(KeyEvent e) {
 
-        ThreadContext.push("keyPressed");
+    private Flux<String> processKeypress(KeyEvent e) {
 
-        try {
+        logger.debug("{}", e::toString);
 
-            logger.debug("{}", e::toString);
+        if (zoneStatus == null) {
+            return Flux.just("zoneStatus unset, blowups likely, ignored: " + e);
+        }
 
-            if (zoneStatus == null) {
-                logger.warn("{}: zoneStatus unset, blowups likely, ignored", zone.getAddress());
-                return;
+        switch (Character.toLowerCase(e.getKeyChar())) {
+            case 'c', 'f' -> {
+                needFahrenheit = !needFahrenheit;
+                refresh();
+                return Flux.just("displaying temperature in " + (needFahrenheit ? "Fahrenheit" : "Celsius"));
             }
+            case 'h' -> {
 
-            switch (Character.toLowerCase(e.getKeyChar())) {
-                case 'c', 'f' -> {
-                    needFahrenheit = !needFahrenheit;
-                    refresh();
-                    logger.info("{}: displaying temperature in {}", zone.getAddress(), (needFahrenheit ? "Fahrenheit" : "Celsius"));
-                }
-                case 'h' -> {
+                // Toggle hold status
 
-                    // Toggle hold status
+                zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
+                        null,
+                        null,
+                        null,
+                        !zoneStatus.settings.hold,
+                        null
+                )));
+                refresh();
+                return Flux.just("hold status is now " + zone.getSettings().hold);
+            }
+            case 'v' -> {
 
-                    zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
-                            null,
-                            null,
-                            null,
-                            !zoneStatus.settings.hold,
-                            null
-                    )));
-                    refresh();
-                    logger.info("{}: hold status is now {}", zone.getAddress(), zone.getSettings().hold);
-                }
-                case 'v' -> {
+                // Toggle voting status
 
-                    // Toggle voting status
+                zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
+                        null,
+                        null,
+                        !zoneStatus.settings.voting,
+                        null,
+                        null
+                )));
+                refresh();
+                return Flux.just("voting status is now " + zone.getSettings().voting);
+            }
+            case 'o' -> {
 
-                    zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
-                            null,
-                            null,
-                            !zoneStatus.settings.voting,
-                            null,
-                            null
-                    )));
-                    refresh();
-                    logger.info("{}: voting status is now {}", zone.getAddress(), zone.getSettings().voting);
-                }
-                case 'o' -> {
+                // Toggle off status
 
-                    // Toggle off status
+                zone.setSettingsSync(new ZoneSettings(zone.getSettings(), !zoneStatus.settings.enabled));
+                refresh();
+                return Flux.just("on status is now " + zone.getSettings().enabled);
+            }
+            case 's' -> {
 
-                    zone.setSettingsSync(new ZoneSettings(zone.getSettings(), !zoneStatus.settings.enabled));
-                    refresh();
-                    logger.info("{}: on status is now {}", zone.getAddress(), zone.getSettings().enabled);
-                }
-                case 's' -> {
+                // Go back to schedule
 
-                    // Go back to schedule
+                // Implies taking the zone off hold
+                zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
+                        null,
+                        null,
+                        null,
+                        false,
+                        null
+                )));
+                activateSchedule();
+                refresh();
+            }
+            case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
 
-                    // Implies taking the zone off hold
-                    zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
-                            null,
-                            null,
-                            null,
-                            false,
-                            null
-                    )));
-                    activateSchedule();
-                    refresh();
-                }
-                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
+                // Change dump priority
 
-                    // Change dump priority
-
-                    zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
-                            null,
-                            null,
-                            null,
-                            null,
-                            e.getKeyChar() - '0'
-                    )));
-                    refresh();
-                    logger.info("{}: dump priority is now {}", zone.getAddress(), zone.getSettings().dumpPriority);
-                }
-                case KeyEvent.CHAR_UNDEFINED -> {
-                    switch (e.getKeyCode()) {
-                        case KeyEvent.VK_KP_UP, KeyEvent.VK_UP ->
-                                raiseSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
-                        case KeyEvent.VK_KP_DOWN, KeyEvent.VK_DOWN ->
-                                lowerSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
-                        default -> {
-                            // Do nothing
-                        }
+                zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
+                        null,
+                        null,
+                        null,
+                        null,
+                        e.getKeyChar() - '0'
+                )));
+                refresh();
+                return Flux.just("dump priority is now " + zone.getSettings().dumpPriority);
+            }
+            case KeyEvent.CHAR_UNDEFINED -> {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_KP_UP, KeyEvent.VK_UP -> {
+                        return raiseSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
+                    }
+                    case KeyEvent.VK_KP_DOWN, KeyEvent.VK_DOWN -> {
+                        return lowerSetpoint(getSetpointDeltaModifier(e.isShiftDown(), e.isControlDown()));
+                    }
+                    default -> {
+                        // Do nothing
                     }
                 }
-                default -> {
-                    // Do nothing
-                }
             }
-
-        } finally {
-            ThreadContext.pop();
+            default -> {
+                // Do nothing
+            }
         }
+
+        return Flux.empty();
     }
 
     private void activateSchedule() {
@@ -379,18 +380,33 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      *
      * @param delta Amount to change by.
      */
-    private void changeSetpoint(double delta) {
+    private Flux<String> changeSetpoint(double delta) {
 
-        // Must operate in visible values to avoid rounding problems
-        var setpoint = getDisplayValue(zone.getSettings().setpoint);
+        try {
 
-        setpoint += delta;
-        setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
+            // Must operate in visible values to avoid rounding problems
+            var setpoint = getDisplayValue(zone.getSettings().setpoint);
 
-        // This may blow up if the zone refuses to take the new setpoint because it is out of range
-        zone.setSettingsSync(new ZoneSettings(zone.getSettings(), setpoint));
+            setpoint += delta;
+            setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
 
-        refresh();
+            final var s = setpoint;
+
+            // This may blow up if the zone refuses to take the new setpoint because it is out of range
+            return Flux.just(1)
+                    .flatMap(ignore -> zone.setSettings(new ZoneSettings(zone.getSettings(), s)))
+                    .doOnNext(signal -> {
+                        if (!signal.isOK()) {
+                            logger.error("{}: changeSetpoint({}) failed", zone.getAddress(), delta, signal.error);
+                        }
+                    })
+                    .filter(Signal::isOK)
+                    .map(Signal::getValue)
+                    .map(Object::toString);
+
+        } finally {
+            refresh();
+        }
     }
 
     /**
@@ -398,8 +414,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      *
      * @param modifier Multiply the default {@link #SETPOINT_DELTA} by this number to get the actual delta.
      */
-    private void raiseSetpoint(int modifier) {
-        changeSetpoint(SETPOINT_DELTA * modifier);
+    private Flux<String> raiseSetpoint(int modifier) {
+        return changeSetpoint(SETPOINT_DELTA * modifier);
     }
 
     /**
@@ -407,13 +423,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      *
      * @param modifier Multiply the default {@link #SETPOINT_DELTA} by this number to get the actual delta.
      */
-    private void lowerSetpoint(int modifier) {
-        changeSetpoint(-SETPOINT_DELTA * modifier);
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        // No special handling
+    private Flux<String> lowerSetpoint(int modifier) {
+        return changeSetpoint(-SETPOINT_DELTA * modifier);
     }
 
     @Override

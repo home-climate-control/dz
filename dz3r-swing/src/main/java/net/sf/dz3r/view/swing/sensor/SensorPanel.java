@@ -10,7 +10,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.time.Clock;
 
@@ -68,21 +67,6 @@ public class SensorPanel extends EntityPanel<Double, Void> {
     public void setFontSize(ScreenDescriptor screenDescriptor) {
         signalLabel.setFont(screenDescriptor.fontSetpoint);
         currentSignalLabel.setFont(screenDescriptor.fontSetpoint);
-    }
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-        // No special handling
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        // No special handling yet
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        // No special handling
     }
 
     @Override
