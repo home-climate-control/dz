@@ -454,7 +454,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
         this.zoneStatus = zoneStatus;
 
-        renderPeriod();
+        update();
     }
 
     /**
@@ -486,6 +486,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             holdLabel.setForeground(Boolean.TRUE.equals(h) ? ColorScheme.getScheme(getMode()).noticeActive : ColorScheme.getScheme(getMode()).noticeDefault);
         });
 
+        renderPeriod();
         repaint();
     }
 
