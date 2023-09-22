@@ -96,7 +96,10 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
                 .map(s -> s.merge(settings))
                 .orElse(settings);
 
-        logger.info("{}: setSettings(): {} + {} => {}", getAddress(), this.settings, settings, newSettings);
+        var r = Integer.toHexString(newSettings.hashCode());
+        logger.info("{}: setSettings({}):   {}", getAddress(), r, this.settings);
+        logger.info("{}: setSettings({}): + {}", getAddress(), r, settings);
+        logger.info("{}: setSettings({}): = {}", getAddress(), r, newSettings);
 
         this.settings = newSettings;
 
