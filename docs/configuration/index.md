@@ -51,7 +51,7 @@ home-climate-control:
 ### Details
 
 * [home-climate-control](./home-climate-control.md)
-    * [instance](#home-climate-control-instance)
+    * [instance](./home-climate-control.md#instance)
     * [MQTT connectors](./mqtt.md)
         * [esphome](./esphome.md)
         * [zigbee2mqtt](./zigbee2mqtt.md)
@@ -70,19 +70,6 @@ home-climate-control:
     * [directors](./directors.md)
     * [web-ui](./web-ui.md)
     * [console](./console.md)
-
-#### home-climate-control instance
-
-This mandatory element is used to identify the currently running HCC instance to many systems, in particular, [connectors](./connectors.md).
-The recommended value for it is a composite of the host this instance runs on, and the method used to run it. Examples:
-
-```
-server0-springboot
-server0-docker
-rack0-host2-k8s
-```
-
-> ***Hint:*** With SpringBoot and Quarkus runners, you can use a profile file that consists just of this element, and use it along with other profiles.
 
 ### Example Configuration
 
