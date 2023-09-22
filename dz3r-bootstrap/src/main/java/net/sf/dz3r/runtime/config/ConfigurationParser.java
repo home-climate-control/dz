@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.config.connector.ConnectorConfigurationParser;
@@ -31,6 +32,11 @@ public class ConfigurationParser {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse", Level.INFO);
         try {
+
+            // Not going anywhere without it, it's a key in too many places
+            HCCObjects.requireNonNull(
+                    source.instance(),
+                    "home-climate-control.instance must be provided. See https://github.com/home-climate-control/dz/wiki/Configuration#home-climate-control-instance for details");
 
             var ctx = new ConfigurationContext();
 
