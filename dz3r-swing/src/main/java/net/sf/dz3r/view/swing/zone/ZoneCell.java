@@ -6,7 +6,6 @@ import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityCell;
-import reactor.core.publisher.Flux;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -66,11 +65,7 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
         return hvacMode;
     }
 
-    public void subscribeMode(Flux<Signal<HvacMode, Void>> hvacModeFlux) {
-        hvacModeFlux.subscribe(this::consumeMode);
-    }
-
-    private void consumeMode(Signal<HvacMode, Void> hvacModeSignal) {
+    public void consumeMode(Signal<HvacMode, Void> hvacModeSignal) {
         var hvacMode = hvacModeSignal.getValue(); // NOSONAR I know
 
         if (this.hvacMode == hvacMode) {

@@ -82,8 +82,10 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         var cell = new DashboardCell();
         var panel = new DashboardPanel(ic, config.screen);
 
-        cell.subscribe(ic.getFlux());
-        panel.subscribe(ic.getFlux());
+        var icFlux = ic.getFlux();
+
+        icFlux.subscribe(cell::consumeSignal);
+        icFlux.subscribe(panel::consumeSignal);
 
         return new CellAndPanel<>(cell, panel);
     }
@@ -133,8 +135,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         var cell = new UnitCell();
         var panel = new UnitPanel(address, config.screen);
 
-        cell.subscribe(source);
-        panel.subscribe(source);
+        source.subscribe(cell::consumeSignal);
+        source.subscribe(panel::consumeSignal);
 
         return new CellAndPanel<>(cell, panel);
     }
@@ -160,18 +162,18 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 .filter(s -> zoneName.equals(s.getKey()))
                 .map(Map.Entry::getValue);
 
-        cell.subscribe(thisZoneFlux);
-        panel.subscribe(thisZoneFlux);
+        thisZoneFlux.subscribe(cell::consumeSignal);
+        thisZoneFlux.subscribe(panel::consumeSignal);
 
         // Zones and zone controller have no business knowing about the sensor signal, but humans want it; inject it
-        panel.subscribeSensor(sensorFlux);
+        sensorFlux.subscribe(panel::consumeSensorSignal);
 
         // Zones and zone controller have no business knowing about HVAC mode; inject it
-        cell.subscribeMode(modeFlux);
-        panel.subscribeMode(modeFlux);
+        modeFlux.subscribe(cell::consumeMode);
+        modeFlux.subscribe(panel::consumeMode);
 
         // Need to display schedule period and deviation, inject it
-        panel.subscribeSchedule(thisScheduleFlux);
+        thisScheduleFlux.subscribe(panel::consumeSchedule);
 
         return new CellAndPanel<>(cell, panel);
     }
@@ -195,8 +197,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
         var cell = new SensorCell(name);
         var panel = new SensorPanel(name, config.screen);
 
-        cell.subscribe(signal);
-        panel.subscribe(signal);
+        signal.subscribe(cell::consumeSignal);
+        signal.subscribe(panel::consumeSignal);
 
         return new CellAndPanel<>(cell, panel);
     }

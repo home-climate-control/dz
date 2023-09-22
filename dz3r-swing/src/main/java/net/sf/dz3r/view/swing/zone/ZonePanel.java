@@ -472,11 +472,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         repaint();
     }
 
-    public void subscribeSensor(Flux<Signal<Double, Void>> sensorFlux) {
-        sensorFlux.subscribe(this::consumeSensorSignal);
-    }
-
-    private void consumeSensorSignal(Signal<Double, Void> sensorSignal) {
+    public void consumeSensorSignal(Signal<Double, Void> sensorSignal) {
         this.sensorSignal = sensorSignal;
         logger.debug("{}: sensorSignal: {}", zone.getAddress(), sensorSignal);
         updateSensorSignal();
@@ -533,14 +529,10 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         return hvacMode;
     }
 
-    public void subscribeMode(Flux<Signal<HvacMode, Void>> hvacModeFlux) {
-        hvacModeFlux.subscribe(this::consumeMode);
-    }
-
     /**
      * Selectively update only the UI parts affected by a changed HVAC mode.
      */
-    private void consumeMode(Signal<HvacMode, Void> hvacModeSignal) {
+    public void consumeMode(Signal<HvacMode, Void> hvacModeSignal) {
 
         var hvacMode = hvacModeSignal.getValue(); // NOSONAR I know
 
@@ -562,11 +554,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     /**
      * Selectively update only the UI parts affected by schedule periods.
      */
-    public void subscribeSchedule(Flux<Map.Entry<SchedulePeriod, ZoneSettings>> source) {
-        source.subscribe(this::consumeSchedule);
-    }
-
-    private void consumeSchedule(Map.Entry<SchedulePeriod, ZoneSettings> period2settings) {
+    public void consumeSchedule(Map.Entry<SchedulePeriod, ZoneSettings> period2settings) {
 
         logger.info("{}: consumeSchedule: ({}, {})", zone.getAddress(), period2settings.getKey(), period2settings.getValue());
 
