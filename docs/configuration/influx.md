@@ -21,7 +21,7 @@ Best explained by example:
 ```
 
 * `id`: Unique identifier this entity will be known as to the rest of the system.
-* `instance`: Unique identifier for _this entity_ (not the whole system, like in [home-climate-control.instance](./home-climate-control.md)).
+* `instance`: Unique identifier for _this entity_ (not the whole system, like in [home-climate-control.instance](./home-climate-control.md#instance) - though that value can be used if there is just one InfluxDB connector).
 * `db`: InfluxDB database name
 * `uri`: InfluxDB server to connect to
 * `username`: InfluxDB username - optional, but recommended
