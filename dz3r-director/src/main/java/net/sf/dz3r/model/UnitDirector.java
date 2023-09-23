@@ -186,10 +186,22 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
                 .collect(Collectors.toSet()).block();
     }
 
-    private Map.Entry<Flux<Signal<Double, String>>, Zone> addZoneName(Map.Entry<Flux<Signal<Double, Void>>, Zone> kv) {
-        var zoneName = kv.getValue().getAddress();
-        return new AbstractMap.SimpleEntry<>(kv.getKey()
-                .map(s -> new Signal<>(s.timestamp, s.getValue(), zoneName, s.status, s.error)), kv.getValue());
+    /**
+     * Convert a {@code Pair<Flux<Signal<Double, Void>>, Zone>} into a {@code Pair<Flux<Signal<Double, String>>, Zone>}, with the string being the zone name.
+     *
+     * @param sensorFlux2zone Mapping from the sensor flux to the zone it feeds.
+     *
+     * @return Source mapping with {@code Void} replaced by {@code zone.getAddress()}.
+     */
+    private Map.Entry<Flux<Signal<Double, String>>, Zone> addZoneName(Map.Entry<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone) {
+
+        var sensorFlux = sensorFlux2zone.getKey();
+        var zone = sensorFlux2zone.getValue();
+        var zoneName = zone.getAddress();
+
+        return new AbstractMap.SimpleEntry<>(
+                sensorFlux
+                        .map(s -> new Signal<>(s.timestamp, s.getValue(), zoneName, s.status, s.error)), zone);
     }
 
     private Signal<UnitControlSignal, Void> stripZoneName(Signal<UnitControlSignal, String> s) {
