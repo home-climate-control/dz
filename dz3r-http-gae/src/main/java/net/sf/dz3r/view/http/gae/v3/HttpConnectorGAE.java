@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import java.io.File;
@@ -51,7 +52,10 @@ public class HttpConnectorGAE extends HttpConnector {
 
     private final Duration pollInterval = Duration.of(10, ChronoUnit.SECONDS);
 
-    private Disposable zoneStatusSubscription;
+    private final ZoneRenderer zoneRenderer = new ZoneRenderer();
+
+    private final Sinks.Many<ZoneSnapshot> bufferSink = Sinks.many().unicast().onBackpressureBuffer();
+    private final Disposable bufferSubscription;
 
     /**
      * Create an instance.
@@ -62,44 +66,46 @@ public class HttpConnectorGAE extends HttpConnector {
     public HttpConnectorGAE(URL serverContextRoot, Set<String> zoneNames) {
         super(serverContextRoot);
         this.zoneNames = new TreeSet<>(zoneNames);
+
+        bufferSubscription = bufferSink.asFlux()
+                .buffer(pollInterval)
+                .doOnNext(this::exchange)
+                .subscribe();
     }
 
     @Override
     public void connect(UnitDirector.Feed feed) {
 
         for (var zone : feed.sensorFlux2zone.values()) {
+            logger.info("connected zone: {}", zone.getAddress());
             name2zone.put(zone.getAddress(), zone);
         }
 
-        var zoneRenderer = new ZoneRenderer();
+        logger.info("{} zones total", name2zone.size());
 
         // Zones and zone controller have no business knowing about the sensor signal, but humans want it; inject it
-        getAggregateSensorFlux(feed.sensorFlux2zone).subscribe(zoneRenderer::consumeSensorSignal);
+        getAggregateSensorFlux(feed.sensorFlux2zone)
+                .subscribe(zoneRenderer::consumeSensorSignal);
 
         // Zones and zone controller have no business knowing about HVAC mode; inject it
-        var modeFlux = feed.hvacDeviceFlux
+        feed.hvacDeviceFlux
                 .doOnNext(s -> {
                     if (s.getValue().command.mode == null) {
                         logger.debug("null hvacMode (normal on startup): {}", s);
                     }
                 })
                 .filter(s -> s.getValue().command.mode != null)
-                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command.mode, null, s.status, s.error));
-        modeFlux.subscribe(zoneRenderer::consumeMode);
+                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command.mode, null, s.status, s.error))
+                .subscribe(zoneRenderer::consumeMode);
 
         // Zone ("thermostat" in its terminology) status feed is the only one supported
-        var zoneStatusFeed =
-                zoneRenderer.compute(
+        zoneRenderer.compute(
                         feed.aggregateZoneFlux
                                 .doOnNext(z -> logger.debug("Incoming zone: {}", z.payload))
                                 .filter(z -> zoneNames.contains(z.payload))
                                 .doOnNext(z -> logger.debug("Reportable zone: {}", z.payload))
-                );
-
-        zoneStatusSubscription = zoneStatusFeed
-                .buffer(pollInterval)
-                .doOnNext(this::exchange)
-                .subscribe();
+                )
+                .subscribe(bufferSink::tryEmitNext);
     }
 
     private Flux<Signal<Double, String>> getAggregateSensorFlux(Map<Flux<Signal<Double, Void>>, Zone> source) {
@@ -257,7 +263,7 @@ public class HttpConnectorGAE extends HttpConnector {
         ThreadContext.push("close");
         try {
             logger.warn("Shutting down: {}", serverContextRoot);
-            zoneStatusSubscription.dispose();
+            bufferSubscription.dispose();
             logger.info("Shut down: {}", serverContextRoot);
         } finally {
             ThreadContext.pop();
