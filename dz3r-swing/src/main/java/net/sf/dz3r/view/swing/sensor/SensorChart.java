@@ -27,13 +27,7 @@ public class SensorChart extends AbstractChart<Double, Void> {
     }
 
     @Override
-    protected void update() {
-
-        if (append(getSignal())) {
-            repaint();
-        }
-    }
-    private boolean append(Signal<Double, Void> signal) {
+    protected boolean update(Signal<Double, Void> signal) {
 
         adjustVerticalLimits(signal.timestamp.toEpochMilli(), signal.getValue());
 

@@ -21,25 +21,23 @@ public abstract class SwingSink<T, P> extends JPanel {
 
     private transient Signal<T, P> signal;
 
-    public void consumeSignal(Signal<T,P> signal) {
+    public final void consumeSignal(Signal<T,P> signal) {
 
         this.signal = signal;
         logger.debug("signal: {}", signal);
 
-        consumeSignalValue(signal.getValue());
-        update();
+        if (update(signal)) {
+            repaint();
+        }
     }
-
-    protected abstract void consumeSignalValue(T value);
 
     /**
-     * Update the display and repaint.
+     * Update the visualization.
+     *
+     * @param signal Signal to consume.
+     * @return {@code true} if a repaint is necessary.
      */
-    protected void update() {
-
-        // Default behavior. May or may not be suitable for subclasses.
-        repaint();
-    }
+    protected abstract boolean update(Signal<T,P> signal);
 
     protected final Signal<T, P> getSignal() {
         return signal;

@@ -15,9 +15,6 @@ import java.awt.Rectangle;
 
 public class ZoneCell extends EntityCell<ZoneStatus, Void> {
 
-    /**
-     * @see #consumeSignalValue(ZoneStatus)
-     */
     private transient ZoneStatus zoneStatus;
 
     private HvacMode hvacMode;
@@ -78,7 +75,8 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
 
         this.hvacMode = hvacMode;
         logger.debug("hvacMode: {}", hvacMode);
-        update();
+
+        repaint();
     }
 
     private Zone.State getState() {
@@ -96,13 +94,14 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
     }
 
     @Override
-    protected void consumeSignalValue(ZoneStatus zoneStatus) {
+    protected boolean update(Signal<ZoneStatus, Void> signal) {
 
-        if (zoneStatus == null) {
-            logger.warn("null zoneStatus update, ignored");
-            return;
+        if (signal == null || signal.getValue() == null) {
+            logger.warn("null or error zoneStatus update, ignored: {}", signal);
+            return true;
         }
 
-        this.zoneStatus = zoneStatus;
+        this.zoneStatus = signal.getValue();
+        return true;
     }
 }

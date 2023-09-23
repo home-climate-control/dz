@@ -94,7 +94,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
     /**
      * Timestamp on {@link #dataMin} or {@link #dataMax}, whichever is younger.
      *
-     * @see #adjustVerticalLimits(long, double, double)
+     * @see #adjustVerticalLimits(long, double)
      */
     private Long minmaxTime ;
 
@@ -152,11 +152,6 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
 
         this.needFahrenheit = needFahrenheit;
         repaint();
-    }
-
-    @Override
-    protected void consumeSignalValue(T value) {
-        // Don't need to do anything, update() will take care of it
     }
 
     @Override

@@ -43,7 +43,8 @@ public class UnitCell extends EntityCell<HvacDeviceStatus, Void> {
     }
 
     @Override
-    protected void consumeSignalValue(HvacDeviceStatus value) {
-        // No special handling
+    protected boolean update(Signal<HvacDeviceStatus, Void> signal) {
+        // Caller has changed the state to make this meaningful
+        return true;
     }
 }

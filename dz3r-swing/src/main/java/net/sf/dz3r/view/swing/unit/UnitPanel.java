@@ -137,18 +137,13 @@ public class UnitPanel extends EntityPanel<HvacDeviceStatus, Void> {
     }
 
     @Override
-    protected void consumeSignalValue(HvacDeviceStatus status) {
-        // No special handling
-    }
+    protected boolean update(Signal<HvacDeviceStatus, Void> signal) {
 
-    @Override
-    protected void update() {
-
-        var signal = getSignal();
         displayDemand(signal);
         displayRunningFor(signal);
         displayLeft(signal);
 
+        return true;
     }
     private void displayDemand(Signal<HvacDeviceStatus, Void> signal) {
 

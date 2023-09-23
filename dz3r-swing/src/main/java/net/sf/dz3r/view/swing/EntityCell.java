@@ -38,7 +38,9 @@ public abstract class EntityCell<T, P> extends SwingSink<T, P> {
      */
     public final void setSelected(boolean selected) {
         this.selected = selected;
-        update();
+        if (update(getSignal())) {
+            repaint();
+        }
     }
 
     protected boolean isSelected() {

@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing.dashboard;
 
+import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.health.SystemStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityCell;
@@ -41,7 +42,8 @@ public class DashboardCell extends EntityCell<SystemStatus, Void> {
     }
 
     @Override
-    protected void consumeSignalValue(SystemStatus value) {
-        // No special handling
+    protected boolean update(Signal<SystemStatus, Void> signal) {
+        // Caller has changed the state to make this meaningful
+        return true;
     }
 }

@@ -89,14 +89,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     }
 
     @Override
-    protected void consumeSignalValue(SystemStatus status) {
-        // No special handling
-    }
-
-    @Override
-    protected void update() {
-
-        var signal = getSignal();
+    protected boolean update(Signal<SystemStatus, Void> signal) {
 
         switch (signal.status) {
             case OK -> setTitleColor(Color.WHITE);
@@ -106,7 +99,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
 
         if (signal.isError()) {
             logger.warn("don't know how to handle: {}", signal);
-            return;
+            return false;
         }
 
         var status = signal.getValue();
@@ -114,6 +107,8 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
         renderSensors(status.sensors());
         renderSwitches(status.switches());
         renderHvacDevices(status.hvacDevices());
+
+        return true;
     }
 
     private void renderSensors(Map<String, Signal<SensorStatus, Void>> source) {

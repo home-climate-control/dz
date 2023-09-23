@@ -444,30 +444,17 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         return changeSetpoint(-SETPOINT_DELTA * modifier);
     }
 
-    @Override
-    protected void consumeSignalValue(ZoneStatus zoneStatus) {
-
-        if (zoneStatus == null) {
-            logger.warn("{}: null zoneStatus update, ignored", zone.getAddress());
-            return;
-        }
-
-        this.zoneStatus = zoneStatus;
-
-        update();
-    }
-
     /**
      * Process {@link ZoneStatus} updates (see {@link net.sf.dz3r.view.swing.SwingSink}).
      */
     @Override
-    protected void update() {
+    protected boolean update(Signal<ZoneStatus, Void> signal) {
 
-        var signal = getSignal();
+        this.zoneStatus = signal.getValue();
 
-        if (signal.isError()) {
-            logger.error("{}: not implemented: processing error signal: {}", zone.getAddress(), signal, new UnsupportedOperationException());
-            return;
+        if (!signal.isOK()) {
+            logger.error("{}: not implemented: processing !OK signal: {}", zone.getAddress(), signal, new UnsupportedOperationException());
+            return false;
         }
 
         var setpoint = Optional.ofNullable(zoneStatus.settings.setpoint);
@@ -487,7 +474,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         });
 
         renderPeriod();
-        repaint();
+
+        return true;
     }
 
     public void consumeSensorSignal(Signal<Double, Void> sensorSignal) {
@@ -499,27 +487,19 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     /**
      * Selectively update only the UI parts affected by a changed sensor signal.
      *
-     * We do not process error signal here, it will propagate to {@link #update()}.
+     * We do not process error signal here, it will propagate to {@link #update(Signal)}}.
      */
     private void updateSensorSignal() {
 
-        if (sensorSignal == null || sensorSignal.isError()) {
-            currentLabel.setText(UNDEFINED);
-        } else {
-
-            updateCurrentTemperature();
-            updateChart();
-        }
-        repaint();
-    }
-
-    private void updateCurrentTemperature() {
-
-        var displayTemperature = String.format(Locale.getDefault(), "%.1f", getDisplayValue(sensorSignal.getValue()));
+        var displayTemperature = Optional.ofNullable(sensorSignal.getValue())
+                .map(v -> String.format(Locale.getDefault(), "%.1f", getDisplayValue(v)))
+                .orElse(UNDEFINED);
         currentLabel.setText(displayTemperature);
 
         var font = needFahrenheit  && displayTemperature.length() > 4 ? currentFontF : currentFontC;
         currentLabel.setFont(font);
+
+        repaint();
     }
 
     private void updateChart() {

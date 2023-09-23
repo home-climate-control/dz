@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing.unit;
 
+import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.swing.AbstractChart;
 
@@ -37,6 +38,11 @@ public class UnitChart extends AbstractChart<HvacDeviceStatus, Void> {
 
     @Override
     protected void paintCharts(Graphics2D g2d, Dimension boundary, Insets insets, long now, double xScale, long xOffset, double yScale, double yOffset) {
+        logger.debug("FIXME: paintCharts()");
+    }
 
+    @Override
+    protected boolean update(Signal<HvacDeviceStatus, Void> signal) {
+        return true;
     }
 }

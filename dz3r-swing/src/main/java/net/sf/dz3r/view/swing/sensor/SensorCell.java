@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing.sensor;
 
+import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityCell;
 
@@ -7,13 +8,12 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.Optional;
 
 public class SensorCell extends EntityCell<Double, Void> {
 
-    /**
-     * @see #consumeSignalValue(Double)
-     */
     private transient Double lastKnownSignal = null;
+
     public SensorCell(String name) {
         setPreferredSize(new Dimension(20, 70));
         setToolTipText(name);
@@ -39,7 +39,8 @@ public class SensorCell extends EntityCell<Double, Void> {
     }
 
     @Override
-    protected void consumeSignalValue(Double value) {
-        lastKnownSignal = value;
+    protected boolean update(Signal<Double, Void> signal) {
+        lastKnownSignal = Optional.ofNullable(signal).map(Signal::getValue).orElse(null);
+        return true;
     }
 }

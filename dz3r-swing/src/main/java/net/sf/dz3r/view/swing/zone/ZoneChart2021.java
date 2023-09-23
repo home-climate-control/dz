@@ -26,21 +26,14 @@ public class ZoneChart2021 extends AbstractZoneChart {
      */
     private final transient SignalColorCache economizerSignalCache = new SignalColorCache(ECO_COLOR_HIGH, ECO_COLOR_LOW);
 
-    private final static int ECO_ALPHA = 0x80;
+    private static final int ECO_ALPHA = 0x80;
 
     protected ZoneChart2021(Clock clock, long chartLengthMillis, boolean needFahrenheit) {
         super(clock, chartLengthMillis, needFahrenheit);
     }
 
     @Override
-    protected void update() {
-
-        if (append(getSignal())) {
-            repaint();
-        }
-    }
-
-    private boolean append(Signal<ZoneChartDataPoint, Void> signal) {
+    protected boolean update(Signal<ZoneChartDataPoint, Void> signal) {
 
         // Economizer signal may be unavailable, either yet, or at all
 

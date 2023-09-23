@@ -1,6 +1,7 @@
 package net.sf.dz3r.view.swing.sensor;
 
 
+import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
 import net.sf.dz3r.view.swing.ScreenDescriptor;
@@ -70,14 +71,12 @@ public class SensorPanel extends EntityPanel<Double, Void> {
     }
 
     @Override
-    protected void consumeSignalValue(Double value) {
-
-        var signal = getSignal();
+    protected boolean update(Signal<Double, Void> signal) {
 
         if (signal.isError()) {
             currentSignalLabel.setForeground(ColorScheme.offMap.error.brighter());
             currentSignalLabel.setText(ERROR);
-            return;
+            return true;
         }
 
         var format = new DecimalFormat("#.###");
@@ -87,5 +86,7 @@ public class SensorPanel extends EntityPanel<Double, Void> {
         currentSignalLabel.setText(format.format(signal.getValue()));
 
         sensorChart.consumeSignal(signal);
+
+        return true;
     }
 }
