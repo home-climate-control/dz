@@ -115,7 +115,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
         logger.info("Starting updates every {}", pollInterval);
 
         updateFlux = Flux
-                .interval(Duration.ZERO, pollInterval)
+                .interval(Duration.ZERO, pollInterval, Schedulers.newSingle("schedule-interval-" + pollInterval))
                 .doOnNext(v -> logger.debug("heartbeat: {}", v))
                 .map(this::getCalendars)
                 .flatMap(this::filterCalendars)
@@ -131,7 +131,9 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
                 // This is still computationally expensive, but with a different breakdown; regroup (inside)
                 .sequential()
                 .map(this::convertEvents)
-                .flatMap(this::convertZoneName);
+                .flatMap(this::convertZoneName)
+                .publish()
+                .autoConnect();
 
         return updateFlux;
     }
