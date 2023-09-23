@@ -1,6 +1,11 @@
 Home Climate Control: Docs
 ==
 
+# FAQ
+
+**Q:** Nothing works!
+: A: [Check the configuration](./configuration/index.md), and check the logs. HCC is permissive (will completely stop operating only on unrecoverable errors), and verbose. Logs often contain links to documentation on how to correct a particular problem.
+
 # State of Affairs
 * Rock stable, but ages old, [imperative branch](https://github.com/home-climate-control/dz/tree/last-imperative-maintenance).
     * Benefits: it works.
