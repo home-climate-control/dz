@@ -65,6 +65,9 @@ public class ShutdownHandler implements AutoCloseable {
 
             m.checkpoint("stopped directors");
 
+            // Same for the schedule
+            logger.error("FIXME: stop the scheduler");
+
             // Rest of operations can be done asynchronously until further notice - no need to wait for them,
             // but must wait before returning from this method
 
