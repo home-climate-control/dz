@@ -102,6 +102,13 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 .dispose();
     }
 
+    /**
+     * Create the UI element set containing unit and set of zone cell/panel pairs.
+     *
+     * @param source Unit director to get the configuration and feeds from.
+     *
+     * @return Flux of cell/panel pairs, unit first, zones second.
+     */
     private Flux<CellAndPanel<?, ?>> initUnit(UnitDirector source) {
 
         var feed = source.getFeed();
