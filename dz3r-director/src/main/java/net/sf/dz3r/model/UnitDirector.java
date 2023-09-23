@@ -91,16 +91,19 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
 
         Optional.ofNullable(metricsCollectorSet)
                 .ifPresent(collectors -> Flux.fromIterable(collectors)
+                        .publishOn(Schedulers.boundedElastic())
                         .doOnNext(c -> c.connect(feed))
-                        .subscribeOn(Schedulers.boundedElastic())
+                        .doOnComplete(() -> logger.info("{}: connected metric collectors", getAddress()))
                         .subscribe());
+
         Optional.ofNullable(connectorSet)
                 .ifPresent(connectors -> Flux.fromIterable(connectors)
+                        .publishOn(Schedulers.boundedElastic())
                         .doOnNext(c -> {
                             c.connect(feed);
                             // VT: FIXME: Connect the control input when the API signature is established
                         })
-                        .subscribeOn(Schedulers.boundedElastic())
+                        .doOnComplete(() -> logger.info("{}: connected connectors", getAddress()))
                         .subscribe());
 
         logger.info("Configured: {} ({} zones: {})",

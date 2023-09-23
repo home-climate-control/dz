@@ -97,7 +97,6 @@ public class HttpConnectorGAE extends HttpConnector {
                 );
 
         zoneStatusSubscription = zoneStatusFeed
-                .publishOn(Schedulers.boundedElastic())
                 .buffer(pollInterval)
                 .doOnNext(this::exchange)
                 .subscribe();
