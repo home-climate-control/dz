@@ -252,12 +252,12 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         keyFlux
                 .flux
                 .filter(e -> e.getID() == KEY_PRESSED)
-                .flatMap(this::processKeypress)
+                .flatMap(this::consumeKeypress)
                 .subscribe(s -> logger.info("{}: {}", zone.getAddress(), s));
     }
 
 
-    private Flux<String> processKeypress(KeyEvent e) {
+    private Flux<String> consumeKeypress(KeyEvent e) {
 
         logger.debug("{}", e::toString);
 
