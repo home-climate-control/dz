@@ -118,15 +118,6 @@ public class Scheduler {
             var zone = source.getKey();
             var zoneName = zone.getAddress();
 
-            if (Boolean.TRUE.equals(zone.getSettings().hold)) {
-                logger.debug("{}: on hold, left alone", zoneName);
-
-                // This and below:
-                // Whatever was displayed at the console previously, will stay.
-                // May be problematic for HCC Remote and generally look weird, need to confirm that UX is right.
-                return Flux.empty();
-            }
-
             var schedule = source.getValue();
 
             logger.debug("{} schedule ({} entries)", zoneName, schedule.size());
@@ -147,6 +138,19 @@ public class Scheduler {
 
             if (period != null) {
                 var settings = source.getValue().get(period);
+
+                if (Boolean.TRUE.equals(zone.getSettings().hold)) {
+                    logger.debug("{}: on hold, left alone", zoneName);
+
+                    // However... need to record the period. The zone will be smart enough not to touch the settings.
+                    zone.setPeriodSettings(new PeriodSettings(period, settings));
+
+                    // This and below:
+                    // Whatever was displayed at the console previously, will stay.
+                    // May be problematic for HCC Remote and generally look weird, need to confirm that UX is right.
+                    return Flux.empty();
+                }
+
                 try {
 
                     logger.info("{}: settings applied: {}", zoneName, settings);

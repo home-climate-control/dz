@@ -147,8 +147,14 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
             return;
         }
 
-        setSettingsSync(periodSettings.settings());
         var r = Integer.toHexString(settings.hashCode());
+
+        if (Boolean.TRUE.equals(settings.hold)) {
+            logger.debug("{}: setSettings({}): on hold, ignored: period = {}, settings = {}", getAddress(), r, periodSettings.period().name, periodSettings.settings());
+            return;
+        }
+
+        setSettingsSync(periodSettings.settings());
         logger.info("{}: setSettings({}): period = {}", getAddress(), r, periodSettings.period().name);
     }
 
