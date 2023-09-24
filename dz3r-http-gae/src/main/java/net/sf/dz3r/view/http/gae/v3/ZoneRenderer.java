@@ -10,6 +10,8 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
 
@@ -44,6 +46,11 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
 
         var zoneName = source.payload;
         var status = source.getValue();
+        var periodName = Optional.ofNullable(status.periodSettings).map(ps -> ps.period().name).orElse(null);
+        var deviationSetpoint = Optional.ofNullable(status.periodSettings).map(ps -> status.settings.setpoint - ps.settings().setpoint).orElse(0d);
+        var deviationEnabled = Optional.ofNullable(status.periodSettings).map(ps -> !Objects.equals(status.settings.enabled, ps.settings().enabled)).orElse(false);
+        var deviationVoting = Optional.ofNullable(status.periodSettings).map(ps -> !Objects.equals(status.settings.voting, ps.settings().voting)).orElse(false);
+
 
         if (source.isError()) {
             logger.error("Not implemented: reporting error signal: {}", source);
@@ -62,10 +69,10 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
                         status.settings.enabled,
                         status.settings.hold,
                         status.settings.voting,
-                        null,
-                        0.0,
-                        false,
-                        false,
+                        periodName,
+                        deviationSetpoint,
+                        deviationEnabled,
+                        deviationVoting,
                         null
                 ));
             } catch (Exception ex) {

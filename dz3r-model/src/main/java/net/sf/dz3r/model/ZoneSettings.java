@@ -109,6 +109,10 @@ public class ZoneSettings {
      */
     public boolean same(ZoneSettings other) {
 
+        if (other == null) {
+            return false;
+        }
+
         return Objects.equals(enabled, other.enabled)
                 && setpoint.compareTo(other.setpoint) == 0
                 && Objects.equals(voting, other.voting);

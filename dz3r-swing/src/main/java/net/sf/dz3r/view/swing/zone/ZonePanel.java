@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.swing.zone;
 
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.model.SchedulePeriod;
+import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
@@ -28,7 +28,6 @@ import java.awt.event.KeyListener;
 import java.text.DecimalFormat;
 import java.time.Clock;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 import static java.awt.event.KeyEvent.KEY_PRESSED;
@@ -90,17 +89,12 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private final AbstractZoneChart chart;
 
-    /**
-     * @see #consumeSignalValue(ZoneStatus)
-     */
     private transient ZoneStatus zoneStatus;
 
     /**
      * @see #consumeSensorSignal(Signal)
      */
     private transient Signal<Double, Void> sensorSignal;
-
-    private transient Map.Entry<SchedulePeriod, ZoneSettings> period2settings;
 
     /**
      * @see #consumeMode(Signal)
@@ -116,8 +110,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
     public ZonePanel(Zone zone, ScreenDescriptor screenDescriptor, TemperatureUnit defaultUnit,
                      Flux<Signal<ZoneStatus, Void>> zoneFlux,
                      Flux<Signal<Double, Void>> sensorFlux,
-                     Flux<Signal<HvacMode, Void>> modeFlux,
-                     Flux<Map.Entry<SchedulePeriod, ZoneSettings>> scheduleFlux) {
+                     Flux<Signal<HvacMode, Void>> modeFlux) {
 
         this.zone = zone;
 
@@ -131,7 +124,6 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         zoneFlux.subscribe(this::consumeSignal);
         sensorFlux.subscribe(this::consumeSensorSignal);
         modeFlux.subscribe(this::consumeMode);
-        scheduleFlux.subscribe(this::consumeSchedule);
 
         initKeyStream();
     }
@@ -359,12 +351,12 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private void activateSchedule() {
 
-        if (period2settings == null) {
-            logger.error("{} activateSchedule(): no schedule data yet, how did we end up here?", zone.getAddress());
+        if (zoneStatus.periodSettings == null) {
+            logger.error("{}: activateSchedule(): no period active", zone.getAddress());
             return;
         }
 
-        var settings = period2settings.getValue();
+        var settings = zoneStatus.periodSettings.settings();
 
         logger.info("{}: returning to settings: {}", zone.getAddress(), settings);
 
@@ -549,38 +541,28 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         setpointLabel.setForeground(c);
     }
 
-    /**
-     * Selectively update only the UI parts affected by schedule periods.
-     */
-    public void consumeSchedule(Map.Entry<SchedulePeriod, ZoneSettings> period2settings) {
-
-        logger.info("{}: consumeSchedule: ({}, {})", zone.getAddress(), period2settings.getKey(), period2settings.getValue());
-
-        this.period2settings = period2settings;
-
-        renderPeriod();
-    }
-
     private void renderPeriod() {
-
-        if (period2settings == null) {
-            logger.trace("{} renderPeriod(): no schedule data yet", zone.getAddress());
-            return;
-        }
 
         if (zoneStatus == null) {
             logger.warn("{} renderPeriod(): no zone status yet", zone.getAddress());
             return;
         }
 
-        periodLabel.setText(period2settings.getKey().name + (isOnSchedule() ? "" : "*"));
+        if (zoneStatus.periodSettings == null) {
+            periodLabel.setText(NO_PERIOD);
+        } else {
+            periodLabel.setText(zoneStatus.periodSettings.period().name + (isOnSchedule() ? "" : "*"));
+        }
     }
 
     /**
      * @return {@code true} if the zone settings are identical to those of the current schedule period, {@code false} otherwise.
      */
     private boolean isOnSchedule() {
-        return zoneStatus.settings.same(period2settings.getValue());
+        return zoneStatus.settings.same(
+                Optional.ofNullable(zoneStatus.periodSettings)
+                        .map(PeriodSettings::settings)
+                        .orElse(null));
     }
 
     /**

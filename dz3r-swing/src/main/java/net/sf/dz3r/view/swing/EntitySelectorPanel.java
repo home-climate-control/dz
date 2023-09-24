@@ -172,8 +172,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 zone, config.screen, config.console().initialUnit(),
                 thisZoneFlux,
                 sensorFlux,
-                modeFlux,
-                thisScheduleFlux);
+                modeFlux);
 
         return new CellAndPanel<>(cell, panel);
     }
