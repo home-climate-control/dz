@@ -1,5 +1,6 @@
 package net.sf.dz3r.scheduler;
 
+import net.sf.dz3r.model.SchedulePeriod;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

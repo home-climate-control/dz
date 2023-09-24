@@ -27,7 +27,7 @@ import java.util.Optional;
  * A {@link Thermostat} is just a device that watches the temperature.
  * A zone is an entity that controls the thermostat.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, JmxAware, AutoCloseable {
 
@@ -47,6 +47,14 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      * Zone settings.
      */
     private ZoneSettings settings;
+
+    /**
+     * Settings that came from the scheduler.
+     *
+     * {@code null} means no period is currently active. The {@link PeriodSettings#settings()} may be different from
+     * {@link #settings}, this indicates that the zone is off schedule.
+     */
+    private PeriodSettings periodSettings;
 
     private final AbstractEconomizer<?> economizer;
 
@@ -79,7 +87,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     /**
      * Set zone settings immediately.
      *
-     * This method isn't, and isn't really diligent to deprecate at the moment - however, using {@link #setSettings(ZoneSettings)} would be more diligent.
+     * This method isn't deprecated, and isn't really diligent to be deprecated at the moment - however, using {@link #setSettings(ZoneSettings)} would be more diligent.
      *
      * @param settings Settings to set zone to.
      *
@@ -124,8 +132,32 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         });
     }
 
+    /**
+     * Set {@link #periodSettings} and {@link #settings} from the scheduler.
+     *
+     * @param periodSettings Settings to set. {@code null} if no period is active.
+     */
+    public void setPeriodSettings(PeriodSettings periodSettings) {
+
+        this.periodSettings = periodSettings;
+
+        if (periodSettings == null) {
+            logger.info("{}: period cleared", getAddress());
+            // Existing settings are left alone
+            return;
+        }
+
+        setSettingsSync(periodSettings.settings());
+        var r = Integer.toHexString(settings.hashCode());
+        logger.info("{}: setSettings({}): period = {}", getAddress(), r, periodSettings.period().name);
+    }
+
     public ZoneSettings getSettings() {
         return settings;
+    }
+
+    public PeriodSettings getPeriodSettings() {
+        return periodSettings;
     }
 
     @Override
@@ -162,7 +194,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         return new Signal<>(
                 source.timestamp,
-                new ZoneStatus(settings, source.getValue().signal, null),
+                new ZoneStatus(settings, source.getValue().signal, null, periodSettings),
                 getAddress(),
                 source.status,
                 source.error);
@@ -176,7 +208,11 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         return new Signal<>(
                 source.timestamp,
-                new ZoneStatus(new ZoneSettings(source.getValue().settings, false), new CallingStatus(null, 0, false), null),
+                new ZoneStatus(
+                        new ZoneSettings(source.getValue().settings, false),
+                        new CallingStatus(null, 0, false),
+                        null,
+                        periodSettings),
                 source.payload,
                 source.status,
                 source.error);
@@ -229,4 +265,5 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
             ThreadContext.pop();
         }
     }
+
 }

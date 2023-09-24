@@ -1,12 +1,12 @@
-package net.sf.dz3r.scheduler;
+package net.sf.dz3r.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * Defines a time period when a given {@link net.sf.dz3r.model.ZoneSettings} is to be activated.
+ * Defines a time period when a given {@link ZoneSettings} is to be activated.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class SchedulePeriod implements Comparable<SchedulePeriod> {
 
@@ -53,7 +53,7 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
      * @param end End time.
      * @param days Days of week bitmask.
      */
-    SchedulePeriod(String id, String name, LocalTime start, LocalTime end, byte days) {
+    public SchedulePeriod(String id, String name, LocalTime start, LocalTime end, byte days) {
 
         this.id = id;
         this.name = name;

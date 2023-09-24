@@ -1,10 +1,10 @@
 package net.sf.dz3r.view.swing.zone;
 
 import net.sf.dz3r.model.HvacMode;
+import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
-import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.swing.ColorScheme;

@@ -87,8 +87,8 @@ class BalancingDamperControllerTest {
                 var unitFlux = Flux
                         .just(new Signal<UnitControlSignal, Void>(Instant.now(), new UnitControlSignal(0d, 0d)));
 
-                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(null, 50, true), null);
-                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(null, -50, false), null);
+                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(null, 50, true), null, null);
+                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(null, -50, false), null, null);
                 var signalFlux = Flux.just(
                         new Signal<>(Instant.now(), status1, "Z1", Signal.Status.OK, null),
                         new Signal<>(Instant.now(), status2, "Z2", Signal.Status.OK, null)
@@ -142,8 +142,8 @@ class BalancingDamperControllerTest {
                 var unitFlux = Flux
                         .just(new Signal<UnitControlSignal, Void>(Instant.now(), new UnitControlSignal(1d, 1d)));
 
-                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(null, 50, true), null);
-                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(null, -50, false), null);
+                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(null, 50, true), null, null);
+                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(null, -50, false), null, null);
                 var signalFlux = Flux.just(
                         new Signal<>(Instant.now(), status1, "Z1", Signal.Status.OK, null),
                         new Signal<>(Instant.now(), status2, "Z2", Signal.Status.OK, null)
@@ -196,8 +196,8 @@ class BalancingDamperControllerTest {
                 var unitFlux = Flux
                         .just(new Signal<UnitControlSignal, Void>(Instant.now(), new UnitControlSignal(1d, 1d)));
 
-                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(null, -50, false), null);
-                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(null, -50, false), null);
+                var status1 = new ZoneStatus(zoneSettings, new CallingStatus(null, -50, false), null, null);
+                var status2 = new ZoneStatus(zoneSettings, new CallingStatus(null, -50, false), null, null);
                 var signalFlux = Flux.just(
                         new Signal<>(Instant.now(), status1, "Z1", Signal.Status.OK, null),
                 new Signal<>(Instant.now(), status2, "Z2", Signal.Status.OK, null)

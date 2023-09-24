@@ -1,7 +1,7 @@
 package net.sf.dz3r.scheduler.gcal.v3;
 
+import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.ZoneSettings;
-import net.sf.dz3r.scheduler.SchedulePeriod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;

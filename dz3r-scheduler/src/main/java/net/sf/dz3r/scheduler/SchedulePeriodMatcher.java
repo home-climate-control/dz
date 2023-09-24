@@ -1,5 +1,6 @@
 package net.sf.dz3r.scheduler;
 
+import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.ZoneSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

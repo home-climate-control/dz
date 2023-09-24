@@ -1,5 +1,6 @@
 package net.sf.dz3r.scheduler;
 
+import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.ZoneSettings;
 import org.junit.jupiter.api.Test;
 

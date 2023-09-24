@@ -1,5 +1,6 @@
 package net.sf.dz3r.scheduler;
 
+import net.sf.dz3r.model.SchedulePeriod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -16,7 +17,7 @@ import java.util.UUID;
 /**
  * Builds {@link SchedulePeriod} instances.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class SchedulePeriodFactory {
 

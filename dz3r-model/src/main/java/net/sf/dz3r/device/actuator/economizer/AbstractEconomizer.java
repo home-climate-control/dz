@@ -27,6 +27,8 @@ import java.util.concurrent.CountDownLatch;
  * Common implementation for all economizer classes.
  *
  * @param <A> Actuator device address type.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
 
@@ -330,13 +332,16 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             return source;
         }
 
+        var zoneSettings = source.getValue();
+
         // Augment the source with the economizer status
         var augmentedSource = new Signal<>(
                 source.timestamp,
                 new ZoneStatus(
-                        source.getValue().settings,
-                        source.getValue().callingStatus,
-                        economizerStatus),
+                        zoneSettings.settings,
+                        zoneSettings.callingStatus,
+                        economizerStatus,
+                        zoneSettings.periodSettings),
                 source.payload,
                 source.status,
                 source.error);
@@ -347,7 +352,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             return augmentedSource;
         }
 
-        if (settings.keepHvacOn) {
+        if (Boolean.TRUE.equals(settings.keepHvacOn)) {
 
             // We're feeding indoor air to HVAC air return, right?
             return augmentedSource;
@@ -355,9 +360,10 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
         // Need to suppress demand and keep the HVAC off while the economizer is on
         var adjusted = new ZoneStatus(
-                source.getValue().settings,
+                zoneSettings.settings,
                 new CallingStatus(null, 0, false),
-                economizerStatus);
+                economizerStatus,
+                zoneSettings.periodSettings);
 
         return new Signal<>(
                 source.timestamp,

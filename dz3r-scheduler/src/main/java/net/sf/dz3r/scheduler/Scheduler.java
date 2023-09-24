@@ -1,5 +1,7 @@
 package net.sf.dz3r.scheduler;
 
+import net.sf.dz3r.model.PeriodSettings;
+import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import org.apache.logging.log4j.LogManager;
@@ -148,7 +150,7 @@ public class Scheduler {
                 try {
 
                     logger.info("{}: settings applied: {}", zoneName, settings);
-                    zone.setSettingsSync(settings);
+                    zone.setPeriodSettings(new PeriodSettings(period, settings));
                     zone2period.put(zone, period);
                     return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, new AbstractMap.SimpleEntry<>(period, settings)));
 
@@ -162,6 +164,7 @@ public class Scheduler {
             } else {
                 logger.info("{}: no active period, settings left as they were", zoneName);
                 zone2period.put(zone, null);
+                zone.setPeriodSettings(null);
                 return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, null));
             }
 

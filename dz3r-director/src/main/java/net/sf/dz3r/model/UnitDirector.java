@@ -2,7 +2,6 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.scheduler.SchedulePeriod;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.scheduler.Scheduler;
 import net.sf.dz3r.signal.Signal;
