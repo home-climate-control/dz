@@ -4,7 +4,12 @@ Home Climate Control: Docs
 # FAQ
 
 **Q:** Nothing works!  
-**A:** [Check the configuration](./configuration/index.md), and check the logs. HCC is permissive (will completely stop operating only on unrecoverable errors), and verbose. Logs often contain links to documentation on how to correct a particular problem.
+**A:** In approximately this order:
+
+* [Check the configuration](./configuration/index.md). Use YAML anchors, they help to keep it consistent. Make sure you examine the configuration dump (logged at `debug` level) to see if the configuration you think you provided is the configuration that's actually been read.
+* Check the logs. HCC is permissive (will completely stop operating only on unrecoverable errors), and verbose. Logs often contain links to documentation on how to correct a particular problem.
+* Enable [InfluxDB connector](./configuration/influx.md). HCC emits a lot data, and one picture is better than a thousand words.
+* Enable [Console](./configuration/console.md) (incompatible with [running in Docker](./build/index.md#docker), but well worth it for troubleshooting). Its [instrument cluster](./instrument-cluster/index.md) might pinpoint problems immediately.
 
 # State of Affairs
 * Rock stable, but ages old, [imperative branch](https://github.com/home-climate-control/dz/tree/last-imperative-maintenance).

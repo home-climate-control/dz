@@ -5,6 +5,16 @@ Integration that allows to use [InfluxDB](https://www.influxdata.com/) as teleme
 
 > **NOTE:** This integration is different from default InfluxDB integration embedded into Spring and Quarkus, those must be configured in [infrastructure configuration](./index.md#infrastructure-specific).
 
+### Telemetry Emitted
+
+Short list:
+
+* Zone state (setpoints, PID controller internal state, and more)
+* Economizer state (setpoints, PID controller internal state, and more)
+* Unit status (demand, uptime, and more)
+
+### Configuration
+
 Best explained by example:
 
 ```yaml
