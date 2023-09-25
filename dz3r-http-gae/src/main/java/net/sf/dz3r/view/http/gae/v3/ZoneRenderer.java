@@ -12,6 +12,7 @@ import reactor.core.publisher.Flux;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TreeMap;
 
 public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
 
@@ -20,31 +21,32 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
     /**
      * @see #consumeSensorSignal(Signal)
      */
-    private Signal<Double, String> sensorSignal;
+    private final Map<String, Signal<Double, String>> zone2signal = new TreeMap<>();
 
     /**
      * @see #consumeMode(Signal)
      */
-    private HvacMode hvacMode;
+    private final Map<String, Signal<HvacMode, String>> unit2mode = new TreeMap<>();
 
     @Override
-    public Flux<ZoneSnapshot> compute(Flux<Signal<ZoneStatus, String>> in) {
-        return in.flatMap(this::convert);
+    public Flux<ZoneSnapshot> compute(String unitId, Flux<Signal<ZoneStatus, String>> in) {
+        return in.flatMap(s -> convert(unitId, s));
     }
 
-    private Flux<ZoneSnapshot> convert(Signal<ZoneStatus, String> source) {
+    private Flux<ZoneSnapshot> convert(String unitId, Signal<ZoneStatus, String> source) {
 
-        if (hvacMode == null) {
+        var zoneName = source.payload;
+
+        if (!unit2mode.containsKey(unitId)) {
             logger.warn("Don't know the mode yet, skipping this status: {}", source);
             return Flux.empty();
         }
 
-        if (sensorSignal == null) {
+        if (!zone2signal.containsKey(zoneName)) {
             logger.warn("Don't know the signal yet, skipping this status: {}", source);
             return Flux.empty();
         }
 
-        var zoneName = source.payload;
         var status = source.getValue();
         var periodName = Optional.ofNullable(status.periodSettings).map(ps -> ps.period().name).orElse(null);
         var deviationSetpoint = Optional.ofNullable(status.periodSettings).map(ps -> status.settings.setpoint - ps.settings().setpoint).orElse(0d);
@@ -61,10 +63,10 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
                 return Flux.just(new ZoneSnapshot(
                         source.timestamp.toEpochMilli(),
                         zoneName,
-                        modeMap.get(hvacMode),
+                        modeMap.get(unit2mode.get(unitId).getValue()),
                         renderState(status.settings.enabled, status.callingStatus.calling),
                         status.callingStatus.demand,
-                        sensorSignal.getValue(),
+                        zone2signal.get(zoneName).getValue(),
                         status.settings.setpoint,
                         status.settings.enabled,
                         status.settings.hold,
@@ -76,8 +78,8 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
                         null
                 ));
             } catch (Exception ex) {
-                logger.warn("hvacMode={}", hvacMode);
-                logger.warn("sensorSignal={}", sensorSignal);
+                logger.warn("hvacMode={}", unit2mode);
+                logger.warn("sensorSignal={}", zone2signal);
                 logger.warn("source={}", source);
                 logger.error("Failed to create zone snapshot, dropped (see logs right above for context)", ex);
                 return Flux.empty();
@@ -99,13 +101,17 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
             HvacMode.HEATING, net.sf.dz3r.view.http.gae.v3.wire.HvacMode.HEATING
     );
 
-    public void consumeSensorSignal(Signal<Double, String> sensorSignal) {
-        this.sensorSignal = sensorSignal;
-        logger.debug("sensorSignal: {}", sensorSignal);
+    public void consumeSensorSignal(Signal<Double, String> signal) {
+
+        // Signals from different zones are coming, must keep them separate
+        zone2signal.put(signal.payload, signal);
+        logger.debug("signal: {}={}", signal.payload, signal);
     }
 
-    public void consumeMode(Signal<HvacMode, Void> signal) {
-        logger.debug("Mode: {}", signal.getValue());
-        this.hvacMode = signal.getValue();
+    public void consumeMode(Signal<HvacMode, String> signal) {
+
+        // Signals from different units are coming, must keep them separate
+        logger.debug("Mode: {}={}", signal.payload, signal);
+        unit2mode.put(signal.payload, signal);
     }
 }
