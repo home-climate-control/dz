@@ -1,0 +1,7 @@
+# Barebones configuration.
+#
+# Use application-localhost.yaml as a template to create the configuration you want. Don't forget to secure it.
+
+home-climate-control:
+  # From this point on, your custom configuration starts. Use a custom configuration file (application-${PROFILE}.yaml),
+  # and don't commit it to source control, that's a privacy leak.

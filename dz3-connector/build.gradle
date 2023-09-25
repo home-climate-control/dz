@@ -1,5 +1,0 @@
-dependencies {
-
-    implementation project(':jukebox:jukebox-common')
-    implementation project(':jukebox:jukebox-jmx')
-}

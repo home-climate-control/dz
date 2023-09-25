@@ -1,6 +1,0 @@
-dependencies {
-
-    implementation project(':dz3-connector')
-    implementation project(':dz3-model')
-    implementation project(':dz3-scheduler')
-}

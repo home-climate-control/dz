@@ -1,6 +1,0 @@
-dependencies {
-
-    api 'joda-time:joda-time:2.8.1'
-
-    api project(':dz3-model')
-}

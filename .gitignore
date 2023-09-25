@@ -2,9 +2,12 @@
 .settings
 .project
 /.gradle/
-/build/
+**/build/
 /target/
 gradlew.bat
 *~
 .idea/
 *.iml
+/logs/
+*.log
+*.diff
