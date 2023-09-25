@@ -38,6 +38,7 @@ Home Climate Control: Docs
     * When to choose: if you are just approaching this project. There is a bit of rocket science involved, by the time you get all the dependencies lined up and operational, the project will reach the stable state and `imperative` will be retired for good.
 
 # Getting Deeper
+* [Platform Support](./platform.md)
 * [Build](./build/index.md)
 * [Configuration Reference](./configuration/index.md)
 * [Instrument Cluster](./instrument-cluster/index.md)
