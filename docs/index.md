@@ -12,33 +12,27 @@ Home Climate Control: Docs
 * Enable [Console](./configuration/console.md) (incompatible with [running in Docker](./build/index.md#docker), but well worth it for troubleshooting). Its [instrument cluster](./instrument-cluster/index.md) might pinpoint problems immediately.
 
 # State of Affairs
+* Bleeding edge, a bit less stable, but with more features, [reactive overhaul](https://github.com/home-climate-control/dz/milestone/12) is now the development mainline. Read everything about it [at the root](../README.md). Some facts not mentioned there for brevity:
+    * Benefits:
+        * Drastically improved startup time
+        * More ways to run (standalone, SpringBoot, Quarkus, Docker, k8s)
+        * Improved platform instrumentation (Micrometer to InfluxDb)
+  * Disadvantages:
+      * Some subsystems (1-Wire, XBee, shell) have not yet been ported over from `reactive`
+      * Needs Java 17
+      * Has not yet been verified to run on Raspberry Pi 3B
+  * When to choose: if you are just approaching this project.
 * Rock stable, but ages old, [imperative branch](https://github.com/home-climate-control/dz/tree/last-imperative-maintenance).
     * Benefits: it works.
     * Disadvantages:
         * The configuration is **very** complex
         * It's getting a bit long in the tooth
         * There will be no new features in this branch, only critical fixes
-    * When to choose: when you want something very reliable and don't mind time learning the ropes.
-* Bleeding edge, a bit less stable, but with more features, [reactive overhaul](https://github.com/home-climate-control/dz/tree/reactive).
-    * Benefits:
-        * Drastically simplified configuration (YAML instead of XML)
-        * Can now be run in a [Docker container](./build/index.md#docker)
-        * Better device support
-        * Special note: economizer support, $$$ saved
-        * The configuration is [documented](./configuration/index.md) and code assist is supported by modern IDEs (thanks to [Spring Configuration Metadata](https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html))
-        * Drastically improved startup time
-        * More ways to run (standalone, SpringBoot, Quarkus, Docker, k8s)
-        * Improved platform instrumentation (Micrometer to InfluxDb)
-        * Improved system instrumentation ("instrument cluster", documentation coming)
-    * Disadvantages:
-        * Some subsystems (1-Wire, XBee, shell) have not yet been ported over from `reactive`
-        * Needs Java 17
-        * Has not yet been verified to run on Raspberry Pi 3B
-        * Bleeding edge
-    * When to choose: if you are just approaching this project. There is a bit of rocket science involved, by the time you get all the dependencies lined up and operational, the project will reach the stable state and `imperative` will be retired for good.
+    * When to choose: when you want something very reliable and don't mind time learning the ropes. The 'reliable' advantage is quickly waning, though, so the only real reason to choose this would be if you want 1-Wire or XBee device support **right now**.
 
-# Getting Deeper
+# Next Steps
 * [Platform Support](./platform.md)
+* [Hardware Support](./hardware.md)
 * [Build](./build/index.md)
 * [Configuration Reference](./configuration/index.md)
 * [Instrument Cluster](./instrument-cluster/index.md)
