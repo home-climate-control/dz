@@ -491,6 +491,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var font = needFahrenheit  && displayTemperature.length() > 4 ? currentFontF : currentFontC;
         currentLabel.setFont(font);
 
+        updateChart();
         repaint();
     }
 
