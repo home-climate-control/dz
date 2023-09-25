@@ -1,0 +1,10 @@
+# Docker specific configuration.
+#
+# Don't forget that DNS resolution needs to be specifically configured when you run the image.
+
+management:
+  influx:
+    metrics:
+      export:
+        # The emitter is included into the image and will spam if kept enabled
+        enabled: false

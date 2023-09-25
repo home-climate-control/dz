@@ -1,12 +1,9 @@
-[submodule "jukebox"]
-	path = jukebox
-	url = https://github.com/climategadgets/jukebox.git
 [submodule "servomaster"]
 	path = servomaster
 	url = https://github.com/climategadgets/servomaster.git
-[submodule "xbee-api"]
-	path = xbee-api
-	url = https://github.com/home-climate-control/xbee-api.git
+[submodule "xbee-api-reactive"]
+	path = xbee-api-reactive
+	url = https://github.com/home-climate-control/xbee-api-reactive.git
 [submodule "owapi-reborn"]
 	path = owapi-reborn
 	url = https://github.com/home-climate-control/owapi-reborn.git

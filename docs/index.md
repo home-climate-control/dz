@@ -1,36 +1,38 @@
 Home Climate Control: Docs
 ==
 
-# State of Affairs
-* Rock stable, but ages old, [imperative branch](https://github.com/home-climate-control/dz/tree/last-imperative-maintenance).
-  * Benefits: it works.
-  * Disadvantages:
-    * The configuration is **very** complex
-    * It's getting a bit long in the tooth
-  * When to choose: when you want something very reliable and don't mind time learning the ropes.
-* Newer, a bit less stable, but with more features, [reactive overhaul](https://github.com/home-climate-control/dz/tree/reactive).
-  * Benefits:
-    * Simpler configuration
-    * More features
-    * Better device support
-    * Special note: economizer support, $$$ saved
-  * Disadvantages:
-    * Some bugs
-    * The configuration is still complex
-  * When to choose: Come to think of it, never. The reason it is mentioned here now is - this is the eventual target for `gh47` below (which is WIP), and it will eventually replace the `imperative` and become the master branch.
-* Newest, as stable as `reactive`, but with radically simplified configuration, [gh47](https://github.com/home-climate-control/dz/tree/gh47) (named after [issue #47](https://github.com/home-climate-control/dz/issues/47)). This branch is about to be merged with `reactive`.
-  * Benefits:
-    * Drastically simplified configuration (YAML instead of XML)
-    * The configuration is documented and code assist is supported by modern IDEs (thanks to [Spring Configuration Metadata](https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html)) 
-    * Drastically improved startup time
-    * More ways to run (standalone, SpringBoot, Quarkus, Docker, k8s)
-    * Improved platform instrumentation (Micrometer to InfluxDb)
-    * Improved system instrumentation ("instrument cluster", documentation coming)
-  * Disadvantages:
-    * Some subsystems (1-Wire, XBee, shell) have not yet been ported over from `reactive`
-    * Bleeding edge
-  * When to choose: if you are just approaching this project. There is a bit of rocket science involved, by the time you get all the dependencies lined up and operational, the project will reach the stable state and `imperative` will be retired for good.
+# FAQ
 
-# Getting Deeper
+**Q:** Nothing works!  
+**A:** In approximately this order:
+
+* [Check the configuration](./configuration/index.md). Use YAML anchors, they help to keep it consistent. Make sure you examine the configuration dump (logged at `debug` level) to see if the configuration you think you provided is the configuration that's actually been read.
+* Check the logs. HCC is permissive (will completely stop operating only on unrecoverable errors), and verbose. Logs often contain links to documentation on how to correct a particular problem.
+* Enable [InfluxDB connector](./configuration/influx.md). HCC emits a lot data, and one picture is better than a thousand words.
+* Enable [Console](./configuration/console.md) (incompatible with [running in Docker](./build/index.md#docker), but well worth it for troubleshooting). Its [instrument cluster](./instrument-cluster/index.md) might pinpoint problems immediately.
+
+# State of Affairs
+* Bleeding edge, a bit less stable, but with more features, [reactive overhaul](https://github.com/home-climate-control/dz/milestone/12) is now the development mainline. Read everything about it [at the root](../README.md). Some facts not mentioned there for brevity:
+    * Benefits:
+        * Drastically improved startup time
+        * More ways to run (standalone, SpringBoot, Quarkus, Docker, k8s)
+        * Improved platform instrumentation (Micrometer to InfluxDb)
+  * Disadvantages:
+      * Some subsystems (1-Wire, XBee, shell) have not yet been ported over from `reactive`
+      * Needs Java 17
+      * Has not yet been verified to run on Raspberry Pi 3B
+  * When to choose: if you are just approaching this project.
+* Rock stable, but ages old, [imperative branch](https://github.com/home-climate-control/dz/tree/last-imperative-maintenance).
+    * Benefits: it works.
+    * Disadvantages:
+        * The configuration is **very** complex
+        * It's getting a bit long in the tooth
+        * There will be no new features in this branch, only critical fixes
+    * When to choose: when you want something very reliable and don't mind time learning the ropes. The 'reliable' advantage is quickly waning, though, so the only real reason to choose this would be if you want 1-Wire or XBee device support **right now**.
+
+# Next Steps
+* [Platform Support](./platform.md)
+* [Hardware Support](./hardware.md)
 * [Build](./build/index.md)
-* [Configuration](./configuration/index.md)
+* [Configuration Reference](./configuration/index.md)
+* [Instrument Cluster](./instrument-cluster/index.md)

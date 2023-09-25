@@ -1,5 +1,0 @@
-dependencies {
-
-    api project(':jukebox:jukebox-datastream')
-    api project(':dz3-common')
-}
