@@ -91,7 +91,7 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
         Optional.ofNullable(metricsCollectorSet)
                 .ifPresent(collectors -> Flux.fromIterable(collectors)
                         .publishOn(Schedulers.boundedElastic())
-                        .doOnNext(c -> c.connect(feed))
+                        .doOnNext(c -> c.connect(name, feed))
                         .doOnComplete(() -> logger.info("{}: connected metric collectors", getAddress()))
                         .subscribe());
 
@@ -99,7 +99,7 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
                 .ifPresent(connectors -> Flux.fromIterable(connectors)
                         .publishOn(Schedulers.boundedElastic())
                         .doOnNext(c -> {
-                            c.connect(feed);
+                            c.connect(name, feed);
                             // VT: FIXME: Connect the control input when the API signature is established
                         })
                         .doOnComplete(() -> logger.info("{}: connected connectors", getAddress()))

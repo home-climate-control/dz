@@ -112,7 +112,7 @@ public class InfluxDbLogger implements Subscriber<Point>, MetricsCollector {
     }
 
     @Override
-    public void connect(UnitDirector.Feed feed) {
+    public void connect(String unitId, UnitDirector.Feed feed) {
 
         var sensorFeeds = Flux.merge(
                 Objects.requireNonNull(

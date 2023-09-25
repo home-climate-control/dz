@@ -74,7 +74,7 @@ public class HttpConnectorGAE extends HttpConnector {
     }
 
     @Override
-    public void connect(UnitDirector.Feed feed) {
+    public void connect(String unitId, UnitDirector.Feed feed) {
 
         for (var zone : feed.sensorFlux2zone.values()) {
             logger.info("connected zone: {}", zone.getAddress());
@@ -95,11 +95,12 @@ public class HttpConnectorGAE extends HttpConnector {
                     }
                 })
                 .filter(s -> s.getValue().command.mode != null)
-                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command.mode, null, s.status, s.error))
+                .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command.mode, unitId, s.status, s.error))
                 .subscribe(zoneRenderer::consumeMode);
 
         // Zone ("thermostat" in its terminology) status feed is the only one supported
         zoneRenderer.compute(
+                        unitId,
                         feed.aggregateZoneFlux
                                 .doOnNext(z -> logger.debug("Incoming zone: {}", z.payload))
                                 .filter(z -> zoneNames.contains(z.payload))
