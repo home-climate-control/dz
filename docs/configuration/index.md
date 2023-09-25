@@ -1,4 +1,3 @@
-=======
 Home Climate Control: Configuration Reference
 ==
 ## Variants
