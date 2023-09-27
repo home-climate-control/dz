@@ -18,6 +18,7 @@ Short list:
 Best explained by example:
 
 ```yaml
+  connectors:
     - influx:
         id: influxdb-connector-house
         instance: house

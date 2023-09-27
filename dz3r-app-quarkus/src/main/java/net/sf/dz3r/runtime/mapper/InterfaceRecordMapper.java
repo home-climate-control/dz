@@ -3,6 +3,7 @@ package net.sf.dz3r.runtime.mapper;
 import net.sf.dz3r.runtime.config.HccRawConfig;
 import net.sf.dz3r.runtime.config.quarkus.HccRawInterfaceConfig;
 import net.sf.dz3r.runtime.config.quarkus.connector.ConnectorConfig;
+import net.sf.dz3r.runtime.config.quarkus.connector.HomeAssistantConfig;
 import net.sf.dz3r.runtime.config.quarkus.connector.HttpConnectorConfig;
 import net.sf.dz3r.runtime.config.quarkus.connector.InfluxCollectorConfig;
 import net.sf.dz3r.runtime.config.quarkus.filter.FilterConfig;
@@ -158,6 +159,7 @@ public interface InterfaceRecordMapper {
 
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connector(source.http().orElse(null)))", target = "http")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connector(source.influx().orElse(null)))", target = "influx")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connector(source.homeAssistant().orElse(null)))", target = "homeAssistant")
     net.sf.dz3r.runtime.config.connector.ConnectorConfig connector(ConnectorConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
@@ -173,6 +175,11 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.password().orElse(null))", target = "password")
     @Mapping(expression = "java(source.sensorFeedMapping())", target = "sensorFeedMapping")
     net.sf.dz3r.runtime.config.connector.InfluxCollectorConfig connector(InfluxCollectorConfig source);
+
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.broker(source.broker()))", target = "broker")
+    @Mapping(expression = "java(source.discoveryPrefix().orElse(null))", target = "discoveryPrefix")
+    @Mapping(expression = "java(source.nodeId().orElse(null))", target = "nodeId")
+    net.sf.dz3r.runtime.config.connector.HomeAssistantConfig connector(HomeAssistantConfig source);
 
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switchable(source.switchable()))", target = "switchable")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.heatpumpHat(source.heatpumpHat()))", target = "heatpumpHat")
