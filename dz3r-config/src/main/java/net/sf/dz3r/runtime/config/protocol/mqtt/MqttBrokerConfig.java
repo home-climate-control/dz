@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 /**
  * MQTT Broker endpoint configuration.
  *
- * @param id Identifier, optional (defaults to {@link #host} if absent).
+ * @param id Identifier, optional (defaults to {@link #host} if absent). Used to identify this client to the MQTT server.
  * @param host MQTT broker host.
  * @param port MQTT broker port. Defaults to 1883 if absent.
  * @param rootTopic MQTT root topic. Mandatory.

@@ -10,6 +10,7 @@ They all share common properties:
 ```yaml
 <connector-type>
   - broker:
+      id: <Client ID> # optional, defaults to internally generated stable hash code
       host: <MQTT broker host>
       port: <MQTT broker port> # optional, defaults to 1883
       root-topic: <root topic for all messages for this connector>
@@ -24,6 +25,10 @@ They all share common properties:
 
 ### broker
 MQTT broker configuration.
+
+#### id
+
+Used to identify this client to the MQTT server. Defaults to internally generated consistent identifier based on host and port.
 
 #### auto-reconnect
 Instructs the MQTT library to try to reconnect automatically. Generally, it is a good thing, but it may backfire during initial setup because the library does it quietly and will do it forever, with the rest of the system appearing stuck. Use with care.
