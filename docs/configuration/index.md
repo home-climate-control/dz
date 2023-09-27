@@ -81,8 +81,9 @@ No-frills, one heatpump, three zones configuration. With traces of some lessons 
 home-climate-control:
   instance: bootstrap
   esphome:
-    - host: mqtt-esphome
-      root-topic: /esphome
+    - broker:
+        host: mqtt-esphome
+        root-topic: /esphome
       sensors:
         - address: air-ambient-north
         - address: air-ambient-south

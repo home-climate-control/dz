@@ -26,6 +26,7 @@ import net.sf.dz3r.runtime.config.quarkus.model.UnitDirectorConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.WebUiConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ZoneConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ZoneSettingsConfig;
+import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttBrokerConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.onewire.OnewireBusConfig;
 import net.sf.dz3r.runtime.config.quarkus.schedule.CalendarConfigEntry;
@@ -63,6 +64,11 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.console(source.console().orElse(null)))", target = "console")
     HccRawConfig rawConfig(HccRawInterfaceConfig source);
 
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.broker(source.broker()))", target = "broker")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switches(source.switches()))", target = "switches")
+    net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig mqttConfig(MqttDeviceConfig source);
+
     @Mapping(expression = "java(source.id().orElse(null))", target = "id")
     @Mapping(expression = "java(source.host())", target = "host")
     @Mapping(expression = "java(source.port().orElse(null))", target = "port")
@@ -70,9 +76,8 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.password().orElse(null))", target = "password")
     @Mapping(expression = "java(source.rootTopic())", target = "rootTopic")
     @Mapping(expression = "java(source.autoReconnect().orElse(true))", target = "autoReconnect")
-    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
-    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switches(source.switches()))", target = "switches")
-    net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig mqttConfig(MqttDeviceConfig source);
+    net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerConfig broker(MqttBrokerConfig source);
+
 
     @Mapping(expression = "java(source.id().orElse(null))", target = "id")
     @Mapping(expression = "java(source.address())", target = "address")
