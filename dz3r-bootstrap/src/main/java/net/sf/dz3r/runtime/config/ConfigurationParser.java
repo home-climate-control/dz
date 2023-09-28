@@ -3,7 +3,9 @@ package net.sf.dz3r.runtime.config;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.instrumentation.Marker;
+import net.sf.dz3r.runtime.config.connector.ConnectorConfig;
 import net.sf.dz3r.runtime.config.connector.ConnectorConfigurationParser;
+import net.sf.dz3r.runtime.config.connector.HomeAssistantConfig;
 import net.sf.dz3r.runtime.config.filter.FilterConfigurationParser;
 import net.sf.dz3r.runtime.config.hardware.HvacConfigurationParser;
 import net.sf.dz3r.runtime.config.hardware.UnitConfigurationParser;
@@ -18,6 +20,10 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Parses {@link HccRawConfig} into a live {@link ConfigurationContext}.
@@ -45,7 +51,11 @@ public class ConfigurationParser {
                     .parse(
                             source.esphome(),
                             source.zigbee2mqtt(),
-                            source.zwave2mqtt());
+                            source.zwave2mqtt(),
+
+                            // As usual, HA requires special handling. It needs zones which are not available until much later,
+                            // but it also needs an MQTT adapter which will be too late to obtain then - see mqtt.close() right down.
+                            getHomeAssistantConfigs(source));
 
             // There will be no more MQTT adapters after this
             ctx.mqtt.close();
@@ -140,5 +150,17 @@ public class ConfigurationParser {
         } finally {
             m.close();
         }
+    }
+
+    private Set<HomeAssistantConfig> getHomeAssistantConfigs(HccRawConfig source) {
+
+        return Optional.ofNullable(source.connectors())
+                .map(c -> Flux
+                        .fromIterable(c)
+                        .filter(cc -> cc.homeAssistant() != null)
+                        .map(ConnectorConfig::homeAssistant))
+                .orElse(Flux.empty())
+                .collect(Collectors.toSet())
+                .block();
     }
 }

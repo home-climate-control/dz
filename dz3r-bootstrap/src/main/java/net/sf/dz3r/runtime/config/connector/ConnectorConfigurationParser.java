@@ -3,7 +3,6 @@ package net.sf.dz3r.runtime.config.connector;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
-import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerConfig;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.http.gae.v3.HttpConnectorGAE;
 import net.sf.dz3r.view.influxdb.v3.InfluxDbLogger;
@@ -33,30 +32,12 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
         }
     }
 
+    /**
+     * Parse HA configuration and register the instance.
+     *
+     * @param cf HA Configuration
+     */
     private void parseHomeAssistant(HomeAssistantConfig cf) {
-
-        // Some sanity checking first
-
-        // VT: NOTE: With existing interfaces and records, either Quarkus will choke on missing root topic,
-        // or I will spend inordinate time refactoring it. So, Worse is Better.
-        // Just require one of (broker.root-topic, discovery-prefix) to be present.
-
-        if (cf.broker().rootTopic() != null && cf.discoveryPrefix() != null) {
-            throw new IllegalArgumentException("both broker.root-topic and discovery-prefix are present, must specify only one");
-        }
-
-        var topic = Optional.ofNullable(cf.broker().rootTopic()).orElse(cf.discoveryPrefix());
-        var id = Optional.ofNullable(cf.broker().id()).orElse(Integer.toHexString((cf.broker().host() + ":" + cf.broker().port()).hashCode()));
-
-        var broker = new MqttBrokerConfig(
-                id,
-                cf.broker().host(),
-                cf.broker().port(),
-                cf.broker().username(),
-                cf.broker().password(),
-                topic,
-                cf.broker().autoReconnect()
-        );
 
 //        context.connectors.register(broker.signature(), new HomeAssistantConnector());
     }

@@ -15,6 +15,8 @@ import java.util.Set;
  * and since Quarkus is picky about nulls but Spring is not, either of them can be used, to the same effect. The parser will
  * enforce valid configuration.
  *
+ * Also see {@link HomeAssistantConfigParser#parse()} - that's the way to get the well-formed configuration for this object.
+ *
  * @param broker MQTT broker configuration.
  * @param discoveryPrefix Optional, defaults to {@code homeassistant} (no leading slash).
  * @param nodeId Optional, not used by HA. Defaults to {@link net.sf.dz3r.runtime.config.HccRawConfig#instance()}.
@@ -26,5 +28,5 @@ public record HomeAssistantConfig(
         String discoveryPrefix,
         String nodeId,
         Set<String> zones
-) {
+) implements HomeAssistantConfigParser {
 }
