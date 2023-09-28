@@ -14,7 +14,6 @@ import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;
 import net.sf.dz3r.view.http.v3.HttpConnector;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
@@ -45,7 +44,6 @@ public class HttpConnectorGAE extends HttpConnector {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     protected final HttpClient httpClient;
-    protected final HttpClientContext context;
 
     private final Set<String> zoneNames;
     private final Map<String, Zone> name2zone = new TreeMap<>();
@@ -74,7 +72,6 @@ public class HttpConnectorGAE extends HttpConnector {
             // VT: FIXME: This is where those 100ms are. Need to move out.
 
             httpClient = HttpClientFactory.createClient();
-            context = HttpClientContext.create();
 
         } finally {
             oops.close();
