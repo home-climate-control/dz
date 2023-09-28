@@ -98,15 +98,12 @@ public class ConfigurationParser {
 
             // This may potentially take a long time, we'll close it later right before it's needed
             new ScheduleConfigurationParser(ctx).parse(source.schedule());
-            m.checkpoint("parsed schedule");
+            m.checkpoint("configured schedule 1/2");
 
             // VT: NOTE: This phase takes a lot of time now, improvement possible?
             // VT: NOTE: it's the HttpConnectorGAE that takes an order of magnitude longer than others
-            // VT: FIXME: See if close() can be moved down below, and configuration parsed in parallel
             new ConnectorConfigurationParser(ctx).parse(source.connectors());
-            ctx.collectors.close();
-            ctx.connectors.close();
-            m.checkpoint("configured connectors");
+            m.checkpoint("configured connectors 1/2");
 
             new HvacConfigurationParser(ctx).parse(source.hvac());
             ctx.hvacDevices.close();
@@ -117,7 +114,11 @@ public class ConfigurationParser {
             m.checkpoint("configured units");
 
             ctx.schedule.close();
-            m.checkpoint("configured schedule");
+            m.checkpoint("configured schedule 2/2");
+
+            ctx.collectors.close();
+            ctx.connectors.close();
+            m.checkpoint("configured connectors 2/2");
 
             // Need just about everything resolved by now
 
