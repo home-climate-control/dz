@@ -85,7 +85,6 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
                 return;
             }
 
-            // VT: NOTE: This operation takes over 100ms, what takes it so long?
             context.connectors.register(cf.id(), new HttpConnectorGAE(new URL(cf.uri()), zones));
 
         } catch (MalformedURLException e) {

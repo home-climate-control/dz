@@ -100,8 +100,6 @@ public class ConfigurationParser {
             new ScheduleConfigurationParser(ctx).parse(source.schedule());
             m.checkpoint("configured schedule 1/2");
 
-            // VT: NOTE: This phase takes a lot of time now, improvement possible?
-            // VT: NOTE: it's the HttpConnectorGAE that takes an order of magnitude longer than others, why?
             var connectorFlux = new ConnectorConfigurationParser(ctx).parse(source.connectors());
             m.checkpoint("configured connectors 1/2");
 

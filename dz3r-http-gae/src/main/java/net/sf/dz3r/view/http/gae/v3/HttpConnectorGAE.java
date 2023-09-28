@@ -43,7 +43,7 @@ public class HttpConnectorGAE extends HttpConnector {
     private final Logger logger = LogManager.getLogger();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    protected final HttpClient httpClient;
+    protected HttpClient httpClient;
 
     private final Set<String> zoneNames;
     private final Map<String, Zone> name2zone = new TreeMap<>();
@@ -65,22 +65,30 @@ public class HttpConnectorGAE extends HttpConnector {
         super(serverContextRoot);
         this.zoneNames = new TreeSet<>(zoneNames);
 
-        Marker oops = new Marker("client creation");
-
-        try {
-
-            // VT: FIXME: This is where those 100ms are. Need to move out.
-
-            httpClient = HttpClientFactory.createClient();
-
-        } finally {
-            oops.close();
-        }
-
         bufferSubscription = bufferSink.asFlux()
                 .buffer(pollInterval)
                 .doOnNext(this::exchange)
                 .subscribe();
+    }
+
+    private synchronized HttpClient getHttpClient() {
+
+        if (httpClient == null) {
+
+            Marker m = new Marker("client creation");
+
+            try {
+
+                // VT: NOTE: This is about 100ms on a decent workstation. Unexpected.
+                // ... but only if it is called from the constructor, otherwise it takes 2ms :O
+                httpClient = HttpClientFactory.createClient();
+
+            } finally {
+                m.close();
+            }
+        }
+
+        return httpClient;
     }
 
     @Override
@@ -158,7 +166,7 @@ public class HttpConnectorGAE extends HttpConnector {
 
             try {
 
-                var rsp = httpClient.execute(post);
+                var rsp = getHttpClient().execute(post);
                 var rc = rsp.getStatusLine().getStatusCode();
 
                 if (rc != 200) {
