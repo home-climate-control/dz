@@ -98,9 +98,10 @@ public class ConfigurationParser {
 
             // This may potentially take a long time, we'll close it later right before it's needed
             new ScheduleConfigurationParser(ctx).parse(source.schedule());
-            m.checkpoint("configured schedule");
+            m.checkpoint("parsed schedule");
 
             // VT: NOTE: This phase takes a lot of time now, improvement possible?
+            // VT: NOTE: it's the HttpConnectorGAE that takes an order of magnitude longer than others
             // VT: FIXME: See if close() can be moved down below, and configuration parsed in parallel
             new ConnectorConfigurationParser(ctx).parse(source.connectors());
             ctx.collectors.close();

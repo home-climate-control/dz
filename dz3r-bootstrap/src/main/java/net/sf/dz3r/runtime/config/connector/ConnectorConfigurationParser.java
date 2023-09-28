@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config.connector;
 
+import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
@@ -44,6 +45,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
     private void parseHttp(HttpConnectorConfig cf) {
 
+        Marker m = new Marker("parseHttp");
         try {
 
             // Configuration contains IDs, connector doesn't know and doesn't care
@@ -59,24 +61,32 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
                 return;
             }
 
+            // VT: NOTE: This operation takes over 100ms, what takes it so long?
             context.connectors.register(cf.id(), new HttpConnectorGAE(new URL(cf.uri()), zones));
 
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException("Invalid URL: '" + cf.uri() + "'");
+        } finally {
+            m.close();
         }
     }
 
     private void parseInflux(InfluxCollectorConfig cf) {
 
-        context.collectors.register(
-                cf.id(),
-                new InfluxDbLogger(
-                        cf.db(),
-                        cf.instance(),
-                        cf.uri(),
-                        cf.username(),
-                        cf.password(),
-                        getSensorFeed2IdMapping(cf.sensorFeedMapping())));
+        Marker m = new Marker("parseInflux");
+        try {
+            context.collectors.register(
+                    cf.id(),
+                    new InfluxDbLogger(
+                            cf.db(),
+                            cf.instance(),
+                            cf.uri(),
+                            cf.username(),
+                            cf.password(),
+                            getSensorFeed2IdMapping(cf.sensorFeedMapping())));
+        } finally {
+            m.close();
+        }
     }
 
     /**
