@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerConfig;
 
+import java.util.Set;
+
 /**
  * Home Assistant MQTT Discovery configuration.
  *
@@ -16,11 +18,13 @@ import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerConfig;
  * @param broker MQTT broker configuration.
  * @param discoveryPrefix Optional, defaults to {@code homeassistant} (no leading slash).
  * @param nodeId Optional, not used by HA. Defaults to {@link net.sf.dz3r.runtime.config.HccRawConfig#instance()}.
+ * @param zones Zones to expose to Home Assistant.
  */
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record HomeAssistantConfig(
         MqttBrokerConfig broker,
         String discoveryPrefix,
-        String nodeId
+        String nodeId,
+        Set<String> zones
 ) {
 }

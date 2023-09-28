@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttBrokerConfig;
 
 import java.util.Optional;
+import java.util.Set;
 
 public interface HomeAssistantConfig {
     @JsonProperty("broker")
@@ -12,4 +13,6 @@ public interface HomeAssistantConfig {
     Optional<String> discoveryPrefix();
     @JsonProperty("node-id")
     Optional<String> nodeId();
+    @JsonProperty("zones")
+    Set<String> zones();
 }
