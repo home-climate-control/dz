@@ -101,8 +101,8 @@ public class ConfigurationParser {
             m.checkpoint("configured schedule 1/2");
 
             // VT: NOTE: This phase takes a lot of time now, improvement possible?
-            // VT: NOTE: it's the HttpConnectorGAE that takes an order of magnitude longer than others
-            new ConnectorConfigurationParser(ctx).parse(source.connectors());
+            // VT: NOTE: it's the HttpConnectorGAE that takes an order of magnitude longer than others, why?
+            var connectorFlux = new ConnectorConfigurationParser(ctx).parse(source.connectors());
             m.checkpoint("configured connectors 1/2");
 
             new HvacConfigurationParser(ctx).parse(source.hvac());
@@ -116,6 +116,7 @@ public class ConfigurationParser {
             ctx.schedule.close();
             m.checkpoint("configured schedule 2/2");
 
+            connectorFlux.blockLast();
             ctx.collectors.close();
             ctx.connectors.close();
             m.checkpoint("configured connectors 2/2");

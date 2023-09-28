@@ -10,6 +10,8 @@ import net.sf.dz3r.view.influxdb.v3.InfluxDbLogger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -24,13 +26,35 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
         super(context);
     }
 
-    public void parse(Set<ConnectorConfig> source) {
+    public Flux<Object> parse(Set<ConnectorConfig> source) {
 
-        for (var entry : Optional.ofNullable(source).orElse(Set.of())) {
-            Optional.ofNullable(entry.homeAssistant()).ifPresent(this::parseHomeAssistant);
-            Optional.ofNullable(entry.http()).ifPresent(this::parseHttp);
-            Optional.ofNullable(entry.influx()).ifPresent(this::parseInflux);
-        }
+        Marker m = new Marker("parse connectors");
+        var flux = Flux
+                .fromIterable(Optional.ofNullable(source).orElse(Set.of()))
+                .parallel()
+                .runOn(Schedulers.boundedElastic())
+                .flatMap(entry -> Mono.create(sink -> {
+
+                        Optional.ofNullable(entry.homeAssistant()).ifPresent(this::parseHomeAssistant);
+                        Optional.ofNullable(entry.http()).ifPresent(this::parseHttp);
+                        Optional.ofNullable(entry.influx()).ifPresent(this::parseInflux);
+
+                        sink.success("done: " + entry.toString());
+                    }
+                ))
+                .sequential()
+                .publishOn(Schedulers.boundedElastic())
+                .doOnNext(ignore -> logger.debug("parse connector: {}", ignore))
+                .doOnComplete(m::close)
+
+                // Prevent multiple subscriptions
+                .publish()
+                .autoConnect();
+
+        // Start right away
+        flux.subscribe(e -> logger.debug("subscription: {}", e));
+
+        return flux;
     }
 
     /**
