@@ -44,8 +44,8 @@ public class HttpConnectorGAE extends HttpConnector {
     private final Logger logger = LogManager.getLogger();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    protected final HttpClient httpClient = HttpClientFactory.createClient();
-    protected final HttpClientContext context = HttpClientContext.create();
+    protected final HttpClient httpClient;
+    protected final HttpClientContext context;
 
     private final Set<String> zoneNames;
     private final Map<String, Zone> name2zone = new TreeMap<>();
@@ -66,6 +66,19 @@ public class HttpConnectorGAE extends HttpConnector {
     public HttpConnectorGAE(URL serverContextRoot, Set<String> zoneNames) {
         super(serverContextRoot);
         this.zoneNames = new TreeSet<>(zoneNames);
+
+        Marker oops = new Marker("client creation");
+
+        try {
+
+            // VT: FIXME: This is where those 100ms are. Need to move out.
+
+            httpClient = HttpClientFactory.createClient();
+            context = HttpClientContext.create();
+
+        } finally {
+            oops.close();
+        }
 
         bufferSubscription = bufferSink.asFlux()
                 .buffer(pollInterval)
