@@ -26,23 +26,19 @@ Full configuration:
           host: mqtt-hass
           root-topic: <see below>
         discovery-prefix: <Home Assistant MQTT Discovery topic> # optional, defaults to "homeassistant"
-        node-id: <This instance's ID> # optional, defaults to `home-climate-control.instance` value
         zones:
           - Workshop-east
           - Workshop-west
 ```
 ### id
 
-Unique identifier this entity will be known as to the rest of the system. In particular, it is used by [directors.connectors](./directors.md).
+Unique identifier this entity will be known as to the rest of the system. In particular, it is used by [directors.connectors](./directors.md). It will also be used as a [node_id](https://www.home-assistant.io/integrations/mqtt#mqtt-discovery) in Home Assistant's config topic.
 
 ### broker
 Configuration is common with other [MQTT integrations](./mqtt.md), with the exception of the `root-topic`. Here, it must be left empty, and `discovery-prefix` provided instead.
 
 ### discovery-prefix
 MQTT topic configured in Home Assistant for MQTT discovery. You probably don't need to provide it.
-
-### node-id
-Home Assistant [doesn't care about it](https://www.home-assistant.io/integrations/mqtt#mqtt-discovery), but you might, to keep your MQTT topic tree tidy.  You probably don't need to provide it, default will likely work well.
 
 > **NOTE:** Due to [Quarkus](../build/index.md#quarkus) quirks, `root-topic` must be specified even if it is at Home Assistant default, but `discovery-prefix` must be omitted. Don't ask.
 

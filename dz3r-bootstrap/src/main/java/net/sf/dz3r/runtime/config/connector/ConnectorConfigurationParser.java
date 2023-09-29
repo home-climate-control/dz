@@ -105,7 +105,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
                     .collect(Collectors.toSet())
                     .block();
 
-            context.connectors.register(brokerConfig.signature(), new HomeAssistantConnector(mqttAdapter, brokerConfig.rootTopic(), zones));
+            context.connectors.register(brokerConfig.signature(), new HomeAssistantConnector(cf.id(), mqttAdapter, brokerConfig.rootTopic(), zones));
 
         } finally {
             m.close();

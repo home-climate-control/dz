@@ -7,23 +7,26 @@ import net.sf.dz3r.view.Connector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 public class HomeAssistantConnector implements Connector {
 
     private final Logger logger = LogManager.getLogger();
 
+    private final Config config;
     private final MqttAdapter mqttAdapter;
-    private final String discoveryPrefix;
     private final Set<Zone> zonesConfigured;
-    public HomeAssistantConnector(MqttAdapter mqttAdapter, String discoveryPrefix, Set<Zone> zonesConfigured) {
+    public HomeAssistantConnector(String id, MqttAdapter mqttAdapter, String discoveryPrefix, Set<Zone> zonesConfigured) {
+        this.config = new Config(id, discoveryPrefix);
         this.mqttAdapter = mqttAdapter;
-        this.discoveryPrefix = discoveryPrefix;
         this.zonesConfigured = Collections.unmodifiableSet(zonesConfigured);
     }
 
@@ -40,11 +43,56 @@ public class HomeAssistantConnector implements Connector {
 
             var zones = getExposedZones(feed.sensorFlux2zone.values());
 
+            Flux
+                    .fromIterable(zones)
+                    // No need to wait for this
+                    .publishOn(Schedulers.boundedElastic())
+                    .subscribe(this::exposeZone);
+
             // ...
 
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    private void exposeZone(Zone zone) {
+        ThreadContext.push("exposeZone: " + zone.getAddress());
+
+        try {
+
+            var errorCounter = checkCharacters("config.id", config.id) ? 0 : 1;
+            errorCounter += checkCharacters("zones.name", zone.getAddress()) ? 0 : 1;
+
+            if (errorCounter > 0) {
+                logger.error("zone skipped: {}", zone.getAddress());
+                return;
+            }
+
+            var configTopic =
+                    config.discoveryPrefix
+                    + "/climate/"
+                    + config.id
+                    + "/" + zone.getAddress()
+                    + "/config";
+
+            logger.debug("config topic: {}", configTopic);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private final Pattern pattern = Pattern.compile("[^A-Za-z0-9_-]");
+
+    private boolean checkCharacters(String target, String value) {
+
+        if (pattern.matcher(value).find()) {
+            logger.error("{} contains characters outside of allowed [A-Za-z0-9_-] range: {}", target, value);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -83,5 +131,12 @@ public class HomeAssistantConnector implements Connector {
         }
 
         return result;
+    }
+
+    private record Config(
+            String id,
+            String discoveryPrefix
+    ) {
+
     }
 }

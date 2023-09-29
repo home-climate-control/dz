@@ -20,7 +20,6 @@ import java.util.Set;
  * @param id Identifier, mandatory.
  * @param broker MQTT broker configuration.
  * @param discoveryPrefix Optional, defaults to {@code homeassistant} (no leading slash).
- * @param nodeId Optional, not used by HA. Defaults to {@link net.sf.dz3r.runtime.config.HccRawConfig#instance()}.
  * @param zones Zones to expose to Home Assistant.
  */
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
@@ -28,7 +27,6 @@ public record HomeAssistantConfig(
         String id,
         MqttBrokerConfig broker,
         String discoveryPrefix,
-        String nodeId,
         Set<String> zones
 ) implements HomeAssistantConfigParser {
 }

@@ -179,7 +179,6 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.broker(source.broker()))", target = "broker")
     @Mapping(expression = "java(source.discoveryPrefix().orElse(null))", target = "discoveryPrefix")
-    @Mapping(expression = "java(source.nodeId().orElse(null))", target = "nodeId")
     @Mapping(expression = "java(source.zones())", target = "zones")
     net.sf.dz3r.runtime.config.connector.HomeAssistantConfig connector(HomeAssistantConfig source);
 

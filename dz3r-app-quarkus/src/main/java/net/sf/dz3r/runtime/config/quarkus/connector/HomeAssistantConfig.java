@@ -13,8 +13,6 @@ public interface HomeAssistantConfig {
     MqttBrokerConfig broker();
     @JsonProperty("discovery-prefix")
     Optional<String> discoveryPrefix();
-    @JsonProperty("node-id")
-    Optional<String> nodeId();
     @JsonProperty("zones")
     Set<String> zones();
 }
