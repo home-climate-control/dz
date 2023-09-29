@@ -3,6 +3,8 @@ home-assistant
 
 Integration that allows [Home Assistant](https://www.home-assistant.io/) to automatically discover HCC zones as its [Climate](https://www.home-assistant.io/integrations/climate/) integrations, view their status and control them.
 
+> **NOTE:** This integration will be inactive unless included into [directors.connectors](./directors.md).
+
 Best explained by example:
 
 Minimal configuration:
@@ -19,6 +21,7 @@ Full configuration:
 ```yaml
   connectors:
     - home-assistant:
+        id: ha-workshop
         broker:
           host: mqtt-hass
           root-topic: <see below>
@@ -28,6 +31,9 @@ Full configuration:
           - Workshop-east
           - Workshop-west
 ```
+### id
+
+Unique identifier this entity will be known as to the rest of the system. In particular, it is used by [directors.connectors](./directors.md).
 
 ### broker
 Configuration is common with other [MQTT integrations](./mqtt.md), with the exception of the `root-topic`. Here, it must be left empty, and `discovery-prefix` provided instead.

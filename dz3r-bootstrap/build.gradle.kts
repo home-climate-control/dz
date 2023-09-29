@@ -35,6 +35,9 @@ dependencies {
     // Enable MQTT
     implementation(project(":dz3r-mqtt"))
 
+    // Enable Home Assistant integration
+    implementation(project(":dz3r-ha"))
+
     // Enable remote control over HTTP
     implementation(project(":dz3r-http"))
     implementation(project(":dz3r-http-gae"))

@@ -17,6 +17,7 @@ import java.util.Set;
  *
  * Also see {@link HomeAssistantConfigParser#parse()} - that's the way to get the well-formed configuration for this object.
  *
+ * @param id Identifier, mandatory.
  * @param broker MQTT broker configuration.
  * @param discoveryPrefix Optional, defaults to {@code homeassistant} (no leading slash).
  * @param nodeId Optional, not used by HA. Defaults to {@link net.sf.dz3r.runtime.config.HccRawConfig#instance()}.
@@ -24,6 +25,7 @@ import java.util.Set;
  */
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record HomeAssistantConfig(
+        String id,
         MqttBrokerConfig broker,
         String discoveryPrefix,
         String nodeId,

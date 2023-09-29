@@ -1,10 +1,13 @@
 package net.sf.dz3r.runtime.config.connector;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
+import net.sf.dz3r.runtime.config.ConfigurationMapper;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.view.ha.HomeAssistantConnector;
 import net.sf.dz3r.view.http.gae.v3.HttpConnectorGAE;
 import net.sf.dz3r.view.influxdb.v3.InfluxDbLogger;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -18,6 +21,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class ConnectorConfigurationParser extends ConfigurationContextAware {
@@ -64,13 +68,55 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
      */
     private void parseHomeAssistant(HomeAssistantConfig cf) {
 
-//        context.connectors.register(broker.signature(), new HomeAssistantConnector());
+        Marker m = new Marker("parseHA");
+
+        try {
+            HCCObjects.requireNonNull(cf.id(), "connectors.ha.id is missing");
+            var zonesExposed = Optional.ofNullable(cf.zones()).orElse(Set.of());
+
+            if (zonesExposed.isEmpty()) {
+                logger.warn("{}: no zones specified, all will be exposed, make sure this is what you want", cf.id());
+            }
+
+            var brokerConfig = cf.parse();
+            var mqttAdapterSignature = ConfigurationMapper.INSTANCE.parseEndpoint(brokerConfig).signature();
+            var mqttAdapterConfigured = new TreeSet<String>();
+            var mqttAdapter = context.mqtt
+                    .getFlux()
+                    .doOnNext(entry -> mqttAdapterConfigured.add(entry.getKey()))
+                    .filter(entry -> entry.getKey().equals(mqttAdapterSignature))
+                    .map(Map.Entry::getValue)
+                    .blockFirst();
+
+            if (mqttAdapter == null) {
+                logger.error("{}: couldn't find an adapter with signature {}, this can't be happening. Existing adapters ({} of them):", cf.id(), mqttAdapterSignature, mqttAdapterConfigured.size());
+                for (var signature : mqttAdapterConfigured) {
+                    logger.error("  {}", signature);
+                }
+                throw new IllegalStateException("This should not be happening - check the logs at error level");
+            }
+
+            var zones = context.zones
+                    .getFlux()
+                    .doOnNext(kv -> logger.debug("{}: zone configured: {}", cf.id(), kv.getKey()))
+                    .filter(kv -> zonesExposed.isEmpty() || zonesExposed.contains(kv.getKey()))
+                    .doOnNext(kv -> logger.debug("{}: zone exposed: {}", cf.id(), kv.getKey()))
+                    .map(Map.Entry::getValue)
+                    .collect(Collectors.toSet())
+                    .block();
+
+            context.connectors.register(brokerConfig.signature(), new HomeAssistantConnector(mqttAdapter, brokerConfig.rootTopic(), zones));
+
+        } finally {
+            m.close();
+        }
     }
 
     private void parseHttp(HttpConnectorConfig cf) {
 
         Marker m = new Marker("parseHttp");
         try {
+            HCCObjects.requireNonNull(cf.id(), "connectors.http.id is missing");
 
             // Configuration contains IDs, connector doesn't know and doesn't care
             var zones = Flux
@@ -98,6 +144,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
         Marker m = new Marker("parseInflux");
         try {
+            HCCObjects.requireNonNull(cf.id(), "connectors.influx.id is missing");
             context.collectors.register(
                     cf.id(),
                     new InfluxDbLogger(

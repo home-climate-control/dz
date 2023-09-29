@@ -176,6 +176,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.sensorFeedMapping())", target = "sensorFeedMapping")
     net.sf.dz3r.runtime.config.connector.InfluxCollectorConfig connector(InfluxCollectorConfig source);
 
+    @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.broker(source.broker()))", target = "broker")
     @Mapping(expression = "java(source.discoveryPrefix().orElse(null))", target = "discoveryPrefix")
     @Mapping(expression = "java(source.nodeId().orElse(null))", target = "nodeId")

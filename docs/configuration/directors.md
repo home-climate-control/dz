@@ -29,7 +29,10 @@ Best explained by example:
 ```
 
 * `id`: Unique identifier this entity will be known as to the rest of the system.
-* `connectors`: List of references to [connectors](./connectors.md). Optional.
+* `connectors`: List of references to [connectors](./connectors.md). Optional. Currently available connectors are:
+  * [home-assistant](./home-assistant.md)
+  * [http](./http.md)
+  * [influx](./influx.md)
 * `sensor-feed-mapping`: List of relations from the [sensor](./sensors-and-switches.md) reference (on the left) to the [zone](./zones.md) it is serving (on the right).
 * `unit`: [Unit abstraction](./units.md) to use.
 * `hvac`: [HVAC device](./hvac.md) to use.

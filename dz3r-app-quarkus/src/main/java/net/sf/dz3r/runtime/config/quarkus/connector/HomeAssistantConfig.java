@@ -7,6 +7,8 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface HomeAssistantConfig {
+    @JsonProperty("id")
+    String id();
     @JsonProperty("broker")
     MqttBrokerConfig broker();
     @JsonProperty("discovery-prefix")
