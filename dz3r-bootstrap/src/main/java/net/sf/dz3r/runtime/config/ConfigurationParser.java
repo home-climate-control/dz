@@ -21,6 +21,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class ConfigurationParser {
 
     private final Logger logger = LogManager.getLogger();
 
-    public ConfigurationContext parse(HccRawConfig source) {
+    public ConfigurationContext parse(HccRawConfig source) throws IOException {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse", Level.INFO);
         try {

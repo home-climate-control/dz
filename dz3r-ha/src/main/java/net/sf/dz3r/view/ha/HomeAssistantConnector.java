@@ -1,5 +1,11 @@
 package net.sf.dz3r.view.ha;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
@@ -24,8 +30,11 @@ public class HomeAssistantConnector implements Connector {
     private final Config config;
     private final MqttAdapter mqttAdapter;
     private final Set<Zone> zonesConfigured;
-    public HomeAssistantConnector(String id, MqttAdapter mqttAdapter, String discoveryPrefix, Set<Zone> zonesConfigured) {
-        this.config = new Config(id, discoveryPrefix);
+
+    private ObjectMapper objectMapper;
+
+    public HomeAssistantConnector(String version, String id, MqttAdapter mqttAdapter, String discoveryPrefix, Set<Zone> zonesConfigured) {
+        this.config = new Config(version, id, discoveryPrefix);
         this.mqttAdapter = mqttAdapter;
         this.zonesConfigured = Collections.unmodifiableSet(zonesConfigured);
     }
@@ -71,13 +80,39 @@ public class HomeAssistantConnector implements Connector {
 
             var configTopic =
                     config.discoveryPrefix
-                    + "/climate/"
-                    + config.id
-                    + "/" + zone.getAddress()
-                    + "/config";
+                            + "/climate/"
+                            // It's recommended to skip the node_id level, so there
+                            + config.id + "-" + zone.getAddress()
+                            + "/config";
+            var root = "/hcc/ha-connector/" + config.id
+                    + "/" + zone.getAddress();
 
             logger.debug("config topic: {}", configTopic);
 
+            var uniqueId = config.id + "-" + zone.getAddress();
+            var discoveryPacket = new ZoneDiscoveryPacket(
+                    root,
+                    zone.getAddress(),
+                    // VT: FIXME: propagate the right values here
+                    new String[] {"off", "cool"},
+                    // VT: FIXME: propagate
+                    20, 33,
+                    uniqueId,
+                    new DeviceDiscoveryPacket(
+                        uniqueId,
+                            "Home Climate Control",
+                            "Zone: " + zone.getAddress(),
+                            config.version,
+                            "homeclimatecontrol.com"
+                    ));
+
+            logger.debug("discoveryPacket:\n{}", () -> {
+                try {
+                    return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(discoveryPacket);
+                } catch (JsonProcessingException ex) {
+                    throw new IllegalStateException("Failed to convert materialized discoveryPacket to JSON", ex);
+                }
+            });
         } finally {
             ThreadContext.pop();
         }
@@ -133,7 +168,30 @@ public class HomeAssistantConnector implements Connector {
         return result;
     }
 
+    private synchronized ObjectMapper getObjectMapper() {
+
+        if (objectMapper == null) {
+
+            objectMapper = new ObjectMapper();
+
+            // Necessary to print Optionals in a sane way
+            objectMapper.registerModule(new Jdk8Module());
+
+            // Necessary to deal with Duration
+            objectMapper.registerModule(new JavaTimeModule());
+
+            // For Quarkus to deal with interfaces nicer
+            objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+
+            // For standalone to allow to ignore the root element
+            objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
+        }
+
+        return objectMapper;
+    }
+
     private record Config(
+            String version,
             String id,
             String discoveryPrefix
     ) {

@@ -3,6 +3,7 @@ package net.sf.dz3r.runtime.config.connector;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.runtime.GitProperties;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.runtime.config.ConfigurationMapper;
@@ -16,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -26,8 +28,16 @@ import java.util.stream.Collectors;
 
 public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
-    public ConnectorConfigurationParser(ConfigurationContext context) {
+    private final String softwareVersion;
+
+    public ConnectorConfigurationParser(ConfigurationContext context) throws IOException {
         super(context);
+
+        var p = GitProperties.get();
+        var branch = p.get("git.branch");
+        var rev = p.get("git.commit.id.abbrev");
+
+        softwareVersion = branch + "-" + rev;
     }
 
     public Flux<Object> parse(Set<ConnectorConfig> source) {
@@ -105,7 +115,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
                     .collect(Collectors.toSet())
                     .block();
 
-            context.connectors.register(brokerConfig.signature(), new HomeAssistantConnector(cf.id(), mqttAdapter, brokerConfig.rootTopic(), zones));
+            context.connectors.register(brokerConfig.signature(), new HomeAssistantConnector(softwareVersion, cf.id(), mqttAdapter, brokerConfig.rootTopic(), zones));
 
         } finally {
             m.close();
