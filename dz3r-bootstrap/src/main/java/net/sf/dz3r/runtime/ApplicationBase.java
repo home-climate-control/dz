@@ -18,6 +18,7 @@ import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -48,16 +49,28 @@ public abstract class ApplicationBase<C> {
         objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
     }
 
-    protected final void init() {
+    protected final void init() throws IOException {
         ReactorDebugAgent.init();
 
         // WARN level so that it shows up in a shorter log and is faster to find on a slow box
         logger.warn("Starting up");
 
+        reportGitProperties();
+
         logger.debug("CPU count reported: {}", Runtime.getRuntime().availableProcessors());
         logger.debug("reactor-core default pool size: {}", Schedulers.DEFAULT_POOL_SIZE);
         logger.debug("reactor-core default bounded elastic size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_SIZE);
         logger.debug("reactor-core default bounded elastic queue size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_QUEUESIZE);
+    }
+
+    private void reportGitProperties() throws IOException {
+
+        var p = GitProperties.get();
+
+        logger.debug("git.branch={}", p.get("git.branch"));
+        logger.debug("git.commit.id={}", p.get("git.commit.id"));
+        logger.debug("git.commit.id.abbrev={}", p.get("git.commit.id.abbrev"));
+        logger.debug("git.build.version={}", p.get("git.build.version"));
     }
 
     /**
