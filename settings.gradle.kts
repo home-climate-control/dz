@@ -56,7 +56,6 @@ include("dz3r-spring")
 // with stable and known good configurations, but may not be the best choice
 // to experiment with.
 
-// VT: FIXME: Coming up
 include("dz3r-app-minimal")
 
 // This is the SpringBoot application, with all SpringBoot bells and
@@ -65,7 +64,6 @@ include("dz3r-app-minimal")
 
 // Run with:
 //   ./gradlew bootRun --args='--spring.profiles.active=<your-profile>'
-
 
 include("dz3r-app-springboot")
 

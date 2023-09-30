@@ -6,14 +6,17 @@ plugins {
     java
 }
 
+val hivemqMqttVersion: String by project
+val jacksonVersion: String by project
+
 dependencies {
 
     api(project(":dz3r-director"))
     api(project(":dz3r-mqtt"))
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
-    implementation("com.hivemq:hivemq-mqtt-client-reactor:1.2.2")
+    implementation("com.hivemq:hivemq-mqtt-client-reactor:$hivemqMqttVersion")
 }
