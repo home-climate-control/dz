@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.view.Connector;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -41,7 +44,7 @@ public class HomeAssistantConnector implements Connector {
 
     @Override
     public void close() throws Exception {
-
+        logger.error("FIXME: close()");
     }
 
     @Override
@@ -54,28 +57,38 @@ public class HomeAssistantConnector implements Connector {
 
             Flux
                     .fromIterable(zones)
-                    // No need to wait for this
-                    .publishOn(Schedulers.boundedElastic())
-                    .subscribe(this::exposeZone);
+                    // No need to wait for this, and we can make it parallel (even though MQTT will likely
+                    // eat some of the parallelism)
 
-            // ...
+                    .parallel()
+                    .runOn(Schedulers.boundedElastic())
+
+                    .flatMap(this::announce)
+                    .doOnNext(this::broadcast)
+                    .subscribe(this::receive);
 
         } finally {
             ThreadContext.pop();
         }
     }
 
-    private void exposeZone(Zone zone) {
-        ThreadContext.push("exposeZone: " + zone.getAddress());
+    /**
+     * Render and send the discovery packet.
+     *
+     * @param zone Zone to announce.
+     */
+    private Flux<Pair<Zone, ZoneDiscoveryPacket>> announce(Zone zone) {
+        ThreadContext.push("announce: " + zone.getAddress());
 
         try {
 
-            var errorCounter = checkCharacters("config.id", config.id) ? 0 : 1;
-            errorCounter += checkCharacters("zones.name", zone.getAddress()) ? 0 : 1;
+            var errorCounter =
+                    checkCharacters("config.id", config.id)
+                            + checkCharacters("zones.name", zone.getAddress());
 
             if (errorCounter > 0) {
                 logger.error("zone skipped: {}", zone.getAddress());
-                return;
+                return Flux.empty();
             }
 
             var configTopic =
@@ -106,28 +119,55 @@ public class HomeAssistantConnector implements Connector {
                             "homeclimatecontrol.com"
                     ));
 
-            logger.debug("discoveryPacket:\n{}", () -> {
-                try {
-                    return getObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(discoveryPacket);
-                } catch (JsonProcessingException ex) {
-                    throw new IllegalStateException("Failed to convert materialized discoveryPacket to JSON", ex);
-                }
-            });
+            try {
+
+                // The payload gets logged at TRACE level, search for the config topic in the log to find it
+                var payload = getObjectMapper()
+                        .writerWithDefaultPrettyPrinter()
+                        .writeValueAsString(discoveryPacket);
+
+                mqttAdapter.publish(configTopic, payload, MqttQos.AT_LEAST_ONCE, true);
+
+            } catch (JsonProcessingException ex) {
+                throw new IllegalStateException("Failed to convert materialized discoveryPacket to JSON", ex);
+            }
+
+
+            // The discovery packet contains topic information that will come handy on the next step
+            return Flux.just(new ImmutablePair<>(zone, discoveryPacket));
+
         } finally {
             ThreadContext.pop();
         }
     }
 
+    /**
+     * Connect the data sources to broadcast data to HA with MQTT topics in the discovery packet.
+     */
+    private void broadcast(Pair<Zone, ZoneDiscoveryPacket> zone2meta) {
+        logger.error("{}: FIXME: broadcast", zone2meta.getKey().getAddress());
+    }
+
+    /**
+     * Connect the MQTT topics for receiving commands from HA to controls that make it happen.
+     */
+    private void receive(Pair<Zone, ZoneDiscoveryPacket> zone2meta) {
+        logger.error("{}: FIXME: receive", zone2meta.getKey().getAddress());
+    }
+
     private final Pattern pattern = Pattern.compile("[^A-Za-z0-9_-]");
 
-    private boolean checkCharacters(String target, String value) {
+    /**
+     * @return 0 if there were no disallowed characters, 1 otherwise
+     */
+    private int checkCharacters(String target, String value) {
 
         if (pattern.matcher(value).find()) {
             logger.error("{} contains characters outside of allowed [A-Za-z0-9_-] range: {}", target, value);
-            return false;
+            return 1;
         }
 
-        return true;
+        return 0;
     }
 
     /**
