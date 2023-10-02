@@ -26,6 +26,23 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+/**
+ * <a href="https://homeassistant.io">Home Assistant</a> integration.
+ *
+ * References:
+ *
+ * <ul>
+ * <li>
+ *     https://github.com/home-climate-control/dz/blob/gh286-ha/docs/configuration/home-assistant.md - configuration reference (will move into the trunk when done)
+ * </li>
+ * <li> https://www.home-assistant.io/integrations/mqtt#mqtt-discovery HA MQTT Discovery reference</li>
+ * <li> https://www.home-assistant.io/integrations/climate.mqtt/ HA MQTT HVAC component</li>
+ * <li> https://www.home-assistant.io/integrations/climate/ HA Climate component</li>
+ * <li> https://esphome.io/components/climate/index.html ESPHome Climate component</li>
+ * </ul>
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ */
 public class HomeAssistantConnector implements Connector {
 
     private final Logger logger = LogManager.getLogger();
