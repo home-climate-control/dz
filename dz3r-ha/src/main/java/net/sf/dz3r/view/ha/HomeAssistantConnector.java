@@ -222,17 +222,28 @@ public class HomeAssistantConnector implements Connector {
                                 source.meta.rootTopic,
                                 source.meta.currentTemperatureTopic),
                         s.getValue(),
+                        source.zone.getSettings().enabled,
                         zone2mode.get(source.zone),
                         source.zone.getSettings().setpoint));
 
         logger.error("{}: FIXME: broadcast", source.zone.getAddress());
     }
 
-    private void broadcast(String topic, Double currentTemperature, HvacMode mode, Double setpoint) {
+    private void broadcast(String topic, Double currentTemperature, Boolean enabled, HvacMode mode, Double setpoint) {
+
+        // Operating mode is a bit of a challenge; zone's OFF state will translate into OFF state for the whole control
+
+        String finalMode;
+
+        if (Boolean.TRUE.equals(enabled)) {
+            finalMode = Optional.ofNullable(mode).map(m -> m == HvacMode.COOLING ? "cool" : "heat").orElse("off");
+        } else {
+            finalMode = "off";
+        }
 
         var message = new StateMessage(
                 currentTemperature,
-                Optional.ofNullable(mode).map(m -> m == HvacMode.COOLING ? "cool" : "heat").orElse("off"),
+                finalMode,
                 setpoint);
 
         logger.debug("broadcast: {}", message);
