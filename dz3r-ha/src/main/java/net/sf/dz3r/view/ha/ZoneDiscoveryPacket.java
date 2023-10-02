@@ -14,7 +14,7 @@ public class ZoneDiscoveryPacket {
      * Topic to receive "set mode" commands.
      */
     public final String modeCommandTopic = "~/mode/command";
-    public final String modeStateTopic = "~/mode/state";
+    public final String modeStateTopic = "~/state";
     public final String modeStateTemplate = "{{value_json.mode}}";
     public final String[] modes;
 
@@ -34,10 +34,10 @@ public class ZoneDiscoveryPacket {
      */
     public final String temperatureCommandTopic = "~/temp";
     public final String temperatureStateTopic = "~/state";
-    public final String temperatureStateTemplate = "{{value_json.target_temp}}";
+    public final String temperatureStateTemplate = "{{value_json.setpoint}}";
     public final String temperatureUnit = "C";
     public final String currentTemperatureTopic = "~/state";
-    public final String currentTemperatureTemplate = "{{value_json.current_temp}}";
+    public final String currentTemperatureTemplate = "{{value_json.current_temperature}}";
     public final int minTemp;
     public final int maxTemp;
     public final double tempStep = 0.1;

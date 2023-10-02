@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.ha;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,9 +25,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
+
 
 /**
  * <a href="https://homeassistant.io">Home Assistant</a> integration.
@@ -66,6 +70,7 @@ public class HomeAssistantConnector implements Connector {
 
     @Override
     public void close() throws Exception {
+
         logger.error("FIXME: close()");
     }
 
@@ -97,7 +102,7 @@ public class HomeAssistantConnector implements Connector {
                     })
                     .filter(s -> s.getValue().command.mode != null)
                     .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command.mode, unitId, s.status, s.error))
-                    .subscribe(mode -> record(mode, sensorFlux2zone.values()));
+                    .subscribe(mode -> captureMode(mode, sensorFlux2zone.values()));
 
         } finally {
             ThreadContext.pop();
@@ -197,9 +202,35 @@ public class HomeAssistantConnector implements Connector {
 
         // Establish a "status" broadcast
 
-        // ...
+        source.signal
+                .filter(Predicate.not(Signal::isError))
+                .subscribe(s -> broadcast(
+                        topicResolver.resolve(
+                                source.meta.rootTopic,
+                                source.meta.currentTemperatureTopic),
+                        s.getValue(),
+                        zone2mode.get(source.zone),
+                        source.zone.getSettings().setpoint));
 
         logger.error("{}: FIXME: broadcast", source.zone.getAddress());
+    }
+
+    private void broadcast(String topic, Double currentTemperature, HvacMode mode, Double setpoint) {
+
+        var message = new StateMessage(
+                currentTemperature,
+                Optional.ofNullable(mode).map(m -> m == HvacMode.COOLING ? "cool" : "heat").orElse("off"),
+                setpoint);
+
+        logger.debug("broadcast: {}", message);
+
+        try {
+            var payload =  getObjectMapper()
+                    .writeValueAsString(message);
+            mqttAdapter.publish(topic, payload, MqttQos.AT_MOST_ONCE, false);
+        } catch (JsonProcessingException ex) {
+            logger.error("Failed to render JSON from {}", message, ex);
+        }
     }
 
     /**
@@ -208,10 +239,10 @@ public class HomeAssistantConnector implements Connector {
      * @param mode Mode to record.
      * @param zones Zones to associate it with
      */
-    private void record(Signal<HvacMode, String> mode, Collection<Zone> zones) {
+    private void captureMode(Signal<HvacMode, String> mode, Collection<Zone> zones) {
 
         if (mode.isError()) {
-            logger.warn("record: don't know what to do with error mode: {}", mode);
+            logger.warn("captureMode: don't know what to do with error mode: {}", mode);
         }
 
         zones.forEach(z -> zone2mode.put(z, mode.getValue()));
@@ -314,6 +345,18 @@ public class HomeAssistantConnector implements Connector {
             Zone zone,
             Flux<Signal<Double, Void>> signal,
             ZoneDiscoveryPacket meta
+    ) {
+
+    }
+
+    /**
+     * Message to send up the MQTT stream.
+     */
+    private record StateMessage(
+            @JsonProperty("current_temperature")
+            Double currentTemperature,
+            String mode,
+            Double setpoint
     ) {
 
     }
