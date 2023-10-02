@@ -58,6 +58,7 @@ public class HomeAssistantConnector implements Connector {
     private final Set<Zone> zonesConfigured;
 
     private final Map<Zone, HvacMode> zone2mode = new LinkedHashMap<>();
+    private final Map<Zone, ZoneDiscoveryPacket> zone2meta = new LinkedHashMap<>();
 
     private ObjectMapper objectMapper;
     private final TopicResolver topicResolver = new TopicResolver();
@@ -71,7 +72,18 @@ public class HomeAssistantConnector implements Connector {
     @Override
     public void close() throws Exception {
 
-        logger.error("FIXME: close()");
+        // LWT is not of much use.
+        // Problem is, it's per connection, while here the connection is shared, and
+        // different zones may become unavailable because of sensor failures.
+
+        zone2meta.forEach((zone, meta) -> mqttAdapter.publish(
+                topicResolver.resolve(meta.rootTopic, meta.availabilityTopic),
+                meta.payloadNotAvailable,
+                MqttQos.AT_MOST_ONCE,
+                false
+        ));
+
+        logger.info("done");
     }
 
     @Override
@@ -174,6 +186,7 @@ public class HomeAssistantConnector implements Connector {
                 throw new IllegalStateException("Failed to convert materialized discoveryPacket to JSON", ex);
             }
 
+            zone2meta.put(zone, discoveryPacket);
 
             // The discovery packet contains topic information that will come handy on the next step
             return Flux.just(new ZoneTuple(zone, signal, discoveryPacket));
