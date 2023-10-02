@@ -8,11 +8,11 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.Connector;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -22,7 +22,8 @@ import reactor.core.scheduler.Schedulers;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
@@ -52,6 +53,8 @@ public class HomeAssistantConnector implements Connector {
     private final MqttAdapter mqttAdapter;
     private final Set<Zone> zonesConfigured;
 
+    private final Map<Zone, HvacMode> zone2mode = new LinkedHashMap<>();
+
     private ObjectMapper objectMapper;
     private final TopicResolver topicResolver = new TopicResolver();
 
@@ -72,10 +75,10 @@ public class HomeAssistantConnector implements Connector {
         ThreadContext.push("connect");
         try {
 
-            var zones = getExposedZones(feed.sensorFlux2zone.values());
+            var sensorFlux2zone = getExposedZones(feed.sensorFlux2zone);
 
             Flux
-                    .fromIterable(zones)
+                    .fromIterable(sensorFlux2zone.entrySet())
                     // No need to wait for this, and we can make it parallel (even though MQTT will likely
                     // eat some of the parallelism)
 
@@ -86,6 +89,16 @@ public class HomeAssistantConnector implements Connector {
                     .doOnNext(this::broadcast)
                     .subscribe(this::receive);
 
+            feed.hvacDeviceFlux
+                    .doOnNext(s -> {
+                        if (s.getValue().command.mode == null) {
+                            logger.debug("null hvacMode (normal on startup): {}", s);
+                        }
+                    })
+                    .filter(s -> s.getValue().command.mode != null)
+                    .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command.mode, unitId, s.status, s.error))
+                    .subscribe(mode -> record(mode, sensorFlux2zone.values()));
+
         } finally {
             ThreadContext.pop();
         }
@@ -94,9 +107,13 @@ public class HomeAssistantConnector implements Connector {
     /**
      * Render and send the discovery packet.
      *
-     * @param zone Zone to announce.
+     * @param source Zone to announce (ignore the flux for now).
      */
-    private Flux<Pair<Zone, ZoneDiscoveryPacket>> announce(Zone zone) {
+    private Flux<ZoneTuple> announce(Map.Entry<Flux<Signal<Double, Void>>, Zone> source) {
+
+        var signal = source.getKey();
+        var zone = source.getValue();
+
         ThreadContext.push("announce: " + zone.getAddress());
 
         try {
@@ -154,7 +171,7 @@ public class HomeAssistantConnector implements Connector {
 
 
             // The discovery packet contains topic information that will come handy on the next step
-            return Flux.just(new ImmutablePair<>(zone, discoveryPacket));
+            return Flux.just(new ZoneTuple(zone, signal, discoveryPacket));
 
         } finally {
             ThreadContext.pop();
@@ -164,10 +181,7 @@ public class HomeAssistantConnector implements Connector {
     /**
      * Connect the data sources to broadcast data to HA with MQTT topics in the discovery packet.
      */
-    private void broadcast(Pair<Zone, ZoneDiscoveryPacket> zone2meta) {
-
-        var zone = zone2meta.getKey();
-        var meta = zone2meta.getValue();
+    private void broadcast(ZoneTuple source) {
 
         // Establish an "alive" broadcast
         Flux
@@ -175,20 +189,38 @@ public class HomeAssistantConnector implements Connector {
                         Duration.ZERO,
                         Duration.ofMinutes(1))
                         .subscribe(ignore -> mqttAdapter.publish(
-                                topicResolver.resolve(meta.rootTopic, meta.availabilityTopic),
-                                meta.payloadAvailable,
+                                topicResolver.resolve(source.meta.rootTopic, source.meta.availabilityTopic),
+                                source.meta.payloadAvailable,
                                 MqttQos.AT_MOST_ONCE,
                                 false
                         ));
 
-        logger.error("{}: FIXME: broadcast", zone2meta.getKey().getAddress());
+        // Establish a "status" broadcast
+
+        // ...
+
+        logger.error("{}: FIXME: broadcast", source.zone.getAddress());
     }
 
     /**
+     * Record the mode information for exposed zones so tht {@link #broadcast(ZoneTuple)} can send it out.
+     *
+     * @param mode Mode to record.
+     * @param zones Zones to associate it with
+     */
+    private void record(Signal<HvacMode, String> mode, Collection<Zone> zones) {
+
+        if (mode.isError()) {
+            logger.warn("record: don't know what to do with error mode: {}", mode);
+        }
+
+        zones.forEach(z -> zone2mode.put(z, mode.getValue()));
+    }
+    /**
      * Connect the MQTT topics for receiving commands from HA to controls that make it happen.
      */
-    private void receive(Pair<Zone, ZoneDiscoveryPacket> zone2meta) {
-        logger.error("{}: FIXME: receive", zone2meta.getKey().getAddress());
+    private void receive(ZoneTuple source) {
+        logger.error("{}: FIXME: receive", source.zone.getAddress());
     }
 
     private final Pattern pattern = Pattern.compile("[^A-Za-z0-9_-]");
@@ -209,31 +241,35 @@ public class HomeAssistantConnector implements Connector {
     /**
      * Get the set of zones that will be actually exposed.
      *
-     * @param feedZones Zones provided by the {@link net.sf.dz3r.model.UnitDirector.Feed}.
+     * @param source Zone mappings provided by the {@link net.sf.dz3r.model.UnitDirector.Feed}.
      *
-     * @return Set of zones that will actually be exposed.
+     * @return Zone mappings that will actually be exposed.
      */
-    private Set<Zone> getExposedZones(Collection<Zone> feedZones) {
+    private Map<Flux<Signal<Double, Void>>, Zone> getExposedZones(Map<Flux<Signal<Double, Void>>, Zone> source) {
 
         // Need to make a copy, retainAll() will modify this
-        var result = new LinkedHashSet<>(feedZones);
+        var result = new LinkedHashMap<Flux<Signal<Double, Void>>, Zone>();
 
-        logger.debug("connected zones ({} total):", result.size());
-        for (var z : result) {
-            logger.debug("  {}", z.getAddress());
+        logger.debug("connected zones ({} total):", source.size());
+        for (var kv : source.entrySet()) {
+
+            var zone = kv.getValue();
+            logger.debug("  {}", zone.getAddress());
+
+            if (zonesConfigured.contains(zone)) {
+                result.put(kv.getKey(), zone);
+            }
         }
 
-        result.retainAll(zonesConfigured);
-
         logger.info("exposed zones ({} total):", result.size());
-        for (var z : result) {
-            logger.info("  {}", z.getAddress());
+        for (var kv : result.entrySet()) {
+            logger.info("  {}", kv.getValue().getAddress());
         }
 
         if (result.size() < zonesConfigured.size()) {
 
             var leftovers = new TreeSet<>(zonesConfigured);
-            leftovers.removeAll(result);
+            leftovers.removeAll(result.values());
 
             logger.warn("not all configured zones were exposed, here's what's left ({} total):", leftovers.size());
             for (var z : leftovers) {
@@ -270,6 +306,14 @@ public class HomeAssistantConnector implements Connector {
             String version,
             String id,
             String discoveryPrefix
+    ) {
+
+    }
+
+    private record ZoneTuple(
+            Zone zone,
+            Flux<Signal<Double, Void>> signal,
+            ZoneDiscoveryPacket meta
     ) {
 
     }
