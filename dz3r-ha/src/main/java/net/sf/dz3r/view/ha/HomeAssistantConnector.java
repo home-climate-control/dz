@@ -19,6 +19,7 @@ import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -52,6 +53,7 @@ public class HomeAssistantConnector implements Connector {
     private final Set<Zone> zonesConfigured;
 
     private ObjectMapper objectMapper;
+    private final TopicResolver topicResolver = new TopicResolver();
 
     public HomeAssistantConnector(String version, String id, MqttAdapter mqttAdapter, String discoveryPrefix, Set<Zone> zonesConfigured) {
         this.config = new Config(version, id, discoveryPrefix);
@@ -117,6 +119,7 @@ public class HomeAssistantConnector implements Connector {
             var root = "/hcc/ha-connector/" + config.id
                     + "/" + zone.getAddress();
 
+            logger.debug("MQTT endpoint: {}", mqttAdapter.address);
             logger.debug("config topic: {}", configTopic);
 
             var uniqueId = config.id + "-" + zone.getAddress();
@@ -162,6 +165,22 @@ public class HomeAssistantConnector implements Connector {
      * Connect the data sources to broadcast data to HA with MQTT topics in the discovery packet.
      */
     private void broadcast(Pair<Zone, ZoneDiscoveryPacket> zone2meta) {
+
+        var zone = zone2meta.getKey();
+        var meta = zone2meta.getValue();
+
+        // Establish an "alive" broadcast
+        Flux
+                .interval(
+                        Duration.ZERO,
+                        Duration.ofMinutes(1))
+                        .subscribe(ignore -> mqttAdapter.publish(
+                                topicResolver.resolve(meta.rootTopic, meta.availabilityTopic),
+                                meta.payloadAvailable,
+                                MqttQos.AT_MOST_ONCE,
+                                false
+                        ));
+
         logger.error("{}: FIXME: broadcast", zone2meta.getKey().getAddress());
     }
 
@@ -253,5 +272,20 @@ public class HomeAssistantConnector implements Connector {
             String discoveryPrefix
     ) {
 
+    }
+
+    static class TopicResolver {
+
+        /**
+         * Resolve the topic absolute name.
+         *
+         * @param rootTopic Device root topic (see {@link ZoneDiscoveryPacket#rootTopic}.
+         * @param topic Abbreviate topic name (with {@code ~} instead of the root topic.
+         *
+         * @return Absolute topic name.
+         */
+        public String resolve(String rootTopic, String topic) {
+            return topic.replace("~", rootTopic);
+        }
     }
 }

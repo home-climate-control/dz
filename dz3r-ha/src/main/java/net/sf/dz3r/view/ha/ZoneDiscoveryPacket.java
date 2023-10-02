@@ -10,16 +10,28 @@ public class ZoneDiscoveryPacket {
     public final String rootTopic;
     public final String name;
 
+    /**
+     * Topic to receive "set mode" commands.
+     */
     public final String modeCommandTopic = "~/mode/command";
     public final String modeStateTopic = "~/mode/state";
     public final String modeStateTemplate = "{{value_json.mode}}";
     public final String[] modes;
 
     public final String actionTopic = "~/action/state";
+
+    /**
+     * Topic for sending "alive status".
+     *
+     * {@link #payloadAvailable} should be sent to indicate availability, {@link #payloadNotAvailable} should ideally be set as LWT.
+     */
     public final String availabilityTopic = "~/status";
     public final String payloadAvailable = "online";
     public final String payloadNotAvailable = "offline";
 
+    /**
+     * Topic to receive "set temperature" commands.
+     */
     public final String temperatureCommandTopic = "~/temp";
     public final String temperatureStateTopic = "~/state";
     public final String temperatureStateTemplate = "{{value_json.target_temp}}";
