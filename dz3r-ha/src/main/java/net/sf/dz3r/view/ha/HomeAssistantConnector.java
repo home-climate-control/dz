@@ -22,6 +22,8 @@ import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
@@ -306,6 +308,12 @@ public class HomeAssistantConnector implements Connector {
                 .map(MqttSignal::message)
                 .map(message -> setMode(zone, message))
                 .subscribe(result -> logger.info("{}: setMode: {}", zone.getAddress(), result));
+
+        mqttAdapter
+                .getFlux(temperatureCommandTopic, false)
+                .map(MqttSignal::message)
+                .map(message -> setSetpoint(zone, message))
+                .subscribe(result -> logger.info("{}: setSetpoint: {}", zone.getAddress(), result));
     }
 
     private String setMode(Zone zone, String command) {
@@ -317,6 +325,38 @@ public class HomeAssistantConnector implements Connector {
         zone.setSettingsSync(newSettings);
 
         return command;
+    }
+
+    private String setSetpoint(Zone zone, String command) {
+
+        ThreadContext.push("setSetpoint(" + zone.getAddress() + ")");
+
+        try {
+
+            logger.debug("command: {}", command);
+
+            var parsed = Double.valueOf(command);
+
+            logger.debug("parsed: {}", parsed);
+
+            var setpoint = BigDecimal.valueOf(parsed)
+                    .setScale(3, RoundingMode.HALF_UP)
+                    .doubleValue();
+
+            logger.debug("setpoint: {}", setpoint);
+
+            zone.setSettingsSync(new ZoneSettings(zone.getSettings(), setpoint));
+
+            return Double.toString(setpoint);
+
+        } catch (Exception ex) {
+
+            logger.error("can't parse command: {}", command, ex);
+            return "ERROR";
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     private final Pattern pattern = Pattern.compile("[^A-Za-z0-9_-]");
