@@ -14,7 +14,6 @@ import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;
 import net.sf.dz3r.view.http.v3.HttpConnector;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
@@ -44,8 +43,7 @@ public class HttpConnectorGAE extends HttpConnector {
     private final Logger logger = LogManager.getLogger();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    protected final HttpClient httpClient = HttpClientFactory.createClient();
-    protected final HttpClientContext context = HttpClientContext.create();
+    protected HttpClient httpClient;
 
     private final Set<String> zoneNames;
     private final Map<String, Zone> name2zone = new TreeMap<>();
@@ -71,6 +69,26 @@ public class HttpConnectorGAE extends HttpConnector {
                 .buffer(pollInterval)
                 .doOnNext(this::exchange)
                 .subscribe();
+    }
+
+    private synchronized HttpClient getHttpClient() {
+
+        if (httpClient == null) {
+
+            Marker m = new Marker("client creation");
+
+            try {
+
+                // VT: NOTE: This is about 100ms on a decent workstation. Unexpected.
+                // ... but only if it is called from the constructor, otherwise it takes 2ms :O
+                httpClient = HttpClientFactory.createClient();
+
+            } finally {
+                m.close();
+            }
+        }
+
+        return httpClient;
     }
 
     @Override
@@ -148,7 +166,7 @@ public class HttpConnectorGAE extends HttpConnector {
 
             try {
 
-                var rsp = httpClient.execute(post);
+                var rsp = getHttpClient().execute(post);
                 var rc = rsp.getStatusLine().getStatusCode();
 
                 if (rc != 200) {

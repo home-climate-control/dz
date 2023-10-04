@@ -26,7 +26,7 @@ import java.util.concurrent.CountDownLatch;
  *
  * @param <C> Framework configuration type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class ApplicationBase<C> {
     protected final Logger logger = LogManager.getLogger();

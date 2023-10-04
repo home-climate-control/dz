@@ -3,6 +3,8 @@ influx
 
 Integration that allows to use [InfluxDB](https://www.influxdata.com/) as telemetry data sink.
 
+> **NOTE:** This integration will be inactive unless included into [directors.connectors](./directors.md).
+
 > **NOTE:** This integration is different from default InfluxDB integration embedded into Spring and Quarkus, those must be configured in [infrastructure configuration](./index.md#infrastructure-specific).
 
 ### Telemetry Emitted
@@ -18,6 +20,7 @@ Short list:
 Best explained by example:
 
 ```yaml
+  connectors:
     - influx:
         id: influxdb-connector-house
         instance: house
@@ -30,7 +33,7 @@ Best explained by example:
           air-ambient-northeast: air-ambient-northeast
 ```
 
-* `id`: Unique identifier this entity will be known as to the rest of the system.
+* `id`: Unique identifier this entity will be known as to the rest of the system. In particular, it is used by [directors.connectors](./directors.md).
 * `instance`: Unique identifier for _this entity_ (not the whole system, like in [home-climate-control.instance](./home-climate-control.md#instance) - though that value can be used if there is just one InfluxDB connector).
 * `db`: InfluxDB database name
 * `uri`: InfluxDB server to connect to

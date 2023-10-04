@@ -5,7 +5,7 @@
     </Properties>
     <Appenders>
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
-            <PatternLayout pattern="%highlight{%d{HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
+            <PatternLayout pattern="%highlight{%d{HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}{TRACE=white}"/>
             <Filters>
                 <!-- Set your comfortable debug level for the console. -->
                 <ThresholdFilter level="info"  onMatch="ACCEPT" onMismatch="DENY"/>
@@ -15,7 +15,7 @@
             name="TraceAppender"
             fileName="${logDir}/dz-trace.log"
             filePattern="${logDir}/dz-trace.log.%d{yyyy-MM-dd}.gz">
-            <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
+            <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}{TRACE=white}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>

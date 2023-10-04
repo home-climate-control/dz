@@ -9,4 +9,6 @@ public interface ConnectorConfig {
     Optional<HttpConnectorConfig> http();
     @JsonProperty("influx")
     Optional<InfluxCollectorConfig> influx();
+    @JsonProperty("home-assistant")
+    Optional<HomeAssistantConfig> homeAssistant();
 }

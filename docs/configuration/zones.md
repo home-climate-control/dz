@@ -44,6 +44,13 @@ Best explained by example:
 ### id
 Unique identifier this zone will be known to the system as. Using a YAML anchor here (as in the first entry above) would be a good idea.
 
+Currently, this identifier is used in:
+* [directors](./directors.md)
+* [home-assistant](./home-assistant.md)
+* [http](./http.md)
+* [influx](./influx.md)
+* [schedule](./schedule.md)
+
 ### name
 Human readable zone name
 

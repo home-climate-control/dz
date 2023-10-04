@@ -15,6 +15,8 @@ plugins {
     id("com.google.cloud.tools.jib") version "3.3.2"
 }
 
+val reactorVersion: String by project
+
 dependencies {
 
     implementation(project(":dz3r-bootstrap"))
@@ -28,8 +30,9 @@ dependencies {
     runtimeOnly("io.micrometer:micrometer-registry-jmx")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.projectreactor:reactor-test")
+    testImplementation("io.projectreactor:reactor-test:$reactorVersion")
 }
+
 configurations {
     all {
         exclude("org.springframework.boot", "spring-boot-starter-logging")

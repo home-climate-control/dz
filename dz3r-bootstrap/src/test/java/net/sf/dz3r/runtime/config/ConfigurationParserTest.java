@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config;
 
+import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,18 +16,13 @@ class ConfigurationParserTest {
     @MethodSource("mqttEndpointExpectedProvider")
     void testHostPort(MqttEndpointExpected source) {
 
+        var broker = new MqttBrokerConfig(null, source.host(), source.port(), null, null, "none", source.autoReconnect);
         var spec = new MqttDeviceConfig(
-                        null,
-                        source.host,
-                        source.port,
-                        null,
-                        null,
-                        "none",
-                        source.autoReconnect,
+                        broker,
                         null,
                         null);
 
-        assertThat(spec.signature()).isEqualTo(source.expected);
+        assertThat(spec.broker().signature()).isEqualTo(source.expected);
     }
 
     public static Stream<MqttEndpointExpected> mqttEndpointExpectedProvider() {

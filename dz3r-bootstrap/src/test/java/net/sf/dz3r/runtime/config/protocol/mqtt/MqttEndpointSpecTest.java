@@ -12,11 +12,13 @@ class MqttEndpointSpecTest {
     @Test
     void equalsIdentical() {
 
-        var ca = new MqttDeviceConfig(null,"localhost", null, null, null, "topicA", false, Set.of(), Set.of());
-        var cb = new MqttDeviceConfig(null,"localhost", null, null, null, "topicA", false, Set.of(), Set.of());
+        var broker = new MqttBrokerConfig(null, "localhost", null, null, null, "topicA", false);
 
-        var ea = ConfigurationMapper.INSTANCE.parseEndpoint(ca);
-        var eb = ConfigurationMapper.INSTANCE.parseEndpoint(cb);
+        var ca = new MqttDeviceConfig(broker, Set.of(), Set.of());
+        var cb = new MqttDeviceConfig(broker, Set.of(), Set.of());
+
+        var ea = ConfigurationMapper.INSTANCE.parseEndpoint(ca.broker());
+        var eb = ConfigurationMapper.INSTANCE.parseEndpoint(cb.broker());
 
         // This will fail with default equals()
 
@@ -25,11 +27,14 @@ class MqttEndpointSpecTest {
     @Test
     void equalsDifferentTopic() {
 
-        var ca = new MqttDeviceConfig(null,"localhost", null, null, null, "topicA", false, Set.of(), Set.of());
-        var cb = new MqttDeviceConfig(null,"localhost", null, null, null, "topicB", false, Set.of(), Set.of());
+        var brokerA = new MqttBrokerConfig(null, "localhost", null, null, null, "topicA", false);
+        var brokerB = new MqttBrokerConfig(null, "localhost", null, null, null, "topicA", false);
 
-        var ea = ConfigurationMapper.INSTANCE.parseEndpoint(ca);
-        var eb = ConfigurationMapper.INSTANCE.parseEndpoint(cb);
+        var ca = new MqttDeviceConfig(brokerA, Set.of(), Set.of());
+        var cb = new MqttDeviceConfig(brokerB, Set.of(), Set.of());
+
+        var ea = ConfigurationMapper.INSTANCE.parseEndpoint(ca.broker());
+        var eb = ConfigurationMapper.INSTANCE.parseEndpoint(cb.broker());
 
         // This will fail with default equals()
 

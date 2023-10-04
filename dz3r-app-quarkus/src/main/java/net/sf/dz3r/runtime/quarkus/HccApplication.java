@@ -17,7 +17,7 @@ import org.apache.logging.log4j.ThreadContext;
 /**
  * Quarkus entry point into HCC Core.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 @ApplicationScoped
 public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {

@@ -8,7 +8,7 @@ import java.time.Instant;
 /**
  * IO sample obtained from a {@link ZNetRxIoSampleResponse}.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class XBeeNetworkIOSample extends XBeeNetworkDeviceStateEvent {
 

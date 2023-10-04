@@ -120,6 +120,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
             var sequence = Flux
                     .fromIterable(source)
 
+                    .map(MqttGateway::broker)
                     .map(item -> new ImmutablePair<>(ConfigurationMapper.INSTANCE.parseEndpoint(item), item))
                     .subscribe(kv -> {
                         var key = kv.getKey();
@@ -142,7 +143,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
         Flux
                 .fromIterable(source)
                 .subscribe(s -> {
-                    var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
+                    var endpoint = s.broker();
                     Optional.ofNullable(s.sensors()).ifPresent(sensors -> {
                         for (var spec : sensors) {
                             sensorConfigs.add(new MqttSensorConfig(endpoint, spec));
@@ -159,7 +160,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
         Flux
                 .fromIterable(source)
                 .subscribe(s -> {
-                    var endpoint = ConfigurationMapper.INSTANCE.parseBroker(s);
+                    var endpoint = s.broker();
                     Optional.ofNullable(s.switches()).ifPresent(switches -> {
                         for (var spec : switches) {
                             switchConfigs.add(new MqttSwitchConfig(endpoint, spec));

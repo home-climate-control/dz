@@ -10,9 +10,11 @@ application {
     mainClass.set("net.sf.dz3.runtime.standalone.HccApplication")
 }
 
+val jacksonVersion: String by project
+
 dependencies {
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
 
     implementation(project(":dz3r-bootstrap"))
     implementation(project(":dz3r-common"))

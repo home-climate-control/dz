@@ -19,7 +19,7 @@ import java.util.UUID;
 /**
  * Command to rescan the XBee network.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class XBeeCommandRescan extends XBeeCommand {
 
