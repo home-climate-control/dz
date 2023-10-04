@@ -252,7 +252,11 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
     @Override
     public String toString() {
-        return "{zone name=" + ts.getAddress() + ", settings={" + settings + "}}";
+        return "{zone name=" + ts.getAddress() + ", settings={" + settings + "}, range={" + ts.setpointRange + "}}";
+    }
+
+    public Range<Double> getSetpointRange() {
+        return ts.setpointRange;
     }
 
     @Override

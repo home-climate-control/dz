@@ -38,15 +38,15 @@ public class ZoneDiscoveryPacket {
     public final String temperatureUnit = "C";
     public final String currentTemperatureTopic = "~/state";
     public final String currentTemperatureTemplate = "{{value_json.current_temperature}}";
-    public final int minTemp;
-    public final int maxTemp;
+    public final double minTemp;
+    public final double maxTemp;
     public final double tempStep = 0.1;
 
     public final String uniqueId;
 
     public final DeviceDiscoveryPacket device;
 
-    public ZoneDiscoveryPacket(String rootTopic, String name, String[] modes, int minTemp, int maxTemp, String uniqueId, DeviceDiscoveryPacket device) {
+    public ZoneDiscoveryPacket(String rootTopic, String name, String[] modes, double minTemp, double maxTemp, String uniqueId, DeviceDiscoveryPacket device) {
         this.rootTopic = rootTopic;
         this.name = name;
         this.modes = modes;

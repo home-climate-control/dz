@@ -166,8 +166,8 @@ public class HomeAssistantConnector implements Connector {
                     zone.getAddress(),
                     // VT: FIXME: propagate the right values here
                     new String[] {"off", "cool"},
-                    // VT: FIXME: propagate
-                    20, 33,
+                    zone.getSetpointRange().min,
+                    zone.getSetpointRange().max,
                     uniqueId,
                     new DeviceDiscoveryPacket(
                         uniqueId,
