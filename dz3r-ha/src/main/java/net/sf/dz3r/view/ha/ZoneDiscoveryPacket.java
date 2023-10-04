@@ -32,7 +32,7 @@ public class ZoneDiscoveryPacket {
     /**
      * Topic to receive "set temperature" commands.
      */
-    public final String temperatureCommandTopic = "~/temp";
+    public final String temperatureCommandTopic = "~/temp/command";
     public final String temperatureStateTopic = "~/state";
     public final String temperatureStateTemplate = "{{value_json.setpoint}}";
     public final String temperatureUnit = "C";

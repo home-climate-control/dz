@@ -9,9 +9,11 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.Connector;
 import org.apache.logging.log4j.LogManager;
@@ -271,11 +273,50 @@ public class HomeAssistantConnector implements Connector {
 
         zones.forEach(z -> zone2mode.put(z, mode.getValue()));
     }
+
     /**
-     * Connect the MQTT topics for receiving commands from HA to controls that make it happen.
+     * Syntax sugar: strip unnecessary parts of the argument and pass it to the actual call.
      */
     private void receive(ZoneTuple source) {
-        logger.error("{}: FIXME: receive", source.zone.getAddress());
+
+        // The syntax up the call stack looked too nice to spoil it with extracting what we *really* need :)
+
+        receive(
+                source.zone,
+                topicResolver.resolve(
+                        source.meta.rootTopic,
+                        source.meta.modeCommandTopic),
+                topicResolver.resolve(
+                        source.meta.rootTopic,
+                        source.meta.temperatureCommandTopic));
+    }
+
+    /**
+     * Connect the MQTT topics for receiving commands from HA to controls that make it happen.
+     *
+     * @param zone Zone to control
+     * @param modeCommandTopic Topic to accept commands to switch between "off" and current operating mode.
+     * @param temperatureCommandTopic Topic to accept setpoint change commands.
+     */
+    private void receive(Zone zone, String modeCommandTopic, String temperatureCommandTopic) {
+
+        // These come published on their own schedulers
+        mqttAdapter
+                .getFlux(modeCommandTopic, false)
+                .map(MqttSignal::message)
+                .map(message -> setMode(zone, message))
+                .subscribe(result -> logger.info("{}: setMode: {}", zone.getAddress(), result));
+    }
+
+    private String setMode(Zone zone, String command) {
+
+        var enabled = !"off".equals(command);
+        var currentSettings = zone.getSettings();
+        var newSettings = new ZoneSettings(currentSettings, enabled);
+
+        zone.setSettingsSync(newSettings);
+
+        return command;
     }
 
     private final Pattern pattern = Pattern.compile("[^A-Za-z0-9_-]");

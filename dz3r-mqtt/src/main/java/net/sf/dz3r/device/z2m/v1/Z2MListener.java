@@ -62,12 +62,12 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
         return mqttListener
                 .getFlux(mqttRootTopicSub, true)
                 .filter(e -> matchSensorAddress(e, address))
-                .doOnNext(s -> logger.debug("{}: matched: {} {}", address, s.topic, s.message))
+                .doOnNext(s -> logger.debug("{}: matched: {}", address, s))
                 .map(this::mqtt2sensor);
     }
 
     private boolean matchSensorAddress(MqttSignal signal, String address) {
-        return signal.topic.equals(mqttRootTopicSub + "/" + address);
+        return signal.topic().equals(mqttRootTopicSub + "/" + address);
     }
 
     private Signal<String, Void> mqtt2sensor(MqttSignal mqttSignal) {
@@ -81,7 +81,7 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
 
             return new Signal<>(
                     timestamp,
-                    mqttSignal.message);
+                    mqttSignal.message());
 
         } catch (Exception ex) {
 

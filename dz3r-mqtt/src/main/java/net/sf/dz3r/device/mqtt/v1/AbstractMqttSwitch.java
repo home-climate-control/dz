@@ -95,7 +95,7 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
 
             logger.debug("getState: {}", mqttSignal);
 
-            return parsePayload(mqttSignal.message);
+            return parsePayload(mqttSignal.message());
 
         } finally {
             ThreadContext.pop();
