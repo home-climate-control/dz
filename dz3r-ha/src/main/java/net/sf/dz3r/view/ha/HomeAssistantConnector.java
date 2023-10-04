@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.ha;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -15,6 +16,7 @@ import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.Connector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -97,6 +99,7 @@ public class HomeAssistantConnector implements Connector {
         try {
 
             var sensorFlux2zone = getExposedZones(feed.sensorFlux2zone);
+            var exposedZones = sensorFlux2zone.values();
 
             Flux
                     .fromIterable(sensorFlux2zone.entrySet())
@@ -109,6 +112,10 @@ public class HomeAssistantConnector implements Connector {
                     .flatMap(this::announce)
                     .doOnNext(this::broadcast)
                     .subscribe(this::receive);
+
+            feed.aggregateZoneFlux
+                    .filter(signal -> contains(signal.payload, exposedZones))
+                    .subscribe(this::broadcast);
 
             feed.hvacDeviceFlux
                     .doOnNext(s -> {
@@ -206,6 +213,7 @@ public class HomeAssistantConnector implements Connector {
     private void broadcast(ZoneTuple source) {
 
         // Establish an "alive" broadcast
+
         Flux
                 .interval(
                         Duration.ZERO,
@@ -231,6 +239,39 @@ public class HomeAssistantConnector implements Connector {
                         source.zone.getSettings().setpoint));
 
         logger.error("{}: FIXME: broadcast", source.zone.getAddress());
+    }
+
+    private void broadcast(Signal<ZoneStatus, String> status2zone) {
+
+        var zoneName = status2zone.payload;
+
+        for (var kv : zone2meta.entrySet()) {
+            var zone = kv.getKey();
+            if (zone.getAddress().equals(zoneName)) {
+                broadcast(zone, status2zone.getValue(), kv.getValue());
+                return;
+            }
+        }
+    }
+
+    private void broadcast(Zone zone, ZoneStatus status, ZoneDiscoveryPacket meta) {
+
+        var topic = topicResolver.resolve(
+                meta.rootTopic,
+                meta.temperatureStateTopic);
+
+        broadcast(topic, null, status.settings.enabled, zone2mode.get(zone), status.settings.setpoint);
+    }
+
+    private boolean contains(String zoneName, Collection<Zone> zones) {
+
+        for (var z: zones) {
+            if (z.getAddress().equals(zoneName)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void broadcast(String topic, Double currentTemperature, Boolean enabled, HvacMode mode, Double setpoint) {
@@ -433,6 +474,8 @@ public class HomeAssistantConnector implements Connector {
 
             // For standalone to allow to ignore the root element
             objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
+
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         }
 
         return objectMapper;
