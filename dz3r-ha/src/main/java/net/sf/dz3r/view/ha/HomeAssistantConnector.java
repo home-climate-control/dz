@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -61,7 +62,18 @@ public class HomeAssistantConnector implements Connector {
 
     private final Config config;
     private final MqttAdapter mqttAdapter;
+
+    /**
+     * Zones configured in the constructor.
+     */
     private final Set<Zone> zonesConfigured;
+
+    /**
+     * Zones found to be exposed during configuration.
+     *
+     * Getting this container populated will take as many passes as there are directors configured.
+     */
+    private final Set<Zone> zonesExposed = new LinkedHashSet<>();
 
     private final Map<Zone, HvacMode> zone2mode = new LinkedHashMap<>();
     private final Map<Zone, ZoneDiscoveryPacket> zone2meta = new LinkedHashMap<>();
@@ -98,7 +110,7 @@ public class HomeAssistantConnector implements Connector {
         ThreadContext.push("connect");
         try {
 
-            var sensorFlux2zone = getExposedZones(feed.sensorFlux2zone);
+            var sensorFlux2zone = getExposedZones(unitId, feed.sensorFlux2zone);
             var exposedZones = sensorFlux2zone.values();
 
             Flux
@@ -430,16 +442,15 @@ public class HomeAssistantConnector implements Connector {
     /**
      * Get the set of zones that will be actually exposed.
      *
-     * @param source Zone mappings provided by the {@link net.sf.dz3r.model.UnitDirector.Feed}.
-     *
+     * @param unitId ID of the unit being processed
+     * @param source Zone mappings provided by the {@link UnitDirector.Feed}.
      * @return Zone mappings that will actually be exposed.
      */
-    private Map<Flux<Signal<Double, Void>>, Zone> getExposedZones(Map<Flux<Signal<Double, Void>>, Zone> source) {
+    private Map<Flux<Signal<Double, Void>>, Zone> getExposedZones(String unitId, Map<Flux<Signal<Double, Void>>, Zone> source) {
 
-        // Need to make a copy, retainAll() will modify this
         var result = new LinkedHashMap<Flux<Signal<Double, Void>>, Zone>();
 
-        logger.debug("connected zones ({} total):", source.size());
+        logger.debug("{}: connected zones ({} total):", unitId, source.size());
         for (var kv : source.entrySet()) {
 
             var zone = kv.getValue();
@@ -447,23 +458,26 @@ public class HomeAssistantConnector implements Connector {
 
             if (zonesConfigured.contains(zone)) {
                 result.put(kv.getKey(), zone);
+                zonesExposed.add(zone);
             }
         }
 
-        logger.info("exposed zones ({} total):", result.size());
+        logger.info("{}: exposed zones ({} total):", unitId, result.size());
         for (var kv : result.entrySet()) {
             logger.info("  {}", kv.getValue().getAddress());
         }
 
-        if (result.size() < zonesConfigured.size()) {
+        if (zonesExposed.size() < zonesConfigured.size()) {
 
             var leftovers = new TreeSet<>(zonesConfigured);
-            leftovers.removeAll(result.values());
+            leftovers.removeAll(zonesExposed);
 
-            logger.warn("not all configured zones were exposed, here's what's left ({} total):", leftovers.size());
+            logger.warn("not all configured zones were exposed (yet?), here's what's left ({} total):", leftovers.size());
             for (var z : leftovers) {
                 logger.warn("  {}", z.getAddress());
             }
+        } else {
+            logger.debug("all configured zones were exposed");
         }
 
         return result;
