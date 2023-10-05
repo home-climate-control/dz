@@ -128,6 +128,7 @@ public class HomeAssistantConnector implements Connector {
                     .subscribe(mode -> captureMode(mode, sensorFlux2zone.values()));
 
         } finally {
+            logger.info("{}: connected", unitId );
             ThreadContext.pop();
         }
     }
@@ -141,14 +142,25 @@ public class HomeAssistantConnector implements Connector {
 
         var signal = source.getKey();
         var zone = source.getValue();
+        var originalName = zone.getAddress();
 
-        ThreadContext.push("announce: " + zone.getAddress());
+        ThreadContext.push("announce: " + originalName);
 
         try {
 
+            // HA is overly restrictive, and having a space is reasonable in a zone name
+
+            var exposedName = originalName.replace(" ", "-");
+
+            if (!exposedName.equals(originalName)) {
+                logger.warn("adjusted to {} to conform to HA naming standards", exposedName);
+            }
+
+            // ... but we're not going to fix anything beyond a stray space.
+
             var errorCounter =
                     checkCharacters("config.id", config.id)
-                            + checkCharacters("zones.name", zone.getAddress());
+                            + checkCharacters("zones.name", exposedName);
 
             if (errorCounter > 0) {
                 logger.error("zone skipped: {}", zone.getAddress());
@@ -159,18 +171,20 @@ public class HomeAssistantConnector implements Connector {
                     config.discoveryPrefix
                             + "/climate/"
                             // It's recommended to skip the node_id level, so there
-                            + config.id + "-" + zone.getAddress()
+                            + config.id + "-" + exposedName
                             + "/config";
             var root = "/hcc/ha-connector/" + config.id
-                    + "/" + zone.getAddress();
+                    + "/" + exposedName;
 
             logger.debug("MQTT endpoint: {}", mqttAdapter.address);
             logger.debug("config topic: {}", configTopic);
 
-            var uniqueId = config.id + "-" + zone.getAddress();
+            logger.error("{}: FIXME: collect correct mode values", originalName);
+
+            var uniqueId = config.id + "-" + exposedName;
             var discoveryPacket = new ZoneDiscoveryPacket(
                     root,
-                    zone.getAddress(),
+                    originalName,
                     // VT: FIXME: propagate the right values here
                     new String[] {"off", "cool"},
                     zone.getSetpointRange().min,
@@ -237,8 +251,6 @@ public class HomeAssistantConnector implements Connector {
                         source.zone.getSettings().enabled,
                         zone2mode.get(source.zone),
                         source.zone.getSettings().setpoint));
-
-        logger.error("{}: FIXME: broadcast", source.zone.getAddress());
     }
 
     private void broadcast(Signal<ZoneStatus, String> status2zone) {
