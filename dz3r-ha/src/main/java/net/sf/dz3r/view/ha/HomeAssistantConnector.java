@@ -347,7 +347,7 @@ public class HomeAssistantConnector implements Connector {
         mqttAdapter
                 .getFlux(modeCommandTopic, false)
                 .map(MqttSignal::message)
-                .map(message -> setMode(zone, message))
+                .map(message -> setEnabled(zone, message))
                 .subscribe(result -> logger.info("{}: setMode: {}", zone.getAddress(), result));
 
         mqttAdapter
@@ -357,7 +357,7 @@ public class HomeAssistantConnector implements Connector {
                 .subscribe(result -> logger.info("{}: setSetpoint: {}", zone.getAddress(), result));
     }
 
-    private String setMode(Zone zone, String command) {
+    private String setEnabled(Zone zone, String command) {
 
         var enabled = !"off".equals(command);
         var currentSettings = zone.getSettings();
