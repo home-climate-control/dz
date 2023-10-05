@@ -1,11 +1,16 @@
 package net.sf.dz3r.view.ha;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class ZoneDiscoveryPacket {
+
+    @JsonIgnore
+    public final String configTopic;
+
     @JsonProperty("~")
     public final String rootTopic;
     public final String name;
@@ -46,7 +51,8 @@ public class ZoneDiscoveryPacket {
 
     public final DeviceDiscoveryPacket device;
 
-    public ZoneDiscoveryPacket(String rootTopic, String name, String[] modes, double minTemp, double maxTemp, String uniqueId, DeviceDiscoveryPacket device) {
+    public ZoneDiscoveryPacket(String configTopic, String rootTopic, String name, String[] modes, double minTemp, double maxTemp, String uniqueId, DeviceDiscoveryPacket device) {
+        this.configTopic = configTopic;
         this.rootTopic = rootTopic;
         this.name = name;
         this.modes = modes;

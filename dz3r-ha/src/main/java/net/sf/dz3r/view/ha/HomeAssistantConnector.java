@@ -27,6 +27,8 @@ import reactor.core.scheduler.Schedulers;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -191,14 +193,13 @@ public class HomeAssistantConnector implements Connector {
             logger.debug("MQTT endpoint: {}", mqttAdapter.address);
             logger.debug("config topic: {}", configTopic);
 
-            logger.error("{}: FIXME: collect correct mode values", originalName);
-
             var uniqueId = config.id + "-" + exposedName;
             var discoveryPacket = new ZoneDiscoveryPacket(
+                    configTopic,
                     root,
                     originalName,
-                    // VT: FIXME: propagate the right values here
-                    new String[] {"off", "cool"},
+                    // VT: NOTE: see adjustModeSet()
+                    new String[] {"off"},
                     zone.getSetpointRange().min,
                     zone.getSetpointRange().max,
                     uniqueId,
@@ -210,26 +211,29 @@ public class HomeAssistantConnector implements Connector {
                             "homeclimatecontrol.com"
                     ));
 
-            try {
-
-                // The payload gets logged at TRACE level, search for the config topic in the log to find it
-                var payload = getObjectMapper()
-                        .writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(discoveryPacket);
-
-                mqttAdapter.publish(configTopic, payload, MqttQos.AT_LEAST_ONCE, true);
-
-            } catch (JsonProcessingException ex) {
-                throw new IllegalStateException("Failed to convert materialized discoveryPacket to JSON", ex);
-            }
-
             zone2meta.put(zone, discoveryPacket);
+            publish(discoveryPacket);
 
             // The discovery packet contains topic information that will come handy on the next step
             return Flux.just(new ZoneTuple(zone, signal, discoveryPacket));
 
         } finally {
             ThreadContext.pop();
+        }
+    }
+
+    private void publish(ZoneDiscoveryPacket discoveryPacket) {
+        try {
+
+            // The payload gets logged at TRACE level, search for the config topic in the log to find it
+            var payload = getObjectMapper()
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(discoveryPacket);
+
+            mqttAdapter.publish(discoveryPacket.configTopic, payload, MqttQos.AT_LEAST_ONCE, true);
+
+        } catch (JsonProcessingException ex) {
+            throw new IllegalStateException("Failed to convert materialized discoveryPacket to JSON", ex);
         }
     }
 
@@ -338,7 +342,54 @@ public class HomeAssistantConnector implements Connector {
             logger.warn("captureMode: don't know what to do with error mode: {}", mode);
         }
 
-        zones.forEach(z -> zone2mode.put(z, mode.getValue()));
+        zones.forEach(z -> {
+            zone2mode.put(z, mode.getValue());
+            adjustModeSet(z, mode.getValue());
+        });
+    }
+
+    /**
+     * Set the correct mode set for the discovery packet for the specified zone.
+     *
+     * @param zone Zone to adjust the discovery packet for.
+     * @param mode Mode to add.
+     */
+    private void adjustModeSet(Zone zone, HvacMode mode) {
+
+        var meta = zone2meta.get(zone);
+
+        if (meta == null) {
+            logger.debug("{}: no discovery packet yet, till better time", zone.getAddress());
+            return;
+        }
+
+        var modeString = mode == HvacMode.COOLING ? "cool" : "heat";
+        var modes = Arrays.asList(meta.modes);
+
+        if (modes.contains(modeString)) {
+            // No point in logging this, too often
+            return;
+        }
+
+        var newModes = new ArrayList<>(modes);
+        newModes.add(modeString);
+
+        logger.debug("{}: adjusting mode set to {}", meta.name, newModes);
+
+        var adjusted = new ZoneDiscoveryPacket(
+                meta.configTopic,
+                meta.rootTopic,
+                meta.name,
+                newModes.toArray(new String[0]),
+                meta.minTemp,
+                meta.maxTemp,
+                meta.uniqueId,
+                meta.device
+        );
+
+        zone2meta.put(zone, adjusted);
+
+        publish(adjusted);
     }
 
     /**
