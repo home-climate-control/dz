@@ -315,7 +315,7 @@ public class HomeAssistantConnector implements Connector {
                 finalMode,
                 setpoint);
 
-        logger.debug("broadcast: {}", message);
+        logger.trace("broadcast: {}", message);
 
         try {
             var payload =  getObjectMapper()
@@ -398,11 +398,11 @@ public class HomeAssistantConnector implements Connector {
 
         try {
 
-            logger.debug("command: {}", command);
+            logger.trace("command: {}", command);
 
             var parsed = Double.valueOf(command);
 
-            logger.debug("parsed: {}", parsed);
+            logger.trace("parsed: {}", parsed);
 
             var setpoint = BigDecimal.valueOf(parsed)
                     .setScale(3, RoundingMode.HALF_UP)

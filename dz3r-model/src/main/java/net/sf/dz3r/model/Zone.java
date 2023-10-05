@@ -128,11 +128,11 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     private void bump() {
 
         if (lastKnownSignal == null) {
-            logger.warn("{}: no lastKnownSignal yet, settings will get to consumers on next sensor signal arrival", getAddress());
+            logger.debug("{}: no lastKnownSignal yet, settings will get to consumers on next sensor signal arrival", getAddress());
             return;
         }
 
-        logger.info("{}: replaying signal: {}", getAddress(), lastKnownSignal);
+        logger.debug("{}: replaying signal: {}", getAddress(), lastKnownSignal);
         feedbackSink.tryEmitNext(lastKnownSignal);
     }
 
