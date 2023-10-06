@@ -38,12 +38,12 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
         var zoneName = source.payload;
 
         if (!unit2mode.containsKey(unitId)) {
-            logger.warn("{}: don't know the mode yet, skipping this status: {}", unitId, source);
+            logger.debug("{}: don't know the mode yet, skipping this status: {}", unitId, source);
             return Flux.empty();
         }
 
         if (!zone2signal.containsKey(zoneName)) {
-            logger.warn("{}: don't know the signal yet, skipping this status: {}", zoneName, source);
+            logger.debug("{}: don't know the signal yet, skipping this status: {}", zoneName, source);
             return Flux.empty();
         }
 

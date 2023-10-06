@@ -122,7 +122,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         var stage1 = Flux
                 .create(this::connectCombined)
                 .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext(pair -> logger.debug("{}: raw indoor={}, ambient={}", getAddress(), pair.getLeft(), pair.getRight()))
+                .doOnNext(pair -> logger.trace("{}: raw indoor={}, ambient={}", getAddress(), pair.getLeft(), pair.getRight()))
                 .filter(pair -> pair.getLeft() != null && pair.getRight() != null)
                 .filter(pair -> !pair.getLeft().isError() && !pair.getRight().isError())
                 .map(this::computeCombined);

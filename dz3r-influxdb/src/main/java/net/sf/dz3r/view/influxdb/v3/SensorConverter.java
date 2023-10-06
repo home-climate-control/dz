@@ -22,7 +22,7 @@ public class SensorConverter {
 
     public Flux<Point> compute(Flux<Signal<Double, Void>> in) {
         return in.map(this::convert)
-                .doOnNext(s -> logger.debug("compute: {}", s));
+                .doOnNext(s -> logger.trace("compute: {}", s));
     }
 
     private Point convert(Signal<Double, Void> signal) {

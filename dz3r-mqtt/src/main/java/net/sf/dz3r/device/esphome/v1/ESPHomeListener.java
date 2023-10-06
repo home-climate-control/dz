@@ -46,7 +46,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
         return mqttListener
                 .getFlux(mqttRootTopicSub, true)
                 .filter(e -> matchSensorAddress(e, address))
-                .doOnNext(s -> logger.debug("{}: matched: {}", address, s))
+                .doOnNext(s -> logger.trace("{}: matched: {}", address, s))
                 .map(this::mqtt2sensor);
     }
 
