@@ -120,16 +120,16 @@ public class Scheduler {
 
             var schedule = source.getValue();
 
-            logger.debug("{} schedule ({} entries)", zoneName, schedule.size());
+            logger.trace("{} schedule ({} entries)", zoneName, schedule.size());
 
             Flux.fromIterable(schedule.keySet())
-                    .subscribe(s -> logger.debug("  {}", s));
+                    .subscribe(s -> logger.trace("  {}", s));
 
             var now = LocalDateTime.now(clock);
             var period = periodMatcher.match(schedule, now);
             var currentPeriod = zone2period.get(zone);
 
-            logger.debug("{}: matched time={} period={}", zoneName, now, period);
+            logger.trace("{}: matched time={} period={}", zoneName, now, period);
 
             if (same(currentPeriod, period)) {
                 logger.trace("{}: already at {}", zoneName, period);

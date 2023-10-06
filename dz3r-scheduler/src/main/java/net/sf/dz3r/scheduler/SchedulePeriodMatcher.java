@@ -40,7 +40,7 @@ public class SchedulePeriodMatcher {
 
             var stack = new ArrayDeque<SchedulePeriod>();
 
-            logger.debug("Matching {}", time);
+            logger.trace("matching {}", time);
 
             SortedMap<SchedulePeriod, ZoneSettings> today = getToday(zoneSchedule, time.toLocalDate());
 
