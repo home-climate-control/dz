@@ -1,6 +1,5 @@
 package net.sf.dz3r.view.ha;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -551,8 +550,6 @@ public class HomeAssistantConnector implements Connector {
 
             // For standalone to allow to ignore the root element
             objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
-
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         }
 
         return objectMapper;
