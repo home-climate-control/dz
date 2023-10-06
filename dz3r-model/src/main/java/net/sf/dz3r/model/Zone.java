@@ -111,8 +111,8 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
                 .orElse(settings);
 
         var r = Integer.toHexString(newSettings.hashCode());
-        logger.info("{}: setSettings({}):   {}", getAddress(), r, this.settings);
-        logger.info("{}: setSettings({}): + {}", getAddress(), r, settings);
+        logger.debug("{}: setSettings({}):   {}", getAddress(), r, this.settings);
+        logger.debug("{}: setSettings({}): + {}", getAddress(), r, settings);
         logger.info("{}: setSettings({}): = {}", getAddress(), r, newSettings);
 
         this.settings = newSettings;
