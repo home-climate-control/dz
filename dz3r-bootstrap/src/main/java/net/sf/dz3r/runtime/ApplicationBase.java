@@ -115,7 +115,8 @@ public abstract class ApplicationBase<C> {
                     }
                 }));
 
-                logger.info("sleeping until killed");
+                // Logged at WARN so that it is easier to see in the log
+                logger.warn("Startup complete, sleeping until killed");
 
                 stopGate.await();
             } catch (InterruptedException ex) {
