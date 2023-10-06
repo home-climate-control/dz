@@ -60,3 +60,9 @@ HCC does not, and will not, expose mode switching (heat/cool) to any system that
 - It would be somewhere between awkward and catastrophic to issue a mode change command to just one zone, or, even worse, issued different mode commands to different zones served by the same HVAC unit.
 
 Until this restriction is lifted, the only things Home Assistant (and others) will be allowed to control would be just single thermostat properties. The OFF mapping in this case will disable an individual [zone](./zones.md).
+
+### Smaller Potatoes
+
+- Home Assistant doesn't support the notion of a "voting zone";
+- It doesn't have a concept of an [economizer](./zones.md#economizer);
+- It doesn't support [scheduling](./schedule.md) as a first class concept, hence, it can't support "return to schedule" which turned out to be surprisingly convenient.
