@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.ha;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -78,6 +80,8 @@ public class HomeAssistantConnector implements Connector {
 
     private final Map<Zone, HvacMode> zone2mode = new LinkedHashMap<>();
     private final Map<Zone, ZoneDiscoveryPacket> zone2meta = new LinkedHashMap<>();
+
+    private final Map<String, Double> temperatureCache = new HashMap<>();
 
     private ObjectMapper objectMapper;
     private final TopicResolver topicResolver = new TopicResolver();
@@ -313,8 +317,23 @@ public class HomeAssistantConnector implements Connector {
             finalMode = "off";
         }
 
+        Double broadcastTemperature;
+
+        if (currentTemperature == null) {
+
+            // HA logs a message at WARNING (flooding the log) if a part of the JSON is missing,
+            // and displays a blank tile if the value is null, so we have to get creative
+
+            broadcastTemperature = temperatureCache.get(topic);
+
+        } else {
+
+            temperatureCache.put(topic, currentTemperature);
+            broadcastTemperature = currentTemperature;
+        }
+
         var message = new StateMessage(
-                currentTemperature,
+                broadcastTemperature,
                 finalMode,
                 setpoint);
 
@@ -550,6 +569,9 @@ public class HomeAssistantConnector implements Connector {
 
             // For standalone to allow to ignore the root element
             objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
+
+            // To avoid HA displaying a blank tile - this will cause WARNING level message and flood the logs, but that's better
+            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         }
 
         return objectMapper;
