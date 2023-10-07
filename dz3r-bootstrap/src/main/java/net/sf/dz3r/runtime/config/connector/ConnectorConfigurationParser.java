@@ -20,6 +20,7 @@ import reactor.core.scheduler.Schedulers;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -63,7 +64,8 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
 
                 // Prevent multiple subscriptions
                 .publish()
-                .autoConnect();
+                .autoConnect()
+                .cache(Duration.ofSeconds(30));
 
         // Start right away
         flux.subscribe(e -> logger.debug("subscription: {}", e));
