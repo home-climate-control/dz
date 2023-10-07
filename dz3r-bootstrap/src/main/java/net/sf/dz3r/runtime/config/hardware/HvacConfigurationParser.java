@@ -111,9 +111,13 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
 
     private HvacDevice parseSwitchable(SwitchableHvacDeviceConfig cf) {
 
+        // VT: NOTE: There is no configuration keyword for the switch being inverted;
+        // likely it will never be needed
         return new SwitchableHvacDevice(
                 cf.id(),
                 HvacMode.valueOf(cf.mode().toUpperCase()),
-                getSwitch(cf.switchAddress()));
+                getSwitch(cf.switchAddress()),
+                false,
+                createFileCounter(cf.id(), cf.filter()));
     }
 }

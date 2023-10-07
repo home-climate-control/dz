@@ -1,7 +1,5 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.common.HCCObjects;
-import net.sf.dz3r.counter.DurationIncrementAdapter;
 import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.model.HvacMode;
@@ -9,7 +7,6 @@ import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -17,7 +14,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
@@ -29,10 +26,14 @@ import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
  *
  * Initial mode is undefined and must be set by control logic; until that is done, any other commands are refused.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class HeatPump extends AbstractHvacDevice {
 
+    /**
+     * Default mode change delay.
+     */
+    private static final Duration DEFAULT_MODE_CHANGE_DELAY = Duration.ofSeconds(10);
     private static final Reconciler reconciler = new Reconciler();
 
     private final Switch<?> switchMode;
@@ -58,8 +59,6 @@ public class HeatPump extends AbstractHvacDevice {
     private final Duration modeChangeDelay;
 
     private final Scheduler scheduler;
-
-    private final Disposable uptimeCounterSubscription;
 
     /**
      * Requested device state.
@@ -108,7 +107,7 @@ public class HeatPump extends AbstractHvacDevice {
             ResourceUsageCounter<Duration> uptimeCounter,
             Scheduler scheduler) {
 
-        super(name);
+        super(name, uptimeCounter);
 
         check(switchMode, "mode");
         check(switchRunning, "running");
@@ -129,48 +128,12 @@ public class HeatPump extends AbstractHvacDevice {
         this.reverseRunning = reverseRunning;
         this.reverseFan = reverseFan;
 
-        this.modeChangeDelay = checkChangeModeDelay(changeModeDelay);
+        this.modeChangeDelay = Optional.ofNullable(changeModeDelay).orElseGet(() -> {
+            logger.warn("using default mode change delay of {}", DEFAULT_MODE_CHANGE_DELAY);
+            return DEFAULT_MODE_CHANGE_DELAY;
+        });
 
         this.scheduler = scheduler;
-
-        if (uptimeCounter != null) {
-
-            var uptimeFlux = getFlux()
-                    .flatMap(this::getUptime);
-            var converter = new DurationIncrementAdapter();
-            uptimeCounterSubscription = uptimeCounter
-                    .consume(converter.split(uptimeFlux))
-                    .subscribe();
-        } else {
-            uptimeCounterSubscription = null;
-        }
-    }
-
-    private Flux<Duration> getUptime(Signal<HvacDeviceStatus, Void> signal) {
-
-        if (signal.isError()) {
-            return Flux.empty();
-        }
-
-        var uptime = signal.getValue().uptime;
-
-        // Null uptime will be in the signal when the HVAC is off
-        return Flux.just(Objects.requireNonNullElse(uptime, Duration.ZERO));
-    }
-
-    private Duration checkChangeModeDelay(Duration d) {
-
-        HCCObjects.requireNonNull(d, "changeModeDelay can't be null");
-
-        if (d.isNegative()) {
-            throw new IllegalArgumentException("can't accept negative delay: " + d);
-        }
-
-        if (d.isZero()) {
-            logger.warn("Zero change mode delay, prepare for trouble");
-        }
-
-        return d;
     }
 
     @Override
@@ -414,8 +377,6 @@ public class HeatPump extends AbstractHvacDevice {
         switchRunning.setState(false).block();
         switchFan.setState(false).block();
         switchMode.setState(false).block();
-
-        uptimeCounterSubscription.dispose();
 
         logger.info("Shut down: {}", getAddress());
     }
