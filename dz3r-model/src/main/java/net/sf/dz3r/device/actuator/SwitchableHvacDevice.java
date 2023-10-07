@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
@@ -7,6 +8,7 @@ import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -21,7 +23,7 @@ import java.util.function.Predicate;
  * {@link NullSwitch} provided for {@link HeatPump#setMode(boolean) mode switch}.
  *
  * @see net.sf.dz3r.model.SingleStageUnitController
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class SwitchableHvacDevice extends AbstractHvacDevice {
 
@@ -40,24 +42,22 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
     private HvacCommand requested;
 
     /**
-     * Create a named instance.
-     *
-     * @param name Device name.
-     * @param mode Supported mode. There can be only one.
-     */
-    public SwitchableHvacDevice(String name, HvacMode mode, Switch<?> theSwitch) {
-        this(name, mode, theSwitch, false);
-    }
-
-    /**
      * Create a named instance, possibly inverted.
      *
      * @param name Device name.
      * @param mode Supported mode. There can be only one.
      * @param inverted {@code true} if the switch is inverted.
+     * @param uptimeCounter Self-explanatory. Optional for now.
      */
-    public SwitchableHvacDevice(String name, HvacMode mode, Switch<?> theSwitch, boolean inverted) {
-        super(name);
+    public SwitchableHvacDevice(
+            String name,
+            HvacMode mode,
+            Switch<?> theSwitch,
+            boolean inverted,
+            ResourceUsageCounter<Duration> uptimeCounter
+    ) {
+
+        super(name, uptimeCounter);
 
         this.mode = mode;
         this.inverted = inverted;
@@ -75,7 +75,9 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
 
     @Override
     public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
-        return computeNonBlocking(in);
+        return
+                computeNonBlocking(in)
+                .doOnNext(this::broadcast);
     }
 
     private Flux<Signal<HvacDeviceStatus, Void>> computeNonBlocking(Flux<Signal<HvacCommand, Void>> in) {

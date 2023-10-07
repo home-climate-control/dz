@@ -1,22 +1,53 @@
 package net.sf.dz3r.runtime.config.hardware;
 
-import net.sf.dz3r.runtime.config.ConfigurationContext;
-import net.sf.dz3r.runtime.config.ConfigurationContextAware;
+import net.sf.dz3r.counter.FileTimeUsageCounter;
+import net.sf.dz3r.counter.LoggerTimeUsageReporter;
+import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.device.actuator.HeatPump;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.pi.autohat.HeatPumpHAT;
 import net.sf.dz3r.model.HvacMode;
+import net.sf.dz3r.runtime.config.ConfigurationContext;
+import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import reactor.core.publisher.Flux;
 
+import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
 public class HvacConfigurationParser extends ConfigurationContextAware {
 
+    /**
+     * Directory to keep the counter files in.
+     */
+    private final File countersRoot;
+
     public HvacConfigurationParser(ConfigurationContext context) {
         super(context);
+        countersRoot = getCountersDirectory();
+    }
+
+    private ResourceUsageCounter<Duration> createFileCounter(String id, FilterConfig config) {
+
+        try {
+
+            var lifetime = Optional.ofNullable(config).map(FilterConfig::lifetime).orElse(Duration.ofHours(200));
+            return new FileTimeUsageCounter(
+                    id,
+                    lifetime,
+                    new File(countersRoot, id),
+                    Set.of(
+                            new LoggerTimeUsageReporter(id)
+                    ));
+
+        } catch (IOException ex) {
+
+            logger.error("couldn't create counter for id={}, config={}, countersRoot={}", id, config, countersRoot, ex);
+            return null;
+        }
     }
 
     public void parse(Set<HvacDeviceConfig> source) {
@@ -45,6 +76,14 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         }
     }
 
+    private File getCountersDirectory() {
+
+        // VT: NOTE: This may need to get more complicated... but all in due time. It's $HOME/.dz/counters for now.
+
+        var home = new File(System.getProperty("user.home"));
+        return new File(home, ".dz/counters");
+    }
+
     private HvacDevice parseHeatpump(HeatpumpConfig cf) {
 
         return new HeatPump(
@@ -55,13 +94,16 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
                 Optional.ofNullable(cf.switchRunningReverse()).orElse(false),
                 getSwitch(cf.switchFan()),
                 Optional.ofNullable(cf.switchFanReverse()).orElse(false),
-                cf.modeChangeDelay());
+                cf.modeChangeDelay(),
+                createFileCounter(cf.id(), cf.filter()));
     }
 
     private HvacDevice parseHeatpumpHAT(HeatpumpHATConfig cf) {
 
         try {
-            return new HeatPumpHAT(cf.id());
+            return new HeatPumpHAT(
+                    cf.id(),
+                    createFileCounter(cf.id(), cf.filter()));
         } catch (IOException ex) {
             throw new IllegalStateException("Can't instantiate HeatPumpHAT", ex);
         }
@@ -69,9 +111,13 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
 
     private HvacDevice parseSwitchable(SwitchableHvacDeviceConfig cf) {
 
+        // VT: NOTE: There is no configuration keyword for the switch being inverted;
+        // likely it will never be needed
         return new SwitchableHvacDevice(
                 cf.id(),
                 HvacMode.valueOf(cf.mode().toUpperCase()),
-                getSwitch(cf.switchAddress()));
+                getSwitch(cf.switchAddress()),
+                false,
+                createFileCounter(cf.id(), cf.filter()));
     }
 }

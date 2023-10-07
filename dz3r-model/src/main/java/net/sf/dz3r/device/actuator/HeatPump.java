@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
@@ -25,7 +26,7 @@ import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
  *
  * Initial mode is undefined and must be set by control logic; until that is done, any other commands are refused.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class HeatPump extends AbstractHvacDevice {
 
@@ -70,29 +71,6 @@ public class HeatPump extends AbstractHvacDevice {
     private HvacCommand requestedState = new HvacCommand(null, null, null);
 
     /**
-     * Create an instance with some switches possibly reverse.
-     *
-     * @param name JMX name.
-     * @param switchMode Switch to pull to change the operating mode.
-     * @param reverseMode {@code true} if the "off" mode position corresponds to logical one.
-     * @param switchRunning Switch to pull to turn on the compressor.
-     * @param reverseRunning {@code true} if the "off" running position corresponds to logical one.
-     * @param switchFan Switch to pull to turn on the air handler.
-     * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
-     */
-    public HeatPump(
-            String name,
-            Switch<?> switchMode, boolean reverseMode,
-            Switch<?> switchRunning, boolean reverseRunning,
-            Switch<?> switchFan, boolean reverseFan) {
-        this(name,
-                switchMode, reverseMode,
-                switchRunning, reverseRunning,
-                switchFan, reverseFan,
-                DEFAULT_MODE_CHANGE_DELAY);
-    }
-
-    /**
      * Create an instance with some switches possibly reverse, and a given change mode delay.
      *
      * @param name JMX name.
@@ -103,18 +81,21 @@ public class HeatPump extends AbstractHvacDevice {
      * @param switchFan Switch to pull to turn on the air handler.
      * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
      * @param changeModeDelay Delay to observe while changing the {@link HvacMode operating mode}.
+     * @param uptimeCounter Self-explanatory. Optional for now.
      */
     public HeatPump(
             String name,
             Switch<?> switchMode, boolean reverseMode,
             Switch<?> switchRunning, boolean reverseRunning,
             Switch<?> switchFan, boolean reverseFan,
-            Duration changeModeDelay) {
+            Duration changeModeDelay,
+            ResourceUsageCounter<Duration> uptimeCounter) {
         this(name,
                 switchMode, reverseMode,
                 switchRunning, reverseRunning,
                 switchFan, reverseFan,
                 changeModeDelay,
+                uptimeCounter,
                 Schedulers.newSingle("HeatPump(" + name + ")"));
     }
     public HeatPump(
@@ -123,9 +104,10 @@ public class HeatPump extends AbstractHvacDevice {
             Switch<?> switchRunning, boolean reverseRunning,
             Switch<?> switchFan, boolean reverseFan,
             Duration changeModeDelay,
+            ResourceUsageCounter<Duration> uptimeCounter,
             Scheduler scheduler) {
 
-        super(name);
+        super(name, uptimeCounter);
 
         check(switchMode, "mode");
         check(switchRunning, "running");
@@ -395,6 +377,7 @@ public class HeatPump extends AbstractHvacDevice {
         switchRunning.setState(false).block();
         switchFan.setState(false).block();
         switchMode.setState(false).block();
+
         logger.info("Shut down: {}", getAddress());
     }
 
