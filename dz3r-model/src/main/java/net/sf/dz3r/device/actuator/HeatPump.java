@@ -17,6 +17,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Objects;
 import java.util.Set;
 
 import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
@@ -151,7 +152,10 @@ public class HeatPump extends AbstractHvacDevice {
             return Flux.empty();
         }
 
-        return Flux.just(signal.getValue().uptime);
+        var uptime = signal.getValue().uptime;
+
+        // Null uptime will be in the signal when the HVAC is off
+        return Flux.just(Objects.requireNonNullElse(uptime, Duration.ZERO));
     }
 
     private Duration checkChangeModeDelay(Duration d) {
