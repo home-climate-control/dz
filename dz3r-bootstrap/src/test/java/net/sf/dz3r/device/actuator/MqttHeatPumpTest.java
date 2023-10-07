@@ -55,7 +55,8 @@ import static org.assertj.core.api.Assertions.assertThatCode;
                 switchMode, true,
                 switchRunning, false,
                 switchFan, false,
-                Duration.ofSeconds(3))) {
+                Duration.ofSeconds(3),
+                null)) {
 
             var commands = Flux
                     .just(

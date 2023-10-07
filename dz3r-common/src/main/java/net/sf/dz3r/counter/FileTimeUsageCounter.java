@@ -62,20 +62,28 @@ public class FileTimeUsageCounter implements ResourceUsageCounter<Duration>, Aut
                 .subscribe();
     }
 
-    private File checkSanity(File target) {
+    private File checkSanity(File target) throws IOException {
 
         HCCObjects.requireNonNull(target, "storage can't be null");
+
+        File canonical = new File(target.getCanonicalPath());
+        if (canonical.getParentFile().mkdirs()) {
+            logger.info("created {}", canonical);
+        }
 
         if (target.isDirectory()) {
             throw new IllegalArgumentException(target + ": is a directory");
         }
 
-        if (!target.canWrite()) {
-            throw new IllegalArgumentException(target + ": can't write");
-        }
+        if (target.exists()) {
 
-        if (!target.isFile()) {
-            throw new IllegalArgumentException(target + ": not a regular file");
+            if (!target.canWrite()) {
+                throw new IllegalArgumentException(target + ": can't write");
+            }
+
+            if (!target.isFile()) {
+                throw new IllegalArgumentException(target + ": not a regular file");
+            }
         }
 
         return target;
@@ -150,10 +158,6 @@ public class FileTimeUsageCounter implements ResourceUsageCounter<Duration>, Aut
 
             if (canonical.exists() && !canonical.renameTo(backup)) {
                 logger.error("failed to rename {} to {}", canonical, backup);
-            }
-
-            if (canonical.getParentFile().mkdirs()) {
-                logger.info("created {}", canonical);
             }
 
             try (PrintWriter pw = new PrintWriter(new FileWriter(storage))) {

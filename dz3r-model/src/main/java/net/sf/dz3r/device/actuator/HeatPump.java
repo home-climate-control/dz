@@ -1,11 +1,15 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.common.HCCObjects;
+import net.sf.dz3r.counter.DurationIncrementAdapter;
+import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
@@ -13,7 +17,6 @@ import reactor.core.scheduler.Schedulers;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Optional;
 import java.util.Set;
 
 import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
@@ -29,10 +32,6 @@ import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
  */
 public class HeatPump extends AbstractHvacDevice {
 
-    /**
-     * Default mode change delay.
-     */
-    private static final Duration DEFAULT_MODE_CHANGE_DELAY = Duration.ofSeconds(10);
     private static final Reconciler reconciler = new Reconciler();
 
     private final Switch<?> switchMode;
@@ -59,6 +58,8 @@ public class HeatPump extends AbstractHvacDevice {
 
     private final Scheduler scheduler;
 
+    private final Disposable uptimeCounterSubscription;
+
     /**
      * Requested device state.
      *
@@ -68,29 +69,6 @@ public class HeatPump extends AbstractHvacDevice {
      * so that subsequent commands in the stream know what they are dealing with.
      */
     private HvacCommand requestedState = new HvacCommand(null, null, null);
-
-    /**
-     * Create an instance with some switches possibly reverse.
-     *
-     * @param name JMX name.
-     * @param switchMode Switch to pull to change the operating mode.
-     * @param reverseMode {@code true} if the "off" mode position corresponds to logical one.
-     * @param switchRunning Switch to pull to turn on the compressor.
-     * @param reverseRunning {@code true} if the "off" running position corresponds to logical one.
-     * @param switchFan Switch to pull to turn on the air handler.
-     * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
-     */
-    public HeatPump(
-            String name,
-            Switch<?> switchMode, boolean reverseMode,
-            Switch<?> switchRunning, boolean reverseRunning,
-            Switch<?> switchFan, boolean reverseFan) {
-        this(name,
-                switchMode, reverseMode,
-                switchRunning, reverseRunning,
-                switchFan, reverseFan,
-                DEFAULT_MODE_CHANGE_DELAY);
-    }
 
     /**
      * Create an instance with some switches possibly reverse, and a given change mode delay.
@@ -103,18 +81,21 @@ public class HeatPump extends AbstractHvacDevice {
      * @param switchFan Switch to pull to turn on the air handler.
      * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
      * @param changeModeDelay Delay to observe while changing the {@link HvacMode operating mode}.
+     * @param uptimeCounter Self-explanatory. Optional for now.
      */
     public HeatPump(
             String name,
             Switch<?> switchMode, boolean reverseMode,
             Switch<?> switchRunning, boolean reverseRunning,
             Switch<?> switchFan, boolean reverseFan,
-            Duration changeModeDelay) {
+            Duration changeModeDelay,
+            ResourceUsageCounter<Duration> uptimeCounter) {
         this(name,
                 switchMode, reverseMode,
                 switchRunning, reverseRunning,
                 switchFan, reverseFan,
                 changeModeDelay,
+                uptimeCounter,
                 Schedulers.newSingle("HeatPump(" + name + ")"));
     }
     public HeatPump(
@@ -123,6 +104,7 @@ public class HeatPump extends AbstractHvacDevice {
             Switch<?> switchRunning, boolean reverseRunning,
             Switch<?> switchFan, boolean reverseFan,
             Duration changeModeDelay,
+            ResourceUsageCounter<Duration> uptimeCounter,
             Scheduler scheduler) {
 
         super(name);
@@ -146,12 +128,45 @@ public class HeatPump extends AbstractHvacDevice {
         this.reverseRunning = reverseRunning;
         this.reverseFan = reverseFan;
 
-        this.modeChangeDelay = Optional.ofNullable(changeModeDelay).orElseGet(() -> {
-            logger.warn("using default mode change delay of {}", DEFAULT_MODE_CHANGE_DELAY);
-            return DEFAULT_MODE_CHANGE_DELAY;
-        });
+        this.modeChangeDelay = checkChangeModeDelay(changeModeDelay);
 
         this.scheduler = scheduler;
+
+        if (uptimeCounter != null) {
+
+            var uptimeFlux = getFlux()
+                    .flatMap(this::getUptime);
+            var converter = new DurationIncrementAdapter();
+            uptimeCounterSubscription = uptimeCounter
+                    .consume(converter.split(uptimeFlux))
+                    .subscribe();
+        } else {
+            uptimeCounterSubscription = null;
+        }
+    }
+
+    private Flux<Duration> getUptime(Signal<HvacDeviceStatus, Void> signal) {
+
+        if (signal.isError()) {
+            return Flux.empty();
+        }
+
+        return Flux.just(signal.getValue().uptime);
+    }
+
+    private Duration checkChangeModeDelay(Duration d) {
+
+        HCCObjects.requireNonNull(d, "changeModeDelay can't be null");
+
+        if (d.isNegative()) {
+            throw new IllegalArgumentException("can't accept negative delay: " + d);
+        }
+
+        if (d.isZero()) {
+            logger.warn("Zero change mode delay, prepare for trouble");
+        }
+
+        return d;
     }
 
     @Override
@@ -395,6 +410,9 @@ public class HeatPump extends AbstractHvacDevice {
         switchRunning.setState(false).block();
         switchFan.setState(false).block();
         switchMode.setState(false).block();
+
+        uptimeCounterSubscription.dispose();
+
         logger.info("Shut down: {}", getAddress());
     }
 
