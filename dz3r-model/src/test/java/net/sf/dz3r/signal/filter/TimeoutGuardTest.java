@@ -46,7 +46,7 @@ class TimeoutGuardTest {
     @Test
     void nodelay() {
 
-        var guard = new TimeoutGuard<Integer, Void>(timeout);
+        var guard = new TimeoutGuard<Integer, Void>(timeout, true);
 
         var source = Flux.range(0, 3).map(v -> new Signal<>(Instant.now(), v, (Void) null));
         var guarded = guard

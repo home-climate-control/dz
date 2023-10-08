@@ -101,7 +101,7 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
             return in;
         }
 
-        return new TimeoutGuard<Double, Void>(t).compute(in);
+        return new TimeoutGuard<Double, Void>(t, true).compute(in);
     }
 
     /**

@@ -38,18 +38,6 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
     private final Thread guardThread;
 
     /**
-     * Create a non-repeating instance.
-     *
-     * This is the preferred way of dealing with timeouts, generating extra traffic is counterproductive
-     * and may mask design problems.
-     *
-     * @param timeout Timeout to observe.
-     */
-    public TimeoutGuard(Duration timeout) {
-        this(timeout, false);
-    }
-
-    /**
      * Create an instance.
      *
      * @param timeout Timeout to observe.
