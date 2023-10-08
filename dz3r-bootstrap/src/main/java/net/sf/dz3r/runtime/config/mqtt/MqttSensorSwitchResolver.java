@@ -105,7 +105,9 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
             return in;
         }
 
-        return new TimeoutGuard<Double, Void>(cf.id(), t, true).compute(in);
+        var id = Optional.ofNullable(cf.id()).orElse(cf.address());
+
+        return new TimeoutGuard<Double, Void>(id, t, true).compute(in);
     }
 
     /**
