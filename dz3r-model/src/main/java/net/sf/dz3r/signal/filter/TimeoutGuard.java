@@ -101,7 +101,7 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
 
     private void generateTimeoutSignal(Instant now) {
 
-        logger.warn("{}: timeout of {} is exceeded", marker, timeout);
+        logger.warn("{}: timeout of {} is exceeded, inTimeout={}, repeat={}", marker, timeout, inTimeout, repeat);
 
         timeoutFluxSink.next(new Signal<>(
                         now,
