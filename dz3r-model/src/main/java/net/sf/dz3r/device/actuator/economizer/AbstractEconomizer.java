@@ -19,7 +19,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -121,7 +120,6 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         // Just get the (indoor, ambient) pair flux with no nulls or errors
         var stage1 = Flux
                 .create(this::connectCombined)
-                .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(pair -> logger.trace("{}: raw indoor={}, ambient={}", getAddress(), pair.getLeft(), pair.getRight()))
                 .filter(pair -> pair.getLeft() != null && pair.getRight() != null)
                 .filter(pair -> !pair.getLeft().isError() && !pair.getRight().isError())
@@ -142,7 +140,6 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
                 .subscribe();
 
         ambientFlux
-                .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(this::recordAmbient)
 
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
