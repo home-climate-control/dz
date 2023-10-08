@@ -3,6 +3,7 @@ package net.sf.dz3r.runtime.config.mqtt;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.runtime.config.ConfigurationMapper;
+import net.sf.dz3r.runtime.config.Id2Flux;
 import net.sf.dz3r.runtime.config.SensorSwitchResolver;
 import net.sf.dz3r.runtime.config.hardware.SensorConfig;
 import net.sf.dz3r.runtime.config.hardware.SwitchConfig;
@@ -46,11 +47,11 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
     }
 
     @Override
-    public final Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> getSensorFluxes() {
+    public final Flux<Id2Flux> getSensorFluxes() {
         return getSensorFluxes(endpoint2adapter, sensorConfigs);
     }
 
-    private Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source) {
+    private Flux<Id2Flux> getSensorFluxes(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttSensorConfig> source) {
 
         return Flux
                 .fromIterable(source)
@@ -61,21 +62,24 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                     var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
                     var listener = resolveListener(c.mqttBrokerSpec(), adapter);
 
-                    return new ImmutablePair<>(c, listener);
+                    return new Config2Listener<>(c.sensorConfig, listener);
                 })
 
                 // This is where things get hairy
                 .parallel()
                 .runOn(Schedulers.boundedElastic())
-                .map(kv -> {
-                    var id = kv.getKey().sensorConfig().id();
-                    var address = kv.getKey().sensorConfig().address();
-                    var flux = kv.getValue().getFlux(address);
+                .map(c2l -> {
+                    var id = c2l.config.id();
+                    var address = c2l.config.address();
+                    var flux = c2l.listener.getFlux(address);
 
                     // ID takes precedence over address
                     var key = id == null ? address : id;
 
-                    return (Map.Entry<String, Flux<Signal<Double, Void>>>) new ImmutablePair<>(key, guarded(flux, kv.getKey().sensorConfig));
+                    return new Id2Flux(
+                            key,
+                            guarded(flux, c2l.config)
+                    );
                 })
                 .sequential();
     }
@@ -210,5 +214,12 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
     public record MqttSwitchConfig(
             MqttBrokerSpec mqttBrokerSpec,
             SwitchConfig switchConfig) {
+    }
+
+    private record Config2Listener<L extends SignalSource<String, Double, Void>>(
+            SensorConfig config,
+            L listener
+    ) {
+
     }
 }

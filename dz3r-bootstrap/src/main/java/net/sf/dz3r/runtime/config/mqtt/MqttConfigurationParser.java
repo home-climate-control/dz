@@ -7,11 +7,11 @@ import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.runtime.config.ConfigurationMapper;
+import net.sf.dz3r.runtime.config.Id2Flux;
 import net.sf.dz3r.runtime.config.connector.HomeAssistantConfig;
 import net.sf.dz3r.runtime.config.connector.HomeAssistantConfigParser;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
-import net.sf.dz3r.signal.Signal;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,7 +49,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
      * is gathered.
      */
     public Mono<Tuple2<
-            List<Map.Entry<String, Flux<Signal<Double, Void>>>>,
+            List<Id2Flux>,
             List<Map.Entry<String, AbstractMqttSwitch>>>> parse(
             Set<MqttDeviceConfig> esphome,
             Set<MqttDeviceConfig> zigbee2mqtt,
@@ -117,7 +117,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             var sensors = mqttConfigs
                     .publishOn(Schedulers.boundedElastic())
                     .flatMap(MqttSensorSwitchResolver::getSensorFluxes)
-                    .doOnNext(kv -> context.sensors.register(kv.getKey(), kv.getValue()))
+                    .doOnNext(kv -> context.sensors.register(kv.id(), kv.flux()))
                     .collectList();
 
             var switches = mqttConfigs
