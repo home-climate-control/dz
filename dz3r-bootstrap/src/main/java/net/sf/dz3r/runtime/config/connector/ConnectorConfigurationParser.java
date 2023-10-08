@@ -165,7 +165,7 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
                             cf.uri(),
                             cf.username(),
                             cf.password(),
-                            getSensorFeed2IdMapping(cf.sensorFeedMapping())));
+                            getSensorFeed2IdMapping(cf.id(), cf.sensorFeedMapping())));
         } finally {
             m.close();
         }
@@ -177,7 +177,12 @@ public class ConnectorConfigurationParser extends ConfigurationContextAware {
      *
      * @param source Mapping from the sensor feed ID to "reported as" ID.
      */
-    private Map<Flux<Signal<Double, Void>>, String> getSensorFeed2IdMapping(Map<String, String> source) {
+    private Map<Flux<Signal<Double, Void>>, String> getSensorFeed2IdMapping(String id, Map<String, String> source) {
+
+        if (source == null) {
+            logger.info("{}: missing sensor feed mapping, ignored", id);
+            return Map.of();
+        }
 
         return Flux
                 .fromIterable(source.entrySet())
