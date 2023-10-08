@@ -9,6 +9,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 
+import java.time.Clock;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -48,7 +49,7 @@ class AbstractEconomizerTest {
          * @param targetDevice Switch to control the economizer actuator.
          */
         protected TestEconomizer(String name, EconomizerSettings settings, Flux<Signal<Double, Void>> ambientFlux, Switch<String> targetDevice) {
-            super(name, settings, ambientFlux, targetDevice);
+            super(Clock.systemUTC(), name, settings, ambientFlux, targetDevice);
         }
 
         @Override

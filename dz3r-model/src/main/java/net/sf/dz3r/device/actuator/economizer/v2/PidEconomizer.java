@@ -12,6 +12,8 @@ import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
+import java.time.Clock;
+
 /**
  * Economizer implementation with PID jitter control.
  *
@@ -46,12 +48,13 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      * @param targetDevice Switch to control the economizer actuator.
      */
     public PidEconomizer(
+            Clock clock,
             String name,
             EconomizerSettings settings,
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(name, settings, ambientFlux, targetDevice);
+        super(clock, name, settings, ambientFlux, targetDevice);
 
         controller = new SimplePidController<>("(controller) " + getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + getAddress(), 0, HYSTERESIS);
