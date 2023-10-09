@@ -101,7 +101,7 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
 
     private void generateTimeoutSignal(Instant now) {
 
-        logger.warn("{}: timeout of {} is exceeded, inTimeout={}, repeat={}", marker, timeout, inTimeout, repeat);
+        logger.info("{}: timeout of {} is exceeded, inTimeout={}, repeat={}", marker, timeout, inTimeout, repeat);
 
         timeoutFluxSink.next(new Signal<>(
                         now,
@@ -119,10 +119,13 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
         var actual = in
                 .doOnNext(s -> touch(s.timestamp))
                 .doOnNext(ignored -> inTimeout = false)
+                .doOnError(t -> logger.error("{}: errored out", marker, t))
                 .doOnComplete(this::close);
 
         return Flux.merge(actual, timeoutFlux)
-                .doOnNext(s -> logger.trace("{}: compute={}", marker, s));
+                .doOnNext(s -> logger.trace("{}: compute={}", marker, s))
+                .doOnError(t -> logger.error("{}: errored out", marker, t))
+                .doOnComplete(() -> logger.debug("{}: completed", marker));
     }
 
     private synchronized void touch(Instant timestamp) {

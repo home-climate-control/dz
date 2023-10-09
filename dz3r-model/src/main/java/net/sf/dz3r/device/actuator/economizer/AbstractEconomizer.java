@@ -138,11 +138,17 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
                 // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
                 .flatMap(demandDevice::setState)
 
+                .doOnError(t -> logger.error("{}: errored out", getAddress(), t))
+                .doOnComplete(() -> logger.debug("{}: completed", getAddress()))
+
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
 
         ambientFlux
                 .doOnNext(this::recordAmbient)
+
+                .doOnError(t -> logger.error("{}: errored out", getAddress(), t))
+                .doOnComplete(() -> logger.debug("{}: completed", getAddress()))
 
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
