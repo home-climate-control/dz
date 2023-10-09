@@ -281,6 +281,9 @@ class TimeoutGuardTest {
         // leftToWait.toMillis() <= 0 AND (inTimeout == true AND repeat == false) will cause
         // wait() with negative time
 
+        // As of rev. e95b3cbf8a4616a82462c805a9cd16d6c2ece8ed this test hangs in IntelliJ, but passes in Gradle.
+        // Apparently, there's a race condition around leftToWait.
+
         // Normal operation will yield 0, timeout, 1, timeout, 2
         // Failure will yield something else
 
