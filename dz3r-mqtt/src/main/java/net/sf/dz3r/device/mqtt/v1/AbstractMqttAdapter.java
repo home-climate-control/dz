@@ -212,7 +212,12 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint>,
             });
         });
 
-        var result = flux.publish().autoConnect();
+        var result = flux
+                .doOnNext(s -> logger.trace("{}: receive: {}", getAddress(), s))
+                .doOnError(t -> logger.error("{}: errored out", getAddress(), t))
+                .doOnComplete(() -> logger.debug("{}: completed", getAddress()))
+                .publish()
+                .autoConnect();
 
         var topicFilter = topic + (includeSubtopics ? "/#" : "");
 
