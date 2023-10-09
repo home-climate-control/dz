@@ -1,7 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.counter.ResourceUsageCounter;
-import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
@@ -350,16 +349,6 @@ public class HeatPump extends AbstractHvacDevice {
                                     requestedOperation,
                                     uptime()))
                 );
-    }
-
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-
-        return new JmxDescriptor(
-                "dz",
-                "Single Stage Heatpump Driver (energize to heat)",
-                getAddress(),
-                "Controls single stage heat pump");
     }
 
     @Override

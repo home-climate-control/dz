@@ -1,6 +1,5 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
  * Adds a multistage capability.
  *
  * @see net.sf.dz3r.model.MultistageUnitController
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class SwitchableStackedHvacDevice extends AbstractHvacDevice {
 
@@ -71,15 +70,6 @@ public class SwitchableStackedHvacDevice extends AbstractHvacDevice {
     public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
         // VT: NOTE: Don't forget to setFlux() here
         throw new UnsupportedOperationException("Not Implemented");
-    }
-
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-        return new JmxDescriptor(
-                "dz",
-                "Switchable Stacked HVAC Device",
-                getAddress(),
-                "Stack of switchable HVAC devices");
     }
 
     @Override

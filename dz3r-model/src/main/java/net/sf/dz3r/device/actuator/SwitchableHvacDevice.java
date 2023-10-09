@@ -1,7 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.counter.ResourceUsageCounter;
-import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
@@ -218,15 +217,6 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
      */
     private boolean getState(HvacCommand command) {
         return Optional.ofNullable(command.demand).orElse(0d) + Optional.ofNullable(command.fanSpeed).orElse(0d) > 0;
-    }
-
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-        return new JmxDescriptor(
-                "dz",
-                "Switchable HVAC Device",
-                getAddress(),
-                "Turns on and off to provide " + mode.description.toLowerCase());
     }
 
     @Override

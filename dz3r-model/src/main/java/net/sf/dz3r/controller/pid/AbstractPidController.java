@@ -1,14 +1,12 @@
 package net.sf.dz3r.controller.pid;
 
 import net.sf.dz3r.controller.AbstractProcessController;
-import net.sf.dz3r.jmx.JmxAttribute;
-import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.signal.Signal;
 
 /**
  * Abstract base for a PID controller implementation.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class AbstractPidController<P> extends AbstractProcessController<Double, Double, P> implements PidController<P> {
 
@@ -213,29 +211,17 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
     }
 
     @Override
-    @JmxAttribute(description = "Integral component saturation limit")
     public final double getLimit() {
         return saturationLimit;
-    }
-
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-        return new JmxDescriptor(
-                "dz",
-                "PID Controller",
-                jmxName,
-                "Emits control signal based on (P, I, D, Limit) values");
     }
 
     protected abstract double getIntegral(Signal<Status<Double>, P> lastKnownSignal, Signal<Double, P>  pv, double error);
     protected abstract double getDerivative(Signal<Status<Double>, P> lastKnownSignal, Signal<Double, P>  pv, double error);
 
-    @JmxAttribute(description = "Accumulated integral component")
     public final double getIntegral() {
         return lastI;
     }
 
-    @JmxAttribute(description = "Whether to reset the accumulated integral component upon setpoint change")
     public boolean getResetOnSetpointChange() {
         return resetOnSetpointChange;
     }

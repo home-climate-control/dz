@@ -6,8 +6,6 @@ import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer;
-import net.sf.dz3r.jmx.JmxAware;
-import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.CallingStatus;
@@ -31,7 +29,7 @@ import java.util.Optional;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, JmxAware, AutoCloseable {
+public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, AutoCloseable {
 
     public enum State {
 
@@ -276,15 +274,6 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     @Override
     public String getAddress() {
         return ts.getAddress();
-    }
-
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-        return new JmxDescriptor(
-                "dz",
-                "Home Climate Control Zone",
-                getAddress(),
-                "Controls zone settings, collects sensor samples, and passes them to Zone Controller");
     }
 
     @Override

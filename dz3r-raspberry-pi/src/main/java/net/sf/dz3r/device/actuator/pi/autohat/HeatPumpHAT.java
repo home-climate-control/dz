@@ -3,8 +3,6 @@ package net.sf.dz3r.device.actuator.pi.autohat;
 import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
 import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.device.actuator.HeatPump;
-import net.sf.dz3r.jmx.JmxAttribute;
-import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.model.HvacMode;
 import reactor.core.publisher.Mono;
 
@@ -17,7 +15,7 @@ import java.time.Duration;
  * In addition to flipping relays, this implementation will use the {@code Power} and {@code Comms} lights
  * to indicate the fan and condenser status, respectively. {@code Warn} light is not used by this implementation.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class HeatPumpHAT extends HeatPump {
 
@@ -91,17 +89,6 @@ public class HeatPumpHAT extends HeatPump {
         setStatusLightsIntensity(statusLightsIntensity);
     }
 
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-
-        return new JmxDescriptor(
-                "dz",
-                "Single Stage Heatpump Driver (energize to heat)",
-                getAddress(),
-                "Controls single stage heat pump connected to Pimoroni Automation HAT");
-    }
-
-    @JmxAttribute(description = "Relay lights intensity. 1.0 is VERY bright.")
     public double getRelayLightsIntensity() {
         return relayLightsIntensity;
     }
@@ -120,7 +107,6 @@ public class HeatPumpHAT extends HeatPump {
         this.relayLightsIntensity = relayLightsIntensity;
     }
 
-    @JmxAttribute(description = "Status lights intensity. 1.0 is VERY bright.")
     public double getStatusLightsIntensity() {
         return statusLightsIntensity;
     }
@@ -174,8 +160,8 @@ public class HeatPumpHAT extends HeatPump {
 
         // VT: FIXME: Temporary solution, let's eat this elephant one bite at a time
         try {
-        PimoroniAutomationHAT.getInstance().status().power().write(state);
-        logger.debug("fan={} - unconfirmed, Mono returned", state);
+            PimoroniAutomationHAT.getInstance().status().power().write(state);
+            logger.debug("fan={} - unconfirmed, Mono returned", state);
         } catch (IOException ex) {
             logger.error("Error setting status lights, ignored", ex);
         }

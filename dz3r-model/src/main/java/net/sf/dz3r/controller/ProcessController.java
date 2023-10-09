@@ -1,6 +1,5 @@
 package net.sf.dz3r.controller;
 
-import net.sf.dz3r.jmx.JmxAttribute;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import reactor.core.publisher.Flux;
@@ -32,7 +31,6 @@ public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessCo
      *
      * @return Current setpoint value.
      */
-    @JmxAttribute(description = "Setpoint")
     double getSetpoint();
 
     /**
@@ -40,7 +38,6 @@ public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessCo
      *
      * @return The process variable.
      */
-    @JmxAttribute(description = "Process Variable")
     Signal<I, P> getProcessVariable();
 
     /**
@@ -48,7 +45,6 @@ public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessCo
      *
      * @return Current error value.
      */
-    @JmxAttribute(description = "Error")
     double getError();
 
     /**

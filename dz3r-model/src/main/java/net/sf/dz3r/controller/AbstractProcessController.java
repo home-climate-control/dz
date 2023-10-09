@@ -1,6 +1,5 @@
 package net.sf.dz3r.controller;
 
-import net.sf.dz3r.jmx.JmxAware;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,9 +11,9 @@ import java.time.Duration;
 /**
  * Base class for reactive process controllers.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public abstract class AbstractProcessController<I, O, P> implements ProcessController<I, O, P>, JmxAware {
+public abstract class AbstractProcessController<I, O, P> implements ProcessController<I, O, P> {
 
     protected final Logger logger = LogManager.getLogger();
 
