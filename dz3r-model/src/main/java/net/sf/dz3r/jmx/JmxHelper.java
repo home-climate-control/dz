@@ -127,7 +127,7 @@ public class JmxHelper implements DynamicMBean {
     @Override
     public Object getAttribute(String attribute) {
 
-        if (attribute == null || "".equals(attribute)) {
+        if (attribute == null || attribute.isEmpty()) {
 
             throw new IllegalArgumentException(NO_NULLS);
         }

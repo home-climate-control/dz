@@ -104,7 +104,7 @@ public class SchedulePeriodFactory {
      */
     public SchedulePeriod build(String id, String name, String startTime, String endTime, String days) {
 
-        if (name == null || "".equals(name)) {
+        if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Name can't be null or empty");
         }
 
