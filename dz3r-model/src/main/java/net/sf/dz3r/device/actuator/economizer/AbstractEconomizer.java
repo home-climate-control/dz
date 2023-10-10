@@ -72,16 +72,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     /**
      * Create an instance.
      *
-     * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
-     *
-     * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected AbstractEconomizer(
             Clock clock,
             String name,
             EconomizerSettings settings,
-            Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
         this.clock = clock == null ? Clock.systemUTC() : clock;

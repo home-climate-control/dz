@@ -54,7 +54,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(clock, name, settings, ambientFlux, targetDevice);
+        super(clock, name, settings, targetDevice);
 
         controller = new SimplePidController<>("(controller) " + getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + getAddress(), 0, HYSTERESIS);

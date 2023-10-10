@@ -30,7 +30,7 @@ class AbstractEconomizerTest {
                 true,
                 1.0, 0.0001, 1.0);
 
-        var e = new TestEconomizer("eco", settings, Flux.empty(), new NullSwitch(""));
+        var e = new TestEconomizer("eco", settings, new NullSwitch(""));
 
         var signal = e.computeCombined(source.indoorTemperature, source.ambientTemperature);
 
@@ -45,11 +45,10 @@ class AbstractEconomizerTest {
          * <p>
          * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
          *
-         * @param ambientFlux  Flux from the ambient temperature sensor.
          * @param targetDevice Switch to control the economizer actuator.
          */
-        protected TestEconomizer(String name, EconomizerSettings settings, Flux<Signal<Double, Void>> ambientFlux, Switch<String> targetDevice) {
-            super(Clock.systemUTC(), name, settings, ambientFlux, targetDevice);
+        protected TestEconomizer(String name, EconomizerSettings settings, Switch<String> targetDevice) {
+            super(Clock.systemUTC(), name, settings, targetDevice);
         }
 
         @Override
