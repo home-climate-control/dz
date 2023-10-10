@@ -202,7 +202,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         var source = Optional.ofNullable(economizer)
                 .map(eco -> eco.compute(combined))
-                .orElse(in);
+                .orElse(combined);
 
         // Since the zone doesn't need the payload, but the thermostat does, need to translate the input
         var stage0 = source
