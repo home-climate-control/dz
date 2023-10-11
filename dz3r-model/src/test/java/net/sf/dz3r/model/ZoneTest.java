@@ -4,7 +4,6 @@ import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -115,7 +114,6 @@ class ZoneTest {
     }
 
     @Test
-    @Disabled("temporary, must address before #290 is closed")
     void setpointChangeEmitsSignal() {
 
         var source = Flux
@@ -143,17 +141,18 @@ class ZoneTest {
         pvSink.complete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
-        assertThat(accumulator).hasSize(4);
+        assertThat(accumulator).hasSize(5);
 
         // PV change
         assertThat(accumulator.get(0).getValue().callingStatus.calling).isFalse();
         assertThat(accumulator.get(1).getValue().callingStatus.calling).isTrue();
 
-        // Setpoint change
+        // Setpoint change; one replayed by AbstractProcessController, another replayed by Zone
         assertThat(accumulator.get(2).getValue().callingStatus.calling).isFalse();
+        assertThat(accumulator.get(3).getValue().callingStatus.calling).isFalse();
 
         // PV change again
-        assertThat(accumulator.get(3).getValue().callingStatus.calling).isTrue();
+        assertThat(accumulator.get(4).getValue().callingStatus.calling).isTrue();
 
         out.dispose();
     }

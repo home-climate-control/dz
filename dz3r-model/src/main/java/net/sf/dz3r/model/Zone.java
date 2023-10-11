@@ -123,6 +123,10 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
     /**
      * Force the {@link #lastKnownSignal} through {@link #compute(Flux)}.
+     *
+     * Note that there's one replay in {@link net.sf.dz3r.controller.AbstractProcessController#setSetpoint(double)}
+     * (which will cause the signal to be replayed twice), however, settings outside the process controller may have changed
+     * which makes this necessary.
      */
     private void bump() {
 
