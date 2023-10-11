@@ -123,6 +123,10 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
     /**
      * Force the {@link #lastKnownSignal} through {@link #compute(Flux)}.
+     *
+     * Note that there's one replay in {@link net.sf.dz3r.controller.AbstractProcessController#setSetpoint(double)}
+     * (which will cause the signal to be replayed twice), however, settings outside the process controller may have changed
+     * which makes this necessary.
      */
     private void bump() {
 
@@ -202,7 +206,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         var source = Optional.ofNullable(economizer)
                 .map(eco -> eco.compute(combined))
-                .orElse(in);
+                .orElse(combined);
 
         // Since the zone doesn't need the payload, but the thermostat does, need to translate the input
         var stage0 = source
@@ -295,6 +299,8 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
             if (economizer != null) {
                 economizer.close();
             }
+
+            feedbackSink.tryEmitComplete();
 
         } finally {
             logger.info("Shut down: {}", getAddress());
