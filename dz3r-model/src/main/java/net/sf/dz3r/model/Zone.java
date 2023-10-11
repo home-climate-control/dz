@@ -296,6 +296,8 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
                 economizer.close();
             }
 
+            feedbackSink.tryEmitComplete();
+
         } finally {
             logger.info("Shut down: {}", getAddress());
             ThreadContext.pop();

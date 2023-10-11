@@ -113,7 +113,7 @@ class ZoneControllerTest {
      * Simplest possible configuration: one thermostat.
      */
     @Test
-    void testOneZone() {
+    void testOneZone() throws Exception {
 
         var offset = new AtomicInteger();
         var sequence = Flux
@@ -126,6 +126,8 @@ class ZoneControllerTest {
 
         var stage1 = z.compute(sequence);
         var stage2 = zc.compute(stage1).log();
+
+        z.close();
 
         // DZ-reactive sequence
         StepVerifier
@@ -147,7 +149,7 @@ class ZoneControllerTest {
      * doesn't indicate calling.
      */
     @Test
-    void testColdStartNotCalling() {
+    void testColdStartNotCalling() throws Exception {
 
         var ts1 = new Thermostat("ts20", 20, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
@@ -166,6 +168,9 @@ class ZoneControllerTest {
         // Note merge(), order is irrelevant, zero demand
         var fluxZ = zc.compute(Flux.merge(flux1, flux2));
 
+        z1.close();
+        z2.close();
+
         StepVerifier
                 .create(fluxZ)
                 .assertNext(s -> assertThat(s.getValue().demand).isZero())
@@ -180,7 +185,7 @@ class ZoneControllerTest {
      * indicates calling.
      */
     @Test
-    void testColdStartCalling() {
+    void testColdStartCalling() throws Exception {
 
         var ts1 = new Thermostat("ts20", 20, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
@@ -199,6 +204,9 @@ class ZoneControllerTest {
         // Note concat(), order is important for StepVerifier
         var fluxZ = zc.compute(Flux.concat(flux1, flux2));
 
+        z1.close();
+        z2.close();
+
         StepVerifier
                 .create(fluxZ)
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
@@ -210,7 +218,7 @@ class ZoneControllerTest {
      * Make sure non-voting zones don't start the HVAC.
      */
     @Test
-    void nonVoting() {
+    void nonVoting() throws Exception {
 
         var setpoint1 = 20.0;
         var setpoint2 = 25.0;
@@ -236,6 +244,9 @@ class ZoneControllerTest {
         // Note concat(), order is important for StepVerifier
         var fluxZ = zc.compute(Flux.concat(flux1, flux2));
 
+        z1.close();
+        z2.close();
+
         StepVerifier
                 .create(fluxZ)
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0))
@@ -248,7 +259,7 @@ class ZoneControllerTest {
      * for the case when it is the last enabled zone of many.
      */
     @Test
-    void lastZoneOfManyNonVoting() {
+    void lastZoneOfManyNonVoting() throws Exception {
 
         var setpoint1 = 20.0;
         var setpoint2 = 25.0;
@@ -276,6 +287,9 @@ class ZoneControllerTest {
         // Note concat(), order is important for StepVerifier
         var fluxZ = zc.compute(Flux.concat(flux1, flux2));
 
+        z1.close();
+        z2.close();
+
         StepVerifier
                 .create(fluxZ)
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(4.0))
@@ -288,7 +302,7 @@ class ZoneControllerTest {
      * for the case when it is the only zone configured for the zone controller.
      */
     @Test
-    void onlyZoneNonVoting() {
+    void onlyZoneNonVoting() throws Exception {
 
         var setpoint1 = 20.0;
 
@@ -306,6 +320,8 @@ class ZoneControllerTest {
         var flux1 = z1.compute(sequence);
         var fluxZ = zc.compute(flux1);
 
+        z1.close();
+
         StepVerifier
                 .create(fluxZ)
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(4.0))
@@ -315,7 +331,7 @@ class ZoneControllerTest {
      * Make sure disabled thermostats don't start the HVAC unit.
      */
     @Test
-    void disabled() {
+    void disabled() throws Exception {
 
         var setpoint1 = 20.0;
 
@@ -333,6 +349,8 @@ class ZoneControllerTest {
         var flux1 = z1.compute(sequence);
         var fluxZ = zc.compute(flux1);
 
+        z1.close();
+
         StepVerifier
                 .create(fluxZ)
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0))
@@ -343,7 +361,7 @@ class ZoneControllerTest {
      * Make sure the zone controller handles incoming error signals as expected.
      */
     @Test
-    void errorSignalSingleZone() {
+    void errorSignalSingleZone() throws Exception {
 
         var ts = new Thermostat("ts", 20, 1, 0, 0, 1);
         var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
@@ -360,6 +378,8 @@ class ZoneControllerTest {
         var fluxSignal = z.compute(sequence);
         var fluxZone = zc.compute(fluxSignal);
 
+        z.close();
+
         // Error signal from the only zone means we need to shut the unit off
         StepVerifier
                 .create(fluxZone)
@@ -373,7 +393,7 @@ class ZoneControllerTest {
      * Make sure the zone controller handles incoming error signals as expected.
      */
     @Test
-    void errorSignalOneInMultiZone() {
+    void errorSignalOneInMultiZone() throws Exception {
 
         var ts1 = new Thermostat("ts20", 20, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
@@ -401,6 +421,9 @@ class ZoneControllerTest {
         // Note concat(), order is important for StepVerifier
         var fluxZ = zc.compute(Flux.concat(flux1, flux2));
 
+        z1.close();
+        z2.close();
+
         // Error signal from just one zone means we just adjust the demand accordingly
         StepVerifier
                 .create(fluxZ)
@@ -416,7 +439,7 @@ class ZoneControllerTest {
      * Make sure the zone controller handles alien zone incoming signals as expected.
      */
     @Test
-    void alienZone() {
+    void alienZone() throws Exception {
 
         var ts1 = new Thermostat("ours", 20, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
@@ -435,6 +458,9 @@ class ZoneControllerTest {
 
         // Note concat(), order is important for StepVerifier
         var fluxZ = zc.compute(Flux.concat(flux1, flux2));
+
+        z1.close();
+        z2.close();
 
         // Note, flux2 never made it through
         StepVerifier
