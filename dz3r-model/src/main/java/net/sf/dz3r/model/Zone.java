@@ -200,7 +200,9 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         // - the feedback, repeats the last sensor reading upon changing zone settings and forces a new signal to be emitted here
 
         // Record the signal so the feedback flux can pick it up
-        var recorded = in.doOnNext(this::recordSignal);
+        var recorded = in
+                .doOnNext(this::recordSignal)
+                .doOnComplete(feedbackSink::tryEmitComplete);
 
         var combined = Flux.merge(recorded, feedbackFlux);
 
@@ -299,8 +301,6 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
             if (economizer != null) {
                 economizer.close();
             }
-
-            feedbackSink.tryEmitComplete();
 
         } finally {
             logger.info("Shut down: {}", getAddress());
