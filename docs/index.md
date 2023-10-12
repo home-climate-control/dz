@@ -32,7 +32,7 @@ Home Climate Control: Docs
 
 # Next Steps
 * [Platform Support](./platform.md)
-* [Hardware Support](./hardware.md)
+* [Hardware Support](hardware/index.md)
 * [Build](./build/index.md)
 * [Configuration Reference](./configuration/index.md)
 * [Instrument Cluster](./instrument-cluster/index.md)
