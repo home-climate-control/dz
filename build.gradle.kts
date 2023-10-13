@@ -42,7 +42,7 @@ subprojects {
     }
 
     group = "net.sf.dz3"
-    version = "3.6.8-SNAPSHOT"
+    version = "4.0.0"
 
     jacoco {
         toolVersion = "0.8.9"
