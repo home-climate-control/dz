@@ -4,7 +4,7 @@ import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
-import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Thermostat;
@@ -21,7 +21,7 @@ import java.time.Clock;
  *
  * @param <A> Actuator device address type.
  */
-public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A> {
+public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
 
     /**
      * Controller defining this economizer's dynamic behavior.
@@ -45,16 +45,16 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
      * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
      *
      * @param ambientFlux Flux from the ambient temperature sensor.
-     * @param targetDevice Switch to control the economizer actuator.
+     * @param device HVAC device acting as the economizer.
      */
     public PidEconomizer(
             Clock clock,
             String name,
             EconomizerSettings settings,
             Flux<Signal<Double, Void>> ambientFlux,
-            Switch<A> targetDevice) {
+            HvacDevice device) {
 
-        super(clock, name, settings, targetDevice);
+        super(clock, name, settings, device);
 
         controller = new SimplePidController<>("(controller) " + getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + getAddress(), 0, HYSTERESIS);
@@ -63,7 +63,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer<A
     }
 
     /**
-     * Compute the {@link #targetDevice} state flux.
+     * Compute the {@link #device} state flux.
      *
      * @see Thermostat#compute(Flux)
      */

@@ -89,6 +89,10 @@ public class ConfigurationParser {
 
             // Need all sensors and switches resolved by now
 
+            new HvacConfigurationParser(ctx).parse(source.hvac());
+            ctx.hvacDevices.close();
+            m.checkpoint("configured HVAC devices");
+
             // VT: FIXME: Need to resolve dampers and damper multiplexers
 
             new ZoneConfigurationParser(ctx).parse(source.zones());
@@ -103,10 +107,6 @@ public class ConfigurationParser {
 
             var connectorFlux = new ConnectorConfigurationParser(ctx).parse(source.connectors());
             m.checkpoint("configured connectors 1/2");
-
-            new HvacConfigurationParser(ctx).parse(source.hvac());
-            ctx.hvacDevices.close();
-            m.checkpoint("configured HVAC devices");
 
             new UnitConfigurationParser(ctx).parse(source.units());
             ctx.units.close();

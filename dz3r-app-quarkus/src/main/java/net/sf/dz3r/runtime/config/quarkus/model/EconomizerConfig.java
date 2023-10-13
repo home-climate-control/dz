@@ -16,6 +16,6 @@ public interface EconomizerConfig {
     PidControllerConfig controller();
     @JsonProperty("mode")
     HvacMode mode();
-    @JsonProperty("switch-address")
-    String switchAddress();
+    @JsonProperty("hvac-device")
+    String hvacDevice();
 }

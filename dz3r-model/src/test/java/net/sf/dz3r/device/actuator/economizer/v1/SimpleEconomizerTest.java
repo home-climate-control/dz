@@ -1,6 +1,7 @@
 package net.sf.dz3r.device.actuator.economizer.v1;
 
 import net.sf.dz3r.device.actuator.NullSwitch;
+import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
@@ -45,7 +46,12 @@ class SimpleEconomizerTest {
         var indoor = 25.0;
 
         // VT: FIXME: Replace with a mock to verify()
-        var targetDevice = new NullSwitch("s");
+        var device = new SwitchableHvacDevice(
+                "d",
+                HvacMode.COOLING,
+                new NullSwitch("s"),
+                false,
+                null);
 
         // Can't feed it right away, it will all be consumed within the constructor
         var ambientFlux = getAmbientFlux();
@@ -56,7 +62,7 @@ class SimpleEconomizerTest {
                 "economizer",
                 settings,
                 deferredAmbientFlux,
-                targetDevice);
+                device);
 
         economizer
                 .compute(Flux.just(new Signal<>(Instant.now(), indoor)))
