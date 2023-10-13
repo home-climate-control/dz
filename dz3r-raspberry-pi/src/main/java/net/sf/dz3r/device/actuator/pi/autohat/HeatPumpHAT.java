@@ -1,12 +1,13 @@
 package net.sf.dz3r.device.actuator.pi.autohat;
 
 import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
+import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.device.actuator.HeatPump;
-import net.sf.dz3r.jmx.JmxAttribute;
-import net.sf.dz3r.jmx.JmxDescriptor;
+import net.sf.dz3r.model.HvacMode;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.time.Duration;
 
 /**
  * Single stage heatpump driver based on Pimoroni Automation HAT.
@@ -14,7 +15,7 @@ import java.io.IOException;
  * In addition to flipping relays, this implementation will use the {@code Power} and {@code Comms} lights
  * to indicate the fan and condenser status, respectively. {@code Warn} light is not used by this implementation.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class HeatPumpHAT extends HeatPump {
 
@@ -36,8 +37,8 @@ public class HeatPumpHAT extends HeatPump {
      *
      * @param name JMX name.
      */
-    public HeatPumpHAT(String name) throws IOException {
-        this(name, AutomationHatWrapper.getInstance(), false, false, false);
+    public HeatPumpHAT(String name, ResourceUsageCounter<Duration> uptimeCounter) throws IOException {
+        this(name, AutomationHatWrapper.getInstance(), false, false, false, Duration.ZERO, uptimeCounter);
     }
 
     /**
@@ -50,14 +51,21 @@ public class HeatPumpHAT extends HeatPump {
      * @param reverseMode {@code true} if the "off" mode position corresponds to logical one.
      * @param reverseRunning {@code true} if the "off" running position corresponds to logical one.
      * @param reverseFan {@code true} if the "off" fan position corresponds to logical one.
+     * @param changeModeDelay Delay to observe while changing the {@link HvacMode operating mode}.
+     * @param uptimeCounter Self-explanatory. Optional for now.
      */
     public HeatPumpHAT(
             String name,
             boolean reverseMode,
             boolean reverseRunning,
-            boolean reverseFan) throws IOException {
+            boolean reverseFan,
+            Duration changeModeDelay,
+            ResourceUsageCounter<Duration> uptimeCounter) throws IOException {
 
-        this(name, AutomationHatWrapper.getInstance(), reverseMode, reverseRunning, reverseFan);
+        this(name, AutomationHatWrapper.getInstance(),
+                reverseMode, reverseRunning, reverseFan,
+                changeModeDelay,
+                uptimeCounter);
     }
 
     private HeatPumpHAT(
@@ -65,29 +73,22 @@ public class HeatPumpHAT extends HeatPump {
             AutomationHatWrapper hatWrapper,
             boolean reverseMode,
             boolean reverseRunning,
-            boolean reverseFan) throws IOException {
+            boolean reverseFan,
+            Duration changeModeDelay,
+            ResourceUsageCounter<Duration> uptimeCounter) throws IOException {
 
         super(name,
                 hatWrapper.relay().get(0), reverseMode,
                 hatWrapper.relay().get(1), reverseRunning,
-                hatWrapper.relay().get(2), reverseFan
+                hatWrapper.relay().get(2), reverseFan,
+                changeModeDelay,
+                uptimeCounter
         );
 
         setRelayLightsIntensity(relayLightsIntensity);
         setStatusLightsIntensity(statusLightsIntensity);
     }
 
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-
-        return new JmxDescriptor(
-                "dz",
-                "Single Stage Heatpump Driver (energize to heat)",
-                getAddress(),
-                "Controls single stage heat pump connected to Pimoroni Automation HAT");
-    }
-
-    @JmxAttribute(description = "Relay lights intensity. 1.0 is VERY bright.")
     public double getRelayLightsIntensity() {
         return relayLightsIntensity;
     }
@@ -106,7 +107,6 @@ public class HeatPumpHAT extends HeatPump {
         this.relayLightsIntensity = relayLightsIntensity;
     }
 
-    @JmxAttribute(description = "Status lights intensity. 1.0 is VERY bright.")
     public double getStatusLightsIntensity() {
         return statusLightsIntensity;
     }
@@ -160,8 +160,8 @@ public class HeatPumpHAT extends HeatPump {
 
         // VT: FIXME: Temporary solution, let's eat this elephant one bite at a time
         try {
-        PimoroniAutomationHAT.getInstance().status().power().write(state);
-        logger.debug("fan={} - unconfirmed, Mono returned", state);
+            PimoroniAutomationHAT.getInstance().status().power().write(state);
+            logger.debug("fan={} - unconfirmed, Mono returned", state);
         } catch (IOException ex) {
             logger.error("Error setting status lights, ignored", ex);
         }

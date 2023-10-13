@@ -2,7 +2,6 @@ package net.sf.dz3r.runtime.config;
 
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
-import net.sf.dz3r.runtime.config.protocol.mqtt.MqttGateway;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -47,55 +46,6 @@ public interface ConfigurationMapper {
             @Override
             public String password() {
                 return source.password();
-            }
-
-            @Override
-            public boolean equals(Object other) {
-
-                if (!(other instanceof MqttEndpointSpec)) {
-                    return false;
-                }
-
-                return signature().equals(((MqttEndpointSpec) other).signature());
-            }
-
-            @Override
-            public int hashCode() {
-                return signature().hashCode();
-            }
-        };
-    }
-
-    default MqttBrokerSpec parseBroker(MqttGateway source) {
-        return new MqttBrokerSpec() {
-            @Override
-            public String host() {
-                return source.host();
-            }
-
-            @Override
-            public Integer port() {
-                return source.port();
-            }
-
-            @Override
-            public boolean autoReconnect() {
-                return source.autoReconnect();
-            }
-
-            @Override
-            public String username() {
-                return source.username();
-            }
-
-            @Override
-            public String password() {
-                return source.password();
-            }
-
-            @Override
-            public String rootTopic() {
-                return source.rootTopic();
             }
 
             @Override

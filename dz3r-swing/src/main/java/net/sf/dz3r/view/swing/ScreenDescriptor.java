@@ -6,7 +6,7 @@ import java.awt.Font;
 /**
  * Object defining screen element dimensions for a screen of a given size.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2020
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2020
  */
 public class ScreenDescriptor {
 

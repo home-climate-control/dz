@@ -11,7 +11,7 @@ import java.util.UUID;
 /**
  * Base class for all XBee commands.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public abstract class XBeeCommand extends DriverCommand<XBeeReactive> {
 

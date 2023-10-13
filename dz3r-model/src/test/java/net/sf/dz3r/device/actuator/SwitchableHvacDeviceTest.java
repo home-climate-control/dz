@@ -26,7 +26,7 @@ class SwitchableHvacDeviceTest {
         var minDelayMillis = 50;
         var maxDelayMillis = 200;
         var s = new NullSwitch("a", false, minDelayMillis, maxDelayMillis, null);
-        var d = new SwitchableHvacDevice("d", COOLING, s);
+        var d = new SwitchableHvacDevice("d", COOLING, s, false, null);
 
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(now, new HvacCommand(null, 0.8, null)),
@@ -64,7 +64,7 @@ class SwitchableHvacDeviceTest {
     @Disabled("for now; need to fix blocking operation first")
     void wrongMode() {
 
-        var d = new SwitchableHvacDevice("d", COOLING, mock(Switch.class));
+        var d = new SwitchableHvacDevice("d", COOLING, mock(Switch.class), false, null);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null))
         );
@@ -89,7 +89,7 @@ class SwitchableHvacDeviceTest {
     @Disabled("until #222 is fixed")
     void noFansForHeating() {
 
-        var d = new SwitchableHvacDevice("d", HvacMode.HEATING, mock(Switch.class));
+        var d = new SwitchableHvacDevice("d", HvacMode.HEATING, mock(Switch.class), false, null);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.8, 1.0))
         );
@@ -111,7 +111,7 @@ class SwitchableHvacDeviceTest {
     void allowFansForCooling() {
 
         var s = new NullSwitch("a");
-        var d = new SwitchableHvacDevice("d", COOLING, s);
+        var d = new SwitchableHvacDevice("d", COOLING, s, false, null);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.8, 1.0))
         );
@@ -132,7 +132,7 @@ class SwitchableHvacDeviceTest {
     @Test
     void modeOnly() {
 
-        var d = new SwitchableHvacDevice("d", COOLING, mock(Switch.class));
+        var d = new SwitchableHvacDevice("d", COOLING, mock(Switch.class), false, null);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(COOLING, null, null))
         );
@@ -152,7 +152,7 @@ class SwitchableHvacDeviceTest {
 
         var now = Instant.now();
         var s = new NullSwitch("a");
-        var d = new SwitchableHvacDevice("d", COOLING, s);
+        var d = new SwitchableHvacDevice("d", COOLING, s, false, null);
 
         var sequence = Flux.just(
                 // First, request cooling
@@ -198,7 +198,7 @@ class SwitchableHvacDeviceTest {
 
         var now = Instant.now();
         var s = new NullSwitch("a");
-        var d = new SwitchableHvacDevice("d", COOLING, s, true);
+        var d = new SwitchableHvacDevice("d", COOLING, s, true, null);
 
         var sequence = Flux.just(
                 // First, request cooling
@@ -222,7 +222,7 @@ class SwitchableHvacDeviceTest {
 
         var now = Instant.now();
         var s = new NullSwitch("a");
-        var d = new SwitchableHvacDevice("d", COOLING, s);
+        var d = new SwitchableHvacDevice("d", COOLING, s, false, null);
         var sequence = Flux
                 .just(new Signal<HvacCommand, Void>(now, new HvacCommand(null, 0.8, null)))
                 .publishOn(Schedulers.newSingle("blocking-fail"));
@@ -254,7 +254,7 @@ class SwitchableHvacDeviceTest {
 
         var now = Instant.now();
         var s = new NullSwitch("a");
-        var d = new SwitchableHvacDevice("d", COOLING, s);
+        var d = new SwitchableHvacDevice("d", COOLING, s, false, null);
         var sequence = Flux
                 .just(new Signal<HvacCommand, Void>(now, new HvacCommand(null, 0.8, null)))
                 .publishOn(Schedulers.newSingle("blocking-fail"));

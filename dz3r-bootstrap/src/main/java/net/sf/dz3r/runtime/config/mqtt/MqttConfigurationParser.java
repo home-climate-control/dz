@@ -1,14 +1,17 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
-import net.sf.dz3r.runtime.config.ConfigurationContext;
-import net.sf.dz3r.runtime.config.ConfigurationContextAware;
-import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
-import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.instrumentation.Marker;
-import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.runtime.config.ConfigurationContext;
+import net.sf.dz3r.runtime.config.ConfigurationContextAware;
+import net.sf.dz3r.runtime.config.ConfigurationMapper;
+import net.sf.dz3r.runtime.config.Id2Flux;
+import net.sf.dz3r.runtime.config.connector.HomeAssistantConfig;
+import net.sf.dz3r.runtime.config.connector.HomeAssistantConfigParser;
+import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
+import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -39,14 +42,19 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
      * @param esphome Set of ESPHome device configurations.
      * @param zigbee2mqtt Set of Zigbee2MQTT device configurations.
      * @param zwave2mqtt Set of ZWave2MQTT device configurations.
+     * @param ha Set of Home Assistant configurations.
      *
      * @return a {@link Mono} that gets completed when every sensor and switch configuration is resolved. Payload is irrelevant
      * and is to be used for informational purposes and flow control only, {@link #context} is where the useful information
      * is gathered.
      */
     public Mono<Tuple2<
-            List<Map.Entry<String, Flux<Signal<Double, Void>>>>,
-            List<Map.Entry<String, AbstractMqttSwitch>>>> parse(Set<MqttDeviceConfig> esphome, Set<MqttDeviceConfig> zigbee2mqtt, Set<MqttDeviceConfig> zwave2mqtt) {
+            List<Id2Flux>,
+            List<Map.Entry<String, AbstractMqttSwitch>>>> parse(
+            Set<MqttDeviceConfig> esphome,
+            Set<MqttDeviceConfig> zigbee2mqtt,
+            Set<MqttDeviceConfig> zwave2mqtt,
+            Set<HomeAssistantConfig> ha) {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse");
         try {
@@ -63,7 +71,14 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             // Step 1: collect all MQTT endpoints and get their configurations
 
             var endpoints = mqttConfigs
-                    .flatMap(MqttSensorSwitchResolver::getEndpoints)
+                    .flatMap(MqttSensorSwitchResolver::getEndpoints);
+
+            var haEndpoints = Flux
+                    .fromIterable(ha)
+                    .map(HomeAssistantConfigParser::parse)
+                    .map(ConfigurationMapper.INSTANCE::parseEndpoint);
+
+            var allEndpoints = Flux.merge(endpoints, haEndpoints)
 
                     // Previous step may have yielded dupes if different sets have the same endpoints
                     .collect(Collectors.toSet())
@@ -72,7 +87,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             // Step 2: for all the endpoints, materialize their adapters - brokers will be created later
             // Need to inject the resolved pairs into resolvers, so they don't have to do it again
 
-            Flux.fromIterable(Optional.ofNullable(endpoints).orElseThrow(() -> new IllegalStateException("Impossible")))
+            Flux.fromIterable(Optional.ofNullable(allEndpoints).orElseThrow(() -> new IllegalStateException("Impossible")))
                     .subscribe(endpoint -> {
 
                         var adapter = new MqttAdapter(
@@ -102,7 +117,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             var sensors = mqttConfigs
                     .publishOn(Schedulers.boundedElastic())
                     .flatMap(MqttSensorSwitchResolver::getSensorFluxes)
-                    .doOnNext(kv -> context.sensors.register(kv.getKey(), kv.getValue()))
+                    .doOnNext(kv -> context.sensors.register(kv.id(), kv.flux()))
                     .collectList();
 
             var switches = mqttConfigs

@@ -1,9 +1,9 @@
 package net.sf.dz3r.runtime.standalone;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.ApplicationBase;
 import net.sf.dz3r.runtime.config.HccRawConfig;
-import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.io.FileInputStream;
@@ -14,7 +14,7 @@ import java.net.URL;
 /**
  * Standalone entry point into HCC Core.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class HccApplication extends ApplicationBase<HccRawConfig> {
 

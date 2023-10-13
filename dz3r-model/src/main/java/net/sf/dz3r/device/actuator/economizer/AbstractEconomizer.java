@@ -12,15 +12,15 @@ import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.CallingStatus;
 import net.sf.dz3r.signal.hvac.EconomizerStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.scheduler.Schedulers;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -33,6 +33,8 @@ import java.util.concurrent.CountDownLatch;
 public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
+
+    protected final Clock clock;
 
     public final String name;
 
@@ -63,24 +65,22 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
      * Mirrors the state of {@link #targetDevice} to avoid expensive operations.
      */
     private Boolean actuatorState;
-    private FluxSink<Pair<Signal<Double, String>, Signal<Double, Void>>> combinedSink;
+    private FluxSink<IndoorAmbientPair> combinedSink;
 
     private final CountDownLatch combinedReady = new CountDownLatch(1);
 
     /**
      * Create an instance.
      *
-     * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
-     *
-     * @param ambientFlux Flux from the ambient temperature sensor.
      * @param targetDevice Switch to control the economizer actuator.
      */
     protected AbstractEconomizer(
+            Clock clock,
             String name,
             EconomizerSettings settings,
-            Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
+        this.clock = clock == null ? Clock.systemUTC() : clock;
         this.name = name;
         setSettings(settings);
 
@@ -121,10 +121,6 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         // Just get the (indoor, ambient) pair flux with no nulls or errors
         var stage1 = Flux
                 .create(this::connectCombined)
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnNext(pair -> logger.debug("{}: raw indoor={}, ambient={}", getAddress(), pair.getLeft(), pair.getRight()))
-                .filter(pair -> pair.getLeft() != null && pair.getRight() != null)
-                .filter(pair -> !pair.getLeft().isError() && !pair.getRight().isError())
                 .map(this::computeCombined);
 
         // Get the signal
@@ -138,12 +134,17 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
                 // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
                 .flatMap(demandDevice::setState)
 
+                .doOnError(t -> logger.error("{}: errored out", getAddress(), t))
+                .doOnComplete(() -> logger.debug("{}: completed", getAddress()))
+
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
 
         ambientFlux
-                .subscribeOn(Schedulers.boundedElastic())
                 .doOnNext(this::recordAmbient)
+
+                .doOnError(t -> logger.error("{}: errored out", getAddress(), t))
+                .doOnComplete(() -> logger.debug("{}: completed", getAddress()))
 
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
@@ -154,16 +155,16 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     private void recordAmbient(Signal<Double, Void> ambient) {
 
         this.ambient = ambient;
-        combinedSink.next(new ImmutablePair<>(indoor, ambient));
+        combinedSink.next(new IndoorAmbientPair(indoor, ambient));
     }
 
     private void recordIndoor(Signal<Double, String> indoor) {
 
         this.indoor = indoor;
-        combinedSink.next(new ImmutablePair<>(indoor, ambient));
+        combinedSink.next(new IndoorAmbientPair(indoor, ambient));
     }
 
-    private void connectCombined(FluxSink<Pair<Signal<Double, String>, Signal<Double, Void>>> sink) {
+    private void connectCombined(FluxSink<IndoorAmbientPair> sink) {
         combinedSink = sink;
         combinedReady.countDown();
         logger.debug("{}: combined sink ready", getAddress());
@@ -230,15 +231,46 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         logger.debug("{}: acquired combined sink", getAddress());
     }
 
-    private Signal<Double, Void> computeCombined(Pair<Signal<Double, String>, Signal<Double, Void>> pair) {
+    private Signal<Double, Void> computeCombined(IndoorAmbientPair pair) {
 
         ThreadContext.push("computeCombined");
 
         try {
 
-            // Null and error values have already been filtered out
-            var indoorTemperature = pair.getLeft().getValue();
-            var ambientTemperature = pair.getRight().getValue();
+            logger.trace("{}: raw {}", getAddress(), pair);
+
+            // Let's take care of corner cases first
+
+            if (pair.indoor == null || pair.ambient == null) {
+
+                // No go, incomplete information
+                logger.debug("{}: null signals? {}", getAddress(), pair);
+                return new Signal<>(Instant.now(clock), -1d);
+            }
+
+            if (pair.indoor.isError() || pair.ambient.isError()) {
+
+                // Absolutely not
+                logger.warn("{}: error signals? {}", getAddress(), pair);
+                return new Signal<>(Instant.now(clock), -1d);
+            }
+
+            // Let's be generous; Zigbee sensors can fall back to 60 seconds interval even if configured faster
+            var stale = Instant.now(clock).minus(Duration.ofSeconds(90));
+
+            if (pair.indoor.timestamp.isBefore(stale) || pair.ambient.timestamp.isBefore(stale)) {
+
+                // How??? Stale signals should have been taken care of by the TimeoutGuard by now.
+                logger.error("{}: stale signals? resetting both {}", getAddress(), pair);
+
+                this.indoor = null;
+                this.ambient = null;
+
+                return new Signal<>(Instant.now(clock), -1d);
+            }
+
+            var indoorTemperature = pair.indoor.getValue();
+            var ambientTemperature = pair.ambient.getValue();
 
             var signal = computeCombined(indoorTemperature, ambientTemperature);
 
@@ -383,5 +415,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
             logger.info("Shut down: {}", getAddress());
             ThreadContext.pop();
         }
+    }
+
+    private record IndoorAmbientPair(
+            Signal<Double, String> indoor,
+            Signal<Double, Void> ambient
+    ) {
+
     }
 }

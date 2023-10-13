@@ -6,7 +6,7 @@ import java.util.UUID;
 /**
  * Base class for all device status related events on an XBee network.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class XBeeNetworkDeviceStateEvent extends XBeeNetworkEvent {
 

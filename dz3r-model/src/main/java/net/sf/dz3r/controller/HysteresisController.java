@@ -1,7 +1,5 @@
 package net.sf.dz3r.controller;
 
-import net.sf.dz3r.jmx.JmxAttribute;
-import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.signal.Signal;
 
 /**
@@ -13,7 +11,7 @@ import net.sf.dz3r.signal.Signal;
  *
  * @param <P> Payload type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class HysteresisController<P> extends AbstractProcessController<Double, Double, P> {
 
@@ -108,7 +106,6 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
      *
      * @return Current value of low threshold.
      */
-    @JmxAttribute(description = "threshold.low")
     public double getThresholdLow() {
         return thresholdLow;
     }
@@ -118,7 +115,6 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
      *
      * @return Current value of high threshold.
      */
-    @JmxAttribute(description = "threshold.high")
     public double getThresholdHigh() {
         return thresholdHigh;
     }
@@ -166,15 +162,6 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
     @Override
     protected void configurationChanged() {
         // Do nothing yet
-    }
-
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-        return new JmxDescriptor(
-                "dz",
-                "Hysteresis Controller",
-                jmxName,
-                "Emits hysteresis control signal");
     }
 
     public static class HysteresisStatus extends Status<Double> {

@@ -52,7 +52,7 @@ class SimpleEconomizerTest {
         var sinkWrapper = new SinkWrapper<Signal<Double, Void>>();
         var deferredAmbientFlux = Flux.create(sinkWrapper::connect);
 
-        var economizer = new SimpleEconomizer<String>(
+        var economizer = new SimpleEconomizer<>(
                 "economizer",
                 settings,
                 deferredAmbientFlux,

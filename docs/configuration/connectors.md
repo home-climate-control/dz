@@ -1,8 +1,9 @@
 connectors
 ==
 There are two at the moment:
-* [influx](./influx.md)
+* [home-assistant](./home-assistant.md)
 * [http](./http.md)
+* [influx](./influx.md)
 
 ### Property of
 * [home-climate-control](./home-climate-control.md)

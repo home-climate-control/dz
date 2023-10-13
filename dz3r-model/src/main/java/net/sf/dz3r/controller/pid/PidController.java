@@ -1,7 +1,6 @@
 package net.sf.dz3r.controller.pid;
 
 import net.sf.dz3r.controller.ProcessController;
-import net.sf.dz3r.jmx.JmxAttribute;
 
 /**
  * A reactive PID controller abstraction.
@@ -9,24 +8,20 @@ import net.sf.dz3r.jmx.JmxAttribute;
  * @param <P> Signal payload type.
  *
  * @see net.sf.dz3r.controller.ProcessController
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public interface PidController<P> extends ProcessController<Double, Double, P> {
 
-    @JmxAttribute(description = "Proportional weight")
     double getP();
 
-    @JmxAttribute(description = "Integral weight")
     double getI();
 
-    @JmxAttribute(description = "Derivative weight")
     double getD();
 
     void setP(double p);
     void setI(double i);
     void setD(double d);
 
-    @JmxAttribute(description = "Integral component saturation limit")
     double getLimit();
 
     /**

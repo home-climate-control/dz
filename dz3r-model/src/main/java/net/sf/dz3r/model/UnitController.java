@@ -1,7 +1,6 @@
 package net.sf.dz3r.model;
 
 import net.sf.dz3r.device.Addressable;
-import net.sf.dz3r.jmx.JmxAware;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
@@ -9,8 +8,8 @@ import net.sf.dz3r.signal.hvac.UnitControlSignal;
 /**
  * Accepts signals from {@link ZoneController}, issues signals to HVAC hardware and {@code DamperController}.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public interface UnitController extends SignalProcessor<UnitControlSignal, HvacCommand, Void>, Addressable<String>, JmxAware {
+public interface UnitController extends SignalProcessor<UnitControlSignal, HvacCommand, Void>, Addressable<String> {
 
 }

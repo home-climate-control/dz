@@ -26,14 +26,14 @@ import reactor.core.publisher.Flux;
  *
  * @see net.sf.dz3r.device.model.Thermostat
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class Thermostat implements ProcessController<Double, CallingStatus, Void>, Addressable<String> {
 
     private final Logger logger = LogManager.getLogger();
 
     private final String name;
-    private final Range<Double> setpointRange;
+    public final Range<Double> setpointRange;
 
     /**
      * Thermostat setpoint.

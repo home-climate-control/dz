@@ -31,7 +31,7 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
             Flux<Signal<Double, Void>> ambientFlux,
             Switch<A> targetDevice) {
 
-        super(name, settings, ambientFlux, targetDevice);
+        super(null, name, settings, targetDevice);
 
         initFluxes(ambientFlux);
     }

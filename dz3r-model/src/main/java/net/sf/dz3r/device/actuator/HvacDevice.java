@@ -1,7 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.device.Addressable;
-import net.sf.dz3r.jmx.JmxAware;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
@@ -14,9 +13,9 @@ import java.util.Set;
 /**
  * HVAC device driver.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatus, Void>, Addressable<String>, JmxAware, AutoCloseable {
+public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatus, Void>, Addressable<String>, AutoCloseable {
 
     /**
      * Find out which modes this device supports.

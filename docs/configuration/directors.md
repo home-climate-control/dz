@@ -1,7 +1,7 @@
 directors
 ==
 
-Director is an entity that brings everything together.
+Director is an entity that brings everything together. There is one director per one HVAC unit.
 
 Best explained by example:
 
@@ -29,10 +29,13 @@ Best explained by example:
 ```
 
 * `id`: Unique identifier this entity will be known as to the rest of the system.
-* `connectors`: List of references to [connectors](./connectors.md). Optional.
-* `sensor-feed-mapping`: List of relation from the sensor reference (on the left) to the zone it is serving (on the right).
-* `unit`: Unit abstraction to use.
-* `hvac`: HVAC device to use.
+* `connectors`: List of references to [connectors](./connectors.md). Optional. Currently available connectors are:
+  * [home-assistant](./home-assistant.md)
+  * [http](./http.md)
+  * [influx](./influx.md)
+* `sensor-feed-mapping`: List of relations from the [sensor](./sensors-and-switches.md) reference (on the left) to the [zone](./zones.md) it is serving (on the right).
+* `unit`: [Unit abstraction](./units.md) to use.
+* `hvac`: [HVAC device](./hvac.md) to use.
 * `mode`: Initial mode for this director. Note that the configuration above shows different units in different modes (yes, this is supported).
 
 ### Property of

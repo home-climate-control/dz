@@ -1,6 +1,5 @@
 package net.sf.dz3r.model;
 
-import net.sf.dz3r.jmx.JmxDescriptor;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
@@ -15,7 +14,7 @@ import java.util.List;
  *
  * Makes a decision about which stage to go to based on demand.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class MultistageUnitController extends AbstractUnitController {
 
@@ -57,14 +56,5 @@ public class MultistageUnitController extends AbstractUnitController {
     @Override
     public Flux<Signal<HvacCommand, Void>> compute(Flux<Signal<UnitControlSignal, Void>> in) {
         throw new UnsupportedOperationException("Not Implemented");
-    }
-
-    @Override
-    public JmxDescriptor getJmxDescriptor() {
-        return new JmxDescriptor(
-                "dz",
-                "HVAC Unit Controller (multistage)",
-                getAddress(),
-                "Issues commands to multistage HVAC Unit Driver");
     }
 }

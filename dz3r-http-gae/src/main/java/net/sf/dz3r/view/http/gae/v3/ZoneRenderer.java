@@ -38,12 +38,12 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
         var zoneName = source.payload;
 
         if (!unit2mode.containsKey(unitId)) {
-            logger.warn("Don't know the mode yet, skipping this status: {}", source);
+            logger.debug("{}: don't know the mode yet, skipping this status: {}", unitId, source);
             return Flux.empty();
         }
 
         if (!zone2signal.containsKey(zoneName)) {
-            logger.warn("Don't know the signal yet, skipping this status: {}", source);
+            logger.debug("{}: don't know the signal yet, skipping this status: {}", zoneName, source);
             return Flux.empty();
         }
 
@@ -105,13 +105,13 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
 
         // Signals from different zones are coming, must keep them separate
         zone2signal.put(signal.payload, signal);
-        logger.debug("signal: {}={}", signal.payload, signal);
+        logger.trace("consume/signal: {}={}", signal.payload, signal);
     }
 
     public void consumeMode(Signal<HvacMode, String> signal) {
 
         // Signals from different units are coming, must keep them separate
-        logger.debug("Mode: {}={}", signal.payload, signal);
         unit2mode.put(signal.payload, signal);
+        logger.trace("consume/mode: {}={}", signal.payload, signal);
     }
 }

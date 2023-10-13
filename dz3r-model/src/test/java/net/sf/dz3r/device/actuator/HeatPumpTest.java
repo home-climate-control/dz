@@ -53,6 +53,7 @@ class HeatPumpTest {
                 switchPack.running, false,
                 switchPack.fan, false,
                 delay,
+                null,
                 scheduler);
         Flux<Signal<HvacCommand, Void>> sequence = Flux.empty();
 
@@ -89,6 +90,7 @@ class HeatPumpTest {
                 switchPack.running, false,
                 switchPack.fan, false,
                 delay,
+                null,
                 scheduler);
         var sequence = Flux.just(
                 // This will fail
@@ -152,6 +154,7 @@ class HeatPumpTest {
                 switchPack.running, false,
                 switchPack.fan, false,
                 delay,
+                null,
                 scheduler);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null))
@@ -201,6 +204,7 @@ class HeatPumpTest {
                 switchPack.running, false,
                 switchPack.fan, false,
                 delay,
+                null,
                 scheduler);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null)),
@@ -275,6 +279,7 @@ class HeatPumpTest {
                 switchPack.running, false,
                 switchPack.fan, false,
                 delay,
+                null,
                 scheduler);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0d, null)),

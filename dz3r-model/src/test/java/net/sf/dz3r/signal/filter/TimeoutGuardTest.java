@@ -46,7 +46,7 @@ class TimeoutGuardTest {
     @Test
     void nodelay() {
 
-        var guard = new TimeoutGuard<Integer, Void>(timeout);
+        var guard = new TimeoutGuard<Integer, Void>("nodelay", timeout, true);
 
         var source = Flux.range(0, 3).map(v -> new Signal<>(Instant.now(), v, (Void) null));
         var guarded = guard
@@ -98,7 +98,7 @@ class TimeoutGuardTest {
     @Test
     void timeoutSingle() {
 
-        var guard = new TimeoutGuard<Integer, Void>(timeout, false);
+        var guard = new TimeoutGuard<Integer, Void>("timeoutSingle", timeout, false);
         var guarded = createFlux(timeout, guard);
 
 //        guarded.blockLast();
@@ -152,7 +152,7 @@ class TimeoutGuardTest {
     @Test
     void timeoutRepeating() {
 
-        var guard = new TimeoutGuard<Integer, Void>(timeout, true);
+        var guard = new TimeoutGuard<Integer, Void>("timeoutRepeating", timeout, true);
         var guarded = createFlux(timeout, guard);
 
         // VT: NOTE: I'm not sure StepVerifier.withVirtualTime() will work here
@@ -219,7 +219,7 @@ class TimeoutGuardTest {
 
         try {
             var timeout = Duration.ofMillis(5);
-            var guard = new TimeoutGuard<Integer, Void>(timeout, false);
+            var guard = new TimeoutGuard<Integer, Void>("backpressure", timeout, false);
             var signal = source
                     .doOnNext(ignored -> counter.incrementAndGet())
                     .map(i -> new Signal<Integer, Void>(Instant.now(), i));
@@ -281,11 +281,14 @@ class TimeoutGuardTest {
         // leftToWait.toMillis() <= 0 AND (inTimeout == true AND repeat == false) will cause
         // wait() with negative time
 
+        // As of rev. e95b3cbf8a4616a82462c805a9cd16d6c2ece8ed this test hangs in IntelliJ, but passes in Gradle.
+        // Apparently, there's a race condition around leftToWait.
+
         // Normal operation will yield 0, timeout, 1, timeout, 2
         // Failure will yield something else
 
         var timeout = Duration.ofMillis(1);
-        var guard = new TimeoutGuard<Integer, Void>(timeout, false);
+        var guard = new TimeoutGuard<Integer, Void>("negativeWaitTime", timeout, false);
         var signal = Flux.interval(Duration.ofMillis(50))
                 .map(i -> new Signal<Integer, Void>(Instant.now(), i.intValue()));
         var guarded = guard
@@ -320,7 +323,7 @@ class TimeoutGuardTest {
     @Test
     void timeoutTooShort() {
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new TimeoutGuard<Integer, Void>(Duration.ofNanos(1), false))
+                .isThrownBy(() -> new TimeoutGuard<Integer, Void>("timeoutTooShort", Duration.ofNanos(1), false))
                 .withMessage("Unreasonably short timeout of PT0.000000001S");
     }
 }

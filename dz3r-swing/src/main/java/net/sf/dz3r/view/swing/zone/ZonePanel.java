@@ -504,16 +504,21 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return;
         }
 
-        var dataPoint = new ZoneChartDataPoint(
-                new ThermostatTintedValue(
-                        sensorSignal.getValue(),
-                        zoneStatus.callingStatus.demand * 2,
-                        zoneStatus.callingStatus.calling),
-                zoneStatus.settings.setpoint,
-                zoneStatus.economizerStatus);
+        try {
 
-        // VT: FIXME: This must be driven via Flux
-        chart.consumeSignal(new Signal<>(getSignal().timestamp, dataPoint));
+            var dataPoint = new ZoneChartDataPoint(
+                    new ThermostatTintedValue(
+                            sensorSignal.getValue(),
+                            zoneStatus.callingStatus.demand * 2,
+                            zoneStatus.callingStatus.calling),
+                    zoneStatus.settings.setpoint,
+                    zoneStatus.economizerStatus);
+
+            // VT: FIXME: This must be driven via Flux
+            chart.consumeSignal(new Signal<>(getSignal().timestamp, dataPoint));
+        } catch (Exception ex) {
+            logger.error("unexpected exception processing {}", sensorSignal, ex);
+        }
     }
 
     private HvacMode getMode() {

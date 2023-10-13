@@ -82,7 +82,7 @@ public class ShellSensor implements SignalSource<String, Double, Void> {
                 .map(i -> pollInterval)
                 .flatMap(timeout -> run(command, timeout));
 
-        return new TimeoutGuard<Double, Void>(pollInterval.multipliedBy(3))
+        return new TimeoutGuard<Double, Void>(address, pollInterval.multipliedBy(3), true)
                 .compute(commandFlux)
                 .share();
     }

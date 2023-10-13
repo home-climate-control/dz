@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * Base class for all events that can be emitted by an XBee network.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2009-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
 public class XBeeNetworkEvent extends DriverNetworkEvent {
 

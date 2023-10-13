@@ -22,7 +22,7 @@ public class StringChannelAddress extends ChannelAddress<String> {
     @Override
     protected String parseChannel(String rawChannel) {
 
-        if (rawChannel == null || "".equals(rawChannel)) {
+        if (rawChannel == null || rawChannel.isEmpty()) {
             throw new IllegalArgumentException("channel can't be null or empty");
         }
 

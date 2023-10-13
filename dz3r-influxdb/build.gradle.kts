@@ -1,6 +1,8 @@
+val influxdbVersion: String by project
+
 dependencies {
 
-    implementation("org.influxdb:influxdb-java:2.23")
+    implementation("org.influxdb:influxdb-java:$influxdbVersion")
 
     implementation(project(":dz3r-director"))
 }

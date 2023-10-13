@@ -25,6 +25,8 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
 
     private final Logger logger = LogManager.getLogger();
 
+    public final String marker;
+
     public final Duration timeout;
     public final boolean repeat;
 
@@ -38,29 +40,19 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
     private final Thread guardThread;
 
     /**
-     * Create a non-repeating instance.
-     *
-     * This is the preferred way of dealing with timeouts, generating extra traffic is counterproductive
-     * and may mask design problems.
-     *
-     * @param timeout Timeout to observe.
-     */
-    public TimeoutGuard(Duration timeout) {
-        this(timeout, false);
-    }
-
-    /**
      * Create an instance.
      *
+     * @param marker A unique marker to trace the control flow in the logs.
      * @param timeout Timeout to observe.
      * @param repeat If {@code true}, keep emitting a timeout error signal every {@link #timeout}, otherwise just once.
      */
-    public TimeoutGuard(Duration timeout, boolean repeat) {
+    public TimeoutGuard(String marker, Duration timeout, boolean repeat) {
 
         if (timeout.minus(Duration.ofMillis(1)).isNegative()) {
             throw new IllegalArgumentException("Unreasonably short timeout of " + timeout);
         }
 
+        this.marker = marker;
         this.timeout = timeout;
         this.repeat = repeat;
 
@@ -98,22 +90,25 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
                 wait(leftToWait.toMillis());
             }
 
-            logger.warn("Interrupted, terminating");
+            logger.warn("{}: interrupted, terminating", marker);
 
         } catch (Throwable t) { // NOSONAR This is intended
-            logger.fatal("Unexpected exception, guard thread is gone", t);
+            logger.fatal("{}: unexpected exception, guard thread is gone", marker, t);
         } finally {
             ThreadContext.clearAll();
         }
     }
 
     private void generateTimeoutSignal(Instant now) {
+
+        logger.info("{}: timeout of {} is exceeded, inTimeout={}, repeat={}", marker, timeout, inTimeout, repeat);
+
         timeoutFluxSink.next(new Signal<>(
                         now,
                         null,
                         null,
                         Signal.Status.FAILURE_TOTAL,
-                        new TimeoutException(String.format("Timeout of %s is exceeded", timeout))));
+                        new TimeoutException(String.format("%s: timeout of %s is exceeded", marker, timeout))));
 
         inTimeout = true;
     }
@@ -124,9 +119,13 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
         var actual = in
                 .doOnNext(s -> touch(s.timestamp))
                 .doOnNext(ignored -> inTimeout = false)
+                .doOnError(t -> logger.error("{}: errored out", marker, t))
                 .doOnComplete(this::close);
 
-        return Flux.merge(actual, timeoutFlux);
+        return Flux.merge(actual, timeoutFlux)
+                .doOnNext(s -> logger.trace("{}: compute={}", marker, s))
+                .doOnError(t -> logger.error("{}: errored out", marker, t))
+                .doOnComplete(() -> logger.debug("{}: completed", marker));
     }
 
     private synchronized void touch(Instant timestamp) {

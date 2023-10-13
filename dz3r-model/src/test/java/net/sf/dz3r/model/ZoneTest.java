@@ -48,7 +48,7 @@ class ZoneTest {
     }
 
     @Test
-    void enabled() {
+    void enabled() throws Exception {
 
         var setpoint = 20.0;
         var signalOK = new Signal<Double, String>(Instant.now(), 30.0);
@@ -69,6 +69,8 @@ class ZoneTest {
                 .compute(sequence)
                 .doOnNext(e -> logger.debug("zone/ON: {}", e));
 
+        z.close();
+
         StepVerifier
                 .create(out)
                 .assertNext(s -> {
@@ -82,7 +84,7 @@ class ZoneTest {
     }
 
     @Test
-    void disabled() {
+    void disabled() throws Exception {
 
         var setpoint = 20.0;
         var signalOK = new Signal<Double, String>(Instant.now(), 30.0);
@@ -97,6 +99,8 @@ class ZoneTest {
         var out = z
                 .compute(sequence)
                 .doOnNext(e -> logger.debug("zone/{}}: {}", name, e));
+
+        z.close();
 
         // The thermostat is calling, but the zone has shut it off
         StepVerifier
@@ -137,17 +141,18 @@ class ZoneTest {
         pvSink.complete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
-        assertThat(accumulator).hasSize(4);
+        assertThat(accumulator).hasSize(5);
 
         // PV change
         assertThat(accumulator.get(0).getValue().callingStatus.calling).isFalse();
         assertThat(accumulator.get(1).getValue().callingStatus.calling).isTrue();
 
-        // Setpoint change
+        // Setpoint change; one replayed by AbstractProcessController, another replayed by Zone
         assertThat(accumulator.get(2).getValue().callingStatus.calling).isFalse();
+        assertThat(accumulator.get(3).getValue().callingStatus.calling).isFalse();
 
         // PV change again
-        assertThat(accumulator.get(3).getValue().callingStatus.calling).isTrue();
+        assertThat(accumulator.get(4).getValue().callingStatus.calling).isTrue();
 
         out.dispose();
     }

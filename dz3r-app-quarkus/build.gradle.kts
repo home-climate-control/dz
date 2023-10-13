@@ -11,11 +11,15 @@ val quarkusPlatformGroupId = "io.quarkus.platform"
 val quarkusPlatformArtifactId = "quarkus-bom"
 val quarkusPlatformVersion = "3.2.0.Final"
 
+val assertjVersion: String by project
+val mapstructVersion: String by project
+val jacksonVersion: String by project
+
 dependencies {
 
     implementation(project(":dz3r-bootstrap"))
     implementation(project(":dz3r-director"))
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
 
     // Enable the Swing console
     runtimeOnly(project(":dz3r-swing"))
@@ -54,8 +58,8 @@ dependencies {
     testImplementation("io.rest-assured:rest-assured")
 
     // Mapstruct
-    implementation("org.mapstruct:mapstruct:1.5.5.Final")
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    implementation("org.mapstruct:mapstruct:$mapstructVersion")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
 
-    testImplementation("org.assertj:assertj-core:3.21.0")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
 }

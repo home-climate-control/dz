@@ -61,7 +61,7 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
 
         logger.info("getFlux: {}", address);
 
-        return new TimeoutGuard<T, P>(timeout)
+        return new TimeoutGuard<T, P>(address.toString(), timeout, true)
                 .compute(Flux.concat(
                         checkPresence(address),
                         getSensorsFlux()

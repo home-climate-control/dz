@@ -120,19 +120,19 @@ public class Scheduler {
 
             var schedule = source.getValue();
 
-            logger.debug("{} schedule ({} entries)", zoneName, schedule.size());
+            logger.trace("{} schedule ({} entries)", zoneName, schedule.size());
 
             Flux.fromIterable(schedule.keySet())
-                    .subscribe(s -> logger.debug("  {}", s));
+                    .subscribe(s -> logger.trace("  {}", s));
 
             var now = LocalDateTime.now(clock);
             var period = periodMatcher.match(schedule, now);
             var currentPeriod = zone2period.get(zone);
 
-            logger.debug("{}: matched time={} period={}", zoneName, now, period);
+            logger.trace("{}: matched time={} period={}", zoneName, now, period);
 
             if (same(currentPeriod, period)) {
-                logger.debug("{}: already at {}", zoneName, period);
+                logger.trace("{}: already at {}", zoneName, period);
                 return Flux.empty();
             }
 
@@ -140,7 +140,7 @@ public class Scheduler {
                 var settings = source.getValue().get(period);
 
                 if (Boolean.TRUE.equals(zone.getSettings().hold)) {
-                    logger.debug("{}: on hold, left alone", zoneName);
+                    logger.trace("{}: on hold, left alone", zoneName);
 
                     // However... need to record the period. The zone will be smart enough not to touch the settings.
                     zone.setPeriodSettings(new PeriodSettings(period, settings));
@@ -166,7 +166,7 @@ public class Scheduler {
                 }
 
             } else {
-                logger.info("{}: no active period, settings left as they were", zoneName);
+                logger.trace("{}: no active period, settings left as they were", zoneName);
                 zone2period.put(zone, null);
                 zone.setPeriodSettings(null);
                 return Flux.just(new AbstractMap.SimpleEntry<>(zoneName, null));

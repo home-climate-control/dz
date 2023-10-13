@@ -1,9 +1,12 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.counter.DurationIncrementAdapter;
+import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
@@ -11,6 +14,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.TimeZone;
 
 /**
@@ -35,16 +39,42 @@ public abstract class AbstractHvacDevice implements HvacDevice {
 
     private boolean isClosed;
 
+    private final Disposable uptimeCounterSubscription;
+
     protected AbstractHvacDevice(String name) {
-        this(Clock.system(TimeZone.getDefault().toZoneId()), name);
+        this(Clock.system(TimeZone.getDefault().toZoneId()), name, null);
     }
 
-    protected AbstractHvacDevice(Clock clock, String name) {
+    protected AbstractHvacDevice(
+            String name,
+            ResourceUsageCounter<Duration> uptimeCounter
+    ) {
+        this(Clock.system(TimeZone.getDefault().toZoneId()), name, uptimeCounter);
+    }
+
+    protected AbstractHvacDevice(
+            Clock clock,
+            String name,
+            ResourceUsageCounter<Duration> uptimeCounter
+    ) {
         this.clock = clock;
         this.name = name;
 
         statusSink = Sinks.many().multicast().onBackpressureBuffer();
         statusFlux = statusSink.asFlux();
+
+
+        if (uptimeCounter != null) {
+
+            var uptimeFlux = getFlux()
+                    .flatMap(this::getUptime);
+            var converter = new DurationIncrementAdapter();
+            uptimeCounterSubscription = uptimeCounter
+                    .consume(converter.split(uptimeFlux))
+                    .subscribe();
+        } else {
+            uptimeCounterSubscription = null;
+        }
     }
 
     @Override
@@ -97,6 +127,18 @@ public abstract class AbstractHvacDevice implements HvacDevice {
         return startedAt == null ? null : Duration.between(startedAt, Instant.now());
     }
 
+    private Flux<Duration> getUptime(Signal<HvacDeviceStatus, Void> signal) {
+
+        if (signal.isError()) {
+            return Flux.empty();
+        }
+
+        var uptime = signal.getValue().uptime;
+
+        // Null uptime will be in the signal when the HVAC is off
+        return Flux.just(Objects.requireNonNullElse(uptime, Duration.ZERO));
+    }
+
     protected boolean isClosed() {
         return isClosed;
     }
@@ -110,6 +152,7 @@ public abstract class AbstractHvacDevice implements HvacDevice {
         }
 
         isClosed = true;
+        uptimeCounterSubscription.dispose();
         doClose();
     }
 

@@ -372,7 +372,7 @@ public class OAuth2DeviceIdentityProvider {
             var responseMap = getResponseMap(rsp);
             var email = responseMap.get("email");
 
-            if (email == null || "".equals(email)) {
+            if (email == null || email.isEmpty()) {
                 throw new IllegalStateException("null or empty email, shouldn't have ended up here");
             }
 

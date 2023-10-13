@@ -6,16 +6,20 @@ plugins {
     java
 }
 
+val assertjVersion: String by project
+val mapstructVersion: String by project
+val jacksonVersion: String by project
+
 dependencies {
 
     api(project(":dz3r-common"))
     api(project(":dz3r-config"))
     implementation(project(":dz3r-director"))
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.15.2")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.15.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
 
     // VTL NOTE: "implementation()" dependencies will migrate to
     // "runtimeOnly" after the annotation based instantiation is introduced
@@ -35,6 +39,9 @@ dependencies {
     // Enable MQTT
     implementation(project(":dz3r-mqtt"))
 
+    // Enable Home Assistant integration
+    implementation(project(":dz3r-ha"))
+
     // Enable remote control over HTTP
     implementation(project(":dz3r-http"))
     implementation(project(":dz3r-http-gae"))
@@ -49,8 +56,8 @@ dependencies {
     implementation(project(":dz3r-raspberry-pi"))
 
     // Mapstruct
-    implementation("org.mapstruct:mapstruct:1.5.5.Final")
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+    implementation("org.mapstruct:mapstruct:$mapstructVersion")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
 
-    testImplementation("org.assertj:assertj-core:3.21.0")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
 }

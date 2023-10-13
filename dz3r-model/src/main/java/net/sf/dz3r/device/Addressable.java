@@ -1,7 +1,5 @@
 package net.sf.dz3r.device;
 
-import net.sf.dz3r.jmx.JmxAttribute;
-
 /**
  * An addressable entity.
  *
@@ -16,7 +14,6 @@ public interface Addressable<T extends Comparable<T>> extends Comparable<Address
      *
      * @return The address.
      */
-    @JmxAttribute(description = "Address")
     T getAddress();
 
     @Override

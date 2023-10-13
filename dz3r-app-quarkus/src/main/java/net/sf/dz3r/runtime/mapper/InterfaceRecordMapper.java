@@ -3,6 +3,7 @@ package net.sf.dz3r.runtime.mapper;
 import net.sf.dz3r.runtime.config.HccRawConfig;
 import net.sf.dz3r.runtime.config.quarkus.HccRawInterfaceConfig;
 import net.sf.dz3r.runtime.config.quarkus.connector.ConnectorConfig;
+import net.sf.dz3r.runtime.config.quarkus.connector.HomeAssistantConfig;
 import net.sf.dz3r.runtime.config.quarkus.connector.HttpConnectorConfig;
 import net.sf.dz3r.runtime.config.quarkus.connector.InfluxCollectorConfig;
 import net.sf.dz3r.runtime.config.quarkus.filter.FilterConfig;
@@ -26,6 +27,7 @@ import net.sf.dz3r.runtime.config.quarkus.model.UnitDirectorConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.WebUiConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ZoneConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ZoneSettingsConfig;
+import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttBrokerConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.onewire.OnewireBusConfig;
 import net.sf.dz3r.runtime.config.quarkus.schedule.CalendarConfigEntry;
@@ -63,6 +65,11 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.console(source.console().orElse(null)))", target = "console")
     HccRawConfig rawConfig(HccRawInterfaceConfig source);
 
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.broker(source.broker()))", target = "broker")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switches(source.switches()))", target = "switches")
+    net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig mqttConfig(MqttDeviceConfig source);
+
     @Mapping(expression = "java(source.id().orElse(null))", target = "id")
     @Mapping(expression = "java(source.host())", target = "host")
     @Mapping(expression = "java(source.port().orElse(null))", target = "port")
@@ -70,9 +77,8 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.password().orElse(null))", target = "password")
     @Mapping(expression = "java(source.rootTopic())", target = "rootTopic")
     @Mapping(expression = "java(source.autoReconnect().orElse(true))", target = "autoReconnect")
-    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
-    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switches(source.switches()))", target = "switches")
-    net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig mqttConfig(MqttDeviceConfig source);
+    net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerConfig broker(MqttBrokerConfig source);
+
 
     @Mapping(expression = "java(source.id().orElse(null))", target = "id")
     @Mapping(expression = "java(source.address())", target = "address")
@@ -153,6 +159,7 @@ public interface InterfaceRecordMapper {
 
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connector(source.http().orElse(null)))", target = "http")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connector(source.influx().orElse(null)))", target = "influx")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.connector(source.homeAssistant().orElse(null)))", target = "homeAssistant")
     net.sf.dz3r.runtime.config.connector.ConnectorConfig connector(ConnectorConfig source);
 
     @Mapping(expression = "java(source.id())", target = "id")
@@ -168,6 +175,12 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.password().orElse(null))", target = "password")
     @Mapping(expression = "java(source.sensorFeedMapping())", target = "sensorFeedMapping")
     net.sf.dz3r.runtime.config.connector.InfluxCollectorConfig connector(InfluxCollectorConfig source);
+
+    @Mapping(expression = "java(source.id())", target = "id")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.broker(source.broker()))", target = "broker")
+    @Mapping(expression = "java(source.discoveryPrefix().orElse(null))", target = "discoveryPrefix")
+    @Mapping(expression = "java(source.zones())", target = "zones")
+    net.sf.dz3r.runtime.config.connector.HomeAssistantConfig connector(HomeAssistantConfig source);
 
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switchable(source.switchable()))", target = "switchable")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.heatpumpHat(source.heatpumpHat()))", target = "heatpumpHat")

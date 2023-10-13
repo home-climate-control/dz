@@ -61,16 +61,20 @@ switches:
     reversed: <boolean flag>
     heartbeat: <Duration>
     pace: <Duration>
+    optimistic: <boolean flag>
 ```
 
 #### reversed
 Set to true if the hardware switch state must be set to the opposite of the logical.
 
 #### heartbeat
-Send the command to hardware this often even if the logical state hasn't changed. Good for fault tolerance (yes, people yank power cords out by accident sometimes).
+Optional. Send the command to hardware this often even if the logical state hasn't changed. Good for fault tolerance (yes, people yank power cords out by accident sometimes). Be careful with slow hardware (notably, [Zigbee](./zigbee2mqtt.md)).
 
 #### pace
-Send the same command to hardware no more often that this. Some bridges (notably `zigbee2mqtt`) are known to become unresponsive with no error indication when incoming traffic exceeds their bandwidth.
+Optional. Send the same command to hardware no more often that this. Some bridges (notably `zigbee2mqtt`) are known to become unresponsive with no error indication when incoming traffic exceeds their bandwidth.
+
+### optimistic
+Optional. Send the command to hardware and don't wait for confirmation. Normally, you wouldn't have to do this, but some firmware (notably, [ESPHome](./esphome.md)) doesn't provide reliable confirmation so this may save the situation (and is a default for known hardware types). Use only if you must, and consider using [heartbeat](#heartbeat) to offset the risk.
 
 ### Property of
 * [esphome](./esphome.md)
