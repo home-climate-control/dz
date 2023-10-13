@@ -37,7 +37,7 @@ Best explained by example:
           i: 0.0000008
           limit: 0.7
         mode: cooling
-        switch-address: s31zb-00
+        hvac-device: economizer-a6
 
 ```
 
@@ -78,7 +78,7 @@ Cooling mode assumed:
 * `keep-hvac-on`: set to `true` if you want the main HVAC to be still working when the economizer is active (maximum comfort), and to `false` if you want to stop it (maximum cost savings).
 * `controller`: just like the zone configuration above.
 * `mode`: self-explanatory
-* `switch-address`: at this point, the economizer is an on/off device (multistage coming). This is the address of the switch that turns the economizer device on or off.
+* `hvac-device`: at this point, the economizer is an on/off device (multistage coming). This is the identifier of the [HVAC device](./hvac.md) acting as an economizer.
 
 ### Property of
 * [home-climate-control](./home-climate-control.md)

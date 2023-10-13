@@ -6,7 +6,10 @@ Home Climate Control: Docs
 **Q:** Nothing works!  
 **A:** In approximately this order:
 
-* [Check the configuration](./configuration/index.md). Use YAML anchors, they help to keep it consistent. Make sure you examine the configuration dump (logged at `debug` level) to see if the configuration you think you provided is the configuration that's actually been read.
+* [Check the configuration](./configuration/index.md).
+  * Use YAML anchors, they help to keep it consistent.
+  * Check if the order of configuration entries is the same as in the documentation.
+  * Make sure you examine the configuration dump (logged at `debug` level) to see if the configuration you think you provided is the configuration that's actually been read.
 * Check the logs. HCC is permissive (will completely stop operating only on unrecoverable errors), and verbose. Logs often contain links to documentation on how to correct a particular problem.
 * Enable [InfluxDB connector](./configuration/influx.md). HCC emits a lot data, and one picture is better than a thousand words.
 * Enable [Console](./configuration/console.md) (incompatible with [running in Docker](./build/index.md#docker), but well worth it for troubleshooting). Its [instrument cluster](./instrument-cluster/index.md) might pinpoint problems immediately.

@@ -28,7 +28,7 @@ This part contains what you would usually provide for your standard Spring or Qu
 > **NOTE:** You can use your IDE to edit configuration files, this will give you code completion and extended documentation, thanks to [Spring Configuration Metadata](https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html), and "code walking" if you are using YAML anchors.
 
 ### General Structure
-Here's the configuration file skeleton:
+Here's the configuration file skeleton. Order of these entries is important.
 ```yaml
 home-climate-control:
   instance: <your-instance-name>
@@ -39,10 +39,10 @@ home-climate-control:
   xbee: ...
   mocks: ...
   filters: ...
+  hvac: ...
   zones: ...
   schedule: ...
   connectors: ...
-  hvac: ...
   units: ...
   directors: ...
   web-ui: ...
@@ -60,12 +60,12 @@ home-climate-control:
     * [xbee](./xbee.md)
     * [mocks](./mocks.md)
     * [filters](./filters.md)
+    * [hvac](./hvac.md)
     * [zones](./zones.md)
     * [schedule](./schedule.md)
     * [connectors](./connectors.md)
         * [influx](./influx.md)
         * [http](./http.md)
-    * [hvac](./hvac.md)
     * [units](./units.md)
     * [directors](./directors.md)
     * [web-ui](./web-ui.md)
@@ -97,6 +97,15 @@ home-climate-control:
           address: /esphome/board-MAC/switch-heatpump-running
         - id: switch-heatpump-fan
           address: /esphome/board-MAC/switch-heatpump-fan
+  hvac:
+    - heatpump:
+        - id: heatpump-main
+          switch-mode: switch-heatpump-mode
+          switch-mode-reverse: true
+          switch-running: switch-heatpump-running
+          switch-fan: switch-heatpump-fan
+          filter:
+            lifetime: 200H
   zones:
     - id: bedroom-master
       name: Master Bedroom
@@ -150,15 +159,6 @@ home-climate-control:
           air-bedroom-master: air-bedroom-master-temperature
           air-bedroom-kids: air-bedroom-kids-temperature
           air-family-room: air-family-room-temperature
-  hvac:
-    - heatpump:
-        - id: heatpump-main
-          switch-mode: switch-heatpump-mode
-          switch-mode-reverse: true
-          switch-running: switch-heatpump-running
-          switch-fan: switch-heatpump-fan
-          filter:
-            lifetime: 200H
   units:
     - single-stage:
         - id: heatpump
@@ -186,3 +186,5 @@ home-climate-control:
       - air-ambient-north
       - air-ambient-south
 ```
+---
+[^^^ Index](../index.md)
