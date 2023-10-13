@@ -38,19 +38,19 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     public final String name;
 
-    public EconomizerSettings settings;
+    private EconomizerSettings settings;
 
     private final Switch<A> targetDevice;
 
     private final StackingSwitch targetDeviceStack;
 
     /**
-     * Last known indoor temperature. Can't be an error.
+     * Last known indoor temperature.
      */
     private Signal<Double, String> indoor;
 
     /**
-     * Last known ambient temperature. Can't be an error.
+     * Last known ambient temperature.
      */
     private Signal<Double, Void> ambient;
 
