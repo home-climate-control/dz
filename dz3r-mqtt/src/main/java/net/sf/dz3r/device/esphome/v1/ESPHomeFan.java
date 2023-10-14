@@ -68,12 +68,10 @@ public class ESPHomeFan implements AutoCloseable {
     private final String id;
     private final Clock clock;
     private final MqttAdapter adapter;
-    private final String rootTopic;
     private final String stateTopic;
     private final String commandTopic;
     private final String speedStateTopic;
     private final String speedCommandTopic;
-    private final String availabilityTopic;
     private String availabilityMessage;
 
     private final AtomicInteger queueDepth = new AtomicInteger();
@@ -112,8 +110,9 @@ public class ESPHomeFan implements AutoCloseable {
         this.id = HCCObjects.requireNonNull(id, "id can't be null");
         this.clock = HCCObjects.requireNonNull(clock, "adapter can't be null");
         this.adapter = HCCObjects.requireNonNull(adapter, "adapter can't be null");
-        this.rootTopic = HCCObjects.requireNonNull(rootTopic, "rootTopic can't be null");
-        this.availabilityTopic = HCCObjects.requireNonNull(availabilityTopic, "availabilityTopic can't be null");
+        HCCObjects.requireNonNull(rootTopic, "rootTopic can't be null");
+
+        HCCObjects.requireNonNull(availabilityTopic, "availabilityTopic can't be null");
 
         // Defaults
         stateTopic = rootTopic + "/state";
@@ -320,6 +319,7 @@ public class ESPHomeFan implements AutoCloseable {
 
         // Close the comms channel
         rootFlux.dispose();
+        availabilityFlux.dispose();
         adapter.close();
     }
 }
