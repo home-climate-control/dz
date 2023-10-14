@@ -82,7 +82,7 @@ public class ESPHomeFan implements AutoCloseable {
     private final Disposable rootFlux;
     private final Sinks.Many<Command> commandSink = Sinks.many().multicast().onBackpressureBuffer();
     private final Disposable commandSubscription;
-    private final Sinks.Many<Signal<State, Void>> stateSink = Sinks.many().multicast().onBackpressureBuffer();
+    private final Sinks.Many<Signal<State, String>> stateSink = Sinks.many().multicast().onBackpressureBuffer();
 
     private FanState requested;
     private FanState actual;
@@ -240,7 +240,7 @@ public class ESPHomeFan implements AutoCloseable {
         commandSink.tryEmitNext(new Command(on, speed));
 
         var state = getState();
-        stateSink.tryEmitNext(new Signal<>(Instant.now(clock), state));
+        stateSink.tryEmitNext(new Signal<>(Instant.now(clock), state, id));
 
         return state;
     }
@@ -289,12 +289,12 @@ public class ESPHomeFan implements AutoCloseable {
      *
      * @return Flux emitting signals every time the {@link #setState(boolean, double) requested} or {@link #getState() actual} state has changed.
      */
-    public Flux<Signal<State, Void>> getFlux() {
+    public Flux<Signal<State, String>> getFlux() {
         return stateSink.asFlux();
     }
 
-    private Signal<State, Void> getStateSignal() {
-        return new Signal<>(Instant.now(clock), getState());
+    private Signal<State, String> getStateSignal() {
+        return new Signal<>(Instant.now(clock), getState(), id);
     }
 
     /**
