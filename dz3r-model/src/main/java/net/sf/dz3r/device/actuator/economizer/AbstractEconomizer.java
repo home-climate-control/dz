@@ -28,8 +28,6 @@ import java.util.concurrent.CountDownLatch;
 /**
  * Common implementation for all economizer classes.
  *
- * @param <A> Actuator device address type.
- *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public abstract class AbstractEconomizer implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
