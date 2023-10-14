@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import static net.sf.dz3r.model.HvacMode.COOLING;
-import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -215,38 +214,6 @@ class SwitchableHvacDeviceTest {
 
         // A bit simpler than full, but it'll do
         assertThat(s.getState().block()).isTrue();
-    }
-
-    @Test
-    void blockingFail() {
-
-        var now = Instant.now();
-        var s = new NullSwitch("a");
-        var d = new SwitchableHvacDevice("d", COOLING, s, false, null);
-        var sequence = Flux
-                .just(new Signal<HvacCommand, Void>(now, new HvacCommand(null, 0.8, null)))
-                .publishOn(Schedulers.newSingle("blocking-fail"));
-        var result = d.computeBlocking(sequence).log();
-
-        StepVerifier
-                .create(result)
-                .assertNext(e -> {
-                    assertThat(e.isOK()).isTrue();
-                    assertThat(e.isError()).isFalse();
-                    assertThat(e.getValue().command.mode).isEqualTo(COOLING);
-                    assertThat(e.getValue().command.demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command.fanSpeed).isNull();
-                })
-                .assertNext(e -> {
-                    assertThat(e.isOK()).isFalse();
-                    assertThat(e.isError()).isTrue();
-                    assertThat(e.getValue()).isNull();
-                    assertThat(e.status).isEqualTo(FAILURE_TOTAL);
-                    assertThat(e.error)
-                            .isInstanceOf(IllegalStateException.class)
-                            .hasMessageStartingWith("block()/blockFirst()/blockLast() are blocking, which is not supported in thread");
-                })
-                .verifyComplete();
     }
 
     @Test

@@ -111,60 +111,6 @@ public class SwitchableHvacDevice extends AbstractHvacDevice {
                 });
     }
 
-    /**
-     * Retanied for analysis. Should be removed as soon as normal operation is confirmed.
-     *
-     * @deprecated
-     */
-    @Deprecated(forRemoval = true, since = "2023-10-01")
-    Flux<Signal<HvacDeviceStatus, Void>> computeBlocking(Flux<Signal<HvacCommand, Void>> in) {
-        return in
-                .filter(Signal::isOK)
-                .flatMap(signal -> {
-                    return Flux
-                            .<Signal<HvacDeviceStatus, Void>>create(sink -> {
-
-                                try {
-
-                                    var command = reconcile(signal.getValue());
-
-                                    if (isModeOnly(command)) {
-                                        return;
-                                    }
-
-                                    var state = getState(command);
-
-                                    logger.debug("State: {}", state);
-
-                                    sink.next(new Signal<>(clock.instant(), new HvacDeviceStatus(command, uptime())));
-
-                                    // By this time, the command has been verified to be valid
-                                    requested = command;
-
-                                    theSwitch.setState(state != inverted).block();
-
-                                    // No longer relevant
-                                    //actual = state;
-
-                                    updateUptime(clock.instant(), state);
-
-                                    var complete = new HvacDeviceStatus(command, uptime());
-                                    sink.next(new Signal<>(clock.instant(), complete));
-
-                                } catch (Throwable t) { // NOSONAR Consequences have been considered
-
-                                    logger.error("Failed to compute {}", signal, t);
-                                    sink.next(new Signal<>(clock.instant(), null, null, Signal.Status.FAILURE_TOTAL, t));
-
-                                } finally {
-                                    sink.complete();
-                                }
-
-                            });
-                })
-                .doOnNext(this::broadcast);
-    }
-
     private boolean isModeOnly(HvacCommand command) {
 
         // A valid situation for the whole system which makes no sense for this particular application
