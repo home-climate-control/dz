@@ -14,8 +14,8 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Objects;
-import java.util.TimeZone;
 
 /**
  * Common functionality for all HVAC device drivers.
@@ -42,14 +42,14 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     private final Disposable uptimeCounterSubscription;
 
     protected AbstractHvacDevice(String name) {
-        this(Clock.system(TimeZone.getDefault().toZoneId()), name, null);
+        this(Clock.system(ZoneId.systemDefault()), name, null);
     }
 
     protected AbstractHvacDevice(
             String name,
             ResourceUsageCounter<Duration> uptimeCounter
     ) {
-        this(Clock.system(TimeZone.getDefault().toZoneId()), name, uptimeCounter);
+        this(Clock.system(ZoneId.systemDefault()), name, uptimeCounter);
     }
 
     protected AbstractHvacDevice(

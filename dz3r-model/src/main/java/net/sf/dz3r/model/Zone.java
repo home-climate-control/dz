@@ -19,6 +19,7 @@ import reactor.core.publisher.Sinks;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 
 /**
@@ -85,7 +86,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         setSettingsSync(new ZoneSettings(settings, ts.getSetpoint()));
 
         economizer = Optional.ofNullable(economizerContext)
-                .map(ctx -> new PidEconomizer<>(Clock.systemUTC(), ts.getAddress(), ctx.settings, ctx.ambientFlux, ctx.device))
+                .map(ctx -> new PidEconomizer<>(Clock.system(ZoneId.systemDefault()), ts.getAddress(), ctx.settings, ctx.ambientFlux, ctx.device))
                 .orElse(null);
     }
 
