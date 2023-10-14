@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config.model;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Range;
@@ -46,13 +47,16 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         return new ImmutablePair<>(cf.id(), zone);
     }
 
-    private EconomizerContext<?> createEconomizer(EconomizerConfig cf) {
+    private EconomizerContext createEconomizer(EconomizerConfig cf) {
 
         if (cf == null) {
             return null;
         }
 
-        return new EconomizerContext<>(
+        var ambientSensor = HCCObjects.requireNonNull(getSensorBlocking(cf.ambientSensor()), "can't resolve ambient-sensor=" + cf.ambientSensor());
+        var hvacDevice = HCCObjects.requireNonNull(getHvacDevice(cf.hvacDevice()), "can't resolve hvac-device=" + cf.hvacDevice());
+
+        return new EconomizerContext(
                 new EconomizerSettings(
                         cf.mode(),
                         cf.changeoverDelta(),
@@ -61,8 +65,8 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                         cf.controller().p(),
                         cf.controller().i(),
                         cf.controller().limit()),
-                getSensorBlocking(cf.ambientSensor()),
-                getSwitch(cf.switchAddress()));
+                ambientSensor,
+                hvacDevice);
     }
 
     private Thermostat createThermostat(String name, Double setpoint, RangeConfig rangeConfig, PidControllerConfig cf) {

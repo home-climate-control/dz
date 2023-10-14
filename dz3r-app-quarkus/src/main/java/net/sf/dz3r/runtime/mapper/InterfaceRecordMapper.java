@@ -143,7 +143,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.keepHvacOn())", target = "keepHvacOn")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.controller(source.controller()))", target = "controller")
     @Mapping(expression = "java(source.mode())", target = "mode")
-    @Mapping(expression = "java(source.switchAddress())", target = "switchAddress")
+    @Mapping(expression = "java(source.hvacDevice())", target = "hvacDevice")
     net.sf.dz3r.runtime.config.model.EconomizerConfig economizer(EconomizerConfig source);
 
     @Mapping(expression = "java(source.min())", target = "min")

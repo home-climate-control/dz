@@ -12,6 +12,6 @@ public record EconomizerConfig(
         Boolean keepHvacOn,
         PidControllerConfig controller,
         HvacMode mode,
-        String switchAddress
+        String hvacDevice
 ) {
 }
