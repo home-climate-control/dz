@@ -89,8 +89,10 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 .compute(
                         deviceCommandSink
                                 .asFlux()
-                                .publishOn(Schedulers.boundedElastic()))
-                .subscribe(s -> logger.debug("{}: HVAC device state: {}", getAddress(), s));
+                                .publishOn(Schedulers.boundedElastic())
+                                .doOnNext(s -> logger.debug("{}: HVAC device state/send: {}", getAddress(), s))
+                )
+                .subscribe(s -> logger.debug("{}: HVAC device state/done: {}", getAddress(), s));
 
         this.economizerStatus = new EconomizerStatus(
                 new EconomizerTransientSettings(settings),
@@ -139,7 +141,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         // And act on it
         stage2
                 // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
+                .doOnNext(s -> logger.debug("{}: setDeviceState/send={}", getAddress(), s))
                 .doOnNext(this::setDeviceState)
+                .doOnNext(s -> logger.debug("{}: setDeviceState/done={}", getAddress(), s))
 
                 .doOnError(t -> logger.error("{}: errored out", getAddress(), t))
                 .doOnComplete(() -> logger.debug("{}: completed", getAddress()))
@@ -159,14 +163,15 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
     private void setDeviceState(Boolean state) {
 
-        double ctl = Boolean.TRUE.equals(state) ? 1.0 : 0.0;
-
-        deviceCommandSink.tryEmitNext(
-                new Signal<>(
-                        Instant.now(clock),
-                        new HvacCommand(settings.mode, ctl, ctl)
-                )
+        var ctl = Boolean.TRUE.equals(state) ? 1.0 : 0.0;
+        var signal = new Signal<HvacCommand, Void>(
+                Instant.now(clock),
+                new HvacCommand(settings.mode, ctl, ctl)
         );
+
+        logger.debug("{}: setDeviceState={}", getAddress(), signal);
+
+        deviceCommandSink.tryEmitNext(signal);
     }
 
     protected abstract Flux<Signal<Boolean, ProcessController.Status<Double>>> computeDeviceState(Flux<Signal<Double, Void>> signal);
