@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
+import net.sf.dz3r.device.esphome.v1.ESPHomeFan;
 import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
 import net.sf.dz3r.device.esphome.v1.ESPHomeSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
@@ -11,9 +12,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig, ESPHomeListener, ESPHomeSwitch> {
+public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, ESPHomeListener, ESPHomeSwitch, ESPHomeFan> {
 
-    public EspSensorSwitchResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
+    public ESPHomeDeviceResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
     }
 
@@ -39,5 +40,15 @@ public class EspSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevice
                 rootTopic,
                 Optional.ofNullable(optimistic).orElse(true),
                 null);
+    }
+
+    @Override
+    protected ESPHomeFan createFan(String id, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+        return new ESPHomeFan(
+                id,
+                adapter,
+                rootTopic,
+                availabilityTopic
+        );
     }
 }

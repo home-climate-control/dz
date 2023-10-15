@@ -18,6 +18,7 @@ import java.util.Set;
 public record MqttDeviceConfig(
         MqttBrokerConfig broker,
         Set<SensorConfig> sensors,
-        Set<SwitchConfig> switches
+        Set<SwitchConfig> switches,
+        Set<FanConfig> fans
 ) implements MqttGateway {
 }
