@@ -39,7 +39,7 @@ Best explained by example:
 * `uri`: InfluxDB server to connect to
 * `username`: InfluxDB username - optional, but recommended
 * `password`: InfluxDB password - optional, but recommended
-* `sensor-feed-mapping`: Optional list of pairs where on the left is the [sensor](./sensors-and-switches.md#sensors) ID, and on the right is the name it will translate to in InfluxDB.
+* `sensor-feed-mapping`: Optional list of pairs where on the left is the [sensor](./sensors-switches-fans.md#sensors) ID, and on the right is the name it will translate to in InfluxDB.
 
 ### Property of
 * [connectors](./connectors.md)

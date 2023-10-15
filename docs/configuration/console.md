@@ -25,7 +25,7 @@ Set of references to [directors](./directors.md). If you skip it HCC will assume
 > Both "include all" and "missing" will be logged at `WARNING` level, verify if what you think you configured is what HCC thinks it is.
 
 ### sensors
-Set of references to [sensors](./sensors-and-switches.md).
+Set of references to [sensors](./sensors-switches-fans.md).
 
 > **NOTE**: Be careful with an empty set. Quarkus will not ignore it, but Spring will include all, and you likely have A LOT of sensors in the system, and it's unlikely that you want all of them on the console.
 > Be sure to examine the boot log to verify how exactly the configuration was interpreted.

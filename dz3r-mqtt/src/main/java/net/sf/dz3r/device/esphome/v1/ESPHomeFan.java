@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Driver for <a href="https://esphome.io/components/fan/index.html">ESPHome Fan Component</a>.
+ * Driver for <a href="https://esphome.io/components/fan">ESPHome Fan Component</a>.
  *
  * Important: {@code speed_count} needs to be left at default (100) for this driver to operate correctly.
  *

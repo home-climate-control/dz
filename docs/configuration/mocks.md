@@ -3,7 +3,7 @@ mocks
 
 The primary use for the mocks is to be able to debug the system configuration without jeopardizing expensive hardware.
 
-This section follows the same syntax as [sensors & switches](./sensors-and-switches.md). Only switches are supported at the moment.
+This section follows the same syntax as [sensors & switches](./sensors-switches-fans.md). Only switches are supported at the moment.
 
 Example:
 
