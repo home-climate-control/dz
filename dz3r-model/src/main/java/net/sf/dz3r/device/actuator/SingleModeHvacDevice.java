@@ -22,7 +22,7 @@ import java.util.function.Predicate;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public abstract class SingleModeHvacDevice extends AbstractHvacDevice {
+public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
 
     private static final HvacCommand OFF = new HvacCommand(null, 0.0, 0d);
 
@@ -46,7 +46,7 @@ public abstract class SingleModeHvacDevice extends AbstractHvacDevice {
     }
 
     @Override
-    public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
+    public Flux<Signal<HvacDeviceStatus<T>, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
 
         var init = Flux.just(OFF);
         var shutdown = Flux.just(OFF);
@@ -121,7 +121,7 @@ public abstract class SingleModeHvacDevice extends AbstractHvacDevice {
      * @param command Command to execute.
      * @return Device status flux.
      */
-    protected abstract Flux<Signal<HvacDeviceStatus, Void>> apply(HvacCommand command);
+    protected abstract Flux<Signal<HvacDeviceStatus<T>, Void>> apply(HvacCommand command);
 
     @Override
     public final Set<HvacMode> getModes() {

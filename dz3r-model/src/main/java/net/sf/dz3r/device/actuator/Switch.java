@@ -11,13 +11,13 @@ import reactor.core.publisher.Mono;
  *
  * @param <A> Address type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
 public interface Switch<A extends Comparable<A>> extends Addressable<A> {
 
     public class State extends DeviceState<Boolean> {
-        public State(Boolean requested, Boolean actual) {
-            super(requested, actual);
+        public State(String id, Boolean available, Boolean requested, Boolean actual) {
+            super(id, available, requested, actual, null);
         }
     }
 

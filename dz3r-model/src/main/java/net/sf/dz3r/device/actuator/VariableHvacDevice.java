@@ -2,6 +2,7 @@ package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.counter.ResourceUsageCounter;
+import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
@@ -11,6 +12,9 @@ import reactor.core.publisher.Flux;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
+
+import static net.sf.dz3r.device.actuator.VariableOutputDevice.OutputState;
 
 /**
  * A device with just one actuator acting as an HVAC device that just supports one mode (either heating or cooling).
@@ -24,7 +28,7 @@ import java.time.Duration;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class VariableHvacDevice extends SingleModeHvacDevice {
+public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
 
     private final VariableOutputDevice actuator;
 
@@ -34,10 +38,26 @@ public class VariableHvacDevice extends SingleModeHvacDevice {
         this.actuator = HCCObjects.requireNonNull(actuator, "actuator can't be null");
     }
 
-
     @Override
-    protected Flux<Signal<HvacDeviceStatus, Void>> apply(HvacCommand hvacCommand) {
-        return Flux.empty();
+    protected Flux<Signal<HvacDeviceStatus<OutputState>, Void>> apply(HvacCommand command) {
+
+        var output = Math.max(command.demand, command.fanSpeed);
+        var on = Double.compare(output, 0d) != 0;
+
+        return Flux.just(
+                new Signal<>(
+                        Instant.now(clock),
+                        translate(command, actuator.setState(on, output))
+                )
+        );
+    }
+
+    private HvacDeviceStatus<OutputState> translate(HvacCommand command, DeviceState<OutputState> state) {
+        return new HvacDeviceStatus<>(
+                command,
+                uptime(),
+                state
+        );
     }
 
     @Override

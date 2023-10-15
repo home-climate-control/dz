@@ -24,7 +24,7 @@ import java.util.function.Predicate;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class SwitchableHvacDevice extends SingleModeHvacDevice {
+public class SwitchableHvacDevice extends SingleModeHvacDevice<Void> {
 
     private final Switch<?> theSwitch;
     private final boolean inverted;
@@ -55,13 +55,13 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice {
     }
 
     @Override
-    public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
+    public Flux<Signal<HvacDeviceStatus<Void>, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
         return
                 computeNonBlocking(in)
                         .doOnNext(this::broadcast);
     }
 
-    private Flux<Signal<HvacDeviceStatus, Void>> computeNonBlocking(Flux<Signal<HvacCommand, Void>> in) {
+    private Flux<Signal<HvacDeviceStatus<Void>, Void>> computeNonBlocking(Flux<Signal<HvacCommand, Void>> in) {
 
         return in
                 .filter(Signal::isOK)
@@ -82,7 +82,7 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice {
                     // By this time, the command has been verified to be valid
                     requested = command;
 
-                    var result = new HvacDeviceStatus(command, uptime());
+                    var result = new HvacDeviceStatus<Void>(command, uptime(), null);
 
                     return theSwitch
                             .setState(state != inverted)
@@ -99,12 +99,12 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice {
      * @deprecated
      */
     @Deprecated(forRemoval = true, since = "2023-10-01")
-    Flux<Signal<HvacDeviceStatus, Void>> computeBlocking(Flux<Signal<HvacCommand, Void>> in) {
+    Flux<Signal<HvacDeviceStatus<Void>, Void>> computeBlocking(Flux<Signal<HvacCommand, Void>> in) {
         return in
                 .filter(Signal::isOK)
                 .flatMap(signal -> {
                     return Flux
-                            .<Signal<HvacDeviceStatus, Void>>create(sink -> {
+                            .<Signal<HvacDeviceStatus<Void>, Void>>create(sink -> {
 
                                 try {
 
@@ -118,7 +118,7 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice {
 
                                     logger.debug("State: {}", state);
 
-                                    sink.next(new Signal<>(clock.instant(), new HvacDeviceStatus(command, uptime())));
+                                    sink.next(new Signal<>(clock.instant(), new HvacDeviceStatus<Void>(command, uptime(), null)));
 
                                     // By this time, the command has been verified to be valid
                                     requested = command;
@@ -130,7 +130,7 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice {
 
                                     updateUptime(clock.instant(), state);
 
-                                    var complete = new HvacDeviceStatus(command, uptime());
+                                    var complete = new HvacDeviceStatus<Void>(command, uptime(), null);
                                     sink.next(new Signal<>(clock.instant(), complete));
 
                                 } catch (Throwable t) { // NOSONAR Consequences have been considered
@@ -148,7 +148,7 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice {
     }
 
     @Override
-    protected Flux<Signal<HvacDeviceStatus, Void>> apply(HvacCommand command) {
+    protected Flux<Signal<HvacDeviceStatus<Void>, Void>> apply(HvacCommand command) {
         throw new IllegalStateException("refactoring incomplete");
     }
 

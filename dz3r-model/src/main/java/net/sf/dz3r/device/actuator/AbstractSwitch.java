@@ -109,7 +109,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
 
             return cached.map(Mono::just).orElseGet(() -> {
 
-                reportState(new Signal<>(Instant.now(), new State(state, lastKnownState)));
+                reportState(new Signal<>(Instant.now(), new State(getAddress().toString(), null, state, lastKnownState)));
 
                 try {
                     setStateSync(state);
@@ -174,7 +174,7 @@ public abstract class AbstractSwitch<A extends Comparable<A>> implements Switch<
                     try {
 
                         lastKnownState = getStateSync();
-                        reportState(new Signal<>(Instant.now(), new State(null, lastKnownState)));
+                        reportState(new Signal<>(Instant.now(), new State(getAddress().toString(), null, null, lastKnownState)));
                         sink.success(lastKnownState);
 
                     } catch (Throwable t) { // NOSONAR Consequences have been considered

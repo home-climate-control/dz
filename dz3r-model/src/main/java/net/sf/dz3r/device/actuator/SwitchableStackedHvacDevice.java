@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @see net.sf.dz3r.model.MultistageUnitController
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class SwitchableStackedHvacDevice extends AbstractHvacDevice {
+public class SwitchableStackedHvacDevice extends AbstractHvacDevice<Void> {
 
     private final HvacMode mode;
     private final List<SwitchableHvacDevice> devices;
@@ -67,7 +67,7 @@ public class SwitchableStackedHvacDevice extends AbstractHvacDevice {
     }
 
     @Override
-    public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
+    public Flux<Signal<HvacDeviceStatus<Void>, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
         // VT: NOTE: Don't forget to setFlux() here
         throw new UnsupportedOperationException("Not Implemented");
     }

@@ -1,5 +1,6 @@
 package net.sf.dz3r.signal.hvac;
 
+import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.device.actuator.HvacDevice;
 
 import java.time.Duration;
@@ -9,7 +10,7 @@ import java.time.Duration;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
-public class HvacDeviceStatus {
+public class HvacDeviceStatus<T> {
 
     /**
      * The state requested by the last incoming command that resulted in this update.
@@ -21,13 +22,16 @@ public class HvacDeviceStatus {
      */
     public final Duration uptime;
 
-    public HvacDeviceStatus(HvacCommand command, Duration uptime) {
+    public final DeviceState<T> deviceState;
+
+    public HvacDeviceStatus(HvacCommand command, Duration uptime, DeviceState<T> deviceState) {
         this.command = command;
         this.uptime = uptime;
+        this.deviceState = deviceState;
     }
 
     @Override
     public String toString() {
-        return "{command=" + command + ", uptime=" + uptime + "}";
+        return "{command=" + command + ", uptime=" + uptime + ", deviceState=" + deviceState + "}";
     }
 }

@@ -1,12 +1,12 @@
 package net.sf.dz3r.runtime.config;
 
-import net.sf.dz3r.runtime.config.onewire.EntityProvider;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.runtime.config.onewire.EntityProvider;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.Connector;

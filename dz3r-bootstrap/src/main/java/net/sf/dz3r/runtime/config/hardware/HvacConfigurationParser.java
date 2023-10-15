@@ -85,7 +85,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         return new File(home, ".dz/counters");
     }
 
-    private HvacDevice parseHeatpump(HeatpumpConfig cf) {
+    private HvacDevice<?> parseHeatpump(HeatpumpConfig cf) {
 
         return new HeatPump(
                 cf.id(),
@@ -99,7 +99,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
                 createFileCounter(cf.id(), cf.filter()));
     }
 
-    private HvacDevice parseHeatpumpHAT(HeatpumpHATConfig cf) {
+    private HvacDevice<?> parseHeatpumpHAT(HeatpumpHATConfig cf) {
 
         try {
             return new HeatPumpHAT(
@@ -110,7 +110,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         }
     }
 
-    private HvacDevice parseSwitchable(SwitchableHvacDeviceConfig cf) {
+    private HvacDevice<?> parseSwitchable(SwitchableHvacDeviceConfig cf) {
 
         // VT: NOTE: There is no configuration keyword for the switch being inverted;
         // likely it will never be needed

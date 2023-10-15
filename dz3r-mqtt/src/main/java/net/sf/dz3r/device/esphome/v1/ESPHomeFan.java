@@ -2,6 +2,7 @@ package net.sf.dz3r.device.esphome.v1;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.common.HCCObjects;
+import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
@@ -46,7 +47,7 @@ public class ESPHomeFan implements VariableOutputDevice {
     private final Disposable rootFlux;
     private final Sinks.Many<Command> commandSink = Sinks.many().multicast().onBackpressureBuffer();
     private final Disposable commandSubscription;
-    private final Sinks.Many<Signal<State, String>> stateSink = Sinks.many().multicast().onBackpressureBuffer();
+    private final Sinks.Many<Signal<DeviceState<OutputState>, String>> stateSink = Sinks.many().multicast().onBackpressureBuffer();
 
     private OutputState requested;
     private OutputState actual;
@@ -169,9 +170,9 @@ public class ESPHomeFan implements VariableOutputDevice {
     }
 
     @Override
-    public State getState() {
+    public DeviceState<OutputState> getState() {
 
-        return new State(
+        return new DeviceState<OutputState>(
                 id,
                 isAvailable(),
                 requested,
@@ -181,7 +182,7 @@ public class ESPHomeFan implements VariableOutputDevice {
     }
 
     @Override
-    public synchronized State setState(boolean on, double output) {
+    public synchronized DeviceState<OutputState> setState(boolean on, double output) {
 
         if (output < 0 || output > 1) {
             throw new IllegalArgumentException("speed given (" + output + ") is outside of 0..1 range");
@@ -230,11 +231,11 @@ public class ESPHomeFan implements VariableOutputDevice {
     }
 
     @Override
-    public Flux<Signal<State, String>> getFlux() {
+    public Flux<Signal<DeviceState<OutputState>, String>> getFlux() {
         return stateSink.asFlux();
     }
 
-    private Signal<State, String> getStateSignal() {
+    private Signal<DeviceState<OutputState>, String> getStateSignal() {
         return new Signal<>(Instant.now(clock), getState(), id);
     }
 

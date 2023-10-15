@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.signal.Signal;
 import reactor.core.publisher.Flux;
 
@@ -25,25 +26,6 @@ public interface VariableOutputDevice extends AutoCloseable {
 
     }
 
-    /**
-     * Variable output device state.
-     *
-     * @param id device ID.
-     * @param available {@code true} if the device was reported as available, {@code false} if not, or if it is unknown.
-     * @param requested Requested device state.
-     * @param actual Actual device state.
-     * @param queueDepth Current value of send queue depth.
-     */
-    public record State(
-            String id,
-            boolean available,
-            OutputState requested,
-            OutputState actual,
-            int queueDepth
-    ) {
-
-    }
-
     public record OutputState(
             Boolean on,
             Double output
@@ -56,7 +38,7 @@ public interface VariableOutputDevice extends AutoCloseable {
      *
      * @return Actual, current state of the device, immediately.
      */
-    State getState();
+    DeviceState<OutputState> getState();
 
     /**
      * Request the provided state, return immediately.
@@ -68,7 +50,7 @@ public interface VariableOutputDevice extends AutoCloseable {
      *
      * @return The result of {@link #getState()} after the command was accepted (not executed).
      */
-    State setState(boolean on, double output);
+    DeviceState<OutputState> setState(boolean on, double output);
 
     /**
      * Check the reported device availability.
@@ -80,12 +62,12 @@ public interface VariableOutputDevice extends AutoCloseable {
     /**
      * Get the state change notification flux.
      *
-     * Note that this sink will NOT emit error signals, however, {@link State#available()} will reflect device availability
+     * Note that this sink will NOT emit error signals, however, {@link DeviceState#available} will reflect device availability
      * the moment the signal was emitted.
      *
      * @return Flux emitting signals every time the {@link #setState(boolean, double) requested} or {@link #getState() actual} state has changed.
      */
-    Flux<Signal<State, String>> getFlux();
+    Flux<Signal<DeviceState<OutputState>, String>> getFlux();
 
     /**
      * Close the device, synchronously.
