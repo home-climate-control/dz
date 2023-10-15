@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Objects;
 
 /**
@@ -42,14 +41,14 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     private final Disposable uptimeCounterSubscription;
 
     protected AbstractHvacDevice(String name) {
-        this(Clock.system(ZoneId.systemDefault()), name, null);
+        this(Clock.systemUTC(), name, null);
     }
 
     protected AbstractHvacDevice(
             String name,
             ResourceUsageCounter<Duration> uptimeCounter
     ) {
-        this(Clock.system(ZoneId.systemDefault()), name, uptimeCounter);
+        this(Clock.systemUTC(), name, uptimeCounter);
     }
 
     protected AbstractHvacDevice(

@@ -18,7 +18,6 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -60,7 +59,7 @@ public class ESPHomeFan implements VariableOutputDevice {
 
         this(
                 id,
-                Clock.system(ZoneId.systemDefault()),
+                Clock.systemUTC(),
                 adapter,
                 rootTopic,
                 availabilityTopic

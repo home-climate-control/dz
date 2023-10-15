@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
@@ -114,6 +115,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         // VT: NOTE: There is no configuration keyword for the switch being inverted;
         // likely it will never be needed
         return new SwitchableHvacDevice(
+                Clock.systemUTC(),
                 cf.id(),
                 HvacMode.valueOf(cf.mode().toUpperCase()),
                 getSwitch(cf.switchAddress()),
