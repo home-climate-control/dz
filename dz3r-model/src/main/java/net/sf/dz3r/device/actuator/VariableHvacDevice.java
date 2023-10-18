@@ -55,7 +55,13 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
             throw new IllegalArgumentException("bandCount must be non-negative");
         }
 
+        if (bandCount > 100) {
+            throw new IllegalArgumentException("unreasonably high bandCount of " + bandCount + ", max=100");
+        }
+
         this.bandCount = bandCount;
+
+        logger.debug("{}: created with bandCount={}", name, bandCount);
     }
 
     @Override
