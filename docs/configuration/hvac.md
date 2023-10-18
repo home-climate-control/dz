@@ -38,6 +38,7 @@ Best explained by example:
         - id: hvac-infinity-ac-a6
           mode: cooling
           actuator: fan-infinity-ac-a6
+          band-count: 5
 
 ```
 ### Common Properties
@@ -76,6 +77,9 @@ An on/off HVAC device. Examples: heat fan, radiant heater, oil heater, motorized
 
 * `mode`: Which mode this device is used in. There can be one. The system will refuse to use this device in the wrong mode. This parameter is mandatory.
 * `actuator`: The variable output device used as a HVAC unit. Currently, only [MQTT fans](./mqtt.md#sensors-switches-fans) are supported.
+* `band-count`: The control signal will be split into this many bands, and the output will not change while the control signal is within the same band. This is done to make the device noise less noticeable, infinitely variable devices annoy people.
+  * Default band count is 10, and the maximum possible value is 100. It would probably be a bad idea to raise it above the default.
+  * Value of 0 disables banding altogether.
 
 ### Property of
 * [home-climate-control](./home-climate-control.md)
