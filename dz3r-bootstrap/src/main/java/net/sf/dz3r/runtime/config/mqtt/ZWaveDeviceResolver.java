@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
+import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch;
 import net.sf.dz3r.device.zwave.v1.ZWaveSensorListener;
@@ -12,9 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig, SignalSource<String, Double, Void>, ZWaveBinarySwitch> {
+public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, SignalSource<String, Double, Void>, ZWaveBinarySwitch, VariableOutputDevice> {
 
-    public ZWaveSensorSwitchResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
+    public ZWaveDeviceResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
     }
 
@@ -44,5 +45,10 @@ public class ZWaveSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDevi
                 rootTopic,
                 Optional.ofNullable(optimistic).orElse(false),
                 null);
+    }
+
+    @Override
+    protected VariableOutputDevice createFan(String id, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+        throw new UnsupportedOperationException("Not Implemented");
     }
 }

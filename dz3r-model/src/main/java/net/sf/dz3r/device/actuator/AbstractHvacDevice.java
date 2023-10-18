@@ -14,23 +14,22 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Objects;
 
 /**
  * Common functionality for all HVAC device drivers.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public abstract class AbstractHvacDevice implements HvacDevice {
+public abstract class AbstractHvacDevice<T> implements HvacDevice<T> {
 
     protected final Logger logger = LogManager.getLogger();
     protected final Clock clock;
 
     private final String name;
 
-    private final Sinks.Many<Signal<HvacDeviceStatus, Void>> statusSink;
-    private final Flux<Signal<HvacDeviceStatus, Void>> statusFlux;
+    private final Sinks.Many<Signal<HvacDeviceStatus<T>, Void>> statusSink;
+    private final Flux<Signal<HvacDeviceStatus<T>, Void>> statusFlux;
 
     /**
      * The moment this device turned on, {@code null} if currently off.
@@ -42,14 +41,14 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     private final Disposable uptimeCounterSubscription;
 
     protected AbstractHvacDevice(String name) {
-        this(Clock.system(ZoneId.systemDefault()), name, null);
+        this(Clock.systemUTC(), name, null);
     }
 
     protected AbstractHvacDevice(
             String name,
             ResourceUsageCounter<Duration> uptimeCounter
     ) {
-        this(Clock.system(ZoneId.systemDefault()), name, uptimeCounter);
+        this(Clock.systemUTC(), name, uptimeCounter);
     }
 
     protected AbstractHvacDevice(
@@ -89,11 +88,11 @@ public abstract class AbstractHvacDevice implements HvacDevice {
     }
 
     @Override
-    public final Flux<Signal<HvacDeviceStatus, Void>> getFlux() {
+    public final Flux<Signal<HvacDeviceStatus<T>, Void>> getFlux() {
         return statusFlux;
     }
 
-    protected final void broadcast(Signal<HvacDeviceStatus, Void> signal) {
+    protected final void broadcast(Signal<HvacDeviceStatus<T>, Void> signal) {
         logger.debug("{}: broadcast: {}", getAddress(), signal);
         statusSink.tryEmitNext(signal);
     }
@@ -127,16 +126,14 @@ public abstract class AbstractHvacDevice implements HvacDevice {
         return startedAt == null ? null : Duration.between(startedAt, Instant.now());
     }
 
-    private Flux<Duration> getUptime(Signal<HvacDeviceStatus, Void> signal) {
+    private Flux<Duration> getUptime(Signal<HvacDeviceStatus<T>, Void> signal) {
 
         if (signal.isError()) {
             return Flux.empty();
         }
 
-        var uptime = signal.getValue().uptime;
-
         // Null uptime will be in the signal when the HVAC is off
-        return Flux.just(Objects.requireNonNullElse(uptime, Duration.ZERO));
+        return Flux.just(Objects.requireNonNullElse(signal.getValue().uptime, Duration.ZERO));
     }
 
     protected boolean isClosed() {

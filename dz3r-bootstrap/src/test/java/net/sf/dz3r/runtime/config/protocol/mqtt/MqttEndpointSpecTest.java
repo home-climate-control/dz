@@ -14,8 +14,8 @@ class MqttEndpointSpecTest {
 
         var broker = new MqttBrokerConfig(null, "localhost", null, null, null, "topicA", false);
 
-        var ca = new MqttDeviceConfig(broker, Set.of(), Set.of());
-        var cb = new MqttDeviceConfig(broker, Set.of(), Set.of());
+        var ca = new MqttDeviceConfig(broker, Set.of(), Set.of(), Set.of());
+        var cb = new MqttDeviceConfig(broker, Set.of(), Set.of(), Set.of());
 
         var ea = ConfigurationMapper.INSTANCE.parseEndpoint(ca.broker());
         var eb = ConfigurationMapper.INSTANCE.parseEndpoint(cb.broker());
@@ -30,8 +30,8 @@ class MqttEndpointSpecTest {
         var brokerA = new MqttBrokerConfig(null, "localhost", null, null, null, "topicA", false);
         var brokerB = new MqttBrokerConfig(null, "localhost", null, null, null, "topicA", false);
 
-        var ca = new MqttDeviceConfig(brokerA, Set.of(), Set.of());
-        var cb = new MqttDeviceConfig(brokerB, Set.of(), Set.of());
+        var ca = new MqttDeviceConfig(brokerA, Set.of(), Set.of(), Set.of());
+        var cb = new MqttDeviceConfig(brokerB, Set.of(), Set.of(), Set.of());
 
         var ea = ConfigurationMapper.INSTANCE.parseEndpoint(ca.broker());
         var eb = ConfigurationMapper.INSTANCE.parseEndpoint(cb.broker());

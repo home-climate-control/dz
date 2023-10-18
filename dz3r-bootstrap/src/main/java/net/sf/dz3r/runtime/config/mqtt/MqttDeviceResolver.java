@@ -1,12 +1,14 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
+import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.runtime.config.ConfigurationMapper;
+import net.sf.dz3r.runtime.config.DeviceResolver;
 import net.sf.dz3r.runtime.config.Id2Flux;
-import net.sf.dz3r.runtime.config.SensorSwitchResolver;
 import net.sf.dz3r.runtime.config.hardware.SensorConfig;
 import net.sf.dz3r.runtime.config.hardware.SwitchConfig;
+import net.sf.dz3r.runtime.config.protocol.mqtt.FanConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttGateway;
@@ -25,23 +27,24 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Common implementations for resolving MQTT sensor and switch instances from their configurations.
+ * Common implementations for resolving MQTT device instances from their configurations.
  *
  * @param <A> Address type.
  * @param <L> Sensor adapter type.
  * @param <S> Switch adapter type.
+ * @param <F> Fan adapter type.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S extends AbstractMqttSwitch> extends SensorSwitchResolver<A> {
+public abstract class MqttDeviceResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S extends AbstractMqttSwitch, F extends VariableOutputDevice> extends DeviceResolver<A> {
 
     private final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
     private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
     private final Set<MqttSwitchConfig> switchConfigs = new LinkedHashSet<>();
-
+    private final Set<MqttFanConfig> fanConfigs = new LinkedHashSet<>();
     private final Map<MqttBrokerSpec, L> broker2listener = new LinkedHashMap<>();
 
-    protected MqttSensorSwitchResolver(Set<A> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
+    protected MqttDeviceResolver(Set<A> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source);
         this.endpoint2adapter = endpoint2adapter;
     }
@@ -175,6 +178,23 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                 });
     }
 
+    /**
+     * Parse the configuration into the mapping from their broker (not endpoint) to fan configuration.
+     */
+    public final void getFanConfigs() {
+
+        Flux
+                .fromIterable(source)
+                .subscribe(s -> {
+                    var endpoint = s.broker();
+                    Optional.ofNullable(s.fans()).ifPresent(fans -> {
+                        for (var spec : fans) {
+                            fanConfigs.add(new MqttFanConfig(endpoint, spec));
+                        }
+                    });
+                });
+    }
+
     private final L resolveListener(MqttBrokerSpec address, MqttAdapter adapter) {
         return broker2listener.computeIfAbsent(address, k -> createSensorListener(adapter, address.rootTopic()));
     }
@@ -206,7 +226,34 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
                 });
     }
 
+    public Flux<Map.Entry<String, F>> getFans() {
+        return getFans(endpoint2adapter, fanConfigs);
+    }
+
+    private Flux<Map.Entry<String, F>> getFans(Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter, Set<MqttFanConfig> source) {
+
+        return Flux
+                .fromIterable(source)
+                .doOnNext(c -> logger.debug("fan: {}", c.fanConfig().address()))
+                .doOnNext(c -> logger.debug("  broker: {}", c.mqttBrokerSpec().signature()))
+                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
+                .map(c -> {
+                    var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
+
+                    var id = c.fanConfig().id();
+                    var address = c.fanConfig.address();
+                    var s = createFan(id, adapter, address, c.fanConfig.availability());
+
+                    // ID takes precedence over address
+                    var key = id == null ? address : id;
+
+                    return new ImmutablePair<>(key, s);
+                });
+    }
+
     protected abstract S createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic);
+
+    protected abstract F createFan(String id, MqttAdapter adapter, String rootTopic, String availabilityTopic);
 
     public record MqttSensorConfig(
             MqttBrokerSpec mqttBrokerSpec,
@@ -216,6 +263,11 @@ public abstract class MqttSensorSwitchResolver<A extends MqttGateway, L extends 
     public record MqttSwitchConfig(
             MqttBrokerSpec mqttBrokerSpec,
             SwitchConfig switchConfig) {
+    }
+
+    public record MqttFanConfig(
+            MqttBrokerSpec mqttBrokerSpec,
+            FanConfig fanConfig) {
     }
 
     private record Config2Listener<L extends SignalSource<String, Double, Void>>(

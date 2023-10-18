@@ -3,7 +3,7 @@ influx
 
 Integration that allows to use [InfluxDB](https://www.influxdata.com/) as telemetry data sink.
 
-> **NOTE:** This integration will be inactive except for `sensor-field-mapping` unless included into [directors.connectors](./directors.md).
+> **NOTE:** This integration will be inactive except for `sensor-field-mapping` unless included into [directors.connectors](./directors.md).   
 
 > **NOTE:** This integration is different from default InfluxDB integration embedded into Spring and Quarkus, those must be configured in [infrastructure configuration](./index.md#infrastructure-specific).
 
@@ -13,7 +13,7 @@ Short list:
 
 * Zone state (setpoints, PID controller internal state, and more)
 * Economizer state (setpoints, PID controller internal state, and more)
-* Unit status (demand, uptime, and more)
+* Unit state (demand, uptime, filter life left, and more)
 
 ### Configuration
 
@@ -39,7 +39,7 @@ Best explained by example:
 * `uri`: InfluxDB server to connect to
 * `username`: InfluxDB username - optional, but recommended
 * `password`: InfluxDB password - optional, but recommended
-* `sensor-feed-mapping`: Optional list of pairs where on the left is the [sensor](./sensors-and-switches.md#sensors) ID, and on the right is the name it will translate to in InfluxDB.
+* `sensor-feed-mapping`: Optional list of pairs where on the left is the [sensor](./sensors-switches-fans.md#sensors) ID, and on the right is the name it will translate to in InfluxDB. Note that this mapping is on top of the standard telemetry emitted for all the entities included in the [directors](./directors.md) this connector is attached to.
 
 ### Property of
 * [connectors](./connectors.md)

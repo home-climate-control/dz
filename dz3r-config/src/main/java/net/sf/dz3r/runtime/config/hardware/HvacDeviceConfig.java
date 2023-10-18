@@ -9,6 +9,7 @@ import java.util.Set;
 public record HvacDeviceConfig(
         Set<SwitchableHvacDeviceConfig> switchable,
         Set<HeatpumpHATConfig> heatpumpHat,
-        Set<HeatpumpConfig> heatpump
+        Set<HeatpumpConfig> heatpump,
+        Set<VariableHvacConfig> variable
 ) {
 }

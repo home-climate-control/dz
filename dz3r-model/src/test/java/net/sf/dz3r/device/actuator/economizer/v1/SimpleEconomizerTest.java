@@ -14,6 +14,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.tools.agent.ReactorDebugAgent;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 
@@ -47,6 +48,7 @@ class SimpleEconomizerTest {
 
         // VT: FIXME: Replace with a mock to verify()
         var device = new SwitchableHvacDevice(
+                Clock.systemUTC(),
                 "d",
                 HvacMode.COOLING,
                 new NullSwitch("s"),

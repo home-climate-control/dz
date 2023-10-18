@@ -34,6 +34,10 @@ Best explained by example:
     - heatpump-hat:
         - id: heatpump-hat
           mode-change-delay: 20S
+    - variable:
+        - id: hvac-infinity-ac-a6
+          mode: cooling
+          actuator: fan-infinity-ac-a6
 
 ```
 ### Common Properties
@@ -45,7 +49,7 @@ Best explained by example:
 
 An on/off HVAC device. Examples: heat fan, radiant heater, oil heater, motorized shade, economizer.
 
-* `mode`: Which mode this device is used in. There can be one. The system will refuse to use this device in the wrong mode.
+* `mode`: Which mode this device is used in. There can be one. The system will refuse to use this device in the wrong mode. This parameter is mandatory.
 * `switch-address`: Address of the switch that turns this device on or off.
 
 ### heatpump
@@ -65,6 +69,13 @@ This is a Raspberry Pi specific device utilizing a [Pimoroni Automation HAT](htt
 * Relay 2 is used as an air handler switch
 
 No additional configuration is required.
+
+### variable
+
+An on/off HVAC device. Examples: heat fan, radiant heater, oil heater, motorized shade, economizer.
+
+* `mode`: Which mode this device is used in. There can be one. The system will refuse to use this device in the wrong mode. This parameter is mandatory.
+* `actuator`: The variable output device used as a HVAC unit. Currently, only [MQTT fans](./mqtt.md#sensors-switches-fans) are supported.
 
 ### Property of
 * [home-climate-control](./home-climate-control.md)

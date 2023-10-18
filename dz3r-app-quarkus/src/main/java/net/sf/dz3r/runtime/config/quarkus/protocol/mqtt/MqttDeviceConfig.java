@@ -25,4 +25,8 @@ public interface MqttDeviceConfig extends MqttGateway {
     @JsonProperty("switches")
     @Override
     Set<SwitchConfig> switches();
+
+    @JsonProperty("fans")
+    @Override
+    Set<FanConfig> fans();
 }

@@ -27,7 +27,7 @@ import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class HeatPump extends AbstractHvacDevice {
+public class HeatPump extends AbstractHvacDevice<Void> {
 
     /**
      * Default mode change delay.
@@ -141,7 +141,7 @@ public class HeatPump extends AbstractHvacDevice {
     }
 
     @Override
-    public Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
+    public Flux<Signal<HvacDeviceStatus<Void>, Void>> compute(Flux<Signal<HvacCommand, Void>> in) {
 
         // Shut off the condenser, let the fan be as is
         var init = Flux.just(new HvacCommand(null, 0.0, null));
@@ -162,7 +162,7 @@ public class HeatPump extends AbstractHvacDevice {
                 .doOnNext(this::broadcast);
     }
 
-    private Flux<Signal<HvacDeviceStatus, Void>> process(HvacCommand command) {
+    private Flux<Signal<HvacDeviceStatus<Void>, Void>> process(HvacCommand command) {
 
         logger.debug("{}: process: {}", getAddress(), command);
 
@@ -185,7 +185,7 @@ public class HeatPump extends AbstractHvacDevice {
         // This is the only time we touch requested state, otherwise side effects will explode the command pipeline
         requestedState = change.command;
 
-        Flux<Signal<HvacDeviceStatus, Void>> modeFlux = change.modeChangeRequired ? setMode(command.mode, change.delayRequired) : Flux.empty();
+        Flux<Signal<HvacDeviceStatus<Void>, Void>> modeFlux = change.modeChangeRequired ? setMode(command.mode, change.delayRequired) : Flux.empty();
         var stateFlux = setState(command);
 
         return Flux.concat(modeFlux, stateFlux);
@@ -210,10 +210,10 @@ public class HeatPump extends AbstractHvacDevice {
      *
      * @return Flux of commands to change the operating mode.
      */
-    private Flux<Signal<HvacDeviceStatus, Void>> setMode(HvacMode mode, boolean needDelay) {
+    private Flux<Signal<HvacDeviceStatus<Void>, Void>> setMode(HvacMode mode, boolean needDelay) {
 
         // May or may not be empty, see comments inside
-        Flux<Signal<HvacDeviceStatus, Void>>  condenserOff = needDelay
+        Flux<Signal<HvacDeviceStatus<Void>, Void>>  condenserOff = needDelay
                 ? stopCondenser().doOnSubscribe(ignore -> logger.info("{}: mode changing to: {}", getAddress(), mode))
                 : Flux.empty();
         var forceMode = forceMode(mode);
@@ -227,7 +227,7 @@ public class HeatPump extends AbstractHvacDevice {
     /**
      * Stop the condenser, then sleep for {@link #modeChangeDelay}.
      */
-    private Flux<Signal<HvacDeviceStatus, Void>> stopCondenser() {
+    private Flux<Signal<HvacDeviceStatus<Void>, Void>> stopCondenser() {
 
         return Flux
                 .just(new StateCommand(switchRunning, reverseRunning))
@@ -258,13 +258,14 @@ public class HeatPump extends AbstractHvacDevice {
                 .map(ignore ->
                         // If we're here, this means that the operation was carried out successfully
                         new Signal<>(clock.instant(),
-                                new HvacDeviceStatus(
+                                new HvacDeviceStatus<Void>(
                                         // Informational only, but still verifiable
                                         reconciler.reconcile(
                                                 getAddress(),
                                                 requestedState,
                                                 new HvacCommand(null, 0.0, null)).command,
-                                        uptime()))
+                                        uptime(),
+                                        null))
                 );
     }
 
@@ -274,7 +275,7 @@ public class HeatPump extends AbstractHvacDevice {
      * @param mode Mode to set.
      * @return The flux of commands to set the mode.
      */
-    private Flux<Signal<HvacDeviceStatus, Void>> forceMode(HvacMode mode) {
+    private Flux<Signal<HvacDeviceStatus<Void>, Void>> forceMode(HvacMode mode) {
 
         return Flux
                 .just(new StateCommand(switchMode, (mode == HvacMode.HEATING) != reverseMode))
@@ -283,13 +284,14 @@ public class HeatPump extends AbstractHvacDevice {
                 .map(ignore ->
                         // If we're here, this means that the operation was carried out successfully
                         new Signal<>(clock.instant(),
-                                new HvacDeviceStatus(
+                                new HvacDeviceStatus<Void>(
                                         reconciler.reconcile(
                                                 getAddress(),
                                                 requestedState,
                                                 new HvacCommand(mode, null, null))
                                                 .command,
-                                        uptime()))
+                                        uptime(),
+                                        null))
                 );
     }
 
@@ -306,7 +308,7 @@ public class HeatPump extends AbstractHvacDevice {
      *
      * @param command Command to execute.
      */
-    private Flux<Signal<HvacDeviceStatus, Void>> setState(HvacCommand command) {
+    private Flux<Signal<HvacDeviceStatus<Void>, Void>> setState(HvacCommand command) {
 
         var requestedOperation = reconciler.reconcile(
                 getAddress(),
@@ -345,9 +347,10 @@ public class HeatPump extends AbstractHvacDevice {
                 .map(pair ->
                     // If we're here, this means that the operation was carried out successfully
                     new Signal<>(clock.instant(),
-                            new HvacDeviceStatus(
+                            new HvacDeviceStatus<Void>(
                                     requestedOperation,
-                                    uptime()))
+                                    uptime(),
+                                    null))
                 );
     }
 

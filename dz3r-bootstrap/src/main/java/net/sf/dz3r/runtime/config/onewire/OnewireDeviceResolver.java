@@ -1,15 +1,15 @@
 package net.sf.dz3r.runtime.config.onewire;
 
+import net.sf.dz3r.runtime.config.DeviceResolver;
 import net.sf.dz3r.runtime.config.Id2Flux;
-import net.sf.dz3r.runtime.config.SensorSwitchResolver;
 import net.sf.dz3r.runtime.config.protocol.onewire.OnewireBusConfig;
 import reactor.core.publisher.Flux;
 
 import java.util.Set;
 
-public class OnewireSensorSwitchResolver extends SensorSwitchResolver<OnewireBusConfig> {
+public class OnewireDeviceResolver extends DeviceResolver<OnewireBusConfig> {
 
-    private OnewireSensorSwitchResolver(Set<OnewireBusConfig> source) {
+    private OnewireDeviceResolver(Set<OnewireBusConfig> source) {
         super(source);
     }
 

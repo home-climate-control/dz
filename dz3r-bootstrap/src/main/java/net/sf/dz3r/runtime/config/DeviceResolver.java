@@ -8,17 +8,17 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Resolves switches and sensors from configuration elements.
+ * Resolves devices from configuration elements.
  *
  * @param <T> Configuration element type.
  */
-public abstract class SensorSwitchResolver<T> {
+public abstract class DeviceResolver<T> {
 
     protected final Logger logger = LogManager.getLogger();
 
     protected final Set<T> source;
 
-    protected SensorSwitchResolver(Set<T> source) {
+    protected DeviceResolver(Set<T> source) {
         this.source = Optional.ofNullable(source).orElse(Set.of());
     }
 

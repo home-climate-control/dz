@@ -9,13 +9,13 @@ import reactor.core.publisher.Mono;
  *
  * @param <A> Address type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
 public interface Damper<A extends Comparable<A>> extends Addressable<A> {
 
     public class State extends DeviceState<Double> {
-        public State(Double requested, Double actual) {
-            super(requested, actual);
+        public State(String id, Boolean available, Double requested, Double actual) {
+            super(id, available, requested, actual, null);
         }
     }
 

@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
+import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.z2m.v1.Z2MJsonListener;
 import net.sf.dz3r.device.z2m.v1.Z2MSwitch;
@@ -11,9 +12,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDeviceConfig, Z2MJsonListener, Z2MSwitch> {
+public class ZigbeeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Z2MJsonListener, Z2MSwitch, VariableOutputDevice> {
 
-    public ZigbeeSensorSwitchResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
+    public ZigbeeDeviceResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
     }
 
@@ -43,5 +44,10 @@ public class ZigbeeSensorSwitchResolver extends MqttSensorSwitchResolver<MqttDev
                 rootTopic,
                 Optional.ofNullable(optimistic).orElse(false),
                 null);
+    }
+
+    @Override
+    protected VariableOutputDevice createFan(String id, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+        throw new UnsupportedOperationException("Not Implemented");
     }
 }

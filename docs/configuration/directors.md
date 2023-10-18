@@ -33,7 +33,7 @@ Best explained by example:
   * [home-assistant](./home-assistant.md)
   * [http](./http.md)
   * [influx](./influx.md)
-* `sensor-feed-mapping`: List of relations from the [sensor](./sensors-and-switches.md) reference (on the left) to the [zone](./zones.md) it is serving (on the right).
+* `sensor-feed-mapping`: List of relations from the [sensor](./sensors-switches-fans.md) reference (on the left) to the [zone](./zones.md) it is serving (on the right).
 * `unit`: [Unit abstraction](./units.md) to use.
 * `hvac`: [HVAC device](./hvac.md) to use.
 * `mode`: Initial mode for this director. Note that the configuration above shows different units in different modes (yes, this is supported).

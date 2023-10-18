@@ -5,6 +5,7 @@ import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.health.SystemStatus;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
 import org.apache.logging.log4j.LogManager;
@@ -173,11 +174,11 @@ public class InstrumentCluster {
                                 logger.debug("update/hvacDevice: id={}, status={}", id, s);
 
                                 // Update the accumulated status
-                                currentStatus.hvacDevices().put(id, s);
+                                currentStatus.hvacDevices().put(id, (Signal<HvacDeviceStatus, Void>) s);
 
                                 // Send an incremental update
                                 var incrementalStatus = createEmptyStatus();
-                                incrementalStatus.hvacDevices().put(id, s);
+                                incrementalStatus.hvacDevices().put(id, (Signal<HvacDeviceStatus, Void>) s);
 
                                 statusSink.tryEmitNext(new Signal<>(Instant.now(), incrementalStatus));
                             });

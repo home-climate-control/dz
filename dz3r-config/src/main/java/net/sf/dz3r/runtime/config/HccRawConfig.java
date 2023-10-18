@@ -30,10 +30,10 @@ import java.util.Set;
  * @param onewire 1-Wire devices.
  * @param mocks Mock devices, to emulate missing features while in development.
  * @param filters Signal filters.
+ * @param hvac HVAC hardware devices.
  * @param zones Zone configurations.
  * @param schedule Schedule configuration.
  * @param connectors Incoming and outgoing connectors.
- * @param hvac HVAC hardware devices.
  * @param units HVAC unit abstractions.
  * @param directors Entities tying configuration details together.
  * @param webUi WebUI representation of the whole system.
@@ -51,10 +51,10 @@ public record HccRawConfig(
         Set<OnewireBusConfig> onewire,
         Set<MockConfig> mocks,
         Set<FilterConfig> filters,
+        Set<HvacDeviceConfig> hvac,
         Set<ZoneConfig> zones,
         ScheduleConfig schedule,
         Set<ConnectorConfig> connectors,
-        Set<HvacDeviceConfig> hvac,
         Set<UnitControllerConfig> units,
         Set<UnitDirectorConfig> directors,
         WebUiConfig webUi,

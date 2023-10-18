@@ -35,6 +35,7 @@ class AbstractEconomizerTest {
                 "eco",
                 settings,
                 new SwitchableHvacDevice(
+                        Clock.systemUTC(),
                         "d",
                         HvacMode.COOLING,
                         new NullSwitch("s"),

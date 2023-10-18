@@ -1,11 +1,13 @@
 package net.sf.dz3r.runtime.config.hardware;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.counter.FileTimeUsageCounter;
 import net.sf.dz3r.counter.LoggerTimeUsageReporter;
 import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.device.actuator.HeatPump;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
+import net.sf.dz3r.device.actuator.VariableHvacDevice;
 import net.sf.dz3r.device.actuator.pi.autohat.HeatPumpHAT;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
@@ -14,6 +16,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
@@ -73,6 +76,13 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
                             .orElse(Set.of()))
                     .map(this::parseSwitchable)
                     .subscribe(h -> context.hvacDevices.register(h.getAddress(), h));
+
+            Flux
+                    .fromIterable(Optional
+                            .ofNullable(entry.variable())
+                            .orElse(Set.of()))
+                    .map(this::parseVariable)
+                    .subscribe(h -> context.hvacDevices.register(h.getAddress(), h));
         }
     }
 
@@ -84,7 +94,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         return new File(home, ".dz/counters");
     }
 
-    private HvacDevice parseHeatpump(HeatpumpConfig cf) {
+    private HvacDevice<?> parseHeatpump(HeatpumpConfig cf) {
 
         return new HeatPump(
                 cf.id(),
@@ -98,7 +108,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
                 createFileCounter(cf.id(), cf.filter()));
     }
 
-    private HvacDevice parseHeatpumpHAT(HeatpumpHATConfig cf) {
+    private HvacDevice<?> parseHeatpumpHAT(HeatpumpHATConfig cf) {
 
         try {
             return new HeatPumpHAT(
@@ -109,15 +119,28 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         }
     }
 
-    private HvacDevice parseSwitchable(SwitchableHvacDeviceConfig cf) {
+    private HvacDevice<?> parseSwitchable(SwitchableHvacDeviceConfig cf) {
 
         // VT: NOTE: There is no configuration keyword for the switch being inverted;
         // likely it will never be needed
         return new SwitchableHvacDevice(
+                Clock.systemUTC(),
                 cf.id(),
-                HvacMode.valueOf(cf.mode().toUpperCase()),
-                getSwitch(cf.switchAddress()),
+                HvacMode.valueOf(HCCObjects.requireNonNull(cf.mode(), "switchable.mode can't be null").toUpperCase()),
+                getSwitch(HCCObjects.requireNonNull(cf.switchAddress(), "switchable.switch-address can't be null")),
                 false,
+                createFileCounter(cf.id(), cf.filter()));
+    }
+
+    private HvacDevice<?> parseVariable(VariableHvacConfig cf) {
+
+        // VT: NOTE: There is no configuration keyword for the switch being inverted;
+        // likely it will never be needed
+        return new VariableHvacDevice(
+                Clock.systemUTC(),
+                cf.id(),
+                HvacMode.valueOf(HCCObjects.requireNonNull(cf.mode(), "variable.mode can't be null").toUpperCase()),
+                getFans(HCCObjects.requireNonNull(cf.actuator(), "variable.actuator can't be null")),
                 createFileCounter(cf.id(), cf.filter()));
     }
 }

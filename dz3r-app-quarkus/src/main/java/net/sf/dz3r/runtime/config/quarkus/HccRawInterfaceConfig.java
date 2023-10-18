@@ -42,14 +42,14 @@ public interface HccRawInterfaceConfig {
     Set<MockConfig> mocks();
     @JsonProperty("filters")
     Set<FilterConfig> filters();
+    @JsonProperty("hvac")
+    Set<HvacDeviceConfig> hvac();
     @JsonProperty("zones")
     Set<ZoneConfig> zones();
     @JsonProperty("schedule")
     ScheduleConfig schedule();
     @JsonProperty("connectors")
     Set<ConnectorConfig> connectors();
-    @JsonProperty("hvac")
-    Set<HvacDeviceConfig> hvac();
     @JsonProperty("units")
     Set<UnitControllerConfig> units();
     @JsonProperty("directors")

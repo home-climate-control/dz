@@ -63,15 +63,15 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
 
             var mqttConfigs = Flux
                     .just(
-                            new EspSensorSwitchResolver(esphome, endpoint2adapter),
-                            new ZigbeeSensorSwitchResolver(zigbee2mqtt, endpoint2adapter),
-                            new ZWaveSensorSwitchResolver(zwave2mqtt, endpoint2adapter)
+                            new ESPHomeDeviceResolver(esphome, endpoint2adapter),
+                            new ZigbeeDeviceResolver(zigbee2mqtt, endpoint2adapter),
+                            new ZWaveDeviceResolver(zwave2mqtt, endpoint2adapter)
                     );
 
             // Step 1: collect all MQTT endpoints and get their configurations
 
             var endpoints = mqttConfigs
-                    .flatMap(MqttSensorSwitchResolver::getEndpoints);
+                    .flatMap(MqttDeviceResolver::getEndpoints);
 
             var haEndpoints = Flux
                     .fromIterable(ha)
@@ -100,14 +100,18 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
                         endpoint2adapter.put(endpoint, adapter);
                     });
 
-            // Step 3: for all the brokers, collect all their sensors and switches
+            // Step 3: for all the brokers, collect all their devices
 
             mqttConfigs
-                    .doOnNext(MqttSensorSwitchResolver::getSensorConfigs)
+                    .doOnNext(MqttDeviceResolver::getSensorConfigs)
                     .blockLast();
 
             mqttConfigs
-                    .doOnNext(MqttSensorSwitchResolver::getSwitchConfigs)
+                    .doOnNext(MqttDeviceResolver::getSwitchConfigs)
+                    .blockLast();
+
+            mqttConfigs
+                    .doOnNext(MqttDeviceResolver::getFanConfigs)
                     .blockLast();
 
             // Step 4: now combine all of those into a single stream of sensors, and another of switches.
@@ -116,22 +120,29 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             var m2 = new Marker(getClass().getSimpleName() + "#gate");
             var sensors = mqttConfigs
                     .publishOn(Schedulers.boundedElastic())
-                    .flatMap(MqttSensorSwitchResolver::getSensorFluxes)
+                    .flatMap(MqttDeviceResolver::getSensorFluxes)
                     .doOnNext(kv -> context.sensors.register(kv.id(), kv.flux()))
                     .collectList();
 
             var switches = mqttConfigs
                     .publishOn(Schedulers.boundedElastic())
-                    .flatMap(MqttSensorSwitchResolver::getSwitches)
+                    .flatMap(MqttDeviceResolver::getSwitches)
                     .doOnNext(kv -> context.switches.register(kv.getKey(), kv.getValue()))
                     .map(kv -> ((Map.Entry<String, AbstractMqttSwitch>) new ImmutablePair<>(kv.getKey(), kv.getValue())))
+                    .collectList();
+
+            var fans = mqttConfigs
+                    .publishOn(Schedulers.boundedElastic())
+                    .flatMap(MqttDeviceResolver::getFans)
+                    .doOnNext(kv -> context.fans.register(kv.getKey(), kv.getValue()))
+                    .map(kv -> (new ImmutablePair<>(kv.getKey(), kv.getValue())))
                     .collectList();
 
             logger.debug("waiting at the gate");
 
             return Mono.create(sink -> {
                 var result = Mono
-                        .zip(sensors, switches)
+                        .zip(sensors, switches, fans)
                         .block();
 
                 logger.debug("passed the gate");
