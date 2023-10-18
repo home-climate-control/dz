@@ -7,7 +7,6 @@ import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
-import org.apache.logging.log4j.LogManager;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -93,11 +92,7 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
 
         var expanded = source * bandCount;
         var ceiling = Math.ceil(expanded);
-        var result = ceiling / bandCount;
-
-        LogManager.getLogger(VariableHvacDevice.class).info("band({}, {}): expanded={}, ceiling={}, result={}", source, bandCount, expanded, ceiling, result);
-
-        return result;
+        return ceiling / bandCount;
     }
 
     private HvacDeviceStatus<OutputState> translate(HvacCommand command, DeviceState<OutputState> state) {
