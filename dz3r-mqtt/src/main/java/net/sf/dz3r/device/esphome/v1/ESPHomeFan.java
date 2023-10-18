@@ -172,7 +172,7 @@ public class ESPHomeFan implements VariableOutputDevice {
     @Override
     public DeviceState<OutputState> getState() {
 
-        return new DeviceState<OutputState>(
+        return new DeviceState<>(
                 id,
                 isAvailable(),
                 requested,
