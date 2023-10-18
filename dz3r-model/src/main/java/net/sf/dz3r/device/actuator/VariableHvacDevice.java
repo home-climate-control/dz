@@ -7,6 +7,7 @@ import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
+import org.apache.logging.log4j.LogManager;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
@@ -31,16 +32,36 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
 
     private final VariableOutputDevice actuator;
 
-    public VariableHvacDevice(Clock clock, String name, HvacMode mode, VariableOutputDevice actuator, ResourceUsageCounter<Duration> uptimeCounter) {
+    /**
+     * Split the output value into this many bands.
+     *
+     * @see #band(double, int)
+     */
+    private int bandCount;
+
+    public VariableHvacDevice(
+            Clock clock,
+            String name,
+            HvacMode mode,
+            VariableOutputDevice actuator,
+            int bandCount,
+            ResourceUsageCounter<Duration> uptimeCounter
+    ) {
         super(clock, name, mode, uptimeCounter);
 
         this.actuator = HCCObjects.requireNonNull(actuator, "actuator can't be null");
+
+        if (bandCount < 0) {
+            throw new IllegalArgumentException("bandCount must be non-negative");
+        }
+
+        this.bandCount = bandCount;
     }
 
     @Override
     protected Flux<Signal<HvacDeviceStatus<OutputState>, Void>> apply(HvacCommand command) {
 
-        var output = Math.max(command.demand, command.fanSpeed);
+        var output = band(Math.max(command.demand, command.fanSpeed), bandCount);
         var on = Double.compare(output, 0d) != 0;
 
         return Flux.just(
@@ -49,6 +70,28 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
                         translate(command, actuator.setState(on, output))
                 )
         );
+    }
+
+    static double band(double source, int bandCount) {
+
+        if (source < 0 || source > 1.0) {
+            throw new IllegalArgumentException("source (" + source + ") is outside of 0..1 range");
+        }
+
+        // Zero means don't split at all
+        if (bandCount == 0) {
+            return source;
+        }
+
+        // Vale of zero translates into zero, value of 1.0 translates into 1.0.
+
+        var expanded = source * bandCount;
+        var ceiling = Math.ceil(expanded);
+        var result = ceiling / bandCount;
+
+        LogManager.getLogger(VariableHvacDevice.class).info("band({}, {}): expanded={}, ceiling={}, result={}", source, bandCount, expanded, ceiling, result);
+
+        return result;
     }
 
     private HvacDeviceStatus<OutputState> translate(HvacCommand command, DeviceState<OutputState> state) {

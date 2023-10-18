@@ -141,6 +141,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
                 cf.id(),
                 HvacMode.valueOf(HCCObjects.requireNonNull(cf.mode(), "variable.mode can't be null").toUpperCase()),
                 getFans(HCCObjects.requireNonNull(cf.actuator(), "variable.actuator can't be null")),
+                0,
                 createFileCounter(cf.id(), cf.filter()));
     }
 }
