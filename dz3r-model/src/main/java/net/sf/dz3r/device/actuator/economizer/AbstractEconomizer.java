@@ -22,7 +22,6 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -165,7 +164,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         var ctl = Boolean.TRUE.equals(state) ? 1.0 : 0.0;
         var signal = new Signal<HvacCommand, Void>(
-                Instant.now(clock),
+                clock.instant(),
                 new HvacCommand(settings.mode, ctl, ctl)
         );
 
@@ -269,18 +268,18 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
                 // No go, incomplete information
                 logger.debug("{}: null signals? {}", getAddress(), pair);
-                return new Signal<>(Instant.now(clock), -1d);
+                return new Signal<>(clock.instant(), -1d);
             }
 
             if (pair.indoor.isError() || pair.ambient.isError()) {
 
                 // Absolutely not
                 logger.warn("{}: error signals? {}", getAddress(), pair);
-                return new Signal<>(Instant.now(clock), -1d);
+                return new Signal<>(clock.instant(), -1d);
             }
 
             // Let's be generous; Zigbee sensors can fall back to 60 seconds interval even if configured faster
-            var stale = Instant.now(clock).minus(Duration.ofSeconds(90));
+            var stale = clock.instant().minus(Duration.ofSeconds(90));
 
             if (pair.indoor.timestamp.isBefore(stale) || pair.ambient.timestamp.isBefore(stale)) {
 
@@ -290,7 +289,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 this.indoor = null;
                 this.ambient = null;
 
-                return new Signal<>(Instant.now(clock), -1d);
+                return new Signal<>(clock.instant(), -1d);
             }
 
             var indoorTemperature = pair.indoor.getValue();

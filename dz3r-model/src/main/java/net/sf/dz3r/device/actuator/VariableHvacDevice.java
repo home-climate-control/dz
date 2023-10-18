@@ -12,7 +12,6 @@ import reactor.core.publisher.Flux;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 
 import static net.sf.dz3r.device.actuator.VariableOutputDevice.OutputState;
 
@@ -46,7 +45,7 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
 
         return Flux.just(
                 new Signal<>(
-                        Instant.now(clock),
+                        clock.instant(),
                         translate(command, actuator.setState(on, output))
                 )
         );

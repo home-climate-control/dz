@@ -18,7 +18,6 @@ import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -193,7 +192,7 @@ public class ESPHomeFan implements VariableOutputDevice {
         commandSink.tryEmitNext(new Command(on, output));
 
         var state = getState();
-        stateSink.tryEmitNext(new Signal<>(Instant.now(clock), state, id));
+        stateSink.tryEmitNext(new Signal<>(clock.instant(), state, id));
 
         return state;
     }
@@ -236,7 +235,7 @@ public class ESPHomeFan implements VariableOutputDevice {
     }
 
     private Signal<DeviceState<OutputState>, String> getStateSignal() {
-        return new Signal<>(Instant.now(clock), getState(), id);
+        return new Signal<>(clock.instant(), getState(), id);
     }
 
     @Override
