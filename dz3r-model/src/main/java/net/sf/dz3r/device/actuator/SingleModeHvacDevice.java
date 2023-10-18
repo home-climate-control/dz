@@ -64,6 +64,7 @@ public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
         return Flux
                 .concat(init, commands, shutdown)
                 .flatMap(this::apply)
+                .doOnNext(this::updateUptime)
                 .doOnNext(this::broadcast);
     }
 
@@ -122,6 +123,10 @@ public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
      * @return Device status flux.
      */
     protected abstract Flux<Signal<HvacDeviceStatus<T>, Void>> apply(HvacCommand command);
+
+    private final void updateUptime(Signal<HvacDeviceStatus<T>, Void> signal) {
+        updateUptime(clock.instant(), signal.getValue().command.demand > 0);
+    }
 
     @Override
     public final Set<HvacMode> getModes() {

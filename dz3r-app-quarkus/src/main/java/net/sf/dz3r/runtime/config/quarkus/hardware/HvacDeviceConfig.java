@@ -11,4 +11,6 @@ public interface HvacDeviceConfig {
     Set<HeatpumpHATConfig> heatpumpHat();
     @JsonProperty("heatpump")
     Set<HeatpumpConfig> heatpump();
+    @JsonProperty("variable")
+    Set<VariableHvacConfig> variable();
 }

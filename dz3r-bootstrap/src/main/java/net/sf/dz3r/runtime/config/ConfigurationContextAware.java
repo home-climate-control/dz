@@ -2,6 +2,7 @@ package net.sf.dz3r.runtime.config;
 
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
@@ -41,6 +42,13 @@ public abstract class ConfigurationContextAware {
         return context
                 .switches
                 .getMonoById("switches", address)
+                .block();
+    }
+
+    protected final VariableOutputDevice getFans(String address) {
+        return context
+                .fans
+                .getMonoById("fans", address)
                 .block();
     }
 

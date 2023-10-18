@@ -2,6 +2,7 @@ package net.sf.dz3r.runtime.mapper;
 
 import net.sf.dz3r.runtime.config.quarkus.hardware.SensorConfig;
 import net.sf.dz3r.runtime.config.quarkus.hardware.SwitchConfig;
+import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.FanConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttBrokerConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttDeviceConfig;
 import org.junit.jupiter.api.Test;
@@ -66,6 +67,11 @@ class InterfaceRecordMapperTest {
 
             @Override
             public Set<SwitchConfig> switches() {
+                return Set.of();
+            }
+
+            @Override
+            public Set<FanConfig> fans() {
                 return Set.of();
             }
         };

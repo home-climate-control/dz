@@ -32,7 +32,7 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
 
     private final VariableOutputDevice actuator;
 
-    protected VariableHvacDevice(Clock clock, String name, HvacMode mode, VariableOutputDevice actuator, ResourceUsageCounter<Duration> uptimeCounter) {
+    public VariableHvacDevice(Clock clock, String name, HvacMode mode, VariableOutputDevice actuator, ResourceUsageCounter<Duration> uptimeCounter) {
         super(clock, name, mode, uptimeCounter);
 
         this.actuator = HCCObjects.requireNonNull(actuator, "actuator can't be null");
