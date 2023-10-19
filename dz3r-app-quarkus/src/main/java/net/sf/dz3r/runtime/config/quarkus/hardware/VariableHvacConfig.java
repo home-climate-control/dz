@@ -11,6 +11,8 @@ public interface VariableHvacConfig {
     String mode();
     @JsonProperty("actuator")
     String actuator();
+    @JsonProperty("max-power")
+    Optional<Double> maxPower();
     @JsonProperty("band-count")
     Optional<Integer> bandCount();
     @JsonProperty("filter")

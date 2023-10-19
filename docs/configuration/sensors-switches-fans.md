@@ -93,7 +93,7 @@ Defines the topic where the device announces its availability.
 
 For more information, see [ESPHome Fan Component](https://esphome.io/components/fan/).
 
-**NOTE:** Leave `speed_count` at default (100), or this integration will not work.
+> **NOTE:** Leave `speed_count` at default (100), or this integration will not work.
 
 ### Property of
 * [esphome](./esphome.md)

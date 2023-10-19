@@ -38,17 +38,34 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
      */
     private int bandCount;
 
+    /**
+     * Set the output power to at most this percentage of the total.
+     *
+     * This value is further split into {@link #setBandCount(int) bands}. Valid values are from 0 to 1.0
+     * (though why would you want to set it to 0?)
+     */
+    private double maxPower;
+
     public VariableHvacDevice(
             Clock clock,
             String name,
             HvacMode mode,
             VariableOutputDevice actuator,
+            double maxPower,
             int bandCount,
             ResourceUsageCounter<Duration> uptimeCounter
     ) {
         super(clock, name, mode, uptimeCounter);
 
         this.actuator = HCCObjects.requireNonNull(actuator, "actuator can't be null");
+
+        setBandCount(bandCount);
+        setMaxPower(maxPower);
+
+        logger.debug("{}: created with maxPower={}, bandCount={}", name, maxPower, bandCount);
+    }
+
+    public void setBandCount(int bandCount) {
 
         if (bandCount < 0) {
             throw new IllegalArgumentException("bandCount must be non-negative");
@@ -59,20 +76,44 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
         }
 
         this.bandCount = bandCount;
+    }
 
-        logger.debug("{}: created with bandCount={}", name, bandCount);
+    public int getBandCount() {
+        return bandCount;
+    }
+
+    public void setMaxPower(double maxPower) {
+
+        if (maxPower < 0.0) {
+            throw new IllegalArgumentException("maxPower must be non-negative");
+        }
+
+        if (maxPower > 1.0) {
+            throw new IllegalArgumentException("maxPower given (" + maxPower + " is outside of 0..1 range");
+        }
+
+        this.maxPower = maxPower;
+    }
+
+    public double getMaxPower() {
+        return maxPower;
     }
 
     @Override
     protected Flux<Signal<HvacDeviceStatus<OutputState>, Void>> apply(HvacCommand command) {
 
         var output = band(Math.max(command.demand, command.fanSpeed), bandCount);
+        var scaled = output * maxPower;
         var on = Double.compare(output, 0d) != 0;
+
+        // VT: FIXME: Need to modify the hierarchy to include band count and scale into the output signal instead
+
+        logger.trace("{}: on={}, output={}, bands={}, scaled={}", getAddress(), on, output, bandCount, scaled);
 
         return Flux.just(
                 new Signal<>(
                         clock.instant(),
-                        translate(command, actuator.setState(on, output))
+                        translate(command, actuator.setState(on, scaled))
                 )
         );
     }

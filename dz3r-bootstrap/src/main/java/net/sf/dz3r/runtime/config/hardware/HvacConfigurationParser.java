@@ -134,13 +134,12 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
 
     private HvacDevice<?> parseVariable(VariableHvacConfig cf) {
 
-        // VT: NOTE: There is no configuration keyword for the switch being inverted;
-        // likely it will never be needed
         return new VariableHvacDevice(
                 Clock.systemUTC(),
                 cf.id(),
                 HvacMode.valueOf(HCCObjects.requireNonNull(cf.mode(), "variable.mode can't be null").toUpperCase()),
                 getFans(HCCObjects.requireNonNull(cf.actuator(), "variable.actuator can't be null")),
+                Optional.ofNullable(cf.maxPower()).orElse(1d),
                 Optional.ofNullable(cf.bandCount()).orElse(10),
                 createFileCounter(cf.id(), cf.filter()));
     }

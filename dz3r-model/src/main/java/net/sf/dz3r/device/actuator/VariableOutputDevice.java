@@ -26,7 +26,7 @@ public interface VariableOutputDevice extends AutoCloseable {
 
     }
 
-    public record OutputState(
+    record OutputState(
             Boolean on,
             Double output
     ) {

@@ -8,6 +8,7 @@ public record VariableHvacConfig(
         String id,
         String mode,
         String actuator,
+        Double maxPower,
         Integer bandCount,
         FilterConfig filter
 ) {
