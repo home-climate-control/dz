@@ -11,6 +11,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 
+import static net.sf.dz3r.device.actuator.VariableOutputDevice.Command;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
@@ -48,7 +49,7 @@ class ESPHomeFanTest {
             Flux
                     .just(0d, 0.25d, 0.5d, 0.75d, 1d)
                     .delayElements(Duration.ofSeconds(1))
-                    .map(level -> fan.setState(true, level))
+                    .map(level -> fan.setState(new Command(true, level)))
                     .doOnNext(state -> logger.info("state/sent: {}", state))
                     .blockLast();
 

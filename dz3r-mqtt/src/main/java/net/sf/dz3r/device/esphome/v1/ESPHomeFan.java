@@ -181,15 +181,15 @@ public class ESPHomeFan implements VariableOutputDevice {
     }
 
     @Override
-    public synchronized DeviceState<OutputState> setState(boolean on, double output) {
+    public synchronized DeviceState<OutputState> setState(Command command) {
 
-        if (output < 0 || output > 1) {
-            throw new IllegalArgumentException("speed given (" + output + ") is outside of 0..1 range");
+        if (command.output() < 0 || command.output() > 1) {
+            throw new IllegalArgumentException("speed given (" + command.output() + ") is outside of 0..1 range");
         }
 
-        this.requested = new OutputState(on, output);
+        this.requested = new OutputState(command.on(), command.output());
         queueDepth.incrementAndGet();
-        commandSink.tryEmitNext(new Command(on, output));
+        commandSink.tryEmitNext(command);
 
         var state = getState();
         stateSink.tryEmitNext(new Signal<>(clock.instant(), state, id));

@@ -15,5 +15,5 @@ import net.sf.dz3r.device.Addressable;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
-public interface CqrsSwitch<A extends Comparable<A>> extends Addressable<A> {
+public interface CqrsSwitch<A extends Comparable<A>> extends CqrsDevice<Boolean, Boolean>, Addressable<A> {
 }

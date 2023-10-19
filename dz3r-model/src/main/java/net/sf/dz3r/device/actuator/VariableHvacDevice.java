@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
 
+import static net.sf.dz3r.device.actuator.VariableOutputDevice.Command;
 import static net.sf.dz3r.device.actuator.VariableOutputDevice.OutputState;
 
 /**
@@ -113,7 +114,7 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
         return Flux.just(
                 new Signal<>(
                         clock.instant(),
-                        translate(command, actuator.setState(on, scaled))
+                        translate(command, actuator.setState(new Command(on, scaled)))
                 )
         );
     }
