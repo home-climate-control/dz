@@ -3,22 +3,20 @@ package net.sf.dz3r.device.esphome.v1;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.DeviceState;
+import net.sf.dz3r.device.actuator.AbstractCqrsDevice;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Sinks;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.Clock;
-import java.util.concurrent.atomic.AtomicInteger;
+
+import static net.sf.dz3r.device.actuator.VariableOutputDevice.Command;
+import static net.sf.dz3r.device.actuator.VariableOutputDevice.OutputState;
 
 /**
  * Driver for <a href="https://esphome.io/components/fan">ESPHome Fan Component</a>.
@@ -27,12 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class ESPHomeFan implements VariableOutputDevice {
+public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> implements VariableOutputDevice {
 
-    private final Logger logger = LogManager.getLogger();
-
-    private final String id;
-    private final Clock clock;
     private final MqttAdapter adapter;
     private final String stateTopic;
     private final String commandTopic;
@@ -40,16 +34,9 @@ public class ESPHomeFan implements VariableOutputDevice {
     private final String speedCommandTopic;
     private String availabilityMessage;
 
-    private final AtomicInteger queueDepth = new AtomicInteger();
 
     private final Disposable availabilityFlux;
     private final Disposable rootFlux;
-    private final Sinks.Many<Command> commandSink = Sinks.many().multicast().onBackpressureBuffer();
-    private final Disposable commandSubscription;
-    private final Sinks.Many<Signal<DeviceState<OutputState>, String>> stateSink = Sinks.many().multicast().onBackpressureBuffer();
-
-    private OutputState requested;
-    private OutputState actual;
 
     public ESPHomeFan(
             String id,
@@ -72,9 +59,8 @@ public class ESPHomeFan implements VariableOutputDevice {
             MqttAdapter adapter,
             String rootTopic,
             String availabilityTopic) {
+        super(id, clock);
 
-        this.id = HCCObjects.requireNonNull(id, "id can't be null");
-        this.clock = HCCObjects.requireNonNull(clock, "adapter can't be null");
         this.adapter = HCCObjects.requireNonNull(adapter, "adapter can't be null");
         HCCObjects.requireNonNull(rootTopic, "rootTopic can't be null");
 
@@ -85,11 +71,6 @@ public class ESPHomeFan implements VariableOutputDevice {
         commandTopic = rootTopic + "/command";
         speedStateTopic = rootTopic + "/speed_level/state";
         speedCommandTopic = rootTopic + "/speed_level/command";
-
-        commandSubscription = commandSink
-                .asFlux()
-                .publishOn(Schedulers.newSingle("espfan-" + id))
-                .subscribe(this::setStateSync);
 
         availabilityFlux = adapter
                 .getFlux(availabilityTopic, true)
@@ -169,18 +150,6 @@ public class ESPHomeFan implements VariableOutputDevice {
     }
 
     @Override
-    public DeviceState<OutputState> getState() {
-
-        return new DeviceState<>(
-                id,
-                isAvailable(),
-                requested,
-                actual,
-                queueDepth.get()
-        );
-    }
-
-    @Override
     public synchronized DeviceState<OutputState> setState(Command command) {
 
         if (command.output() < 0 || command.output() > 1) {
@@ -202,7 +171,8 @@ public class ESPHomeFan implements VariableOutputDevice {
      *
      * @param command Command to execute.
      */
-    private void setStateSync(Command command) {
+    @Override
+    protected void setStateSync(Command command) {
 
         ThreadContext.push("setStateSync");
         var m = new Marker("setStateSync", Level.TRACE);
@@ -225,40 +195,21 @@ public class ESPHomeFan implements VariableOutputDevice {
     }
 
     @Override
-    public boolean isAvailable() {
-        return "online".equals(availabilityMessage);
+    protected Command getCloseCommand() {
+        return new Command(false, 0d);
     }
 
     @Override
-    public Flux<Signal<DeviceState<OutputState>, String>> getFlux() {
-        return stateSink.asFlux();
-    }
-
-    private Signal<DeviceState<OutputState>, String> getStateSignal() {
-        return new Signal<>(clock.instant(), getState(), id);
-    }
-
-    @Override
-    public void close() throws Exception {
-
-        // Prevent new commands from coming in
-        commandSubscription.dispose();
-
-        // Shut down the device
-        setStateSync(new Command(false, 0d));
-
-        // Adjust the queue depth - previous command skewed it
-        queueDepth.incrementAndGet();
-
-        // Emit the final notification
-        stateSink.tryEmitNext(getStateSignal());
-
-        // Indicate that we're done
-        stateSink.tryEmitComplete();
+    protected void closeSubclass() throws Exception {
 
         // Close the comms channel
         rootFlux.dispose();
         availabilityFlux.dispose();
         adapter.close();
+    }
+
+    @Override
+    public boolean isAvailable() {
+        return "online".equals(availabilityMessage);
     }
 }
