@@ -48,7 +48,7 @@ public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Si
     }
 
     @Override
-    protected VariableOutputDevice createFan(String id, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+    protected VariableOutputDevice createFan(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
         throw new UnsupportedOperationException("Not Implemented");
     }
 }

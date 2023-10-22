@@ -11,6 +11,7 @@ import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class AbstractCqrsDevice<I, O> implements CqrsDevice<I, O> {
@@ -19,6 +20,17 @@ public abstract class AbstractCqrsDevice<I, O> implements CqrsDevice<I, O> {
 
     protected final String id;
     protected final Clock clock;
+
+
+    /**
+     *  Issue identical control commands to this device at least this often, repeat if necessary.
+     */
+    protected final Duration heartbeat;
+
+    /**
+     * Issue identical control commands to this device at most this often.
+     */
+    protected final Duration pace;
 
     protected final AtomicInteger queueDepth = new AtomicInteger();
 
@@ -29,10 +41,14 @@ public abstract class AbstractCqrsDevice<I, O> implements CqrsDevice<I, O> {
     protected O requested;
     protected O actual;
 
-    protected AbstractCqrsDevice(String id, Clock clock) {
+    protected AbstractCqrsDevice(String id, Clock clock, Duration heartbeat, Duration pace) {
 
         this.id = HCCObjects.requireNonNull(id, "id can't be null");
         this.clock = HCCObjects.requireNonNull(clock, "adapter can't be null");
+
+        // These are nullable
+        this.heartbeat = heartbeat;
+        this.pace = pace;
 
         commandSubscription = commandSink
                 .asFlux()

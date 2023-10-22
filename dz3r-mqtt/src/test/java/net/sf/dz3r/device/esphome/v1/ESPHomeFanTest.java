@@ -35,6 +35,8 @@ class ESPHomeFanTest {
             var adapter = new MqttAdapter(new MqttEndpoint(host));
             var fan = new ESPHomeFan(
                     "a6",
+                    null,
+                    null,
                     adapter,
                     fanTopic,
                     availabilityTopic

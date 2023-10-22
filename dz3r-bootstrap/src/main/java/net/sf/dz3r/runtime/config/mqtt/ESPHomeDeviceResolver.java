@@ -43,9 +43,11 @@ public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, 
     }
 
     @Override
-    protected ESPHomeFan createFan(String id, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+    protected ESPHomeFan createFan(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
         return new ESPHomeFan(
                 id,
+                heartbeat,
+                pace,
                 adapter,
                 rootTopic,
                 availabilityTopic

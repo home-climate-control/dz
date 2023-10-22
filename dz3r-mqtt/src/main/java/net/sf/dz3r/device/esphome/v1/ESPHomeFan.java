@@ -14,6 +14,7 @@ import org.apache.logging.log4j.ThreadContext;
 import reactor.core.Disposable;
 
 import java.time.Clock;
+import java.time.Duration;
 
 import static net.sf.dz3r.device.actuator.VariableOutputDevice.Command;
 import static net.sf.dz3r.device.actuator.VariableOutputDevice.OutputState;
@@ -40,6 +41,8 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
 
     public ESPHomeFan(
             String id,
+            Duration heartbeat,
+            Duration pace,
             MqttAdapter adapter,
             String rootTopic,
             String availabilityTopic) {
@@ -47,6 +50,8 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
         this(
                 id,
                 Clock.systemUTC(),
+                heartbeat,
+                pace,
                 adapter,
                 rootTopic,
                 availabilityTopic
@@ -56,10 +61,12 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
     public ESPHomeFan(
             String id,
             Clock clock,
+            Duration heartbeat,
+            Duration pace,
             MqttAdapter adapter,
             String rootTopic,
             String availabilityTopic) {
-        super(id, clock);
+        super(id, clock, heartbeat, pace);
 
         this.adapter = HCCObjects.requireNonNull(adapter, "adapter can't be null");
         HCCObjects.requireNonNull(rootTopic, "rootTopic can't be null");
