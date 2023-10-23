@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.esphome.v1;
 
+import net.sf.dz3r.device.esphome.v2.ESPHomeFan;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import org.apache.logging.log4j.LogManager;

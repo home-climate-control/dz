@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.esphome.v1;
+package net.sf.dz3r.device.esphome.v2;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.common.HCCObjects;
