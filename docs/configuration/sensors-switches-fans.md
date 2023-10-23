@@ -91,6 +91,26 @@ fans:
 #### availability
 Defines the topic where the device announces its availability.
 
+This is how ESPHome configuration section looks like (`pin` and `min_power` depend on your particular hardware setup):
+
+```yaml
+output:
+  - platform: esp8266_pwm
+    id: pwm_output
+    pin: D1
+    frequency: 5000 Hz
+    min_power: 0.2
+    max_power: 1.0
+    zero_means_zero: true
+    inverted: true
+
+fan:
+  - platform: speed
+    output: pwm_output
+    name: "A6-0"
+
+```
+
 For more information, see [ESPHome Fan Component](https://esphome.io/components/fan/).
 
 > **NOTE:** Leave `speed_count` at default (100), or this integration will not work.
