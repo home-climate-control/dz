@@ -89,7 +89,7 @@ public abstract class AbstractCqrsDevice<I, O> implements CqrsDevice<I, O> {
     protected abstract void closeSubclass() throws Exception;
 
     @Override
-    public void close() throws Exception {
+    public final void close() throws Exception {
 
         // Prevent new commands from coming in
         commandSubscription.dispose();
