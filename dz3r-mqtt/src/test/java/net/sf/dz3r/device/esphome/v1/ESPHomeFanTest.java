@@ -10,6 +10,7 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.Clock;
 import java.time.Duration;
 
 import static net.sf.dz3r.device.actuator.VariableOutputDevice.Command;
@@ -36,6 +37,7 @@ class ESPHomeFanTest {
             var adapter = new MqttAdapter(new MqttEndpoint(host));
             var fan = new ESPHomeFan(
                     "a6",
+                    Clock.systemUTC(),
                     null,
                     null,
                     adapter,

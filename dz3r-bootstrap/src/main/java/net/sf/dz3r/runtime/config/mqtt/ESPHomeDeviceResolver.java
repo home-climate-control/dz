@@ -7,6 +7,7 @@ import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -46,6 +47,7 @@ public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, 
     protected ESPHomeFan createFan(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
         return new ESPHomeFan(
                 id,
+                Clock.systemUTC(),
                 heartbeat,
                 pace,
                 adapter,

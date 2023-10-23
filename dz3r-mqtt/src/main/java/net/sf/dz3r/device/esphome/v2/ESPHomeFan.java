@@ -41,25 +41,6 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
 
     public ESPHomeFan(
             String id,
-            Duration heartbeat,
-            Duration pace,
-            MqttAdapter adapter,
-            String rootTopic,
-            String availabilityTopic) {
-
-        this(
-                id,
-                Clock.systemUTC(),
-                heartbeat,
-                pace,
-                adapter,
-                rootTopic,
-                availabilityTopic
-        );
-    }
-
-    public ESPHomeFan(
-            String id,
             Clock clock,
             Duration heartbeat,
             Duration pace,
@@ -70,7 +51,6 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
 
         this.adapter = HCCObjects.requireNonNull(adapter, "adapter can't be null");
         HCCObjects.requireNonNull(rootTopic, "rootTopic can't be null");
-
         HCCObjects.requireNonNull(availabilityTopic, "availabilityTopic can't be null");
 
         // Defaults
@@ -94,7 +74,7 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
     }
 
     /**
-     * Parse device state coming from {@link #adapter}.
+     * Parse device state coming from the {@link #adapter}.
      *
      * @param message Incoming MQTT message.
      */
