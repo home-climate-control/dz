@@ -35,7 +35,6 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
     private final String speedCommandTopic;
     private String availabilityMessage;
 
-
     private final Disposable availabilityFlux;
     private final Disposable rootFlux;
 

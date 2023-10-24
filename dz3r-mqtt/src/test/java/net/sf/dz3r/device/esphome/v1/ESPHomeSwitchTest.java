@@ -26,7 +26,7 @@ class ESPHomeSwitchTest {
 
     private final String MQTT_BROKER = "mqtt-esphome";
 
-    private final String ESPHOME_SWITCH_TOPIC = "/esphome/0156AC/switch/t-relay-2-r3";
+    private final String ESPHOME_SWITCH_TOPIC = "/esphome/81B190/switch/t-relay-3-r3";
 
     @BeforeAll
     static void init() {

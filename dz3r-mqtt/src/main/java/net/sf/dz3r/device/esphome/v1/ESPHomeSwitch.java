@@ -22,7 +22,10 @@ import java.time.Instant;
  * @see net.sf.dz3r.device.z2m.v1.Z2MSwitch
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ *
+ * @deprecated Use {@link net.sf.dz3r.device.esphome.v2.ESPHomeCqrsSwitch} instead.
  */
+@Deprecated(since = "5.0.0")
 public class ESPHomeSwitch extends AbstractMqttSwitch {
 
     private final String deviceRootTopic;
