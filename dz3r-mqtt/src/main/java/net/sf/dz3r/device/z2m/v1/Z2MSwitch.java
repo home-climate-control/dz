@@ -23,7 +23,10 @@ import java.util.Map;
  * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ *
+ * @deprecated Use {@link net.sf.dz3r.device.z2m.v2.Z2MCqrsSwitch} instead.
  */
+@Deprecated(since = "5.0.0")
 public class Z2MSwitch extends AbstractMqttSwitch {
 
     private final ObjectMapper objectMapper = new ObjectMapper();

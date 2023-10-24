@@ -82,6 +82,8 @@ public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
             case "ON" -> actual = true;
             default -> logger.error("{}: can't parse state from {}", id, message);
         }
+
+        stateSink.tryEmitNext(getStateSignal());
     }
 
     @Override
@@ -92,6 +94,7 @@ public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
 
         try {
             mqttAdapter.publish(getCommandTopic(), renderPayload(command), MqttQos.AT_LEAST_ONCE, false);
+            queueDepth.decrementAndGet();
         } finally {
             m.close();
             ThreadContext.pop();

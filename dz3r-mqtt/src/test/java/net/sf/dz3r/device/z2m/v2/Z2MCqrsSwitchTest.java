@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.esphome.v2;
+package net.sf.dz3r.device.z2m.v2;
 
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
@@ -18,18 +18,17 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
-        named = "TEST_DZ_ESPHOME_SWITCH",
+        named = "TEST_DZ_Z2M_SWITCH",
         matches = "safe",
-        disabledReason = "Only execute this test if a suitable MQTT broker and ESPHome switch device are available"
+        disabledReason = "Only execute this test if a suitable MQTT broker and Zigbee switch device are available"
 )
-class ESPHomeCqrsSwitchTest {
+class Z2MCqrsSwitchTest {
 
     private final Logger logger = LogManager.getLogger();
 
-    private final String MQTT_BROKER = "mqtt-esphome";
+    private final String MQTT_BROKER = "mqtt-zigbee";
 
-    private final String ESPHOME_SWITCH_TOPIC = "/esphome/81B190/switch/t-relay-3-r3";
-    private final String ESPHOME_AVAILABILITY_TOPIC = "/esphome/81B190/status";
+    private final String ZIGBEE_SWITCH_TOPIC = "zigbee2mqtt-dev/sengled-01";
 
     @BeforeAll
     static void init() {
@@ -42,17 +41,16 @@ class ESPHomeCqrsSwitchTest {
         assertThatCode(() -> {
 
             var endpoint = new MqttEndpoint(MQTT_BROKER);
-            var address = new MqttMessageAddress(endpoint, ESPHOME_SWITCH_TOPIC);
+            var address = new MqttMessageAddress(endpoint, ZIGBEE_SWITCH_TOPIC);
 
             try (var adapter = new MqttAdapter(endpoint)) {
 
-                var esphomeSwitch = new ESPHomeCqrsSwitch(
+                var z2mSwitch = new Z2MCqrsSwitch(
                         "s",
                         Clock.systemUTC(),
                         null, null,
                         adapter,
-                        address,
-                        ESPHOME_AVAILABILITY_TOPIC
+                        address
                 );
 
                 // VT: NOTE: This switch doesn't control anything critical now, does it?
@@ -63,11 +61,11 @@ class ESPHomeCqrsSwitchTest {
                         .publishOn(Schedulers.boundedElastic())
                         .doOnNext(state -> {
                             logger.info("Switch state requested={}", state);
-                            esphomeSwitch.setState(state);
+                            z2mSwitch.setState(state);
                         });
 
                 // This is likely to miss the last status update; good enough for now
-                esphomeSwitch
+                z2mSwitch
                         .getFlux()
                         .subscribe(s -> logger.info("status: {}", s));
 

@@ -27,7 +27,7 @@ class Z2MSwitchTest {
 
     private final String MQTT_BROKER = "mqtt-zigbee";
 
-    private final String ZIGBEE_SWITCH_TOPIC = "zigbee2mqtt/sengled-00";
+    private final String ZIGBEE_SWITCH_TOPIC = "zigbee2mqtt-dev/sengled-01";
 
     @BeforeAll
     static void init() {
