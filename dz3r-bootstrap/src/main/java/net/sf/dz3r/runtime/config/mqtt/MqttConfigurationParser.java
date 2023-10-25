@@ -135,7 +135,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
                     .publishOn(Schedulers.boundedElastic())
                     .flatMap(MqttDeviceResolver::getFans)
                     .doOnNext(kv -> context.fans.register(kv.getKey(), kv.getValue()))
-                    .map(kv -> (new ImmutablePair<>(kv.getKey(), kv.getValue())))
+                    .map(kv -> new ImmutablePair<>(kv.getKey(), kv.getValue()))
                     .collectList();
 
             logger.debug("waiting at the gate");

@@ -2,11 +2,11 @@ package net.sf.dz3r.device.zwave.v2;
 
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
@@ -16,6 +16,11 @@ import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+@EnabledIfEnvironmentVariable(
+        named = "TEST_HCC_ZWAVE_SWITCH",
+        matches = "safe",
+        disabledReason = "Only execute this test if a suitable MQTT broker and Z-Wave switch device are available"
+)
 class ZWaveCqrsBinarySwitchTest {
 
     private final Logger logger = LogManager.getLogger();
@@ -34,17 +39,14 @@ class ZWaveCqrsBinarySwitchTest {
 
         assertThatCode(() -> {
 
-            var endpoint = new MqttEndpoint(MQTT_BROKER);
-            var address = new MqttMessageAddress(endpoint, ZWAVE_SWITCH_TOPIC);
-
-            try (var adapter = new MqttAdapter(endpoint)) {
+            try (var adapter = new MqttAdapter(new MqttEndpoint(MQTT_BROKER))) {
 
                 var zwaveSwitch = new ZWaveCqrsBinarySwitch(
                         "zwave",
                         Clock.systemUTC(),
                         null, null,
                         adapter,
-                        address
+                        ZWAVE_SWITCH_TOPIC
                 );
 
                 // VT: NOTE: This switch doesn't control anything critical now, does it?

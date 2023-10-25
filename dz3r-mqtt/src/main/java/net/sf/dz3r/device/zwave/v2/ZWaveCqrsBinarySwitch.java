@@ -3,7 +3,6 @@ package net.sf.dz3r.device.zwave.v2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
-import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import org.apache.logging.log4j.ThreadContext;
@@ -21,8 +20,8 @@ public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
             Clock clock,
             Duration heartbeat,
             Duration pace,
-            MqttAdapter mqttAdapter, MqttMessageAddress address) {
-        super(id, clock, heartbeat, pace, mqttAdapter, address);
+            MqttAdapter mqttAdapter, String rootTopic) {
+        super(id, clock, heartbeat, pace, mqttAdapter, rootTopic);
     }
 
     @Override
@@ -51,8 +50,13 @@ public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
     }
 
     @Override
+    protected boolean includeSubtopics() {
+        return true;
+    }
+
+    @Override
     protected String getAvailabilityTopic() {
-        return address.topic + "/status";
+        return rootTopic + "/status";
     }
 
     @Override
@@ -80,7 +84,7 @@ public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
      */
     @Override
     protected String getStateTopic() {
-        return address.topic + "/37/0/currentValue";
+        return rootTopic + "/37/0/currentValue";
     }
 
     /**
@@ -88,11 +92,11 @@ public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
      */
     @Override
     protected String getCommandTopic() {
-        return address.topic + "/37/0/targetValue/set";
+        return rootTopic + "/37/0/targetValue/set";
     }
 
     @Override
-    protected String renderPayload(boolean state) {
+    protected String renderPayload(Boolean state) {
         return "{\"value\": " + state + "}";
     }
 }

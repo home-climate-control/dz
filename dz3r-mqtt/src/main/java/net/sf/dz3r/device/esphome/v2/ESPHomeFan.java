@@ -2,16 +2,13 @@ package net.sf.dz3r.device.esphome.v2;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.common.HCCObjects;
-import net.sf.dz3r.device.DeviceState;
-import net.sf.dz3r.device.actuator.AbstractCqrsDevice;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
+import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsDevice;
 import net.sf.dz3r.instrumentation.Marker;
-import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.ThreadContext;
-import reactor.core.Disposable;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -26,58 +23,49 @@ import static net.sf.dz3r.device.actuator.VariableOutputDevice.OutputState;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> implements VariableOutputDevice {
+public class ESPHomeFan extends AbstractMqttCqrsDevice<Command, OutputState> implements VariableOutputDevice {
 
-    private final MqttAdapter adapter;
-    private final String stateTopic;
-    private final String commandTopic;
     private final String speedStateTopic;
     private final String speedCommandTopic;
-    private String availabilityMessage;
-
-    private final Disposable availabilityFlux;
-    private final Disposable rootFlux;
+    private final String availabilityTopic;
 
     public ESPHomeFan(
             String id,
             Clock clock,
             Duration heartbeat,
             Duration pace,
-            MqttAdapter adapter,
+            MqttAdapter mqttAdapter,
             String rootTopic,
             String availabilityTopic) {
-        super(id, clock, heartbeat, pace);
+        super(
+                id, clock,
+                heartbeat, pace,
+                mqttAdapter, rootTopic);
 
-        this.adapter = HCCObjects.requireNonNull(adapter, "adapter can't be null");
-        HCCObjects.requireNonNull(rootTopic, "rootTopic can't be null");
-        HCCObjects.requireNonNull(availabilityTopic, "availabilityTopic can't be null");
+        this.availabilityTopic = HCCObjects.requireNonNull(availabilityTopic, "availabilityTopic can't be null");
 
         // Defaults
-        stateTopic = rootTopic + "/state";
-        commandTopic = rootTopic + "/command";
         speedStateTopic = rootTopic + "/speed_level/state";
         speedCommandTopic = rootTopic + "/speed_level/command";
-
-        availabilityFlux = adapter
-                .getFlux(availabilityTopic, true)
-                .subscribe(this::parseAvailability);
-        rootFlux = adapter
-                .getFlux(rootTopic, true)
-                .subscribe(this::parseState);
     }
 
-    private void parseAvailability(MqttSignal message) {
+    @Override
+    protected boolean includeSubtopics() {
+        return true;
+    }
 
-        this.availabilityMessage = message.message();
-        stateSink.tryEmitNext(getStateSignal());
+    @Override
+    protected String getAvailabilityTopic() {
+        return availabilityTopic;
     }
 
     /**
-     * Parse device state coming from the {@link #adapter}.
+     * Parse device state coming from the {@link #mqttAdapter}.
      *
      * @param message Incoming MQTT message.
      */
-    private void parseState(MqttSignal message) {
+    @Override
+    protected void parseState(MqttSignal message) {
 
         // VT: NOTE: MqttAdapter has already logged the message at TRACE level
 
@@ -87,9 +75,19 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
         stateSink.tryEmitNext(getStateSignal());
     }
 
+    @Override
+    protected String getStateTopic() {
+        return rootTopic + "/state";
+    }
+
+    @Override
+    protected String getCommandTopic() {
+        return rootTopic + "/command";
+    }
+
     private void tryParseState(MqttSignal message) {
 
-        if (!stateTopic.equals(message.topic())) {
+        if (!getStateTopic().equals(message.topic())) {
             return;
         }
 
@@ -136,20 +134,18 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
     }
 
     @Override
-    public synchronized DeviceState<OutputState> setState(Command command) {
+    protected void checkCommand(Command command) {
+
+        super.checkCommand(command);
 
         if (command.output() < 0 || command.output() > 1) {
             throw new IllegalArgumentException("speed given (" + command.output() + ") is outside of 0..1 range");
         }
+    }
 
-        this.requested = new OutputState(command.on(), command.output());
-        queueDepth.incrementAndGet();
-        commandSink.tryEmitNext(command);
-
-        var state = getState();
-        stateSink.tryEmitNext(new Signal<>(clock.instant(), state, id));
-
-        return state;
+    @Override
+    protected OutputState translateCommand(Command command) {
+        return new OutputState(command.on(), command.output());
     }
 
     /**
@@ -167,8 +163,8 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
 
             // This will translate into two commands, but so be it
 
-            adapter.publish(commandTopic, command.on() ? "ON" : "OFF", MqttQos.AT_LEAST_ONCE, false);
-            adapter.publish(speedCommandTopic, Integer.toString((int) (command.output() * 100)), MqttQos.AT_LEAST_ONCE, false);
+            mqttAdapter.publish(getCommandTopic(), command.on() ? "ON" : "OFF", MqttQos.AT_LEAST_ONCE, false);
+            mqttAdapter.publish(speedCommandTopic, Integer.toString((int) (command.output() * 100)), MqttQos.AT_LEAST_ONCE, false);
 
             queueDepth.decrementAndGet();
 
@@ -183,15 +179,6 @@ public class ESPHomeFan extends AbstractCqrsDevice<Command, OutputState> impleme
     @Override
     protected Command getCloseCommand() {
         return new Command(false, 0d);
-    }
-
-    @Override
-    protected void closeSubclass() throws Exception {
-
-        // Close the comms channel
-        rootFlux.dispose();
-        availabilityFlux.dispose();
-        adapter.close();
     }
 
     @Override

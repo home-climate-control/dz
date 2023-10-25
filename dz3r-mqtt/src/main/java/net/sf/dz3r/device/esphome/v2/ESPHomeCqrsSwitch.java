@@ -1,7 +1,6 @@
 package net.sf.dz3r.device.esphome.v2;
 
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
-import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 
@@ -29,11 +28,16 @@ public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
             Duration heartbeat,
             Duration pace,
             MqttAdapter adapter,
-            MqttMessageAddress address,
+            String rootTopic,
             String availabilityTopic) {
-        super(id, clock, heartbeat, pace, adapter, address);
+        super(id, clock, heartbeat, pace, adapter, rootTopic);
 
         this.availabilityTopic = availabilityTopic;
+    }
+
+    @Override
+    protected boolean includeSubtopics() {
+        return true;
     }
 
     @Override
@@ -43,25 +47,17 @@ public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
 
     @Override
     protected String getStateTopic() {
-        return address.topic + "/state";
+        return rootTopic + "/state";
     }
 
     @Override
     protected String getCommandTopic() {
-        return address.topic + "/command";
+        return rootTopic + "/command";
     }
 
     @Override
-    protected String renderPayload(boolean state) {
-        return state ? "ON" : "OFF";
-    }
-
-
-    @Override
-    protected void parseAvailability(MqttSignal message) {
-
-        this.availabilityMessage = message.message();
-        stateSink.tryEmitNext(getStateSignal());
+    protected String renderPayload(Boolean state) {
+        return Boolean.TRUE.equals(state) ? "ON" : "OFF";
     }
 
     @Override

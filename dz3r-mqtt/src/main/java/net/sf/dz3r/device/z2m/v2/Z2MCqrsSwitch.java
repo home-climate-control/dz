@@ -3,7 +3,6 @@ package net.sf.dz3r.device.z2m.v2;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
-import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import org.apache.logging.log4j.ThreadContext;
@@ -30,8 +29,8 @@ public class Z2MCqrsSwitch extends AbstractMqttCqrsSwitch {
             Duration heartbeat,
             Duration pace,
             MqttAdapter mqttAdapter,
-            MqttMessageAddress address) {
-        super(id, clock, heartbeat, pace, mqttAdapter, address);
+            String rootTopic) {
+        super(id, clock, heartbeat, pace, mqttAdapter, rootTopic);
     }
 
     @Override
@@ -75,23 +74,28 @@ public class Z2MCqrsSwitch extends AbstractMqttCqrsSwitch {
     }
 
     @Override
+    protected boolean includeSubtopics() {
+        return false;
+    }
+
+    @Override
     protected String getAvailabilityTopic() {
-        return address.topic + "/availability";
+        return rootTopic + "/availability";
     }
 
     @Override
     protected String getStateTopic() {
         // Z2M pushes device state as JSON in the device root topic
-        return address.topic;
+        return rootTopic;
     }
 
     @Override
     protected String getCommandTopic() {
-        return address.topic + "/set";
+        return rootTopic + "/set";
     }
 
     @Override
-    protected String renderPayload(boolean state) {
-        return "{\"state\": \"" + (state ? "ON" : "OFF") + "\"}";
+    protected String renderPayload(Boolean state) {
+        return "{\"state\": \"" + (Boolean.TRUE.equals(state) ? "ON" : "OFF") + "\"}";
     }
 }

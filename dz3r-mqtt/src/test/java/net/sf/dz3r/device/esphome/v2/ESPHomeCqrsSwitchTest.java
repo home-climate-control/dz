@@ -2,7 +2,6 @@ package net.sf.dz3r.device.esphome.v2;
 
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,7 +17,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
-        named = "TEST_DZ_ESPHOME_SWITCH",
+        named = "TEST_HCC_ESPHOME_SWITCH",
         matches = "safe",
         disabledReason = "Only execute this test if a suitable MQTT broker and ESPHome switch device are available"
 )
@@ -41,17 +40,14 @@ class ESPHomeCqrsSwitchTest {
 
         assertThatCode(() -> {
 
-            var endpoint = new MqttEndpoint(MQTT_BROKER);
-            var address = new MqttMessageAddress(endpoint, ESPHOME_SWITCH_TOPIC);
-
-            try (var adapter = new MqttAdapter(endpoint)) {
+            try (var adapter = new MqttAdapter(new MqttEndpoint(MQTT_BROKER))) {
 
                 var esphomeSwitch = new ESPHomeCqrsSwitch(
                         "s",
                         Clock.systemUTC(),
                         null, null,
                         adapter,
-                        address,
+                        ESPHOME_SWITCH_TOPIC,
                         ESPHOME_AVAILABILITY_TOPIC
                 );
 

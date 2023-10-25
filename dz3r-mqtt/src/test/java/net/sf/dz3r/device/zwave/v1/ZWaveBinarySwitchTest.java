@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
-        named = "TEST_DZ_ZWAVE_SWITCH",
+        named = "TEST_HCC_ZWAVE_SWITCH",
         matches = "safe",
         disabledReason = "Only execute this test if a suitable MQTT broker and Z-Wave switch device are available"
 )

@@ -2,7 +2,6 @@ package net.sf.dz3r.device.z2m.v2;
 
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,7 +17,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
-        named = "TEST_DZ_Z2M_SWITCH",
+        named = "TEST_HCC_Z2M_SWITCH",
         matches = "safe",
         disabledReason = "Only execute this test if a suitable MQTT broker and Zigbee switch device are available"
 )
@@ -40,17 +39,14 @@ class Z2MCqrsSwitchTest {
 
         assertThatCode(() -> {
 
-            var endpoint = new MqttEndpoint(MQTT_BROKER);
-            var address = new MqttMessageAddress(endpoint, ZIGBEE_SWITCH_TOPIC);
-
-            try (var adapter = new MqttAdapter(endpoint)) {
+            try (var adapter = new MqttAdapter(new MqttEndpoint(MQTT_BROKER))) {
 
                 var z2mSwitch = new Z2MCqrsSwitch(
                         "zigbee",
                         Clock.systemUTC(),
                         null, null,
                         adapter,
-                        address
+                        ZIGBEE_SWITCH_TOPIC
                 );
 
                 // VT: NOTE: This switch doesn't control anything critical now, does it?
