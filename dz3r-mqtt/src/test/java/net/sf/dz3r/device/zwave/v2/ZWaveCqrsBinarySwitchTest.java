@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.z2m.v2;
+package net.sf.dz3r.device.zwave.v2;
 
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
@@ -7,7 +7,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
@@ -17,18 +16,13 @@ import java.time.Duration;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-@EnabledIfEnvironmentVariable(
-        named = "TEST_DZ_Z2M_SWITCH",
-        matches = "safe",
-        disabledReason = "Only execute this test if a suitable MQTT broker and Zigbee switch device are available"
-)
-class Z2MCqrsSwitchTest {
+class ZWaveCqrsBinarySwitchTest {
 
     private final Logger logger = LogManager.getLogger();
 
-    private final String MQTT_BROKER = "mqtt-zigbee";
+    private final String MQTT_BROKER = "mqtt-zwave";
 
-    private final String ZIGBEE_SWITCH_TOPIC = "zigbee2mqtt-dev/sengled-01";
+    private final String ZWAVE_SWITCH_TOPIC = "zwave/SE_Bedroom/MP31ZP-0";
 
     @BeforeAll
     static void init() {
@@ -41,12 +35,12 @@ class Z2MCqrsSwitchTest {
         assertThatCode(() -> {
 
             var endpoint = new MqttEndpoint(MQTT_BROKER);
-            var address = new MqttMessageAddress(endpoint, ZIGBEE_SWITCH_TOPIC);
+            var address = new MqttMessageAddress(endpoint, ZWAVE_SWITCH_TOPIC);
 
             try (var adapter = new MqttAdapter(endpoint)) {
 
-                var z2mSwitch = new Z2MCqrsSwitch(
-                        "zigbee",
+                var zwaveSwitch = new ZWaveCqrsBinarySwitch(
+                        "zwave",
                         Clock.systemUTC(),
                         null, null,
                         adapter,
@@ -61,11 +55,11 @@ class Z2MCqrsSwitchTest {
                         .publishOn(Schedulers.boundedElastic())
                         .doOnNext(state -> {
                             logger.info("Switch state requested={}", state);
-                            z2mSwitch.setState(state);
+                            zwaveSwitch.setState(state);
                         });
 
                 // This is likely to miss the last status update; good enough for now
-                z2mSwitch
+                zwaveSwitch
                         .getFlux()
                         .subscribe(s -> logger.info("status: {}", s));
 

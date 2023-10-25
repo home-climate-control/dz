@@ -26,7 +26,7 @@ class ZWaveBinarySwitchTest {
 
     private final String MQTT_BROKER = "mqtt-zwave";
 
-    private final String ZWAVE_SWITCH_TOPIC = "zwave/TestLab/MP31ZP-0";
+    private final String ZWAVE_SWITCH_TOPIC = "zwave/SE_Bedroom/MP31ZP-0";
 
     @BeforeAll
     static void init() {
