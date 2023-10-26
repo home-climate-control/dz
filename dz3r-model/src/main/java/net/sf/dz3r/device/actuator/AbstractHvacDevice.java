@@ -15,6 +15,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Common functionality for all HVAC device drivers.
@@ -149,7 +150,9 @@ public abstract class AbstractHvacDevice<T> implements HvacDevice<T> {
         }
 
         isClosed = true;
-        uptimeCounterSubscription.dispose();
+        Optional
+                .ofNullable(uptimeCounterSubscription)
+                .ifPresent(Disposable::dispose);
         doClose();
     }
 
