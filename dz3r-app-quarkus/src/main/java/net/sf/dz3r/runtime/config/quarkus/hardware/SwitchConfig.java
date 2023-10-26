@@ -21,4 +21,6 @@ public interface SwitchConfig {
     Optional<Duration> heartbeat();
     @JsonProperty("pace")
     Optional<Duration> pace();
+    @JsonProperty("availability-topic")
+    Optional<String> availabilityTopic();
 }

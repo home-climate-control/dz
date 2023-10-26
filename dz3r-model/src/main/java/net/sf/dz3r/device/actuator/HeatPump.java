@@ -35,22 +35,22 @@ public class HeatPump extends AbstractHvacDevice<Void> {
     private static final Duration DEFAULT_MODE_CHANGE_DELAY = Duration.ofSeconds(10);
     private static final Reconciler reconciler = new Reconciler();
 
-    private final Switch<?> switchMode;
-    private final Switch<?> switchRunning;
+    private final CqrsSwitch<?> switchMode;
+    private final CqrsSwitch<?> switchRunning;
 
     /**
      * Fan hardware control switch.
      *
      * @see #switchFanStack
      */
-    private final Switch<?> switchFan;
+    private final CqrsSwitch<?> switchFan;
 
     /**
      * Fan logical control switch.
      *
      * @see #switchFan
      */
-    private final StackingSwitch switchFanStack;
+    private final StackingCqrsSwitch switchFanStack;
 
     private final boolean reverseMode;
     private final boolean reverseRunning;
@@ -84,9 +84,9 @@ public class HeatPump extends AbstractHvacDevice<Void> {
      */
     public HeatPump(
             String name,
-            Switch<?> switchMode, boolean reverseMode,
-            Switch<?> switchRunning, boolean reverseRunning,
-            Switch<?> switchFan, boolean reverseFan,
+            CqrsSwitch<?> switchMode, boolean reverseMode,
+            CqrsSwitch<?> switchRunning, boolean reverseRunning,
+            CqrsSwitch<?> switchFan, boolean reverseFan,
             Duration changeModeDelay,
             ResourceUsageCounter<Duration> uptimeCounter) {
         this(name,
@@ -99,9 +99,9 @@ public class HeatPump extends AbstractHvacDevice<Void> {
     }
     public HeatPump(
             String name,
-            Switch<?> switchMode, boolean reverseMode,
-            Switch<?> switchRunning, boolean reverseRunning,
-            Switch<?> switchFan, boolean reverseFan,
+            CqrsSwitch<?> switchMode, boolean reverseMode,
+            CqrsSwitch<?> switchRunning, boolean reverseRunning,
+            CqrsSwitch<?> switchFan, boolean reverseFan,
             Duration changeModeDelay,
             ResourceUsageCounter<Duration> uptimeCounter,
             Scheduler scheduler) {
@@ -121,7 +121,7 @@ public class HeatPump extends AbstractHvacDevice<Void> {
         // "demand" - controlled by heating and cooling operations
         // "ventilation" - controlled by explicit requests to turn the fan on or off
 
-        this.switchFanStack = new StackingSwitch("fan", switchFan);
+        this.switchFanStack = new StackingCqrsSwitch("fan", switchFan);
 
         this.reverseMode = reverseMode;
         this.reverseRunning = reverseRunning;
@@ -232,7 +232,7 @@ public class HeatPump extends AbstractHvacDevice<Void> {
         return Flux
                 .just(new StateCommand(switchRunning, reverseRunning))
                 .doOnNext(ignore -> logger.info("{}: stopping the condenser", getAddress()))
-                .flatMap(this::setState)
+                .doOnNext(this::setState)
                 .doOnNext(ignore -> logger.warn("{}: letting the hardware settle for modeChangeDelay={}", getAddress(), modeChangeDelay))
 
                 // VT: FIXME: This doesn't work where as it should (see test cases) and allows the next main sequence element to jump ahead, why?
@@ -284,7 +284,7 @@ public class HeatPump extends AbstractHvacDevice<Void> {
                 .map(ignore ->
                         // If we're here, this means that the operation was carried out successfully
                         new Signal<>(clock.instant(),
-                                new HvacDeviceStatus<Void>(
+                                new HvacDeviceStatus<>(
                                         reconciler.reconcile(
                                                 getAddress(),
                                                 requestedState,
@@ -296,8 +296,14 @@ public class HeatPump extends AbstractHvacDevice<Void> {
     }
 
     private Mono<Boolean> setState(StateCommand command) {
+
+        // VT: FIXME: Late night shortcut (#292), simplify
+
         logger.debug("{}: setState({})={}", getAddress(), command.target, command.state);
-        return command.target.setState(command.state);
+        var result = command.target.setState(command.state);
+        logger.debug("{}: setState result={}", getAddress(), result);
+
+        return Mono.just(result.requested);
     }
 
     /**
@@ -359,33 +365,26 @@ public class HeatPump extends AbstractHvacDevice<Void> {
 
         logger.warn("Shutting down: {}", getAddress());
 
-        Flux.just(
-                        switchRunning,
-                        switchFan,
-                        switchMode)
-                .flatMap(s -> s.setState(false))
-                .blockLast();
-
-        switchRunning.setState(false).block();
-        switchFan.setState(false).block();
-        switchMode.setState(false).block();
+        switchRunning.setState(reverseRunning);
+        switchFan.setState(reverseFan);
+        switchMode.setState(reverseRunning);
 
         logger.info("Shut down: {}", getAddress());
     }
 
     @Deprecated
     protected Mono<Boolean> setMode(boolean state) {
-        return switchMode.setState(state);
+        return Mono.just(switchMode.setState(state).requested);
     }
 
     @Deprecated
     protected Mono<Boolean> setRunning(boolean state) {
-        return switchRunning.setState(state);
+        return Mono.just(switchRunning.setState(state).requested);
     }
 
     @Deprecated
     protected Mono<Boolean> setFan(boolean state) {
-        return switchFanStack.getSwitch("demand").setState(state);
+        return Mono.just(switchFanStack.getSwitch("demand").setState(state).requested);
     }
 
     static class Reconciler {
@@ -433,7 +432,7 @@ public class HeatPump extends AbstractHvacDevice<Void> {
     }
 
     private record StateCommand(
-            Switch<?> target,
+            CqrsSwitch<?> target,
             boolean state
     ) {}
 }

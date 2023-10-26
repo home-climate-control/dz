@@ -1,7 +1,7 @@
 package net.sf.dz3r.runtime.config;
 
+import net.sf.dz3r.device.actuator.CqrsSwitch;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.model.UnitController;
@@ -30,7 +30,7 @@ public class ConfigurationContext {
 
     public final EntityProvider<MqttAdapter> mqtt = new EntityProvider<>("mqtt");
     public final EntityProvider<Flux<Signal<Double, Void>>> sensors = new EntityProvider<>("sensor");
-    public final EntityProvider<Switch<?>> switches = new EntityProvider<>("switch");
+    public final EntityProvider<CqrsSwitch<?>> switches = new EntityProvider<>("switch");
     public final EntityProvider<VariableOutputDevice> fans = new EntityProvider<>("fan");
     public final EntityProvider<Zone> zones = new EntityProvider<>("zone");
     public final EntityProvider<ScheduleUpdater> schedule = new EntityProvider<>("schedule");

@@ -44,7 +44,7 @@ public abstract class AbstractCqrsDevice<I, O> implements CqrsDevice<I, O> {
     protected AbstractCqrsDevice(String id, Clock clock, Duration heartbeat, Duration pace) {
 
         this.id = HCCObjects.requireNonNull(id, "id can't be null");
-        this.clock = HCCObjects.requireNonNull(clock, "adapter can't be null");
+        this.clock = HCCObjects.requireNonNull(clock, "clock can't be null");
 
         // These are nullable
         this.heartbeat = heartbeat;

@@ -1,8 +1,8 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
-import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import net.sf.dz3r.runtime.config.ConfigurationMapper;
 import net.sf.dz3r.runtime.config.DeviceResolver;
 import net.sf.dz3r.runtime.config.Id2Flux;
@@ -36,7 +36,7 @@ import java.util.Set;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public abstract class MqttDeviceResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S extends AbstractMqttSwitch, F extends VariableOutputDevice> extends DeviceResolver<A> {
+public abstract class MqttDeviceResolver<A extends MqttGateway, L extends SignalSource<String, Double, Void>, S extends AbstractMqttCqrsSwitch, F extends VariableOutputDevice> extends DeviceResolver<A> {
 
     private final Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter;
     private final Set<MqttSensorConfig> sensorConfigs = new LinkedHashSet<>();
@@ -217,7 +217,13 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
 
                     var id = c.switchConfig().id();
                     var address = c.switchConfig.address();
-                    var s = createSwitch(adapter, address);
+                    var s = createSwitch(
+                            id,
+                            c.switchConfig.heartbeat(),
+                            c.switchConfig.pace(),
+                            adapter,
+                            address,
+                            c.switchConfig.availabilityTopic());
 
                     // ID takes precedence over address
                     var key = id == null ? address : id;
@@ -257,7 +263,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
                 });
     }
 
-    protected abstract S createSwitch(MqttAdapter adapter, String rootTopic);
+    protected abstract S createSwitch(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic);
 
     protected abstract F createFan(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic);
 

@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer.v1;
 
-import net.sf.dz3r.device.actuator.NullSwitch;
+import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.HvacMode;
@@ -51,7 +51,7 @@ class SimpleEconomizerTest {
                 Clock.systemUTC(),
                 "d",
                 HvacMode.COOLING,
-                new NullSwitch("s"),
+                new NullCqrsSwitch("s"),
                 false,
                 null);
 

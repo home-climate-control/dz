@@ -81,7 +81,7 @@ public abstract class AbstractHvacDevice<T> implements HvacDevice<T> {
         return name;
     }
 
-    protected void check(Switch<?> s, String purpose) {
+    protected void check(CqrsSwitch<?> s, String purpose) {
         if (s == null) {
             throw new IllegalArgumentException("'" + purpose + "' switch can't be null");
         }

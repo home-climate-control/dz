@@ -2,17 +2,18 @@ package net.sf.dz3r.runtime.config.mqtt;
 
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
-import net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch;
 import net.sf.dz3r.device.zwave.v1.ZWaveSensorListener;
+import net.sf.dz3r.device.zwave.v2.ZWaveCqrsBinarySwitch;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.signal.SignalSource;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 
-public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, SignalSource<String, Double, Void>, ZWaveBinarySwitch, VariableOutputDevice> {
+public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, SignalSource<String, Double, Void>, ZWaveCqrsBinarySwitch, VariableOutputDevice> {
 
     public ZWaveDeviceResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
@@ -38,12 +39,14 @@ public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Si
     }
 
     @Override
-    protected ZWaveBinarySwitch createSwitch(MqttAdapter adapter, String rootTopic) {
-        return new ZWaveBinarySwitch(
+    protected ZWaveCqrsBinarySwitch createSwitch(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+        return new ZWaveCqrsBinarySwitch(
+                id,
+                Clock.systemUTC(),
+                heartbeat,
+                pace,
                 adapter,
-                rootTopic,
-                false,
-                null);
+                rootTopic);
     }
 
     @Override

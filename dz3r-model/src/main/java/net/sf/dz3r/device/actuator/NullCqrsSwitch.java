@@ -24,7 +24,17 @@ public class NullCqrsSwitch extends AbstractCqrsDevice<Boolean, Boolean> impleme
     private final Duration minDelay;
     private final Duration maxDelay;
 
-    protected NullCqrsSwitch(
+    public NullCqrsSwitch(String address) {
+        this(
+                address,
+                Clock.systemUTC(),
+                null,
+                null,
+                null,
+                null);
+    }
+
+    public NullCqrsSwitch(
             String address,
             Clock clock,
             Duration heartbeat, Duration pace,
@@ -32,15 +42,15 @@ public class NullCqrsSwitch extends AbstractCqrsDevice<Boolean, Boolean> impleme
 
         super(address, clock, heartbeat, pace);
 
-        checkDelays();
-
         this.minDelay = Optional.ofNullable(minDelay).orElse(Duration.ZERO);
         this.maxDelay = Optional.ofNullable(maxDelay).orElse(Duration.ZERO);
+
+        checkDelays();
     }
 
     private void checkDelays() {
 
-        if (minDelay.isNegative() || maxDelay.isNegative() || minDelay.minus(maxDelay).toMillis() < 0) {
+        if (minDelay.isNegative() || maxDelay.isNegative() || minDelay.minus(maxDelay).toMillis() > 0) {
             throw new IllegalArgumentException("invalid delays min=" + minDelay + ", max=" + maxDelay);
         }
     }

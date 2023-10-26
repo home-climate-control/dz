@@ -2,7 +2,7 @@ package net.sf.dz3r.device.actuator.economizer;
 
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.NullSwitch;
+import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
@@ -38,7 +38,7 @@ class AbstractEconomizerTest {
                         Clock.systemUTC(),
                         "d",
                         HvacMode.COOLING,
-                        new NullSwitch("s"),
+                        new NullCqrsSwitch("s"),
                         false,
                         null)
         );

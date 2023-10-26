@@ -15,7 +15,7 @@ public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    protected ZWaveCqrsBinarySwitch(
+    public ZWaveCqrsBinarySwitch(
             String id,
             Clock clock,
             Duration heartbeat,

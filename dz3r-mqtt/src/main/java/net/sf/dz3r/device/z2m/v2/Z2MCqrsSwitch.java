@@ -23,7 +23,7 @@ public class Z2MCqrsSwitch extends AbstractMqttCqrsSwitch {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    protected Z2MCqrsSwitch(
+    public Z2MCqrsSwitch(
             String id,
             Clock clock,
             Duration heartbeat,

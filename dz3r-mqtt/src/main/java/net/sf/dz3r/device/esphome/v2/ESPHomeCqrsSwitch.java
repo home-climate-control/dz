@@ -22,7 +22,7 @@ import java.time.Duration;
 public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
 
     private final String availabilityTopic;
-    protected ESPHomeCqrsSwitch(
+    public ESPHomeCqrsSwitch(
             String id,
             Clock clock,
             Duration heartbeat,

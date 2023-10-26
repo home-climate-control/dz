@@ -3,15 +3,16 @@ package net.sf.dz3r.runtime.config.mqtt;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.z2m.v1.Z2MJsonListener;
-import net.sf.dz3r.device.z2m.v1.Z2MSwitch;
+import net.sf.dz3r.device.z2m.v2.Z2MCqrsSwitch;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 
-public class ZigbeeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Z2MJsonListener, Z2MSwitch, VariableOutputDevice> {
+public class ZigbeeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Z2MJsonListener, Z2MCqrsSwitch, VariableOutputDevice> {
 
     public ZigbeeDeviceResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
@@ -37,12 +38,14 @@ public class ZigbeeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Z
     }
 
     @Override
-    protected Z2MSwitch createSwitch(MqttAdapter adapter, String rootTopic) {
-        return new Z2MSwitch(
+    protected Z2MCqrsSwitch createSwitch(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+        return new Z2MCqrsSwitch(
+                id,
+                Clock.systemUTC(),
+                heartbeat,
+                pace,
                 adapter,
-                rootTopic,
-                false,
-                null);
+                rootTopic);
     }
 
     @Override

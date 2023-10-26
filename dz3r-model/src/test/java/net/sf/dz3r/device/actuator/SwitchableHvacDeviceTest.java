@@ -10,6 +10,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -23,9 +24,9 @@ class SwitchableHvacDeviceTest {
     void lifecycle() {
 
         var now = Instant.now();
-        var minDelayMillis = 50;
-        var maxDelayMillis = 200;
-        var s = new NullSwitch("a", false, minDelayMillis, maxDelayMillis, null);
+        var minDelay = Duration.ofMillis(50);
+        var maxDelay = Duration.ofMillis(200);
+        var s = new NullCqrsSwitch("a", Clock.systemUTC(), null, null, minDelay, maxDelay);
         var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, s, false, null);
 
         var sequence = Flux.just(
@@ -64,7 +65,7 @@ class SwitchableHvacDeviceTest {
     @Disabled("for now; need to fix blocking operation first")
     void wrongMode() {
 
-        var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, mock(Switch.class), false, null);
+        var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, mock(CqrsSwitch.class), false, null);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(HvacMode.HEATING, 0.8, null))
         );
@@ -89,7 +90,7 @@ class SwitchableHvacDeviceTest {
     @Disabled("until #222 is fixed")
     void noFansForHeating() {
 
-        var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", HvacMode.HEATING, mock(Switch.class), false, null);
+        var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", HvacMode.HEATING, mock(CqrsSwitch.class), false, null);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.8, 1.0))
         );
@@ -110,7 +111,7 @@ class SwitchableHvacDeviceTest {
     @Test
     void allowFansForCooling() {
 
-        var s = new NullSwitch("a");
+        var s = new NullCqrsSwitch("a");
         var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, s, false, null);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(null, 0.8, 1.0))
@@ -132,7 +133,7 @@ class SwitchableHvacDeviceTest {
     @Test
     void modeOnly() {
 
-        var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, mock(Switch.class), false, null);
+        var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, mock(CqrsSwitch.class), false, null);
         var sequence = Flux.just(
                 new Signal<HvacCommand, Void>(Instant.now(), new HvacCommand(COOLING, null, null))
         );
@@ -151,7 +152,7 @@ class SwitchableHvacDeviceTest {
     void interleave() {
 
         var now = Instant.now();
-        var s = new NullSwitch("a");
+        var s = new NullCqrsSwitch("a");
         var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, s, false, null);
 
         var sequence = Flux.just(
@@ -197,7 +198,7 @@ class SwitchableHvacDeviceTest {
     void inverted() {
 
         var now = Instant.now();
-        var s = new NullSwitch("a");
+        var s = new NullCqrsSwitch("a");
         var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, s, true, null);
 
         var sequence = Flux.just(
@@ -214,14 +215,14 @@ class SwitchableHvacDeviceTest {
         d.compute(sequence).log().blockLast();
 
         // A bit simpler than full, but it'll do
-        assertThat(s.getState().block()).isTrue();
+        assertThat(s.getState().requested).isTrue();
     }
 
     @Test
     void nonBlockingPass() {
 
         var now = Instant.now();
-        var s = new NullSwitch("a");
+        var s = new NullCqrsSwitch("a");
         var d = new SwitchableHvacDevice(Clock.systemUTC(), "d", COOLING, s, false, null);
         var sequence = Flux
                 .just(new Signal<HvacCommand, Void>(now, new HvacCommand(null, 0.8, null)))
