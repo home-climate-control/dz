@@ -217,7 +217,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
 
                     var id = c.switchConfig().id();
                     var address = c.switchConfig.address();
-                    var s = createSwitch(adapter, address, c.switchConfig.optimistic());
+                    var s = createSwitch(adapter, address);
 
                     // ID takes precedence over address
                     var key = id == null ? address : id;
@@ -257,7 +257,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
                 });
     }
 
-    protected abstract S createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic);
+    protected abstract S createSwitch(MqttAdapter adapter, String rootTopic);
 
     protected abstract F createFan(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic);
 

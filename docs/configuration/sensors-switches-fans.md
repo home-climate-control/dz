@@ -61,7 +61,6 @@ switches:
     reversed: <boolean flag>
     heartbeat: <Duration>
     pace: <Duration>
-    optimistic: <boolean flag>
 ```
 
 #### reversed
@@ -72,9 +71,6 @@ Optional. Send the command to hardware this often even if the logical state hasn
 
 #### pace
 Optional. Send the same command to hardware no more often that this. Some bridges (notably `zigbee2mqtt`) are known to become unresponsive with no error indication when incoming traffic exceeds their bandwidth.
-
-#### optimistic
-Optional. Send the command to hardware and don't wait for confirmation. Normally, you wouldn't have to do this, but some firmware (notably, [ESPHome](./esphome.md)) doesn't provide reliable confirmation so this may save the situation (and is a default for known hardware types). Use only if you must, and consider using [heartbeat](#heartbeat) to offset the risk.
 
 ### fans
 Similar to above:

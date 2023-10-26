@@ -10,7 +10,6 @@ import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, ESPHomeListener, ESPHomeSwitch, ESPHomeFan> {
@@ -31,7 +30,7 @@ public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, 
     }
 
     @Override
-    protected ESPHomeSwitch createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic) {
+    protected ESPHomeSwitch createSwitch(MqttAdapter adapter, String rootTopic) {
 
         // Optimistic defaults to true for this switch only
         // https://github.com/home-climate-control/dz/issues/280
@@ -39,7 +38,7 @@ public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, 
         return new ESPHomeSwitch(
                 adapter,
                 rootTopic,
-                Optional.ofNullable(optimistic).orElse(true),
+                true,
                 null);
     }
 

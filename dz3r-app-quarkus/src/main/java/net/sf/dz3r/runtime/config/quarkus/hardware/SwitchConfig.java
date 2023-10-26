@@ -21,6 +21,4 @@ public interface SwitchConfig {
     Optional<Duration> heartbeat();
     @JsonProperty("pace")
     Optional<Duration> pace();
-    @JsonProperty("optimistic")
-    Optional<Boolean> optimistic();
 }

@@ -10,7 +10,6 @@ import net.sf.dz3r.signal.SignalSource;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, SignalSource<String, Double, Void>, ZWaveBinarySwitch, VariableOutputDevice> {
@@ -39,11 +38,11 @@ public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Si
     }
 
     @Override
-    protected ZWaveBinarySwitch createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic) {
+    protected ZWaveBinarySwitch createSwitch(MqttAdapter adapter, String rootTopic) {
         return new ZWaveBinarySwitch(
                 adapter,
                 rootTopic,
-                Optional.ofNullable(optimistic).orElse(false),
+                false,
                 null);
     }
 

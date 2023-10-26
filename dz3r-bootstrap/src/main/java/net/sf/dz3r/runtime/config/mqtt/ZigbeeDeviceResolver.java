@@ -9,7 +9,6 @@ import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public class ZigbeeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Z2MJsonListener, Z2MSwitch, VariableOutputDevice> {
@@ -38,11 +37,11 @@ public class ZigbeeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Z
     }
 
     @Override
-    protected Z2MSwitch createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic) {
+    protected Z2MSwitch createSwitch(MqttAdapter adapter, String rootTopic) {
         return new Z2MSwitch(
                 adapter,
                 rootTopic,
-                Optional.ofNullable(optimistic).orElse(false),
+                false,
                 null);
     }
 
