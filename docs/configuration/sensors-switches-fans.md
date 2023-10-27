@@ -61,6 +61,7 @@ switches:
     reversed: <boolean flag>
     heartbeat: <Duration>
     pace: <Duration>
+    availability-topic: <MQTT topic for availability information>
 ```
 
 #### reversed
@@ -72,6 +73,9 @@ Optional. Send the command to hardware this often even if the logical state hasn
 #### pace
 Optional. Send the same command to hardware no more often that this. Some bridges (notably `zigbee2mqtt`) are known to become unresponsive with no error indication when incoming traffic exceeds their bandwidth.
 
+#### availability-topic
+Optional or redundant for some types, mandatory for others. Log messages at `ERROR` level will provide enough details to resolve the problem.
+
 ### fans
 Similar to above:
 ```yaml
@@ -81,15 +85,13 @@ fans:
     availability: /esphome/550212/status
     heartbeat: <Duration>
     pace: <Duration>
+    availability-topic: <MQTT topic for availability information>
 ```
-`id`, `address`, `heartbeat`, and `pace` parameters are identical to those above.
-
-#### availability
-Defines the topic where the device announces its availability.
+`id`, `address`, `heartbeat`, `pace`, and `availability-topic` parameters are identical to those above.
 
 For more information, see [ESPHome Fan Component](https://esphome.io/components/fan/).
 
-> **NOTE:** Leave `speed_count` at default (100), or this integration will not work.
+> **NOTE:** Leave ESPHome `speed_count` at default (100), or this integration will not work.
 
 ### Property of
 * [esphome](./esphome.md)
