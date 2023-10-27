@@ -254,7 +254,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
                             c.fanConfig().pace(),
                             adapter,
                             address,
-                            c.fanConfig.availability());
+                            c.fanConfig.availabilityTopic());
 
                     // ID takes precedence over address
                     var key = id == null ? address : id;

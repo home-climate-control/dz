@@ -1,5 +1,8 @@
 package net.sf.dz3r.runtime.config.protocol.mqtt;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import java.time.Duration;
 
 /**
@@ -7,15 +10,16 @@ import java.time.Duration;
  *
  * @param id Identifier, optional (defaults to {@link #address} if absent).
  * @param address Device address. Mandatory.
- * @param availability Availability topic. Mandatory.
  * @param heartbeat Issue identical control commands to this switch at least this often, repeat if necessary.
  * @param pace Issue identical control commands to this switch at most this often.
+ * @param availabilityTopic Availability topic. Mandatory.
  */
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record FanConfig(
         String id,
         String address,
-        String availability,
         Duration heartbeat,
-        Duration pace
+        Duration pace,
+        String availabilityTopic
 ) {
 }

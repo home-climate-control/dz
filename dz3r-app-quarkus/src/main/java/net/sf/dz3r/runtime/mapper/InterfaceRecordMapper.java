@@ -98,6 +98,13 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.availabilityTopic().orElse(null))", target = "availabilityTopic")
     net.sf.dz3r.runtime.config.hardware.SwitchConfig switchConfig(SwitchConfig source);
 
+    @Mapping(expression = "java(source.id().orElse(null))", target = "id")
+    @Mapping(expression = "java(source.address())", target = "address")
+    @Mapping(expression = "java(source.heartbeat().orElse(null))", target = "heartbeat")
+    @Mapping(expression = "java(source.pace().orElse(null))", target = "pace")
+    @Mapping(expression = "java(source.availabilityTopic().orElse(null))", target = "availabilityTopic")
+    net.sf.dz3r.runtime.config.protocol.mqtt.FanConfig fanConfig(FanConfig source);
+
     @Mapping(expression = "java(source.serialPort())", target = "serialPort")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switches(source.switches()))", target = "switches")
