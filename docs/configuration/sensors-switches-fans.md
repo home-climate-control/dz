@@ -74,7 +74,10 @@ Optional. Send the command to hardware this often even if the logical state hasn
 Optional. Send the same command to hardware no more often that this. Some bridges (notably `zigbee2mqtt`) are known to become unresponsive with no error indication when incoming traffic exceeds their bandwidth.
 
 #### availability-topic
-Optional or redundant for some types, mandatory for others. Log messages at `ERROR` level will provide enough details to resolve the problem.
+* Mandatory for [ESPHome](./esphome.md) devices (see [esphome #5030](https://github.com/esphome/issues/issues/5030) for more information);
+* Disallowed for [Zigbee](./zigbee2mqtt.md) and [Z-Wave](./zwave2mqtt.md) devices.
+
+Log messages at `ERROR` level will provide enough details to resolve the problem.
 
 ### fans
 Similar to above:
