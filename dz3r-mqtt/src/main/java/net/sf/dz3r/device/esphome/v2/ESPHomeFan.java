@@ -42,7 +42,7 @@ public class ESPHomeFan extends AbstractMqttCqrsDevice<Command, OutputState> imp
                 heartbeat, pace,
                 mqttAdapter, rootTopic);
 
-        this.availabilityTopic = HCCObjects.requireNonNull(availabilityTopic, "availabilityTopic can't be null");
+        this.availabilityTopic = HCCObjects.requireNonNull(availabilityTopic, "esphome.fans.availability-topic can't be null (id=" + id + ")");
 
         // Defaults
         speedStateTopic = rootTopic + "/speed_level/state";

@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.esphome.v2;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
@@ -32,7 +33,7 @@ public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
             String availabilityTopic) {
         super(id, clock, heartbeat, pace, adapter, rootTopic);
 
-        this.availabilityTopic = availabilityTopic;
+        this.availabilityTopic = HCCObjects.requireNonNull(availabilityTopic, "esphome.switches.availability-topic can't be null (id=" + id + ")");
     }
 
     @Override

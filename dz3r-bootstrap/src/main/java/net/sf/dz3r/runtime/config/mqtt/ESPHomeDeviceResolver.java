@@ -32,9 +32,6 @@ public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, 
     @Override
     protected ESPHomeCqrsSwitch createSwitch(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
 
-        // Optimistic defaults to true for this switch only
-        // https://github.com/home-climate-control/dz/issues/280
-
         return new ESPHomeCqrsSwitch(
                 id,
                 Clock.systemUTC(),
@@ -42,7 +39,7 @@ public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, 
                 pace,
                 adapter,
                 rootTopic,
-                null);
+                availabilityTopic);
     }
 
     @Override
