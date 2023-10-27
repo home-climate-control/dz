@@ -40,6 +40,11 @@ public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Si
 
     @Override
     protected ZWaveCqrsBinarySwitch createSwitch(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+
+        if (availabilityTopic != null) {
+            throw new IllegalArgumentException("zigbee2mqtt.switches.availability-topic is determined automatically, please remove it from the configuration");
+        }
+
         return new ZWaveCqrsBinarySwitch(
                 id,
                 Clock.systemUTC(),
