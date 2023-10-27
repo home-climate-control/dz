@@ -16,6 +16,7 @@ import java.util.Set;
 public interface MqttDeviceConfig extends MqttGateway {
 
     @JsonProperty("broker")
+    @Override
     MqttBrokerConfig broker();
 
     @JsonProperty("sensors")

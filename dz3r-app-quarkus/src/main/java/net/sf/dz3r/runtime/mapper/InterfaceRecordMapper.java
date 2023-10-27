@@ -224,6 +224,14 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
     net.sf.dz3r.runtime.config.hardware.HeatpumpConfig heatpump(HeatpumpConfig source);
 
+    @Mapping(expression = "java(source.id())", target = "id")
+    @Mapping(expression = "java(source.mode())", target = "mode")
+    @Mapping(expression = "java(source.actuator())", target = "actuator")
+    @Mapping(expression = "java(source.maxPower().orElse(null))", target = "maxPower")
+    @Mapping(expression = "java(source.bandCount().orElse(null))", target = "bandCount")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
+    net.sf.dz3r.runtime.config.hardware.VariableHvacConfig variable(VariableHvacConfig source);
+
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.singleStage(source.singleStage()))", target = "singleStage")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.multiStage(source.multiStage()))", target = "multiStage")
     net.sf.dz3r.runtime.config.hardware.UnitControllerConfig unit(UnitControllerConfig source);
