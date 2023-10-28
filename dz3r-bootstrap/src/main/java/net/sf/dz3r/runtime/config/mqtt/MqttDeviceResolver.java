@@ -220,7 +220,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
                     var s = createSwitch(
                             id,
                             c.switchConfig.heartbeat(),
-                            c.switchConfig.pace(),
+                            getOrDefaultPace(c.switchConfig.pace(), Duration.ofMinutes(1), "switch=" + id),
                             adapter,
                             address,
                             c.switchConfig.availabilityTopic());
@@ -230,6 +230,16 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
 
                     return new ImmutablePair<>(key, s);
                 });
+    }
+
+    private Duration getOrDefaultPace(Duration pace, Duration defaultPace, String target) {
+
+        if (pace == null) {
+            logger.debug("using default pace={} for {}", defaultPace, target);
+            return defaultPace;
+        }
+
+        return pace;
     }
 
     public Flux<Map.Entry<String, F>> getFans() {
@@ -251,7 +261,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
                     var s = createFan(
                             id,
                             c.fanConfig().heartbeat(),
-                            c.fanConfig().pace(),
+                            getOrDefaultPace(c.fanConfig.pace(), Duration.ofMinutes(1), "fan=" + id),
                             adapter,
                             address,
                             c.fanConfig.availabilityTopic());
