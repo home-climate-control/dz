@@ -70,6 +70,7 @@ public abstract class ApplicationBase<C> {
         logger.debug("git.branch={}", p.get("git.branch"));
         logger.debug("git.commit.id={}", p.get("git.commit.id"));
         logger.debug("git.commit.id.abbrev={}", p.get("git.commit.id.abbrev"));
+        logger.debug("git.commit.id.describe={}", p.get("git.commit.id.describe"));
         logger.debug("git.build.version={}", p.get("git.build.version"));
     }
 
