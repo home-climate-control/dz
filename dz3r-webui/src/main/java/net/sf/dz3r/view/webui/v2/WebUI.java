@@ -2,6 +2,7 @@ package net.sf.dz3r.view.webui.v2;
 
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.runtime.GitProperties;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
@@ -20,6 +21,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.AbstractMap;
@@ -261,6 +263,16 @@ public class WebUI {
         String name = rq.pathVariable("unit");
         logger.info("POST /unit/{}", name);
         return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
+    }
+
+    public Mono<ServerResponse> getVersion(ServerRequest rq) {
+        logger.info("GET /version");
+
+        try {
+            return ok().contentType(MediaType.APPLICATION_JSON).body(Flux.fromIterable(GitProperties.get().entrySet()), Object.class);
+        } catch (IOException ex) {
+            throw new IllegalStateException("This shouldn't have happened", ex);
+        }
     }
 
     private interface Initializer<T> {
