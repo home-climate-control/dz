@@ -29,6 +29,7 @@ public class RoutingConfiguration {
                 GET("/zones").and(ACCEPT_JSON), webUI::getZones).andRoute(
                 GET("/zone/{zone}").and(ACCEPT_JSON), webUI::getZone).andRoute(
 
+                GET("/uptime").and(ACCEPT_JSON), webUI::getUptime).andRoute(
                 GET("/version").and(ACCEPT_JSON), webUI::getVersion).andRoute(
 
                 // Mutators

@@ -22,10 +22,15 @@ import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.AbstractMap;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -263,6 +268,26 @@ public class WebUI {
         String name = rq.pathVariable("unit");
         logger.info("POST /unit/{}", name);
         return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
+    }
+
+    public Mono<ServerResponse> getUptime(ServerRequest rq) {
+        logger.info("GET /uptime");
+
+        var mx = ManagementFactory.getRuntimeMXBean();
+        var startMillis = mx.getStartTime();
+        var uptimeMillis = mx.getUptime();
+        var start = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS").format(new Date(startMillis)) + " " + ZoneId.systemDefault();
+        var uptime = Duration.ofMillis(uptimeMillis).toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase();
+
+        // Let's make the JSON order predictable
+        var result = new LinkedHashMap<>();
+
+        result.put("start", start);
+        result.put("uptime", uptime);
+        result.put("start.millis", startMillis);
+        result.put("uptime.millis", uptimeMillis);
+
+        return ok().contentType(MediaType.APPLICATION_JSON).body(Flux.fromIterable(result.entrySet()), Object.class);
     }
 
     public Mono<ServerResponse> getVersion(ServerRequest rq) {
