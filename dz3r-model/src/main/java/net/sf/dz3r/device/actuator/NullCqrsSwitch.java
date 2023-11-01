@@ -99,7 +99,7 @@ public class NullCqrsSwitch extends AbstractCqrsDevice<Boolean, Boolean> impleme
     @Override
     public synchronized DeviceState<Boolean> setState(Boolean command) {
 
-        logger.info("{}: setState={}", getAddress(), command);
+        logger.debug("{}: setState={}", getAddress(), command);
         this.requested = command;
 
         queueDepth.incrementAndGet();
