@@ -77,14 +77,14 @@ public class NullCqrsSwitch extends AbstractCqrsDevice<Boolean, Boolean> impleme
     @Override
     protected void setStateSync(Boolean command) {
         var delay = getDelay();
-        logger.info("{}: setStateSync={} wait...", getAddress(), command);
+        logger.trace("{}: setStateSync={} wait({})...", getAddress(), command, delay);
         try {
             Thread.sleep(delay.toMillis());
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("interrupted", ex);
         }
-        logger.info("{}: setStateSync={} done", getAddress(), command);
+        logger.trace("{}: setStateSync={} done", getAddress(), command);
         this.actual = command;
     }
 
