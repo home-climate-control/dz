@@ -78,7 +78,7 @@ public class LoggerTimeUsageReporter implements ResourceUsageReporter<Duration> 
                 return;
             }
 
-            logger.log(level, "{}: current usage {}%{}", marker, percent, (percent > 100 ? " (OVERDUE)" : ""));
+            logger.log(level, "{}: current usage {}%{}", marker, (int) percent, (percent > 100 ? " (OVERDUE)" : ""));
             lastAlertIssued = now;
 
         } finally {
