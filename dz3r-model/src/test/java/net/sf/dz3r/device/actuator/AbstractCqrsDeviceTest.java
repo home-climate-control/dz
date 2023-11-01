@@ -2,6 +2,7 @@ package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.common.TestClock;
 import net.sf.dz3r.device.DeviceState;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
@@ -11,8 +12,21 @@ import java.time.Duration;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class AbstractCqrsDeviceTest {
+
+    @Test
+    void noPace() {
+        var clock = new TestClock();
+        var device = new PaceTest("pt", clock, null, null);
+
+        device.limitRate("command");
+
+        assertThatCode(() -> {
+            device.limitRate("command");
+        }).doesNotThrowAnyException();
+    }
 
     @ParameterizedTest
     @MethodSource("getPaceStream")

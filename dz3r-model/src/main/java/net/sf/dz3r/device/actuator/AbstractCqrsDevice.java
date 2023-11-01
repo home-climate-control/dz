@@ -75,6 +75,11 @@ public abstract class AbstractCqrsDevice<I, O> implements CqrsDevice<I, O> {
 
         try {
 
+            if (pace == null) {
+                logger.trace("{}: null pace - passthrough command={}", id, command);
+                return Flux.just(command);
+            }
+
             var now = clock.instant();
 
             if (!command.equals(lastCommand)) {
