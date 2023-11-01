@@ -24,8 +24,8 @@ public class LoggerTimeUsageReporter implements ResourceUsageReporter<Duration> 
     private final Map<Level, Duration> frequencyMap = Map.of(
             Level.DEBUG, Duration.of(1, ChronoUnit.HOURS),
             Level.INFO, Duration.of(1, ChronoUnit.HOURS),
-            Level.WARN, Duration.of(10, ChronoUnit.MINUTES),
-            Level.ERROR, Duration.of(1, ChronoUnit.MINUTES)
+            Level.WARN, Duration.of(30, ChronoUnit.MINUTES),
+            Level.ERROR, Duration.of(10, ChronoUnit.MINUTES)
     );
 
     private Instant lastAlertIssued;
