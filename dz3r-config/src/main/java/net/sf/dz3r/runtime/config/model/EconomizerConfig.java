@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3r.model.HvacMode;
 
+import java.time.Duration;
+
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record EconomizerConfig(
         String ambientSensor,
@@ -12,6 +14,7 @@ public record EconomizerConfig(
         Boolean keepHvacOn,
         PidControllerConfig controller,
         HvacMode mode,
-        String hvacDevice
+        String hvacDevice,
+        Duration timeout
 ) {
 }

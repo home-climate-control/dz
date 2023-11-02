@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -59,7 +60,7 @@ class AbstractEconomizerTest {
          * @param device HVAC device acting as the economizer.
          */
         protected TestEconomizer(String name, EconomizerSettings settings, HvacDevice device) {
-            super(Clock.systemUTC(), name, settings, device);
+            super(Clock.systemUTC(), name, settings, device, Duration.ofSeconds(90));
         }
 
         @Override

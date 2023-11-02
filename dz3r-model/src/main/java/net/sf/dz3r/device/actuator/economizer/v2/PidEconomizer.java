@@ -13,6 +13,7 @@ import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
 import java.time.Clock;
+import java.time.Duration;
 
 /**
  * Economizer implementation with PID jitter control.
@@ -46,15 +47,17 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
      *
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param device HVAC device acting as the economizer.
+     * @param timeout Stale timeout. 90 seconds is a reasonable default.
      */
     public PidEconomizer(
             Clock clock,
             String name,
             EconomizerSettings settings,
             Flux<Signal<Double, Void>> ambientFlux,
-            HvacDevice device) {
+            HvacDevice device,
+            Duration timeout) {
 
-        super(clock, name, settings, device);
+        super(clock, name, settings, device, timeout);
 
         controller = new SimplePidController<>("(controller) " + getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + getAddress(), 0, HYSTERESIS);

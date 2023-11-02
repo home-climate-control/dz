@@ -15,6 +15,7 @@ import reactor.core.publisher.FluxSink;
 import reactor.tools.agent.ReactorDebugAgent;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 
@@ -64,7 +65,8 @@ class SimpleEconomizerTest {
                 "economizer",
                 settings,
                 deferredAmbientFlux,
-                device);
+                device,
+                Duration.ofSeconds(90));
 
         economizer
                 .compute(Flux.just(new Signal<>(Instant.now(), indoor)))

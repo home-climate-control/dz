@@ -8,6 +8,8 @@ import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
+import java.time.Duration;
+
 /**
  * Simple economizer implementation with no jitter control (rather a prototype).
  *
@@ -24,14 +26,16 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
      *
      * @param ambientFlux Flux from the ambient temperature sensor.
      * @param device HVAC device acting as the economizer.
+     * @param timeout Stale timeout. 90 seconds is a reasonable default.
      */
     public SimpleEconomizer(
             String name,
             EconomizerSettings settings,
             Flux<Signal<Double, Void>> ambientFlux,
-            HvacDevice device) {
+            HvacDevice device,
+            Duration timeout) {
 
-        super(null, name, settings, device);
+        super(null, name, settings, device, timeout);
 
         initFluxes(ambientFlux);
     }

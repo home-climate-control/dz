@@ -38,6 +38,7 @@ Best explained by example:
           limit: 0.7
         mode: cooling
         hvac-device: economizer-a6
+        timeout: 75S
 
 ```
 
@@ -79,6 +80,7 @@ Cooling mode assumed:
 * `controller`: just like the zone configuration above.
 * `mode`: self-explanatory
 * `hvac-device`: at this point, the economizer is an on/off device (multistage coming). This is the identifier of the [HVAC device](./hvac.md) acting as an economizer.
+* `timeout`: treat both indoor and ambient sensors as stale and shut off the economizer after not receiving data from them for this long. Default is 90 seconds. The system will complain at `INFO` level if this is happening.
 
 ### Property of
 * [home-climate-control](./home-climate-control.md)

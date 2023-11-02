@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
@@ -40,6 +41,8 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
     private EconomizerSettings settings;
 
     private final HvacDevice device;
+
+    private Duration timeout;
     private final Sinks.Many<Signal<HvacCommand, Void>> deviceCommandSink = Sinks.many().unicast().onBackpressureBuffer();
     /**
      * Last known indoor temperature.
@@ -70,12 +73,14 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
      * Create an instance.
      *
      * @param device HVAC device acting as the economizer.
+     * @param timeout Stale timeout. 90 seconds is a reasonable default.
      */
     protected AbstractEconomizer(
             Clock clock,
             String name,
             EconomizerSettings settings,
-            HvacDevice device) {
+            HvacDevice device,
+            Duration timeout) {
 
         checkModes(settings.mode, device);
 
@@ -83,7 +88,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         this.name = name;
         setSettings(settings);
 
-        this.device = device;
+        this.device = HCCObjects.requireNonNull(device, "device can't be null");
+        this.timeout = HCCObjects.requireNonNull(timeout, "timeout can't be null");
+
         device
                 .compute(
                         deviceCommandSink
@@ -278,8 +285,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 return new Signal<>(clock.instant(), -1d);
             }
 
-            // Let's be generous; Zigbee sensors can fall back to 60 seconds interval even if configured faster
-            var stale = clock.instant().minus(Duration.ofSeconds(90));
+            // Let's be generous; Zigbee sensors can fall back to 60 seconds interval even if configured faster,
+            // and even 90 seconds can cause blips once in a while
+            var stale = clock.instant().minus(timeout);
 
             if (pair.indoor.timestamp.isBefore(stale) || pair.ambient.timestamp.isBefore(stale)) {
 
