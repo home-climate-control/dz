@@ -35,9 +35,9 @@ class HeatPumpTest {
 
         // VT: NOTE: Might need to use this for running parameterized tests with different schedulers
         return new SwitchPack(
-                new NullSwitch("mode", true, scheduler),
-                new NullSwitch("running", true, scheduler),
-                new NullSwitch("fan", true, scheduler)
+                new NullCqrsSwitch("mode"),
+                new NullCqrsSwitch("running"),
+                new NullCqrsSwitch("fan")
         );
     }
 
@@ -434,8 +434,8 @@ class HeatPumpTest {
     }
 
     private record SwitchPack(
-            Switch<?> mode,
-            Switch<?> running,
-            Switch<?> fan
+            CqrsSwitch<?> mode,
+            CqrsSwitch<?> running,
+            CqrsSwitch<?> fan
             ) {}
 }

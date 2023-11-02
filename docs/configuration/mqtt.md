@@ -13,7 +13,7 @@ They all share common properties:
       id: <Client ID> # optional, defaults to internally generated stable hash code
       host: <MQTT broker host>
       port: <MQTT broker port> # optional, defaults to 1883
-      root-topic: <root topic for all messages for this connector>
+      root-topic: <root MQTT topic for all messages for this connector>
       username: <MQTT broker username> # optional, but recommended
       password: <MQTT broker password> # optional, but recommended
       auto-reconnect: <boolean flag> #optional, see below

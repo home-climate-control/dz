@@ -26,7 +26,7 @@ import java.util.function.Predicate;
  */
 public class SwitchableHvacDevice extends SingleModeHvacDevice<Void> {
 
-    private final Switch<?> theSwitch;
+    private final CqrsSwitch<?> theSwitch;
     private final boolean inverted;
 
 
@@ -42,7 +42,7 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice<Void> {
             Clock clock,
             String name,
             HvacMode mode,
-            Switch<?> theSwitch,
+            CqrsSwitch<?> theSwitch,
             boolean inverted,
             ResourceUsageCounter<Duration> uptimeCounter
     ) {
@@ -84,12 +84,9 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice<Void> {
 
                     var result = new HvacDeviceStatus<Void>(command, uptime(), null);
 
-                    return theSwitch
-                            .setState(state != inverted)
-                            .map(ignore -> {
-                                updateUptime(clock.instant(), state);
-                                return new Signal<>(clock.instant(), result);
-                            });
+                    theSwitch.setState(state != inverted);
+                    updateUptime(clock.instant(), state);
+                    return Flux.just(new Signal<>(clock.instant(), result));
                 });
     }
 
@@ -113,7 +110,7 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice<Void> {
     protected void doClose() {
         logger.warn("Shutting down: {}", getAddress());
         logger.warn("close(): setting {} to off", theSwitch.getAddress());
-        theSwitch.setState(inverted).block();
+        theSwitch.setState(inverted);
         logger.info("Shut down: {}", getAddress());
     }
 }

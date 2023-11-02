@@ -4,6 +4,7 @@ Home Climate Control: Release Notes
 ## Coming Up
 
 * [#293 Implement variable output single mode HVAC device](https://github.com/home-climate-control/dz/issues/293)
+* [#292 Decouple possibly faulty actuators from control logic so that the processing pipeline doesn't get stuck ](https://github.com/home-climate-control/dz/issues/292)
 * [#291 Economizer: control a HVAC device, not a switch](https://github.com/home-climate-control/dz/issues/291)
 
 ## v4.0.0

@@ -1,8 +1,8 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
-import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
+import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
@@ -50,7 +50,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
      */
     public Mono<Tuple2<
             List<Id2Flux>,
-            List<Map.Entry<String, AbstractMqttSwitch>>>> parse(
+            List<Map.Entry<String, AbstractMqttCqrsSwitch>>>> parse(
             Set<MqttDeviceConfig> esphome,
             Set<MqttDeviceConfig> zigbee2mqtt,
             Set<MqttDeviceConfig> zwave2mqtt,
@@ -128,14 +128,14 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
                     .publishOn(Schedulers.boundedElastic())
                     .flatMap(MqttDeviceResolver::getSwitches)
                     .doOnNext(kv -> context.switches.register(kv.getKey(), kv.getValue()))
-                    .map(kv -> ((Map.Entry<String, AbstractMqttSwitch>) new ImmutablePair<>(kv.getKey(), kv.getValue())))
+                    .map(kv -> ((Map.Entry<String, AbstractMqttCqrsSwitch>) new ImmutablePair<>(kv.getKey(), kv.getValue())))
                     .collectList();
 
             var fans = mqttConfigs
                     .publishOn(Schedulers.boundedElastic())
                     .flatMap(MqttDeviceResolver::getFans)
                     .doOnNext(kv -> context.fans.register(kv.getKey(), kv.getValue()))
-                    .map(kv -> (new ImmutablePair<>(kv.getKey(), kv.getValue())))
+                    .map(kv -> new ImmutablePair<>(kv.getKey(), kv.getValue()))
                     .collectList();
 
             logger.debug("waiting at the gate");

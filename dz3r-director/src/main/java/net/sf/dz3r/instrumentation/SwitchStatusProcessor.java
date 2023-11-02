@@ -1,6 +1,6 @@
 package net.sf.dz3r.instrumentation;
 
-import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.health.SwitchStatus;
@@ -15,7 +15,7 @@ import java.util.Optional;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
-public class SwitchStatusProcessor implements SignalProcessor<Switch.State, SwitchStatus, String> {
+public class SwitchStatusProcessor implements SignalProcessor<DeviceState<Boolean>, SwitchStatus, String> {
 
     private final Logger logger = LogManager.getLogger();
 
@@ -28,18 +28,18 @@ public class SwitchStatusProcessor implements SignalProcessor<Switch.State, Swit
     }
 
     @Override
-    public Flux<Signal<SwitchStatus, String>> compute(Flux<Signal<Switch.State, String>> in) {
+    public Flux<Signal<SwitchStatus, String>> compute(Flux<Signal<DeviceState<Boolean>, String>> in) {
         return in.map(this::compute);
     }
 
-    private Signal<SwitchStatus, String> compute(Signal<Switch.State, String> source) {
+    private Signal<SwitchStatus, String> compute(Signal<DeviceState<Boolean>, String> source) {
 
         if (source.isError()) {
-            // Nothing else matters
+            // Nothing else matters, for now
             return new Signal<>(source.timestamp, null, null, source.status, source.error);
         }
 
-        // VT: FIXME: Pass/fail is the only thing of interest right now
+        // VT: FIXME: Pass/fail is the only thing of interest right now, but DeviceState contains some juicy bits
         return new Signal<>(source.timestamp, new SwitchStatus(Optional.empty()));
     }
 }

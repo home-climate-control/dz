@@ -1,18 +1,18 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
-import net.sf.dz3r.device.esphome.v1.ESPHomeFan;
 import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
-import net.sf.dz3r.device.esphome.v1.ESPHomeSwitch;
+import net.sf.dz3r.device.esphome.v2.ESPHomeCqrsSwitch;
+import net.sf.dz3r.device.esphome.v2.ESPHomeFan;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, ESPHomeListener, ESPHomeSwitch, ESPHomeFan> {
+public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, ESPHomeListener, ESPHomeCqrsSwitch, ESPHomeFan> {
 
     public ESPHomeDeviceResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
@@ -30,22 +30,25 @@ public class ESPHomeDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, 
     }
 
     @Override
-    protected ESPHomeSwitch createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic) {
+    protected ESPHomeCqrsSwitch createSwitch(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
 
-        // Optimistic defaults to true for this switch only
-        // https://github.com/home-climate-control/dz/issues/280
-
-        return new ESPHomeSwitch(
+        return new ESPHomeCqrsSwitch(
+                id,
+                Clock.systemUTC(),
+                heartbeat,
+                pace,
                 adapter,
                 rootTopic,
-                Optional.ofNullable(optimistic).orElse(true),
-                null);
+                availabilityTopic);
     }
 
     @Override
-    protected ESPHomeFan createFan(String id, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+    protected ESPHomeFan createFan(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
         return new ESPHomeFan(
                 id,
+                Clock.systemUTC(),
+                heartbeat,
+                pace,
                 adapter,
                 rootTopic,
                 availabilityTopic

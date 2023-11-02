@@ -2,18 +2,18 @@ package net.sf.dz3r.runtime.config.mqtt;
 
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
-import net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch;
 import net.sf.dz3r.device.zwave.v1.ZWaveSensorListener;
+import net.sf.dz3r.device.zwave.v2.ZWaveCqrsBinarySwitch;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.signal.SignalSource;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
-public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, SignalSource<String, Double, Void>, ZWaveBinarySwitch, VariableOutputDevice> {
+public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, SignalSource<String, Double, Void>, ZWaveCqrsBinarySwitch, VariableOutputDevice> {
 
     public ZWaveDeviceResolver(Set<MqttDeviceConfig> source, Map<MqttEndpointSpec, MqttAdapter> endpoint2adapter) {
         super(source, endpoint2adapter);
@@ -39,16 +39,23 @@ public class ZWaveDeviceResolver extends MqttDeviceResolver<MqttDeviceConfig, Si
     }
 
     @Override
-    protected ZWaveBinarySwitch createSwitch(MqttAdapter adapter, String rootTopic, Boolean optimistic) {
-        return new ZWaveBinarySwitch(
+    protected ZWaveCqrsBinarySwitch createSwitch(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+
+        if (availabilityTopic != null) {
+            throw new IllegalArgumentException("zigbee2mqtt.switches.availability-topic is determined automatically, please remove it from the configuration");
+        }
+
+        return new ZWaveCqrsBinarySwitch(
+                id,
+                Clock.systemUTC(),
+                heartbeat,
+                pace,
                 adapter,
-                rootTopic,
-                Optional.ofNullable(optimistic).orElse(false),
-                null);
+                rootTopic);
     }
 
     @Override
-    protected VariableOutputDevice createFan(String id, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
+    protected VariableOutputDevice createFan(String id, Duration heartbeat, Duration pace, MqttAdapter adapter, String rootTopic, String availabilityTopic) {
         throw new UnsupportedOperationException("Not Implemented");
     }
 }

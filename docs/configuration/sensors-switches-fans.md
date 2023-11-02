@@ -61,7 +61,7 @@ switches:
     reversed: <boolean flag>
     heartbeat: <Duration>
     pace: <Duration>
-    optimistic: <boolean flag>
+    availability-topic: <MQTT topic for availability information>
 ```
 
 #### reversed
@@ -73,8 +73,11 @@ Optional. Send the command to hardware this often even if the logical state hasn
 #### pace
 Optional. Send the same command to hardware no more often that this. Some bridges (notably `zigbee2mqtt`) are known to become unresponsive with no error indication when incoming traffic exceeds their bandwidth.
 
-#### optimistic
-Optional. Send the command to hardware and don't wait for confirmation. Normally, you wouldn't have to do this, but some firmware (notably, [ESPHome](./esphome.md)) doesn't provide reliable confirmation so this may save the situation (and is a default for known hardware types). Use only if you must, and consider using [heartbeat](#heartbeat) to offset the risk.
+#### availability-topic
+* Mandatory for [ESPHome](./esphome.md) devices (see [esphome #5030](https://github.com/esphome/issues/issues/5030) for more information);
+* Disallowed for [Zigbee](./zigbee2mqtt.md) and [Z-Wave](./zwave2mqtt.md) devices.
+
+Log messages at `ERROR` level will provide enough details to resolve the problem.
 
 ### fans
 Similar to above:
@@ -85,11 +88,9 @@ fans:
     availability: /esphome/550212/status
     heartbeat: <Duration>
     pace: <Duration>
+    availability-topic: <MQTT topic for availability information>
 ```
-`id`, `address`, `heartbeat`, and `pace` parameters are identical to those above.
-
-#### availability
-Defines the topic where the device announces its availability.
+`id`, `address`, `heartbeat`, `pace`, and `availability-topic` parameters are identical to those above.
 
 This is how ESPHome configuration section looks like (`pin` and `min_power` depend on your particular hardware setup):
 
@@ -113,7 +114,7 @@ fan:
 
 For more information, see [ESPHome Fan Component](https://esphome.io/components/fan/).
 
-> **NOTE:** Leave `speed_count` at default (100), or this integration will not work.
+> **NOTE:** Leave ESPHome `speed_count` at default (100), or this integration will not work.
 
 ### Property of
 * [esphome](./esphome.md)

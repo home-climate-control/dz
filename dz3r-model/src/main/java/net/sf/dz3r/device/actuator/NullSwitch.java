@@ -15,8 +15,11 @@ import java.util.Random;
  *
  * A useful tool for troubleshooting a configuration without actual hardware available.
  *
+ * @deprecated Use {@link NullCqrsSwitch} instead.
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
  */
+@Deprecated(since = "5.0.0")
 public class NullSwitch extends AbstractSwitch<String> {
 
     private static final Random rg = new SecureRandom();

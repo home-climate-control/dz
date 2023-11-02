@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer.v1;
 
-import net.sf.dz3r.device.actuator.NullSwitch;
+import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.HvacMode;
@@ -15,6 +15,7 @@ import reactor.core.publisher.FluxSink;
 import reactor.tools.agent.ReactorDebugAgent;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 
@@ -51,7 +52,7 @@ class SimpleEconomizerTest {
                 Clock.systemUTC(),
                 "d",
                 HvacMode.COOLING,
-                new NullSwitch("s"),
+                new NullCqrsSwitch("s"),
                 false,
                 null);
 
@@ -64,7 +65,8 @@ class SimpleEconomizerTest {
                 "economizer",
                 settings,
                 deferredAmbientFlux,
-                device);
+                device,
+                Duration.ofSeconds(90));
 
         economizer
                 .compute(Flux.just(new Signal<>(Instant.now(), indoor)))

@@ -2,7 +2,7 @@ package net.sf.dz3r.device.actuator.economizer;
 
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.NullSwitch;
+import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -38,7 +39,7 @@ class AbstractEconomizerTest {
                         Clock.systemUTC(),
                         "d",
                         HvacMode.COOLING,
-                        new NullSwitch("s"),
+                        new NullCqrsSwitch("s"),
                         false,
                         null)
         );
@@ -59,7 +60,7 @@ class AbstractEconomizerTest {
          * @param device HVAC device acting as the economizer.
          */
         protected TestEconomizer(String name, EconomizerSettings settings, HvacDevice device) {
-            super(Clock.systemUTC(), name, settings, device);
+            super(Clock.systemUTC(), name, settings, device, Duration.ofSeconds(90));
         }
 
         @Override

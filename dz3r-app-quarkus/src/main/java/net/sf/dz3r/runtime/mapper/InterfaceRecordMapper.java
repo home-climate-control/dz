@@ -95,8 +95,15 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.reversed().orElse(false))", target = "reversed")
     @Mapping(expression = "java(source.heartbeat().orElse(null))", target = "heartbeat")
     @Mapping(expression = "java(source.pace().orElse(null))", target = "pace")
-    @Mapping(expression = "java(source.optimistic().orElse(null))", target = "optimistic")
+    @Mapping(expression = "java(source.availabilityTopic().orElse(null))", target = "availabilityTopic")
     net.sf.dz3r.runtime.config.hardware.SwitchConfig switchConfig(SwitchConfig source);
+
+    @Mapping(expression = "java(source.id().orElse(null))", target = "id")
+    @Mapping(expression = "java(source.address())", target = "address")
+    @Mapping(expression = "java(source.heartbeat().orElse(null))", target = "heartbeat")
+    @Mapping(expression = "java(source.pace().orElse(null))", target = "pace")
+    @Mapping(expression = "java(source.availabilityTopic().orElse(null))", target = "availabilityTopic")
+    net.sf.dz3r.runtime.config.protocol.mqtt.FanConfig fanConfig(FanConfig source);
 
     @Mapping(expression = "java(source.serialPort())", target = "serialPort")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
@@ -147,6 +154,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.controller(source.controller()))", target = "controller")
     @Mapping(expression = "java(source.mode())", target = "mode")
     @Mapping(expression = "java(source.hvacDevice())", target = "hvacDevice")
+    @Mapping(expression = "java(source.timeout().orElse(null))", target = "timeout")
     net.sf.dz3r.runtime.config.model.EconomizerConfig economizer(EconomizerConfig source);
 
     @Mapping(expression = "java(source.min())", target = "min")
@@ -216,6 +224,14 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.modeChangeDelay().orElse(null))", target = "modeChangeDelay")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
     net.sf.dz3r.runtime.config.hardware.HeatpumpConfig heatpump(HeatpumpConfig source);
+
+    @Mapping(expression = "java(source.id())", target = "id")
+    @Mapping(expression = "java(source.mode())", target = "mode")
+    @Mapping(expression = "java(source.actuator())", target = "actuator")
+    @Mapping(expression = "java(source.maxPower().orElse(null))", target = "maxPower")
+    @Mapping(expression = "java(source.bandCount().orElse(null))", target = "bandCount")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
+    net.sf.dz3r.runtime.config.hardware.VariableHvacConfig variable(VariableHvacConfig source);
 
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.singleStage(source.singleStage()))", target = "singleStage")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.multiStage(source.multiStage()))", target = "multiStage")

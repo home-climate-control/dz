@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.esphome.v1;
+package net.sf.dz3r.device.esphome.v2;
 
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
@@ -9,8 +9,10 @@ import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.Clock;
 import java.time.Duration;
 
+import static net.sf.dz3r.device.actuator.VariableOutputDevice.Command;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
@@ -22,21 +24,24 @@ class ESPHomeFanTest {
 
     private final Logger logger = LogManager.getLogger();
 
-    private final String host = "mqtt-esphome";
-    private final String fanTopic = "/esphome/550212/fan/a6-0";
-    private final String availabilityTopic = "/esphome/550212/status";
+    private final String MQTT_BROKER = "mqtt-esphome";
+    private final String FAN_TOPIC = "/esphome/550212/fan/a6-0";
+    private final String AVAILABILITY_TOPIC = "/esphome/550212/status";
 
     @Test
     void sendCycle() throws Exception {
 
         assertThatCode(() -> {
 
-            var adapter = new MqttAdapter(new MqttEndpoint(host));
+            var adapter = new MqttAdapter(new MqttEndpoint(MQTT_BROKER));
             var fan = new ESPHomeFan(
                     "a6",
+                    Clock.systemUTC(),
+                    null,
+                    null,
                     adapter,
-                    fanTopic,
-                    availabilityTopic
+                    FAN_TOPIC,
+                    AVAILABILITY_TOPIC
             );
 
             var status = fan
@@ -48,7 +53,7 @@ class ESPHomeFanTest {
             Flux
                     .just(0d, 0.25d, 0.5d, 0.75d, 1d)
                     .delayElements(Duration.ofSeconds(1))
-                    .map(level -> fan.setState(true, level))
+                    .map(level -> fan.setState(new Command(true, level)))
                     .doOnNext(state -> logger.info("state/sent: {}", state))
                     .blockLast();
 

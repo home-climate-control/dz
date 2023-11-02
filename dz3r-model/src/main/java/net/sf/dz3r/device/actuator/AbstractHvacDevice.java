@@ -15,6 +15,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Common functionality for all HVAC device drivers.
@@ -81,7 +82,7 @@ public abstract class AbstractHvacDevice<T> implements HvacDevice<T> {
         return name;
     }
 
-    protected void check(Switch<?> s, String purpose) {
+    protected void check(CqrsSwitch<?> s, String purpose) {
         if (s == null) {
             throw new IllegalArgumentException("'" + purpose + "' switch can't be null");
         }
@@ -149,7 +150,9 @@ public abstract class AbstractHvacDevice<T> implements HvacDevice<T> {
         }
 
         isClosed = true;
-        uptimeCounterSubscription.dispose();
+        Optional
+                .ofNullable(uptimeCounterSubscription)
+                .ifPresent(Disposable::dispose);
         doClose();
     }
 
