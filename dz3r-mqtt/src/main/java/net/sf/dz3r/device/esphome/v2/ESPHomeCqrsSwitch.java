@@ -4,9 +4,13 @@ import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Implementation to control <a href="https://esphome.io/components/switch/">ESPHome Switch Component</a> via
@@ -56,6 +60,33 @@ public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
         return rootTopic + "/command";
     }
 
+    private static final Map<String, String> topic2status = Collections.synchronizedMap(new TreeMap<>());
+
+    @Override
+    protected void parseAvailability(MqttSignal message) {
+
+        ThreadContext.push("parseAvailability");
+
+        try {
+
+            logger.trace("{}: availability={}", id, message);
+
+            // https://github.com/home-climate-control/dz/issues/295
+            // Until https://github.com/esphome/issues/issues/5030 is fixed, multiple logical ESPHome switches
+            // hosted on the same chip will share the same availability topic. Ugly, but we have to share the state.
+
+            topic2status.put(message.topic(), message.message());
+
+            for (var kv : topic2status.entrySet()) {
+                logger.trace("  {}={}", kv.getKey(), kv.getValue());
+            }
+
+            stateSink.tryEmitNext(getStateSignal());
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
     @Override
     protected String renderPayload(Boolean state) {
         return Boolean.TRUE.equals(state) ? "ON" : "OFF";
@@ -78,6 +109,6 @@ public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
 
     @Override
     public boolean isAvailable() {
-        return "online".equals(availabilityMessage);
+        return "online".equals(topic2status.get(getAvailabilityTopic()));
     }
 }
