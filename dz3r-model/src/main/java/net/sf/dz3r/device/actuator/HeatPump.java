@@ -299,7 +299,7 @@ public class HeatPump extends AbstractHvacDevice<Void> {
 
         // VT: FIXME: Late night shortcut (#292), simplify
 
-        logger.debug("{}: setState({})={}", getAddress(), command.target, command.state);
+        logger.debug("{}: setState({})={}", getAddress(), command.target.getAddress(), command.state);
         var result = command.target.setState(command.state);
         logger.debug("{}: setState result={}", getAddress(), result);
 
