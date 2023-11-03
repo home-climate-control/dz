@@ -66,7 +66,7 @@ public class NullCqrsSwitch extends AbstractCqrsDevice<Boolean, Boolean> impleme
 
     @Override
     public boolean isAvailable() {
-        return false;
+        return available;
     }
 
     @Override
