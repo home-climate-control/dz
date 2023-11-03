@@ -15,27 +15,17 @@ class NullCqrsSwitchTest {
 
     @Test
     void unlimited() throws InterruptedException {
-
-        var s = new NullCqrsSwitch("unlimited");
-        var result = Flux
-                .range(0, 20)
-                .map(ignore -> true)
-                .map(s::setState)
-                .doOnNext(state -> logger.info("state: {}", state))
-                .blockLast();
-
-        logger.info("done sending");
-
-        // Let things settle down
-        Thread.sleep(100);
-
-        assertThat(s.getState().queueDepth).isZero();
+        test(new NullCqrsSwitch("unlimited"));
     }
+
     @Test
     void limited() throws InterruptedException {
+        test(new NullCqrsSwitch("limited", Clock.systemUTC(), null, Duration.ofSeconds(1), null, null));
+    }
 
-        var s = new NullCqrsSwitch("limited", Clock.systemUTC(), null, Duration.ofSeconds(1), null, null);
-        var result = Flux
+    private void test(NullCqrsSwitch s) throws InterruptedException {
+
+        Flux
                 .range(0, 20)
                 .map(ignore -> true)
                 .map(s::setState)
