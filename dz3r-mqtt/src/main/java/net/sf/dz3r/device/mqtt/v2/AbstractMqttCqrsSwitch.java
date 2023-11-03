@@ -60,6 +60,6 @@ public abstract class AbstractMqttCqrsSwitch extends AbstractMqttCqrsDevice<Bool
 
     @Override
     public MqttMessageAddress getAddress() {
-        return null;
+        return new MqttMessageAddress(mqttAdapter.getAddress(), rootTopic);
     }
 }
