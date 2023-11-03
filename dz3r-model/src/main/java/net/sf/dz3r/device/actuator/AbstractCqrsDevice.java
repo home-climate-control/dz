@@ -95,6 +95,8 @@ public abstract class AbstractCqrsDevice<I, O> implements CqrsDevice<I, O> {
             var interval = Duration.between(lastSet, now);
             if (interval.compareTo(pace) < 0) {
                 logger.trace("{}: command={} drop - too soon ({} vs {})", id, command, interval, pace);
+
+                queueDepth.decrementAndGet();
                 return Flux.empty();
             }
 
