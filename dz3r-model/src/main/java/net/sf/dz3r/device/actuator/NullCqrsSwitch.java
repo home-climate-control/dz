@@ -71,7 +71,7 @@ public class NullCqrsSwitch extends AbstractCqrsDevice<Boolean, Boolean> impleme
 
     @Override
     public DeviceState<Boolean> getState() {
-        return new DeviceState<>(id, available, requested, actual, 0);
+        return new DeviceState<>(id, available, requested, actual, queueDepth.get());
     }
 
     @Override
@@ -84,8 +84,9 @@ public class NullCqrsSwitch extends AbstractCqrsDevice<Boolean, Boolean> impleme
             Thread.currentThread().interrupt();
             throw new IllegalStateException("interrupted", ex);
         }
-        logger.trace("{}: setStateSync={} done", getAddress(), command);
         this.actual = command;
+        queueDepth.decrementAndGet();
+        logger.trace("{}: setStateSync={} done, queueDepth={}", getAddress(), command, queueDepth.get());
     }
 
     private Duration getDelay() {
