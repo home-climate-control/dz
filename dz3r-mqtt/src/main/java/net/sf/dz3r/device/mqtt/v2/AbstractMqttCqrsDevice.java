@@ -47,6 +47,7 @@ public abstract class AbstractMqttCqrsDevice<I, O> extends AbstractCqrsDevice<I,
     protected abstract String getCommandTopic();
 
     protected void parseAvailability(MqttSignal message) {
+        logger.trace("{}: availability={}", id, message);
         this.availabilityMessage = message.message();
         stateSink.tryEmitNext(getStateSignal());
     }
