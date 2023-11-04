@@ -1,6 +1,7 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapterImpl;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import net.sf.dz3r.instrumentation.Marker;
@@ -90,7 +91,7 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
             Flux.fromIterable(Optional.ofNullable(allEndpoints).orElseThrow(() -> new IllegalStateException("Impossible")))
                     .subscribe(endpoint -> {
 
-                        var adapter = new MqttAdapter(
+                        var adapter = new MqttAdapterImpl(
                                 new MqttEndpoint(endpoint.host(), Optional.ofNullable(endpoint.port()).orElse(MqttEndpoint.DEFAULT_PORT)),
                                 endpoint.username(),
                                 endpoint.password(),

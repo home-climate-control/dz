@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.esphome.v2;
 
 import net.sf.dz3r.common.HCCObjects;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import org.apache.logging.log4j.ThreadContext;

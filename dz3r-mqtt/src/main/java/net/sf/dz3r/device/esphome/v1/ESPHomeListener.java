@@ -2,8 +2,8 @@ package net.sf.dz3r.device.esphome.v1;
 
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.mqtt.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.device.mqtt.v1.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
@@ -28,7 +28,7 @@ public class ESPHomeListener implements Addressable<MqttEndpoint>, SignalSource<
 
     @Override
     public MqttEndpoint getAddress() {
-        return mqttListener.address;
+        return mqttListener.getAddress();
     }
 
     /**

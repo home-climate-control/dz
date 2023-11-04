@@ -3,7 +3,7 @@ package net.sf.dz3r.runtime.config.mqtt;
 import net.sf.dz3r.device.esphome.v1.ESPHomeListener;
 import net.sf.dz3r.device.esphome.v2.ESPHomeCqrsSwitch;
 import net.sf.dz3r.device.esphome.v2.ESPHomeFan;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 

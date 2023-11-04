@@ -3,8 +3,9 @@ package net.sf.dz3r.device.zwave.v1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapterImpl;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.signal.Signal;
@@ -41,7 +42,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, boolean, Scheduler)} instead.
+     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapterImpl, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public ZWaveBinarySwitch(String host, String deviceRootTopic) {
@@ -54,7 +55,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, boolean, Scheduler)} instead.
+     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapterImpl, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public ZWaveBinarySwitch(String host, int port,
@@ -65,7 +66,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
     }
 
     /**
-     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapter, String, boolean, Scheduler)} instead.
+     * @deprecated Use {@link ZWaveBinarySwitch#ZWaveBinarySwitch(MqttAdapterImpl, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public ZWaveBinarySwitch(String host, int port,
@@ -75,7 +76,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
                              Scheduler scheduler) {
 
         this(
-                new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect),
+                new MqttAdapterImpl(new MqttEndpoint(host, port), username, password, reconnect),
                 deviceRootTopic,
                 false,
                 scheduler);
@@ -91,7 +92,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
         super(
                 mqttAdapter,
                 new MqttMessageAddress(
-                        mqttAdapter.address,
+                        mqttAdapter.getAddress(),
                         deviceRootTopic),
                 scheduler,
                 Duration.ofSeconds(30),

@@ -21,7 +21,7 @@ class MqttListenerTest {
     @Test
     void create() {
         assertThatCode(() -> {
-            new MqttListener(new MqttEndpoint("localhost"));
+            new MqttListenerImpl(new MqttEndpoint("localhost"));
         }).doesNotThrowAnyException();
     }
 
@@ -29,7 +29,7 @@ class MqttListenerTest {
     void subscribe() {
 
         assertThatCode(() -> {
-            new MqttListener(new MqttEndpoint("localhost"))
+            new MqttListenerImpl(new MqttEndpoint("localhost"))
                     .getFlux("", true)
                     .doOnNext(v -> logger.info("message: {}", v))
                     .take(Duration.ofSeconds(1))

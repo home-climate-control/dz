@@ -1,7 +1,7 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import net.sf.dz3r.runtime.config.ConfigurationMapper;
 import net.sf.dz3r.runtime.config.DeviceResolver;
@@ -60,7 +60,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
                 .fromIterable(source)
                 .doOnNext(c -> logger.debug("sensor: {}", c.sensorConfig().address()))
                 .doOnNext(c -> logger.debug("  broker: {}", c.mqttBrokerSpec().signature()))
-                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
+                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).getAddress()))
                 .map(c -> {
                     var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
                     var listener = resolveListener(c.mqttBrokerSpec(), adapter);
@@ -211,7 +211,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
                 .fromIterable(source)
                 .doOnNext(c -> logger.debug("switch: {}", c.switchConfig().address()))
                 .doOnNext(c -> logger.debug("  broker: {}", c.mqttBrokerSpec().signature()))
-                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
+                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).getAddress()))
                 .map(c -> {
                     var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
 
@@ -252,7 +252,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
                 .fromIterable(source)
                 .doOnNext(c -> logger.debug("fan: {}", c.fanConfig().address()))
                 .doOnNext(c -> logger.debug("  broker: {}", c.mqttBrokerSpec().signature()))
-                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).address))
+                .doOnNext(c -> logger.debug("  endpoint: {}", endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec())).getAddress()))
                 .map(c -> {
                     var adapter = endpoint2adapter.get(ConfigurationMapper.INSTANCE.parseEndpoint(c.mqttBrokerSpec()));
 

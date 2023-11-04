@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.esphome.v1;
 
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.device.mqtt.v1.MqttListener;
+import net.sf.dz3r.device.mqtt.v1.MqttListenerImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -22,7 +22,7 @@ class ESPHomeListenerTest {
     @Test
     void constructor() {
 
-        var mqttListener = new MqttListener(new MqttEndpoint("localhost"), null, null, false);
+        var mqttListener = new MqttListenerImpl(new MqttEndpoint("localhost"), null, null, false);
 
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> {
@@ -34,7 +34,7 @@ class ESPHomeListenerTest {
     void sensorFlux() throws InterruptedException {
 
         assertThatCode(() -> {
-            var mqttListener = new MqttListener(new MqttEndpoint("localhost"), null, null, false);
+            var mqttListener = new MqttListenerImpl(new MqttEndpoint("localhost"), null, null, false);
             var esphomeListener = new ESPHomeListener(mqttListener, "/esphome");
 
             var subscription = esphomeListener.getFlux("dining-room")

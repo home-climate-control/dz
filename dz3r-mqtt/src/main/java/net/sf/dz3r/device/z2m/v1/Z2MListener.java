@@ -1,8 +1,9 @@
 package net.sf.dz3r.device.z2m.v1;
 
 import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.mqtt.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.device.mqtt.v1.MqttListener;
+import net.sf.dz3r.device.mqtt.v1.MqttListenerImpl;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
@@ -33,7 +34,7 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
                        boolean reconnect,
                        String mqttRootTopicSub) {
 
-        mqttListener = new MqttListener(new MqttEndpoint(host, port), username, password, reconnect);
+        mqttListener = new MqttListenerImpl(new MqttEndpoint(host, port), username, password, reconnect);
         this.mqttRootTopicSub = mqttRootTopicSub;
     }
 
@@ -44,7 +45,7 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
 
     @Override
     public MqttEndpoint getAddress() {
-        return mqttListener.address;
+        return mqttListener.getAddress();
     }
 
     /**

@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.zwave.v2;
 
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapterImpl;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,7 +39,7 @@ class ZWaveCqrsBinarySwitchTest {
 
         assertThatCode(() -> {
 
-            try (var adapter = new MqttAdapter(new MqttEndpoint(MQTT_BROKER))) {
+            try (var adapter = new MqttAdapterImpl(new MqttEndpoint(MQTT_BROKER))) {
 
                 var zwaveSwitch = new ZWaveCqrsBinarySwitch(
                         "zwave",

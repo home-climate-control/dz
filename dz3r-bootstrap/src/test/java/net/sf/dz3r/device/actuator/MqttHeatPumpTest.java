@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.device.esphome.v2.ESPHomeCqrsSwitch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.v1.MqttAdapterImpl;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
@@ -41,7 +41,7 @@ class ESPHomeHeatPumpTest {
     void cycle() throws Exception {
 
 
-        try (var adapter = new MqttAdapter(new MqttEndpoint(MQTT_BROKER))) {
+        try (var adapter = new MqttAdapterImpl(new MqttEndpoint(MQTT_BROKER))) {
 
             var switchFan = new ESPHomeCqrsSwitch("fan", Clock.systemUTC(), null, null, adapter, ESPHOME_SWITCH_TOPIC_ROOT + "t-relay-3-r0-fan", ESPHOME_AVAILABILITY_TOPIC);
             var switchRunning = new ESPHomeCqrsSwitch("running", Clock.systemUTC(), null, null, adapter, ESPHOME_SWITCH_TOPIC_ROOT + "t-relay-3-r1-condenser", ESPHOME_AVAILABILITY_TOPIC);
