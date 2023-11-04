@@ -9,7 +9,6 @@ import net.sf.dz3r.device.mqtt.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.instrumentation.Marker;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -23,8 +22,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.logging.log4j.Level.DEBUG;
+
 /**
- * MQTT stream publisher, v2.
+ * MQTT v5 stream publisher, v2.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
@@ -89,7 +90,7 @@ public class MqttListenerImpl implements MqttListener {
         }
 
         ThreadContext.push("getClient");
-        Marker m = new Marker("getClient(" + getAddress() + ")", Level.DEBUG);
+        Marker m = new Marker("getClient(" + getAddress() + ")", DEBUG);
 
         try {
 
