@@ -251,7 +251,7 @@ public class MqttListenerImpl implements MqttListener {
                         // Persistent messages will be delivered immediately before there's a chance to call
                         // subscribe() on the flux - we didn't even return it yet
 
-                        // VT: FIXME: Buffer the last value received? May want to log this once per runtime, logs of chatter here
+                        // VT: FIXME: Buffer the last value received? May want to log this once per runtime, lots of chatter here
 
                         logger.debug("no subscriptions to '{}/#' yet, dropped: {} {}", topic, p.getTopic(), new String(p.getPayloadAsBytes(), StandardCharsets.UTF_8));
                         return;

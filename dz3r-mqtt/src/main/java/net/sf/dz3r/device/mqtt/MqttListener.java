@@ -20,6 +20,8 @@ public interface MqttListener extends Addressable<MqttEndpoint>, AutoCloseable {
     /**
      * Get an MQTT topic flux.
      *
+     * See implementing classes for additional behavior details.
+     *
      * @param topic Root topic to get the flux for.
      * @param includeSubtopics Self-explanatory.
      *
