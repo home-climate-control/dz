@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapterImpl;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
+import net.sf.dz3r.device.mqtt.v2.MqttAdapterImpl;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Scheduler;
@@ -40,7 +40,7 @@ public class Z2MSwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapterImpl, String, boolean, Scheduler)} instead.
+     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public Z2MSwitch(String host, String deviceRootTopic) {
@@ -53,7 +53,7 @@ public class Z2MSwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapterImpl, String, boolean, Scheduler)} instead.
+     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public Z2MSwitch(String host, int port,
@@ -69,7 +69,7 @@ public class Z2MSwitch extends AbstractMqttSwitch {
      * Even though deprecated, left intact not to disrupt existing configurations until
      * <a href="https://github.com/home-climate-control/dz/issues/47">issue 47</a> is complete.
      *
-     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapterImpl, String, boolean, Scheduler)} instead.
+     * @deprecated Use {@link Z2MSwitch#Z2MSwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public Z2MSwitch(String host, int port,

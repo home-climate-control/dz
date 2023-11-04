@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.z2m.v2;
 
-import net.sf.dz3r.device.mqtt.v1.MqttAdapterImpl;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
+import net.sf.dz3r.device.mqtt.v2.MqttAdapterImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;

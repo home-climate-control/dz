@@ -1,8 +1,8 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.device.esphome.v2.ESPHomeCqrsSwitch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapterImpl;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
+import net.sf.dz3r.device.mqtt.v2.MqttAdapterImpl;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
