@@ -110,7 +110,7 @@ public class MqttListenerImpl implements MqttListener {
             client = Mqtt5ReactorClient.from(stage3.buildRx());
 
             client
-                    .publishes(MqttGlobalPublishFilter.ALL)
+                    .publishes(MqttGlobalPublishFilter.SUBSCRIBED)
                     .publishOn(Schedulers.newSingle("mqtt-listener-" + getAddress()))
                     .subscribe(this::receive);
 
@@ -169,14 +169,15 @@ public class MqttListenerImpl implements MqttListener {
                     .subscribeWith()
                     .topicFilter(topicFilter)
                     .applySubscribe()
-                    .doOnSubscribe(ack -> logger.debug("{}: subscribed", key))
-                    .block();
+                    .doOnSubscribe(ack -> logger.debug("{}: subscribed: {}", getAddress(), key))
+                    .subscribe();
 
         } finally {
             m.close();
         }
 
         return receiveFlux
+                .publishOn(Schedulers.boundedElastic())
                 .filter(message -> {
                     var topic = message.getTopic().toString();
                     var pass = key.includeSubtopics()
