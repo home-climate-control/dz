@@ -169,7 +169,7 @@ public class MqttListenerImpl implements MqttListener {
                     .subscribeWith()
                     .topicFilter(topicFilter)
                     .applySubscribe()
-                    .doOnSubscribe(ack -> logger.debug("{}: subscribed: {}", key, ack))
+                    .doOnSubscribe(ack -> logger.debug("{}: subscribed", key))
                     .block();
 
         } finally {
