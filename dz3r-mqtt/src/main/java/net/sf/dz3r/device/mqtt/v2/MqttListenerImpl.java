@@ -50,8 +50,6 @@ public class MqttListenerImpl implements MqttListener {
     private final Flux<Mqtt5Publish> receiveFlux;
     private final Map<ConnectionKey, Flux<MqttSignal>> topic2flux = Collections.synchronizedMap(new LinkedHashMap<>());
 
-//    private
-
     /**
      * Create an unauthenticated instance that will NOT automatically reconnect.
      *
