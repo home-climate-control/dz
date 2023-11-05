@@ -107,6 +107,11 @@ public class MqttListenerImpl implements MqttListener {
                     : stage1;
 
             // VT: FIXME: Add authentication
+
+            if (username != null || password != null) {
+                throw new UnsupportedOperationException("Authentication not implemented, kick the maintainer");
+            }
+
             var stage3 = stage2;
 
             var stage4 = Mqtt5ReactorClient.from(stage3.buildRx());
