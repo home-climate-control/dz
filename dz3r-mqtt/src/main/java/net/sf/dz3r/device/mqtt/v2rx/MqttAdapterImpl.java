@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.mqtt.v2;
+package net.sf.dz3r.device.mqtt.v2rx;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;

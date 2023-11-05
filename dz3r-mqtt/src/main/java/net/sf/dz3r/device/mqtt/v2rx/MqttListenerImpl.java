@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.mqtt.v2;
+package net.sf.dz3r.device.mqtt.v2rx;
 
 import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
@@ -27,6 +27,9 @@ import static org.apache.logging.log4j.Level.DEBUG;
 
 /**
  * MQTT v5 stream publisher, v2.
+ *
+ * This class is using
+ * <a href="https://www.hivemq.com/article/mqtt-client-api/the-hivemq-mqtt-client-library-for-java-and-its-reactive-api-flavor/">HiveMQ MQTT Reactive API</a>.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */

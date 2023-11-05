@@ -7,7 +7,7 @@ import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
-import net.sf.dz3r.device.mqtt.v2.MqttAdapterImpl;
+import net.sf.dz3r.device.mqtt.v2rx.MqttAdapterImpl;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Scheduler;

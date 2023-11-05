@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.esphome.v1;
 
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.device.mqtt.v2.MqttListenerImpl;
+import net.sf.dz3r.device.mqtt.v2rx.MqttListenerImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;

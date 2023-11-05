@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.mqtt.v2;
+package net.sf.dz3r.device.mqtt.v2rx;
 
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import org.apache.logging.log4j.LogManager;
