@@ -83,7 +83,7 @@ public class MqttListenerImpl implements MqttListener {
         }
     }
 
-    protected final synchronized Mqtt5ReactorClient getClient() {
+    protected final Mqtt5ReactorClient getClient() {
 
         if (client != null) {
             return client;
@@ -107,20 +107,25 @@ public class MqttListenerImpl implements MqttListener {
             // VT: FIXME: Add authentication
             var stage3 = stage2;
 
-            client = Mqtt5ReactorClient.from(stage3.buildRx());
+            var stage4 = Mqtt5ReactorClient.from(stage3.buildRx());
 
-            client
+            stage4
                     .publishes(MqttGlobalPublishFilter.SUBSCRIBED)
                     .publishOn(Schedulers.newSingle("mqtt-listener-" + getAddress()))
                     .subscribe(this::receive);
 
-            client
+            // This is just the mono, need to wrap it into a pipeline
+            stage4
                     .connect()
                     .doOnSuccess(ack -> logger.info("{}: connected: {}", getAddress(), ack))
                     .doOnError(error -> {
                         throw new IllegalStateException("Can't connect to " + getAddress(), error);
                     })
-                    .subscribe();
+
+                    // VT: FIXME: This is where the race condition breaking everything is happening - subscribe() leaves the current thread, and block() can't be used here
+                    .subscribe(ack -> logger.info("{}: ack={}", getAddress(), ack));
+
+            client = stage4;
 
             return client;
 
