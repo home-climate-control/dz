@@ -154,6 +154,17 @@ public class MqttListenerImpl implements MqttListener {
         }
     }
 
+    /**
+     * Receive ALL the messages for ALL the topics this listener is subscribed to.
+     *
+     * This is the way {@link Mqtt5ReactorClient#publishes(MqttGlobalPublishFilter)} is implemented - the only ways to receive individual topic fluxes are
+     * either to create multiple clients (out of the question, dozens of connections at play here), or
+     * to filter topics inside manually. Current implementation of {@link #createFlux(ConnectionKey)} is doing that, clumsily.
+     *
+     * Looks like this approach needs to be scrapped.
+     *
+     * @param message Incoming message.
+     */
     private void receive(Mqtt5Publish message) {
         logger.trace("{}: receive: {} payload={}", getAddress(), message, new String(message.getPayloadAsBytes()));
         receiveSink.tryEmitNext(message);
