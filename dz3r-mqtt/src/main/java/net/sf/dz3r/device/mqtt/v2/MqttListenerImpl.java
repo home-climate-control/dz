@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 
 import static org.apache.logging.log4j.Level.DEBUG;
 
@@ -114,21 +115,41 @@ public class MqttListenerImpl implements MqttListener {
                     .publishOn(Schedulers.newSingle("mqtt-listener-" + getAddress()))
                     .subscribe(this::receive);
 
+            // VT: FIXME: Hack. Ugly. Remove.
+            var gate = new CountDownLatch(1);
+
+            logger.debug("{}: connecting...", getAddress());
+
             // This is just the mono, need to wrap it into a pipeline
             stage4
                     .connect()
-                    .doOnSuccess(ack -> logger.info("{}: connected: {}", getAddress(), ack))
+                    .doOnSuccess(ack -> logger.debug("{}: connected: {}", getAddress(), ack))
                     .doOnError(error -> {
                         throw new IllegalStateException("Can't connect to " + getAddress(), error);
                     })
 
+                    // VT: FIXME: An extremely ugly, but working hack to avoid transforming the whole call into a Mono right now (there's bigger fish to fry).
+
+                    // This breaks the whole reactive model and is only tolerated here now because it happens once at startup.
+                    // Still, need to get rid of this (as well as the 'synchronized' keyword on this method) and replace them
+                    // with a lockless solution.
+                    .doOnSuccess(ignored -> gate.countDown())
+
                     // VT: FIXME: This is where the race condition breaking everything is happening - subscribe() leaves the current thread, and block() can't be used here
                     .subscribe(ack -> logger.info("{}: ack={}", getAddress(), ack));
+
+            logger.debug("{}: awaiting at the gate...", getAddress());
+
+            gate.await();
+
+            logger.debug("{}: past the gate", getAddress());
 
             client = stage4;
 
             return client;
 
+        } catch (InterruptedException ex) {
+            throw new IllegalStateException("We're screwed on " + getAddress(), ex);
         } finally {
             m.close();
             ThreadContext.pop();
