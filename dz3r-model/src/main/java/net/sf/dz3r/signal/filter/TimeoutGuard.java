@@ -78,6 +78,8 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
                 var now = Instant.now();
                 var leftToWait = timeout.minus(Duration.between(lastSeenAt, now));
 
+                logger.trace("{}: leftToWait={}, inTimeout={}, repeat={}", marker, leftToWait, inTimeout, repeat);
+
                 if ((leftToWait.toMillis() <= 0) && (!inTimeout || repeat)) {
                     generateTimeoutSignal(now);
                 }
