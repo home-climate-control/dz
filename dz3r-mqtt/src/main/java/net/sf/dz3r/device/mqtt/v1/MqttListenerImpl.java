@@ -252,6 +252,7 @@ public class MqttListenerImpl implements MqttListener {
                         // subscribe() on the flux - we didn't even return it yet
 
                         // VT: FIXME: Buffer the last value received? May want to log this once per runtime, lots of chatter here
+                        // VT: NOTE: This is the root cause for https://github.com/home-climate-control/dz/issues/296; will be handled elsewhere
 
                         logger.debug("no subscriptions to '{}/#' yet, dropped: {} {}", topic, p.getTopic(), new String(p.getPayloadAsBytes(), StandardCharsets.UTF_8));
                         return;

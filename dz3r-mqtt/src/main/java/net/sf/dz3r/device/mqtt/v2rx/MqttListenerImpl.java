@@ -4,13 +4,10 @@ import com.hivemq.client.mqtt.MqttGlobalPublishFilter;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
 import com.hivemq.client.mqtt.mqtt5.reactor.Mqtt5ReactorClient;
-import net.sf.dz3r.common.HCCObjects;
-import net.sf.dz3r.device.mqtt.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
+import net.sf.dz3r.device.mqtt.v2.AbstractMqttListener;
 import net.sf.dz3r.instrumentation.Marker;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
@@ -31,21 +28,14 @@ import static org.apache.logging.log4j.Level.DEBUG;
  * This class is using
  * <a href="https://www.hivemq.com/article/mqtt-client-api/the-hivemq-mqtt-client-library-for-java-and-its-reactive-api-flavor/">HiveMQ MQTT Reactive API</a>.
  *
+ * There is a contradiction between the way the reactive API works (one flux for all subscriptions on a connection),
+ * and HCC design goals (minimize the number of active connections). This can't be fixed; there will be several comments below
+ * marked with {@code ***} to explain the problem.
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class MqttListenerImpl implements MqttListener {
+public class MqttListenerImpl extends AbstractMqttListener {
 
-    public static final Duration DEFAULT_CACHE_AGE = Duration.ofSeconds(30);
-
-    protected final Logger logger = LogManager.getLogger();
-
-    public final MqttEndpoint address;
-    private final String username;
-    private final String password;
-    public final boolean autoReconnect;
-    public final Duration cacheFor;
-
-    private boolean closed = false;
 
     private Mqtt5ReactorClient client;
 
@@ -67,22 +57,11 @@ public class MqttListenerImpl implements MqttListener {
     }
 
     public MqttListenerImpl(MqttEndpoint address, String username, String password, boolean autoReconnect, Duration cacheFor) {
-
-        this.address = HCCObjects.requireNonNull(address, "address can't be null");
-        this.username = username;
-        this.password = password;
-        this.autoReconnect = autoReconnect;
-        this.cacheFor = HCCObjects.requireNonNull(cacheFor, "cacheFor can't be null");
+        super(address, username, password, autoReconnect, cacheFor);
 
         receiveFlux = receiveSink.asFlux().cache(cacheFor);
 
         logger.info("created endpoint={}, autoReconnect={}, cacheFor={}", address, autoReconnect, cacheFor);
-    }
-
-    private void checkClosed() {
-        if (closed) {
-            throw new IllegalStateException("Already close()d");
-        }
     }
 
     protected final Mqtt5ReactorClient getClient() {
@@ -119,12 +98,16 @@ public class MqttListenerImpl implements MqttListener {
             stage4
                     .publishes(MqttGlobalPublishFilter.SUBSCRIBED)
                     .publishOn(Schedulers.newSingle("mqtt-listener-" + getAddress()))
+
+                    // *** Part 1: one flux for all subscriptions per connection. No way to get one flux per subscription.
                     .subscribe(this::receive);
 
             // VT: FIXME: Hack. Ugly. Remove.
             var gate = new CountDownLatch(1);
 
-            logger.debug("{}: connecting...", getAddress());
+            logger.info("Connecting to {}{}",
+                    address,
+                    autoReconnect ? " (disable reconnect if this gets stuck)" : "");
 
             // This is just the mono, need to wrap it into a pipeline
             stage4
@@ -203,7 +186,7 @@ public class MqttListenerImpl implements MqttListener {
 
     private Flux<MqttSignal> createFlux(ConnectionKey key) {
 
-        var topicFilter = key.topic + (key.includeSubtopics ? "/#" : "");
+        var topicFilter = key.topic() + (key.includeSubtopics() ? "/#" : "");
 
         Marker m = new Marker("subscribe " + key);
 
@@ -221,6 +204,10 @@ public class MqttListenerImpl implements MqttListener {
 
         return receiveFlux
                 .publishOn(Schedulers.boundedElastic())
+
+                // *** Part 2: here, we're forced to make ALL subscription fluxes to filter the single incoming stream,
+                // instead of having this done inside the MQTT client where it can be done efficiently.
+                // See v1 or v2async implementations for details.
                 .filter(message -> {
                     var topic = message.getTopic().toString();
                     var pass = key.includeSubtopics()
@@ -230,27 +217,9 @@ public class MqttListenerImpl implements MqttListener {
 
                     return pass;
                 })
+
                 .doOnNext(message -> logger.trace("pass: {}", message))
                 .map(message -> new MqttSignal(message.getTopic().toString(), new String(message.getPayloadAsBytes())));
     }
 
-    /**
-     * Close and mark unusable.
-     */
-    @Override
-    public void close() throws Exception {
-        closed = true;
-    }
-
-    @Override
-    public MqttEndpoint getAddress() {
-        return address;
-    }
-
-    private record ConnectionKey(
-            String topic,
-            boolean includeSubtopics
-    ) {
-
-    }
 }
