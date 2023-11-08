@@ -3,7 +3,7 @@ package net.sf.dz3r.runtime.config.mqtt;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
-import net.sf.dz3r.device.mqtt.v2rx.MqttAdapterImpl;
+import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
@@ -102,6 +102,8 @@ public class MqttConfigurationParser extends ConfigurationContextAware {
                     });
 
             // Step 3: for all the brokers, collect all their devices
+
+            // VT: FIXME: use zip() here
 
             mqttConfigs
                     .doOnNext(MqttDeviceResolver::getSensorConfigs)

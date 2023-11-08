@@ -4,7 +4,7 @@ import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.mqtt.MqttListener;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
-import net.sf.dz3r.device.mqtt.v2rx.MqttListenerImpl;
+import net.sf.dz3r.device.mqtt.v2async.MqttListenerImpl;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
@@ -12,6 +12,8 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.time.Instant;
+
+import static net.sf.dz3r.device.mqtt.v2.AbstractMqttListener.DEFAULT_CACHE_AGE;
 
 /**
  * <a href="https://zigbee2mqtt.io">Zigbee2MQTT</a> sensor stream cold publisher.
@@ -34,7 +36,7 @@ public class Z2MListener implements Addressable<MqttEndpoint>, SignalSource<Stri
                        boolean reconnect,
                        String mqttRootTopicSub) {
 
-        mqttListener = new MqttListenerImpl(new MqttEndpoint(host, port), username, password, reconnect);
+        mqttListener = new MqttListenerImpl(new MqttEndpoint(host, port), username, password, reconnect, DEFAULT_CACHE_AGE);
         this.mqttRootTopicSub = mqttRootTopicSub;
     }
 

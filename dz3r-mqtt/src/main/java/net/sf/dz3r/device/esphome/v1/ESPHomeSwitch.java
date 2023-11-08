@@ -5,12 +5,14 @@ import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
-import net.sf.dz3r.device.mqtt.v2rx.MqttAdapterImpl;
+import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
 import net.sf.dz3r.signal.Signal;
 import reactor.core.scheduler.Scheduler;
 
 import java.io.IOException;
 import java.time.Instant;
+
+import static net.sf.dz3r.device.mqtt.v2.AbstractMqttListener.DEFAULT_CACHE_AGE;
 
 /**
  * Implementation to control <a href="https://esphome.io/components/switch/">ESPHome Switch Component</a> via
@@ -50,7 +52,7 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
      *
      * @param deviceRootTopic Switch root topic. See the doc link at the top for the configuration reference.
      *
-     * @deprecated Use {@link ESPHomeSwitch#ESPHomeSwitch(MqttAdapterImpl, String, boolean, Scheduler)} instead.
+     * @deprecated Use {@link ESPHomeSwitch#ESPHomeSwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public ESPHomeSwitch(String host, int port,
@@ -68,7 +70,7 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
      *
      * @param deviceRootTopic Switch root topic. See the doc link at the top for the configuration reference.
      *
-     * @deprecated Use {@link ESPHomeSwitch#ESPHomeSwitch(MqttAdapterImpl, String, boolean, Scheduler)} instead.
+     * @deprecated Use {@link ESPHomeSwitch#ESPHomeSwitch(MqttAdapter, String, boolean, Scheduler)} instead.
      */
     @Deprecated(forRemoval = false)
     public ESPHomeSwitch(String host, int port,
@@ -80,7 +82,7 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
 
         // VT: NOTE: ESPHome appears to not suffer from buffer overruns like Zigbee and Z-Wave do,
         // so not providing the delay
-        this(new MqttAdapterImpl(new MqttEndpoint(host, port), username, password, reconnect),
+        this(new MqttAdapterImpl(new MqttEndpoint(host, port), username, password, reconnect, DEFAULT_CACHE_AGE),
                 deviceRootTopic,
                 optimistic,
                 scheduler);

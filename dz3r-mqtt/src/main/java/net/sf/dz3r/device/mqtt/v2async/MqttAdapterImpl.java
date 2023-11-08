@@ -22,6 +22,10 @@ public class MqttAdapterImpl extends MqttListenerImpl implements MqttAdapter {
         super(address);
     }
 
+    public MqttAdapterImpl(MqttEndpoint address, String username, String password, boolean autoReconnect) {
+        super(address, username, password, autoReconnect, DEFAULT_CACHE_AGE);
+    }
+
     public MqttAdapterImpl(MqttEndpoint address, String username, String password, boolean autoReconnect, Duration cacheFor) {
         super(address, username, password, autoReconnect, cacheFor);
     }
