@@ -122,7 +122,7 @@ public class MqttListenerImpl extends AbstractMqttListener {
     /**
      * Get the client, or {@link Mono#error(Throwable) fail}.
      */
-    protected synchronized Mono<Mqtt5AsyncClient> getClient() {
+    protected Mono<Mqtt5AsyncClient> getClient() {
 
         if (clientAccessCount.getAndIncrement() == 0) {
             new Thread(this::createClient).start();
