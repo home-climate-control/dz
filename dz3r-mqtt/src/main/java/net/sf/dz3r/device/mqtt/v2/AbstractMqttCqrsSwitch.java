@@ -2,7 +2,7 @@ package net.sf.dz3r.device.mqtt.v2;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.device.actuator.CqrsSwitch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.Level;

@@ -1,7 +1,7 @@
 package net.sf.dz3r.runtime.config.mqtt;
 
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.zwave.v1.ZWaveSensorListener;
 import net.sf.dz3r.device.zwave.v2.ZWaveCqrsBinarySwitch;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig;

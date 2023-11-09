@@ -2,7 +2,7 @@ package net.sf.dz3r.device.z2m.v2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import org.apache.logging.log4j.ThreadContext;

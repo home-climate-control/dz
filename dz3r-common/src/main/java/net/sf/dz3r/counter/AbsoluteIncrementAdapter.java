@@ -31,7 +31,7 @@ public abstract class AbsoluteIncrementAdapter<T extends Comparable<T>> {
         return snapshots.flatMap(this::convert);
     }
 
-    private synchronized Flux<T> convert(T snapshot) {
+    private Flux<T> convert(T snapshot) {
 
         if (lastKnown == null) {
 

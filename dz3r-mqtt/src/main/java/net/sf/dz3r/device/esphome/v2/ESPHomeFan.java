@@ -3,7 +3,7 @@ package net.sf.dz3r.device.esphome.v2;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsDevice;
 import net.sf.dz3r.instrumentation.Marker;
@@ -67,7 +67,7 @@ public class ESPHomeFan extends AbstractMqttCqrsDevice<Command, OutputState> imp
     @Override
     protected void parseState(MqttSignal message) {
 
-        // VT: NOTE: MqttAdapter has already logged the message at TRACE level
+        // VT: NOTE: MqttAdapterImpl has already logged the message at TRACE level
 
         tryParseState(message);
         tryParseSpeed(message);

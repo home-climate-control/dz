@@ -3,7 +3,7 @@ package net.sf.dz3r.device.mqtt.v2;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.device.actuator.AbstractCqrsDevice;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.signal.Signal;
 import reactor.core.Disposable;

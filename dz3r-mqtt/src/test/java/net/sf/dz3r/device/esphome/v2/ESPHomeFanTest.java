@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.esphome.v2;
 
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
+import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ class ESPHomeFanTest {
 
         assertThatCode(() -> {
 
-            var adapter = new MqttAdapter(new MqttEndpoint(MQTT_BROKER));
+            var adapter = new MqttAdapterImpl(new MqttEndpoint(MQTT_BROKER));
             var fan = new ESPHomeFan(
                     "a6",
                     Clock.systemUTC(),

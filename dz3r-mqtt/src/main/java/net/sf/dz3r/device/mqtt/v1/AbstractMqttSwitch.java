@@ -1,6 +1,7 @@
 package net.sf.dz3r.device.mqtt.v1;
 
 import net.sf.dz3r.device.actuator.AbstractSwitch;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;

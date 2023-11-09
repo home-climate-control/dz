@@ -3,7 +3,7 @@ package net.sf.dz3r.runtime.config;
 import net.sf.dz3r.device.actuator.CqrsSwitch;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
