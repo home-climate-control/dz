@@ -138,7 +138,7 @@ public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
         // A valid situation for the whole system which makes no sense for this particular application
 
         if (command.demand == null && command.fanSpeed == null) {
-            logger.warn("{}: mode only command, ignored: {}", getAddress(), command);
+            logger.debug("{}: mode only command, ignored: {}", getAddress(), command);
             return true;
         }
 

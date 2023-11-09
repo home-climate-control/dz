@@ -99,7 +99,7 @@ public abstract class MqttDeviceResolver<A extends MqttGateway, L extends Signal
         var t = Optional
                 .ofNullable(cf.timeout())
                 .orElseGet(() -> {
-                    logger.warn("{}: default timeout of {} is used", cf, getDefaultTimeout());
+                    logger.info("{}: default timeout of {} is used", cf, getDefaultTimeout());
                     return getDefaultTimeout();
                 });
 

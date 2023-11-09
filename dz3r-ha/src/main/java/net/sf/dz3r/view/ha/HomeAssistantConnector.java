@@ -170,7 +170,7 @@ public class HomeAssistantConnector implements Connector {
             var exposedName = originalName.replace(" ", "-");
 
             if (!exposedName.equals(originalName)) {
-                logger.warn("adjusted to {} to conform to HA naming standards", exposedName);
+                logger.debug("adjusted to {} to conform to HA naming standards", exposedName);
             }
 
             // ... but we're not going to fix anything beyond a stray space.
