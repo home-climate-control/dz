@@ -43,8 +43,7 @@ public class ConfigurationParser {
             // Not going anywhere without it, it's a key in too many places
             HCCObjects.requireNonNull(
                     source.instance(),
-                    // VT: FIXME: Replace this with the actual link to home-climate-control.md#instance when the branch is merged
-                    "home-climate-control.instance must be provided. See https://github.com/home-climate-control/dz/wiki/Configuration for details");
+                    "home-climate-control.instance must be provided. See https://github.com/home-climate-control/dz/tree/master/docs/configuration/index.md for details");
 
             var ctx = new ConfigurationContext();
 
