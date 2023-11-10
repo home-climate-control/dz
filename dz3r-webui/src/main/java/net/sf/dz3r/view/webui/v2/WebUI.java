@@ -21,8 +21,11 @@ import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceInfo;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
@@ -42,7 +45,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
  */
-public class WebUI {
+public class WebUI implements AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -52,6 +55,8 @@ public class WebUI {
     private final Set<UnitDirector> initSet = new HashSet<>();
 
     private final Map<UnitDirector, UnitObserver> unit2observer = new TreeMap<>();
+
+    private JmDNS jmDNS;
 
     public WebUI(int port,
                  String interfaces,
@@ -95,10 +100,51 @@ public class WebUI {
 
             logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
 
+            advertise();
+
             disposableServer.onDispose().block(); // NOSONAR Acknowledged, ignored
 
             logger.info("done");
 
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void advertise() {
+        ThreadContext.push("mdns-advertise");
+        try {
+
+            var localhost = InetAddress.getLocalHost();
+            var name = localhost.getHostName();
+            var canonical = localhost.getCanonicalHostName();
+            var fqdn = InetAddress.getByName(canonical);
+
+            // Old bug
+            final var local11 = "127.0.1.1";
+
+            if (fqdn.getHostAddress().equals(local11)) {
+                logger.error("Check /etc/hosts for {}, it likely breaks mDNS resolution", local11);
+            }
+
+            logger.debug("fqdn={}/{}", canonical, fqdn);
+
+            jmDNS = JmDNS.create(fqdn);
+
+            var serviceInfo = ServiceInfo.create(
+                    "_http._tcp.local.",
+                    "HCC WebUI @" + name,
+                    config.port,
+                    "path=/" // http://www.dns-sd.org/txtrecords.html#http
+            );
+
+            jmDNS.registerService(serviceInfo);
+
+            logger.debug("mDNS registered: {}", serviceInfo);
+
+
+        } catch (IOException ex) {
+            logger.error("failed to advertise over mDNS, ignored", ex);
         } finally {
             ThreadContext.pop();
         }
@@ -297,6 +343,14 @@ public class WebUI {
             return ok().contentType(MediaType.APPLICATION_JSON).body(Flux.fromIterable(GitProperties.get().entrySet()), Object.class);
         } catch (IOException ex) {
             throw new IllegalStateException("This shouldn't have happened", ex);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (jmDNS != null) {
+            jmDNS.unregisterAllServices();
+            jmDNS.close();
         }
     }
 
