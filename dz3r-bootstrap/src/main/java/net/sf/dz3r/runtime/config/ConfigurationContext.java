@@ -12,6 +12,7 @@ import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
+import net.sf.dz3r.view.webui.v2.WebUI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -39,4 +40,5 @@ public class ConfigurationContext {
     public final EntityProvider<HvacDevice> hvacDevices = new EntityProvider<>("HVAC device");
     public final EntityProvider<UnitController> units = new EntityProvider<>("unit controller");
     public final EntityProvider<UnitDirector> directors = new EntityProvider<>("unit director");
+    public final EntityProvider<WebUI> webUI = new EntityProvider<>("Web UI");
 }
