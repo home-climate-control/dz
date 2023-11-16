@@ -135,11 +135,21 @@ public class WebUI implements AutoCloseable {
 
             jmDNS = JmDNS.create(fqdn);
 
+            var propMap = Map.of(
+                    "path", META_PATH, // http://www.dns-sd.org/txtrecords.html#http
+                    "protocol-version", Version.PROTOCOL_VERSION,
+                    // VT: FIXME: Need to make this a default and provide an option to configure
+                    "duplex", Integer.toString(config.port + 1)
+            );
+
             var serviceInfo = ServiceInfo.create(
                     "_http._tcp.local.",
                     "HCC WebUI @" + name,
+                    "",
                     config.port,
-                    "path=" + META_PATH // http://www.dns-sd.org/txtrecords.html#http
+                    0,
+                    0,
+                    propMap
             );
 
             jmDNS.registerService(serviceInfo);
