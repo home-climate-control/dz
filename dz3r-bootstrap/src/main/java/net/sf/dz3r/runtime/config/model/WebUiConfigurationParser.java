@@ -36,7 +36,7 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
                 .collect(Collectors.toSet())
                 .block();
 
-        var webUI = new WebUI(port, interfaces, directors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
+        var webUI = new WebUI(port, interfaces, context.endpoint.getFlux().blockFirst().getValue(), directors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
 
         // Needs to be resolvable to stop mDNS advertisements at the end
         context.webUI.register("web-ui", webUI);

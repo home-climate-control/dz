@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.webui.v2;
 
+import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.runtime.GitProperties;
@@ -60,11 +61,12 @@ public class WebUI implements AutoCloseable {
 
     public WebUI(int port,
                  String interfaces,
+                 EndpointMeta endpointMeta,
                  Set<UnitDirector> directors,
                  InstrumentCluster ic,
                  TemperatureUnit temperatureUnit) {
 
-        this.config = new Config(port, interfaces, directors, ic, temperatureUnit);
+        this.config = new Config(port, interfaces, endpointMeta, directors, ic, temperatureUnit);
 
         this.initSet.addAll(directors);
 
@@ -167,14 +169,35 @@ public class WebUI implements AutoCloseable {
     }
 
     /**
-     * Response handler for the {@code /} HTTP request.
+     * Advertise the capabilities ({@code HTTP GET /} request).
      *
-     * @param rq Request object.
+     * @param rq ignored.
      *
-     * @return Whole system representation.
+     * @return Whole system representation ({@link EndpointMeta} as JSON).
      */
     public Mono<ServerResponse> getDashboard(ServerRequest rq) {
-        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
+        logger.info("GET /");
+
+        return ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Flux.just(config.endpointMeta), EndpointMeta.class);
+    }
+
+    /**
+     * Advertise the capabilities.
+     *
+     * @param rq ignored.
+     *
+     * @return {@link EndpointMeta} as JSON.
+     */
+    public Mono<ServerResponse> getMeta(ServerRequest rq) {
+        logger.info("GET /zones");
+
+        return ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Flux.fromIterable(unit2observer.values())
+                                .flatMap(UnitObserver::getZones),
+                        EndpointMeta.class);
     }
 
     /**
@@ -371,6 +394,7 @@ public class WebUI implements AutoCloseable {
     public record Config(
             int port,
             String interfaces,
+            EndpointMeta endpointMeta,
             Set<UnitDirector> directors,
             InstrumentCluster ic,
             TemperatureUnit initialUnit
