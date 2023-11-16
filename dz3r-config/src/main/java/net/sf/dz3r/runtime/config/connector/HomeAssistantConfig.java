@@ -2,6 +2,7 @@ package net.sf.dz3r.runtime.config.connector;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import net.sf.dz3r.runtime.config.Identifiable;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerConfig;
 
 import java.util.Set;
@@ -28,5 +29,5 @@ public record HomeAssistantConfig(
         MqttBrokerConfig broker,
         String discoveryPrefix,
         Set<String> zones
-) implements HomeAssistantConfigParser {
+) implements HomeAssistantConfigParser, Identifiable {
 }

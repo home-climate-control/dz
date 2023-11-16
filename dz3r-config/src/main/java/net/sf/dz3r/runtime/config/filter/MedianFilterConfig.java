@@ -1,5 +1,7 @@
 package net.sf.dz3r.runtime.config.filter;
 
+import net.sf.dz3r.runtime.config.Identifiable;
+
 /**
  * Median signal filter configuration.
  *
@@ -11,5 +13,5 @@ public record MedianFilterConfig(
         String id,
         Integer depth,
         String source
-) {
+) implements Identifiable {
 }

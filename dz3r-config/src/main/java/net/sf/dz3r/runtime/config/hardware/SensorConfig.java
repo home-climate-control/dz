@@ -1,5 +1,7 @@
 package net.sf.dz3r.runtime.config.hardware;
 
+import net.sf.dz3r.runtime.config.Identifiable;
+
 import java.time.Duration;
 
 /**
@@ -17,5 +19,5 @@ public record SensorConfig(
         String measurement,
         Duration step,
         Duration timeout
-) {
+) implements Identifiable {
 }

@@ -9,14 +9,14 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
  * This data structure reflects the HCC configuration in a way suitable for external clients to build the UI
  * and start pulling the right data feeds.
  *
- * @param id Instance ID.
+ * @param id Instance ID, taken from {@code HccRawConfig#instance}.
  * @param simple Simple UI metadata.
  * @param full Full control metadata.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
-public record HccInstanceMeta(
+public record InstanceMeta(
         String id,
         SimpleClientMeta simple,
         InstrumentClusterMeta full

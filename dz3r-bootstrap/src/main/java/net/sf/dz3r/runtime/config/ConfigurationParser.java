@@ -1,5 +1,11 @@
 package net.sf.dz3r.runtime.config;
 
+import com.homeclimatecontrol.hcc.meta.EndpointMeta;
+import com.homeclimatecontrol.hcc.meta.HvacDeviceMeta;
+import com.homeclimatecontrol.hcc.meta.InstanceMeta;
+import com.homeclimatecontrol.hcc.meta.InstrumentClusterMeta;
+import com.homeclimatecontrol.hcc.meta.SimpleClientMeta;
+import com.homeclimatecontrol.hcc.meta.ZoneMeta;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.instrumentation.Marker;
@@ -7,11 +13,14 @@ import net.sf.dz3r.runtime.config.connector.ConnectorConfig;
 import net.sf.dz3r.runtime.config.connector.ConnectorConfigurationParser;
 import net.sf.dz3r.runtime.config.connector.HomeAssistantConfig;
 import net.sf.dz3r.runtime.config.filter.FilterConfigurationParser;
+import net.sf.dz3r.runtime.config.hardware.GenericHvacDeviceConfig;
 import net.sf.dz3r.runtime.config.hardware.HvacConfigurationParser;
+import net.sf.dz3r.runtime.config.hardware.HvacDeviceConfig;
 import net.sf.dz3r.runtime.config.hardware.UnitConfigurationParser;
 import net.sf.dz3r.runtime.config.model.ConsoleConfigurationParser;
 import net.sf.dz3r.runtime.config.model.DirectorConfigurationParser;
 import net.sf.dz3r.runtime.config.model.WebUiConfigurationParser;
+import net.sf.dz3r.runtime.config.model.ZoneConfig;
 import net.sf.dz3r.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3r.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3r.runtime.config.onewire.OnewireConfigurationParser;
@@ -22,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -133,7 +143,9 @@ public class ConfigurationParser {
                     ctx.collectors.getFlux(),
                     ctx.hvacDevices.getFlux());
 
-            // Need directors resolved by now
+            ctx.endpoint.register("endpoint", renderMeta(source));
+
+            // Need directors and the meta resolved by now
 
             var webUi = new WebUiConfigurationParser(ctx, ic).parse(source.webUi());
             m.checkpoint("configured WebUI");
@@ -151,6 +163,71 @@ public class ConfigurationParser {
         } finally {
             m.close();
         }
+    }
+
+    private EndpointMeta renderMeta(HccRawConfig source) {
+
+        var zones = Flux.fromIterable(source.zones())
+                .map(this::renderZoneMeta)
+                .collect(Collectors.toSet())
+                .block();
+
+        var devices = Flux.fromIterable(source.hvac())
+                .flatMap(this::renderHvacMeta)
+                .collect(Collectors.toSet())
+                .block();
+
+        return new EndpointMeta(
+                EndpointMeta.Type.DIRECT,
+                new InstanceMeta(
+                        source.instance(),
+                        new SimpleClientMeta(
+                                zones,
+                                devices
+                        ),
+                        new InstrumentClusterMeta()
+                )
+        );
+    }
+
+    private ZoneMeta renderZoneMeta(ZoneConfig source) {
+        return new ZoneMeta(
+                source.id(),
+                source.name(),
+                source.economizer() != null
+        );
+    }
+
+    private Flux<HvacDeviceMeta> renderHvacMeta(HvacDeviceConfig source) {
+
+        var result = new HashSet<HvacDeviceMeta>();
+
+        for (var s: Optional.ofNullable(source.switchable()).orElse(Set.of())) {
+            result.add(renderHvacDeviceMeta(s));
+        }
+
+        for (var s: Optional.ofNullable(source.heatpumpHat()).orElse(Set.of())) {
+            result.add(renderHvacDeviceMeta(s));
+        }
+
+        for (var s: Optional.ofNullable(source.heatpump()).orElse(Set.of())) {
+            result.add(renderHvacDeviceMeta(s));
+        }
+
+        for (var s: Optional.ofNullable(source.variable()).orElse(Set.of())) {
+            result.add(renderHvacDeviceMeta(s));
+        }
+
+        return Flux.fromIterable(result);
+    }
+
+    private HvacDeviceMeta renderHvacDeviceMeta(GenericHvacDeviceConfig source) {
+
+        return new HvacDeviceMeta(
+                source.id(),
+                HvacDeviceMeta.Type.SWITCHABLE,
+                source.filter() != null
+        );
     }
 
     private Set<HomeAssistantConfig> getHomeAssistantConfigs(HccRawConfig source) {

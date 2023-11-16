@@ -12,6 +12,7 @@ val jacksonVersion: String by project
 
 dependencies {
 
+    implementation(project(":hcc-data-source-api"))
     api(project(":dz3r-common"))
     api(project(":dz3r-config"))
     implementation(project(":dz3r-director"))

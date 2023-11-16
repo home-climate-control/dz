@@ -2,6 +2,7 @@ package net.sf.dz3r.runtime.config.hardware;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import net.sf.dz3r.runtime.config.Identifiable;
 
 import java.time.Duration;
 
@@ -23,5 +24,5 @@ public record SwitchConfig(
         Duration heartbeat,
         Duration pace,
         String availabilityTopic
-) {
+) implements Identifiable {
 }

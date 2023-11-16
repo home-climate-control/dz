@@ -16,5 +16,5 @@ public record HeatpumpConfig(
         Boolean switchFanReverse,
         Duration modeChangeDelay,
         FilterConfig filter
-) {
+) implements GenericHvacDeviceConfig {
 }

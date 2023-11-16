@@ -1,5 +1,7 @@
 package net.sf.dz3r.runtime.config.filter;
 
+import net.sf.dz3r.runtime.config.Identifiable;
+
 import java.util.Set;
 
 /**
@@ -11,5 +13,5 @@ import java.util.Set;
 public record MedianSetFilterConfig(
         String id,
         Set<String> sources
-) {
+) implements Identifiable {
 }

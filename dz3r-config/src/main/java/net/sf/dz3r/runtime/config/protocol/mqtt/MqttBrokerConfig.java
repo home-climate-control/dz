@@ -2,6 +2,7 @@ package net.sf.dz3r.runtime.config.protocol.mqtt;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import net.sf.dz3r.runtime.config.Identifiable;
 
 /**
  * MQTT Broker endpoint configuration.
@@ -20,5 +21,5 @@ public record MqttBrokerConfig(
         String password,
         String rootTopic,
         boolean autoReconnect
-) implements MqttBrokerSpec {
+) implements MqttBrokerSpec, Identifiable {
 }

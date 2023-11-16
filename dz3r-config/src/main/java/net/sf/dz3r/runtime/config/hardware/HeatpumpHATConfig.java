@@ -6,5 +6,5 @@ public record HeatpumpHATConfig(
         String id,
         Duration modeChangeDelay,
         FilterConfig filter
-) {
+) implements GenericHvacDeviceConfig {
 }

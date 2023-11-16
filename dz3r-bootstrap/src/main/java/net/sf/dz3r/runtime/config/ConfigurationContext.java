@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config;
 
+import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import net.sf.dz3r.device.actuator.CqrsSwitch;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
@@ -41,4 +42,5 @@ public class ConfigurationContext {
     public final EntityProvider<UnitController> units = new EntityProvider<>("unit controller");
     public final EntityProvider<UnitDirector> directors = new EntityProvider<>("unit director");
     public final EntityProvider<WebUI> webUI = new EntityProvider<>("Web UI");
+    public final EntityProvider<EndpointMeta> endpoint = new EntityProvider<>("endpoint");
 }

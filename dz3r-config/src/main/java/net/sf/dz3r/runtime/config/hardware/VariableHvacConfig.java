@@ -11,5 +11,5 @@ public record VariableHvacConfig(
         Double maxPower,
         Integer bandCount,
         FilterConfig filter
-) {
+) implements GenericHvacDeviceConfig {
 }
