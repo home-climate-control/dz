@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.webui.v2;
 
+import com.homeclimatecontrol.hcc.Version;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.UnitDirector;
@@ -39,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static net.sf.dz3r.view.webui.v2.RoutingConfiguration.META_PATH;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 /**
@@ -137,7 +139,7 @@ public class WebUI implements AutoCloseable {
                     "_http._tcp.local.",
                     "HCC WebUI @" + name,
                     config.port,
-                    "path=/" // http://www.dns-sd.org/txtrecords.html#http
+                    "path=" + META_PATH // http://www.dns-sd.org/txtrecords.html#http
             );
 
             jmDNS.registerService(serviceInfo);
@@ -175,29 +177,12 @@ public class WebUI implements AutoCloseable {
      *
      * @return Whole system representation ({@link EndpointMeta} as JSON).
      */
-    public Mono<ServerResponse> getDashboard(ServerRequest rq) {
-        logger.info("GET /");
+    public Mono<ServerResponse> getMeta(ServerRequest rq) {
+        logger.info("GET ? " + Version.PROTOCOL_VERSION);
 
         return ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Flux.just(config.endpointMeta), EndpointMeta.class);
-    }
-
-    /**
-     * Advertise the capabilities.
-     *
-     * @param rq ignored.
-     *
-     * @return {@link EndpointMeta} as JSON.
-     */
-    public Mono<ServerResponse> getMeta(ServerRequest rq) {
-        logger.info("GET /zones");
-
-        return ok()
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Flux.fromIterable(unit2observer.values())
-                                .flatMap(UnitObserver::getZones),
-                        EndpointMeta.class);
     }
 
     /**

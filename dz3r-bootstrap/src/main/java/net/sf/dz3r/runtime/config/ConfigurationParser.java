@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config;
 
+import com.homeclimatecontrol.hcc.Version;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import com.homeclimatecontrol.hcc.meta.HvacDeviceMeta;
 import com.homeclimatecontrol.hcc.meta.InstanceMeta;
@@ -178,6 +179,7 @@ public class ConfigurationParser {
                 .block();
 
         return new EndpointMeta(
+                Version.PROTOCOL_VERSION,
                 EndpointMeta.Type.DIRECT,
                 new InstanceMeta(
                         source.instance(),
