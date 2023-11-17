@@ -52,7 +52,8 @@ public class WebUI implements AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
-    public static final int DEFAULT_PORT = 3939;
+    public static final int DEFAULT_PORT_HTTP = 3939;
+    public static final int DEFAULT_PORT_DUPLEX = 3940;
 
     private final Config config;
     private final Set<UnitDirector> initSet = new HashSet<>();
@@ -61,18 +62,19 @@ public class WebUI implements AutoCloseable {
 
     private JmDNS jmDNS;
 
-    public WebUI(int port,
+    public WebUI(int httpPort,
+                 int duplexPort,
                  String interfaces,
                  EndpointMeta endpointMeta,
                  Set<UnitDirector> directors,
                  InstrumentCluster ic,
                  TemperatureUnit temperatureUnit) {
 
-        this.config = new Config(port, interfaces, endpointMeta, directors, ic, temperatureUnit);
+        this.config = new Config(httpPort, duplexPort, interfaces, endpointMeta, directors, ic, temperatureUnit);
 
         this.initSet.addAll(directors);
 
-        logger.info("port: {}", port);
+        logger.info("port: {}", httpPort);
 
         if (directors.isEmpty()) {
             logger.warn("empty init set, only diagnostic URLs will be available");
@@ -99,7 +101,7 @@ public class WebUI implements AutoCloseable {
             var httpHandler = RouterFunctions.toHttpHandler(new RoutingConfiguration().monoRouterFunction(this));
             var adapter = new ReactorHttpHandlerAdapter(httpHandler);
 
-            var server = HttpServer.create().host(config.interfaces).port(config.port);
+            var server = HttpServer.create().host(config.interfaces).port(config.httpPort);
             DisposableServer disposableServer = server.handle(adapter).bind().block();
 
             logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
@@ -138,15 +140,14 @@ public class WebUI implements AutoCloseable {
             var propMap = Map.of(
                     "path", META_PATH, // http://www.dns-sd.org/txtrecords.html#http
                     "protocol-version", Version.PROTOCOL_VERSION,
-                    // VT: FIXME: Need to make this a default and provide an option to configure
-                    "duplex", Integer.toString(config.port + 1)
+                    "duplex", Integer.toString(config.duplexPort)
             );
 
             var serviceInfo = ServiceInfo.create(
                     "_http._tcp.local.",
                     "HCC WebUI @" + name,
                     "",
-                    config.port,
+                    config.httpPort,
                     0,
                     0,
                     propMap
@@ -387,7 +388,8 @@ public class WebUI implements AutoCloseable {
         }
     }
     public record Config(
-            int port,
+            int httpPort,
+            int duplexPort,
             String interfaces,
             EndpointMeta endpointMeta,
             Set<UnitDirector> directors,
