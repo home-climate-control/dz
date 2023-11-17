@@ -7,15 +7,19 @@ Best explained by example:
 
 ```yaml
   web-ui:
-    port: 9999
+    http-port: 6666
+    duplex-port: 7777
     directors:
       - house-unit1
       - house-unit2
       - server-room
 ```
 
-### port
-Port to listen on. Defaults to 3939.
+### http-port
+HTTP port to listen on. Defaults to 3939.
+
+### duplex-port
+Duplex protocol port to listen on. Defaults to 3940.
 
 ### interface
 Interfaces to listen on. Defaults to `0.0.0.0`.

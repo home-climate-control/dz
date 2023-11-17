@@ -11,6 +11,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("org.jmdns:jmdns:$jmdnsVersion")
 
+    implementation(project(":hcc-data-source-api"))
     implementation(project(":dz3r-config"))
     implementation(project(":dz3r-director"))
 }

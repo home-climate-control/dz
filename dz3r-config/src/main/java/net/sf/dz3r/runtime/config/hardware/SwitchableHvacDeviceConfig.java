@@ -10,5 +10,5 @@ public record SwitchableHvacDeviceConfig(
         String switchAddress,
         Boolean switchReverse,
         FilterConfig filter
-) {
+) implements GenericHvacDeviceConfig {
 }

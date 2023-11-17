@@ -40,6 +40,7 @@ include("dz3r-scheduler-gcal-v3")
 include("dz3r-swing")
 include("dz3r-webui")
 include("dz3r-xbee")
+include("hcc-data-source-api")
 
 // Run options
 

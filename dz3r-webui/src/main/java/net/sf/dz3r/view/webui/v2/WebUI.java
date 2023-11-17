@@ -1,5 +1,7 @@
 package net.sf.dz3r.view.webui.v2;
 
+import com.homeclimatecontrol.hcc.Version;
+import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.runtime.GitProperties;
@@ -38,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static net.sf.dz3r.view.webui.v2.RoutingConfiguration.META_PATH;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 /**
@@ -49,7 +52,8 @@ public class WebUI implements AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
-    public static final int DEFAULT_PORT = 3939;
+    public static final int DEFAULT_PORT_HTTP = 3939;
+    public static final int DEFAULT_PORT_DUPLEX = 3940;
 
     private final Config config;
     private final Set<UnitDirector> initSet = new HashSet<>();
@@ -58,17 +62,19 @@ public class WebUI implements AutoCloseable {
 
     private JmDNS jmDNS;
 
-    public WebUI(int port,
+    public WebUI(int httpPort,
+                 int duplexPort,
                  String interfaces,
+                 EndpointMeta endpointMeta,
                  Set<UnitDirector> directors,
                  InstrumentCluster ic,
                  TemperatureUnit temperatureUnit) {
 
-        this.config = new Config(port, interfaces, directors, ic, temperatureUnit);
+        this.config = new Config(httpPort, duplexPort, interfaces, endpointMeta, directors, ic, temperatureUnit);
 
         this.initSet.addAll(directors);
 
-        logger.info("port: {}", port);
+        logger.info("port: {}", httpPort);
 
         if (directors.isEmpty()) {
             logger.warn("empty init set, only diagnostic URLs will be available");
@@ -95,7 +101,7 @@ public class WebUI implements AutoCloseable {
             var httpHandler = RouterFunctions.toHttpHandler(new RoutingConfiguration().monoRouterFunction(this));
             var adapter = new ReactorHttpHandlerAdapter(httpHandler);
 
-            var server = HttpServer.create().host(config.interfaces).port(config.port);
+            var server = HttpServer.create().host(config.interfaces).port(config.httpPort);
             DisposableServer disposableServer = server.handle(adapter).bind().block();
 
             logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
@@ -131,11 +137,20 @@ public class WebUI implements AutoCloseable {
 
             jmDNS = JmDNS.create(fqdn);
 
+            var propMap = Map.of(
+                    "path", META_PATH, // http://www.dns-sd.org/txtrecords.html#http
+                    "protocol-version", Version.PROTOCOL_VERSION,
+                    "duplex", Integer.toString(config.duplexPort)
+            );
+
             var serviceInfo = ServiceInfo.create(
                     "_http._tcp.local.",
                     "HCC WebUI @" + name,
-                    config.port,
-                    "path=/" // http://www.dns-sd.org/txtrecords.html#http
+                    "",
+                    config.httpPort,
+                    0,
+                    0,
+                    propMap
             );
 
             jmDNS.registerService(serviceInfo);
@@ -167,14 +182,18 @@ public class WebUI implements AutoCloseable {
     }
 
     /**
-     * Response handler for the {@code /} HTTP request.
+     * Advertise the capabilities ({@code HTTP GET /} request).
      *
-     * @param rq Request object.
+     * @param rq ignored.
      *
-     * @return Whole system representation.
+     * @return Whole system representation ({@link EndpointMeta} as JSON).
      */
-    public Mono<ServerResponse> getDashboard(ServerRequest rq) {
-        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
+    public Mono<ServerResponse> getMeta(ServerRequest rq) {
+        logger.info("GET ? " + Version.PROTOCOL_VERSION);
+
+        return ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Flux.just(config.endpointMeta), EndpointMeta.class);
     }
 
     /**
@@ -369,8 +388,10 @@ public class WebUI implements AutoCloseable {
         }
     }
     public record Config(
-            int port,
+            int httpPort,
+            int duplexPort,
             String interfaces,
+            EndpointMeta endpointMeta,
             Set<UnitDirector> directors,
             InstrumentCluster ic,
             TemperatureUnit initialUnit
