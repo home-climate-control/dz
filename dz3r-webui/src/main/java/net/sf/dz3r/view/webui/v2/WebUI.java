@@ -2,6 +2,7 @@ package net.sf.dz3r.view.webui.v2;
 
 import com.homeclimatecontrol.hcc.Version;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
+import net.sf.dz3r.common.DurationFormatter;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.runtime.GitProperties;
@@ -335,6 +336,7 @@ public class WebUI implements AutoCloseable {
         return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
     }
 
+    private static final DurationFormatter uptimeFormatter = new DurationFormatter();
     public Mono<ServerResponse> getUptime(ServerRequest rq) {
         logger.info("GET /uptime");
 
@@ -342,7 +344,7 @@ public class WebUI implements AutoCloseable {
         var startMillis = mx.getStartTime();
         var uptimeMillis = mx.getUptime();
         var start = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS").format(new Date(startMillis)) + " " + ZoneId.systemDefault();
-        var uptime = Duration.ofMillis(uptimeMillis).toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase();
+        var uptime = uptimeFormatter.format(uptimeMillis);
 
         // Let's make the JSON order predictable
         var result = new LinkedHashMap<>();
