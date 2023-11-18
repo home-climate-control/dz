@@ -185,11 +185,11 @@ public class WebUI implements AutoCloseable {
     /**
      * Advertise the capabilities ({@code HTTP GET /} request).
      *
-     * @param rq ignored.
+     * @param ignoredRq ignored.
      *
      * @return Whole system representation ({@link EndpointMeta} as JSON).
      */
-    public Mono<ServerResponse> getMeta(ServerRequest rq) {
+    public Mono<ServerResponse> getMeta(ServerRequest ignoredRq) {
         logger.info("GET ? " + Version.PROTOCOL_VERSION);
 
         return ok()
@@ -200,11 +200,11 @@ public class WebUI implements AutoCloseable {
     /**
      * Response handler for the zone set request.
      *
-     * @param rq Request object.
+     * @param ignoredRq ignored.
      *
      * @return Set of zone representations.
      */
-    public Mono<ServerResponse> getZones(ServerRequest rq) {
+    public Mono<ServerResponse> getZones(ServerRequest ignoredRq) {
         logger.info("GET /zones");
 
         return ok()
@@ -250,11 +250,11 @@ public class WebUI implements AutoCloseable {
     /**
      * Response handler for the sensor set request.
      *
-     * @param rq Request object.
+     * @param ignoredRq ignored.
      *
      * @return Set of sensor representations.
      */
-    public Mono<ServerResponse> getSensors(ServerRequest rq) {
+    public Mono<ServerResponse> getSensors(ServerRequest ignoredRq) {
         logger.info("GET /sensors");
 
         return ok()
@@ -287,11 +287,11 @@ public class WebUI implements AutoCloseable {
     /**
      * Response handler for the unit set request.
      *
-     * @param rq Request object.
+     * @param ignoredRq ignored.
      *
      * @return Set of unit representations.
      */
-    public Mono<ServerResponse> getUnits(ServerRequest rq) {
+    public Mono<ServerResponse> getUnits(ServerRequest ignoredRq) {
         logger.info("GET /units");
 
         var units = Flux.fromIterable(unit2observer.entrySet())
@@ -337,7 +337,15 @@ public class WebUI implements AutoCloseable {
     }
 
     private static final DurationFormatter uptimeFormatter = new DurationFormatter();
-    public Mono<ServerResponse> getUptime(ServerRequest rq) {
+
+    /**
+     * Get uptime.
+     *
+     * @param ignoredRq ignored.
+     *
+     * @return System uptime in both computer and human readable form.
+     */
+    public Mono<ServerResponse> getUptime(ServerRequest ignoredRq) {
         logger.info("GET /uptime");
 
         var mx = ManagementFactory.getRuntimeMXBean();
@@ -357,7 +365,14 @@ public class WebUI implements AutoCloseable {
         return ok().contentType(MediaType.APPLICATION_JSON).body(Flux.fromIterable(result.entrySet()), Object.class);
     }
 
-    public Mono<ServerResponse> getVersion(ServerRequest rq) {
+    /**
+     * Get the version.
+     *
+     * @param ignoredRq ignored.
+     *
+     * @return Git revision properties.
+     */
+    public Mono<ServerResponse> getVersion(ServerRequest ignoredRq) {
         logger.info("GET /version");
 
         try {
