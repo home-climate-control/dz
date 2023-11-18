@@ -71,6 +71,8 @@ jib {
     }
 
     container {
+        // VT: FIXME: Hack to see if there is thread starvation when running on boxes with few cores
+        jvmFlags =listOf("-Dreactor.schedulers.defaultPoolSize=20", "-Dreactor.schedulers.defaultBoundedElasticSize=200")
         // Whatever profiles that are provided on the command line will be added to this one
         args = listOf("--spring.profiles.active=docker")
         workingDirectory = "${jib.container.appRoot}/app/"
