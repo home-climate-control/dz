@@ -25,6 +25,10 @@ Additionally, if you take a look at the output of `git tag -n`, it will usually 
 * Enable [InfluxDB connector](./configuration/influx.md). HCC emits a lot of data, and one picture is better than a thousand words.
 * Enable [Console](./configuration/console.md) (incompatible with [running in Docker](./build/index.md#docker), but well worth it for troubleshooting). Its [instrument cluster](./instrument-cluster/index.md) might pinpoint problems immediately.
 
+**Q:** HCC advertises itself on `127.0.1.1`, clients can't connect  
+**A:** You're likely running Debian or derivative, and [this is what is going on](https://serverfault.com/questions/363095/why-does-my-hostname-appear-with-the-address-127-0-1-1-rather-than-127-0-0-1-in).
+Remove `127.0.1.1` from `/etc/hosts`.
+
 # Next Steps
 * [Platform Support](./platform.md)
 * [Hardware Support](hardware/index.md)

@@ -127,7 +127,7 @@ public class WebUI implements AutoCloseable {
             var canonical = localhost.getCanonicalHostName();
             var fqdn = InetAddress.getByName(canonical);
 
-            // Old bug
+            // Old bug: https://serverfault.com/questions/363095/why-does-my-hostname-appear-with-the-address-127-0-1-1-rather-than-127-0-0-1-in
             final var local11 = "127.0.1.1";
 
             if (fqdn.getHostAddress().equals(local11)) {
