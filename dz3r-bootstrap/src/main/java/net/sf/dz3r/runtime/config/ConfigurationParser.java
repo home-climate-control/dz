@@ -10,6 +10,7 @@ import com.homeclimatecontrol.hcc.meta.ZoneMeta;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.instrumentation.Marker;
+import net.sf.dz3r.runtime.InstanceIdProvider;
 import net.sf.dz3r.runtime.config.connector.ConnectorConfig;
 import net.sf.dz3r.runtime.config.connector.ConnectorConfigurationParser;
 import net.sf.dz3r.runtime.config.connector.HomeAssistantConfig;
@@ -166,7 +167,7 @@ public class ConfigurationParser {
         }
     }
 
-    private EndpointMeta renderMeta(HccRawConfig source) {
+    private EndpointMeta renderMeta(HccRawConfig source) throws IOException {
 
         var zones = Flux.fromIterable(source.zones())
                 .map(this::renderZoneMeta)
@@ -183,6 +184,7 @@ public class ConfigurationParser {
                 EndpointMeta.Type.DIRECT,
                 new InstanceMeta(
                         source.instance(),
+                        InstanceIdProvider.getId(),
                         new SimpleClientMeta(
                                 zones,
                                 devices

@@ -6,6 +6,7 @@ import net.sf.dz3r.common.DurationFormatter;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.runtime.GitProperties;
+import net.sf.dz3r.runtime.InstanceIdProvider;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
@@ -48,7 +49,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
 /**
  * Web UI for Home Climate Control - reactive version.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class WebUI implements AutoCloseable {
 
@@ -149,7 +150,9 @@ public class WebUI implements AutoCloseable {
                     "type",DIRECT.toString().toLowerCase(),
 
                     "name", config.instance,
-                    "vendor", "homeclimatecontrol.com"
+                    "vendor", "homeclimatecontrol.com",
+
+                    "unique-id", InstanceIdProvider.getId().toString()
             );
 
             var serviceInfo = ServiceInfo.create(
