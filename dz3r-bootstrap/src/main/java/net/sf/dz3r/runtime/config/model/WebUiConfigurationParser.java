@@ -19,7 +19,7 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
         this.ic = ic;
     }
 
-    public WebUI parse(WebUiConfig cf) {
+    public WebUI parse(String instance, WebUiConfig cf) {
 
         if (cf == null) {
             logger.warn("WebUI is not configured");
@@ -37,7 +37,7 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
                 .collect(Collectors.toSet())
                 .block();
 
-        var webUI = new WebUI(httpPort, duplexPort, interfaces, context.endpoint.getFlux().blockFirst().getValue(), directors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
+        var webUI = new WebUI(instance, httpPort, duplexPort, interfaces, context.endpoint.getFlux().blockFirst().getValue(), directors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
 
         // Needs to be resolvable to stop mDNS advertisements at the end
         context.webUI.register("web-ui", webUI);

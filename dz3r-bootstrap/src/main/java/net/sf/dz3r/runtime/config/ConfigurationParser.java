@@ -148,7 +148,7 @@ public class ConfigurationParser {
 
             // Need directors and the meta resolved by now
 
-            var webUi = new WebUiConfigurationParser(ctx, ic).parse(source.webUi());
+            var webUi = new WebUiConfigurationParser(ctx, ic).parse(source.instance(), source.webUi());
             m.checkpoint("configured WebUI");
 
             var console = new ConsoleConfigurationParser(ctx, ic).parse(source.instance(), source.console());

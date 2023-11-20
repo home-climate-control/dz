@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static com.homeclimatecontrol.hcc.meta.EndpointMeta.Type.DIRECT;
 import static net.sf.dz3r.view.webui.v2.RoutingConfiguration.META_PATH;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
@@ -63,15 +64,17 @@ public class WebUI implements AutoCloseable {
 
     private JmDNS jmDNS;
 
-    public WebUI(int httpPort,
-                 int duplexPort,
-                 String interfaces,
-                 EndpointMeta endpointMeta,
-                 Set<UnitDirector> directors,
-                 InstrumentCluster ic,
-                 TemperatureUnit temperatureUnit) {
+    public WebUI(
+            String instance,
+            int httpPort,
+            int duplexPort,
+            String interfaces,
+            EndpointMeta endpointMeta,
+            Set<UnitDirector> directors,
+            InstrumentCluster ic,
+            TemperatureUnit temperatureUnit) {
 
-        this.config = new Config(httpPort, duplexPort, interfaces, endpointMeta, directors, ic, temperatureUnit);
+        this.config = new Config(instance, httpPort, duplexPort, interfaces, endpointMeta, directors, ic, temperatureUnit);
 
         this.initSet.addAll(directors);
 
@@ -123,7 +126,6 @@ public class WebUI implements AutoCloseable {
         try {
 
             var localhost = InetAddress.getLocalHost();
-            var name = localhost.getHostName();
             var canonical = localhost.getCanonicalHostName();
             var fqdn = InetAddress.getByName(canonical);
 
@@ -139,14 +141,20 @@ public class WebUI implements AutoCloseable {
             jmDNS = JmDNS.create(fqdn);
 
             var propMap = Map.of(
+
                     "path", META_PATH, // http://www.dns-sd.org/txtrecords.html#http
                     "protocol-version", Version.PROTOCOL_VERSION,
-                    "duplex", Integer.toString(config.duplexPort)
+
+                    "duplex", Integer.toString(config.duplexPort),
+                    "type",DIRECT.toString().toLowerCase(),
+
+                    "name", config.instance,
+                    "vendor", "homeclimatecontrol.com"
             );
 
             var serviceInfo = ServiceInfo.create(
                     "_http._tcp.local.",
-                    "HCC WebUI @" + name,
+                    "HCC WebUI @" + config.instance,
                     "",
                     config.httpPort,
                     0,
@@ -405,6 +413,7 @@ public class WebUI implements AutoCloseable {
         }
     }
     public record Config(
+            String instance,
             int httpPort,
             int duplexPort,
             String interfaces,
