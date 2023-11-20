@@ -3,6 +3,7 @@ Home Climate Control: Release Notes
 
 ## Coming Up
 
+* [#298](https://github.com/home-climate-control/dz/issues/298) HCC now advertizes itself over mDNS
 * [#296 MQTT devices relying on retained messages may not work correctly](https://github.com/home-climate-control/dz/issues/296)
 * [#295 Multiple ESPHome logical devices per physical device will report "available" only for one random](https://github.com/home-climate-control/dz/issues/295)
 * [#293 Implement variable output single mode HVAC device](https://github.com/home-climate-control/dz/issues/293)
