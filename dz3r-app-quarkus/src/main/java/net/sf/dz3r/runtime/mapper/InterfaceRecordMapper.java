@@ -19,6 +19,7 @@ import net.sf.dz3r.runtime.config.quarkus.hardware.SingleStageUnitControllerConf
 import net.sf.dz3r.runtime.config.quarkus.hardware.SwitchConfig;
 import net.sf.dz3r.runtime.config.quarkus.hardware.SwitchableHvacDeviceConfig;
 import net.sf.dz3r.runtime.config.quarkus.hardware.UnitControllerConfig;
+import net.sf.dz3r.runtime.config.quarkus.hardware.VariableHvacConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ConsoleConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.EconomizerConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.PidControllerConfig;
@@ -27,6 +28,7 @@ import net.sf.dz3r.runtime.config.quarkus.model.UnitDirectorConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.WebUiConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ZoneConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ZoneSettingsConfig;
+import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.FanConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttBrokerConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.mqtt.MqttDeviceConfig;
 import net.sf.dz3r.runtime.config.quarkus.protocol.onewire.OnewireBusConfig;
@@ -68,6 +70,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.broker(source.broker()))", target = "broker")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switches(source.switches()))", target = "switches")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.fans(source.fans()))", target = "fans")
     net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig mqttConfig(MqttDeviceConfig source);
 
     @Mapping(expression = "java(source.id().orElse(null))", target = "id")
@@ -92,8 +95,15 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.reversed().orElse(false))", target = "reversed")
     @Mapping(expression = "java(source.heartbeat().orElse(null))", target = "heartbeat")
     @Mapping(expression = "java(source.pace().orElse(null))", target = "pace")
-    @Mapping(expression = "java(source.optimistic().orElse(null))", target = "optimistic")
+    @Mapping(expression = "java(source.availabilityTopic().orElse(null))", target = "availabilityTopic")
     net.sf.dz3r.runtime.config.hardware.SwitchConfig switchConfig(SwitchConfig source);
+
+    @Mapping(expression = "java(source.id().orElse(null))", target = "id")
+    @Mapping(expression = "java(source.address())", target = "address")
+    @Mapping(expression = "java(source.heartbeat().orElse(null))", target = "heartbeat")
+    @Mapping(expression = "java(source.pace().orElse(null))", target = "pace")
+    @Mapping(expression = "java(source.availabilityTopic().orElse(null))", target = "availabilityTopic")
+    net.sf.dz3r.runtime.config.protocol.mqtt.FanConfig fanConfig(FanConfig source);
 
     @Mapping(expression = "java(source.serialPort())", target = "serialPort")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
@@ -143,7 +153,8 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.keepHvacOn())", target = "keepHvacOn")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.controller(source.controller()))", target = "controller")
     @Mapping(expression = "java(source.mode())", target = "mode")
-    @Mapping(expression = "java(source.switchAddress())", target = "switchAddress")
+    @Mapping(expression = "java(source.hvacDevice())", target = "hvacDevice")
+    @Mapping(expression = "java(source.timeout().orElse(null))", target = "timeout")
     net.sf.dz3r.runtime.config.model.EconomizerConfig economizer(EconomizerConfig source);
 
     @Mapping(expression = "java(source.min())", target = "min")
@@ -185,6 +196,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.switchable(source.switchable()))", target = "switchable")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.heatpumpHat(source.heatpumpHat()))", target = "heatpumpHat")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.heatpump(source.heatpump()))", target = "heatpump")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.variable(source.variable()))", target = "variable")
     net.sf.dz3r.runtime.config.hardware.HvacDeviceConfig hvac(HvacDeviceConfig source);
 
     @Mapping(expression = "java(source.lifetime())", target = "lifetime")
@@ -213,6 +225,14 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
     net.sf.dz3r.runtime.config.hardware.HeatpumpConfig heatpump(HeatpumpConfig source);
 
+    @Mapping(expression = "java(source.id())", target = "id")
+    @Mapping(expression = "java(source.mode())", target = "mode")
+    @Mapping(expression = "java(source.actuator())", target = "actuator")
+    @Mapping(expression = "java(source.maxPower().orElse(null))", target = "maxPower")
+    @Mapping(expression = "java(source.bandCount().orElse(null))", target = "bandCount")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.filter(source.filter().orElse(null)))", target = "filter")
+    net.sf.dz3r.runtime.config.hardware.VariableHvacConfig variable(VariableHvacConfig source);
+
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.singleStage(source.singleStage()))", target = "singleStage")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.multiStage(source.multiStage()))", target = "multiStage")
     net.sf.dz3r.runtime.config.hardware.UnitControllerConfig unit(UnitControllerConfig source);
@@ -231,7 +251,8 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.hvac())", target = "hvac")
     @Mapping(expression = "java(source.mode())", target = "mode")
     net.sf.dz3r.runtime.config.model.UnitDirectorConfig director(UnitDirectorConfig source);
-    @Mapping(expression = "java(source.port().orElse(null))", target = "port")
+    @Mapping(expression = "java(source.httpPort().orElse(null))", target = "httpPort")
+    @Mapping(expression = "java(source.duplexPort().orElse(null))", target = "duplexPort")
     @Mapping(expression = "java(source.interfaces().orElse(null))", target = "interfaces")
     @Mapping(expression = "java(source.directors().orElse(null))", target = "directors")
     @Mapping(expression = "java(source.units().orElse(null))", target = "units")
@@ -244,6 +265,7 @@ public interface InterfaceRecordMapper {
 
     Set<net.sf.dz3r.runtime.config.hardware.SensorConfig> sensors(Set<SensorConfig> source);
     Set<net.sf.dz3r.runtime.config.hardware.SwitchConfig> switches(Set<SwitchConfig> source);
+    Set<net.sf.dz3r.runtime.config.protocol.mqtt.FanConfig> fans(Set<FanConfig> source);
     Set<net.sf.dz3r.runtime.config.protocol.mqtt.MqttDeviceConfig> mqtt(Set<MqttDeviceConfig> source);
     Set<net.sf.dz3r.runtime.config.protocol.onewire.OnewireBusConfig> onewire(Set<OnewireBusConfig> source);
     Set<net.sf.dz3r.runtime.config.hardware.MockConfig> mocks(Set<MockConfig> source);
@@ -257,6 +279,7 @@ public interface InterfaceRecordMapper {
     Set<net.sf.dz3r.runtime.config.hardware.SwitchableHvacDeviceConfig> switchable(Set<SwitchableHvacDeviceConfig> source);
     Set<net.sf.dz3r.runtime.config.hardware.HeatpumpHATConfig> heatpumpHat(Set<HeatpumpHATConfig> source);
     Set<net.sf.dz3r.runtime.config.hardware.HeatpumpConfig> heatpump(Set<HeatpumpConfig> source);
+    Set<net.sf.dz3r.runtime.config.hardware.VariableHvacConfig> variable(Set<VariableHvacConfig> source);
     Set<net.sf.dz3r.runtime.config.hardware.UnitControllerConfig> units(Set<UnitControllerConfig> source);
     Set<net.sf.dz3r.runtime.config.hardware.SingleStageUnitControllerConfig> singleStage(Set<SingleStageUnitControllerConfig> source);
     Set<net.sf.dz3r.runtime.config.hardware.MultiStageUnitControllerConfig> multiStage(Set<MultiStageUnitControllerConfig> source);

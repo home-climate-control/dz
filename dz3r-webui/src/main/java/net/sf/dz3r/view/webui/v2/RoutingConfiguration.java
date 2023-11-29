@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.webui.v2;
 
+import com.homeclimatecontrol.hcc.Version;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RequestPredicate;
@@ -13,6 +14,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 
 public class RoutingConfiguration {
 
+    public static final String META_PATH = "/meta/" + Version.PROTOCOL_VERSION;
     private static final RequestPredicate ACCEPT_JSON = accept(MediaType.APPLICATION_JSON);
 
     @Bean
@@ -21,13 +23,17 @@ public class RoutingConfiguration {
 
                 // Accessors
 
-                GET("/").and(ACCEPT_JSON), webUI::getDashboard).andRoute(
+                GET("/").and(ACCEPT_JSON), webUI::getMeta).andRoute(
+                GET(META_PATH + Version.PROTOCOL_VERSION).and(ACCEPT_JSON), webUI::getMeta).andRoute(
                 GET("/sensors").and(ACCEPT_JSON), webUI::getSensors).andRoute(
                 GET("/sensor/{sensor}").and(ACCEPT_JSON), webUI::getSensor).andRoute(
                 GET("/units").and(ACCEPT_JSON), webUI::getUnits).andRoute(
                 GET("/unit/{unit}").and(ACCEPT_JSON), webUI::getUnit).andRoute(
                 GET("/zones").and(ACCEPT_JSON), webUI::getZones).andRoute(
                 GET("/zone/{zone}").and(ACCEPT_JSON), webUI::getZone).andRoute(
+
+                GET("/uptime").and(ACCEPT_JSON), webUI::getUptime).andRoute(
+                GET("/version").and(ACCEPT_JSON), webUI::getVersion).andRoute(
 
                 // Mutators
 

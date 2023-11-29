@@ -10,7 +10,7 @@ import java.time.Duration;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
-        named = "TEST_DZ_MQTT_REACTIVE",
+        named = "TEST_HCC_MQTT_REACTIVE",
         matches = "safe",
         disabledReason = "Only execute this test if a suitable MQTT broker is available"
 )
@@ -21,7 +21,7 @@ class MqttListenerTest {
     @Test
     void create() {
         assertThatCode(() -> {
-            new MqttListener(new MqttEndpoint("localhost"));
+            new MqttListenerImpl(new MqttEndpoint("localhost"));
         }).doesNotThrowAnyException();
     }
 
@@ -29,7 +29,7 @@ class MqttListenerTest {
     void subscribe() {
 
         assertThatCode(() -> {
-            new MqttListener(new MqttEndpoint("localhost"))
+            new MqttListenerImpl(new MqttEndpoint("mqtt-esphome"))
                     .getFlux("", true)
                     .doOnNext(v -> logger.info("message: {}", v))
                     .take(Duration.ofSeconds(1))

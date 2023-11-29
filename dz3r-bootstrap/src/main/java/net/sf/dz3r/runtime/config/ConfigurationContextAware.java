@@ -1,7 +1,8 @@
 package net.sf.dz3r.runtime.config;
 
+import net.sf.dz3r.device.actuator.CqrsSwitch;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
@@ -37,10 +38,17 @@ public abstract class ConfigurationContextAware {
                 .doOnNext(s -> logger.debug("getSensor({}) = {}", address, s));
     }
 
-    protected final Switch<?> getSwitch(String address) {
+    protected final CqrsSwitch<?> getSwitch(String address) {
         return context
                 .switches
                 .getMonoById("switches", address)
+                .block();
+    }
+
+    protected final VariableOutputDevice getFans(String address) {
+        return context
+                .fans
+                .getMonoById("fans", address)
                 .block();
     }
 

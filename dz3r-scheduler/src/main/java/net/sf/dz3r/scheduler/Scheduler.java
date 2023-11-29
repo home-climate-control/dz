@@ -109,7 +109,7 @@ public class Scheduler {
      *
      * VT: FIXME: The above looks weird, need refactoring.
      */
-    private synchronized Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> applySchedule(Map.Entry<Zone, SortedMap<SchedulePeriod, ZoneSettings>> source) {
+    private Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> applySchedule(Map.Entry<Zone, SortedMap<SchedulePeriod, ZoneSettings>> source) {
 
         ThreadContext.push("applySchedule");
 

@@ -3,6 +3,9 @@ package net.sf.dz3r.runtime.config.quarkus.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import net.sf.dz3r.model.HvacMode;
 
+import java.time.Duration;
+import java.util.Optional;
+
 public interface EconomizerConfig {
     @JsonProperty("ambient-sensor")
     String ambientSensor();
@@ -16,6 +19,8 @@ public interface EconomizerConfig {
     PidControllerConfig controller();
     @JsonProperty("mode")
     HvacMode mode();
-    @JsonProperty("switch-address")
-    String switchAddress();
+    @JsonProperty("hvac-device")
+    String hvacDevice();
+    @JsonProperty("timeout")
+    Optional<Duration> timeout();
 }

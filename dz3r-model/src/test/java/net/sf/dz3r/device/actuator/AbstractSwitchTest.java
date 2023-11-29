@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
+import net.sf.dz3r.common.TestClock;
 import org.junit.jupiter.api.Test;
 import reactor.core.scheduler.Scheduler;
 
@@ -121,39 +122,6 @@ class AbstractSwitchTest {
         @Override
         protected boolean getStateSync() throws IOException {
             return state;
-        }
-    }
-
-    private static class TestClock extends Clock {
-
-        private final Clock baseClock;
-        private Duration offset = Duration.ofSeconds(0);
-
-        private TestClock() {
-            baseClock = Clock.systemUTC();
-        }
-
-        private TestClock(Clock baseClock) {
-            this.baseClock = baseClock;
-        }
-
-        public void setOffset(Duration offset) {
-            this.offset = offset;
-        }
-
-        @Override
-        public ZoneId getZone() {
-            return baseClock.getZone();
-        }
-
-        @Override
-        public Clock withZone(ZoneId zone) {
-            return baseClock.withZone(zone);
-        }
-
-        @Override
-        public Instant instant() {
-            return baseClock.instant().plus(offset);
         }
     }
 }

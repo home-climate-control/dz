@@ -1,10 +1,11 @@
 package net.sf.dz3r.instrumentation;
 
+import net.sf.dz3r.device.actuator.CqrsSwitch;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.health.SystemStatus;
+import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,7 @@ public class InstrumentCluster {
     private final Logger logger = LogManager.getLogger();
 
     private final Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> sensors;
-    private final Flux<Map.Entry<String, Switch<?>>> switches;
+    private final Flux<Map.Entry<String, CqrsSwitch<?>>> switches;
     private final Flux<Map.Entry<String, ScheduleUpdater>> schedule;
     private final Flux<Map.Entry<String, Connector>> connectors;
     private final Flux<Map.Entry<String, MetricsCollector>> collectors;
@@ -50,7 +51,7 @@ public class InstrumentCluster {
 
     public InstrumentCluster(
             Flux<Map.Entry<String, Flux<Signal<Double, Void>>>> sensors,
-            Flux<Map.Entry<String, Switch<?>>> switches,
+            Flux<Map.Entry<String, CqrsSwitch<?>>> switches,
             Flux<Map.Entry<String, ScheduleUpdater>> schedule,
             Flux<Map.Entry<String, Connector>> connectors,
             Flux<Map.Entry<String, MetricsCollector>> collectors,
@@ -173,11 +174,11 @@ public class InstrumentCluster {
                                 logger.debug("update/hvacDevice: id={}, status={}", id, s);
 
                                 // Update the accumulated status
-                                currentStatus.hvacDevices().put(id, s);
+                                currentStatus.hvacDevices().put(id, (Signal<HvacDeviceStatus, Void>) s);
 
                                 // Send an incremental update
                                 var incrementalStatus = createEmptyStatus();
-                                incrementalStatus.hvacDevices().put(id, s);
+                                incrementalStatus.hvacDevices().put(id, (Signal<HvacDeviceStatus, Void>) s);
 
                                 statusSink.tryEmitNext(new Signal<>(Instant.now(), incrementalStatus));
                             });

@@ -13,14 +13,16 @@ import java.util.Set;
 /**
  * HVAC device driver.
  *
+ * @param <T> Device status type.
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatus, Void>, Addressable<String>, AutoCloseable {
+public interface HvacDevice<T> extends SignalProcessor<HvacCommand, HvacDeviceStatus<T>, Void>, Addressable<String>, AutoCloseable {
 
     /**
      * Find out which modes this device supports.
      *
-     * @return List of supported modes.
+     * @return Set of supported modes.
      */
     Set<HvacMode> getModes();
 
@@ -35,12 +37,12 @@ public interface HvacDevice extends SignalProcessor<HvacCommand, HvacDeviceStatu
      * @return Execution status.
      */
     @Override
-    Flux<Signal<HvacDeviceStatus, Void>> compute(Flux<Signal<HvacCommand, Void>> in);
+    Flux<Signal<HvacDeviceStatus<T>, Void>> compute(Flux<Signal<HvacCommand, Void>> in);
 
     /**
      * Get the stream of status updates.
      *
      * @return The mirror of the flux issued by {@link #compute(Flux)}.
      */
-    Flux<Signal<HvacDeviceStatus, Void>> getFlux();
+    Flux<Signal<HvacDeviceStatus<T>, Void>> getFlux();
 }

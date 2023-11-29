@@ -56,7 +56,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      */
     private PeriodSettings periodSettings;
 
-    private final AbstractEconomizer<?> economizer;
+    private final AbstractEconomizer economizer;
 
     private final Sinks.Many<Signal<Double, String>> feedbackSink = Sinks.many().unicast().onBackpressureBuffer();
     private final Flux<Signal<Double, String>> feedbackFlux = feedbackSink.asFlux();
@@ -80,12 +80,18 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      * @param settings Zone settings. Thermostat setpoint overrides zone setpoint - this argument is here to configure initial flags.
      * @param economizerContext Optional context to initialize the economizer with.
      */
-    public Zone(Thermostat ts, ZoneSettings settings, EconomizerContext<?> economizerContext) {
+    public Zone(Thermostat ts, ZoneSettings settings, EconomizerContext economizerContext) {
         this.ts = ts;
         setSettingsSync(new ZoneSettings(settings, ts.getSetpoint()));
 
         economizer = Optional.ofNullable(economizerContext)
-                .map(ctx -> new PidEconomizer<>(Clock.systemUTC(), ts.getAddress(), ctx.settings, ctx.ambientFlux, ctx.targetDevice))
+                .map(ctx -> new PidEconomizer<>(
+                        Clock.systemUTC(),
+                        ts.getAddress(),
+                        ctx.settings,
+                        ctx.ambientFlux,
+                        ctx.device,
+                        ctx.timeout))
                 .orElse(null);
     }
 

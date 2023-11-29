@@ -1,16 +1,19 @@
 package net.sf.dz3r.runtime.config;
 
-import net.sf.dz3r.runtime.config.onewire.EntityProvider;
+import com.homeclimatecontrol.hcc.meta.EndpointMeta;
+import net.sf.dz3r.device.actuator.CqrsSwitch;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.Switch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.actuator.VariableOutputDevice;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.runtime.config.onewire.EntityProvider;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
+import net.sf.dz3r.view.webui.v2.WebUI;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
@@ -29,7 +32,8 @@ public class ConfigurationContext {
 
     public final EntityProvider<MqttAdapter> mqtt = new EntityProvider<>("mqtt");
     public final EntityProvider<Flux<Signal<Double, Void>>> sensors = new EntityProvider<>("sensor");
-    public final EntityProvider<Switch<?>> switches = new EntityProvider<>("switch");
+    public final EntityProvider<CqrsSwitch<?>> switches = new EntityProvider<>("switch");
+    public final EntityProvider<VariableOutputDevice> fans = new EntityProvider<>("fan");
     public final EntityProvider<Zone> zones = new EntityProvider<>("zone");
     public final EntityProvider<ScheduleUpdater> schedule = new EntityProvider<>("schedule");
     public final EntityProvider<Connector> connectors = new EntityProvider<>("connector");
@@ -37,4 +41,6 @@ public class ConfigurationContext {
     public final EntityProvider<HvacDevice> hvacDevices = new EntityProvider<>("HVAC device");
     public final EntityProvider<UnitController> units = new EntityProvider<>("unit controller");
     public final EntityProvider<UnitDirector> directors = new EntityProvider<>("unit director");
+    public final EntityProvider<WebUI> webUI = new EntityProvider<>("Web UI");
+    public final EntityProvider<EndpointMeta> endpoint = new EntityProvider<>("endpoint");
 }

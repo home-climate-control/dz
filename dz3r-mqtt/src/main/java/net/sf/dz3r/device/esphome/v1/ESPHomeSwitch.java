@@ -1,15 +1,18 @@
 package net.sf.dz3r.device.esphome.v1;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
+import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
 import net.sf.dz3r.signal.Signal;
 import reactor.core.scheduler.Scheduler;
 
 import java.io.IOException;
 import java.time.Instant;
+
+import static net.sf.dz3r.device.mqtt.v2.AbstractMqttListener.DEFAULT_CACHE_AGE;
 
 /**
  * Implementation to control <a href="https://esphome.io/components/switch/">ESPHome Switch Component</a> via
@@ -22,7 +25,10 @@ import java.time.Instant;
  * @see net.sf.dz3r.device.z2m.v1.Z2MSwitch
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ *
+ * @deprecated Use {@link net.sf.dz3r.device.esphome.v2.ESPHomeCqrsSwitch} instead.
  */
+@Deprecated(since = "5.0.0")
 public class ESPHomeSwitch extends AbstractMqttSwitch {
 
     private final String deviceRootTopic;
@@ -76,7 +82,7 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
 
         // VT: NOTE: ESPHome appears to not suffer from buffer overruns like Zigbee and Z-Wave do,
         // so not providing the delay
-        this(new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect),
+        this(new MqttAdapterImpl(new MqttEndpoint(host, port), username, password, reconnect, DEFAULT_CACHE_AGE),
                 deviceRootTopic,
                 optimistic,
                 scheduler);
@@ -97,7 +103,7 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
         super(
                 mqttAdapter,
                 new MqttMessageAddress(
-                        mqttAdapter.address,
+                        mqttAdapter.getAddress(),
                         deviceRootTopic),
                 scheduler,
                 null,

@@ -8,9 +8,11 @@ import java.util.Set;
 
 public interface WebUiConfig {
 
-    @JsonProperty("port")
-    Optional<Integer> port();
+    @JsonProperty("http-port")
+    Optional<Integer> httpPort();
 
+    @JsonProperty("duplex-port")
+    Optional<Integer> duplexPort();
     @JsonProperty("interfaces")
     Optional<String> interfaces();
 

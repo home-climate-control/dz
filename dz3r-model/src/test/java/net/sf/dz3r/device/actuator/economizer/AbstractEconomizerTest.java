@@ -1,8 +1,9 @@
 package net.sf.dz3r.device.actuator.economizer;
 
 import net.sf.dz3r.controller.ProcessController;
-import net.sf.dz3r.device.actuator.NullSwitch;
-import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.actuator.HvacDevice;
+import net.sf.dz3r.device.actuator.NullCqrsSwitch;
+import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,6 +11,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
 
 import java.time.Clock;
+import java.time.Duration;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -30,7 +32,17 @@ class AbstractEconomizerTest {
                 true,
                 1.0, 0.0001, 1.0);
 
-        var e = new TestEconomizer("eco", settings, new NullSwitch(""));
+        var e = new TestEconomizer(
+                "eco",
+                settings,
+                new SwitchableHvacDevice(
+                        Clock.systemUTC(),
+                        "d",
+                        HvacMode.COOLING,
+                        new NullCqrsSwitch("s"),
+                        false,
+                        null)
+        );
 
         var signal = e.computeCombined(source.indoorTemperature, source.ambientTemperature);
 
@@ -38,17 +50,17 @@ class AbstractEconomizerTest {
 
     }
 
-    private class TestEconomizer extends AbstractEconomizer<String> {
+    private class TestEconomizer extends AbstractEconomizer {
 
         /**
          * Create an instance.
          * <p>
          * Note that only the {@code ambientFlux} argument is present, indoor flux is provided to {@link #compute(Flux)}.
          *
-         * @param targetDevice Switch to control the economizer actuator.
+         * @param device HVAC device acting as the economizer.
          */
-        protected TestEconomizer(String name, EconomizerSettings settings, Switch<String> targetDevice) {
-            super(Clock.systemUTC(), name, settings, targetDevice);
+        protected TestEconomizer(String name, EconomizerSettings settings, HvacDevice device) {
+            super(Clock.systemUTC(), name, settings, device, Duration.ofSeconds(90));
         }
 
         @Override

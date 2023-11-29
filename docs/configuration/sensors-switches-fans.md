@@ -1,4 +1,4 @@
-sensors & switches
+sensors, switches, fans
 ==
 
 ### sensors
@@ -61,7 +61,7 @@ switches:
     reversed: <boolean flag>
     heartbeat: <Duration>
     pace: <Duration>
-    optimistic: <boolean flag>
+    availability-topic: <MQTT topic for availability information>
 ```
 
 #### reversed
@@ -73,8 +73,48 @@ Optional. Send the command to hardware this often even if the logical state hasn
 #### pace
 Optional. Send the same command to hardware no more often that this. Some bridges (notably `zigbee2mqtt`) are known to become unresponsive with no error indication when incoming traffic exceeds their bandwidth.
 
-### optimistic
-Optional. Send the command to hardware and don't wait for confirmation. Normally, you wouldn't have to do this, but some firmware (notably, [ESPHome](./esphome.md)) doesn't provide reliable confirmation so this may save the situation (and is a default for known hardware types). Use only if you must, and consider using [heartbeat](#heartbeat) to offset the risk.
+#### availability-topic
+* Mandatory for [ESPHome](./esphome.md) devices (see [esphome #5030](https://github.com/esphome/issues/issues/5030) for more information);
+* Disallowed for [Zigbee](./zigbee2mqtt.md) and [Z-Wave](./zwave2mqtt.md) devices.
+
+Log messages at `ERROR` level will provide enough details to resolve the problem.
+
+### fans
+Similar to above:
+```yaml
+fans:
+  - id: ac-infinity-a6
+    address: /esphome/550212/fan/a6-0
+    availability: /esphome/550212/status
+    heartbeat: <Duration>
+    pace: <Duration>
+    availability-topic: <MQTT topic for availability information>
+```
+`id`, `address`, `heartbeat`, `pace`, and `availability-topic` parameters are identical to those above.
+
+This is how ESPHome configuration section looks like (`pin` and `min_power` depend on your particular hardware setup):
+
+```yaml
+output:
+  - platform: esp8266_pwm
+    id: pwm_output
+    pin: D1
+    frequency: 5000 Hz
+    min_power: 0.2
+    max_power: 1.0
+    zero_means_zero: true
+    inverted: true
+
+fan:
+  - platform: speed
+    output: pwm_output
+    name: "A6-0"
+
+```
+
+For more information, see [ESPHome Fan Component](https://esphome.io/components/fan/).
+
+> **NOTE:** Leave ESPHome `speed_count` at default (100), or this integration will not work.
 
 ### Property of
 * [esphome](./esphome.md)

@@ -37,7 +37,8 @@ Best explained by example:
           i: 0.0000008
           limit: 0.7
         mode: cooling
-        switch-address: s31zb-00
+        hvac-device: economizer-a6
+        timeout: 75S
 
 ```
 
@@ -56,6 +57,8 @@ Human readable zone name
 
 ### controller
 Zone [PID controller](https://en.wikipedia.org/wiki/Proportional%E2%80%93integral%E2%80%93derivative_controller). `p` and `i` are self-explanatory, `limit` is the [integral windup](https://en.wikipedia.org/wiki/Integral_windup) saturation limit. Values in the snippet above are good defaults. Looking at instrumentation (article coming) will help you to determine the right values for your zones.
+
+Positive `p` and `i` values are used for cooling mode, negative for heating. `limit` stays the same for both.
 
 > **NOTE:** this configuration item is the most important for your comfort. A more detailed explanation is coming, for now - step carefully here, especially with the `i` value.
 
@@ -78,7 +81,11 @@ Cooling mode assumed:
 * `keep-hvac-on`: set to `true` if you want the main HVAC to be still working when the economizer is active (maximum comfort), and to `false` if you want to stop it (maximum cost savings).
 * `controller`: just like the zone configuration above.
 * `mode`: self-explanatory
-* `switch-address`: at this point, the economizer is an on/off device (multistage coming). This is the address of the switch that turns the economizer device on or off.
+* `hvac-device`: at this point, the economizer is an on/off device (multistage coming). This is the identifier of the [HVAC device](./hvac.md) acting as an economizer.
+* `timeout`: treat both indoor and ambient sensors as stale and shut off the economizer after not receiving data from them for this long. Default is 90 seconds. The system will complain at `INFO` level if this is happening.
+
+#### controller
+Economizer PID controller. `p` and `i` values are always positive, regardless of the mode.
 
 ### Property of
 * [home-climate-control](./home-climate-control.md)

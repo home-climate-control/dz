@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
@@ -170,7 +170,7 @@ public class HomeAssistantConnector implements Connector {
             var exposedName = originalName.replace(" ", "-");
 
             if (!exposedName.equals(originalName)) {
-                logger.warn("adjusted to {} to conform to HA naming standards", exposedName);
+                logger.debug("adjusted to {} to conform to HA naming standards", exposedName);
             }
 
             // ... but we're not going to fix anything beyond a stray space.
@@ -193,7 +193,7 @@ public class HomeAssistantConnector implements Connector {
             var root = "/hcc/ha-connector/" + config.id
                     + "/" + exposedName;
 
-            logger.debug("MQTT endpoint: {}", mqttAdapter.address);
+            logger.debug("MQTT endpoint: {}", mqttAdapter.getAddress());
             logger.debug("config topic: {}", configTopic);
 
             var uniqueId = config.id + "-" + exposedName;

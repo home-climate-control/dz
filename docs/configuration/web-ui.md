@@ -7,15 +7,19 @@ Best explained by example:
 
 ```yaml
   web-ui:
-    port: 9999
+    http-port: 6666
+    duplex-port: 7777
     directors:
       - house-unit1
       - house-unit2
       - server-room
 ```
 
-### port
-Port to listen on. Defaults to 3939.
+### http-port
+HTTP port to listen on. Defaults to 3939.
+
+### duplex-port
+Duplex protocol port to listen on. Defaults to 3940.
 
 ### interface
 Interfaces to listen on. Defaults to `0.0.0.0`.
@@ -28,7 +32,7 @@ Set of references to [directors](./directors.md). If you skip it HCC will assume
 > It is best to include at least one non-empty keyword (in this case, `port`).
 
 ### sensors
-Unlike the [console](./console.md#sensors), WebUI takes all the configured [sensors](./sensors-and-switches.md) as a part of the implied configuration.
+Unlike the [console](./console.md#sensors), WebUI takes all the configured [sensors](./sensors-switches-fans.md) as a part of the implied configuration.
 
 ### units
 

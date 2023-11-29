@@ -274,6 +274,19 @@ class TimeoutGuardTest {
         );
     }
 
+    /**
+     * Damn the confusion between {@link Duration#toNanos()}, {@link Duration#getNano()}, {@link Duration#toNanosPart()}, and their signs.
+     */
+    @Test
+    void negativeNanos() {
+
+        var late = Duration.ofMillis(-1);
+
+        assertThat(late.toNanos()).isEqualTo(-1000000L);
+        assertThat(late.getNano()).isEqualTo(999000000L);
+        assertThat(late.toNanosPart()).isEqualTo(999000000L);
+    }
+
     @Test
     void negativeWaitTime() {
 

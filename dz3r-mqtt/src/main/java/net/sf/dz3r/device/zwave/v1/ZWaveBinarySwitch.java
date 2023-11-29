@@ -3,10 +3,11 @@ package net.sf.dz3r.device.zwave.v1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
+import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Scheduler;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+
+import static net.sf.dz3r.device.mqtt.v2.AbstractMqttListener.DEFAULT_CACHE_AGE;
 
 /**
  * Implementation for Z-Wave Binary Switch Generic Device Class over MQTT.
@@ -25,7 +28,10 @@ import java.util.Map;
  * @see net.sf.dz3r.device.z2m.v1.Z2MSwitch
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ *
+ * @deprecated Use {@link net.sf.dz3r.device.zwave.v2.ZWaveCqrsBinarySwitch} instead.
  */
+@Deprecated(since = "5.0.0")
 public class ZWaveBinarySwitch extends AbstractMqttSwitch {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -72,7 +78,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
                              Scheduler scheduler) {
 
         this(
-                new MqttAdapter(new MqttEndpoint(host, port), username, password, reconnect),
+                new MqttAdapterImpl(new MqttEndpoint(host, port), username, password, reconnect, DEFAULT_CACHE_AGE),
                 deviceRootTopic,
                 false,
                 scheduler);
@@ -88,7 +94,7 @@ public class ZWaveBinarySwitch extends AbstractMqttSwitch {
         super(
                 mqttAdapter,
                 new MqttMessageAddress(
-                        mqttAdapter.address,
+                        mqttAdapter.getAddress(),
                         deviceRootTopic),
                 scheduler,
                 Duration.ofSeconds(30),

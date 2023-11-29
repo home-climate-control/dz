@@ -34,6 +34,12 @@ Best explained by example:
     - heatpump-hat:
         - id: heatpump-hat
           mode-change-delay: 20S
+    - variable:
+        - id: hvac-infinity-ac-a6
+          mode: cooling
+          actuator: fan-infinity-ac-a6
+          band-count: 5
+          max-power: 0.5
 
 ```
 ### Common Properties
@@ -45,7 +51,7 @@ Best explained by example:
 
 An on/off HVAC device. Examples: heat fan, radiant heater, oil heater, motorized shade, economizer.
 
-* `mode`: Which mode this device is used in. There can be one. The system will refuse to use this device in the wrong mode.
+* `mode`: Which mode this device is used in. There can be one. The system will refuse to use this device in the wrong mode. This parameter is mandatory.
 * `switch-address`: Address of the switch that turns this device on or off.
 
 ### heatpump
@@ -65,6 +71,19 @@ This is a Raspberry Pi specific device utilizing a [Pimoroni Automation HAT](htt
 * Relay 2 is used as an air handler switch
 
 No additional configuration is required.
+
+### variable
+
+An on/off HVAC device. Examples: heat fan, radiant heater, oil heater, motorized shade, economizer.
+
+* `mode`: Which mode this device is used in. There can be one. The system will refuse to use this device in the wrong mode. This parameter is mandatory.
+* `actuator`: The variable output device used as a HVAC unit. Currently, only [MQTT fans](./mqtt.md#sensors-switches-fans) are supported.
+* `max-power`: scale the maximum power output of this device to this much from the total power. The purpose of this parameter is to reduce noise.
+* `band-count`: The control signal will be split into this many bands, and the output will not change while the control signal is within the same band. This is done to make the device noise less noticeable, infinitely variable devices annoy people.
+  * Default band count is 10, and the maximum possible value is 100. It would probably be a bad idea to raise it above the default.
+  * Value of 0 disables banding altogether.
+
+> NOTE: Device power output is first scaled to `max-power`, and then banded by `band-count`. Control quality does not deteriorate with reduced output.
 
 ### Property of
 * [home-climate-control](./home-climate-control.md)

@@ -18,9 +18,10 @@ class ConfigurationParserTest {
 
         var broker = new MqttBrokerConfig(null, source.host(), source.port(), null, null, "none", source.autoReconnect);
         var spec = new MqttDeviceConfig(
-                        broker,
-                        null,
-                        null);
+                broker,
+                null,
+                null,
+                null);
 
         assertThat(spec.broker().signature()).isEqualTo(source.expected);
     }

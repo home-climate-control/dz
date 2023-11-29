@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Schedulers;
 
+import java.io.IOException;
+
 public class ShutdownHandler implements AutoCloseable {
 
     private final Logger logger = LogManager.getLogger();
@@ -24,6 +26,19 @@ public class ShutdownHandler implements AutoCloseable {
         Marker m = new Marker("shutdown", Level.INFO);
         try {
             logger.warn("Shutting down");
+
+            // Stop advertisement
+            context.webUI
+                    .getFlux()
+                    .publishOn(Schedulers.boundedElastic())
+                    .doOnNext(ui -> {
+                        try {
+                            ui.getValue().close();
+                        } catch (IOException ex) {
+                            logger.warn("failed to stop mDNS advertisement, nothing we can do about that now", ex);
+                        }
+                    })
+                    .subscribe();
 
             // Disable controls - console and WebUI
             logger.error("FIXME: shut off controls");

@@ -1,7 +1,12 @@
 package net.sf.dz3r.view.webui.v2;
 
+import com.homeclimatecontrol.hcc.Version;
+import com.homeclimatecontrol.hcc.meta.EndpointMeta;
+import net.sf.dz3r.common.DurationFormatter;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.model.UnitDirector;
+import net.sf.dz3r.runtime.GitProperties;
+import net.sf.dz3r.runtime.InstanceIdProvider;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
@@ -20,43 +25,61 @@ import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 
+import javax.jmdns.JmDNS;
+import javax.jmdns.ServiceInfo;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.util.AbstractMap;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static com.homeclimatecontrol.hcc.meta.EndpointMeta.Type.DIRECT;
+import static net.sf.dz3r.view.webui.v2.RoutingConfiguration.META_PATH;
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
 /**
  * Web UI for Home Climate Control - reactive version.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public class WebUI {
+public class WebUI implements AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
-    public static final int DEFAULT_PORT = 3939;
+    public static final int DEFAULT_PORT_HTTP = 3939;
+    public static final int DEFAULT_PORT_DUPLEX = 3940;
 
     private final Config config;
     private final Set<UnitDirector> initSet = new HashSet<>();
 
     private final Map<UnitDirector, UnitObserver> unit2observer = new TreeMap<>();
 
-    public WebUI(int port,
-                 String interfaces,
-                 Set<UnitDirector> directors,
-                 InstrumentCluster ic,
-                 TemperatureUnit temperatureUnit) {
+    private JmDNS jmDNS;
 
-        this.config = new Config(port, interfaces, directors, ic, temperatureUnit);
+    public WebUI(
+            String instance,
+            int httpPort,
+            int duplexPort,
+            String interfaces,
+            EndpointMeta endpointMeta,
+            Set<UnitDirector> directors,
+            InstrumentCluster ic,
+            TemperatureUnit temperatureUnit) {
+
+        this.config = new Config(instance, httpPort, duplexPort, interfaces, endpointMeta, directors, ic, temperatureUnit);
 
         this.initSet.addAll(directors);
 
-        logger.info("port: {}", port);
+        logger.info("port: {}", httpPort);
 
         if (directors.isEmpty()) {
             logger.warn("empty init set, only diagnostic URLs will be available");
@@ -83,15 +106,72 @@ public class WebUI {
             var httpHandler = RouterFunctions.toHttpHandler(new RoutingConfiguration().monoRouterFunction(this));
             var adapter = new ReactorHttpHandlerAdapter(httpHandler);
 
-            var server = HttpServer.create().host(config.interfaces).port(config.port);
+            var server = HttpServer.create().host(config.interfaces).port(config.httpPort);
             DisposableServer disposableServer = server.handle(adapter).bind().block();
 
             logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());
+
+            advertise();
 
             disposableServer.onDispose().block(); // NOSONAR Acknowledged, ignored
 
             logger.info("done");
 
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void advertise() {
+        ThreadContext.push("mdns-advertise");
+        try {
+
+            var localhost = InetAddress.getLocalHost();
+            var canonical = localhost.getCanonicalHostName();
+            var fqdn = InetAddress.getByName(canonical);
+
+            // Old bug: https://serverfault.com/questions/363095/why-does-my-hostname-appear-with-the-address-127-0-1-1-rather-than-127-0-0-1-in
+            final var local11 = "127.0.1.1";
+
+            if (fqdn.getHostAddress().equals(local11)) {
+                logger.error("Check /etc/hosts for {}, it likely breaks mDNS resolution", local11);
+            }
+
+            logger.debug("fqdn={}/{}", canonical, fqdn);
+
+            jmDNS = JmDNS.create(fqdn);
+
+            var propMap = Map.of(
+
+                    "path", META_PATH, // http://www.dns-sd.org/txtrecords.html#http
+                    "protocol-version", Version.PROTOCOL_VERSION,
+
+                    "duplex", Integer.toString(config.duplexPort),
+                    "type",DIRECT.toString().toLowerCase(),
+
+                    "name", config.instance,
+                    "vendor", "homeclimatecontrol.com",
+
+                    "unique-id", InstanceIdProvider.getId().toString()
+            );
+
+            var serviceInfo = ServiceInfo.create(
+                    "_http._tcp.local.",
+                    "HCC WebUI @" + config.instance,
+                    "",
+                    config.httpPort,
+                    0,
+                    0,
+                    propMap
+            );
+
+            jmDNS.registerService(serviceInfo);
+
+            logger.debug("mDNS registered: {}", serviceInfo);
+
+
+        } catch (IOException ex) {
+            logger.error("failed to advertise over mDNS, ignored", ex);
         } finally {
             ThreadContext.pop();
         }
@@ -114,24 +194,28 @@ public class WebUI {
     }
 
     /**
-     * Response handler for the {@code /} HTTP request.
+     * Advertise the capabilities ({@code HTTP GET /} request).
      *
-     * @param rq Request object.
+     * @param ignoredRq ignored.
      *
-     * @return Whole system representation.
+     * @return Whole system representation ({@link EndpointMeta} as JSON).
      */
-    public Mono<ServerResponse> getDashboard(ServerRequest rq) {
-        return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
+    public Mono<ServerResponse> getMeta(ServerRequest ignoredRq) {
+        logger.info("GET ? " + Version.PROTOCOL_VERSION);
+
+        return ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Flux.just(config.endpointMeta), EndpointMeta.class);
     }
 
     /**
      * Response handler for the zone set request.
      *
-     * @param rq Request object.
+     * @param ignoredRq ignored.
      *
      * @return Set of zone representations.
      */
-    public Mono<ServerResponse> getZones(ServerRequest rq) {
+    public Mono<ServerResponse> getZones(ServerRequest ignoredRq) {
         logger.info("GET /zones");
 
         return ok()
@@ -177,11 +261,11 @@ public class WebUI {
     /**
      * Response handler for the sensor set request.
      *
-     * @param rq Request object.
+     * @param ignoredRq ignored.
      *
      * @return Set of sensor representations.
      */
-    public Mono<ServerResponse> getSensors(ServerRequest rq) {
+    public Mono<ServerResponse> getSensors(ServerRequest ignoredRq) {
         logger.info("GET /sensors");
 
         return ok()
@@ -214,11 +298,11 @@ public class WebUI {
     /**
      * Response handler for the unit set request.
      *
-     * @param rq Request object.
+     * @param ignoredRq ignored.
      *
      * @return Set of unit representations.
      */
-    public Mono<ServerResponse> getUnits(ServerRequest rq) {
+    public Mono<ServerResponse> getUnits(ServerRequest ignoredRq) {
         logger.info("GET /units");
 
         var units = Flux.fromIterable(unit2observer.entrySet())
@@ -263,6 +347,60 @@ public class WebUI {
         return ServerResponse.unprocessableEntity().bodyValue("Stay tuned, coming soon");
     }
 
+    private static final DurationFormatter uptimeFormatter = new DurationFormatter();
+
+    /**
+     * Get uptime.
+     *
+     * @param ignoredRq ignored.
+     *
+     * @return System uptime in both computer and human readable form.
+     */
+    public Mono<ServerResponse> getUptime(ServerRequest ignoredRq) {
+        logger.info("GET /uptime");
+
+        var mx = ManagementFactory.getRuntimeMXBean();
+        var startMillis = mx.getStartTime();
+        var uptimeMillis = mx.getUptime();
+        var start = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS").format(new Date(startMillis)) + " " + ZoneId.systemDefault();
+        var uptime = uptimeFormatter.format(uptimeMillis);
+
+        // Let's make the JSON order predictable
+        var result = new LinkedHashMap<>();
+
+        result.put("start", start);
+        result.put("uptime", uptime);
+        result.put("start.millis", startMillis);
+        result.put("uptime.millis", uptimeMillis);
+
+        return ok().contentType(MediaType.APPLICATION_JSON).body(Flux.fromIterable(result.entrySet()), Object.class);
+    }
+
+    /**
+     * Get the version.
+     *
+     * @param ignoredRq ignored.
+     *
+     * @return Git revision properties.
+     */
+    public Mono<ServerResponse> getVersion(ServerRequest ignoredRq) {
+        logger.info("GET /version");
+
+        try {
+            return ok().contentType(MediaType.APPLICATION_JSON).body(Flux.fromIterable(GitProperties.get().entrySet()), Object.class);
+        } catch (IOException ex) {
+            throw new IllegalStateException("This shouldn't have happened", ex);
+        }
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (jmDNS != null) {
+            jmDNS.unregisterAllServices();
+            jmDNS.close();
+        }
+    }
+
     private interface Initializer<T> {
         void init(T source);
     }
@@ -278,8 +416,11 @@ public class WebUI {
         }
     }
     public record Config(
-            int port,
+            String instance,
+            int httpPort,
+            int duplexPort,
             String interfaces,
+            EndpointMeta endpointMeta,
             Set<UnitDirector> directors,
             InstrumentCluster ic,
             TemperatureUnit initialUnit

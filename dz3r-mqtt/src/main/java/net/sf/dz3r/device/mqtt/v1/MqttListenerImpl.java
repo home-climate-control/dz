@@ -4,7 +4,7 @@ import com.hivemq.client.mqtt.datatypes.MqttTopic;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
 import com.hivemq.client.mqtt.mqtt3.exceptions.Mqtt3ConnAckException;
-import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.mqtt.MqttListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -24,7 +24,17 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint>, AutoCloseable {
+/**
+ * MQTT stream cold publisher.
+ *
+ * Doesn't implement the {@link net.sf.dz3r.signal.SignalSource} interface - no need at this point
+ * in the data pipeline, DZ entities haven't been resolved yet.
+ *
+ * If you need to publish messages, use {@link MqttAdapterImpl} instead.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ */
+public class MqttListenerImpl implements MqttListener {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -47,10 +57,17 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint>,
     private Mqtt3AsyncClient client;
 
     private final Map<String, Flux<MqttSignal>> topic2flux = new TreeMap<>();
-    protected AbstractMqttAdapter(
-            MqttEndpoint address,
-            String username, String password,
-            boolean autoReconnect) {
+
+    /**
+     * Create an unauthenticated instance that will NOT automatically reconnect.
+     *
+     * @param address MQTT broker endpoint.
+     */
+    public MqttListenerImpl(MqttEndpoint address) {
+        this(address, null, null, false);
+    }
+
+    public MqttListenerImpl(MqttEndpoint address, String username, String password, boolean autoReconnect) {
 
         this.address = address;
         this.username = username;
@@ -234,7 +251,8 @@ public abstract class AbstractMqttAdapter  implements Addressable<MqttEndpoint>,
                         // Persistent messages will be delivered immediately before there's a chance to call
                         // subscribe() on the flux - we didn't even return it yet
 
-                        // VT: FIXME: Buffer the last value received? May want to log this once per runtime, logs of chatter here
+                        // VT: FIXME: Buffer the last value received? May want to log this once per runtime, lots of chatter here
+                        // VT: NOTE: This is the root cause for https://github.com/home-climate-control/dz/issues/296; will be handled elsewhere
 
                         logger.debug("no subscriptions to '{}/#' yet, dropped: {} {}", topic, p.getTopic(), new String(p.getPayloadAsBytes(), StandardCharsets.UTF_8));
                         return;

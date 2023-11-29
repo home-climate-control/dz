@@ -3,7 +3,7 @@ package net.sf.dz3r.device.z2m.v1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3r.device.Addressable;
-import net.sf.dz3r.device.mqtt.v1.MqttAdapter;
+import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
@@ -65,7 +65,7 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
     public Z2MJsonListener(MqttAdapter mqttAdapter, String mqttRootTopicSub, String measurement) {
 
         if (measurement == null) {
-            logger.warn("{} {} created with default measurement of {}", mqttAdapter.address, mqttRootTopicSub, DEFAULT_MEASUREMENT);
+            logger.warn("{} {} created with default measurement of {}", mqttAdapter.getAddress(), mqttRootTopicSub, DEFAULT_MEASUREMENT);
             measurement = DEFAULT_MEASUREMENT;
         }
 

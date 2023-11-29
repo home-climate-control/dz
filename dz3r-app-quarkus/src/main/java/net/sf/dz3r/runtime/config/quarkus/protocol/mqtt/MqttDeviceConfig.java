@@ -16,6 +16,7 @@ import java.util.Set;
 public interface MqttDeviceConfig extends MqttGateway {
 
     @JsonProperty("broker")
+    @Override
     MqttBrokerConfig broker();
 
     @JsonProperty("sensors")
@@ -25,4 +26,8 @@ public interface MqttDeviceConfig extends MqttGateway {
     @JsonProperty("switches")
     @Override
     Set<SwitchConfig> switches();
+
+    @JsonProperty("fans")
+    @Override
+    Set<FanConfig> fans();
 }

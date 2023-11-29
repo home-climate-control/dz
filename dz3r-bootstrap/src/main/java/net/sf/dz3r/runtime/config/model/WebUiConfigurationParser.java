@@ -19,14 +19,15 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
         this.ic = ic;
     }
 
-    public WebUI parse(WebUiConfig cf) {
+    public WebUI parse(String instance, WebUiConfig cf) {
 
         if (cf == null) {
             logger.warn("WebUI is not configured");
             return null;
         }
 
-        var port = Optional.ofNullable(cf.port()).orElse(WebUI.DEFAULT_PORT);
+        var httpPort = Optional.ofNullable(cf.httpPort()).orElse(WebUI.DEFAULT_PORT_HTTP);
+        var duplexPort = Optional.ofNullable(cf.duplexPort()).orElse(WebUI.DEFAULT_PORT_DUPLEX);
         var interfaces = Optional.ofNullable(cf.interfaces()).orElse("0.0.0.0");
         var directors = context
                 .directors
@@ -36,6 +37,11 @@ public class WebUiConfigurationParser extends ConfigurationContextAware {
                 .collect(Collectors.toSet())
                 .block();
 
-        return new WebUI(port, interfaces, directors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
+        var webUI = new WebUI(instance, httpPort, duplexPort, interfaces, context.endpoint.getFlux().blockFirst().getValue(), directors, ic, Optional.ofNullable(cf.units()).orElse(TemperatureUnit.C));
+
+        // Needs to be resolvable to stop mDNS advertisements at the end
+        context.webUI.register("web-ui", webUI);
+
+        return webUI;
     }
 }

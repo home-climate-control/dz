@@ -1,5 +1,7 @@
 package net.sf.dz3r.counter;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
 
 /**
@@ -15,6 +17,8 @@ import reactor.core.publisher.Flux;
  */
 public abstract class AbsoluteIncrementAdapter<T extends Comparable<T>> {
 
+    private final Logger logger = LogManager.getLogger();
+
     /**
      * Last known snapshot
      */
@@ -27,7 +31,7 @@ public abstract class AbsoluteIncrementAdapter<T extends Comparable<T>> {
         return snapshots.flatMap(this::convert);
     }
 
-    private synchronized Flux<T> convert(T snapshot) {
+    private Flux<T> convert(T snapshot) {
 
         if (lastKnown == null) {
 
@@ -51,7 +55,10 @@ public abstract class AbsoluteIncrementAdapter<T extends Comparable<T>> {
         }
 
         if (!isMonotonous(lastKnown, snapshot)) {
-            return Flux.error(new IllegalArgumentException("lastKnown=" + lastKnown + ", snapshot=" + snapshot + ", not monotonous"));
+
+            // Need to keep an eye on this - there's a race condition that makes this happen
+            logger.warn("lastKnown={}, snapshot={}, not monotonous", lastKnown, snapshot, new IllegalStateException("trace"));
+            return Flux.empty();
         }
 
         lastKnown = snapshot;

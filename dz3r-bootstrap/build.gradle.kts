@@ -12,6 +12,7 @@ val jacksonVersion: String by project
 
 dependencies {
 
+    implementation(project(":hcc-data-source-api"))
     api(project(":dz3r-common"))
     api(project(":dz3r-config"))
     implementation(project(":dz3r-director"))
@@ -21,7 +22,7 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
 
-    // VTL NOTE: "implementation()" dependencies will migrate to
+    // VT: NOTE: "implementation()" dependencies will migrate to
     // "runtimeOnly" after the annotation based instantiation is introduced
 
     // Enable the Swing console

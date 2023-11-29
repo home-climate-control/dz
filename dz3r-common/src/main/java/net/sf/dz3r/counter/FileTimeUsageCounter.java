@@ -99,7 +99,7 @@ public class FileTimeUsageCounter implements ResourceUsageCounter<Duration>, Aut
 
             if (!storage.exists()) {
 
-                logger.warn("{} doesn't exist, will initialize with 0/{}", source, defaultThreshold);
+                logger.info("{} doesn't exist, will initialize with 0/{}", source, defaultThreshold);
                 return new TimeUsageCounter(Duration.ZERO, defaultThreshold);
             }
 

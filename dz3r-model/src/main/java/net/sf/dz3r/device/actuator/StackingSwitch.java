@@ -16,8 +16,11 @@ import java.util.TreeSet;
  * participating virtual switch is turned off.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2022
+ *
+ * @deprecated Use {@link StackingCqrsSwitch} instead.
  */
-public class StackingSwitch  implements Switch<String> {
+@Deprecated(since = "5.0.0")
+public class StackingSwitch implements Switch<String> {
 
     private final Logger logger = LogManager.getLogger();
 

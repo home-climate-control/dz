@@ -1,36 +1,36 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
-import net.sf.dz3r.device.actuator.StackingSwitch;
-import net.sf.dz3r.device.actuator.Switch;
+import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.CallingStatus;
 import net.sf.dz3r.signal.hvac.EconomizerStatus;
+import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Clock;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.concurrent.CountDownLatch;
 
 /**
  * Common implementation for all economizer classes.
  *
- * @param <A> Actuator device address type.
- *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
-public abstract class AbstractEconomizer <A extends Comparable<A>> implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
+public abstract class AbstractEconomizer implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
 
     protected final Logger logger = LogManager.getLogger();
 
@@ -38,19 +38,19 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
     public final String name;
 
-    public EconomizerSettings settings;
+    private EconomizerSettings settings;
 
-    private final Switch<A> targetDevice;
+    private final HvacDevice device;
 
-    private final StackingSwitch targetDeviceStack;
-
+    private Duration timeout;
+    private final Sinks.Many<Signal<HvacCommand, Void>> deviceCommandSink = Sinks.many().unicast().onBackpressureBuffer();
     /**
-     * Last known indoor temperature. Can't be an error.
+     * Last known indoor temperature.
      */
     private Signal<Double, String> indoor;
 
     /**
-     * Last known ambient temperature. Can't be an error.
+     * Last known ambient temperature.
      */
     private Signal<Double, Void> ambient;
 
@@ -62,7 +62,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     private EconomizerStatus economizerStatus;
 
     /**
-     * Mirrors the state of {@link #targetDevice} to avoid expensive operations.
+     * Mirrors the state of {@link #device} to avoid expensive operations.
      */
     private Boolean actuatorState;
     private FluxSink<IndoorAmbientPair> combinedSink;
@@ -72,26 +72,33 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
     /**
      * Create an instance.
      *
-     * @param targetDevice Switch to control the economizer actuator.
+     * @param device HVAC device acting as the economizer.
+     * @param timeout Stale timeout. 90 seconds is a reasonable default.
      */
     protected AbstractEconomizer(
             Clock clock,
             String name,
             EconomizerSettings settings,
-            Switch<A> targetDevice) {
+            HvacDevice device,
+            Duration timeout) {
+
+        checkModes(settings.mode, device);
 
         this.clock = clock == null ? Clock.systemUTC() : clock;
         this.name = name;
         setSettings(settings);
 
-        this.targetDevice = targetDevice;
+        this.device = HCCObjects.requireNonNull(device, "device can't be null");
+        this.timeout = HCCObjects.requireNonNull(timeout, "timeout can't be null");
 
-        // There are two virtual switches linked to this switch:
-        //
-        // "demand" - controlled by heating and cooling operations
-        // "ventilation" - controlled by explicit requests to turn the fan on or off
-
-        this.targetDeviceStack = new StackingSwitch("economizer", targetDevice);
+        device
+                .compute(
+                        deviceCommandSink
+                                .asFlux()
+                                .publishOn(Schedulers.boundedElastic())
+                                .doOnNext(s -> logger.debug("{}: HVAC device state/send: {}", getAddress(), s))
+                )
+                .subscribe(s -> logger.debug("{}: HVAC device state/done: {}", getAddress(), s));
 
         this.economizerStatus = new EconomizerStatus(
                 new EconomizerTransientSettings(settings),
@@ -100,6 +107,16 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         // Don't forget to connect fluxes; this can only be done in subclasses after all the
         // necessary components were initialized
         // initFluxes(ambientFlux); // NOSONAR
+    }
+
+    /**
+     * Make sure the device supports the required mode.
+     */
+    private void checkModes(HvacMode mode, HvacDevice device) {
+
+        if (!device.getModes().contains(mode)) {
+            throw new IllegalArgumentException("requested mode " + mode + " is not among available: " + device.getModes());
+        }
     }
 
     public void setSettings(EconomizerSettings settings) {
@@ -127,12 +144,12 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         var stage2 = computeDeviceState(stage1)
                 .map(this::recordDeviceState);
 
-        var demandDevice = targetDeviceStack.getSwitch("demand");
-
         // And act on it
         stage2
                 // Let the transmission layer figure out the dupes, they have a better idea about what to do with them
-                .flatMap(demandDevice::setState)
+                .doOnNext(s -> logger.debug("{}: setDeviceState/send={}", getAddress(), s))
+                .doOnNext(this::setDeviceState)
+                .doOnNext(s -> logger.debug("{}: setDeviceState/done={}", getAddress(), s))
 
                 .doOnError(t -> logger.error("{}: errored out", getAddress(), t))
                 .doOnComplete(() -> logger.debug("{}: completed", getAddress()))
@@ -148,6 +165,19 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
                 // VT: NOTE: Careful when testing, this will consume everything thrown at it immediately
                 .subscribe();
+    }
+
+    private void setDeviceState(Boolean state) {
+
+        var ctl = Boolean.TRUE.equals(state) ? 1.0 : 0.0;
+        var signal = new Signal<HvacCommand, Void>(
+                clock.instant(),
+                new HvacCommand(settings.mode, ctl, ctl)
+        );
+
+        logger.debug("{}: setDeviceState={}", getAddress(), signal);
+
+        deviceCommandSink.tryEmitNext(signal);
     }
 
     protected abstract Flux<Signal<Boolean, ProcessController.Status<Double>>> computeDeviceState(Flux<Signal<Double, Void>> signal);
@@ -245,18 +275,19 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
 
                 // No go, incomplete information
                 logger.debug("{}: null signals? {}", getAddress(), pair);
-                return new Signal<>(Instant.now(clock), -1d);
+                return new Signal<>(clock.instant(), -1d);
             }
 
             if (pair.indoor.isError() || pair.ambient.isError()) {
 
                 // Absolutely not
                 logger.warn("{}: error signals? {}", getAddress(), pair);
-                return new Signal<>(Instant.now(clock), -1d);
+                return new Signal<>(clock.instant(), -1d);
             }
 
-            // Let's be generous; Zigbee sensors can fall back to 60 seconds interval even if configured faster
-            var stale = Instant.now(clock).minus(Duration.ofSeconds(90));
+            // Let's be generous; Zigbee sensors can fall back to 60 seconds interval even if configured faster,
+            // and even 90 seconds can cause blips once in a while
+            var stale = clock.instant().minus(timeout);
 
             if (pair.indoor.timestamp.isBefore(stale) || pair.ambient.timestamp.isBefore(stale)) {
 
@@ -266,7 +297,7 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
                 this.indoor = null;
                 this.ambient = null;
 
-                return new Signal<>(Instant.now(clock), -1d);
+                return new Signal<>(clock.instant(), -1d);
             }
 
             var indoorTemperature = pair.indoor.getValue();
@@ -410,7 +441,8 @@ public abstract class AbstractEconomizer <A extends Comparable<A>> implements Si
         ThreadContext.push("close");
         try {
             logger.warn("Shutting down: {}", getAddress());
-            targetDevice.setState(false).block();
+            setDeviceState(false);
+            deviceCommandSink.tryEmitComplete();
         } finally {
             logger.info("Shut down: {}", getAddress());
             ThreadContext.pop();
