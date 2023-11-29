@@ -3,12 +3,14 @@ Home Climate Control: Release Notes
 
 ## Coming Up
 
-* [#298](https://github.com/home-climate-control/dz/issues/298) HCC now advertizes itself over mDNS
-* [#296 MQTT devices relying on retained messages may not work correctly](https://github.com/home-climate-control/dz/issues/296)
-* [#295 Multiple ESPHome logical devices per physical device will report "available" only for one random](https://github.com/home-climate-control/dz/issues/295)
-* [#293 Implement variable output single mode HVAC device](https://github.com/home-climate-control/dz/issues/293)
-* [#292 Decouple possibly faulty actuators from control logic so that the processing pipeline doesn't get stuck ](https://github.com/home-climate-control/dz/issues/292)
-* [#291 Economizer: control a HVAC device, not a switch](https://github.com/home-climate-control/dz/issues/291)
+## v4.1.0
+Major milestones:
+
+* Any HVAC device can now be used as an economizer ([#291](https://github.com/home-climate-control/dz/issues/291))
+* Major fault tolerance improvement, better telemetry and diagnostics ([#292](https://github.com/home-climate-control/dz/issues/292))
+* Variable output single mode HVAC devices are now supported ([#293](https://github.com/home-climate-control/dz/issues/293))
+
+[read more...](./release-notes/v4.1.0.md)
 
 ## v4.0.0
 Major milestones:
@@ -17,7 +19,7 @@ Major milestones:
 * Now [runs in a container](../docs/build/index.md#docker)
 * Now [integrated with Home Assistant](../docs/configuration/home-assistant.md)
 
-[read more](./release-notes/v4.0.0.md) 
+[read more...](./release-notes/v4.0.0.md)
 
 ## pre-v4.0.0
 
