@@ -2,14 +2,22 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.UnitControlSignal;
+import net.sf.dz3r.signal.hvac.ZoneStatus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 class ZoneControllerTest {
+
+    private final Logger logger = LogManager.getLogger();
 
     private final List<Double> source = List.of(
             20.0,
@@ -467,5 +477,105 @@ class ZoneControllerTest {
                 .create(fluxZ)
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
                 .verifyComplete();
+    }
+
+    /**
+     * Make sure all zones are raised when the HVAC unit turns on.
+     *
+     * See <a href="https://github.com/home-climate-control/dz/issues/300">#300</a> for details.
+     */
+    @Test
+    void raise() throws InterruptedException {
+
+        var t1 = createRaiseTuple(20.0, "ts20");
+        var t2 = createRaiseTuple(25.0, "ts25");
+        var t3 = createRaiseTuple(30.0, "ts30");
+
+        var tuples = Set.of(t1, t2, t3);
+        var zones = Set.of(
+                t1.zone,
+                t2.zone,
+                t3.zone
+        );
+
+        var zc = new ZoneController(zones);
+
+        var z1 = t1.zone.compute(t1.flux).doOnNext(signal -> t1.output.add(signal.getValue()));
+        var z2 = t2.zone.compute(t2.flux).doOnNext(signal -> t2.output.add(signal.getValue()));
+        var z3 = t3.zone.compute(t3.flux).doOnNext(signal -> t3.output.add(signal.getValue()));
+
+        var allZones = Flux.merge(z1, z2, z3);
+
+        var output = zc
+                .compute(allZones)
+                .subscribeOn(Schedulers.boundedElastic());
+
+        // Prime all the zones so that they are barely happy
+        for (var t: tuples) {
+            t.sink.tryEmitNext(createSignal(t.setpoint - 0.9, t.zone.getAddress()));
+        }
+
+        var zcOutput = new ArrayList<Signal<UnitControlSignal, String>>();
+
+        // As many as there are zones
+        var gate = new CountDownLatch(3);
+
+        output
+                .doOnNext(r -> logger.info("output/barely-happy: {}", r))
+                .doOnNext(ignored -> gate.countDown())
+                .subscribe(zcOutput::add);
+
+        // Give the thread a chance to start
+        gate.await();
+
+        // Verify
+        assertThat(t1.output.get(0).callingStatus.calling).isFalse();
+        assertThat(t2.output.get(0).callingStatus.calling).isFalse();
+        assertThat(t3.output.get(0).callingStatus.calling).isFalse();
+
+        assertThat(zcOutput).hasSize(3);
+        assertThat(zcOutput.get(2).getValue().demand).isZero();
+
+        // Now make one unhappy
+        t1.sink.tryEmitNext(createSignal(t1.setpoint + 5, t1.zone.getAddress()));
+
+        assertThat(t1.output.get(1).callingStatus.calling).isTrue();
+
+        // These two are unchanged for now
+        // VT: FIXME: THIS IS WRONG - both of them should've been raised
+        assertThat(t2.output).hasSize(1);
+        assertThat(t3.output).hasSize(1);
+
+        assertThat(zcOutput).hasSize(4);
+        assertThat(zcOutput.get(3).getValue().demand).isEqualTo(6.0);
+    }
+
+    private Signal<Double, String> createSignal(double temperature, String address) {
+        return new Signal<>(Instant.now(), temperature, address);
+    }
+
+    private RaiseTuple createRaiseTuple(double setpoint, String zoneName) {
+
+        Sinks.Many<Signal<Double, String>> sink = Sinks.many().multicast().onBackpressureBuffer();
+
+        return new RaiseTuple(
+                setpoint,
+                new Zone(
+                        new Thermostat(zoneName, setpoint, 1, 0, 0, 1),
+                        new ZoneSettings(true, setpoint, true, false, 0)
+                ),
+                sink,
+                sink.asFlux(),
+                new ArrayList<>());
+    }
+
+    private record RaiseTuple(
+            double setpoint,
+            Zone zone,
+            Sinks.Many<Signal<Double, String>> sink,
+            Flux<Signal<Double, String>> flux,
+            List<ZoneStatus> output
+    ) {
+
     }
 }
