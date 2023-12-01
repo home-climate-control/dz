@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.controller.pid.AbstractPidController;
@@ -9,7 +10,11 @@ import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.CallingStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
+
+import java.time.Clock;
 
 /**
  * Thermostat.
@@ -31,6 +36,7 @@ import reactor.core.publisher.Flux;
 public class Thermostat implements ProcessController<Double, CallingStatus, Void>, Addressable<String> {
 
     private final Logger logger = LogManager.getLogger();
+    private final Clock clock;
 
     private final String name;
     public final Range<Double> setpointRange;
@@ -62,17 +68,21 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
      */
     private final HysteresisController<Status<Double>> signalRenderer;
 
+    private final Sinks.Many<Signal<Double, Status<Double>>> stateSink = Sinks.many().unicast().onBackpressureBuffer();
+    private final Flux<Signal<Double, Status<Double>>> stateFlux = stateSink.asFlux();
+
     /**
      * Create a thermostat with a default 10C..40C setpoint range and specified setpoint and PID values.
      *
      */
     public Thermostat(String name, double setpoint, double p, double i, double d, double limit) {
-        this(name, new Range<>(10d, 40d), setpoint, p, i, d, limit);
+        this(Clock.systemUTC(), name, new Range<>(10d, 40d), setpoint, p, i, d, limit);
     }
 
     /**
      * Create a thermostat with a custom setpoint range.
      *
+     * @param clock Clock to base operations on.
      * @param name Thermostat name.
      * @param setpointRange Setpoint range for this thermostat.
      * @param setpoint Initial setpoint.
@@ -81,8 +91,9 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
      * @param d PID controller derivative weight.
      * @param limit PID controller saturation limit.
      */
-    public Thermostat(String name, Range<Double> setpointRange, double setpoint, double p, double i, double d, double limit) {
+    public Thermostat(Clock clock, String name, Range<Double> setpointRange, double setpoint, double p, double i, double d, double limit) {
 
+        this.clock = HCCObjects.requireNonNull(clock, "clock can't be null");
         this.name = name;
         this.setpointRange = setpointRange;
         this.setpoint = setpoint;
@@ -153,18 +164,22 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
         // Might want to make this available to outside consumers for instrumentation.
         var stage1 = controller
                 .compute(pv)
-                .doOnNext(e -> logger.trace("controller/{}: {}", name, e));
+                .doOnNext(e -> logger.trace("controller/{}: {}", name, e))
+                .doOnComplete(stateSink::tryEmitComplete); // or it will hang forever
 
         // Discard things the renderer doesn't understand.
         // Total failure is denoted by NaN by stage 1, it will get through.
         // The PID controller output value becomes the extra payload to pass to the zone controller to calculate demand.
-        var stage2 = stage1
+        Flux<Signal<Double, Status<Double>>> stage2 = stage1
                 .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
+
+        // Inject signals from raise(), if any
+        var stage3 = Flux.merge(stage2, stateFlux);
 
         // Deliver the signal
         // Might want to expose this as well
         return signalRenderer
-                .compute(stage2)
+                .compute(stage3)
                 .doOnNext(e -> logger.trace("renderer/{}: {}", name, e))
                 .map(this::mapOutput);
     }
@@ -183,5 +198,46 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
                 null,
                 source.status,
                 source.error);
+    }
+
+    /**
+     * Make the thermostat reconsider its calling status.
+     *
+     * If it is calling, there must be no change.
+     * If it is not calling, but the signal is within the hysteresis loop, status must change to calling.
+     * If it is not calling, and the signal is below the hysteresis loop, there must be no change.
+     */
+    public void raise() {
+        ThreadContext.push("raise");
+        try {
+            var actual = signalRenderer.getProcessVariable();
+
+            if (actual == null) {
+                logger.debug("no renderer state available yet, we'll have to wait until it is established");
+                return;
+            }
+
+            if (actual.getValue() >= HYSTERESIS) {
+                // no need, it's already calling
+                return;
+            }
+
+            if (actual.getValue() < -HYSTERESIS) {
+                // no point, it will not get high enough
+                return;
+            }
+
+            // All we need is a little nudge
+            // Timestamp has to be current - there's no say how long the PV was sitting there
+            var adjusted = new Signal<>(clock.instant(), HYSTERESIS, actual.payload);
+
+            logger.trace("{}: actual:   {}", getAddress(), actual);
+            logger.trace("{}: adjusted: {}", getAddress(), adjusted);
+
+            stateSink.tryEmitNext(adjusted);
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }

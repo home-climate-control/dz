@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import net.sf.dz3r.device.actuator.damper.DamperController;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
@@ -14,11 +15,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
- * Accepts signals from {@link Zone zones} and issues signals to Unit and Damper Controller.
+ * Accepts signals from {@link Zone zones} and issues signals to {@link UnitController} and {@link DamperController}.
  *
- * VT: FIXME: Augment the description with links once those entities are ported to reactive streams.
- *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSignal, String> {
 
@@ -143,12 +142,14 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         // "Bump" is letting the thermostat know that the unit is starting and they may want to reconsider their
         // calling status
-        var needBump = lastKnownCalling == 0 && unhappyVoting.size() > 0;
+        var needBump = lastKnownCalling == 0 && !unhappyVoting.isEmpty();
         lastKnownCalling = unhappyVoting.size();
 
         logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", unhappyCount, unhappyVotingCount, needBump, signal);
 
-        // VT: FIXME: implement bump() and call it here
+        if (needBump) {
+            raise();
+        }
 
         var demand = computeDemand(unhappy, unhappyVoting);
 
@@ -183,7 +184,6 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
         var votingEnabledCount = getVotingEnabledCount();
         var includeNonVoting = votingEnabledCount == 0;
 
-
         logger.debug("demandVoting={}, votingEnabledCount={}, includeNonVoting={}", demandVoting, votingEnabledCount, includeNonVoting);
 
         if (demandVoting == 0.0 && !includeNonVoting) {
@@ -212,5 +212,12 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .stream()
                 .map(e -> e.getValue().callingStatus.demand)
                 .reduce(Double::sum).orElse(0d);
+    }
+
+    private void raise() {
+
+        Flux
+                .fromIterable(zoneMap.values())
+                .subscribe(Zone::raise);
     }
 }

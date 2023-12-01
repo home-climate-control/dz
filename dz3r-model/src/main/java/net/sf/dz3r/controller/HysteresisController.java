@@ -143,6 +143,8 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
             throw new IllegalStateException("empty state, not error, can't be: " + pv);
         }
 
+        var oldState = state;
+
         if (state) {
 
             if (sample - thresholdLow <= setpoint) {
@@ -154,6 +156,10 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
             if (sample - thresholdHigh >= setpoint) {
                 state = true;
             }
+        }
+
+        if (oldState != state) {
+            logger.trace("{}: state change {} => {}", jmxName, oldState, state);
         }
 
         return new Signal<>(pv.timestamp, new HysteresisStatus(setpoint, getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS, sample), pv.payload);
