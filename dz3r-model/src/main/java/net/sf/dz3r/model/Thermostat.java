@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.controller.pid.AbstractPidController;
@@ -12,6 +13,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+
+import java.time.Clock;
 
 /**
  * Thermostat.
@@ -33,6 +36,7 @@ import reactor.core.publisher.Sinks;
 public class Thermostat implements ProcessController<Double, CallingStatus, Void>, Addressable<String> {
 
     private final Logger logger = LogManager.getLogger();
+    private final Clock clock;
 
     private final String name;
     public final Range<Double> setpointRange;
@@ -72,12 +76,13 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
      *
      */
     public Thermostat(String name, double setpoint, double p, double i, double d, double limit) {
-        this(name, new Range<>(10d, 40d), setpoint, p, i, d, limit);
+        this(Clock.systemUTC(), name, new Range<>(10d, 40d), setpoint, p, i, d, limit);
     }
 
     /**
      * Create a thermostat with a custom setpoint range.
      *
+     * @param clock Clock to base operations on.
      * @param name Thermostat name.
      * @param setpointRange Setpoint range for this thermostat.
      * @param setpoint Initial setpoint.
@@ -86,8 +91,9 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
      * @param d PID controller derivative weight.
      * @param limit PID controller saturation limit.
      */
-    public Thermostat(String name, Range<Double> setpointRange, double setpoint, double p, double i, double d, double limit) {
+    public Thermostat(Clock clock, String name, Range<Double> setpointRange, double setpoint, double p, double i, double d, double limit) {
 
+        this.clock = HCCObjects.requireNonNull(clock, "clock can't be null");
         this.name = name;
         this.setpointRange = setpointRange;
         this.setpoint = setpoint;
@@ -222,7 +228,8 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
             }
 
             // All we need is a little nudge
-            var adjusted = new Signal<>(actual.timestamp, HYSTERESIS, actual.payload);
+            // Timestamp has to be current - there's no say how long the PV was sitting there
+            var adjusted = new Signal<>(clock.instant(), HYSTERESIS, actual.payload);
 
             logger.trace("{}: actual:   {}", getAddress(), actual);
             logger.trace("{}: adjusted: {}", getAddress(), adjusted);

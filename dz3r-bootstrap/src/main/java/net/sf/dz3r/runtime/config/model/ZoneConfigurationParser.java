@@ -12,6 +12,7 @@ import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import reactor.core.publisher.Flux;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
@@ -79,7 +80,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
     private Thermostat createThermostat(String name, Double setpoint, RangeConfig rangeConfig, PidControllerConfig cf) {
 
         var range = map(Optional.ofNullable(rangeConfig).orElse(new RangeConfig(10.0, 40.0)));
-        return new Thermostat(name, range, setpoint, cf.p(), cf.i(), cf.d(), cf.limit());
+        return new Thermostat(Clock.systemUTC(), name, range, setpoint, cf.p(), cf.i(), cf.d(), cf.limit());
     }
 
     private ZoneSettings map(ZoneSettingsConfig source) {
