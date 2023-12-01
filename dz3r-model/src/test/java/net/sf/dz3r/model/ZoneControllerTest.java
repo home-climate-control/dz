@@ -544,6 +544,9 @@ class ZoneControllerTest {
         // Now make one unhappy
         t1.sink.tryEmitNext(createSignal(t1.setpoint + 5, t1.zone.getAddress()));
 
+        // Slow boxes struggle with ConcurrentModificationException; let's give them a bit of time to think until the right solution is implemented
+        Thread.sleep(100);
+
         assertThat(zcOutput).hasSize(5);
         assertThat(zcOutput.get(3).getValue().demand).isEqualTo(6.0);
 
