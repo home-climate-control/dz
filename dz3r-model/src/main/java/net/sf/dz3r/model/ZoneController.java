@@ -142,7 +142,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         // "Bump" is letting the thermostat know that the unit is starting and they may want to reconsider their
         // calling status
-        var needBump = lastKnownCalling == 0 && unhappyVoting.size() > 0;
+        var needBump = lastKnownCalling == 0 && !unhappyVoting.isEmpty();
         lastKnownCalling = unhappyVoting.size();
 
         logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", unhappyCount, unhappyVotingCount, needBump, signal);
@@ -181,7 +181,6 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
         // https://github.com/home-climate-control/dz/issues/195
         var votingEnabledCount = getVotingEnabledCount();
         var includeNonVoting = votingEnabledCount == 0;
-
 
         logger.debug("demandVoting={}, votingEnabledCount={}, includeNonVoting={}", demandVoting, votingEnabledCount, includeNonVoting);
 
