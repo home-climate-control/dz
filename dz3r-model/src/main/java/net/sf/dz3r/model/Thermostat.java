@@ -206,6 +206,11 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
         try {
             var actual = signalRenderer.getProcessVariable();
 
+            if (actual == null) {
+                logger.debug("no renderer state available yet, we'll have to wait until it is established");
+                return;
+            }
+
             if (actual.getValue() >= HYSTERESIS) {
                 // no need, it's already calling
                 return;
