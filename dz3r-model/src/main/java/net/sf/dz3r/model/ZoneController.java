@@ -147,7 +147,9 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", unhappyCount, unhappyVotingCount, needBump, signal);
 
-        // VT: FIXME: implement bump() and call it here
+        if (needBump) {
+            raise();
+        }
 
         var demand = computeDemand(unhappy, unhappyVoting);
 
@@ -210,5 +212,12 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .stream()
                 .map(e -> e.getValue().callingStatus.demand)
                 .reduce(Double::sum).orElse(0d);
+    }
+
+    private void raise() {
+
+        Flux
+                .fromIterable(zoneMap.values())
+                .subscribe(Zone::raise);
     }
 }

@@ -9,7 +9,9 @@ import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.CallingStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Sinks;
 
 /**
  * Thermostat.
@@ -61,6 +63,9 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
      * Controller defining this thermostat's output signal.
      */
     private final HysteresisController<Status<Double>> signalRenderer;
+
+    private final Sinks.Many<Signal<Double, Status<Double>>> stateSink = Sinks.many().unicast().onBackpressureBuffer();
+    private final Flux<Signal<Double, Status<Double>>> stateFlux = stateSink.asFlux();
 
     /**
      * Create a thermostat with a default 10C..40C setpoint range and specified setpoint and PID values.
@@ -153,18 +158,22 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
         // Might want to make this available to outside consumers for instrumentation.
         var stage1 = controller
                 .compute(pv)
-                .doOnNext(e -> logger.trace("controller/{}: {}", name, e));
+                .doOnNext(e -> logger.trace("controller/{}: {}", name, e))
+                .doOnComplete(stateSink::tryEmitComplete); // or it will hang forever
 
         // Discard things the renderer doesn't understand.
         // Total failure is denoted by NaN by stage 1, it will get through.
         // The PID controller output value becomes the extra payload to pass to the zone controller to calculate demand.
-        var stage2 = stage1
+        Flux<Signal<Double, Status<Double>>> stage2 = stage1
                 .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
+
+        // Inject signals from raise(), if any
+        var stage3 = Flux.merge(stage2, stateFlux);
 
         // Deliver the signal
         // Might want to expose this as well
         return signalRenderer
-                .compute(stage2)
+                .compute(stage3)
                 .doOnNext(e -> logger.trace("renderer/{}: {}", name, e))
                 .map(this::mapOutput);
     }
@@ -183,5 +192,40 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
                 null,
                 source.status,
                 source.error);
+    }
+
+    /**
+     * Make the thermostat reconsider its calling status.
+     *
+     * If it is calling, there must be no change.
+     * If it is not calling, but the signal is within the hysteresis loop, status must change to calling.
+     * If it is not calling, and the signal is below the hysteresis loop, there must be no change.
+     */
+    public void raise() {
+        ThreadContext.push("raise");
+        try {
+            var actual = signalRenderer.getProcessVariable();
+
+            if (actual.getValue() >= HYSTERESIS) {
+                // no need, it's already calling
+                return;
+            }
+
+            if (actual.getValue() < -HYSTERESIS) {
+                // no point, it will not get high enough
+                return;
+            }
+
+            // All we need is a little nudge
+            var adjusted = new Signal<>(actual.timestamp, HYSTERESIS, actual.payload);
+
+            logger.trace("{}: actual:   {}", getAddress(), actual);
+            logger.trace("{}: adjusted: {}", getAddress(), adjusted);
+
+            stateSink.tryEmitNext(adjusted);
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 }

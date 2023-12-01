@@ -314,4 +314,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         }
     }
 
+    public void raise() {
+        ts.raise();
+    }
 }

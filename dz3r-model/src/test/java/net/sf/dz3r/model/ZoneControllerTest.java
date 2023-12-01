@@ -511,10 +511,14 @@ class ZoneControllerTest {
                 .compute(allZones)
                 .subscribeOn(Schedulers.boundedElastic());
 
-        // Prime all the zones so that they are barely happy
-        for (var t: tuples) {
-            t.sink.tryEmitNext(createSignal(t.setpoint - 0.9, t.zone.getAddress()));
-        }
+        // Prime the zones
+
+        // Almost unhappy
+        t1.sink.tryEmitNext(createSignal(t1.setpoint + 0.9, t1.zone.getAddress()));
+        t2.sink.tryEmitNext(createSignal(t2.setpoint + 0.9, t2.zone.getAddress()));
+
+        // Quite happy
+        t3.sink.tryEmitNext(createSignal(t3.setpoint - 2, t3.zone.getAddress()));
 
         var zcOutput = Collections.synchronizedList(new ArrayList<Signal<UnitControlSignal, String>>());
 
@@ -522,7 +526,7 @@ class ZoneControllerTest {
         var gate = new CountDownLatch(3);
 
         output
-                .doOnNext(r -> logger.info("output/barely-happy: {}", r))
+                .doOnNext(r -> logger.info("output: {}", r))
                 .doOnNext(zcOutput::add)
                 .subscribe(ignored -> gate.countDown());
 
@@ -542,12 +546,14 @@ class ZoneControllerTest {
 
         assertThat(t1.output.get(1).callingStatus.calling).isTrue();
 
-        // These two are unchanged for now
-        // VT: FIXME: THIS IS WRONG - both of them should've been raised
-        assertThat(t2.output).hasSize(1);
+        // This one was raised
+        assertThat(t2.output).hasSize(2);
+        // But this one wasn't, no signals were emitted
         assertThat(t3.output).hasSize(1);
 
-        assertThat(zcOutput).hasSize(4);
+        assertThat(t2.output.get(1).callingStatus.calling).isTrue();
+
+        assertThat(zcOutput).hasSize(5);
         assertThat(zcOutput.get(3).getValue().demand).isEqualTo(6.0);
     }
 
