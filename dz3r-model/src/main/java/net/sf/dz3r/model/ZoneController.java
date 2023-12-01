@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import net.sf.dz3r.device.actuator.damper.DamperController;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
@@ -14,11 +15,9 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
- * Accepts signals from {@link Zone zones} and issues signals to Unit and Damper Controller.
+ * Accepts signals from {@link Zone zones} and issues signals to {@link UnitController} and {@link DamperController}.
  *
- * VT: FIXME: Augment the description with links once those entities are ported to reactive streams.
- *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */
 public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSignal, String> {
 
