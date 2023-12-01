@@ -15,6 +15,7 @@ import reactor.test.StepVerifier;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -515,15 +516,15 @@ class ZoneControllerTest {
             t.sink.tryEmitNext(createSignal(t.setpoint - 0.9, t.zone.getAddress()));
         }
 
-        var zcOutput = new ArrayList<Signal<UnitControlSignal, String>>();
+        var zcOutput = Collections.synchronizedList(new ArrayList<Signal<UnitControlSignal, String>>());
 
         // As many as there are zones
         var gate = new CountDownLatch(3);
 
         output
                 .doOnNext(r -> logger.info("output/barely-happy: {}", r))
-                .doOnNext(ignored -> gate.countDown())
-                .subscribe(zcOutput::add);
+                .doOnNext(zcOutput::add)
+                .subscribe(ignored -> gate.countDown());
 
         // Give the thread a chance to start
         gate.await();
