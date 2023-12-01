@@ -544,6 +544,11 @@ class ZoneControllerTest {
         // Now make one unhappy
         t1.sink.tryEmitNext(createSignal(t1.setpoint + 5, t1.zone.getAddress()));
 
+        assertThat(zcOutput).hasSize(5);
+        assertThat(zcOutput.get(3).getValue().demand).isEqualTo(6.0);
+
+        // This one was responsible for changing the status
+        assertThat(t1.output).hasSize(2);
         assertThat(t1.output.get(1).callingStatus.calling).isTrue();
 
         // This one was raised
@@ -553,8 +558,6 @@ class ZoneControllerTest {
 
         assertThat(t2.output.get(1).callingStatus.calling).isTrue();
 
-        assertThat(zcOutput).hasSize(5);
-        assertThat(zcOutput.get(3).getValue().demand).isEqualTo(6.0);
     }
 
     private Signal<Double, String> createSignal(double temperature, String address) {
@@ -573,7 +576,7 @@ class ZoneControllerTest {
                 ),
                 sink,
                 sink.asFlux(),
-                new ArrayList<>());
+                Collections.synchronizedList(new ArrayList<>()));
     }
 
     private record RaiseTuple(
