@@ -36,16 +36,15 @@ subprojects {
     apply(plugin = "jacoco")
     apply(plugin = "net.ltgt.errorprone")
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
     group = "net.sf.dz3"
     version = "4.2.0-SNAPSHOT"
 
     jacoco {
         toolVersion = "0.8.9"
+    }
+
+    tasks.compileJava {
+        options.release = 17
     }
 
     tasks.test {
