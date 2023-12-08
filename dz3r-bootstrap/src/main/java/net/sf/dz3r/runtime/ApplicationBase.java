@@ -8,6 +8,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.sf.dz3r.instrumentation.Marker;
+import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationParser;
 import net.sf.dz3r.runtime.config.HccRawConfig;
 import net.sf.dz3r.runtime.config.ShutdownHandler;
@@ -82,7 +83,7 @@ public abstract class ApplicationBase<C> {
      */
     protected abstract HccRawConfig mapConfiguration(C source);
 
-    protected final void run(C rawConfig) throws InterruptedException {
+    protected final void run(C rawConfig) throws IOException {
 
         Marker m = new Marker("run", Level.INFO);
         try {
@@ -101,34 +102,43 @@ public abstract class ApplicationBase<C> {
             var context = new ConfigurationParser().parse(config);
             m.checkpoint("started");
 
-            var stopGate = new CountDownLatch(1);
-            try (var shutdownHandler = new ShutdownHandler(context)) {
+            sleepUntilKilled(context);
 
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    ThreadContext.push("shutdownHook");
-                    try {
-
-                        logger.warn("Received termination signal");
-                        stopGate.countDown();
-
-                    } finally {
-                        ThreadContext.pop();
-                    }
-                }));
-
-                // Logged at WARN so that it is easier to see in the log
-                logger.warn("Startup complete, sleeping until killed");
-
-                stopGate.await();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                logger.error("Interrupted, can do nothing about it", ex);
-            }
-        } catch (Exception ex) {
-            logger.error("Unexpected exception, can do nothing about it", ex);
         } finally {
             logger.fatal("Shut down");
             m.close();
+        }
+    }
+
+    private void sleepUntilKilled(ConfigurationContext context) {
+
+        var stopGate = new CountDownLatch(1);
+
+        // ShutdownHandler *is* used - it is AutoCloseable
+        try (var ignored = new ShutdownHandler(context)) {
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                ThreadContext.push("shutdownHook");
+                try {
+
+                    logger.warn("Received termination signal");
+                    stopGate.countDown();
+
+                } finally {
+                    ThreadContext.pop();
+                }
+            }));
+
+            // Logged at WARN so that it is easier to see in the log
+            logger.warn("Startup complete, sleeping until killed");
+
+            stopGate.await();
+
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            logger.error("Interrupted, can do nothing about it", ex);
+        } catch (Exception ex) {
+            logger.error("Unexpected exception, can do nothing about it", ex);
         }
     }
 }
