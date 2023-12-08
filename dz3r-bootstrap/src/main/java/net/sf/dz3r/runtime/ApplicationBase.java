@@ -1,6 +1,5 @@
 package net.sf.dz3r.runtime;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -20,7 +19,12 @@ import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.concurrent.CountDownLatch;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * HCC core common logic.
@@ -89,14 +93,10 @@ public abstract class ApplicationBase<C> {
         try {
 
             var config = mapConfiguration(rawConfig);
+            var configYaml = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+            var digest = getDigest(configYaml);
 
-            logger.debug("configuration: {}", () -> {
-                try {
-                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
-                } catch (JsonProcessingException ex) {
-                    throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
-                }
-            });
+            logger.debug("configuration: digest={}, YAML:\n{}", digest, configYaml);
 
             m.checkpoint("read configuration");
             var context = new ConfigurationParser().parse(config);
@@ -107,6 +107,20 @@ public abstract class ApplicationBase<C> {
         } finally {
             logger.fatal("Shut down");
             m.close();
+        }
+    }
+
+    private String getDigest(String source) {
+        try {
+
+            var md = MessageDigest.getInstance("MD5");
+            md.update(source.getBytes(UTF_8));
+            var digest = md.digest();
+
+            return HexFormat.of().formatHex(digest);
+
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("Can't get MD5? Something is seriously wrong", ex);
         }
     }
 
