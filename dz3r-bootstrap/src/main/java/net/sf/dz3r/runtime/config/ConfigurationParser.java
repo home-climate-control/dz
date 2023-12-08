@@ -47,7 +47,7 @@ public class ConfigurationParser {
 
     private final Logger logger = LogManager.getLogger();
 
-    public ConfigurationContext parse(HccRawConfig source) throws IOException {
+    public ConfigurationContext parse(HccRawConfig source, String digest) throws IOException {
 
         Marker m = new Marker(getClass().getSimpleName() + "#parse", Level.INFO);
         try {
@@ -145,11 +145,11 @@ public class ConfigurationParser {
                     ctx.collectors.getFlux(),
                     ctx.hvacDevices.getFlux());
 
-            ctx.endpoint.register("endpoint", renderMeta(source));
+            ctx.endpoint.register("endpoint", renderMeta(source, digest));
 
             // Need directors and the meta resolved by now
 
-            var webUi = new WebUiConfigurationParser(ctx, ic).parse(source.instance(), source.webUi());
+            var webUi = new WebUiConfigurationParser(ctx, ic).parse(source.instance(), digest, source.webUi());
             m.checkpoint("configured WebUI");
 
             var console = new ConsoleConfigurationParser(ctx, ic).parse(source.instance(), source.console());
@@ -167,7 +167,7 @@ public class ConfigurationParser {
         }
     }
 
-    private EndpointMeta renderMeta(HccRawConfig source) throws IOException {
+    private EndpointMeta renderMeta(HccRawConfig source, String digest) throws IOException {
 
         var zones = Flux.fromIterable(source.zones())
                 .map(this::renderZoneMeta)
@@ -185,6 +185,7 @@ public class ConfigurationParser {
                 new InstanceMeta(
                         source.instance(),
                         InstanceIdProvider.getId(),
+                        digest,
                         new SimpleClientMeta(
                                 zones,
                                 devices

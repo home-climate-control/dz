@@ -67,6 +67,7 @@ public class WebUI implements AutoCloseable {
 
     public WebUI(
             String instance,
+            String configDigest,
             int httpPort,
             int duplexPort,
             String interfaces,
@@ -75,7 +76,7 @@ public class WebUI implements AutoCloseable {
             InstrumentCluster ic,
             TemperatureUnit temperatureUnit) {
 
-        this.config = new Config(instance, httpPort, duplexPort, interfaces, endpointMeta, directors, ic, temperatureUnit);
+        this.config = new Config(instance, configDigest, httpPort, duplexPort, interfaces, endpointMeta, directors, ic, temperatureUnit);
 
         this.initSet.addAll(directors);
 
@@ -152,7 +153,8 @@ public class WebUI implements AutoCloseable {
                     "name", config.instance,
                     "vendor", "homeclimatecontrol.com",
 
-                    "unique-id", InstanceIdProvider.getId().toString()
+                    "unique-id", InstanceIdProvider.getId().toString(),
+                    "config-digest", config.configDigest
             );
 
             var serviceInfo = ServiceInfo.create(
@@ -417,6 +419,7 @@ public class WebUI implements AutoCloseable {
     }
     public record Config(
             String instance,
+            String configDigest,
             int httpPort,
             int duplexPort,
             String interfaces,

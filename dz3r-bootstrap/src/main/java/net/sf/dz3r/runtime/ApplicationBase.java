@@ -1,6 +1,5 @@
 package net.sf.dz3r.runtime;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -8,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.sf.dz3r.instrumentation.Marker;
+import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationParser;
 import net.sf.dz3r.runtime.config.HccRawConfig;
 import net.sf.dz3r.runtime.config.ShutdownHandler;
@@ -19,7 +19,12 @@ import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.concurrent.CountDownLatch;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * HCC core common logic.
@@ -82,53 +87,72 @@ public abstract class ApplicationBase<C> {
      */
     protected abstract HccRawConfig mapConfiguration(C source);
 
-    protected final void run(C rawConfig) throws InterruptedException {
+    protected final void run(C rawConfig) throws IOException {
 
         Marker m = new Marker("run", Level.INFO);
         try {
 
             var config = mapConfiguration(rawConfig);
+            var configYaml = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+            var digest = getDigest(configYaml);
 
-            logger.debug("configuration: {}", () -> {
-                try {
-                    return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
-                } catch (JsonProcessingException ex) {
-                    throw new IllegalStateException("Failed to convert materialized record configuration to JSON", ex);
-                }
-            });
+            logger.debug("configuration: digest={}, YAML:\n{}", digest, configYaml);
 
             m.checkpoint("read configuration");
-            var context = new ConfigurationParser().parse(config);
+            var context = new ConfigurationParser().parse(config, digest);
             m.checkpoint("started");
 
-            var stopGate = new CountDownLatch(1);
-            try (var shutdownHandler = new ShutdownHandler(context)) {
+            sleepUntilKilled(context);
 
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    ThreadContext.push("shutdownHook");
-                    try {
-
-                        logger.warn("Received termination signal");
-                        stopGate.countDown();
-
-                    } finally {
-                        ThreadContext.pop();
-                    }
-                }));
-
-                // Logged at WARN so that it is easier to see in the log
-                logger.warn("Startup complete, sleeping until killed");
-
-                stopGate.await();
-            } catch (InterruptedException ex) {
-                Thread.currentThread().interrupt();
-                logger.error("Interrupted, can do nothing about it", ex);
-            }
-        } catch (Exception ex) {
-            logger.error("Unexpected exception, can do nothing about it", ex);
         } finally {
             logger.fatal("Shut down");
             m.close();
+        }
+    }
+
+    private String getDigest(String source) {
+        try {
+
+            var md = MessageDigest.getInstance("MD5");
+            md.update(source.getBytes(UTF_8));
+            var digest = md.digest();
+
+            return HexFormat.of().formatHex(digest);
+
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("Can't get MD5? Something is seriously wrong", ex);
+        }
+    }
+
+    private void sleepUntilKilled(ConfigurationContext context) {
+
+        var stopGate = new CountDownLatch(1);
+
+        // ShutdownHandler *is* used - it is AutoCloseable
+        try (var ignored = new ShutdownHandler(context)) {
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                ThreadContext.push("shutdownHook");
+                try {
+
+                    logger.warn("Received termination signal");
+                    stopGate.countDown();
+
+                } finally {
+                    ThreadContext.pop();
+                }
+            }));
+
+            // Logged at WARN so that it is easier to see in the log
+            logger.warn("Startup complete, sleeping until killed");
+
+            stopGate.await();
+
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            logger.error("Interrupted, can do nothing about it", ex);
+        } catch (Exception ex) {
+            logger.error("Unexpected exception, can do nothing about it", ex);
         }
     }
 }
