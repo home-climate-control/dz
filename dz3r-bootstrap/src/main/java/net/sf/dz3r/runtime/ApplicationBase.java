@@ -99,7 +99,7 @@ public abstract class ApplicationBase<C> {
             logger.debug("configuration: digest={}, YAML:\n{}", digest, configYaml);
 
             m.checkpoint("read configuration");
-            var context = new ConfigurationParser().parse(config);
+            var context = new ConfigurationParser().parse(config, digest);
             m.checkpoint("started");
 
             sleepUntilKilled(context);
