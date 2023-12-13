@@ -46,12 +46,6 @@ include("hcc-data-source-api")
 
 // One ring to find^Wrun them all
 
-// This is the legacy application that reads the XML configuration. Will
-// cease to exist soon, that configuration is too cumbersome. Name is out of
-// the pattern, kept like that for compatibility.
-
-include("dz3r-spring")
-
 // This is the minimal application that reads the configuration from the
 // given file, and contains no extra bells and whistles. May be ideal to run
 // with stable and known good configurations, but may not be the best choice

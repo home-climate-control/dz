@@ -14,12 +14,6 @@ plugins {
     id("com.github.ben-manes.versions")
 }
 
-val assertjVersion: String by project
-val errorproneVersion: String by project
-val log4jVersion: String by project
-val mockitoVersion: String by project
-val reactorVersion: String by project
-
 sonarqube {
     properties {
         property("sonar.projectKey", "home-climate-control_dz")
@@ -66,20 +60,20 @@ subprojects {
 
     dependencies {
 
-        implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
-        implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
+        implementation(rootProject.libs.log4j.api)
+        implementation(rootProject.libs.log4j.core)
 
-        implementation("io.projectreactor:reactor-core:$reactorVersion")
-        implementation("io.projectreactor:reactor-tools:$reactorVersion")
+        implementation(rootProject.libs.reactor.core)
+        implementation(rootProject.libs.reactor.tools)
 
-        testImplementation("org.mockito:mockito-core:$mockitoVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
-        testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.3")
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
-        testImplementation("org.assertj:assertj-core:$assertjVersion")
-        testImplementation("io.projectreactor:reactor-test:$reactorVersion")
+        testImplementation(rootProject.libs.mockito)
+        testImplementation(rootProject.libs.junit5.api)
+        testImplementation(rootProject.libs.junit5.params)
+        testRuntimeOnly(rootProject.libs.junit5.engine)
+        testImplementation(rootProject.libs.assertj.core)
+        testImplementation(rootProject.libs.reactor.test)
 
-        errorprone("com.google.errorprone:error_prone_core:$errorproneVersion")
+        errorprone(rootProject.libs.errorprone)
     }
 
     tasks.test {

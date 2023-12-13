@@ -1,10 +1,8 @@
-val jacksonVersion: String by project
-
 dependencies {
 
     // https://cloud.google.com/docs/authentication/production#auth-cloud-implicit-java
-    implementation("com.google.cloud:google-cloud-storage:1.48.0")
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation(libs.google.cloud.storage)
+    implementation(libs.jackson.databind)
 
     implementation(project(":dz3r-common"))
     implementation(project(":dz3r-http"))

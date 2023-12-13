@@ -1,15 +1,11 @@
-val jacksonVersion: String by project
-val jmdnsVersion: String by project
-val springStandaloneVersion: String by project
-
 dependencies {
 
-    implementation("org.springframework:spring-context:$springStandaloneVersion")
-    implementation("org.springframework:spring-webflux:$springStandaloneVersion")
-    implementation("io.projectreactor.netty:reactor-netty:1.1.6")
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("org.jmdns:jmdns:$jmdnsVersion")
+    implementation(libs.spring.standalone.context)
+    implementation(libs.spring.standalone.webflux)
+    implementation(libs.reactor.netty)
+    implementation(libs.jackson.databind)
+    implementation(libs.jackson.datatype.jsr310)
+    implementation(libs.jmdns)
 
     implementation(project(":hcc-data-source-api"))
     implementation(project(":dz3r-config"))
