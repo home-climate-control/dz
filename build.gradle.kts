@@ -1,17 +1,17 @@
 plugins {
     java
-    id("maven-publish")
+    `maven-publish`
     jacoco
-    id("net.ltgt.errorprone")
-    id("org.sonarqube")
-    id("com.gorylenko.gradle-git-properties") apply false
+    alias(libs.plugins.errorprone)
+    alias(libs.plugins.sonarqube)
+    alias(libs.plugins.git.properties) apply false
 
-    id("org.springframework.boot") apply false
-    id("io.spring.dependency-management") apply false
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management) apply false
 
-    id("io.quarkus") apply false
+    alias(libs.plugins.quarkus.plugin) apply false
 
-    id("com.github.ben-manes.versions")
+    alias(libs.plugins.gradle.versions)
 }
 
 sonarqube {

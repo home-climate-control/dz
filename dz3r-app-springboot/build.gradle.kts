@@ -1,18 +1,18 @@
 buildscript {
     dependencies {
-        classpath("com.google.cloud.tools:jib-layer-filter-extension-gradle:0.3.0")
+        classpath(libs.jib.layer.filter)
     }
 }
 
 plugins {
     // See https://github.com/home-climate-control/dz/issues/230
     // Should that bug be fixed, this goes to the parent
-    id("com.gorylenko.gradle-git-properties")
+    alias(libs.plugins.git.properties)
 
-    id("org.springframework.boot")
-    id("io.spring.dependency-management")
+    alias(libs.plugins.spring.boot)
+    alias(libs.plugins.spring.dependency.management)
 
-    id("com.google.cloud.tools.jib") version "3.3.2"
+    alias(libs.plugins.jib)
 }
 
 dependencies {
@@ -75,5 +75,4 @@ jib {
         args = listOf("--spring.profiles.active=docker")
         workingDirectory = "${jib.container.appRoot}/app/"
     }
-
 }

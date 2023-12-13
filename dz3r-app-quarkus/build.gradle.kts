@@ -1,15 +1,14 @@
 plugins {
     // See https://github.com/home-climate-control/dz/issues/230
     // Should that bug be fixed, this goes to the parent
-    id("com.gorylenko.gradle-git-properties")
+    alias(libs.plugins.git.properties)
 
     java
-    id("io.quarkus")
+    alias(libs.plugins.quarkus.plugin)
 }
 
 val quarkusPlatformGroupId = "io.quarkus.platform"
 val quarkusPlatformArtifactId = "quarkus-bom"
-val quarkusPlatformVersion = "3.2.0.Final"
 
 dependencies {
 
@@ -46,12 +45,12 @@ dependencies {
     runtimeOnly(project(":dz3r-raspberry-pi"))
 
     // Quarkus additions
-    implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
-    implementation("io.quarkus:quarkus-arc")
-    implementation("io.quarkus:quarkus-config-yaml")
-    implementation("io.quarkus:quarkus-resteasy-reactive")
-    testImplementation("io.quarkus:quarkus-junit5")
-    testImplementation("io.rest-assured:rest-assured")
+    implementation(enforcedPlatform(libs.quarkus.bom))
+    implementation(libs.quarkus.arc)
+    implementation(libs.quarkus.config.yaml)
+    implementation(libs.quarkus.resteasy.reactive)
+    testImplementation(libs.quarkus.junit5)
+    testImplementation(libs.rest.assured)
 
     // Mapstruct
     implementation(libs.mapstruct)
