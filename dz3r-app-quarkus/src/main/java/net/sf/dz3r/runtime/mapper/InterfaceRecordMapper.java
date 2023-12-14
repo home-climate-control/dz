@@ -78,7 +78,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.port().orElse(null))", target = "port")
     @Mapping(expression = "java(source.username().orElse(null))", target = "username")
     @Mapping(expression = "java(source.password().orElse(null))", target = "password")
-    @Mapping(expression = "java(source.rootTopic())", target = "rootTopic")
+    @Mapping(expression = "java(source.rootTopic().orElse(null))", target = "rootTopic")
     @Mapping(expression = "java(source.autoReconnect().orElse(true))", target = "autoReconnect")
     net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerConfig broker(MqttBrokerConfig source);
 

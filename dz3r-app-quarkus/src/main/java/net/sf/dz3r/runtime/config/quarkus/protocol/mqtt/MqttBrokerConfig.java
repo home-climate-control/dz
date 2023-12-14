@@ -25,7 +25,7 @@ public interface MqttBrokerConfig extends MqttBrokerSpec {
     Optional<String> password();
     @JsonProperty("root-topic")
     @Override
-    String rootTopic();
+    Optional<String> rootTopic();
 
     @JsonProperty("auto-reconnect")
     @Override

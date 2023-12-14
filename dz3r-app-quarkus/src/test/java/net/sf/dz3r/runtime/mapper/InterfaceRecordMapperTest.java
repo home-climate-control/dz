@@ -48,8 +48,8 @@ class InterfaceRecordMapperTest {
                     }
 
                     @Override
-                    public String rootTopic() {
-                        return "";
+                    public Optional<String> rootTopic() {
+                        return Optional.empty();
                     }
 
 
@@ -81,5 +81,6 @@ class InterfaceRecordMapperTest {
         assertThat(result.broker().id()).isNull();
         assertThat(result.broker().port()).isEqualTo(9999);
         assertThat(result.broker().autoReconnect()).isTrue();
+        assertThat(result.broker().rootTopic()).isNull();
     }
 }
