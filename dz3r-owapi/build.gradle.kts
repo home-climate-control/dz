@@ -1,6 +1,6 @@
 dependencies {
 
-    implementation("org.rxtx:rxtx:2.1.7")
+    implementation(libs.rxtx)
 
     implementation(project(":owapi-reborn"))
     implementation(project(":dz3r-common"))

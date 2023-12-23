@@ -1,0 +1,86 @@
+[versions]
+
+assertj = "3.24.2"
+commons-lang3 = "3.12.0"
+errorprone = "2.20.0"
+google-api-services-calendar = "v3-rev305-1.23.0"
+google-cloud-storage = "1.48.0"
+google-oauth-client-jetty = "1.23.0"
+hivemq-mqtt = "1.3.3"
+httpclient = "4.5.13"
+influxdb = "2.23"
+jackson = "2.15.2"
+jmdns = "3.5.8"
+junit5 = "5.9.3"
+log4j = "2.20.0"
+mapstruct = "1.5.5.Final"
+mockito = "5.5.0"
+netty = "1.1.6"
+reactor = "3.6.0"
+rxtx = "2.1.7"
+
+# Quarkus
+
+quarkus-platform = "3.2.0.Final"
+
+# This relates to Spring packages used outside SpringBoot, those are managed by their own plugin
+# Gradle is smart enough to match this to SpringBoot, but it'll be a good idea to keep an eye on it.
+
+spring-standalone = "6.0.11"
+
+[libraries]
+
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+errorprone = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
+google-api-services-calendar = { module = "com.google.apis:google-api-services-calendar", version.ref = "google-api-services-calendar" }
+google-cloud-storage = { module = "com.google.cloud:google-cloud-storage", version.ref = "google-cloud-storage" }
+google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "google-oauth-client-jetty" }
+hivemq-mqtt-client-reactor = { module = "com.hivemq:hivemq-mqtt-client-reactor", version.ref = "hivemq-mqtt" }
+httpclient = { module = "org.apache.httpcomponents:httpclient", version.ref = "httpclient" }
+influxdb = { module = "org.influxdb:influxdb-java", version.ref = "influxdb" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
+jackson-datatype-jdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+jib-layer-filter = { module = "com.google.cloud.tools:jib-layer-filter-extension-gradle", version = "0.3.0" }
+jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
+junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit5-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+junit5-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
+log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
+log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
+mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "reactor" }
+reactor-netty = { module = "io.projectreactor.netty:reactor-netty", version.ref = "netty" }
+reactor-test = { module = "io.projectreactor:reactor-test", version.ref = "reactor" }
+reactor-tools = { module = "io.projectreactor:reactor-tools", version.ref = "reactor" }
+rxtx = { module = "org.rxtx:rxtx", version.ref = "rxtx" }
+
+# Quarkus
+
+quarkus-bom = { module = "io.quarkus.platform:quarkus-bom", version.ref = "quarkus-platform" }
+
+quarkus-arc = { module = "io.quarkus:quarkus-arc" }
+quarkus-config-yaml = { module = "io.quarkus:quarkus-config-yaml" }
+quarkus-resteasy-reactive = { module = "io.quarkus:quarkus-resteasy-reactive" }
+quarkus-junit5 = { module = "io.quarkus:quarkus-junit5" }
+rest-assured = { module = "io.rest-assured:rest-assured" }
+
+# Spring
+
+spring-standalone-context = { module = "org.springframework:spring-context", version.ref = "spring-standalone" }
+spring-standalone-webflux = { module = "org.springframework:spring-webflux", version.ref = "spring-standalone" }
+
+[plugins]
+
+errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
+git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
+gradle-versions = { id = "com.github.ben-manes.versions", version = "0.50.0"}
+jib = { id = "com.google.cloud.tools.jib", version = "3.3.2" }
+quarkus-plugin = { id = "io.quarkus", version.ref = "quarkus-platform" }
+sonarqube = { id = "org.sonarqube", version = "4.0.0.2929" }
+spring-boot = { id = "org.springframework.boot", version = "3.1.5" }
+spring-dependency-management = { id = "io.spring.dependency-management", version = "1.1.4" }

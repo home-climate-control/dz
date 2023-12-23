@@ -1,14 +1,6 @@
 plugins {
-    // See https://github.com/home-climate-control/dz/issues/230
-    // Should that bug be fixed, this goes to the parent
-    id("com.gorylenko.gradle-git-properties")
-
     java
 }
-
-val assertjVersion: String by project
-val mapstructVersion: String by project
-val jacksonVersion: String by project
 
 dependencies {
 
@@ -17,10 +9,10 @@ dependencies {
     api(project(":dz3r-config"))
     implementation(project(":dz3r-director"))
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
+    implementation(libs.jackson.databind)
+    implementation(libs.jackson.dataformat.yaml)
+    implementation(libs.jackson.datatype.jdk8)
+    implementation(libs.jackson.datatype.jsr310)
 
     // VT: NOTE: "implementation()" dependencies will migrate to
     // "runtimeOnly" after the annotation based instantiation is introduced
@@ -57,8 +49,8 @@ dependencies {
     implementation(project(":dz3r-raspberry-pi"))
 
     // Mapstruct
-    implementation("org.mapstruct:mapstruct:$mapstructVersion")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    implementation(libs.mapstruct)
+    annotationProcessor(libs.mapstruct.processor)
 
-    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation(libs.assertj.core)
 }

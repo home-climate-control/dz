@@ -2,7 +2,7 @@ plugins {
     application
     // See https://github.com/home-climate-control/dz/issues/230
     // Should that bug be fixed, this goes to the parent
-    id("com.gorylenko.gradle-git-properties")
+    alias(libs.plugins.git.properties)
 }
 
 application {
@@ -10,11 +10,9 @@ application {
     mainClass.set("net.sf.dz3.runtime.standalone.HccApplication")
 }
 
-val jacksonVersion: String by project
-
 dependencies {
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation(libs.jackson.databind)
 
     implementation(project(":dz3r-bootstrap"))
     implementation(project(":dz3r-common"))

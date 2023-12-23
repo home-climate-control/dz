@@ -1,18 +1,3 @@
-pluginManagement {
-    plugins {
-        id("net.ltgt.errorprone") version "3.1.0"
-        id("org.sonarqube") version "4.0.0.2929"
-        id("com.gorylenko.gradle-git-properties") version "2.4.1"
-
-        id("org.springframework.boot") version "3.1.5"
-        id("io.spring.dependency-management") version "1.1.4"
-
-        id("io.quarkus") version "3.2.0.Final"
-
-        id("com.github.ben-manes.versions") version "0.50.0"
-    }
-}
-
 // External dependencies
 
 include("automation-hat-driver")
@@ -45,12 +30,6 @@ include("hcc-data-source-api")
 // Run options
 
 // One ring to find^Wrun them all
-
-// This is the legacy application that reads the XML configuration. Will
-// cease to exist soon, that configuration is too cumbersome. Name is out of
-// the pattern, kept like that for compatibility.
-
-include("dz3r-spring")
 
 // This is the minimal application that reads the configuration from the
 // given file, and contains no extra bells and whistles. May be ideal to run

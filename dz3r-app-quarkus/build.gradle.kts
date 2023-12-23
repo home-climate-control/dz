@@ -1,25 +1,20 @@
 plugins {
     // See https://github.com/home-climate-control/dz/issues/230
     // Should that bug be fixed, this goes to the parent
-    id("com.gorylenko.gradle-git-properties")
+    alias(libs.plugins.git.properties)
 
     java
-    id("io.quarkus")
+    alias(libs.plugins.quarkus.plugin)
 }
 
 val quarkusPlatformGroupId = "io.quarkus.platform"
 val quarkusPlatformArtifactId = "quarkus-bom"
-val quarkusPlatformVersion = "3.2.0.Final"
-
-val assertjVersion: String by project
-val mapstructVersion: String by project
-val jacksonVersion: String by project
 
 dependencies {
 
     implementation(project(":dz3r-bootstrap"))
     implementation(project(":dz3r-director"))
-    implementation("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+    implementation(libs.jackson.databind)
 
     // Enable the Swing console
     runtimeOnly(project(":dz3r-swing"))
@@ -50,16 +45,16 @@ dependencies {
     runtimeOnly(project(":dz3r-raspberry-pi"))
 
     // Quarkus additions
-    implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
-    implementation("io.quarkus:quarkus-arc")
-    implementation("io.quarkus:quarkus-config-yaml")
-    implementation("io.quarkus:quarkus-resteasy-reactive")
-    testImplementation("io.quarkus:quarkus-junit5")
-    testImplementation("io.rest-assured:rest-assured")
+    implementation(enforcedPlatform(libs.quarkus.bom))
+    implementation(libs.quarkus.arc)
+    implementation(libs.quarkus.config.yaml)
+    implementation(libs.quarkus.resteasy.reactive)
+    testImplementation(libs.quarkus.junit5)
+    testImplementation(libs.rest.assured)
 
     // Mapstruct
-    implementation("org.mapstruct:mapstruct:$mapstructVersion")
-    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    implementation(libs.mapstruct)
+    annotationProcessor(libs.mapstruct.processor)
 
-    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation(libs.assertj.core)
 }
