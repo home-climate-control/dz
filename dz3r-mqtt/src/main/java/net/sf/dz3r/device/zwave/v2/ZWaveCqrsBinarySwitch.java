@@ -39,10 +39,15 @@ public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
 
             actual = Boolean.valueOf(payload.get("value").toString());
 
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ex) {
 
             actual = null;
-            throw new IllegalStateException("Can't parse JSON: " + message, e);
+
+            // Throwing an exception here breaks everything
+            // https://github.com/home-climate-control/dz/issues/303
+
+            logger.error("Can't parse JSON:\n{}\n---", message, ex);
+
 
         } finally {
             ThreadContext.pop();

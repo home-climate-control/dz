@@ -104,8 +104,13 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
             return new Signal<>(signal.timestamp, value);
 
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Can't parse JSON: " + signal.getValue(), e);
+        } catch (JsonProcessingException ex) {
+
+            // Throwing an exception here breaks everything
+            // https://github.com/home-climate-control/dz/issues/303
+
+            logger.error("Can't parse JSON:\n{}\n---", signal.getValue(), ex);
+            return new Signal<>(signal.timestamp, null, signal.payload, Signal.Status.FAILURE_TOTAL, ex);
         }
     }
 }

@@ -55,8 +55,12 @@ public class Z2MCqrsSwitch extends AbstractMqttCqrsSwitch {
 
             stateSink.tryEmitNext(getStateSignal());
 
-        } catch (JsonProcessingException e) {
-            throw new IllegalStateException("Can't parse JSON: " + message, e);
+        } catch (JsonProcessingException ex) {
+
+            // Throwing an exception here breaks everything
+            // https://github.com/home-climate-control/dz/issues/303
+
+            logger.error("Can't parse JSON:\n{}\n---", message, ex);
         } finally {
             ThreadContext.pop();
         }
