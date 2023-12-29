@@ -1,31 +1,31 @@
 // External dependencies
 
-include("automation-hat-driver")
-include("owapi-reborn")
-include("servomaster:servomaster-common")
-include("xbee-api-reactive:xbee-api")
+include("submodules:automation-hat-driver")
+include("submodules:owapi-reborn")
+include("submodules:servomaster:servomaster-common")
+include("submodules:xbee-api-reactive:xbee-api")
 
 // Modules
 
-include("dz3r-bootstrap")
-include("dz3r-common")
-include("dz3r-config")
-include("dz3r-director")
-include("dz3r-driver")
-include("dz3r-ha")
-include("dz3r-http")
-include("dz3r-http-gae")
-include("dz3r-influxdb")
-include("dz3r-model")
-include("dz3r-mqtt")
-include("dz3r-raspberry-pi")
-include("dz3r-owapi")
-include("dz3r-scheduler")
-include("dz3r-scheduler-gcal-v3")
-include("dz3r-swing")
-include("dz3r-webui")
-include("dz3r-xbee")
-include("hcc-data-source-api")
+include("modules:hcc-bootstrap")
+include("modules:hcc-common")
+include("modules:hcc-config")
+include("modules:hcc-director")
+include("modules:hcc-driver")
+include("modules:hcc-ha")
+include("modules:hcc-http")
+include("modules:hcc-http-gae")
+include("modules:hcc-influxdb")
+include("modules:hcc-model")
+include("modules:hcc-mqtt")
+include("modules:hcc-raspberry-pi")
+include("modules:hcc-owapi")
+include("modules:hcc-scheduler")
+include("modules:hcc-scheduler-gcal-v3")
+include("modules:hcc-swing")
+include("modules:hcc-webui")
+include("modules:hcc-xbee")
+include("modules:hcc-data-source-api")
 
 // Run options
 
@@ -36,7 +36,7 @@ include("hcc-data-source-api")
 // with stable and known good configurations, but may not be the best choice
 // to experiment with.
 
-include("dz3r-app-minimal")
+include("app:hcc-minimal")
 
 // This is the SpringBoot application, with all SpringBoot bells and
 // whistles (including emitting metrics) included. See application.yaml for
@@ -45,7 +45,7 @@ include("dz3r-app-minimal")
 // Run with:
 //   ./gradlew bootRun --args='--spring.profiles.active=<your-profile>'
 
-include("dz3r-app-springboot")
+include("app:hcc-springboot")
 
 // This is the Quarkus application, with all Quarkus bells and
 // whistles (including emitting metrics) included. See application.yaml for
@@ -54,6 +54,6 @@ include("dz3r-app-springboot")
 // Run with (for starters; native app instructions coming):
 //   QUARKUS_PROFILE=<your-profile> ./gradlew quarkusDev
 
-include("dz3r-app-quarkus")
+include("app:hcc-quarkus")
 
 rootProject.name = "dz3-master"

@@ -1,12 +1,12 @@
 [submodule "servomaster"]
-	path = servomaster
+	path = submodules/servomaster
 	url = https://github.com/climategadgets/servomaster.git
 [submodule "xbee-api-reactive"]
-	path = xbee-api-reactive
+	path = submodules/xbee-api-reactive
 	url = https://github.com/home-climate-control/xbee-api-reactive.git
 [submodule "owapi-reborn"]
-	path = owapi-reborn
+	path = submodules/owapi-reborn
 	url = https://github.com/home-climate-control/owapi-reborn.git
 [submodule "automation-hat-driver"]
-	path = automation-hat-driver
+	path = submodules/automation-hat-driver
 	url = https://github.com/home-climate-control/automation-hat-driver.git

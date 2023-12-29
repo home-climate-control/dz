@@ -13,7 +13,7 @@ git submodule update && \
 
 When completed successfully, it will create a set of executable scripts and execution targets. To summarize,
 ### Standalone, or "minimal"
-* To execute this variant: run the `${project_root}/dz3r-app-minimal/build/install/hcc/bin/hcc` script, having provided it with the literal configuration location to as an argument.
+* To execute this variant: run the `${project_root}/app/hcc-minimal/build/install/hcc/bin/hcc` script, having provided it with the literal configuration location to as an argument.
 * This version will have stricter constraints on YAML configuration, in particular,
   * It doesn't support [YAML anchors]() (yet?)
   * It requires more stringent [Duration](https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html#parse-java.lang.CharSequence-) syntax than other versions
