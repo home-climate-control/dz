@@ -36,7 +36,7 @@ include("hcc-data-source-api")
 // with stable and known good configurations, but may not be the best choice
 // to experiment with.
 
-include("dz3r-app-minimal")
+include("app:hcc-minimal")
 
 // This is the SpringBoot application, with all SpringBoot bells and
 // whistles (including emitting metrics) included. See application.yaml for
@@ -45,7 +45,7 @@ include("dz3r-app-minimal")
 // Run with:
 //   ./gradlew bootRun --args='--spring.profiles.active=<your-profile>'
 
-include("dz3r-app-springboot")
+include("app:hcc-springboot")
 
 // This is the Quarkus application, with all Quarkus bells and
 // whistles (including emitting metrics) included. See application.yaml for
@@ -54,6 +54,6 @@ include("dz3r-app-springboot")
 // Run with (for starters; native app instructions coming):
 //   QUARKUS_PROFILE=<your-profile> ./gradlew quarkusDev
 
-include("dz3r-app-quarkus")
+include("app:hcc-quarkus")
 
 rootProject.name = "dz3-master"
