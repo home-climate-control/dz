@@ -14,6 +14,7 @@ import reactor.tools.agent.ReactorDebugAgent;
 import java.time.Clock;
 import java.time.Duration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 @EnabledIfEnvironmentVariable(
@@ -71,5 +72,16 @@ class ZWaveCqrsBinarySwitchTest {
             }
 
         }).doesNotThrowAnyException();
+    }
+
+    @Test
+    void parseBinary() {
+        assertThat(Boolean.valueOf("TRUE")).isTrue();
+        assertThat(Boolean.valueOf("true")).isTrue();
+        assertThat(Boolean.valueOf("false")).isFalse();
+
+        assertThat(Boolean.valueOf(null)).isFalse();
+        assertThat(Boolean.valueOf("")).isFalse();
+        assertThat(Boolean.valueOf("what's that?")).isFalse();
     }
 }

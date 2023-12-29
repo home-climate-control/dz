@@ -104,7 +104,7 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
             return new Signal<>(signal.timestamp, value);
 
-        } catch (JsonProcessingException ex) {
+        } catch (JsonProcessingException | NumberFormatException ex) {
 
             // Throwing an exception here breaks everything
             // https://github.com/home-climate-control/dz/issues/303
