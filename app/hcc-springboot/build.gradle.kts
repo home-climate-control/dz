@@ -17,7 +17,7 @@ plugins {
 
 dependencies {
 
-    implementation(project(":dz3r-bootstrap"))
+    implementation(project(":modules:hcc-bootstrap"))
 
     // SpringBoot additions
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")

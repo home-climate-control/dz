@@ -14,34 +14,34 @@ dependencies {
 
     implementation(libs.jackson.databind)
 
-    implementation(project(":dz3r-bootstrap"))
-    implementation(project(":dz3r-common"))
+    implementation(project(":modules:hcc-bootstrap"))
+    implementation(project(":modules:hcc-common"))
 
     // Enable the Swing console
-    runtimeOnly(project(":dz3r-swing"))
+    runtimeOnly(project(":modules:hcc-swing"))
 
     // Enable InfluxDB logger
-    runtimeOnly(project(":dz3r-influxdb"))
+    runtimeOnly(project(":modules:hcc-influxdb"))
 
     // Enable 1-Wire bus
-    runtimeOnly(project(":dz3r-owapi"))
+    runtimeOnly(project(":modules:hcc-owapi"))
 
     // Enable XBee
-    runtimeOnly(project(":dz3r-xbee"))
+    runtimeOnly(project(":modules:hcc-xbee"))
 
     // Enable MQTT
-    runtimeOnly(project(":dz3r-mqtt"))
+    runtimeOnly(project(":modules:hcc-mqtt"))
 
     // Enable remote control over HTTP
-    runtimeOnly(project(":dz3r-http"))
-    runtimeOnly(project(":dz3r-http-gae"))
+    runtimeOnly(project(":modules:hcc-http"))
+    runtimeOnly(project(":modules:hcc-http-gae"))
 
     // Enable remote control via WebUI
-    runtimeOnly(project(":dz3r-webui"))
+    runtimeOnly(project(":modules:hcc-webui"))
 
     // Enable Google Calendar integration
-    runtimeOnly(project(":dz3r-scheduler-gcal-v3"))
+    runtimeOnly(project(":modules:hcc-scheduler-gcal-v3"))
 
     // Enable Raspberry Pi specific hardware integration
-    runtimeOnly(project(":dz3r-raspberry-pi"))
+    runtimeOnly(project(":modules:hcc-raspberry-pi"))
 }
