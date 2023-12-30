@@ -1,32 +1,35 @@
 [versions]
 
 assertj = "3.24.2"
-commons-lang3 = "3.12.0"
-errorprone = "2.20.0"
+commons-lang3 = "3.14.0"
+errorprone = "2.24.0"
 google-api-services-calendar = "v3-rev305-1.23.0"
 google-cloud-storage = "1.48.0"
 google-oauth-client-jetty = "1.23.0"
 hivemq-mqtt = "1.3.3"
-httpclient = "4.5.13"
-influxdb = "2.23"
-jackson = "2.15.2"
-jmdns = "3.5.8"
-junit5 = "5.9.3"
+httpclient = "4.5.14"
+influxdb = "2.24"
+jackson = "2.16.1"
+jib = "3.4.0"
+jmdns = "3.5.9"
+junit5 = "5.10.1"
 log4j = "2.20.0"
 mapstruct = "1.5.5.Final"
-mockito = "5.5.0"
-netty = "1.1.6"
-reactor = "3.6.0"
+mockito = "5.8.0"
+netty = "1.1.14"
+reactor = "3.6.1"
 rxtx = "2.1.7"
+sonarqube = "4.4.1.3373"
+spring-boot-plugin = "3.2.1"
 
 # Quarkus
 
-quarkus-platform = "3.2.0.Final"
+quarkus-platform = "3.6.4"
 
 # This relates to Spring packages used outside SpringBoot, those are managed by their own plugin
 # Gradle is smart enough to match this to SpringBoot, but it'll be a good idea to keep an eye on it.
 
-spring-standalone = "6.0.11"
+spring-standalone = "6.1.2"
 
 [libraries]
 
@@ -79,8 +82,8 @@ spring-standalone-webflux = { module = "org.springframework:spring-webflux", ver
 errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
 git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
 gradle-versions = { id = "com.github.ben-manes.versions", version = "0.50.0"}
-jib = { id = "com.google.cloud.tools.jib", version = "3.3.2" }
+jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 quarkus-plugin = { id = "io.quarkus", version.ref = "quarkus-platform" }
-sonarqube = { id = "org.sonarqube", version = "4.0.0.2929" }
-spring-boot = { id = "org.springframework.boot", version = "3.1.5" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot-plugin" }
 spring-dependency-management = { id = "io.spring.dependency-management", version = "1.1.4" }
