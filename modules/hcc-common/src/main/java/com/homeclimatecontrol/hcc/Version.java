@@ -10,7 +10,7 @@ public final class Version {
      *
      * Follows <a href ="https://semver.org/#semantic-versioning-200">Semantic Versioning 2.0.0</a> conventions.
      */
-    public static final String PROTOCOL_VERSION = "0.0.1";
+    public static final String PROTOCOL_VERSION = "4.2.0";
 
     private Version() {
 
