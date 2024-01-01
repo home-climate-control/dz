@@ -34,7 +34,7 @@ subprojects {
     version = "4.2.0-SNAPSHOT"
 
     jacoco {
-        toolVersion = "0.8.11"
+        toolVersion = rootProject.libs.versions.jacoco.get()
     }
 
     tasks.compileJava {
