@@ -1,24 +1,18 @@
 plugins {
     java
-    id("maven-publish")
+    `maven-publish`
     jacoco
-    id("net.ltgt.errorprone")
-    id("org.sonarqube")
-    id("com.gorylenko.gradle-git-properties") apply false
+    alias(libs.plugins.errorprone)
+    alias(libs.plugins.sonarqube)
+    alias(libs.plugins.git.properties) apply false
 
-    id("org.springframework.boot") apply false
-    id("io.spring.dependency-management") apply false
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management) apply false
 
-    id("io.quarkus") apply false
+    alias(libs.plugins.quarkus.plugin) apply false
 
-    id("com.github.ben-manes.versions")
+    alias(libs.plugins.gradle.versions)
 }
-
-val assertjVersion: String by project
-val errorproneVersion: String by project
-val log4jVersion: String by project
-val mockitoVersion: String by project
-val reactorVersion: String by project
 
 sonarqube {
     properties {
@@ -36,16 +30,15 @@ subprojects {
     apply(plugin = "jacoco")
     apply(plugin = "net.ltgt.errorprone")
 
-    java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
     group = "net.sf.dz3"
-    version = "4.1.0"
+    version = "4.2.0-SNAPSHOT"
 
     jacoco {
-        toolVersion = "0.8.9"
+        toolVersion = rootProject.libs.versions.jacoco.get()
+    }
+
+    tasks.compileJava {
+        options.release = 17
     }
 
     tasks.test {
@@ -67,20 +60,21 @@ subprojects {
 
     dependencies {
 
-        implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
-        implementation("org.apache.logging.log4j:log4j-core:$log4jVersion")
+        implementation(rootProject.libs.log4j.api)
+        implementation(rootProject.libs.log4j.core)
 
-        implementation("io.projectreactor:reactor-core:$reactorVersion")
-        implementation("io.projectreactor:reactor-tools:$reactorVersion")
+        implementation(rootProject.libs.reactor.core)
+        implementation(rootProject.libs.reactor.tools)
 
-        testImplementation("org.mockito:mockito-core:$mockitoVersion")
-        testImplementation("org.junit.jupiter:junit-jupiter-api:5.9.3")
-        testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.3")
-        testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.3")
-        testImplementation("org.assertj:assertj-core:$assertjVersion")
-        testImplementation("io.projectreactor:reactor-test:$reactorVersion")
+        testImplementation(rootProject.libs.mockito)
+        testImplementation(rootProject.libs.junit5.api)
+        testImplementation(rootProject.libs.junit5.params)
+        testImplementation(rootProject.libs.assertj.core)
+        testImplementation(rootProject.libs.reactor.test)
 
-        errorprone("com.google.errorprone:error_prone_core:$errorproneVersion")
+        testRuntimeOnly(rootProject.libs.junit5.engine)
+
+        errorprone(rootProject.libs.errorprone)
     }
 
     tasks.test {

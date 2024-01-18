@@ -3,6 +3,8 @@ Home Climate Control: Release Notes
 
 ## Coming Up
 
+* Project layout decluttered - now it is organized into [./app](../app), [./modules](../modules), and [./submodules](../submodules) instead of a big flat mess.
+
 ## v4.1.0
 Major milestones:
 
