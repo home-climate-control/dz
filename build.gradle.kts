@@ -69,9 +69,10 @@ subprojects {
         testImplementation(rootProject.libs.mockito)
         testImplementation(rootProject.libs.junit5.api)
         testImplementation(rootProject.libs.junit5.params)
-        testRuntimeOnly(rootProject.libs.junit5.engine)
         testImplementation(rootProject.libs.assertj.core)
         testImplementation(rootProject.libs.reactor.test)
+
+        testRuntimeOnly(rootProject.libs.junit5.engine)
 
         errorprone(rootProject.libs.errorprone)
     }
