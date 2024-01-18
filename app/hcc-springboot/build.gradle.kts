@@ -5,6 +5,7 @@ buildscript {
 }
 
 plugins {
+    `jacoco-report-aggregation`
     // See https://github.com/home-climate-control/dz/issues/230
     // Should that bug be fixed, this goes to the parent
     alias(libs.plugins.git.properties)
@@ -75,4 +76,8 @@ jib {
         args = listOf("--spring.profiles.active=docker")
         workingDirectory = "${jib.container.appRoot}/app/"
     }
+}
+
+tasks.check {
+    dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
 }
