@@ -14,10 +14,10 @@ Home Climate Control
 
 ---
 
-## v4.1.0. is out
+## v4.2.0. is out
 
-* Get the code [here](https://github.com/home-climate-control/dz/tree/v4.1.0)
-* See the [v4.1.0 Release Notes](./docs/release-notes/v4.1.0.md) for the list of changes
+* Get the code [here](https://github.com/home-climate-control/dz/tree/v4.2.0)
+* See the [v4.2.0 Release Notes](./docs/release-notes/v4.2.0.md) for the list of changes
 * See the [list of release notes](./docs/release-notes.md)
 
 

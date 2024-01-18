@@ -3,9 +3,13 @@ Home Climate Control: Release Notes
 
 ## Coming Up
 
-* Project layout decluttered - now it is organized into [./app](../app), [./modules](../modules), and [./submodules](../submodules) instead of a big flat mess.
+## v4.2.0 (2024-01-17)
 
-## v4.1.0
+* Project layout decluttered - now it is organized into [./app](../app), [./modules](../modules), and [./submodules](../submodules) instead of a big flat mess ([#304](https://github.com/home-climate-control/dz/issues/304)).
+* Stability improvement - a single invalid Zigbee2MQTT no longer causes a cascading failure ([#303](https://github.com/home-climate-control/dz/issues/303))
+* Important comfort improvement ([#300](https://github.com/home-climate-control/dz/issues/300))
+
+## v4.1.0 (2023-11-28)
 Major milestones:
 
 * Any HVAC device can now be used as an economizer ([#291](https://github.com/home-climate-control/dz/issues/291))
@@ -14,7 +18,7 @@ Major milestones:
 
 [read more...](./release-notes/v4.1.0.md)
 
-## v4.0.0
+## v4.0.0 (2023-10-12)
 Major milestones:
 * [YAML configuration](../docs/configuration/index.md)
 * Extended [list of supported devices](../docs/hardware/index.md)
