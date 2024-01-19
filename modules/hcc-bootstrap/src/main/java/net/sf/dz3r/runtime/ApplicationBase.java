@@ -111,16 +111,17 @@ public abstract class ApplicationBase<C> {
     }
 
     private String getDigest(String source) {
+        var algorithm = "SHA256";
         try {
 
-            var md = MessageDigest.getInstance("MD5");
+            var md = MessageDigest.getInstance(algorithm);
             md.update(source.getBytes(UTF_8));
             var digest = md.digest();
 
             return HexFormat.of().formatHex(digest);
 
         } catch (NoSuchAlgorithmException ex) {
-            throw new IllegalStateException("Can't get MD5? Something is seriously wrong", ex);
+            throw new IllegalStateException("Can't get " + algorithm + "? Something is seriously wrong", ex);
         }
     }
 
