@@ -7,14 +7,14 @@ plugins {
     alias(libs.plugins.quarkus.plugin)
 }
 
-val quarkusPlatformGroupId = "io.quarkus.platform"
-val quarkusPlatformArtifactId = "quarkus-bom"
-
 dependencies {
 
     implementation(project(":modules:hcc-bootstrap"))
     implementation(project(":modules:hcc-director"))
     implementation(libs.jackson.databind)
+
+    // Enable MQTT
+    implementation(project(":modules:hcc-mqtt"))
 
     // Enable the Swing console
     runtimeOnly(project(":modules:hcc-swing"))
@@ -27,9 +27,6 @@ dependencies {
 
     // Enable XBee
     runtimeOnly(project(":modules:hcc-xbee"))
-
-    // Enable MQTT
-    implementation(project(":modules:hcc-mqtt"))
 
     // Enable remote control over HTTP
     runtimeOnly(project(":modules:hcc-http"))
@@ -44,17 +41,23 @@ dependencies {
     // Enable Raspberry Pi specific hardware integration
     runtimeOnly(project(":modules:hcc-raspberry-pi"))
 
-    // Quarkus additions
+    testImplementation(libs.rest.assured)
+    testImplementation(libs.assertj.core)
+}
+
+// Quarkus additions
+dependencies {
+
     implementation(enforcedPlatform(libs.quarkus.bom))
     implementation(libs.quarkus.arc)
     implementation(libs.quarkus.config.yaml)
     implementation(libs.quarkus.resteasy.reactive)
     testImplementation(libs.quarkus.junit5)
-    testImplementation(libs.rest.assured)
+}
 
-    // Mapstruct
+// Mapstruct
+dependencies {
+
     implementation(libs.mapstruct)
     annotationProcessor(libs.mapstruct.processor)
-
-    testImplementation(libs.assertj.core)
 }

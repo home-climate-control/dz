@@ -28,7 +28,7 @@ subprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "jacoco")
-    apply(plugin = "net.ltgt.errorprone")
+    apply(plugin = rootProject.libs.plugins.errorprone.get().pluginId)
 
     group = "net.sf.dz3"
     version = "4.3.0-SNAPSHOT"

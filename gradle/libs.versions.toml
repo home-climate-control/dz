@@ -78,6 +78,18 @@ rest-assured = { module = "io.rest-assured:rest-assured" }
 spring-standalone-context = { module = "org.springframework:spring-context", version.ref = "spring-standalone" }
 spring-standalone-webflux = { module = "org.springframework:spring-webflux", version.ref = "spring-standalone" }
 
+# SpringBoot
+# Versions are missing here because they are implied by spring-dependency-management plugin
+
+springboot-configuration-processor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
+springboot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
+springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2" }
+springboot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
+springboot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+
+micrometer-registry-influx = { module = "io.micrometer:micrometer-registry-influx" }
+micrometer-registry-jmx = { module = "io.micrometer:micrometer-registry-jmx" }
+
 [plugins]
 
 errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
