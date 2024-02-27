@@ -43,6 +43,17 @@ jib {
     from {
         // JDK, not JRE (which is the default). Necessary to support sane exception traces for Project Reactor.
         image = "eclipse-temurin:17-jdk"
+
+        // Uncomment this block to execute the jibDockerBuild task on a Pi.
+        // Regrettably, multiplatform build to Docker is not supported.
+        // See for more: https://github.com/GoogleContainerTools/jib/issues/2743
+
+        // platforms {
+        //     platform {
+        //         architecture = "arm64"
+        //         os = "linux"
+        //     }
+        // }
     }
 
     to {
