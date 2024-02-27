@@ -34,7 +34,10 @@ When completed successfully, it will create a set of executable scripts and exec
 
 ### Docker
 #### Local Image
-* To execute this variant, you need to first build it with `./gradlew jibDockerBuild` (assuming you granted your build user permissions to run Docker tools) and then run the image with configuration, logs, and connector directories exposed as volumes. Details are coming soon.
+* To execute this variant, you need to first build it with `./gradlew jibDockerBuild`
+(assuming you [granted your build user permissions to run Docker tools](https://docs.docker.com/go/rootless/)) and then run the image with configuration, logs, and connector directories exposed as volumes.
+Don't forget [#305](https://github.com/home-climate-control/dz/issues/305) if you're building the container on a Raspberry Pi.
+More details are coming soon.
 * When to use: if you want to tinker with the code and still run it from Docker.
 
 #### Public Image
