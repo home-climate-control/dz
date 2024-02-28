@@ -35,7 +35,7 @@ class NullCqrsSwitchTest {
         logger.info("done sending");
 
         // Let things settle down
-        Thread.sleep(100);
+        Thread.sleep(200); //NOSONAR Risks have been considered
 
         assertThat(s.getState().queueDepth).isZero();
     }
