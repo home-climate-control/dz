@@ -1,5 +1,6 @@
 package net.sf.dz3r.counter;
 
+import net.sf.dz3r.common.DurationParser;
 import net.sf.dz3r.common.HCCObjects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,6 +28,7 @@ import java.util.Set;
 public class FileTimeUsageCounter implements ResourceUsageCounter<Duration>, AutoCloseable {
 
     private final Logger logger = LogManager.getLogger();
+    private final DurationParser durationParser = new DurationParser();
 
     private static final String CF_THRESHOLD = "threshold";
     private static final String CF_CURRENT = "current";
@@ -123,7 +125,7 @@ public class FileTimeUsageCounter implements ResourceUsageCounter<Duration>, Aut
                 }
 
                 var threshold = Optional.ofNullable(thresholdString).map(Duration::parse).orElse(Duration.ZERO);
-                var current = Duration.parse(currentString);
+                var current = durationParser.parse(currentString);
 
                 return new TimeUsageCounter(current, threshold);
             }
