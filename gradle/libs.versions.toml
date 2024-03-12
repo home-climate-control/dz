@@ -6,6 +6,7 @@ errorprone = "2.24.0"
 google-api-services-calendar = "v3-rev305-1.23.0"
 google-cloud-storage = "1.48.0"
 google-oauth-client-jetty = "1.23.0"
+gradle-dependency-analysis = "1.30.0"
 hivemq-mqtt = "1.3.3"
 httpclient = "4.5.14"
 influxdb = "2.24"
@@ -94,6 +95,7 @@ micrometer-registry-jmx = { module = "io.micrometer:micrometer-registry-jmx" }
 
 errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
 git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
+gradle-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "gradle-dependency-analysis" }
 gradle-versions = { id = "com.github.ben-manes.versions", version = "0.50.0"}
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 quarkus-plugin = { id = "io.quarkus", version.ref = "quarkus-platform" }

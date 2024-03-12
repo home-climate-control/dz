@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.quarkus.plugin) apply false
 
     alias(libs.plugins.gradle.versions)
+    alias(libs.plugins.gradle.dependency.analysis)
 }
 
 sonarqube {

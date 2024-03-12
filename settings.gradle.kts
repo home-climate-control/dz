@@ -54,6 +54,7 @@ include("app:hcc-springboot")
 // Run with (for starters; native app instructions coming):
 //   QUARKUS_PROFILE=<your-profile> ./gradlew quarkusDev
 
-include("app:hcc-quarkus")
+// VT: FIXME: temporarily removed to accommodate https://github.com/autonomousapps/dependency-analysis-gradle-plugin - they don't like each other, need to find a permanent fix
+// include("app:hcc-quarkus")
 
 rootProject.name = "dz3-master"
