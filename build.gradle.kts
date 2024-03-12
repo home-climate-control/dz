@@ -59,21 +59,6 @@ subprojects {
     }
 
     dependencies {
-
-        implementation(rootProject.libs.log4j.api)
-        implementation(rootProject.libs.log4j.core)
-
-        implementation(rootProject.libs.reactor.core)
-        implementation(rootProject.libs.reactor.tools)
-
-        testImplementation(rootProject.libs.mockito)
-        testImplementation(rootProject.libs.junit5.api)
-        testImplementation(rootProject.libs.junit5.params)
-        testImplementation(rootProject.libs.assertj.core)
-        testImplementation(rootProject.libs.reactor.test)
-
-        testRuntimeOnly(rootProject.libs.junit5.engine)
-
         errorprone(rootProject.libs.errorprone)
     }
 

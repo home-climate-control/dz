@@ -6,4 +6,8 @@ dependencies {
 
     implementation(project(":modules:hcc-common"))
     implementation(project(":modules:hcc-model"))
+
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.junit5.api)
+    testImplementation(libs.reactor.tools)
 }

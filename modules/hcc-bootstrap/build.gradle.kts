@@ -4,15 +4,17 @@ plugins {
 
 dependencies {
 
-    implementation(project(":modules:hcc-data-source-api"))
     api(project(":modules:hcc-common"))
     api(project(":modules:hcc-config"))
+
+    implementation(project(":modules:hcc-data-source-api"))
     implementation(project(":modules:hcc-director"))
 
     implementation(libs.jackson.databind)
     implementation(libs.jackson.dataformat.yaml)
     implementation(libs.jackson.datatype.jdk8)
     implementation(libs.jackson.datatype.jsr310)
+    implementation(libs.reactor.tools)
 
     // VT: NOTE: "implementation()" dependencies will migrate to
     // "runtimeOnly" after the annotation based instantiation is introduced
@@ -53,4 +55,6 @@ dependencies {
     annotationProcessor(libs.mapstruct.processor)
 
     testImplementation(libs.assertj.core)
+    testImplementation(libs.junit5.api)
+    testImplementation(libs.junit5.params)
 }
