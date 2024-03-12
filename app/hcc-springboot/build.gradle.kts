@@ -19,10 +19,7 @@ plugins {
 }
 
 dependencies {
-
     implementation(project(":modules:hcc-bootstrap"))
-
-    testImplementation(libs.reactor.test)
 }
 
 // SpringBoot additions

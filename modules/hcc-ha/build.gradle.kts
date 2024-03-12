@@ -15,6 +15,5 @@ dependencies {
 
     testImplementation(libs.assertj.core)
     testImplementation(libs.junit5.api)
-    testImplementation(libs.mockito)
-    testImplementation(libs.reactor.tools)
+    testImplementation(libs.reactor.test)
 }
