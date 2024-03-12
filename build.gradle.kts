@@ -26,7 +26,6 @@ sonarqube {
 subprojects {
 
     apply(plugin = "java")
-    apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "jacoco")
     apply(plugin = rootProject.libs.plugins.errorprone.get().pluginId)
