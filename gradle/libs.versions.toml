@@ -39,7 +39,7 @@ commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "co
 errorprone = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone" }
 google-api-services-calendar = { module = "com.google.apis:google-api-services-calendar", version.ref = "google-api-services-calendar" }
 google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "google-oauth-client-jetty" }
-hivemq-mqtt-client-reactor = { module = "com.hivemq:hivemq-mqtt-client-reactor", version.ref = "hivemq-mqtt" }
+hivemq-mqtt-client = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqtt" }
 httpclient = { module = "org.apache.httpcomponents:httpclient", version.ref = "httpclient" }
 influxdb = { module = "org.influxdb:influxdb-java", version.ref = "influxdb" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }

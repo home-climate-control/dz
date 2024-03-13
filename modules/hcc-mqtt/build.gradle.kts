@@ -1,7 +1,10 @@
+plugins {
+    `java-library`
+}
+
 dependencies {
 
-
-    implementation(libs.hivemq.mqtt.client.reactor)
+    api(libs.hivemq.mqtt.client)
     implementation(libs.jackson.databind)
 
     implementation(project(":modules:hcc-common"))
