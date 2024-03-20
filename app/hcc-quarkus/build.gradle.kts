@@ -9,9 +9,10 @@ plugins {
 
 dependencies {
 
+    implementation(libs.jackson.databind)
+
     implementation(project(":modules:hcc-bootstrap"))
     implementation(project(":modules:hcc-director"))
-    implementation(libs.jackson.databind)
 
     // Enable MQTT
     implementation(project(":modules:hcc-mqtt"))

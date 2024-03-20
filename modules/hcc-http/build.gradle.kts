@@ -1,6 +1,8 @@
-dependencies {
+plugins {
+    `java-library`
+}
 
-    api(libs.httpclient)
+dependencies {
 
     api(project(":modules:hcc-director"))
 }

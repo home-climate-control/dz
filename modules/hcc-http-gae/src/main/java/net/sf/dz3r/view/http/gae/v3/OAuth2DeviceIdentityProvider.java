@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.http.gae.v3;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -18,7 +18,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Type;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -35,8 +34,7 @@ public class OAuth2DeviceIdentityProvider {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
-    private final Gson gson = new Gson();
-    private final Type mapType  = new TypeToken<Map<String,String>>(){}.getType();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final HttpClient httpClient = HttpClientFactory.createClient();
 
@@ -249,7 +247,7 @@ public class OAuth2DeviceIdentityProvider {
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-6-handle-responses-to-polling-requests
 
             {
-                responseMap = gson.fromJson(responseJson, mapType);
+                responseMap = objectMapper.readValue(responseJson, new TypeReference<>() {});
 
                 String accessToken = responseMap.get("access_token");
                 String refreshToken = responseMap.get("refresh_token");
@@ -309,7 +307,7 @@ public class OAuth2DeviceIdentityProvider {
         }
 
         var responseJson = EntityUtils.toString(rsp.getEntity());
-        Map<String,String> responseMap = gson.fromJson(responseJson, mapType);
+        Map<String,String> responseMap = objectMapper.readValue(responseJson, new TypeReference<>() {});
 
         logger.debug("response: {}", responseMap);
 
