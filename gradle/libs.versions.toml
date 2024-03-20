@@ -2,6 +2,7 @@
 
 assertj = "3.25.3"
 commons-lang3 = "3.14.0"
+editorconfig = "0.1.0"
 errorprone = "2.26.1"
 google-api-services-calendar = "v3-rev305-1.23.0"
 google-oauth-client-jetty = "1.23.0"
@@ -91,6 +92,7 @@ micrometer-registry-jmx = { module = "io.micrometer:micrometer-registry-jmx" }
 
 [plugins]
 
+editorconfig = { id = "org.ec4j.editorconfig", version.ref = "editorconfig" }
 errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
 git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
 gradle-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "gradle-dependency-analysis" }

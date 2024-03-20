@@ -13,6 +13,8 @@ plugins {
 
     alias(libs.plugins.gradle.versions)
     alias(libs.plugins.gradle.dependency.analysis)
+
+    alias(libs.plugins.editorconfig)
 }
 
 sonarqube {
@@ -29,6 +31,7 @@ subprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "jacoco")
     apply(plugin = rootProject.libs.plugins.errorprone.get().pluginId)
+    apply(plugin = rootProject.libs.plugins.editorconfig.get().pluginId)
 
     group = "net.sf.dz3"
     version = "4.3.0-SNAPSHOT"
