@@ -1,10 +1,13 @@
+root = true
+
 [*]
 charset = utf-8
 end_of_line = lf
 indent_size = 4
 indent_style = space
 insert_final_newline = true
-max_line_length = 120
+# Default 120 is hardly reasonable on today's 4K monitors
+max_line_length = 200
 tab_width = 4
 trim_trailing_whitespace = true
 ij_continuation_indent_size = 8
