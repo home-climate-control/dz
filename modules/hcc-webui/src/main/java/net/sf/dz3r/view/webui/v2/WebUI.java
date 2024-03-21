@@ -124,6 +124,22 @@ public class WebUI implements AutoCloseable {
         }
     }
 
+    /**
+     * Initialize everything from the given set of init objects.
+     */
+    private void init() {
+
+        ThreadContext.push("init");
+        try {
+
+            for (var source : initSet) {
+                new UnitDirectorInitializer().init(source);
+            }
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
     private void advertise() {
         ThreadContext.push("mdns-advertise");
         try {
@@ -175,22 +191,6 @@ public class WebUI implements AutoCloseable {
 
         } catch (IOException ex) {
             logger.error("failed to advertise over mDNS, ignored", ex);
-        } finally {
-            ThreadContext.pop();
-        }
-    }
-
-    /**
-     * Initialize everything from the given set of init objects.
-     */
-    private void init() {
-
-        ThreadContext.push("init");
-        try {
-
-            for (var source : initSet) {
-                new UnitDirectorInitializer().init(source);
-            }
         } finally {
             ThreadContext.pop();
         }
