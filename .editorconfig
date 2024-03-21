@@ -17,6 +17,24 @@ ij_formatter_tags_enabled = true
 ij_smart_tabs = false
 ij_wrap_on_typing = false
 
+# Ignore these, they've been created by tools or third parties
+[{gradlew,gradlew.bat,*.diff,client_secrets.json}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+# Cans of worms, let's deal with them when the rest is taken care of
+[/submodules/**]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
 [*.conf]
 indent_size = 2
 tab_width = 2
@@ -749,6 +767,7 @@ ij_jsp_keep_indents_on_empty_lines = false
 ij_jspx_keep_indents_on_empty_lines = false
 
 [{*.markdown,*.md}]
+trim_trailing_whitespace = false
 ij_markdown_force_one_space_after_blockquote_symbol = true
 ij_markdown_force_one_space_after_header_symbol = true
 ij_markdown_force_one_space_after_list_bullet = true
