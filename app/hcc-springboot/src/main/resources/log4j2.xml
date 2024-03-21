@@ -87,7 +87,7 @@
                 <!-- Set your comfortable debug level for the long term log. -->
                 <ThresholdFilter level="warn"  onMatch="ACCEPT" onMismatch="DENY"/>
             </Filters>
-    </RollingFile>
+        </RollingFile>
 
     </Appenders>
     <Loggers>
