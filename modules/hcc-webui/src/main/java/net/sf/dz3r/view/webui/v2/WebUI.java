@@ -14,6 +14,7 @@ import net.sf.dz3r.view.UnitObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -221,6 +222,7 @@ public class WebUI implements AutoCloseable {
         logger.info("GET /zones");
 
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Flux.fromIterable(unit2observer.values())
                                 .flatMap(UnitObserver::getZones),
@@ -240,6 +242,7 @@ public class WebUI implements AutoCloseable {
         logger.info("GET /zone/{}", zone);
 
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(
                         Flux.fromIterable(unit2observer.values())
@@ -271,6 +274,7 @@ public class WebUI implements AutoCloseable {
         logger.info("GET /sensors");
 
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Flux.fromIterable(unit2observer.values())
                                 .flatMap(UnitObserver::getSensors),
@@ -290,6 +294,7 @@ public class WebUI implements AutoCloseable {
         logger.info("GET /sensor/{}", address);
 
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(
                         Flux.fromIterable(unit2observer.values())
@@ -312,7 +317,10 @@ public class WebUI implements AutoCloseable {
                         kv.getKey().getAddress(),
                         kv.getValue().getUnitStatus()));
 
-        return ok().contentType(MediaType.APPLICATION_JSON).body(units, Map.class);
+        return ok()
+                .cacheControl(CacheControl.noCache())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(units, Map.class);
     }
 
     /**
@@ -329,6 +337,7 @@ public class WebUI implements AutoCloseable {
 
         // Returning empty JSON is simpler on both receiving and sending side than a 404
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Flux.fromIterable(unit2observer.entrySet())
                                 .filter(kv -> kv.getKey().getAddress().equals(name))
@@ -375,7 +384,10 @@ public class WebUI implements AutoCloseable {
         result.put("start.millis", startMillis);
         result.put("uptime.millis", uptimeMillis);
 
-        return ok().contentType(MediaType.APPLICATION_JSON).body(Flux.fromIterable(result.entrySet()), Object.class);
+        return ok()
+                .cacheControl(CacheControl.noStore())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Flux.fromIterable(result.entrySet()), Object.class);
     }
 
     /**
