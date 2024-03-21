@@ -11,3 +11,4 @@ gradlew.bat
 /logs/
 *.log
 *.diff
+client_secrets.json
