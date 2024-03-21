@@ -315,7 +315,8 @@ public class WebUI implements AutoCloseable {
         var units = Flux.fromIterable(unit2observer.entrySet())
                 .map(kv -> new AbstractMap.SimpleEntry<>(
                         kv.getKey().getAddress(),
-                        kv.getValue().getUnitStatus()));
+                        kv.getValue().getUnitStatus()))
+                .collectMap(Map.Entry::getKey, Map.Entry::getValue);
 
         return ok()
                 .cacheControl(CacheControl.noCache())
