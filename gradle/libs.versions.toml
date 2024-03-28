@@ -94,6 +94,7 @@ micrometer-registry-jmx = { module = "io.micrometer:micrometer-registry-jmx" }
 errorprone = { id = "net.ltgt.errorprone", version = "3.1.0" }
 git-properties = { id = "com.gorylenko.gradle-git-properties", version = "2.4.1" }
 gradle-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "gradle-dependency-analysis" }
+gradle-doctor = { id = "com.osacky.doctor", version = "0.9.2" }
 gradle-versions = { id = "com.github.ben-manes.versions", version = "0.51.0"}
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 quarkus-plugin = { id = "io.quarkus", version.ref = "quarkus-platform" }
