@@ -21,16 +21,16 @@ netty = "1.1.14"
 reactor = "3.6.4"
 rxtx = "2.1.7"
 sonarqube = "4.4.1.3373"
-spring-boot-plugin = "3.2.3"
+spring-boot-plugin = "3.2.4"
 
 # Quarkus
 
-quarkus-platform = "3.8.2"
+quarkus-platform = "3.9.1"
 
 # This relates to Spring packages used outside SpringBoot, those are managed by their own plugin
 # Gradle is smart enough to match this to SpringBoot, but it'll be a good idea to keep an eye on it.
 
-spring-standalone = "6.1.4"
+spring-standalone = "6.1.5"
 
 [libraries]
 
