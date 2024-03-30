@@ -1,7 +1,7 @@
 // External dependencies
 
 include("submodules:automation-hat-driver")
-include("submodules:owapi-reborn")
+includeBuild("submodules/owapi-reborn")
 include("submodules:servomaster:servomaster-common")
 include("submodules:xbee-api-reactive:xbee-api")
 
