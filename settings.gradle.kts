@@ -2,7 +2,7 @@
 
 includeBuild("submodules/automation-hat-driver")
 includeBuild("submodules/owapi-reborn")
-include("submodules:servomaster:servomaster-common")
+includeBuild("submodules/servomaster")
 includeBuild("submodules/xbee-api-reactive")
 
 // Modules
