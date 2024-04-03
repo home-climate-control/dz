@@ -4,6 +4,7 @@
 [submodule "xbee-api-reactive"]
 	path = submodules/xbee-api-reactive
 	url = https://github.com/home-climate-control/xbee-api-reactive.git
+	branch = dev
 [submodule "owapi-reborn"]
 	path = submodules/owapi-reborn
 	url = https://github.com/home-climate-control/owapi-reborn.git

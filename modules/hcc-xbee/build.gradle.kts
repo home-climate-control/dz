@@ -1,6 +1,6 @@
 dependencies {
 
-    implementation(project(":submodules:xbee-api-reactive:xbee-api"))
+    implementation("com.homeclimatecontrol:xbee-api")
     implementation(project(":modules:hcc-common"))
     implementation(project(":modules:hcc-driver"))
 
