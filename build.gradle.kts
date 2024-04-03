@@ -24,6 +24,10 @@ sonarqube {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
 subprojects {
 
     apply(plugin = "java")
@@ -56,7 +60,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-        mavenLocal()
     }
 
     dependencies {
