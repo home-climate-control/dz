@@ -6,13 +6,13 @@ import java.io.Serializable;
  * Zone snapshot.
  *
  * This class is common across the DZ server application, Home Climate Control proxy, wherever it is running,
- * and Home Climate Control Remote Android application (https://play.google.com/store/apps/details?id=com.homeclimatecontrol.dz3.view.android).
+ * and <a href="https://play.google.com/store/apps/details?id=net.sf.dz4.android.remote">Home Climate Control Remote Android application</a>.
  * Hence, a strange "public" implementation - it needs to support easy JSON, XML or other serialization/deserialization.
  *
  * NOTE: The deviation* variables support fast "return to schedule" function on remote devices (otherwise, it'll take
  * the full round trip time for them to reflect proper values, oscillating feedback loop becomes possible).
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2013
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
 
@@ -102,8 +102,6 @@ public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
 
     @Override
     public int compareTo(ZoneSnapshot o) {
-
-//    	org.apache.log4j.Logger.getLogger(getClass()).error("ZoneSnapshot#toString", new IllegalStateException("Trace"));
 
     	String us = Long.toString(timestamp) + "." + this;
     	String them = Long.toString(o.timestamp) + "." + o;
