@@ -50,6 +50,11 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Google Calendar Schedule updater using <a href="https://github.com/googleapis/google-api-java-client-services/tree/main/clients/google-api-services-calendar/v3/2.0.0">v3-rev20240111-2.0.0</a> client library.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ */
 public class GCalScheduleUpdater implements ScheduleUpdater {
 
     protected final Logger logger = LogManager.getLogger();
