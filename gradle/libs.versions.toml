@@ -25,7 +25,7 @@ spring-boot-plugin = "3.2.4"
 
 # Quarkus
 
-quarkus-platform = "3.9.1"
+quarkus-platform = "3.9.2"
 
 # This relates to Spring packages used outside SpringBoot, those are managed by their own plugin
 # Gradle is smart enough to match this to SpringBoot, but it'll be a good idea to keep an eye on it.
