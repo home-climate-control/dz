@@ -2,7 +2,7 @@ package net.sf.dz3r.device.actuator.economizer.v1;
 
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
+import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +37,7 @@ class SimpleEconomizerTest {
 
         // Target temperature is below the lowest in the ambient flux,
         // the economizer will just turn on and off
-        var settings = new EconomizerSettings(
+        var settings = new EconomizerConfig(
                 HvacMode.COOLING,
                 true,
                 2.0,
@@ -91,7 +91,7 @@ class SimpleEconomizerTest {
 
         // Target temperature is within the range of the ambient flux,
         // the economizer will turn on, then off, then on and off again
-        var settings = new EconomizerSettings(
+        var settings = new EconomizerConfig(
                 HvacMode.COOLING,
                 true,
                 2.0,

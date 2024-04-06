@@ -1,6 +1,6 @@
 package net.sf.dz3r.signal.hvac;
 
-import net.sf.dz3r.device.actuator.economizer.EconomizerTransientSettings;
+import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.signal.Signal;
 
 /**
@@ -12,11 +12,11 @@ import net.sf.dz3r.signal.Signal;
  */
 public class EconomizerStatus {
 
-    public final EconomizerTransientSettings settings;
+    public final EconomizerSettings settings;
     public final CallingStatus callingStatus;
     public final Signal<Double, Void> ambient;
 
-    public EconomizerStatus(EconomizerTransientSettings settings, Double sample, double demand, boolean calling, Signal<Double, Void> ambient) {
+    public EconomizerStatus(EconomizerSettings settings, Double sample, double demand, boolean calling, Signal<Double, Void> ambient) {
 
         this.settings = settings;
         this.callingStatus = new CallingStatus(sample, demand, calling);

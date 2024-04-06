@@ -1,8 +1,8 @@
 package net.sf.dz3r.runtime.config.model;
 
 import net.sf.dz3r.common.HCCObjects;
+import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Range;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
@@ -49,7 +49,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         return new ImmutablePair<>(cf.id(), zone);
     }
 
-    private EconomizerContext createEconomizer(String zoneName, EconomizerConfig cf) {
+    private EconomizerContext createEconomizer(String zoneName, net.sf.dz3r.runtime.config.model.EconomizerConfig cf) {
 
         if (cf == null) {
             return null;
@@ -76,7 +76,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         }
 
         return new EconomizerContext(
-                new EconomizerSettings(
+                new EconomizerConfig(
                         cf.mode(),
                         cf.settings().changeoverDelta(),
                         cf.settings().targetTemperature(),

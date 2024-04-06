@@ -1,104 +1,53 @@
 package net.sf.dz3r.device.actuator.economizer;
 
-import net.sf.dz3r.model.HvacMode;
-
 /**
- * Full set of economizer settings.
+ * Set of user changeable economizer settings.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
-public class EconomizerSettings extends EconomizerTransientSettings {
+public class EconomizerSettings {
+
+    public final Boolean enabled;
 
     /**
-     * Which mode this device is active in. This mode may be different from the zone mode; it is the user's
-     * responsibility to make sure the system doesn't enter a runaway loop.
+     * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
      */
-    public final HvacMode mode;
-
-    public final Double P;
-
-    public final Double I;
-
-    public final Double saturationLimit;
+    public final Double changeoverDelta;
 
     /**
-     * All except {@code enabled} argument constructor (defaults to {@code true}, for common sense.
-     *
-     * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
-     * @param P Internal {@link net.sf.dz3r.controller.pid.PidController} P component.
-     * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
-     * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
+     * When this temperature is reached, the device is shut off.
      */
-    public EconomizerSettings(HvacMode mode,
-                              Double changeoverDelta, Double targetTemperature,
-                              Boolean keepHvacOn,
-                              Double P, Double I, Double saturationLimit) {
-        this(mode, true, changeoverDelta, targetTemperature, keepHvacOn, P, I, saturationLimit);
+    public final Double targetTemperature;
+
+    /**
+     * {@code true} means that turning on the device will NOT turn the HVAC off.
+     * You probably want to keep this at {@code false}, unless the indoor temperature is measured at HVAC return
+     * and fresh air is injected into HVAC return.
+     */
+    public final Boolean keepHvacOn;
+
+    public EconomizerSettings(Boolean enabled, Double changeoverDelta, Double targetTemperature, Boolean keepHvacOn) {
+
+        this.enabled = enabled;
+        this.changeoverDelta = changeoverDelta;
+        this.targetTemperature = targetTemperature;
+        this.keepHvacOn = keepHvacOn;
     }
 
-    /**
-     * All argument constructor.
-     *
-     * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
-     * @param P Internal {@link net.sf.dz3r.controller.pid.PidController} P component.
-     * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
-     * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
-     */
-    public EconomizerSettings(HvacMode mode,
-                              Boolean enabled,
-                              Double changeoverDelta, Double targetTemperature,
-                              Boolean keepHvacOn,
-                              Double P, Double I, Double saturationLimit) {
-        super(enabled, changeoverDelta, targetTemperature, keepHvacOn);
+    public EconomizerSettings(EconomizerConfig source) {
 
-        this.mode = mode;
-
-        this.P = P;
-        this.I = I;
-        this.saturationLimit = saturationLimit;
-
-        checkArgs();
-    }
-
-    protected void checkArgs() {
-
-        if (mode == null) {
-            throw new IllegalArgumentException("mode can't be null");
-        }
-
-        if (changeoverDelta < 0) {
-            throw new IllegalArgumentException("changeoverDelta must be non-negative");
-        }
-    }
-
-    /**
-     * Merge this instance with an update.
-     *
-     * @param from Adjustment instance. Non-null values take precedence over this object's values.
-     */
-    public EconomizerSettings merge(EconomizerSettings from) {
-
-        return new EconomizerSettings(
-                from.mode != null ? from.mode : mode,
-                from.enabled != null ? from.enabled : enabled,
-                from.changeoverDelta != null ? from.changeoverDelta : changeoverDelta,
-                from.targetTemperature != null ? from.targetTemperature : targetTemperature,
-                from.keepHvacOn != null ? from.keepHvacOn : keepHvacOn,
-                from.P != null ? from.P : P,
-                from.I != null ? from.I : I,
-                from.saturationLimit != null ? from.saturationLimit : saturationLimit);
+        this.enabled = source.enabled;
+        this.changeoverDelta = source.changeoverDelta;
+        this.targetTemperature = source.targetTemperature;
+        this.keepHvacOn = source.keepHvacOn;
     }
 
     @Override
     public String toString() {
-        return "{mode=" + mode
-                + ", enabled=" + enabled
+        return "{enabled=" + enabled
                 + ", changeoverDelta=" + changeoverDelta
                 + ", targetTemperature=" + targetTemperature
                 + ", keepHvacOn=" + keepHvacOn
-                + ", P=" + P
-                + ", I=" + I
-                + ", saturationLimit=" + saturationLimit
                 + "}";
     }
 }

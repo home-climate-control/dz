@@ -38,7 +38,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
     public final String name;
 
-    private EconomizerSettings settings;
+    private EconomizerConfig settings;
 
     private final HvacDevice device;
 
@@ -78,7 +78,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
     protected AbstractEconomizer(
             Clock clock,
             String name,
-            EconomizerSettings settings,
+            EconomizerConfig settings,
             HvacDevice device,
             Duration timeout) {
 
@@ -101,7 +101,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 .subscribe(s -> logger.debug("{}: HVAC device state/done: {}", getAddress(), s));
 
         this.economizerStatus = new EconomizerStatus(
-                new EconomizerTransientSettings(settings),
+                new EconomizerSettings(settings),
                 null, 0, false, null);
 
         // Don't forget to connect fluxes; this can only be done in subclasses after all the
@@ -119,7 +119,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         }
     }
 
-    public void setSettings(EconomizerSettings settings) {
+    public void setSettings(EconomizerConfig settings) {
         if (settings == null) {
             throw new IllegalArgumentException("settings can't be null");
         }
@@ -206,7 +206,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
 
         economizerStatus = new EconomizerStatus(
-                new EconomizerTransientSettings(settings),
+                new EconomizerSettings(settings),
                 sample,
                 demand,
                 stateSignal.getValue(),
@@ -356,7 +356,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
     }
 
     /**
-     * Get the {@link EconomizerSettings#changeoverDelta ambient} delta signal.
+     * Get the {@link EconomizerConfig#changeoverDelta ambient} delta signal.
      *
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */
@@ -368,7 +368,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
     }
 
     /**
-     * Get the {@link EconomizerSettings#targetTemperature} delta signal.
+     * Get the {@link EconomizerConfig#targetTemperature} delta signal.
      *
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */

@@ -19,13 +19,13 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class AbstractEconomizerTest {
 
     /**
-     * Make sure that control signal is computed properly as the indoor temperature is approaching the {@link EconomizerSettings#targetTemperature}.
+     * Make sure that control signal is computed properly as the indoor temperature is approaching the {@link EconomizerConfig#targetTemperature}.
      */
     @ParameterizedTest
     @MethodSource("targetAdjustmentProvider")
     void targetAdjustmentTest(TargetAdjustmentTestData source) {
 
-        var settings = new EconomizerSettings(
+        var settings = new EconomizerConfig(
                 source.mode,
                 source.changeoverDelta,
                 source.targetTemperature,
@@ -59,7 +59,7 @@ class AbstractEconomizerTest {
          *
          * @param device HVAC device acting as the economizer.
          */
-        protected TestEconomizer(String name, EconomizerSettings settings, HvacDevice device) {
+        protected TestEconomizer(String name, EconomizerConfig settings, HvacDevice device) {
             super(Clock.systemUTC(), name, settings, device, Duration.ofSeconds(90));
         }
 

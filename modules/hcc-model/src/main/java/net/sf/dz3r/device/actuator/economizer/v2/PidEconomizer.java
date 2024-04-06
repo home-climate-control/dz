@@ -6,7 +6,7 @@ import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
+import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
@@ -52,7 +52,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
     public PidEconomizer(
             Clock clock,
             String name,
-            EconomizerSettings settings,
+            EconomizerConfig settings,
             Flux<Signal<Double, Void>> ambientFlux,
             HvacDevice device,
             Duration timeout) {
