@@ -7,8 +7,6 @@ package net.sf.dz3r.device.actuator.economizer;
  */
 public class EconomizerSettings {
 
-    public final Boolean enabled;
-
     /**
      * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
      */
@@ -26,17 +24,19 @@ public class EconomizerSettings {
      */
     public final Boolean keepHvacOn;
 
-    public EconomizerSettings(Boolean enabled, Double changeoverDelta, Double targetTemperature, Boolean keepHvacOn) {
+    public EconomizerSettings(Double changeoverDelta, Double targetTemperature, Boolean keepHvacOn) {
 
-        this.enabled = enabled;
+        if (changeoverDelta < 0) {
+            throw new IllegalArgumentException("changeoverDelta must be non-negative");
+        }
+
         this.changeoverDelta = changeoverDelta;
         this.targetTemperature = targetTemperature;
         this.keepHvacOn = keepHvacOn;
     }
 
-    public EconomizerSettings(EconomizerConfig source) {
+    public EconomizerSettings(EconomizerSettings source) {
 
-        this.enabled = source.enabled;
         this.changeoverDelta = source.changeoverDelta;
         this.targetTemperature = source.targetTemperature;
         this.keepHvacOn = source.keepHvacOn;
@@ -44,8 +44,7 @@ public class EconomizerSettings {
 
     @Override
     public String toString() {
-        return "{enabled=" + enabled
-                + ", changeoverDelta=" + changeoverDelta
+        return "{changeoverDelta=" + changeoverDelta
                 + ", targetTemperature=" + targetTemperature
                 + ", keepHvacOn=" + keepHvacOn
                 + "}";

@@ -7,7 +7,7 @@ import net.sf.dz3r.model.HvacMode;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
-public class EconomizerConfig extends EconomizerSettings {
+public class EconomizerConfig {
 
     /**
      * Which mode this device is active in. This mode may be different from the zone mode; it is the user's
@@ -21,35 +21,23 @@ public class EconomizerConfig extends EconomizerSettings {
 
     public final Double saturationLimit;
 
-    /**
-     * All except {@code enabled} argument constructor (defaults to {@code true}, for common sense.
-     *
-     * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
-     * @param P Internal {@link net.sf.dz3r.controller.pid.PidController} P component.
-     * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
-     * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
-     */
-    public EconomizerConfig(HvacMode mode,
-                            Double changeoverDelta, Double targetTemperature,
-                            Boolean keepHvacOn,
-                            Double P, Double I, Double saturationLimit) {
-        this(mode, true, changeoverDelta, targetTemperature, keepHvacOn, P, I, saturationLimit);
-    }
+    public final EconomizerSettings settings;
 
     /**
      * All argument constructor.
      *
-     * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
      * @param P Internal {@link net.sf.dz3r.controller.pid.PidController} P component.
      * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
      * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
+     * @param settings User changeable settings.
      */
     public EconomizerConfig(HvacMode mode,
-                            Boolean enabled,
-                            Double changeoverDelta, Double targetTemperature,
-                            Boolean keepHvacOn,
-                            Double P, Double I, Double saturationLimit) {
-        super(enabled, changeoverDelta, targetTemperature, keepHvacOn);
+                            Double P, Double I, Double saturationLimit,
+                            EconomizerSettings settings) {
+
+        if (mode == null) {
+            throw new IllegalArgumentException("mode can't be null");
+        }
 
         this.mode = mode;
 
@@ -57,18 +45,7 @@ public class EconomizerConfig extends EconomizerSettings {
         this.I = I;
         this.saturationLimit = saturationLimit;
 
-        checkArgs();
-    }
-
-    protected void checkArgs() {
-
-        if (mode == null) {
-            throw new IllegalArgumentException("mode can't be null");
-        }
-
-        if (changeoverDelta < 0) {
-            throw new IllegalArgumentException("changeoverDelta must be non-negative");
-        }
+        this.settings = settings;
     }
 
     /**
@@ -79,26 +56,25 @@ public class EconomizerConfig extends EconomizerSettings {
     public EconomizerConfig merge(EconomizerConfig from) {
 
         return new EconomizerConfig(
-                from.mode != null ? from.mode : mode,
-                from.enabled != null ? from.enabled : enabled,
-                from.changeoverDelta != null ? from.changeoverDelta : changeoverDelta,
-                from.targetTemperature != null ? from.targetTemperature : targetTemperature,
-                from.keepHvacOn != null ? from.keepHvacOn : keepHvacOn,
+                from.mode,
                 from.P != null ? from.P : P,
                 from.I != null ? from.I : I,
-                from.saturationLimit != null ? from.saturationLimit : saturationLimit);
+                from.saturationLimit != null ? from.saturationLimit : saturationLimit,
+                from.settings != null ? from.settings : settings);
     }
 
     @Override
     public String toString() {
         return "{mode=" + mode
-                + ", enabled=" + enabled
-                + ", changeoverDelta=" + changeoverDelta
-                + ", targetTemperature=" + targetTemperature
-                + ", keepHvacOn=" + keepHvacOn
+                + ", enabled=" + isEnabled()
                 + ", P=" + P
                 + ", I=" + I
                 + ", saturationLimit=" + saturationLimit
+                + ", settings=" + settings
                 + "}";
+    }
+
+    public boolean isEnabled() {
+        return settings != null;
     }
 }
