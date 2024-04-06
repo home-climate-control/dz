@@ -9,12 +9,17 @@ import java.time.Duration;
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record EconomizerConfig(
         String ambientSensor,
-        double changeoverDelta,
-        double targetTemperature,
-        Boolean keepHvacOn,
         PidControllerConfig controller,
         HvacMode mode,
         String hvacDevice,
-        Duration timeout
+        Duration timeout,
+        Settings settings
 ) {
+    public record Settings(
+            double changeoverDelta,
+            double targetTemperature,
+            Boolean keepHvacOn
+    ) {
+
+    }
 }

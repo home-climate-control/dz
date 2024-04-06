@@ -63,12 +63,24 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
             return t;
         });
 
+        if (cf.settings() == null) {
+
+            // This is likely a result of a breaking change in the configuration, let's complain loudly but not explode
+            // PS: It might be a good idea to remove this check a bit later when the users do update the configuration
+            // PPS: Or just pretend it doesn't exist and configure the economizer inactive without them, see https://github.com/home-climate-control/dz/issues/267
+
+            logger.error("null settings, have you updated the configuration? Here's what it looks like: {}", cf);
+            logger.error("Ignoring economizer configuration for now");
+
+            return null;
+        }
+
         return new EconomizerContext(
                 new EconomizerSettings(
                         cf.mode(),
-                        cf.changeoverDelta(),
-                        cf.targetTemperature(),
-                        cf.keepHvacOn(),
+                        cf.settings().changeoverDelta(),
+                        cf.settings().targetTemperature(),
+                        cf.settings().keepHvacOn(),
                         cf.controller().p(),
                         cf.controller().i(),
                         cf.controller().limit()),

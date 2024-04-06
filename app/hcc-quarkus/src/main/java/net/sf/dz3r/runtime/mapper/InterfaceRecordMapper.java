@@ -148,14 +148,17 @@ public interface InterfaceRecordMapper {
     net.sf.dz3r.runtime.config.model.ZoneSettingsConfig settings(ZoneSettingsConfig source);
 
     @Mapping(expression = "java(source.ambientSensor())", target = "ambientSensor")
-    @Mapping(expression = "java(source.changeoverDelta())", target = "changeoverDelta")
-    @Mapping(expression = "java(source.targetTemperature())", target = "targetTemperature")
-    @Mapping(expression = "java(source.keepHvacOn())", target = "keepHvacOn")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.controller(source.controller()))", target = "controller")
     @Mapping(expression = "java(source.mode())", target = "mode")
     @Mapping(expression = "java(source.hvacDevice())", target = "hvacDevice")
     @Mapping(expression = "java(source.timeout().orElse(null))", target = "timeout")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.settings(source.settings().orElse(null)))", target = "settings")
     net.sf.dz3r.runtime.config.model.EconomizerConfig economizer(EconomizerConfig source);
+
+    @Mapping(expression = "java(source.changeoverDelta())", target = "changeoverDelta")
+    @Mapping(expression = "java(source.targetTemperature())", target = "targetTemperature")
+    @Mapping(expression = "java(source.keepHvacOn())", target = "keepHvacOn")
+    net.sf.dz3r.runtime.config.model.EconomizerConfig.Settings settings(EconomizerConfig.Settings source);
 
     @Mapping(expression = "java(source.min())", target = "min")
     @Mapping(expression = "java(source.max())", target = "max")
