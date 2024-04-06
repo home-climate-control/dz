@@ -101,7 +101,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 .subscribe(s -> logger.debug("{}: HVAC device state/done: {}", getAddress(), s));
 
         this.economizerStatus = new EconomizerStatus(
-                new EconomizerSettings(config.settings),
+                config.settings,
                 null, 0, false, null);
 
         // Don't forget to connect fluxes; this can only be done in subclasses after all the

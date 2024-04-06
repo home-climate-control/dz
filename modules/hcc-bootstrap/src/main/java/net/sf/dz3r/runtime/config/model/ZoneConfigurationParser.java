@@ -66,14 +66,12 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
 
         if (cf.settings() == null) {
 
-            // This is likely a result of a breaking change in the configuration, let's complain loudly but not explode
-            // PS: It might be a good idea to remove this check a bit later when the users do update the configuration
-            // PPS: Or just pretend it doesn't exist and configure the economizer inactive without them, see https://github.com/home-climate-control/dz/issues/267
+            // This is possibly a result of a breaking change in the configuration at rev. a05d2593c12f6821a7b0c6e10b41808d04544a01.
+            // But rev. 6befbc1afde887de526439e93bc7762eb25f4a1b unbrokeded the change, and now missing settings are OK, so this is just a warning.
+            // It'll go away after the transition period is over.
 
-            logger.error("null settings, have you updated the configuration? Here's what it looks like: {}", cf);
-            logger.error("Ignoring economizer configuration for now");
-
-            return null;
+            logger.warn("null settings, have you updated the economizer configuration? Here's what it looks like: {}", cf);
+            logger.warn("see https://github.com/home-climate-control/dz/blob/master/docs/configuration/zones.md#economizer for more information");
         }
 
         return new EconomizerContext(
@@ -82,11 +80,13 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                         cf.controller().p(),
                         cf.controller().i(),
                         cf.controller().limit(),
-                        new EconomizerSettings(
-                                cf.settings().changeoverDelta(),
-                                cf.settings().targetTemperature(),
-                                cf.settings().keepHvacOn()
-                        )
+                        Optional
+                                .ofNullable(cf.settings())
+                                .map(settings -> new EconomizerSettings(
+                                        settings.changeoverDelta(),
+                                        settings.targetTemperature(),
+                                        settings.keepHvacOn()))
+                                .orElse(null)
                 ),
                 ambientSensor,
                 hvacDevice,
