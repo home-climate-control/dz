@@ -5,7 +5,7 @@ import net.sf.dz3r.model.HvacMode;
 /**
  * Full set of economizer settings.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 public class EconomizerSettings extends EconomizerTransientSettings {
 
@@ -14,13 +14,6 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      * responsibility to make sure the system doesn't enter a runaway loop.
      */
     public final HvacMode mode;
-
-    /**
-     * {@code true} means that turning on the device will NOT turn the HVAC off.
-     * You probably want to keep this at {@code false}, unless the indoor temperature is measured at HVAC return
-     * and fresh air is injected into HVAC return.
-     */
-    public final Boolean keepHvacOn;
 
     public final Double P;
 
@@ -56,10 +49,9 @@ public class EconomizerSettings extends EconomizerTransientSettings {
                               Double changeoverDelta, Double targetTemperature,
                               Boolean keepHvacOn,
                               Double P, Double I, Double saturationLimit) {
-        super(enabled, changeoverDelta, targetTemperature);
+        super(enabled, changeoverDelta, targetTemperature, keepHvacOn);
 
         this.mode = mode;
-        this.keepHvacOn = keepHvacOn;
 
         this.P = P;
         this.I = I;
