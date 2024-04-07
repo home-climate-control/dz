@@ -30,7 +30,7 @@ subprojects {
 
 
     jacoco {
-        toolVersion = "0.8.5"
+        toolVersion = "0.8.11"
     }
 
     jacocoTestReport {
@@ -67,7 +67,7 @@ subprojects {
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.2'
         testImplementation('org.assertj:assertj-core:3.20.2')
 
-        errorprone 'com.google.errorprone:error_prone_core:2.6.0'
+        errorprone "com.google.errorprone:error_prone_core:2.26.1"
     }
 
     test {
