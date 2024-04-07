@@ -4,6 +4,7 @@
 [submodule "servomaster"]
 	path = servomaster
 	url = https://github.com/climategadgets/servomaster.git
+	branch = last-imperative-maintenance
 [submodule "xbee-api"]
 	path = xbee-api
 	url = https://github.com/home-climate-control/xbee-api.git
@@ -15,3 +16,4 @@
 [submodule "automation-hat-driver"]
 	path = automation-hat-driver
 	url = https://github.com/home-climate-control/automation-hat-driver.git
+	branch = last-imperative-maintenance
