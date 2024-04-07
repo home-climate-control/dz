@@ -7,7 +7,7 @@ plugins {
 
 application {
     applicationName = "hcc"
-    mainClass.set("net.sf.dz3.runtime.standalone.HccApplication")
+    mainClass.set("net.sf.dz3r.runtime.standalone.HccApplication")
 }
 
 dependencies {
