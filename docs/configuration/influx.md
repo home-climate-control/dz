@@ -1,7 +1,9 @@
 influx
 ==
 
-Integration that allows to use [InfluxDB](https://www.influxdata.com/) as telemetry data sink.
+Integration that allows to use [InfluxDB 1.x](https://www.influxdata.com/time-series-platform/) as telemetry data sink.
+
+InfluxDB 2.x is not yet supported, [vote or submit a PR](https://github.com/home-climate-control/dz/issues/197) if you want to use 2.x instead or in addition to 1.x. 
 
 > **NOTE:** This integration will be inactive except for `sensor-field-mapping` unless included into [directors.connectors](./directors.md).   
 
