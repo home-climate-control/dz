@@ -12,6 +12,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 class SimplePidControllerTest {
 
@@ -19,7 +20,7 @@ class SimplePidControllerTest {
 
     @Test
     void testPSimple() throws InterruptedException {
-        testP(new SimplePidController<>("simple", 0, 1, 0, 0, 0));
+        testP(new SimplePidController<>("simple", 0d, 1, 0, 0, 0));
     }
 
     private void testP(ProcessController<Double, Double, Void> pc) {
@@ -67,5 +68,12 @@ class SimplePidControllerTest {
         } finally {
             ThreadContext.pop();
         }
+    }
+
+    @Test
+    void nullSetpointAtStart() {
+        assertThatCode(() -> {
+            new SimplePidController<Double>("simple", null, 1, 0, 0, 1);
+        }).doesNotThrowAnyException();
     }
 }

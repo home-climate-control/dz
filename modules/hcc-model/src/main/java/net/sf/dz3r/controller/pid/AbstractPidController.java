@@ -58,7 +58,7 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
      */
     private double lastD = 0;
 
-    protected AbstractPidController(String jmxName, final double setpoint, final double P, final double I, final double D, double saturationLimit) {
+    protected AbstractPidController(String jmxName, final Double setpoint, final double P, final double I, final double D, double saturationLimit) {
 
         super(jmxName, setpoint);
 
@@ -71,7 +71,7 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
     }
 
     @Override
-    protected double getError(Signal<Double, P> pv, double setpoint) {
+    protected double getError(Signal<Double, P> pv, Double setpoint) {
         return pv.getValue() - setpoint;
     }
 

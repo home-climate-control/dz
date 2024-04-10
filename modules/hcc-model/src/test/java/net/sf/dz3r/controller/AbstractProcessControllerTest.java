@@ -64,7 +64,7 @@ class AbstractProcessControllerTest {
                 .create(this::connectSetpoint)
                 .map(v -> new Signal<Double, Void>(Instant.now(), v));
 
-        var pc = new SimplePidController<Void>("pc", 20, 1, 0, 0, 1.1);
+        var pc = new SimplePidController<Void>("pc", 20d, 1, 0, 0, 1.1);
 
         var accumulator = new ArrayList<Signal<ProcessController.Status<Double>, Void>>();
         var out = pc

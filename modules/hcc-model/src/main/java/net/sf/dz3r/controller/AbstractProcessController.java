@@ -7,6 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 
 import java.time.Duration;
+import java.util.Optional;
 
 /**
  * Base class for reactive process controllers.
@@ -22,10 +23,10 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
     /**
      * The process setpoint.
      */
-    private double setpoint;
+    private Double setpoint;
 
-    private final Flux<Double> setpointFlux;
-    private FluxSink<Double> setpointSink;
+    private final Flux<Optional<Double>> setpointFlux;
+    private FluxSink<Optional<Double>> setpointSink;
 
     /**
      * The current process variable value.
@@ -43,26 +44,26 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
      * @param jmxName This controller's JMX name.
      * @param setpoint Initial setpoint.
      */
-    protected AbstractProcessController(String jmxName, double setpoint) {
+    protected AbstractProcessController(String jmxName, Double setpoint) {
         this.jmxName = jmxName;
 
         setpointFlux = Flux.create(this::connectSetpoint);
-        setpointFlux.subscribe(s -> this.setpoint = s);
+        setpointFlux.subscribe(s -> this.setpoint = s.orElse(null));
 
         setSetpoint(setpoint);
     }
 
-    private void connectSetpoint(FluxSink<Double> setpointSink) {
+    private void connectSetpoint(FluxSink<Optional<Double>> setpointSink) {
         this.setpointSink = setpointSink;
     }
 
     @Override
-    public void setSetpoint(double setpoint) {
-        setpointSink.next(setpoint);
+    public void setSetpoint(Double setpoint) {
+        setpointSink.next(Optional.ofNullable(setpoint));
     }
 
     @Override
-    public double getSetpoint() {
+    public Double getSetpoint() {
         return setpoint;
     }
 
@@ -72,17 +73,16 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
     }
 
     @Override
-    public final synchronized double getError() {
+    public final synchronized Double getError() {
 
-        if (pv == null) {
-            // No sample, no error
-            return 0;
+        if (setpoint == null || pv == null) {
+            return null;
         }
 
         return getError(pv, setpoint);
     }
 
-    protected abstract double getError(Signal<I, P> pv, double setpoint);
+    protected abstract double getError(Signal<I, P> pv, Double setpoint);
 
     /**
      * Get last output signal value.
@@ -100,14 +100,14 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
         // Need to re-inject it.
         return Flux.combineLatest(
                 Flux.concat(
-                        Flux.just(setpoint),
+                        Flux.just(Optional.ofNullable(setpoint)),
                         setpointFlux
                 ),
                 pv.doOnComplete(() -> setpointSink.complete()), // or it will hang forever
                 this::compute);
     }
 
-    private Signal<Status<O>, P> compute(Double setpoint, Signal<I, P> pv) {
+    private Signal<Status<O>, P> compute(Optional<Double> setpoint, Signal<I, P> pv) {
 
         if (pv.isError()) {
 
@@ -115,7 +115,7 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
             // recalculate the state. In practice, this will have to wait.
 
             // For now, let's throw them a NaN, they better pay attention.
-            return new Signal<>(pv.timestamp, new Status(setpoint, null, Double.NaN), pv.payload, pv.status, pv.error);
+            return new Signal<>(pv.timestamp, new Status(setpoint.orElse(null), null, Double.NaN), pv.payload, pv.status, pv.error);
         }
 
         if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
@@ -127,7 +127,7 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
         }
 
         this.pv = pv;
-        lastOutputSignal = wrapCompute(setpoint, pv);
+        lastOutputSignal = wrapCompute(setpoint.orElse(null), pv);
 
         return lastOutputSignal;
     }
