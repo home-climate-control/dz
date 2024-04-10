@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 
 import java.util.Objects;
@@ -11,7 +12,7 @@ import java.util.Objects;
  *
  * @see ZoneStatus
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 public class ZoneSettings {
 
@@ -20,6 +21,7 @@ public class ZoneSettings {
     public final Boolean voting;
     public final Boolean hold;
     public final Integer dumpPriority;
+    public final EconomizerSettings economizerSettings;
 
     /**
      * Create an instance from just a setpoint.
@@ -29,7 +31,7 @@ public class ZoneSettings {
      * @param setpoint Setpoint to set.
      */
     public ZoneSettings(double setpoint) {
-        this(true, setpoint, true, false, 0);
+        this(true, setpoint, true, false, 0, null);
     }
 
     /**
@@ -39,7 +41,7 @@ public class ZoneSettings {
      * @param enabled {@link #enabled} flag to set.
      */
     public ZoneSettings(ZoneSettings template, boolean enabled) {
-        this(enabled, template.setpoint, template.voting, template.hold, template.dumpPriority);
+        this(enabled, template.setpoint, template.voting, template.hold, template.dumpPriority, template.economizerSettings);
     }
 
     /**
@@ -49,7 +51,7 @@ public class ZoneSettings {
      * @param setpoint {@link #setpoint} to set.
      */
     public ZoneSettings(ZoneSettings template, Double setpoint) {
-        this(template.enabled, setpoint, template.voting, template.hold, template.dumpPriority);
+        this(template.enabled, setpoint, template.voting, template.hold, template.dumpPriority, template.economizerSettings);
     }
 
     /**
@@ -64,16 +66,31 @@ public class ZoneSettings {
                 from.setpoint != null ? from.setpoint : setpoint,
                 from.voting != null ? from.voting : voting,
                 from.hold != null ? from.hold : hold,
-                from.dumpPriority != null ? from.dumpPriority : dumpPriority);
+                from.dumpPriority != null ? from.dumpPriority : dumpPriority,
+                from.economizerSettings != null ? from.economizerSettings : economizerSettings);
     }
 
+    /**
+     * Abbreviated constructor without {@link #economizerSettings} to support incremental refactoring.
+     *
+     * @deprecated Use the full constructor instead.
+     */
+    @Deprecated
     public ZoneSettings(Boolean enabled, Double setpoint, Boolean voting, Boolean hold, Integer dumpPriority) {
+        this(enabled, setpoint, voting, hold, dumpPriority, null);
+    }
+
+    /**
+     * Full constructor.
+     */
+    public ZoneSettings(Boolean enabled, Double setpoint, Boolean voting, Boolean hold, Integer dumpPriority, EconomizerSettings economizerSettings) {
 
         this.enabled = enabled;
         this.setpoint = setpoint;
         this.voting = voting;
         this.hold = hold;
         this.dumpPriority = dumpPriority;
+        this.economizerSettings = economizerSettings;
     }
 
     @Override
@@ -83,6 +100,7 @@ public class ZoneSettings {
                 + ", voting=" + voting
                 + ", hold=" + hold
                 + ", dump=" + dumpPriority
+                + ", ecp=" + economizerSettings
                 + "}";
     }
 
@@ -92,9 +110,9 @@ public class ZoneSettings {
                 && enabled.equals(other.enabled)
                 && setpoint.equals(other.setpoint)
                 && voting.equals(other.voting)
-                // hold is the only member that can be null along the business logic pipeline
                 && ((hold == null && other.hold == null) || (hold != null && hold.equals(other.hold)))
-                && dumpPriority.equals(other.dumpPriority);
+                && dumpPriority.equals(other.dumpPriority)
+                && ((economizerSettings == null && other.economizerSettings == null) || (economizerSettings != null && economizerSettings.equals(other.economizerSettings)));
     }
 
     @Override
@@ -115,6 +133,7 @@ public class ZoneSettings {
 
         return Objects.equals(enabled, other.enabled)
                 && setpoint.compareTo(other.setpoint) == 0
-                && Objects.equals(voting, other.voting);
+                && Objects.equals(voting, other.voting)
+                && Objects.equals(economizerSettings, other.economizerSettings);
     }
 }
