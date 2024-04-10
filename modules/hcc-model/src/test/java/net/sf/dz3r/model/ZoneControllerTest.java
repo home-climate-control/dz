@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 class ZoneControllerTest {
 
@@ -235,7 +235,7 @@ class ZoneControllerTest {
         var setpoint2 = 25.0;
 
         var s1 = new ZoneSettings(true, setpoint1, false, false, 0);
-        var s2 = new ZoneSettings(true, setpoint1, true, false, 0);
+        var s2 = new ZoneSettings(true, setpoint2, true, false, 0);
 
         var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
         var z1 = new Zone(ts1, s1);
