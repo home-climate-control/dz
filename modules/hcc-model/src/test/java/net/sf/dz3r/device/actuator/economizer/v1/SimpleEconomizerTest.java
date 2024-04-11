@@ -44,7 +44,8 @@ class SimpleEconomizerTest {
                 new EconomizerSettings(
                         2.0,
                         10.0,
-                        false
+                        false,
+                        1.0
                 ));
 
         var indoor = 25.0;
@@ -99,7 +100,8 @@ class SimpleEconomizerTest {
                 new EconomizerSettings(
                         2.0,
                         18.0,
-                        false
+                        false,
+                        1.0
                 ));
 
         var ambient = getAmbientFlux();

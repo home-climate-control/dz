@@ -74,6 +74,8 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
             logger.warn("see https://github.com/home-climate-control/dz/blob/master/docs/configuration/zones.md#economizer for more information");
         }
 
+        // VT: NOTE: maxPower is only configurable via UI and scheduler - there's no sense in setting it here, semantics are unclear
+
         return new EconomizerContext(
                 new EconomizerConfig(
                         cf.mode(),
@@ -85,7 +87,8 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                                 .map(settings -> new EconomizerSettings(
                                         settings.changeoverDelta(),
                                         settings.targetTemperature(),
-                                        settings.keepHvacOn()))
+                                        settings.keepHvacOn(),
+                                        1.0))
                                 .orElse(null)
                 ),
                 ambientSensor,

@@ -97,35 +97,35 @@ class SettingsParserTest {
         return Stream.of(
                 new TestPair(
                         "setpoint 18",
-                        new ZoneSettings(true, 18.0, true, null, 0)
+                        new ZoneSettings(true, 18.0, true, null, 0, null)
                 ),
                 new TestPair(
                         "setpoint 18C, enabled, voting",
-                        new ZoneSettings(true, 18.0, true, null, 0)
+                        new ZoneSettings(true, 18.0, true, null, 0, null)
                 ),
                 new TestPair(
                         "setpoint 18C, on, voting, dump priority = 2",
-                        new ZoneSettings(true, 18.0, true, null, 2)
+                        new ZoneSettings(true, 18.0, true, null, 2, null)
                 ),
                 new TestPair(
                         "setpoint 18C, enabled, voting, dump priority: 2",
-                        new ZoneSettings(true, 18.0, true, null, 2)
+                        new ZoneSettings(true, 18.0, true, null, 2, null)
                 ),
                 new TestPair(
                         "setpoint = 18C; enabled; voting; dump priority 2",
-                        new ZoneSettings(true, 18.0, true, null, 2)
+                        new ZoneSettings(true, 18.0, true, null, 2, null)
                 ),
                 new TestPair(
                         "enabled; not voting; setpoint = 80F",
-                        new ZoneSettings(true, 26.666666666666668, false, null, 0)
+                        new ZoneSettings(true, 26.666666666666668, false, null, 0, null)
                 ),
                 new TestPair(
                         "disabled; non-voting, setpoint: 80F",
-                        new ZoneSettings(false, 26.666666666666668, false, null, 0)
+                        new ZoneSettings(false, 26.666666666666668, false, null, 0, null)
                 ),
                 new TestPair(
                         "off; non-voting, setpoint: 80F",
-                        new ZoneSettings(false, 26.666666666666668, false, null, 0)
+                        new ZoneSettings(false, 26.666666666666668, false, null, 0, null)
                 )
         );
     }

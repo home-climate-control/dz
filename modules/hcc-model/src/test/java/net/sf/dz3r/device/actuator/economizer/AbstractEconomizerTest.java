@@ -31,7 +31,8 @@ class AbstractEconomizerTest {
                 new EconomizerSettings(
                         source.changeoverDelta,
                         source.targetTemperature,
-                        true
+                        true,
+                        1.0
                 )
         );
 

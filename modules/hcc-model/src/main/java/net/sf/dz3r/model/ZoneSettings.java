@@ -1,9 +1,15 @@
 package net.sf.dz3r.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Zone settings.
@@ -14,13 +20,20 @@ import java.util.Objects;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public class ZoneSettings {
 
     public final Boolean enabled;
     public final Double setpoint;
     public final Boolean voting;
+
+    @JsonIgnore
     public final Boolean hold;
+
     public final Integer dumpPriority;
+
+    @JsonProperty("economizer")
     public final EconomizerSettings economizerSettings;
 
     /**
@@ -100,18 +113,33 @@ public class ZoneSettings {
                 + ", voting=" + voting
                 + ", hold=" + hold
                 + ", dump=" + dumpPriority
-                + ", ecp=" + economizerSettings
+                + ", economizer=" + economizerSettings
                 + "}";
+    }
+
+    @JsonIgnore
+    public boolean isEnabled() {
+        return Optional.ofNullable(enabled).orElse(true);
+    }
+
+    @JsonIgnore
+    public boolean isVoting() {
+        return Optional.ofNullable(voting).orElse(true);
+    }
+
+    @JsonIgnore
+    public int getDumpPriority() {
+        return Optional.ofNullable(dumpPriority).orElse(0);
     }
 
     @Override
     public boolean equals(Object o) {
         return o instanceof ZoneSettings other
-                && enabled.equals(other.enabled)
+                && isEnabled() == other.isEnabled()
                 && setpoint.equals(other.setpoint)
-                && voting.equals(other.voting)
+                && isVoting() == other.isVoting()
                 && ((hold == null && other.hold == null) || (hold != null && hold.equals(other.hold)))
-                && dumpPriority.equals(other.dumpPriority)
+                && getDumpPriority() == other.getDumpPriority()
                 && ((economizerSettings == null && other.economizerSettings == null) || (economizerSettings != null && economizerSettings.equals(other.economizerSettings)));
     }
 

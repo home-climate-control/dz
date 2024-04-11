@@ -1,10 +1,14 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 /**
  * Set of user changeable economizer settings.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public class EconomizerSettings {
 
     /**
@@ -24,15 +28,22 @@ public class EconomizerSettings {
      */
     public final Boolean keepHvacOn;
 
-    public EconomizerSettings(Double changeoverDelta, Double targetTemperature, Boolean keepHvacOn) {
+    public final Double maxPower;
+
+    public EconomizerSettings(Double changeoverDelta, Double targetTemperature, Boolean keepHvacOn, Double maxPower) {
 
         if (changeoverDelta < 0) {
             throw new IllegalArgumentException("changeoverDelta must be non-negative");
         }
 
+        if (maxPower != null && (maxPower.isInfinite() || maxPower.isNaN() || maxPower <= 0 || maxPower > 1)) {
+                throw new IllegalArgumentException("maxPower must be in range ]0,1]");
+        }
+
         this.changeoverDelta = changeoverDelta;
         this.targetTemperature = targetTemperature;
         this.keepHvacOn = keepHvacOn;
+        this.maxPower = maxPower;
     }
 
     public EconomizerSettings(EconomizerSettings source) {
@@ -40,6 +51,7 @@ public class EconomizerSettings {
         this.changeoverDelta = source.changeoverDelta;
         this.targetTemperature = source.targetTemperature;
         this.keepHvacOn = source.keepHvacOn;
+        this.maxPower = source.maxPower;
     }
 
     @Override
