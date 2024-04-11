@@ -68,15 +68,31 @@ public abstract class ApplicationBase<C> {
         logger.debug("reactor-core default bounded elastic queue size: {}", Schedulers.DEFAULT_BOUNDED_ELASTIC_QUEUESIZE);
     }
 
-    private void reportGitProperties() throws IOException {
+    private void reportGitProperties() {
 
-        var p = GitProperties.get();
+        // Once in a blue moon, this code fails to read git.properties. Likely a race condition, not an excuse to start up.
+        // Besides, it's not on a critical path so we can do it in the background.
 
-        logger.debug("git.branch={}", p.get("git.branch"));
-        logger.debug("git.commit.id={}", p.get("git.commit.id"));
-        logger.debug("git.commit.id.abbrev={}", p.get("git.commit.id.abbrev"));
-        logger.debug("git.commit.id.describe={}", p.get("git.commit.id.describe"));
-        logger.debug("git.build.version={}", p.get("git.build.version"));
+        new Thread(() -> {
+
+            ThreadContext.push("git.properties");
+
+            try {
+                var p = GitProperties.get();
+
+                logger.debug("git.branch={}", p.get("git.branch"));
+                logger.debug("git.commit.id={}", p.get("git.commit.id"));
+                logger.debug("git.commit.id.abbrev={}", p.get("git.commit.id.abbrev"));
+                logger.debug("git.commit.id.describe={}", p.get("git.commit.id.describe"));
+                logger.debug("git.build.version={}", p.get("git.build.version"));
+
+            } catch (IOException ex) {
+                logger.error("Failed to read Git properties", ex);
+            } finally {
+                ThreadContext.pop();
+            }
+
+        }).start();
     }
 
     /**
