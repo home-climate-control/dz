@@ -22,6 +22,7 @@ import net.sf.dz3r.runtime.config.quarkus.hardware.UnitControllerConfig;
 import net.sf.dz3r.runtime.config.quarkus.hardware.VariableHvacConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ConsoleConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.EconomizerConfig;
+import net.sf.dz3r.runtime.config.quarkus.model.MeasurementUnits;
 import net.sf.dz3r.runtime.config.quarkus.model.PidControllerConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.RangeConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.UnitDirectorConfig;
@@ -51,6 +52,7 @@ public interface InterfaceRecordMapper {
     InterfaceRecordMapper INSTANCE = Mappers.getMapper(InterfaceRecordMapper.class);
 
     @Mapping(expression = "java(source.instance())", target = "instance")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.measurementUnits(source.measurementUnits().orElse(null)))", target = "measurementUnits")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.mqtt(source.esphome()))", target = "esphome")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.mqtt(source.zigbee2mqtt()))", target = "zigbee2mqtt")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.mqtt(source.zwave2mqtt()))", target = "zwave2mqtt")
@@ -66,6 +68,9 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.webUi(source.webUi().orElse(null)))", target = "webUi")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.console(source.console().orElse(null)))", target = "console")
     HccRawConfig rawConfig(HccRawInterfaceConfig source);
+
+    @Mapping(expression = "java(source.temperature().orElse(null))", target = "temperature")
+    net.sf.dz3r.runtime.config.model.MeasurementUnits measurementUnits(MeasurementUnits source);
 
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.broker(source.broker()))", target = "broker")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensors(source.sensors()))", target = "sensors")
@@ -261,7 +266,6 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.units().orElse(null))", target = "units")
     net.sf.dz3r.runtime.config.model.WebUiConfig webUi(WebUiConfig source);
 
-    @Mapping(expression = "java(source.units().orElse(null))", target = "units")
     @Mapping(expression = "java(source.directors().orElse(Set.of()))", target = "directors")
     @Mapping(expression = "java(source.sensors().orElse(Set.of()))", target = "sensors")
     net.sf.dz3r.runtime.config.model.ConsoleConfig console(ConsoleConfig source);

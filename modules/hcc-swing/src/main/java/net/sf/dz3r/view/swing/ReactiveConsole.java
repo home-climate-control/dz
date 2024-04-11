@@ -3,7 +3,7 @@ package net.sf.dz3r.view.swing;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.UnitDirector;
-import net.sf.dz3r.runtime.config.model.TemperatureUnit;
+import net.sf.dz3r.runtime.config.model.MeasurementUnits;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -53,16 +53,16 @@ public class ReactiveConsole {
      * @param instance HCC instance name to display on the UI title bar.
      * @param directors Directors to include into this console.
      * @param sensors Sensors to include information panels for into this console.
-     * @param temperatureUnit Initial temperature unit to display. Can be either {@code "C.*"} for Celsius, or {@code "F.*"} for Fahrenheit.
+     * @param units Measurement units.
      */
     public ReactiveConsole(
             String instance,
             Set<UnitDirector> directors,
             Map<String, Flux<Signal<Double, Void>>> sensors,
             InstrumentCluster ic,
-            TemperatureUnit temperatureUnit) {
+            MeasurementUnits units) {
 
-        this.config = new Config(instance, directors, sensors, ic, temperatureUnit);
+        this.config = new Config(instance, directors, sensors, ic, units);
 
         Flux.just(config)
                 .publishOn(Schedulers.boundedElastic())
@@ -252,7 +252,7 @@ public class ReactiveConsole {
             Set<UnitDirector> directors,
             Map<String, Flux<Signal<Double, Void>>> sensors,
             InstrumentCluster ic,
-            TemperatureUnit initialUnit
+            MeasurementUnits measurementUnits
     ) {
 
     }

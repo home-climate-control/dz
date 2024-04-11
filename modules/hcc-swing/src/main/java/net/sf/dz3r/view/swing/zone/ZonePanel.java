@@ -4,6 +4,7 @@ import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.model.ZoneSettings;
+import net.sf.dz3r.runtime.config.model.MeasurementUnits;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
@@ -105,16 +106,16 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      * Create an instance.
      *
      * @param zone Zone to display the status of.
-     * @param defaultUnit Temperature unit at instantiation time.
+     * @param defaultUnits Default measurement units
      */
-    public ZonePanel(Zone zone, ScreenDescriptor screenDescriptor, TemperatureUnit defaultUnit,
+    public ZonePanel(Zone zone, ScreenDescriptor screenDescriptor, MeasurementUnits defaultUnits,
                      Flux<Signal<ZoneStatus, Void>> zoneFlux,
                      Flux<Signal<Double, Void>> sensorFlux,
                      Flux<Signal<HvacMode, Void>> modeFlux) {
 
         this.zone = zone;
 
-        needFahrenheit = defaultUnit == TemperatureUnit.F;
+        needFahrenheit = defaultUnits != null && defaultUnits.temperature() == TemperatureUnit.F;
         chart = new ZoneChart2021(Clock.systemUTC(), 1000L * 60 * 60 * 3, needFahrenheit);
 
         setFontSize(screenDescriptor);

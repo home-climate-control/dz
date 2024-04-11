@@ -72,6 +72,7 @@ public class HccApplication extends ApplicationBase<HccRawRecordConfig> implemen
     protected HccRawConfig mapConfiguration(HccRawRecordConfig source) {
         return new HccRawConfig(
                 source.instance(),
+                source.measurementUnits(),
                 source.esphome(),
                 source.zigbee2mqtt(),
                 source.zwave2mqtt(),
