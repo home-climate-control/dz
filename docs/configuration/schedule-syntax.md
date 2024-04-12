@@ -11,16 +11,17 @@ HCC reads the `title` (contains period name), `description` (contains period set
 
 # General Syntax
 
-Until the [old syntax](./schedule-syntax-deprecated.md) is retired the `description` field will be attempted to be parsed into period settings, if that fails,
+Until the [old syntax](./schedule-syntax-deprecated.md) is retired the `description` field will be attempted to be parsed into period settings first, if that fails,
 then the old syntax will be attempted to be parsed (having issued a `WARN` level message in the log), and only then the scheduler will give up.
 
 ## Title field
 
-Contains the period name. No restrictions.  
+Contains the period name. No restrictions. Text after a `#` sign is treated as comments, will not be shown in the console.  
+Exercise your judgment here, if you make it too long it won't scroll but will go beyond the screen.
  
 ## Description field
 
-Contains the period settings. Best explained by example:
+Contains the period settings in YAML. Best explained by example:
 
 ```yaml
 # Comments are allowed in the event description text 

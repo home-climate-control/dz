@@ -10,6 +10,7 @@ import com.google.api.services.calendar.model.Event;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.scheduler.gcal.v3.SettingsParser.ZoneSettingsYaml.EconomizerSettingsYaml;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -43,6 +44,44 @@ public class SettingsParser {
         }
 
         return objectMapper;
+    }
+
+    /**
+     * Parse period name, two ways.
+     *
+     * Legacy: if there's a colon, the period name is everything before it. This will go away along with parsing settings out of the event summary.
+     * Going forward: if the event description is not empty, treat the whole summary before "#" as a period name.
+     *
+     * @param source Event to parse the period name from.
+     *
+     * @return Period name.
+     */
+    public String parsePeriodName(Event source) {
+
+        var summary = source.getSummary();
+        var description = source.getDescription();
+
+        if (description == null || description.isEmpty()) {
+            return parseLegacyPeriodName(summary);
+        }
+
+        var name = StringUtils.substringBefore(summary, '#').trim();
+
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Can't parse period name out of event title '" + summary + "' (empty text before '#')");
+        }
+
+        return name;
+    }
+
+    private String parseLegacyPeriodName(String summary) {
+        int colonIndex = summary.indexOf(':');
+
+        if (colonIndex <= 0) {
+            throw new IllegalArgumentException("Can't parse period name out of event title '" + summary + "' (must be separated by a colon, and not empty)");
+        }
+
+        return summary.substring(0, colonIndex).trim();
     }
 
     /**
