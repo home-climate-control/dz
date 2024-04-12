@@ -47,16 +47,16 @@ public class SettingsParser {
 
     /**
      * Parse the complete zone settings (with economizer settings) from the whole event and if it doesn't work,
-     * try to parse it {@link #parse(String) the old style}.
+     * try to parse it {@link #parseSettings(String) the old style}.
      *
      * @param source Event to parse.
      * @param settingsAsString Legacy argument - the summary substring; will go away.
      */
-    public ZoneSettings parse(Event source, String settingsAsString) {
+    public ZoneSettings parseSettings(Event source, String settingsAsString) {
 
         return Optional
-                .ofNullable(parse(source))
-                .orElseGet(() -> parse(settingsAsString));
+                .ofNullable(parseSettings(source))
+                .orElseGet(() -> parseSettings(settingsAsString));
     }
 
     /**
@@ -65,7 +65,7 @@ public class SettingsParser {
      *
      * @return Parsed settings, or {@code null} if settings couldn't have been parsed this way.
      */
-    private ZoneSettings parse(Event source) {
+    private ZoneSettings parseSettings(Event source) {
 
         var summary = source.getSummary();
         var description = source.getDescription();
@@ -133,7 +133,7 @@ public class SettingsParser {
      *
      * @deprecated This syntax will go away soon, use the new syntax instead.
      */
-    ZoneSettings parse(String arguments) {
+    ZoneSettings parseSettings(String arguments) {
 
         ThreadContext.push("parse");
 

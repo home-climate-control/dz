@@ -27,7 +27,7 @@ class SettingsParserTest {
 
         SettingsParser p = new SettingsParser();
 
-        ZoneSettings settings = p.parse(pair.source);
+        ZoneSettings settings = p.parseSettings(pair.source);
 
         logger.info("Command:  {}", pair.source);
         logger.info("Settings: {}", settings);
@@ -67,7 +67,7 @@ class SettingsParserTest {
                 try {
 
                     assertThatIllegalArgumentException()
-                            .isThrownBy(() -> p.parse(setpoint))
+                            .isThrownBy(() -> p.parseSettings(setpoint))
                             .withMessage("can't parse '" + setpoint + "' (malformed setpoint '" + setpoint + "')");
 
                 } finally {
@@ -84,7 +84,7 @@ class SettingsParserTest {
     void testOff() {
 
         assertThatIllegalArgumentException()
-                .isThrownBy(() -> new SettingsParser().parse("off"))
+                .isThrownBy(() -> new SettingsParser().parseSettings("off"))
                 .withMessage("Could not parse setpoint out of 'off'");
     }
 

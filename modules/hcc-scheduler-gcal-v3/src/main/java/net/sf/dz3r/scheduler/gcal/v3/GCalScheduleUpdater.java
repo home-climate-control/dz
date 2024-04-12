@@ -285,7 +285,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             }
 
             var settingsAsString = event.getSummary().substring(period.name.length() + 1);
-            var settings = settingsParser.parse(event, settingsAsString);
+            var settings = settingsParser.parseSettings(event, settingsAsString);
 
             return Flux.just(new AbstractMap.SimpleEntry<>(period, settings));
 
