@@ -34,7 +34,16 @@ public class SettingsParser {
     private final Logger logger = LogManager.getLogger();
     private final NumberFormat numberFormat = NumberFormat.getInstance();
 
-    private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+    private ObjectMapper objectMapper;
+
+    private synchronized ObjectMapper getMapper() {
+
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper(new YAMLFactory());
+        }
+
+        return objectMapper;
+    }
 
     /**
      * Parse the complete zone settings (with economizer settings) from the whole event and if it doesn't work,
@@ -82,11 +91,11 @@ public class SettingsParser {
 
     ZoneSettings parseAsYaml(String source) throws JsonProcessingException {
 
-            var result = objectMapper
+            var result = getMapper()
                     .readerFor(ZoneSettingsYaml.class)
                     .withoutRootName()
                     .readValue(source);
-            var yaml = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+            var yaml = getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
 
             logger.debug("YAML event settings parsed:\n{}", yaml);
 
@@ -169,7 +178,7 @@ public class SettingsParser {
 
             // Let's make the transition easier and pretty print the parsed settings
 
-            var yaml = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
+            var yaml = getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
             logger.debug("Settings as YAML:\n{}", yaml);
 
             return result;
