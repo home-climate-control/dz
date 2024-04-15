@@ -9,4 +9,7 @@ dependencies {
 
     implementation(project(":modules:hcc-common"))
     api(project(":modules:hcc-http"))
+
+    testImplementation(libs.assertj.core)
+    testImplementation(libs.junit5.api)
 }
