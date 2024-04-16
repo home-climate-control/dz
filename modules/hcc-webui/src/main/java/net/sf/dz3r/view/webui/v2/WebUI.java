@@ -153,6 +153,7 @@ public class WebUI implements AutoCloseable {
 
             if (fqdn.getHostAddress().equals(local11)) {
                 logger.error("Check /etc/hosts for {}, it likely breaks mDNS resolution", local11);
+                logger.error("More information: https://serverfault.com/questions/363095/why-does-my-hostname-appear-with-the-address-127-0-1-1-rather-than-127-0-0-1-in");
             }
 
             logger.debug("fqdn={}/{}", canonical, fqdn);
