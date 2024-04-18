@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -149,7 +148,9 @@ public class ZoneSettings {
     }
 
     /**
-     * @param other Settings to compare to. Must not be null.
+     * Find out if the settings look the same to the user (doesn't imply they are {@link #equals(Object)}).
+     *
+     * @param other Settings to compare to.
      *
      * @return {@code true} if the user visible settings are the same (hold and dump priority are ignored).
      */
@@ -159,9 +160,27 @@ public class ZoneSettings {
             return false;
         }
 
-        return Objects.equals(enabled, other.enabled)
-                && setpoint.compareTo(other.setpoint) == 0
-                && Objects.equals(voting, other.voting)
-                && Objects.equals(economizerSettings, other.economizerSettings);
+        // Null values are interpreted as "true" for "enabled" and "voting"
+
+        return (isEnabled() == other.isEnabled())
+                && (setpoint.compareTo(other.setpoint) == 0)
+                && (isVoting() == other.isVoting())
+                && same(economizerSettings, other.economizerSettings);
+    }
+
+    private boolean same(EconomizerSettings a, EconomizerSettings b) {
+
+        if (a == null && b == null) {
+            return true;
+        }
+
+        if (b == null) {
+            return false;
+        }
+
+        return Optional
+                .ofNullable(a)
+                .map(left -> left.same(b))
+                .orElse(false);
     }
 }

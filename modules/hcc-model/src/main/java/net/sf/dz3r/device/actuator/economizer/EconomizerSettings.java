@@ -3,6 +3,8 @@ package net.sf.dz3r.device.actuator.economizer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import java.util.Optional;
+
 /**
  * Set of user changeable economizer settings.
  *
@@ -60,5 +62,32 @@ public class EconomizerSettings {
                 + ", targetTemperature=" + targetTemperature
                 + ", keepHvacOn=" + keepHvacOn
                 + "}";
+    }
+
+    public final boolean isKeepHvacOn() {
+        return Optional.ofNullable(keepHvacOn).orElse(true);
+    }
+
+    public final double getMaxPower() {
+        return Optional.ofNullable(maxPower).orElse(1d);
+    }
+
+    /**
+     * Find out if the settings look the same to the user (doesn't imply they are {@link #equals(Object)}).
+     *
+     * @param other Settings to compare to.
+     *
+     * @return {@code true} if the user visible settings are the same.
+     */
+    public boolean same(EconomizerSettings other) {
+
+        if (other == null) {
+            return false;
+        }
+
+        return Double.compare(changeoverDelta, other.changeoverDelta) == 0
+                && Double.compare(targetTemperature, other.targetTemperature) == 0
+                && isKeepHvacOn() == other.isKeepHvacOn()
+                && Double.compare(getMaxPower(), other.getMaxPower()) == 0;
     }
 }
