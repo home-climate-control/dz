@@ -213,7 +213,8 @@ public class SettingsParser {
                     setpoint,
                     voting,
                     null,
-                    dumpPriority);
+                    dumpPriority,
+                    null);
 
             // Let's make the transition easier and pretty print the parsed settings
 

@@ -83,16 +83,6 @@ public class ZoneSettings {
     }
 
     /**
-     * Abbreviated constructor without {@link #economizerSettings} to support incremental refactoring.
-     *
-     * @deprecated Use the full constructor instead.
-     */
-    @Deprecated
-    public ZoneSettings(Boolean enabled, Double setpoint, Boolean voting, Boolean hold, Integer dumpPriority) {
-        this(enabled, setpoint, voting, hold, dumpPriority, null);
-    }
-
-    /**
      * Full constructor.
      */
     public ZoneSettings(Boolean enabled, Double setpoint, Boolean voting, Boolean hold, Integer dumpPriority, EconomizerSettings economizerSettings) {

@@ -273,6 +273,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         null,
                         null,
                         !zoneStatus.settings.hold,
+                        null,
                         null
                 )));
                 refresh();
@@ -286,6 +287,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         null,
                         null,
                         !zoneStatus.settings.voting,
+                        null,
                         null,
                         null
                 )));
@@ -310,6 +312,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         null,
                         null,
                         false,
+                        null,
                         null
                 )));
                 activateSchedule();
@@ -324,7 +327,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         null,
                         null,
                         null,
-                        e.getKeyChar() - '0'
+                        e.getKeyChar() - '0',
+                        null
                 )));
                 refresh();
                 return Flux.just("dump priority is now " + zone.getSettings().dumpPriority);

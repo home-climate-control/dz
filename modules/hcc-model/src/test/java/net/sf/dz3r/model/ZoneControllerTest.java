@@ -234,8 +234,8 @@ class ZoneControllerTest {
         var setpoint1 = 20.0;
         var setpoint2 = 25.0;
 
-        var s1 = new ZoneSettings(true, setpoint1, false, false, 0);
-        var s2 = new ZoneSettings(true, setpoint2, true, false, 0);
+        var s1 = new ZoneSettings(true, setpoint1, false, false, 0, null);
+        var s2 = new ZoneSettings(true, setpoint2, true, false, 0, null);
 
         var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
         var z1 = new Zone(ts1, s1);
@@ -276,10 +276,10 @@ class ZoneControllerTest {
         var setpoint2 = 25.0;
 
         // Enabled, but not voting
-        var s1 = new ZoneSettings(true, setpoint1, false, false, 0);
+        var s1 = new ZoneSettings(true, setpoint1, false, false, 0, null);
 
         // Disabled, but voting
-        var s2 = new ZoneSettings(false, setpoint1, true, false, 0);
+        var s2 = new ZoneSettings(false, setpoint1, true, false, 0, null);
 
         var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
         var z1 = new Zone(ts1, s1);
@@ -318,7 +318,7 @@ class ZoneControllerTest {
         var setpoint1 = 20.0;
 
         // Enabled, but not voting
-        var s1 = new ZoneSettings(true, setpoint1, false, false, 0);
+        var s1 = new ZoneSettings(true, setpoint1, false, false, 0, null);
 
         var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
         var z1 = new Zone(ts1, s1);
@@ -347,7 +347,7 @@ class ZoneControllerTest {
         var setpoint1 = 20.0;
 
         // Disabled
-        var s1 = new ZoneSettings(false, setpoint1, true, false, 0);
+        var s1 = new ZoneSettings(false, setpoint1, true, false, 0, null);
 
         var ts1 = new Thermostat("ts20", setpoint1, 1, 0, 0, 1);
         var z1 = new Zone(ts1, s1);
@@ -575,7 +575,7 @@ class ZoneControllerTest {
                 setpoint,
                 new Zone(
                         new Thermostat(zoneName, setpoint, 1, 0, 0, 1),
-                        new ZoneSettings(true, setpoint, true, false, 0)
+                        new ZoneSettings(true, setpoint, true, false, 0, null)
                 ),
                 sink,
                 sink.asFlux(),
