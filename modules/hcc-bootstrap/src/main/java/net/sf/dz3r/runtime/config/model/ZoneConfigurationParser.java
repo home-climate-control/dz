@@ -45,7 +45,8 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
 
         var ts = createThermostat(cf.name(), cf.settings().setpoint(), cf.settings().setpointRange(), cf.controller());
         var eco = createEconomizer(cf.name(), cf.economizer());
-        var zone = new Zone(ts, map(cf.settings()), eco);
+        var ecoSettings = Optional.ofNullable(eco).map(v -> v.config.settings).orElse(null);
+        var zone = new Zone(ts, map(cf.settings(), ecoSettings), eco);
 
         return new ImmutablePair<>(cf.id(), zone);
     }
@@ -102,14 +103,15 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         return new Thermostat(Clock.systemUTC(), name, range, setpoint, cf.p(), cf.i(), cf.d(), cf.limit());
     }
 
-    private ZoneSettings map(ZoneSettingsConfig source) {
+    private ZoneSettings map(ZoneSettingsConfig source, EconomizerSettings economizerSettings) {
 
         return new ZoneSettings(
                 Optional.ofNullable(source.enabled()).orElse(true),
                 source.setpoint(),
                 Optional.ofNullable(source.voting()).orElse(true),
                 Optional.ofNullable(source.hold()).orElse(false),
-                source.dumpPriority());
+                source.dumpPriority(),
+                economizerSettings);
     }
 
     private Range<Double> map(RangeConfig cf) {
