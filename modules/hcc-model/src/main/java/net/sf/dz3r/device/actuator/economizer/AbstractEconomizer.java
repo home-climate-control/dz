@@ -23,6 +23,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -206,7 +207,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
 
         economizerStatus = new EconomizerStatus(
-                new EconomizerSettings(config.settings),
+                Optional.ofNullable(config.settings).map(EconomizerSettings::new).orElse(null),
                 sample,
                 demand,
                 stateSignal.getValue(),
@@ -274,6 +275,13 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             if (config.isEnabled()) {
 
                 logger.trace("not enabled, bailing out with 0");
+                return new Signal<>(clock.instant(), 0d);
+            }
+
+
+            if (config.settings == null) {
+
+                logger.trace("no settings, bailing out with 0");
                 return new Signal<>(clock.instant(), 0d);
             }
 
