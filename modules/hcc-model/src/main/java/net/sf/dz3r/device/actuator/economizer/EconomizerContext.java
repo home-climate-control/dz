@@ -11,13 +11,13 @@ import java.time.Duration;
  */
 public class EconomizerContext {
 
-    public final EconomizerConfig settings;
+    public final EconomizerConfig config;
     public final Flux<Signal<Double, Void>> ambientFlux;
     public final HvacDevice device;
     public final Duration timeout;
 
-    public EconomizerContext(EconomizerConfig settings, Flux<Signal<Double, Void>> ambientFlux, HvacDevice device, Duration timeout) {
-        this.settings = settings;
+    public EconomizerContext(EconomizerConfig config, Flux<Signal<Double, Void>> ambientFlux, HvacDevice device, Duration timeout) {
+        this.config = config;
         this.ambientFlux = ambientFlux;
         this.device = device;
         this.timeout = timeout;

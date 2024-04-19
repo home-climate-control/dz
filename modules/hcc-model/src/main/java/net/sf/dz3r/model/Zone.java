@@ -88,7 +88,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
                 .map(ctx -> new PidEconomizer<>(
                         Clock.systemUTC(),
                         ts.getAddress(),
-                        ctx.settings,
+                        ctx.config,
                         ctx.ambientFlux,
                         ctx.device,
                         ctx.timeout))
