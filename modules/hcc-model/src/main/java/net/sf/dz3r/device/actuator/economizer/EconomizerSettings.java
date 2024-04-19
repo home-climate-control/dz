@@ -16,12 +16,12 @@ public class EconomizerSettings {
     /**
      * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
      */
-    public final Double changeoverDelta;
+    public final double changeoverDelta;
 
     /**
      * When this temperature is reached, the device is shut off.
      */
-    public final Double targetTemperature;
+    public final double targetTemperature;
 
     /**
      * {@code true} means that turning on the device will NOT turn the HVAC off.
@@ -32,7 +32,7 @@ public class EconomizerSettings {
 
     public final Double maxPower;
 
-    public EconomizerSettings(Double changeoverDelta, Double targetTemperature, Boolean keepHvacOn, Double maxPower) {
+    public EconomizerSettings(double changeoverDelta, double targetTemperature, Boolean keepHvacOn, Double maxPower) {
 
         if (changeoverDelta < 0) {
             throw new IllegalArgumentException("changeoverDelta must be non-negative");
