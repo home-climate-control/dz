@@ -7,6 +7,7 @@ import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.runtime.config.model.MeasurementUnits;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
+import net.sf.dz3r.signal.hvac.EconomizerStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
@@ -61,11 +62,16 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      */
     private static final double SETPOINT_DELTA = 0.1d;
 
+    private static final String UNICODE_DELTA = "Δ";
+    private static final String UNICODE_SUN = "☉";
+
     private final JLabel currentLabel = new JLabel(UNDEFINED, SwingConstants.RIGHT);
     private final JLabel setpointLabel = new JLabel(UNDEFINED + "°", SwingConstants.RIGHT);
     private final JLabel votingLabel = new JLabel(VOTING, SwingConstants.RIGHT);
     private final JLabel holdLabel = new JLabel(HOLD, SwingConstants.RIGHT);
     private final JLabel periodLabel = new JLabel("", SwingConstants.LEFT);
+    private final JLabel ecoLabel = new JLabel("", SwingConstants.LEFT);
+
 
     /**
      * Font to display the current temperature in Celsius.
@@ -141,6 +147,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                 + "Ctrl+Up/Down to change by " + numberFormat.format(SETPOINT_DELTA * getSetpointDeltaModifier(false, true)) + "&deg;<br>"
                 + "Shift+Ctrl+Up/Down to change by " + numberFormat.format(SETPOINT_DELTA * getSetpointDeltaModifier(true, true)) + "&deg;<br>"
                 + "</html>");
+
+        ecoLabel.setToolTipText("<html>Economizer Status<hr>ECO " + UNICODE_DELTA + " {changeover-delta} " + UNICODE_SUN + " {target-temperature} ({ambient-temperature})</html>");
 
         createLayout(zone.getAddress(), chart);
     }
@@ -224,6 +232,19 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
                 layout.setConstraints(votingLabel, cs);
                 controls.add(votingLabel);
+            }
+
+            {
+                // Economizer status label us the bottommost field in the controls
+                // VT: FIXME: Temporary hack until KMP/Flutter app takes the place of this console
+
+                cs.gridy++;
+                cs.gridx = 0;
+                cs.gridwidth = 2;
+                cs.fill = GridBagConstraints.HORIZONTAL;
+
+                layout.setConstraints(ecoLabel, cs);
+                controls.add(ecoLabel);
             }
         }
     }
@@ -471,8 +492,24 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         });
 
         renderPeriod();
+        renderEconomizer(zoneStatus.economizerStatus);
 
         return true;
+    }
+
+    private void renderEconomizer(EconomizerStatus source) {
+
+        if (source == null || source.settings == null) {
+            logger.debug("economizer: invisible: {}", source);
+            ecoLabel.setVisible(false);
+            return;
+        }
+
+        ecoLabel.setVisible(true);
+        ecoLabel.setText("ECO " + UNICODE_DELTA + " " + source.settings.changeoverDelta
+                        + " " + UNICODE_SUN + " " + source.settings.targetTemperature + " "
+                        + Optional.ofNullable(source.ambient).map(s -> " (" + s.getValue() + ")").orElse("")
+        );
     }
 
     public void consumeSensorSignal(Signal<Double, Void> sensorSignal) {
@@ -550,6 +587,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var c = ColorScheme.getScheme(getMode()).setpoint;
         currentLabel.setForeground(c);
         setpointLabel.setForeground(c);
+        ecoLabel.setForeground(c);
     }
 
     private void renderPeriod() {
