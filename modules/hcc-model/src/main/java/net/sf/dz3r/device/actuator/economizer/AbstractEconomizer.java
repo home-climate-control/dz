@@ -305,16 +305,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
             // Shortcut: are we enabled to begin with?
 
-            if (config.isEnabled()) {
+            if (!config.isEnabled()) {
 
-                logger.trace("not enabled, bailing out with 0");
-                return new Signal<>(clock.instant(), 0d);
-            }
-
-
-            if (config.settings == null) {
-
-                logger.trace("no settings, bailing out with 0");
+                logger.trace("not enabled, bailing out with 0: {}", config);
                 return new Signal<>(clock.instant(), 0d);
             }
 
