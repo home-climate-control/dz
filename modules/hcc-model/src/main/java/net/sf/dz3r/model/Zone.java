@@ -120,6 +120,10 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         logger.debug("{}: setSettings({}): + {}", getAddress(), r, settings);
         logger.info("{}: setSettings({}): = {}", getAddress(), r, newSettings);
 
+        if (economizer != null) {
+            economizer.setSettings(newSettings.economizerSettings);
+        }
+
         this.settings = newSettings;
 
         bump();

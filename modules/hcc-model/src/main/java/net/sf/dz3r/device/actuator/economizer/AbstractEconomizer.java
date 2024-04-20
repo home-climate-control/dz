@@ -87,7 +87,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         this.clock = clock == null ? Clock.systemUTC() : clock;
         this.name = name;
-        setSettings(config);
+        setConfig(config);
 
         this.device = HCCObjects.requireNonNull(device, "device can't be null");
         this.timeout = HCCObjects.requireNonNull(timeout, "timeout can't be null");
@@ -120,14 +120,47 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         }
     }
 
-    public void setSettings(EconomizerConfig config) {
-        if (config == null) {
-            throw new IllegalArgumentException("settings can't be null");
+    public void setConfig(EconomizerConfig config) {
+
+        ThreadContext.push("setConfig");
+
+        try {
+            if (config == null) {
+                throw new IllegalArgumentException("config can't be null");
+            }
+
+            this.config = this.config == null ? config : this.config.merge(config);
+
+            logger.info("{}: setConfig(): {}", getAddress(), config);
+
+        } finally {
+            ThreadContext.pop();
         }
+    }
 
-        this.config = this.config == null ? config : this.config.merge(config);
+    public void setSettings(EconomizerSettings settings) {
 
-        logger.info("{}: setSettings(): {}", getAddress(), config);
+        ThreadContext.push("setSettings");
+
+        try {
+
+            if (config == null) {
+                throw new IllegalStateException("setSettings() before setConfig()???");
+            }
+
+            if (settings == null) {
+                throw new IllegalArgumentException("settings can't be null");
+            }
+
+            // VT: FIXME: Config and settings need to be separated
+
+            config = config.merge(settings);
+
+            logger.info("{}: setSettings(): {}", getAddress(), config);
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     @Override

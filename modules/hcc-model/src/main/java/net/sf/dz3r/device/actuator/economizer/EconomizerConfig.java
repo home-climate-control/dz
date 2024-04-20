@@ -77,4 +77,14 @@ public class EconomizerConfig {
     public boolean isEnabled() {
         return settings != null;
     }
+
+    public EconomizerConfig merge(EconomizerSettings settings) {
+
+        return new EconomizerConfig(
+                mode,
+                P,
+                I,
+                saturationLimit,
+                settings);
+    }
 }
