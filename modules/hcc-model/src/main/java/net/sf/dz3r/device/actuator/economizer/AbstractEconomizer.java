@@ -374,10 +374,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         } else if (ambientDelta < 0) {
 
-            // We're below the target, but the mode adjusted ambient is too high - this is an abnormal situation,
-            // either the target is misconfigured, or someone pulled the setpoint too far
-
-            logger.warn("{}: economizer abnormal, indoor={}, ambient={}, settings={}", getAddress(), indoorTemperature, ambientTemperature, config);
+            // We're below the target, but the mode adjusted ambient is still too high. Happens.
             targetAdjustment = 0.0;
 
         } else {
