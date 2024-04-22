@@ -117,6 +117,11 @@ public class ZoneSettings {
     }
 
     @JsonIgnore
+    public boolean isOnHold() {
+        return Optional.ofNullable(hold).orElse(false);
+    }
+
+    @JsonIgnore
     public int getDumpPriority() {
         return Optional.ofNullable(dumpPriority).orElse(0);
     }

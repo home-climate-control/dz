@@ -61,6 +61,7 @@ public class EconomizerSettings {
         return "{changeoverDelta=" + changeoverDelta
                 + ", targetTemperature=" + targetTemperature
                 + ", keepHvacOn=" + keepHvacOn
+                + ", maxPower=" + maxPower
                 + "}";
     }
 
