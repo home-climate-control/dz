@@ -50,6 +50,11 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Google Calendar Schedule updater using <a href="https://github.com/googleapis/google-api-java-client-services/tree/main/clients/google-api-services-calendar/v3/2.0.0">v3-rev20240111-2.0.0</a> client library.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ */
 public class GCalScheduleUpdater implements ScheduleUpdater {
 
     protected final Logger logger = LogManager.getLogger();
@@ -279,7 +284,17 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
                 return Flux.empty();
             }
 
-            var settings = settingsParser.parse(event.getSummary().substring(period.name.length() + 1));
+            String settingsAsString;
+
+            try {
+                settingsAsString = event.getSummary().substring(period.name.length() + 1);
+            } catch (Exception ex) {
+                // Easier to paint over than to scratch off; this code will be gone with the old syntax
+                logger.warn("Goofed up parsing '{}' as settings, likely new/old syntax clash, treating the entry as new syntax", event.getSummary(), ex);
+                settingsAsString = null;
+            }
+
+            var settings = settingsParser.parseSettings(event, settingsAsString);
 
             return Flux.just(new AbstractMap.SimpleEntry<>(period, settings));
 
@@ -310,15 +325,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             EventDateTime start = event.getStart();
             EventDateTime end = event.getEnd();
             var today = isToday(start);
-            String title = event.getSummary();
-
-            int colonIndex = title.indexOf(':');
-
-            if (colonIndex < 0) {
-                throw new IllegalArgumentException("Can't parse period name out of event title '" + title + "' (must be separated by a colon)");
-            }
-
-            String periodName = title.substring(0, colonIndex).trim();
+            var periodName = settingsParser.parsePeriodName(event);
 
             logger.trace("name: '{}'", periodName);
             logger.trace("  {} to {}, today={}", start, end, today);

@@ -23,6 +23,7 @@ import reactor.core.scheduler.Schedulers;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -38,7 +39,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
     public final String name;
 
-    private EconomizerSettings settings;
+    private EconomizerConfig config;
 
     private final HvacDevice device;
 
@@ -78,15 +79,15 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
     protected AbstractEconomizer(
             Clock clock,
             String name,
-            EconomizerSettings settings,
+            EconomizerConfig config,
             HvacDevice device,
             Duration timeout) {
 
-        checkModes(settings.mode, device);
+        checkModes(config.mode, device);
 
         this.clock = clock == null ? Clock.systemUTC() : clock;
         this.name = name;
-        setSettings(settings);
+        setConfig(config);
 
         this.device = HCCObjects.requireNonNull(device, "device can't be null");
         this.timeout = HCCObjects.requireNonNull(timeout, "timeout can't be null");
@@ -101,7 +102,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 .subscribe(s -> logger.debug("{}: HVAC device state/done: {}", getAddress(), s));
 
         this.economizerStatus = new EconomizerStatus(
-                new EconomizerTransientSettings(settings),
+                config.settings,
                 null, 0, false, null);
 
         // Don't forget to connect fluxes; this can only be done in subclasses after all the
@@ -119,14 +120,47 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         }
     }
 
-    public void setSettings(EconomizerSettings settings) {
-        if (settings == null) {
-            throw new IllegalArgumentException("settings can't be null");
+    public void setConfig(EconomizerConfig config) {
+
+        ThreadContext.push("setConfig");
+
+        try {
+            if (config == null) {
+                throw new IllegalArgumentException("config can't be null");
+            }
+
+            this.config = this.config == null ? config : this.config.merge(config);
+
+            logger.info("{}: setConfig(): {}", getAddress(), config);
+
+        } finally {
+            ThreadContext.pop();
         }
+    }
 
-        this.settings = this.settings == null ? settings : this.settings.merge(settings);
+    public void setSettings(EconomizerSettings settings) {
 
-        logger.info("{}: setSettings(): {}", getAddress(), settings);
+        ThreadContext.push("setSettings");
+
+        try {
+
+            if (config == null) {
+                throw new IllegalStateException("setSettings() before setConfig()???");
+            }
+
+            if (settings == null) {
+                throw new IllegalArgumentException("settings can't be null");
+            }
+
+            // VT: FIXME: Config and settings need to be separated
+
+            config = config.merge(settings);
+
+            logger.info("{}: setSettings(): {}", getAddress(), config);
+
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     @Override
@@ -172,7 +206,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var ctl = Boolean.TRUE.equals(state) ? 1.0 : 0.0;
         var signal = new Signal<HvacCommand, Void>(
                 clock.instant(),
-                new HvacCommand(settings.mode, ctl, ctl)
+                new HvacCommand(config.mode, ctl, ctl)
         );
 
         logger.debug("{}: setDeviceState={}", getAddress(), signal);
@@ -206,7 +240,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
 
         economizerStatus = new EconomizerStatus(
-                new EconomizerTransientSettings(settings),
+                Optional.ofNullable(config.settings).map(EconomizerSettings::new).orElse(null),
                 sample,
                 demand,
                 stateSignal.getValue(),
@@ -269,6 +303,14 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
             logger.trace("{}: raw {}", getAddress(), pair);
 
+            // Shortcut: are we enabled to begin with?
+
+            if (!config.isEnabled()) {
+
+                logger.trace("not enabled, bailing out with 0: {}", config);
+                return new Signal<>(clock.instant(), 0d);
+            }
+
             // Let's take care of corner cases first
 
             if (pair.indoor == null || pair.ambient == null) {
@@ -325,23 +367,20 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         double targetAdjustment;
 
-        if (targetDelta > settings.changeoverDelta) {
+        if (targetDelta > config.settings.changeoverDelta) {
 
             // We're still above the target
             targetAdjustment = 0.0;
 
         } else if (ambientDelta < 0) {
 
-            // We're below the target, but the mode adjusted ambient is too high - this is an abnormal situation,
-            // either the target is misconfigured, or someone pulled the setpoint too far
-
-            logger.warn("{}: economizer abnormal, indoor={}, ambient={}, settings={}", getAddress(), indoorTemperature, ambientTemperature, settings);
+            // We're below the target, but the mode adjusted ambient is still too high. Happens.
             targetAdjustment = 0.0;
 
         } else {
 
             // As the indoor temperature is approaching the target, need to take corrective measures
-            var k = (1.0 / settings.changeoverDelta) * (settings.changeoverDelta - targetDelta);
+            var k = (1.0 / config.settings.changeoverDelta) * (config.settings.changeoverDelta - targetDelta);
 
             targetAdjustment = ambientDelta * k;
 
@@ -362,9 +401,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
      */
     double getAmbientDelta(double indoor, double ambient) {
 
-        return settings.mode == HvacMode.COOLING
-                ? indoor - (ambient + settings.changeoverDelta)
-                : ambient - (indoor + settings.changeoverDelta);
+        return config.mode == HvacMode.COOLING
+                ? indoor - (ambient + config.settings.changeoverDelta)
+                : ambient - (indoor + config.settings.changeoverDelta);
     }
 
     /**
@@ -373,9 +412,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */
     double getTargetDelta(double indoor) {
-        return settings.mode == HvacMode.COOLING
-                ? indoor - settings.targetTemperature
-                : settings.targetTemperature - indoor;
+        return config.mode == HvacMode.COOLING
+                ? indoor - config.settings.targetTemperature
+                : config.settings.targetTemperature - indoor;
     }
 
     /**
@@ -415,7 +454,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             return augmentedSource;
         }
 
-        if (Boolean.TRUE.equals(settings.keepHvacOn)) {
+        if (Boolean.TRUE.equals(config.settings.keepHvacOn)) {
 
             // We're feeding indoor air to HVAC air return, right?
             return augmentedSource;

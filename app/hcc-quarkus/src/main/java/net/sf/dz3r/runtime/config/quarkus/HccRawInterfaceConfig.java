@@ -9,6 +9,7 @@ import net.sf.dz3r.runtime.config.quarkus.hardware.HvacDeviceConfig;
 import net.sf.dz3r.runtime.config.quarkus.hardware.MockConfig;
 import net.sf.dz3r.runtime.config.quarkus.hardware.UnitControllerConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ConsoleConfig;
+import net.sf.dz3r.runtime.config.quarkus.model.MeasurementUnits;
 import net.sf.dz3r.runtime.config.quarkus.model.UnitDirectorConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.WebUiConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ZoneConfig;
@@ -30,6 +31,8 @@ import java.util.Set;
 public interface HccRawInterfaceConfig {
     @JsonProperty("instance")
     String instance();
+    @JsonProperty("measurement-units")
+    Optional<MeasurementUnits> measurementUnits();
     @JsonProperty("esphome")
     Set<MqttDeviceConfig> esphome();
     @JsonProperty("zigbee2mqtt")

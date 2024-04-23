@@ -2,6 +2,7 @@ package net.sf.dz3r.device.actuator.economizer.v1;
 
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
+import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
@@ -37,13 +38,15 @@ class SimpleEconomizerTest {
 
         // Target temperature is below the lowest in the ambient flux,
         // the economizer will just turn on and off
-        var settings = new EconomizerSettings(
+        var config = new EconomizerConfig(
                 HvacMode.COOLING,
-                true,
-                2.0,
-                10.0,
-                false,
-                1.0, 0.000004, 1.1);
+                1.0, 0.000004, 1.1,
+                new EconomizerSettings(
+                        2.0,
+                        10.0,
+                        false,
+                        1.0
+                ));
 
         var indoor = 25.0;
 
@@ -63,7 +66,7 @@ class SimpleEconomizerTest {
 
         var economizer = new SimpleEconomizer<>(
                 "economizer",
-                settings,
+                config,
                 deferredAmbientFlux,
                 device,
                 Duration.ofSeconds(90));
@@ -91,13 +94,15 @@ class SimpleEconomizerTest {
 
         // Target temperature is within the range of the ambient flux,
         // the economizer will turn on, then off, then on and off again
-        var settings = new EconomizerSettings(
+        var config = new EconomizerConfig(
                 HvacMode.COOLING,
-                true,
-                2.0,
-                18.0,
-                false,
-                1.0, 0.000004, 1.1);
+                1.0, 0.000004, 1.1,
+                new EconomizerSettings(
+                        2.0,
+                        18.0,
+                        false,
+                        1.0
+                ));
 
         var ambient = getAmbientFlux();
     }

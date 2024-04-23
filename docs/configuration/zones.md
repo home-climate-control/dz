@@ -29,9 +29,6 @@ Best explained by example:
           max: 32
       economizer:
         ambient-sensor: ambient-patio-temperature
-        changeover-delta: 1
-        target-temperature: 22
-        keep-hvac-on: true
         controller:
           p: 1
           i: 0.0000008
@@ -39,7 +36,10 @@ Best explained by example:
         mode: cooling
         hvac-device: economizer-a6
         timeout: 75S
-
+        settings:
+            changeover-delta: 1
+            target-temperature: 22
+            keep-hvac-on: true
 ```
 
 ### id
@@ -76,13 +76,14 @@ Optional.
 Cooling mode assumed:
 
 * `ambient-sensor`: the sensor used as ambient for this economizer. Zones at different sides of the house may have different ambient temperatures (determined by sun exposure, shade, wind, presence of water, and a zillion of other factors), don't neglect this.
-* `changeover-delta`: ambient temperature has to be this much lower than indoors for the economizer to start working (subject to PID configuration).
-* `target-temperature`: shut the economizer off when indoor temperature drops to this value.
-* `keep-hvac-on`: set to `true` if you want the main HVAC to be still working when the economizer is active (maximum comfort), and to `false` if you want to stop it (maximum cost savings).
 * `controller`: just like the zone configuration above.
 * `mode`: self-explanatory
 * `hvac-device`: at this point, the economizer is an on/off device (multistage coming). This is the identifier of the [HVAC device](./hvac.md) acting as an economizer.
 * `timeout`: treat both indoor and ambient sensors as stale and shut off the economizer after not receiving data from them for this long. Default is 90 seconds. The system will complain at `INFO` level if this is happening.
+* `settings`: This section is optional. If missing, it is assumed that the [schedule](./schedule.md) will take care of configuring economizer settings dynamically.
+  * `changeover-delta`: ambient temperature has to be this much lower than indoors for the economizer to start working (subject to PID configuration).
+  * `target-temperature`: shut the economizer off when indoor temperature drops to this value.
+  * `keep-hvac-on`: set to `true` if you want the main HVAC to be still working when the economizer is active (maximum comfort), and to `false` if you want to stop it (maximum cost savings).
 
 #### controller
 Economizer PID controller. `p` and `i` values are always positive, regardless of the mode.

@@ -9,12 +9,6 @@ import java.util.Optional;
 public interface EconomizerConfig {
     @JsonProperty("ambient-sensor")
     String ambientSensor();
-    @JsonProperty("changeover-delta")
-    double changeoverDelta();
-    @JsonProperty("target-temperature")
-    double targetTemperature();
-    @JsonProperty("keep-hvac-on")
-    Boolean keepHvacOn();
     @JsonProperty("controller")
     PidControllerConfig controller();
     @JsonProperty("mode")
@@ -23,4 +17,15 @@ public interface EconomizerConfig {
     String hvacDevice();
     @JsonProperty("timeout")
     Optional<Duration> timeout();
+    @JsonProperty("settings")
+    Optional<Settings> settings();
+
+    interface Settings {
+        @JsonProperty("changeover-delta")
+        double changeoverDelta();
+        @JsonProperty("target-temperature")
+        double targetTemperature();
+        @JsonProperty("keep-hvac-on")
+        Boolean keepHvacOn();
+    }
 }

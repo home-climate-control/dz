@@ -1,6 +1,7 @@
 package net.sf.dz3r.runtime.config.model;
 
 import net.sf.dz3r.common.HCCObjects;
+import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Range;
@@ -44,12 +45,13 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
 
         var ts = createThermostat(cf.name(), cf.settings().setpoint(), cf.settings().setpointRange(), cf.controller());
         var eco = createEconomizer(cf.name(), cf.economizer());
-        var zone = new Zone(ts, map(cf.settings()), eco);
+        var ecoSettings = Optional.ofNullable(eco).map(v -> v.config.settings).orElse(null);
+        var zone = new Zone(ts, map(cf.settings(), ecoSettings), eco);
 
         return new ImmutablePair<>(cf.id(), zone);
     }
 
-    private EconomizerContext createEconomizer(String zoneName, EconomizerConfig cf) {
+    private EconomizerContext createEconomizer(String zoneName, net.sf.dz3r.runtime.config.model.EconomizerConfig cf) {
 
         if (cf == null) {
             return null;
@@ -63,15 +65,33 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
             return t;
         });
 
+        if (cf.settings() == null) {
+
+            // This is possibly a result of a breaking change in the configuration at rev. a05d2593c12f6821a7b0c6e10b41808d04544a01.
+            // But rev. 6befbc1afde887de526439e93bc7762eb25f4a1b unbrokeded the change, and now missing settings are OK, so this is just a warning.
+            // It'll go away after the transition period is over.
+
+            logger.warn("null settings, have you updated the economizer configuration? Here's what it looks like: {}", cf);
+            logger.warn("see https://github.com/home-climate-control/dz/blob/master/docs/configuration/zones.md#economizer for more information");
+        }
+
+        // VT: NOTE: maxPower is only configurable via UI and scheduler - there's no sense in setting it here, semantics are unclear
+
         return new EconomizerContext(
-                new EconomizerSettings(
+                new EconomizerConfig(
                         cf.mode(),
-                        cf.changeoverDelta(),
-                        cf.targetTemperature(),
-                        cf.keepHvacOn(),
                         cf.controller().p(),
                         cf.controller().i(),
-                        cf.controller().limit()),
+                        cf.controller().limit(),
+                        Optional
+                                .ofNullable(cf.settings())
+                                .map(settings -> new EconomizerSettings(
+                                        settings.changeoverDelta(),
+                                        settings.targetTemperature(),
+                                        settings.keepHvacOn(),
+                                        1.0))
+                                .orElse(null)
+                ),
                 ambientSensor,
                 hvacDevice,
                 timeout);
@@ -83,14 +103,15 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         return new Thermostat(Clock.systemUTC(), name, range, setpoint, cf.p(), cf.i(), cf.d(), cf.limit());
     }
 
-    private ZoneSettings map(ZoneSettingsConfig source) {
+    private ZoneSettings map(ZoneSettingsConfig source, EconomizerSettings economizerSettings) {
 
         return new ZoneSettings(
                 Optional.ofNullable(source.enabled()).orElse(true),
                 source.setpoint(),
                 Optional.ofNullable(source.voting()).orElse(true),
                 Optional.ofNullable(source.hold()).orElse(false),
-                source.dumpPriority());
+                source.dumpPriority(),
+                economizerSettings);
     }
 
     private Range<Double> map(RangeConfig cf) {

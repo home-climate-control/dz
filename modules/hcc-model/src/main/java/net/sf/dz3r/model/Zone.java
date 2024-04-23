@@ -27,7 +27,7 @@ import java.util.Optional;
  * A {@link Thermostat} is just a device that watches the temperature.
  * A zone is an entity that controls the thermostat.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, AutoCloseable {
 
@@ -82,13 +82,13 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      */
     public Zone(Thermostat ts, ZoneSettings settings, EconomizerContext economizerContext) {
         this.ts = ts;
-        setSettingsSync(new ZoneSettings(settings, ts.getSetpoint()));
+        setSettingsSync(new ZoneSettings(settings, settings.setpoint));
 
         economizer = Optional.ofNullable(economizerContext)
                 .map(ctx -> new PidEconomizer<>(
                         Clock.systemUTC(),
                         ts.getAddress(),
-                        ctx.settings,
+                        ctx.config,
                         ctx.ambientFlux,
                         ctx.device,
                         ctx.timeout))
@@ -119,6 +119,10 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         logger.debug("{}: setSettings({}):   {}", getAddress(), r, this.settings);
         logger.debug("{}: setSettings({}): + {}", getAddress(), r, settings);
         logger.info("{}: setSettings({}): = {}", getAddress(), r, newSettings);
+
+        if (economizer != null) {
+            economizer.setSettings(newSettings.economizerSettings);
+        }
 
         this.settings = newSettings;
 

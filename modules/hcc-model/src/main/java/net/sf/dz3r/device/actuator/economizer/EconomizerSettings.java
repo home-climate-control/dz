@@ -1,19 +1,27 @@
 package net.sf.dz3r.device.actuator.economizer;
 
-import net.sf.dz3r.model.HvacMode;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import java.util.Optional;
 
 /**
- * Full set of economizer settings.
+ * Set of user changeable economizer settings.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
-public class EconomizerSettings extends EconomizerTransientSettings {
+@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
+public class EconomizerSettings {
 
     /**
-     * Which mode this device is active in. This mode may be different from the zone mode; it is the user's
-     * responsibility to make sure the system doesn't enter a runaway loop.
+     * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
      */
-    public final HvacMode mode;
+    public final double changeoverDelta;
+
+    /**
+     * When this temperature is reached, the device is shut off.
+     */
+    public final double targetTemperature;
 
     /**
      * {@code true} means that turning on the device will NOT turn the HVAC off.
@@ -22,91 +30,65 @@ public class EconomizerSettings extends EconomizerTransientSettings {
      */
     public final Boolean keepHvacOn;
 
-    public final Double P;
+    public final Double maxPower;
 
-    public final Double I;
-
-    public final Double saturationLimit;
-
-    /**
-     * All except {@code enabled} argument constructor (defaults to {@code true}, for common sense.
-     *
-     * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
-     * @param P Internal {@link net.sf.dz3r.controller.pid.PidController} P component.
-     * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
-     * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
-     */
-    public EconomizerSettings(HvacMode mode,
-                              Double changeoverDelta, Double targetTemperature,
-                              Boolean keepHvacOn,
-                              Double P, Double I, Double saturationLimit) {
-        this(mode, true, changeoverDelta, targetTemperature, keepHvacOn, P, I, saturationLimit);
-    }
-
-    /**
-     * All argument constructor.
-     *
-     * @param keepHvacOn See {@link #keepHvacOn}. Think twice before setting this to {@code true}.
-     * @param P Internal {@link net.sf.dz3r.controller.pid.PidController} P component.
-     * @param I Internal {@link net.sf.dz3r.controller.pid.PidController} I component.
-     * @param saturationLimit Internal {@link net.sf.dz3r.controller.pid.PidController} saturation limit.
-     */
-    public EconomizerSettings(HvacMode mode,
-                              Boolean enabled,
-                              Double changeoverDelta, Double targetTemperature,
-                              Boolean keepHvacOn,
-                              Double P, Double I, Double saturationLimit) {
-        super(enabled, changeoverDelta, targetTemperature);
-
-        this.mode = mode;
-        this.keepHvacOn = keepHvacOn;
-
-        this.P = P;
-        this.I = I;
-        this.saturationLimit = saturationLimit;
-
-        checkArgs();
-    }
-
-    protected void checkArgs() {
-
-        if (mode == null) {
-            throw new IllegalArgumentException("mode can't be null");
-        }
+    public EconomizerSettings(double changeoverDelta, double targetTemperature, Boolean keepHvacOn, Double maxPower) {
 
         if (changeoverDelta < 0) {
             throw new IllegalArgumentException("changeoverDelta must be non-negative");
         }
+
+        if (maxPower != null && (maxPower.isInfinite() || maxPower.isNaN() || maxPower <= 0 || maxPower > 1)) {
+                throw new IllegalArgumentException("maxPower must be in range ]0,1]");
+        }
+
+        this.changeoverDelta = changeoverDelta;
+        this.targetTemperature = targetTemperature;
+        this.keepHvacOn = keepHvacOn;
+        this.maxPower = maxPower;
     }
 
-    /**
-     * Merge this instance with an update.
-     *
-     * @param from Adjustment instance. Non-null values take precedence over this object's values.
-     */
-    public EconomizerSettings merge(EconomizerSettings from) {
+    public EconomizerSettings(EconomizerSettings source) {
 
-        return new EconomizerSettings(
-                from.mode != null ? from.mode : mode,
-                from.enabled != null ? from.enabled : enabled,
-                from.changeoverDelta != null ? from.changeoverDelta : changeoverDelta,
-                from.targetTemperature != null ? from.targetTemperature : targetTemperature,
-                from.keepHvacOn != null ? from.keepHvacOn : keepHvacOn,
-                from.P != null ? from.P : P,
-                from.I != null ? from.I : I,
-                from.saturationLimit != null ? from.saturationLimit : saturationLimit);
+        this.changeoverDelta = source.changeoverDelta;
+        this.targetTemperature = source.targetTemperature;
+        this.keepHvacOn = source.keepHvacOn;
+        this.maxPower = source.maxPower;
     }
 
     @Override
     public String toString() {
-        return "{mode=" + mode
-                + ", enabled=" + enabled
-                + ", changeoverDelta=" + changeoverDelta
+        return "{changeoverDelta=" + changeoverDelta
                 + ", targetTemperature=" + targetTemperature
                 + ", keepHvacOn=" + keepHvacOn
-                + ", P=" + P
-                + ", I=" + I
-                + ", saturationLimit=" + saturationLimit
+                + ", maxPower=" + maxPower
                 + "}";
+    }
+
+    public final boolean isKeepHvacOn() {
+        return Optional.ofNullable(keepHvacOn).orElse(true);
+    }
+
+    public final double getMaxPower() {
+        return Optional.ofNullable(maxPower).orElse(1d);
+    }
+
+    /**
+     * Find out if the settings look the same to the user (doesn't imply they are {@link #equals(Object)}).
+     *
+     * @param other Settings to compare to.
+     *
+     * @return {@code true} if the user visible settings are the same.
+     */
+    public boolean same(EconomizerSettings other) {
+
+        if (other == null) {
+            return false;
+        }
+
+        return Double.compare(changeoverDelta, other.changeoverDelta) == 0
+                && Double.compare(targetTemperature, other.targetTemperature) == 0
+                && isKeepHvacOn() == other.isKeepHvacOn()
+                && Double.compare(getMaxPower(), other.getMaxPower()) == 0;
     }
 }

@@ -57,6 +57,7 @@ class HccRawConfigTest {
                 ));
         var config = new HccRawConfig(
                 null,
+                null,
                 Set.of(),
                 Set.of(),
                 Set.of(),

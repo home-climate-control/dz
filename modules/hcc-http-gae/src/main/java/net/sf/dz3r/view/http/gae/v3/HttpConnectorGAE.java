@@ -225,6 +225,7 @@ public class HttpConnectorGAE extends HttpConnector {
                                     command.setpointTemperature,
                                     command.voting,
                                     command.onHold,
+                                    null,
                                     null)
                     ));
 

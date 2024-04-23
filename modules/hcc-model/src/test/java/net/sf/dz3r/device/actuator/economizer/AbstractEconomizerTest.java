@@ -25,16 +25,20 @@ class AbstractEconomizerTest {
     @MethodSource("targetAdjustmentProvider")
     void targetAdjustmentTest(TargetAdjustmentTestData source) {
 
-        var settings = new EconomizerSettings(
+        var config = new EconomizerConfig(
                 source.mode,
-                source.changeoverDelta,
-                source.targetTemperature,
-                true,
-                1.0, 0.0001, 1.0);
+                1.0, 0.0001, 1.0,
+                new EconomizerSettings(
+                        source.changeoverDelta,
+                        source.targetTemperature,
+                        true,
+                        1.0
+                )
+        );
 
         var e = new TestEconomizer(
                 "eco",
-                settings,
+                config,
                 new SwitchableHvacDevice(
                         Clock.systemUTC(),
                         "d",
@@ -59,7 +63,7 @@ class AbstractEconomizerTest {
          *
          * @param device HVAC device acting as the economizer.
          */
-        protected TestEconomizer(String name, EconomizerSettings settings, HvacDevice device) {
+        protected TestEconomizer(String name, EconomizerConfig settings, HvacDevice device) {
             super(Clock.systemUTC(), name, settings, device, Duration.ofSeconds(90));
         }
 
