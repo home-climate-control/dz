@@ -25,9 +25,10 @@ These are simply known to work, with neither positive nor negative comments.
 
 ## Testing In progress
 * [3RSP02028BZ](https://www.zigbee2mqtt.io/devices/3RSP02028BZ.html#third%2520reality-3rsp02028bz) - most detailed reported metrics among metering outlets.  
-However, one of six devices started becoming unresponsive and eventually falling off the network and had to be decommissioned. The rest are fine so far.  
+However, THREE of six devices started becoming unresponsive and eventually falling off the network and had to be decommissioned. The rest are fine so far.  
+Current suspicion is that different Zigbee gateways produce different traffic patterns, and there's something that these switches don't like (devices connected to "ZBDongle-P" work fine whereas devices connected to "ZBDongle-E" fall off).  
 Also, the ground prong is hollow, extra caution when connecting high power loads is recommended.
-* [ZG-205ZL](https://www.zigbee2mqtt.io/devices/ZG-205ZL.html#tuya-zg-205zl) - human presence detector. Just arrived, no conclusions yet.
+* [ZG-205ZL](https://www.zigbee2mqtt.io/devices/ZG-205ZL.html#tuya-zg-205zl) - human presence detector. Works 100% reliably in some installations, and is extremely oversensitive with massive false positives in others, very likely to misconfigured area of detection, though. Can see people through walls (really).
 
 ---
 [^^^ Index](../index.md)
