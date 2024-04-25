@@ -209,18 +209,13 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
         var zoneCount = new AtomicInteger();
         var calendarClient = source.getKey();
 
-        try {
-
-            return Flux.fromIterable(source.getValue())
-                    .doOnNext(e -> logger.debug("Calendar found: {}", e.getSummary()))
-                    .filter(e -> name2calendar.containsValue(e.getSummary()))
-                    .doOnNext(e -> logger.debug("Zone schedule found: {}", e.getSummary()))
-                    .doOnNext(e -> zoneCount.incrementAndGet())
-                    .map(e -> new AbstractMap.SimpleEntry<>(calendarClient, e));
-
-        } finally {
-            logger.debug("Zone schedule list: {} items", zoneCount.get());
-        }
+        return Flux.fromIterable(source.getValue())
+                .doOnNext(e -> logger.debug("Calendar found: {}", e.getSummary()))
+                .filter(e -> name2calendar.containsValue(e.getSummary()))
+                .doOnNext(e -> logger.debug("Zone schedule found: {}", e.getSummary()))
+                .doOnNext(e -> zoneCount.incrementAndGet())
+                .doOnComplete(() -> logger.debug("Zone schedule list: {} items", zoneCount.get()))
+                .map(e -> new AbstractMap.SimpleEntry<>(calendarClient, e));
     }
 
     private Flux<Map.Entry<CalendarListEntry, List<Event>>> getEvents(Map.Entry<Calendar, CalendarListEntry> source) {
