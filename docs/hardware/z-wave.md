@@ -19,6 +19,9 @@ Devices tested are `0x0086-0x0101-0x005a` (older) and `0x0086-0x0001-0x005a` (ne
 
 * [MP31ZP Minoston / Mini Plug with Power Meter](https://devices.zwave-js.io/?jumpTo=0x0312:0xff00:0xff0e:0.0)
 
+## Testing In progress
+
+* [MP31Z Minoston / Mini Smart Plug](https://devices.zwave-js.io/?jumpTo=0x0312:0xff00:0xff0c:0.0) - interestingly enough, arrived branded as "New One Z-Wave Plug, 800 Series".
 ---
 [^^^ Index](../index.md)
 [^^^ Hardware Support](./index.md)
