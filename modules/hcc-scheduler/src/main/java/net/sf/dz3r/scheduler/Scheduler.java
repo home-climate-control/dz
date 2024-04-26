@@ -133,6 +133,12 @@ public class Scheduler {
 
             logger.trace("{}: matched time={} period={}", zoneName, now, period);
 
+            // VT: FIXME: https://github.com/home-climate-control/dz/issues/319
+            // After that is fixed, the precedence will be:
+            //
+            // 1. Local settings change first.
+            // 2. Changed event settings will NOT be applied upon change, however, "return to schedule" will apply new, changed, settings.
+
             if (same(currentPeriod, period)) {
                 logger.trace("{}: already at {}", zoneName, period);
                 return Flux.empty();
