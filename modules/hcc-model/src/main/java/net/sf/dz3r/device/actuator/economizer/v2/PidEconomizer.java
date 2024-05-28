@@ -9,7 +9,6 @@ import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.signal.Signal;
-import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
 import java.time.Clock;
@@ -21,6 +20,8 @@ import java.time.Duration;
  * More information: <a href="https://github.com/home-climate-control/dz/wiki/HVAC-Device:-Economizer">HVAC Device: Economizer</a>
  *
  * @param <A> Actuator device address type.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
 
@@ -73,32 +74,24 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
     @Override
     protected Flux<Signal<Boolean, ProcessController.Status<Double>>> computeDeviceState(Flux<Signal<Double, Void>> pv) {
 
-        ThreadContext.push("computeDeviceState");
+        // Compute the control signal to feed to the renderer.
+        // Might want to make this available to outside consumers for instrumentation.
+        var stage1 = controller
+                .compute(pv)
+                .doOnNext(e -> logger.debug("controller/{}: {}", getAddress(), e));
 
-        try {
+        // Discard things the renderer doesn't understand.
+        // Total failure is denoted by NaN by stage 1, it will get through.
+        // The PID controller output value becomes the extra payload but is ignored at the moment (unlike Thermostat#compute()).
+        var stage2 = stage1
+                .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
 
-            // Compute the control signal to feed to the renderer.
-            // Might want to make this available to outside consumers for instrumentation.
-            var stage1 = controller
-                    .compute(pv)
-                    .doOnNext(e -> logger.debug("controller/{}: {}", getAddress(), e));
-
-            // Discard things the renderer doesn't understand.
-            // Total failure is denoted by NaN by stage 1, it will get through.
-            // The PID controller output value becomes the extra payload but is ignored at the moment (unlike Thermostat#compute()).
-            var stage2 = stage1
-                    .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
-
-            // Deliver the signal
-            // Might want to expose this as well
-            return signalRenderer
-                    .compute(stage2)
-                    .doOnNext(e -> logger.debug("renderer/{}: {}", getAddress(), e))
-                    .map(this::mapOutput);
-
-        } finally {
-            ThreadContext.pop();
-        }
+        // Deliver the signal
+        // Might want to expose this as well
+        return signalRenderer
+                .compute(stage2)
+                .doOnNext(e -> logger.debug("renderer/{}: {}", getAddress(), e))
+                .map(this::mapOutput);
     }
 
     private Signal<Boolean, ProcessController.Status<Double>> mapOutput(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> source) {
