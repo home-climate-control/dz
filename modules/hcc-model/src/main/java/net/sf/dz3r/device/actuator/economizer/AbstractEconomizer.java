@@ -176,7 +176,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         // Get the signal
         var stage2 = computeDeviceState(stage1)
-                .map(this::recordDeviceState);
+                .map(this::computeDeviceState);
 
         // And act on it
         stage2
@@ -234,7 +234,13 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         logger.debug("{}: combined sink ready", getAddress());
     }
 
-    private Boolean recordDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
+    /**
+     * Compute the device state based on the state signal.
+     *
+     * @param stateSignal Device state as computed by the pipeline.
+     * @return State to send to the device.
+     */
+    private Boolean computeDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
 
         var sample = stateSignal.payload == null ? null : ((HysteresisController.HysteresisStatus) stateSignal.payload).sample;
         var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
