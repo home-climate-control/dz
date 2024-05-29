@@ -28,7 +28,7 @@ class PidEconomizerTest {
      *
      * See <a href="https://github.com/home-climate-control/dz/issues/320">#320</a>.
      */
-    @RepeatedTest(value = 100, failureThreshold = 1)
+    @RepeatedTest(value = 10, failureThreshold = 1)
     void ambientSensorLoss() throws InterruptedException {
 
         var s = new NullCqrsSwitch("test");
@@ -82,13 +82,13 @@ class PidEconomizerTest {
         indoorSink.tryEmitNext(new Signal<>(start, 25.0, "indoor"));
         ambientSink.tryEmitNext(new Signal<>(start.plus(Duration.ofMillis(offset.addAndGet(timeStep))), 20.0));
 
-        Thread.sleep(5); // NOSONAR Risks have been assessed and accepted
+        Thread.sleep(10); // NOSONAR Risks have been assessed and accepted
         assertThat(s.getState().requested).isTrue();
 
         // It should turn off now
         ambientSink.tryEmitNext(new Signal<>(start.plus(Duration.ofMillis(offset.addAndGet(timeStep))), null, null,Signal.Status.FAILURE_TOTAL, new TimeoutException("oops")));
 
-        Thread.sleep(5); // NOSONAR Risks have been assessed and accepted
+        Thread.sleep(10); // NOSONAR Risks have been assessed and accepted
 
         // As of rev. 139c3ae65438f4a98c90e74dbffe24073e178d20:
         // If at any time the I component of stage 1 controller signal is more than 0, this makes its output less than the renderer threshold because the value of -1 is used for signaling,

@@ -323,14 +323,14 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
                 // No go, incomplete information
                 logger.debug("{}: null signals? {}", getAddress(), pair);
-                return new Signal<>(clock.instant(), -1d);
+                return new Signal<>(clock.instant(), null, null, Signal.Status.FAILURE_TOTAL, new IllegalStateException("null signals, see the log above"));
             }
 
             if (pair.indoor.isError() || pair.ambient.isError()) {
 
                 // Absolutely not
                 logger.warn("{}: error signals? {}", getAddress(), pair);
-                return new Signal<>(clock.instant(), -1d);
+                return new Signal<>(clock.instant(), null, null, Signal.Status.FAILURE_TOTAL, new IllegalStateException("error signals, see the log above"));
             }
 
             // Let's be generous; Zigbee sensors can fall back to 60 seconds interval even if configured faster,

@@ -80,11 +80,8 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
                 .compute(pv)
                 .doOnNext(e -> logger.debug("controller/{}: {}", getAddress(), e));
 
-        // Discard things the renderer doesn't understand.
-        // Total failure is denoted by NaN by stage 1, it will get through.
-        // The PID controller output value becomes the extra payload but is ignored at the moment (unlike Thermostat#compute()).
-        var stage2 = stage1
-                .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
+        // Interpret things the renderer doesn't understand
+        var stage2 = stage1.map(this::computeRendererInput);
 
         // Deliver the signal
         // Might want to expose this as well
@@ -92,6 +89,20 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
                 .compute(stage2)
                 .doOnNext(e -> logger.debug("renderer/{}: {}", getAddress(), e))
                 .map(this::mapOutput);
+    }
+
+    /**
+     * Convert a possibly error signal from the computing pipeline into an actionable signal for the hysteresis controller.
+     */
+    private Signal<Double, ProcessController. Status<Double>> computeRendererInput(Signal<ProcessController.Status<Double>, Void> signal) {
+
+        if (signal.isOK()) {
+            // PID controller output value becomes the extra payload but is ignored at the moment (unlike Thermostat#compute()).
+            return new Signal<>(signal.timestamp, signal.getValue().signal, signal.getValue(), signal.status, signal.error);
+        }
+
+        // Any kind of errors at this point must be interpreted as "turn it off"
+        return new Signal<>(signal.timestamp, -1d);
     }
 
     private Signal<Boolean, ProcessController.Status<Double>> mapOutput(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> source) {
