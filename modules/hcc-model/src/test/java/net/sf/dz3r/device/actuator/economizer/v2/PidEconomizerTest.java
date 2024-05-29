@@ -54,7 +54,7 @@ class PidEconomizerTest {
                         HvacMode.COOLING,
                         1.0,
                         0.0000008,
-                        0.7,
+                        1.1,
                         new EconomizerSettings(
                                 0,
                                 20,
@@ -89,6 +89,10 @@ class PidEconomizerTest {
         ambientSink.tryEmitNext(new Signal<>(start.plus(Duration.ofMillis(offset.addAndGet(timeStep))), null, null,Signal.Status.FAILURE_TOTAL, new TimeoutException("oops")));
 
         Thread.sleep(5); // NOSONAR Risks have been assessed and accepted
+
+        // As of rev. 139c3ae65438f4a98c90e74dbffe24073e178d20:
+        // If at any time the I component of stage 1 controller signal is more than 0, this makes its output less than the renderer threshold because the value of -1 is used for signaling,
+        // and the economizer gets stuck on.
         assertThat(s.getState().requested).isFalse();
     }
 }
