@@ -81,7 +81,7 @@ Cooling mode assumed:
 * `hvac-device`: at this point, the economizer is an on/off device (multistage coming). This is the identifier of the [HVAC device](./hvac.md) acting as an economizer.
 * `timeout`: treat both indoor and ambient sensors as stale and shut off the economizer after not receiving data from them for this long. Default is 90 seconds. The system will complain at `INFO` level if this is happening.
 * `settings`: This section is optional. If missing, it is assumed that the [schedule](./schedule.md) will take care of configuring economizer settings dynamically.
-  * `changeover-delta`: ambient temperature has to be this much lower than indoors for the economizer to start working (subject to PID configuration).
+  * `changeover-delta`: ambient temperature has to be this much lower than indoors for the economizer to start working (subject to PID configuration). Surprisingly, a value of 0 works well due to [PID control magic](https://en.wikipedia.org/wiki/Proportional%E2%80%93integral%E2%80%93derivative_controller).
   * `target-temperature`: shut the economizer off when indoor temperature drops to this value.
   * `keep-hvac-on`: set to `true` if you want the main HVAC to be still working when the economizer is active (maximum comfort), and to `false` if you want to stop it (maximum cost savings).
 
