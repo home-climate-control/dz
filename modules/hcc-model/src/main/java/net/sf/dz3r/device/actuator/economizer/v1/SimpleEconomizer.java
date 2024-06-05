@@ -3,7 +3,7 @@ package net.sf.dz3r.device.actuator.economizer.v1;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
+import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
@@ -30,7 +30,7 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
      */
     public SimpleEconomizer(
             String name,
-            EconomizerSettings settings,
+            EconomizerConfig settings,
             Flux<Signal<Double, Void>> ambientFlux,
             HvacDevice device,
             Duration timeout) {

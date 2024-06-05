@@ -14,6 +14,7 @@ import net.sf.dz3r.view.UnitObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
 import org.springframework.web.reactive.function.server.RouterFunctions;
@@ -123,6 +124,22 @@ public class WebUI implements AutoCloseable {
         }
     }
 
+    /**
+     * Initialize everything from the given set of init objects.
+     */
+    private void init() {
+
+        ThreadContext.push("init");
+        try {
+
+            for (var source : initSet) {
+                new UnitDirectorInitializer().init(source);
+            }
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
     private void advertise() {
         ThreadContext.push("mdns-advertise");
         try {
@@ -136,6 +153,7 @@ public class WebUI implements AutoCloseable {
 
             if (fqdn.getHostAddress().equals(local11)) {
                 logger.error("Check /etc/hosts for {}, it likely breaks mDNS resolution", local11);
+                logger.error("More information: https://serverfault.com/questions/363095/why-does-my-hostname-appear-with-the-address-127-0-1-1-rather-than-127-0-0-1-in");
             }
 
             logger.debug("fqdn={}/{}", canonical, fqdn);
@@ -180,22 +198,6 @@ public class WebUI implements AutoCloseable {
     }
 
     /**
-     * Initialize everything from the given set of init objects.
-     */
-    private void init() {
-
-        ThreadContext.push("init");
-        try {
-
-            for (var source : initSet) {
-                new UnitDirectorInitializer().init(source);
-            }
-        } finally {
-            ThreadContext.pop();
-        }
-    }
-
-    /**
      * Advertise the capabilities ({@code HTTP GET /} request).
      *
      * @param ignoredRq ignored.
@@ -221,6 +223,7 @@ public class WebUI implements AutoCloseable {
         logger.info("GET /zones");
 
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Flux.fromIterable(unit2observer.values())
                                 .flatMap(UnitObserver::getZones),
@@ -240,6 +243,7 @@ public class WebUI implements AutoCloseable {
         logger.info("GET /zone/{}", zone);
 
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(
                         Flux.fromIterable(unit2observer.values())
@@ -271,6 +275,7 @@ public class WebUI implements AutoCloseable {
         logger.info("GET /sensors");
 
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Flux.fromIterable(unit2observer.values())
                                 .flatMap(UnitObserver::getSensors),
@@ -290,6 +295,7 @@ public class WebUI implements AutoCloseable {
         logger.info("GET /sensor/{}", address);
 
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(
                         Flux.fromIterable(unit2observer.values())
@@ -310,9 +316,13 @@ public class WebUI implements AutoCloseable {
         var units = Flux.fromIterable(unit2observer.entrySet())
                 .map(kv -> new AbstractMap.SimpleEntry<>(
                         kv.getKey().getAddress(),
-                        kv.getValue().getUnitStatus()));
+                        kv.getValue().getUnitStatus()))
+                .collectMap(Map.Entry::getKey, Map.Entry::getValue);
 
-        return ok().contentType(MediaType.APPLICATION_JSON).body(units, Map.class);
+        return ok()
+                .cacheControl(CacheControl.noCache())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(units, Map.class);
     }
 
     /**
@@ -329,6 +339,7 @@ public class WebUI implements AutoCloseable {
 
         // Returning empty JSON is simpler on both receiving and sending side than a 404
         return ok()
+                .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Flux.fromIterable(unit2observer.entrySet())
                                 .filter(kv -> kv.getKey().getAddress().equals(name))
@@ -375,7 +386,10 @@ public class WebUI implements AutoCloseable {
         result.put("start.millis", startMillis);
         result.put("uptime.millis", uptimeMillis);
 
-        return ok().contentType(MediaType.APPLICATION_JSON).body(Flux.fromIterable(result.entrySet()), Object.class);
+        return ok()
+                .cacheControl(CacheControl.noStore())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Flux.fromIterable(result.entrySet()), Object.class);
     }
 
     /**

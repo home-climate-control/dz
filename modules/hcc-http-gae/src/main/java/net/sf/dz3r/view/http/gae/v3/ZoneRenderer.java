@@ -48,11 +48,13 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
         }
 
         var status = source.getValue();
+
         var periodName = Optional.ofNullable(status.periodSettings).map(ps -> ps.period().name).orElse(null);
         var deviationSetpoint = Optional.ofNullable(status.periodSettings).map(ps -> status.settings.setpoint - ps.settings().setpoint).orElse(0d);
-        var deviationEnabled = Optional.ofNullable(status.periodSettings).map(ps -> !Objects.equals(status.settings.enabled, ps.settings().enabled)).orElse(false);
-        var deviationVoting = Optional.ofNullable(status.periodSettings).map(ps -> !Objects.equals(status.settings.voting, ps.settings().voting)).orElse(false);
 
+        // Careful with literals on ZoneSettings - null values are interpreted as "true" for "enabled" and "voting"
+        var deviationEnabled = Optional.ofNullable(status.periodSettings).map(ps -> !Objects.equals(status.settings.isEnabled(), ps.settings().isEnabled())).orElse(false);
+        var deviationVoting = Optional.ofNullable(status.periodSettings).map(ps -> !Objects.equals(status.settings.isVoting(), ps.settings().isVoting())).orElse(false);
 
         if (source.isError()) {
             logger.error("Not implemented: reporting error signal: {}", source);

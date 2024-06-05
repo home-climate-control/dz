@@ -1,3 +1,5 @@
+import com.google.cloud.tools.jib.gradle.extension.layerfilter.Configuration
+
 buildscript {
     dependencies {
         classpath(libs.jib.layer.filter)
@@ -17,19 +19,22 @@ plugins {
 }
 
 dependencies {
-
     implementation(project(":modules:hcc-bootstrap"))
+}
 
-    // SpringBoot additions
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-starter-log4j2")
-    runtimeOnly("io.micrometer:micrometer-registry-influx")
-    runtimeOnly("io.micrometer:micrometer-registry-jmx")
+// SpringBoot additions
+dependencies {
 
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation(libs.reactor.test)
+    annotationProcessor(libs.springboot.configuration.processor)
+
+    implementation(libs.springboot.starter.actuator)
+    implementation(libs.springboot.starter.log4j2)
+    implementation(libs.springboot.starter.webflux)
+
+    testImplementation(libs.springboot.starter.test)
+
+    runtimeOnly(libs.micrometer.registry.influx)
+    runtimeOnly(libs.micrometer.registry.jmx)
 }
 
 configurations {
@@ -64,7 +69,8 @@ jib {
     pluginExtensions {
         pluginExtension {
             implementation = "com.google.cloud.tools.jib.gradle.extension.layerfilter.JibLayerFilterExtension"
-            configuration(Action<com.google.cloud.tools.jib.gradle.extension.layerfilter.Configuration> {
+
+            configuration(Action<Configuration> {
                 filters {
                     filter {
                         // Filter out all custom configurations that may be present in the source tree protected by .gitignore

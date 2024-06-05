@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.time.Duration;
 
 /**
- * Base class for {@link net.sf.dz3r.device.mqtt.v2async.MqttListenerImpl} and {@link net.sf.dz3r.device.mqtt.v2rx.MqttListenerImpl}.
+ * Base class for {@link net.sf.dz3r.device.mqtt.v2async.MqttListenerImpl}}.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */

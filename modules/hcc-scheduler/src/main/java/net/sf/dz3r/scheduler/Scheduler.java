@@ -1,5 +1,6 @@
 package net.sf.dz3r.scheduler;
 
+import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.Zone;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -131,15 +133,44 @@ public class Scheduler {
 
             logger.trace("{}: matched time={} period={}", zoneName, now, period);
 
+            // VT: FIXME: https://github.com/home-climate-control/dz/issues/319
+            // After that is fixed, the precedence will be:
+            //
+            // 1. Local settings change first.
+            // 2. Changed event settings will NOT be applied upon change, however, "return to schedule" will apply new, changed, settings.
+
             if (same(currentPeriod, period)) {
                 logger.trace("{}: already at {}", zoneName, period);
                 return Flux.empty();
             }
 
             if (period != null) {
-                var settings = source.getValue().get(period);
+                var parsedSettings = source.getValue().get(period);
 
-                if (Boolean.TRUE.equals(zone.getSettings().hold)) {
+                // Have to be careful here. Some settings may have been missing from the source JSON, they have defaults.
+                // ZoneSettings#merge will not calculate the outcome correctly, it will treat null settings as unchanged.
+
+                var settings = new ZoneSettings(
+                        parsedSettings.isEnabled(),
+                        parsedSettings.setpoint,
+                        parsedSettings.isVoting(),
+                        parsedSettings.isOnHold(),
+                        parsedSettings.getDumpPriority(),
+                        Optional
+                                .ofNullable(parsedSettings.economizerSettings)
+                                .map(s -> new EconomizerSettings(
+                                        s.changeoverDelta,
+                                        s.targetTemperature,
+                                        s.isKeepHvacOn(),
+                                        s.getMaxPower()
+                                ))
+                                .orElse(null)
+                );
+
+                logger.trace("{}: settings/parsed: {}", zoneName, parsedSettings);
+                logger.trace("{}: settings/actual: {}", zoneName, settings);
+
+                if (zone.getSettings().isOnHold()) {
                     logger.trace("{}: on hold, left alone", zoneName);
 
                     // However... need to record the period. The zone will be smart enough not to touch the settings.

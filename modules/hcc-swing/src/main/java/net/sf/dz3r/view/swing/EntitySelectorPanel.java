@@ -169,7 +169,7 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 thisZoneFlux,
                 modeFlux);
         var panel = new ZonePanel(
-                zone, config.screen, config.console().initialUnit(),
+                zone, config.screen, config.console.measurementUnits(),
                 thisZoneFlux,
                 sensorFlux,
                 modeFlux);

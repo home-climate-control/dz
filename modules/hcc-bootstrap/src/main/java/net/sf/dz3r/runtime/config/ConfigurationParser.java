@@ -21,6 +21,8 @@ import net.sf.dz3r.runtime.config.hardware.HvacDeviceConfig;
 import net.sf.dz3r.runtime.config.hardware.UnitConfigurationParser;
 import net.sf.dz3r.runtime.config.model.ConsoleConfigurationParser;
 import net.sf.dz3r.runtime.config.model.DirectorConfigurationParser;
+import net.sf.dz3r.runtime.config.model.MeasurementUnits;
+import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.runtime.config.model.WebUiConfigurationParser;
 import net.sf.dz3r.runtime.config.model.ZoneConfig;
 import net.sf.dz3r.runtime.config.model.ZoneConfigurationParser;
@@ -56,6 +58,8 @@ public class ConfigurationParser {
             HCCObjects.requireNonNull(
                     source.instance(),
                     "home-climate-control.instance must be provided. See https://github.com/home-climate-control/dz/tree/master/docs/configuration/index.md for details");
+
+            checkUnits(source.measurementUnits());
 
             var ctx = new ConfigurationContext();
 
@@ -152,7 +156,7 @@ public class ConfigurationParser {
             var webUi = new WebUiConfigurationParser(ctx, ic).parse(source.instance(), digest, source.webUi());
             m.checkpoint("configured WebUI");
 
-            var console = new ConsoleConfigurationParser(ctx, ic).parse(source.instance(), source.console());
+            var console = new ConsoleConfigurationParser(ctx, ic).parse(source.instance(), source.measurementUnits(), source.console());
             m.checkpoint("configured console");
 
             if (webUi == null && console == null) {
@@ -164,6 +168,15 @@ public class ConfigurationParser {
 
         } finally {
             m.close();
+        }
+    }
+
+    private void checkUnits(MeasurementUnits units) {
+
+        if (units != null && units.temperature() != TemperatureUnit.C) {
+            logger.error("FAHRENHEIT UNITS: NOT THOROUGHLY TESTED. WATCH OUT FOR INCONSISTENCIES. SUBMIT A COMMENT TO https://github.com/home-climate-control/dz/issues/315 IF ANY FOUND");
+
+            throw new UnsupportedOperationException("On second thought... Let's implement it first");
         }
     }
 

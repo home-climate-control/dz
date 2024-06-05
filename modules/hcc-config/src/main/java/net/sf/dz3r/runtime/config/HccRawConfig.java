@@ -9,6 +9,7 @@ import net.sf.dz3r.runtime.config.hardware.HvacDeviceConfig;
 import net.sf.dz3r.runtime.config.hardware.MockConfig;
 import net.sf.dz3r.runtime.config.hardware.UnitControllerConfig;
 import net.sf.dz3r.runtime.config.model.ConsoleConfig;
+import net.sf.dz3r.runtime.config.model.MeasurementUnits;
 import net.sf.dz3r.runtime.config.model.UnitDirectorConfig;
 import net.sf.dz3r.runtime.config.model.WebUiConfig;
 import net.sf.dz3r.runtime.config.model.ZoneConfig;
@@ -24,6 +25,7 @@ import java.util.Set;
  * This configuration needs to be parsed, validated, and materialized to be usable.
  *
  * @param instance HCC instance, to distinguish in metrics.
+ * @param measurementUnits System wide measurement units to use in configuration and display.
  * @param esphome ESPHome based devices.
  * @param zigbee2mqtt Zigbee devices, accessed via {@code zigbee2mqtt}
  * @param zwave2mqtt Z-Wave devices, accessed via {@code zwave2mqtt}.
@@ -45,6 +47,7 @@ import java.util.Set;
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
 public record HccRawConfig(
         String instance,
+        MeasurementUnits measurementUnits,
         Set<MqttDeviceConfig> esphome,
         Set<MqttDeviceConfig> zigbee2mqtt,
         Set<MqttDeviceConfig> zwave2mqtt,

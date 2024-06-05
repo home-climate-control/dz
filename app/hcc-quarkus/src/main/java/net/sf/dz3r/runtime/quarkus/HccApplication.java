@@ -59,7 +59,7 @@ public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {
             try {
                 return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
             } catch (JsonProcessingException ex) {
-                throw new IllegalStateException("Failed to convert materialized interface configuration to JSON", ex);
+                throw new IllegalStateException("Failed to convert materialized interface configuration to YAML", ex);
             }
         });
     }

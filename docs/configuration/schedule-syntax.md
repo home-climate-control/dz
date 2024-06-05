@@ -1,45 +1,85 @@
 # Google Calendar Schedule Integration Syntax
 
-Context: [home-climate-control.schedule.google-calendar] integration.
+Context: [home-climate-control.schedule.google-calendar](./schedule.md#google-calendar) integration.  
+See also: [deprecated schedule integration syntax](./schedule-syntax-deprecated.md)
 
 ---
 
-HCC reads the `title` (contains period description), `start`, `end`, `all day`, `recurrence` calendar fields and ignores the rest.
+HCC reads the `title` (contains period name), `description` (contains period settings), `start`, `end`, `all day`, `recurrence` calendar fields and ignores the rest.
 
 **IMPORTANT:** historically, different calendars are used for heating and cooling, and the heating or cooling mode is set outside of the calendar, so you won't find any mention of it here. This may change in the future.
 
 # General Syntax
 
+Until the [old syntax](./schedule-syntax-deprecated.md) is retired the `description` field will be attempted to be parsed into period settings first, if that fails,
+then the old syntax will be attempted to be parsed (having issued a `WARN` level message in the log), and only then the scheduler will give up.
+
 ## Title field
 
-Contains a period name followed by a colon, and several sections, separated by `,` or `;`:
+Contains the period name. No restrictions. Text after a `#` sign is treated as comments, will not be shown in the console.  
+Exercise your judgment here, if you make it too long it won't scroll but will go beyond the screen.
+ 
+## Description field
 
-* on/off
-* voting
-* setpoint
-* dump priority
+Contains the period settings in YAML. Best explained by example:
 
-### On/Off
+```yaml
+# Comments are allowed in the event description text 
+enabled: true | false # optional, defaults to true
+voting: true | false # optional, defaults to true
+setpoint: decimal number # mandatory
+dump-priority: integer number # optional, defaults to 0
+economizer: # optional section, defaults to "not present"
+  changeover-delta: decimal number # mandatory
+  target-temperature: decimal number # mandatory
+  keep-hvac-on: true | false # optional, defaults to true
+  max-power: decimal number between 0 and 1 # optional, defaults to 1
+```
 
-String literals `on` and `enabled` mean that the zone is ON during this period. This is the default behavior.
+### enabled
 
-String literals `off` and `disabled` mean that the zone is OFF during this period. You have to explicitly specify this.
+The value of `true` mean that the zone is ON during this period. This is the default behavior.
+
+The value of `false`` mean that the zone is OFF during this period. You have to explicitly specify this.
 
 Setpoint value is ignored for a disabled zone, to make it easier to do one-off edits. However, it is still required.
 
-### Voting
+### voting
 
-String literal `voting` means that if the zone is calling for heat or cool during this period, it will cause the HVAC unit to turn on. This is the default behavior.
+The value of `true` means that if the zone is calling for heat or cool during this period, it will cause the HVAC unit to turn on. This is the default behavior.
 
-String literal `non-voting` or `not voting` means that the HVAC unit will only turn on if any other **voting** zone calls for heat or cool.
+The value of `false` means that the HVAC unit will only turn on if any other **voting** zone calls for heat or cool.
 
-### Setpoint
+### setpoint
 
-String literal `setpoint` or `temperature` followed by space, then a numerical value, and optional `C` or `F` unit modifier specifies the setpoint temperature.
+Setpoint temperature. Numerical value. There is no default for the setpoint.
 
-There is no default for the setpoint.
 
-Default temperature unit is `C` (degrees Celsius).
+### dump-priority
+
+Unused for now, but allowed to be present.
+
+### economizer
+
+### economizer.changeover-delta
+
+Specifies temperature difference between indoor and outdoor temperature necessary to turn the device on.
+
+### economizer.target-temperature
+
+When this temperature is reached, the economizer is shut off.
+
+### economizer.keep-hvac-on
+
+The value of `true` means that the main HVAC unit for this zone will be kept on even if the economizer is on. This maximizes comfort.
+
+The value of `false` means that when the conditions are suitable for the economizer to turn on, the main HVAC unit will be kept off. This maximizes energy savings.
+
+### economizer.max-power
+
+Specifies the maximum amount of power allowed to be applied to a variable output HVAC device acting as an economizer (example: max speed for a fan).
+
+The value will be ignored with a log warning if the configured economizer device doesn't support variable output.
 
 ## Start and end time, recurrence
 
@@ -49,28 +89,5 @@ Default temperature unit is `C` (degrees Celsius).
 
 Other than that, self-explanatory.
 
-# Examples
-
-### Away: setpoint 32C, not voting
-
-Period name is `Away`  
-Setpoint is at 32°C  
-This zone will **not** turn on the HVAC if it calls for heat or cool because it is `non-voting`, but its setpoint will be satisfied if any other voting zone does.
-
-### Away: setpoint 32, not voting
-
-Same as the above, but the temperature unit defaults to degrees Celsius.
-
-### Away: setpoint 90F, not voting
-
-Same as the above, but the temperature unit is explicitly specified to be degrees Fahrenheit.
-
-### Away: setpoint 32, off
-
-Same as the above, but the zone will not participate in HVAC exchange, dampers will stay closed no matter what happens to the rest of the house. This zone will appear grayed out on Swing and mobile consoles.
-
-### Night: setpoint 24
-
-Period name is `Night`  
-Setpoint is at 24°C  
-Zone **will** turn on the HVAC if it calls for heat or cool, and it will be turned off when all other voting zones that it serves are satisfied.
+---
+[^^^ Configuration](./index.md)  

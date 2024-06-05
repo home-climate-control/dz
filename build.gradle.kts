@@ -12,6 +12,8 @@ plugins {
     alias(libs.plugins.quarkus.plugin) apply false
 
     alias(libs.plugins.gradle.versions)
+    alias(libs.plugins.gradle.dependency.analysis)
+    alias(libs.plugins.gradle.doctor)
 }
 
 sonarqube {
@@ -22,16 +24,27 @@ sonarqube {
     }
 }
 
+repositories {
+    mavenCentral()
+}
+
+doctor {
+    javaHome {
+        // Build breaks in IntelliJ IDEA on macOS even if JAVA_HOME is set correctly
+        // (it picks up JetBrains JDK instead)
+        failOnError.set(false)
+    }
+}
+
 subprojects {
 
     apply(plugin = "java")
-    apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "jacoco")
-    apply(plugin = "net.ltgt.errorprone")
+    apply(plugin = rootProject.libs.plugins.errorprone.get().pluginId)
 
     group = "net.sf.dz3"
-    version = "4.2.0"
+    version = "4.3.0"
 
     jacoco {
         toolVersion = rootProject.libs.versions.jacoco.get()
@@ -55,25 +68,9 @@ subprojects {
 
     repositories {
         mavenCentral()
-        mavenLocal()
     }
 
     dependencies {
-
-        implementation(rootProject.libs.log4j.api)
-        implementation(rootProject.libs.log4j.core)
-
-        implementation(rootProject.libs.reactor.core)
-        implementation(rootProject.libs.reactor.tools)
-
-        testImplementation(rootProject.libs.mockito)
-        testImplementation(rootProject.libs.junit5.api)
-        testImplementation(rootProject.libs.junit5.params)
-        testImplementation(rootProject.libs.assertj.core)
-        testImplementation(rootProject.libs.reactor.test)
-
-        testRuntimeOnly(rootProject.libs.junit5.engine)
-
         errorprone(rootProject.libs.errorprone)
     }
 

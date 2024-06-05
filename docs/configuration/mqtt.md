@@ -16,7 +16,7 @@ They all share common properties:
       root-topic: <root MQTT topic for all messages for this connector>
       username: <MQTT broker username> # optional, but recommended
       password: <MQTT broker password> # optional, but recommended
-      auto-reconnect: <boolean flag> #optional, see below
+      auto-reconnect: <boolean flag> #optional, defaults to false, see below
     sensors:
       ...
     switches:
@@ -33,7 +33,10 @@ MQTT broker configuration.
 Used to identify this client to the MQTT server. Defaults to internally generated consistent identifier based on host and port.
 
 #### auto-reconnect
-Instructs the MQTT library to try to reconnect automatically. Generally, it is a good thing, but it may backfire during initial setup because the library does it quietly and will do it forever, with the rest of the system appearing stuck. Use with care.
+Instructs the MQTT library to try to reconnect automatically. Generally, it is a good thing, but it may backfire during initial setup because the library does it quietly and will do it forever, with the rest of the system appearing stuck, hence the default of `false`.  
+On the other hand, unless it is set to `true`, a service interruption may result in connection being lost without any log messages emitted.
+
+Either way, use with care.
 
 ### sensors, switches, fans
 

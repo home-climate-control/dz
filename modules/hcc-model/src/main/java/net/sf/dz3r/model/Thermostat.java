@@ -2,7 +2,7 @@ package net.sf.dz3r.model;
 
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HysteresisController;
-import net.sf.dz3r.controller.ProcessController;
+import net.sf.dz3r.controller.ProcessController.Status;
 import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.Addressable;
@@ -31,20 +31,15 @@ import java.time.Clock;
  *
  * @see net.sf.dz3r.device.model.Thermostat
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
-public class Thermostat implements ProcessController<Double, CallingStatus, Void>, Addressable<String> {
+public class Thermostat implements Addressable<String> {
 
     private final Logger logger = LogManager.getLogger();
     private final Clock clock;
 
     private final String name;
     public final Range<Double> setpointRange;
-
-    /**
-     * Thermostat setpoint.
-     */
-    private double setpoint;
 
     /**
      * The current process variable value.
@@ -96,7 +91,6 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
         this.clock = HCCObjects.requireNonNull(clock, "clock can't be null");
         this.name = name;
         this.setpointRange = setpointRange;
-        this.setpoint = setpoint;
 
         controller = new SimplePidController<>("(controller) " + name, setpoint, p, i, d, limit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + name, 0, HYSTERESIS);
@@ -116,14 +110,12 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
         // VT: FIXME: Recalculate everything, issue new control signal
     }
 
-    @Override
     public void setSetpoint(double setpoint) {
 
         if (!setpointRange.contains(setpoint)) {
             throw new IllegalArgumentException(setpoint + " is outside of " + setpointRange.min + ".." + setpointRange.max);
         }
 
-        this.setpoint = setpoint;
         controller.setSetpoint(setpoint);
 
         logger.info("setSetpoint({}): {}", name, setpoint);
@@ -131,25 +123,8 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
         configurationChanged();
     }
 
-    @Override
     public double getSetpoint() {
-        return setpoint;
-    }
-
-    @Override
-    public Signal<Double, Void> getProcessVariable() {
-        return pv;
-    }
-
-    @Override
-    public double getError() {
-
-        if (pv == null) {
-            // No sample, no error
-            return 0;
-        }
-
-        return pv.getValue() - setpoint;
+        return controller.getSetpoint();
     }
 
     /**
@@ -157,7 +132,7 @@ public class Thermostat implements ProcessController<Double, CallingStatus, Void
      *
      * @see net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer#computeDeviceState(Flux)
      */
-    @Override
+//    @Override
     public Flux<Signal<Status<CallingStatus>, Void>> compute(Flux<Signal<Double, Void>> pv) {
 
         // Compute the control signal to feed to the renderer.

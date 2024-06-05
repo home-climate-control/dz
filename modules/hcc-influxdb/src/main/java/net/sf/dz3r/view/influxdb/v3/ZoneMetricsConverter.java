@@ -63,9 +63,15 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
 
         var economizerStatus = status.economizerStatus;
 
-        b.addField("enabled", economizerStatus.settings.enabled);
-        b.addField("delta", economizerStatus.settings.changeoverDelta);
-        b.addField("target", economizerStatus.settings.targetTemperature);
+        if (economizerStatus.settings != null) {
+
+            b.addField("enabled", true);
+            b.addField("delta", economizerStatus.settings.changeoverDelta);
+            b.addField("target", economizerStatus.settings.targetTemperature);
+
+        } else {
+            b.addField("enabled", false);
+        }
 
         b.addField("calling", economizerStatus.callingStatus.calling);
         b.addField("demand", economizerStatus.callingStatus.demand);

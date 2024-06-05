@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
 
 public class ZoneChart2021 extends AbstractZoneChart {
@@ -51,11 +52,8 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
             logger.trace("eco: {}", signal.getValue().economizerStatus);
 
-            ambient = signal.getValue().economizerStatus.ambient == null
-                    ? null
-                    : signal.getValue().economizerStatus.ambient.getValue();
-
-            target = signal.getValue().economizerStatus.settings.targetTemperature;
+            ambient = Optional.ofNullable(signal.getValue().economizerStatus.ambient).map(Signal::getValue).orElse(null);
+            target = Optional.ofNullable(signal.getValue().economizerStatus.settings).map(s -> s.targetTemperature).orElse(null);
         }
 
         logger.trace("ambient={}, target={}", ambient, target);

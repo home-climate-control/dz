@@ -12,6 +12,7 @@ import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -138,7 +139,9 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
         var result = new Limits(min, max, minmaxTime);
 
         logger.info("Recalculated in {}ms", (clock.instant().toEpochMilli() - startTime));
-        logger.info("New minmaxTime set to + {}", () -> Duration.ofMillis(clock.instant().toEpochMilli() - result.minmaxTime));
+
+        // result.minmaxTime is null if the chart was never rendered since the start of the console
+        logger.info("New minmaxTime set to + {}", () -> Optional.ofNullable(result.minmaxTime).map(t -> Duration.ofMillis(clock.instant().toEpochMilli() - t)).orElse(null));
 
         return result;
     }
