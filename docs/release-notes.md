@@ -1,10 +1,11 @@
 Home Climate Control: Release Notes
 ==
 
-## Coming Up: v4.3.0
+## v4.3.0 (2024-06-04)
 
+* Enhancement: [#267](https://github.com/home-climate-control/dz/issues/267) - economizer can now exist without a setpoint.
 * Bugfix: [#320 Economizer runs forever when there is an ambient sensor failure](https://github.com/home-climate-control/dz/issues/320)
-* Breaking change: [economizer configuration syntax](../configuration/zones.md#economizer) changed to allow future enahancements
+* Breaking change: [economizer configuration syntax](../configuration/zones.md#economizer) changed to allow future enhancements
 
 ## v4.2.0 (2024-01-17)
 

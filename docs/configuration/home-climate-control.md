@@ -42,7 +42,7 @@ home-climate-control:
 
 ![countries that use Fahrenheit](https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Countries_that_use_Fahrenheit.svg/320px-Countries_that_use_Fahrenheit.svg.png)
 
-**P.P.S.** This setting will be recognized but for now rejected - it's been deprioritized to give more time to other things. If it is important for you, please voice your support at [#315 GitHub Issue](https://github.com/home-climate-control/dz/issues/315).
+**P.P.S.** This setting will be recognized but for now rejected - it's been deprioritized to give more time to other things. If it is important for you, please voice your support at [#315](https://github.com/home-climate-control/dz/issues/315).
 
 ---
 [^^^ Configuration](./index.md)
