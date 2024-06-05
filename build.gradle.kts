@@ -44,7 +44,7 @@ subprojects {
     apply(plugin = rootProject.libs.plugins.errorprone.get().pluginId)
 
     group = "net.sf.dz3"
-    version = "4.3.0-SNAPSHOT"
+    version = "4.3.0"
 
     jacoco {
         toolVersion = rootProject.libs.versions.jacoco.get()
