@@ -107,6 +107,18 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
                 this::compute);
     }
 
+    /**
+     * Compute the controller signal.
+     *
+     * Using {@code Optional} for arguments is an antipattern, but an unavoidable one -
+     * the setpoint is supplied by a {@code Flux} which doesn't support null values, so some kind of wrapper
+     * would've been necessary anyway, so why not use whatever is intended for this specifically.
+     *
+     * @param setpoint Setpoint wrapped into {@code Optional}.
+     * @param pv Process variable.
+     *
+     * @return Computed signal.
+     */
     private Signal<Status<O>, P> compute(Optional<Double> setpoint, Signal<I, P> pv) {
 
         if (pv.isError()) {
