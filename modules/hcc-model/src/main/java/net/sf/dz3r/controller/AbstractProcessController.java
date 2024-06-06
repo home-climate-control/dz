@@ -121,14 +121,7 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
      */
     private Signal<Status<O>, P> compute(Optional<Double> setpoint, Signal<I, P> pv) {
 
-        if (pv.isError()) {
-
-            // VT: FIXME: Ideally, even the error signal must be passed to wrapCompute() in case it needs to
-            // recalculate the state. In practice, this will have to wait.
-
-            // For now, let's throw them a NaN, they better pay attention.
-            return new Signal<>(pv.timestamp, new Status(setpoint.orElse(null), null, Double.NaN), pv.payload, pv.status, pv.error);
-        }
+        // VT: NOTE: https://github.com/home-climate-control/dz/issues/321 - no more "magic numbers"
 
         if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
             logger.warn("Can't go back in time: last sample was @{}, this is @{}, {}ms difference: {}",

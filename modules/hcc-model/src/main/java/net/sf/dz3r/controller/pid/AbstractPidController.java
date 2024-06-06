@@ -72,7 +72,11 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
 
     @Override
     protected double getError(Signal<Double, P> pv, Double setpoint) {
-        return pv.getValue() - setpoint;
+
+        // VT: NOTE: https://github.com/home-climate-control/dz/issues/321
+        // Until this is proven to be a bad idea, we're assuming that error == 0 for the error input, to recalculate I and especially D correctly.
+        // However, the output signal emitted will still be an error signal - let's not forget about that.
+        return pv.isError() ? 0 : pv.getValue() - setpoint;
     }
 
     @Override
@@ -83,7 +87,6 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
         var error = getError(pv, setpoint);
         var p = error * getP();
         lastP = p;
-        var signal = p;
 
         if (saturationLimit == 0) {
             var integral = getIntegral(lastOutputSignal, pv, error);
@@ -91,7 +94,7 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
 
         } else {
 
-            if (lastOutputSignal != null && Math.abs(lastOutputSignal.getValue().signal) < saturationLimit) {
+            if (lastOutputSignal != null && !lastOutputSignal.isError() && Math.abs(lastOutputSignal.getValue().signal) < saturationLimit) {
 
                 // Integral value will only be updated if the output is not saturated
                 var integral = getIntegral(lastOutputSignal, pv, error);
@@ -110,8 +113,6 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
             }
         }
 
-        signal += lastI;
-
         var derivative = getDerivative(lastOutputSignal, pv, error);
 
         // One cause of this is setSetpoint(), which causes values
@@ -122,8 +123,9 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
                 && Double.compare(derivative, Double.POSITIVE_INFINITY) != 0) {
 
             lastD = derivative * getD();
-            signal += lastD;
         }
+
+        var signal = p + lastI + lastD;
 
         // VT: NOTE: When the hell was it NaN? I know this code wouldn't be
         // here for no reason, but can't remember the circumstances.

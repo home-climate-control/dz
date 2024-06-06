@@ -133,8 +133,9 @@ class AbstractProcessControllerTest {
         // Normal signal triggering status change
         assertThat(accumulator.get(0).getValue().signal).isEqualTo(1.0);
 
-        // Error signal
-        assertThat(accumulator.get(1).getValue().signal).isNaN();
+        // Error signal. However, the value is still present.
+        assertThat(accumulator.get(1).isError()).isTrue();
+        assertThat(accumulator.get(1).getValue().signal).isNull();
 
         // Normal again
         assertThat(accumulator.get(2).getValue().signal).isEqualTo(1.0);
@@ -176,7 +177,12 @@ class AbstractProcessControllerTest {
 
         // PV change
         assertThat(accumulator.get(0).getValue().signal).isEqualTo(-5.0);
-        assertThat(accumulator.get(1).getValue().signal).isNaN();
+
+        // Error signal. However, the value is still present.
+        assertThat(accumulator.get(1).isError()).isTrue();
+        assertThat(accumulator.get(1).getValue().signal).isZero();
+
+        // PV change
         assertThat(accumulator.get(2).getValue().signal).isEqualTo(5.0);
 
         // Setpoint change
