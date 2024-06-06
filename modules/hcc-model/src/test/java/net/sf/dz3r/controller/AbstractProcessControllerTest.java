@@ -3,8 +3,7 @@ package net.sf.dz3r.controller;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.signal.Signal;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,13 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AbstractProcessControllerTest {
 
-    private FluxSink<Double> pvSink;
-
     @Test
     void setpointChangeEmitsSignalHysteresis() {
 
-        var source = Flux
-                .create(this::connectSetpoint)
+        Sinks.Many<Double> sink = Sinks.many().unicast().onBackpressureError();
+        var source = sink
+                .asFlux()
                 .map(v -> new Signal<Double, Void>(Instant.now(), v));
 
         var pc = new HysteresisController<Void>("pc", 20);
@@ -30,16 +28,16 @@ class AbstractProcessControllerTest {
                 .log()
                 .subscribe(accumulator::add);
 
-        pvSink.next(15.0);
-        pvSink.next(25.0);
+        sink.tryEmitNext(15.0);
+        sink.tryEmitNext(25.0);
 
         // This should make the controller emit a signal since the setpoint now calls for action, but
         // in imperative implementation it doesn't; it'll wait till the next incoming signal to do so
         pc.setSetpoint(30.0);
 
-        pvSink.next(35.0);
+        sink.tryEmitNext(35.0);
 
-        pvSink.complete();
+        sink.tryEmitComplete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
         assertThat(accumulator).hasSize(4);
@@ -60,9 +58,11 @@ class AbstractProcessControllerTest {
     @Test
     void setpointChangeEmitsSignalPid() {
 
-        var source = Flux
-                .create(this::connectSetpoint)
+        Sinks.Many<Double> sink = Sinks.many().unicast().onBackpressureError();
+        var source = sink
+                .asFlux()
                 .map(v -> new Signal<Double, Void>(Instant.now(), v));
+
 
         var pc = new SimplePidController<Void>("pc", 20d, 1, 0, 0, 1.1);
 
@@ -72,14 +72,14 @@ class AbstractProcessControllerTest {
                 .log()
                 .subscribe(accumulator::add);
 
-        pvSink.next(15.0);
-        pvSink.next(25.0);
+        sink.tryEmitNext(15.0);
+        sink.tryEmitNext(25.0);
 
         pc.setSetpoint(30.0);
 
-        pvSink.next(35.0);
+        sink.tryEmitNext(35.0);
 
-        pvSink.complete();
+        sink.tryEmitComplete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
         assertThat(accumulator).hasSize(4);
@@ -95,9 +95,5 @@ class AbstractProcessControllerTest {
         assertThat(accumulator.get(3).getValue().signal).isEqualTo(5.0);
 
         out.dispose();
-    }
-
-    private void connectSetpoint(FluxSink<Double> pvSink) {
-        this.pvSink = pvSink;
     }
 }
