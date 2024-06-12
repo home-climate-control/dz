@@ -112,7 +112,7 @@ class SimplePidControllerTest {
     @ParameterizedTest
     @MethodSource("getIntegralStream")
     void testIntegral(Flux<PidSourceTuple> source) {
-        var c = new SimplePidController<PidSourceTuple>("simple", 20.0, 1, 0.00001, 0, 2);
+        var c = new SimplePidController<PidSourceTuple>("integral", 20.0, 1, 0.00001, 0, 2);
         var now = Instant.now();
         var signal = source
                 .map(t -> tuple2signal(now, t));
@@ -122,6 +122,24 @@ class SimplePidControllerTest {
                 .doOnNext(s -> {
                     logger.debug("output: {}", s);
                     assertThat(((PidController.PidStatus) s.getValue()).i).isEqualTo(s.payload.expectedOutput);
+                })
+                .blockLast();
+    }
+
+
+    @ParameterizedTest
+    @MethodSource("getDerivativeStream")
+    void testDerivative(Flux<PidSourceTuple> source) {
+        var c = new SimplePidController<PidSourceTuple>("derivative", 20.0, 1, 0, 2_000, 0);
+        var now = Instant.now();
+        var signal = source
+                .map(t -> tuple2signal(now, t));
+
+        var output = c
+                .compute(signal)
+                .doOnNext(s -> {
+                    logger.debug("output: {}", s);
+                    assertThat(((PidController.PidStatus) s.getValue()).d).isEqualTo(s.payload.expectedOutput);
                 })
                 .blockLast();
     }
@@ -147,6 +165,62 @@ class SimplePidControllerTest {
                         new PidSourceTuple(Duration.ofMinutes(7), 20.0, 20.5, 1.5000000000000002),
                         new PidSourceTuple(Duration.ofMinutes(8), 20.0, 20.5, 1.5000000000000002),
                         new PidSourceTuple(Duration.ofMinutes(9), 20.0, 20.5, 1.5000000000000002)
+                )
+        );
+    }
+
+    public static Stream<Flux<PidSourceTuple>> getDerivativeStream() {
+
+        return Stream.of(
+
+                // PV is changing
+                Flux.just(
+                        new PidSourceTuple(Duration.ZERO, 20.0, 20, 0),
+
+                        // With current algorithm, only one derivative component immediately following the change will be non-zero
+
+                        new PidSourceTuple(Duration.ofSeconds(1), 20.0, 21, 2),
+                        new PidSourceTuple(Duration.ofSeconds(2), 20.0, 21, 0),
+                        new PidSourceTuple(Duration.ofSeconds(3), 20.0, 21, 0),
+                        new PidSourceTuple(Duration.ofSeconds(4), 20.0, 21, 0),
+                        new PidSourceTuple(Duration.ofSeconds(5), 20.0, 21, 0),
+                        new PidSourceTuple(Duration.ofSeconds(10), 20.0, 21, 0),
+                        new PidSourceTuple(Duration.ofSeconds(15), 20.0, 21, 0),
+
+                        new PidSourceTuple(Duration.ofSeconds(20), 20.0, 20, -0.4),
+                        new PidSourceTuple(Duration.ofSeconds(21), 20.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(25), 20.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(30), 20.0, 20, 0),
+
+                        new PidSourceTuple(Duration.ofSeconds(35), 20.0, 22, 0.8),
+                        new PidSourceTuple(Duration.ofSeconds(36), 20.0, 22, 0),
+                        new PidSourceTuple(Duration.ofSeconds(40), 20.0, 22, 0),
+                        new PidSourceTuple(Duration.ofSeconds(45), 20.0, 22, 0)
+                ),
+
+                // Setpoint is changing
+                Flux.just(
+                        new PidSourceTuple(Duration.ZERO, 20.0, 20, 0),
+
+                        // With current algorithm, setpoint changes cause no reaction at all
+
+                        new PidSourceTuple(Duration.ofSeconds(1), 21.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(2), 21.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(3), 21.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(4), 21.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(5), 21.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(10), 21.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(15), 21.0, 20, 0),
+
+                        new PidSourceTuple(Duration.ofSeconds(20), 20.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(21), 20.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(25), 20.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(30), 20.0, 20, 0),
+
+                        new PidSourceTuple(Duration.ofSeconds(35), 22.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(36), 22.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(40), 22.0, 20, 0),
+                        new PidSourceTuple(Duration.ofSeconds(45), 22.0, 20, 0)
                 )
         );
     }
