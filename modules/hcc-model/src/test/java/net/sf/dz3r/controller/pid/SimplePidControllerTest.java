@@ -20,7 +20,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
-
 class SimplePidControllerTest {
 
     private final Logger logger = LogManager.getLogger();
@@ -102,13 +101,6 @@ class SimplePidControllerTest {
 
     }
 
-    record PidOutputTuple(
-            PidSourceTuple source,
-            double actualOutput
-    ) {
-
-    }
-
     @ParameterizedTest
     @MethodSource("getIntegralStream")
     void testIntegral(Flux<PidSourceTuple> source) {
@@ -125,7 +117,6 @@ class SimplePidControllerTest {
                 })
                 .blockLast();
     }
-
 
     @ParameterizedTest
     @MethodSource("getDerivativeStream")
@@ -164,7 +155,14 @@ class SimplePidControllerTest {
                         new PidSourceTuple(Duration.ofMinutes(6), 20.0, 20.5, 1.5000000000000002),
                         new PidSourceTuple(Duration.ofMinutes(7), 20.0, 20.5, 1.5000000000000002),
                         new PidSourceTuple(Duration.ofMinutes(8), 20.0, 20.5, 1.5000000000000002),
-                        new PidSourceTuple(Duration.ofMinutes(9), 20.0, 20.5, 1.5000000000000002)
+                        new PidSourceTuple(Duration.ofMinutes(9), 20.0, 20.5, 1.5000000000000002),
+
+                        // Current algorithm doesn't have any decay, this value is going to stay there forever
+
+                        new PidSourceTuple(Duration.ofMinutes(18), 20.0, 20.5, 1.5000000000000002),
+                        new PidSourceTuple(Duration.ofMinutes(36), 20.0, 20.5, 1.5000000000000002),
+                        new PidSourceTuple(Duration.ofMinutes(72), 20.0, 20.5, 1.5000000000000002),
+                        new PidSourceTuple(Duration.ofMinutes(144), 20.0, 20.5, 1.5000000000000002)
                 )
         );
     }
