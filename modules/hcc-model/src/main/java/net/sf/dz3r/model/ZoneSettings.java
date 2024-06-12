@@ -42,7 +42,7 @@ public class ZoneSettings {
      *
      * @param setpoint Setpoint to set.
      */
-    public ZoneSettings(double setpoint) {
+    public ZoneSettings(Double setpoint) {
         this(true, setpoint, true, false, 0, null);
     }
 
