@@ -70,7 +70,7 @@ public class Thermostat implements Addressable<String> {
      * Create a thermostat with a default 10C..40C setpoint range and specified setpoint and PID values.
      *
      */
-    public Thermostat(String name, double setpoint, double p, double i, double d, double limit) {
+    public Thermostat(String name, Double setpoint, double p, double i, double d, double limit) {
         this(Clock.systemUTC(), name, new Range<>(10d, 40d), setpoint, p, i, d, limit);
     }
 
@@ -86,7 +86,7 @@ public class Thermostat implements Addressable<String> {
      * @param d PID controller derivative weight.
      * @param limit PID controller saturation limit.
      */
-    public Thermostat(Clock clock, String name, Range<Double> setpointRange, double setpoint, double p, double i, double d, double limit) {
+    public Thermostat(Clock clock, String name, Range<Double> setpointRange, Double setpoint, double p, double i, double d, double limit) {
 
         this.clock = HCCObjects.requireNonNull(clock, "clock can't be null");
         this.name = name;
@@ -110,9 +110,9 @@ public class Thermostat implements Addressable<String> {
         // VT: FIXME: Recalculate everything, issue new control signal
     }
 
-    public void setSetpoint(double setpoint) {
+    public void setSetpoint(Double setpoint) {
 
-        if (!setpointRange.contains(setpoint)) {
+        if (setpoint != null && !setpointRange.contains(setpoint)) {
             throw new IllegalArgumentException(setpoint + " is outside of " + setpointRange.min + ".." + setpointRange.max);
         }
 
@@ -123,7 +123,7 @@ public class Thermostat implements Addressable<String> {
         configurationChanged();
     }
 
-    public double getSetpoint() {
+    public Double getSetpoint() {
         return controller.getSetpoint();
     }
 
