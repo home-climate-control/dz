@@ -22,16 +22,16 @@ public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessCo
     /**
      * Set the setpoint.
      *
-     * @param setpoint Setpoint to set.
+     * @param setpoint Setpoint to set. {@code null} value is allowed.
      */
-    void setSetpoint(double setpoint);
+    void setSetpoint(Double setpoint);
 
     /**
      * Get the setpoint.
      *
      * @return Current setpoint value.
      */
-    double getSetpoint();
+    Double getSetpoint();
 
     /**
      * Get the process variable.
@@ -43,12 +43,14 @@ public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessCo
     /**
      * Get the current value of the error.
      *
-     * @return Current error value.
+     * @return Current error value. {@code null} indicates either {@link #getSetpoint() no setpoint}, or no signal.
      */
-    double getError();
+    Double getError();
 
     /**
      * Compute the output signal.
+     *
+     * {@code null} {@link #getSetpoint()} or signal will result in an error status.
      *
      * @param pv Process variable flux.
      *
@@ -59,11 +61,11 @@ public interface ProcessController<I, O, P> extends SignalProcessor<I, ProcessCo
 
     class Status<T> {
 
-        public final double setpoint;
+        public final Double setpoint;
         public final Double error;
         public final T signal;
 
-        public Status(double setpoint, Double error, T signal) {
+        public Status(Double setpoint, Double error, T signal) {
             this.setpoint = setpoint;
             this.error = error;
             this.signal = signal;

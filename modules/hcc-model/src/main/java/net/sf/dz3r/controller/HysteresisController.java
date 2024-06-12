@@ -120,7 +120,7 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
     }
 
     @Override
-    protected double getError(Signal<Double, P> pv, double setpoint) {
+    protected double getError(Signal<Double, P> pv, Double setpoint) {
         return pv.getValue() - setpoint;
     }
 

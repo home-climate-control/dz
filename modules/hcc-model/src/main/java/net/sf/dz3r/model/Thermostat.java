@@ -164,8 +164,10 @@ public class Thermostat implements Addressable<String> {
         var sample = source.getValue() instanceof HysteresisController.HysteresisStatus value
                 ? value.sample
                 : null;
-        var demand = source.payload.signal - signalRenderer.getThresholdLow();
-        var calling = Double.compare(source.getValue().signal, 1.0) == 0;
+
+        // Watch for the error signal
+        var demand = source.isError() ? 0 : source.payload.signal - signalRenderer.getThresholdLow();
+        var calling = !source.isError() && Double.compare(source.getValue().signal, 1.0) == 0;
 
         return new Signal<>(
                 source.timestamp,

@@ -153,15 +153,13 @@ class ThermostatTest {
 
         assertThat(s.getValue().setpoint).isEqualTo(20.0);
 
-        // This [process control] error can't be calculated because the signal doesn't exist
-        assertThat(s.getValue().error).isNull();
-
-        // NaN is an indication of a hard error
-        assertThat(s.getValue().signal.demand).isNaN();
-
         // Total error made it all the way - this is intended
         assertThat(s.isOK()).isFalse();
         assertThat(s.isError()).isTrue();
+
+        // Special case: total failure, but the value still exists
+        assertThat(s.getValue().error).isZero();
+        assertThat(s.getValue().signal.demand).isZero();
     }
 
     private void assertPartial(Signal<ProcessController.Status<CallingStatus>, Void> s) {
