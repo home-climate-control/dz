@@ -48,7 +48,6 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
 
     @Override
     protected synchronized Signal<Status<Double>, P> wrapCompute(Double setpoint, Signal<Double, P> pv) {
-        logger.info("wrapCompute: setpoint={}, pv={}", setpoint, pv);
 
         // This will only be non-null upon second invocation
         var lastOutputSignal = getLastOutputSignal();
@@ -87,37 +86,26 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
      */
     private double computeRemaining(Instant timestamp, double lastKnown, double diff) {
 
-        logger.debug("computeRemaining: now={}, lastKnown={}, diff={}", timestamp, lastKnown, diff);
-
         if (Double.compare(diff, 0) != 0 || current == null) {
 
             // There's been a change, we'll need to recalculate things
             current = new Sample(timestamp, lastKnown + diff);
         }
 
-        var result = computeRemaining(current.value, Duration.between(current.start, timestamp));
-
-        logger.debug("result={}", result);
-
-        return result;
+        return computeRemaining(current.value, Duration.between(current.start, timestamp));
     }
 
     private double computeRemaining(double initial, Duration elapsed) {
 
         // Duration.dividedBy() doesn't work here
         var power = ((double) elapsed.toMillis() / halfLife.toMillis());
-        logger.debug("computeRemaining: initial={}, elapsed={}, power={}", initial, elapsed, power);
 
         return initial * Math.pow(0.5, power);
     }
 
     private double getDiff(Signal<Double, P> before, Signal<Double, P> now) {
 
-        if (before == null) {
-            return 0;
-        }
-
-        if (before.isError() || now.isError()) {
+        if (before == null || before.isError() || now.isError()) {
             return 0;
         }
 
