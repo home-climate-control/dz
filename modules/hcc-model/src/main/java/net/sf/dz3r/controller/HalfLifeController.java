@@ -43,7 +43,7 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
 
     @Override
     protected double getError(Signal<Double, P> pv, Double setpoint) {
-        return pv.isError() ? 0 : pv.getValue() - setpoint;
+        throw new UnsupportedOperationException("Doesn't make sense for this class. Reimplement as independent and not AbstractProcessController child?");
     }
 
     @Override
@@ -57,14 +57,14 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
             if (lastOutputSignal == null) {
 
                 // Not much we can do, this is the first signal ever. The superclass will remember it for us.
-                return new Signal<>(pv.timestamp, new Status<>(setpoint, getError(), 0d), pv.payload);
+                return new Signal<>(pv.timestamp, new Status<>(setpoint, 0d, 0d), pv.payload);
             }
 
             double diff = getDiff(lastPV, pv);
 
             return new Signal<>(
                     pv.timestamp,
-                    new Status<>(setpoint, getError(), computeRemaining(pv.timestamp, lastOutputSignal.getValue().signal, diff)),
+                    new Status<>(setpoint, diff, computeRemaining(pv.timestamp, lastOutputSignal.getValue().signal, diff)),
                     pv.payload
             );
 
