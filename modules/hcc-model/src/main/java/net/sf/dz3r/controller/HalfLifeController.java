@@ -9,7 +9,8 @@ import java.time.Instant;
 /**
  * Emits signal decaying according to radioactive decay algorithm on input signal change.
  *
- * Reference: <a href="https://www.omnicalculator.com/chemistry/half-life#half-life-formula">half life formulas</a>.
+ * References: <a href="https://www.omnicalculator.com/chemistry/half-life#half-life-formula">half life formulas</a>,
+ * <a href="https://www.emathhelp.net/en/calculators/differential-equations/half-life-calculator/">interactive calculator</a>.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
