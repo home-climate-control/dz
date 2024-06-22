@@ -39,6 +39,15 @@ class HalfLifeControllerTest {
                 });
     }
 
+
+    @Test
+    void negativeHalfLife() {
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> {
+                    new HalfLifeController<Void>("negative", Duration.ofSeconds(-30));
+                });
+    }
+
     @Test
     void zeroHalfLife() {
         var c = new HalfLifeController<Void>("nop", Duration.ZERO);
