@@ -11,6 +11,9 @@ Best explained by example:
         p: 0.7
         i: 0.000002
         limit: 1.1
+      sensitivity:
+        half-life: PT10S
+        multiplier: 2
       settings:
         setpoint: 31
         setpoint-range:
@@ -61,6 +64,14 @@ Zone [PID controller](https://en.wikipedia.org/wiki/Proportional%E2%80%93integra
 Positive `p` and `i` values are used for cooling mode, negative for heating. `limit` stays the same for both.
 
 > **NOTE:** this configuration item is the most important for your comfort. A more detailed explanation is coming, for now - step carefully here, especially with the `i` value.
+
+### sensitivity
+Defines how strongly the zone will react to setpoint changes. The algorithm is explained [here](https://www.emathhelp.net/en/calculators/differential-equations/half-life-calculator).
+
+* `half-life` defines for how long the setpoint change amplification will linger.
+* `multiplier` defines
+
+This section is optional with system defined defaults (logged at startup at `DEBUG` level), but feel free to tinker with it if you think that the system is too sluggish or too trigger-happy reacting to setpoint changes.
 
 ### settings
 
