@@ -34,7 +34,7 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
      * @param jmxName  This controller's JMX name.
      * @param halfLife Duration required for the output value to halve with no additional input changes.
      */
-    protected HalfLifeController(String jmxName, Duration halfLife) {
+    public HalfLifeController(String jmxName, Duration halfLife) {
         super(jmxName, 0.0);
 
         setHalfLife(halfLife);
