@@ -1,6 +1,7 @@
 package net.sf.dz3r.model;
 
 import net.sf.dz3r.common.HCCObjects;
+import net.sf.dz3r.controller.HalfLifeController;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController.Status;
 import net.sf.dz3r.controller.pid.AbstractPidController;
@@ -15,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 
 import java.time.Clock;
+import java.time.Duration;
 
 /**
  * Thermostat.
@@ -59,6 +61,16 @@ public class Thermostat implements Addressable<String> {
     private final AbstractPidController<Void> controller;
 
     /**
+     * Controller defining how trigger happy the thermostat is.
+     */
+    private final HalfLifeController<Void> sensitivityController;
+
+    /**
+     * Multiplier for {@link #sensitivityController}.
+     */
+    private final double sensitivityMultiplier;
+
+    /**
      * Controller defining this thermostat's output signal.
      */
     private final HysteresisController<Status<Double>> signalRenderer;
@@ -67,11 +79,11 @@ public class Thermostat implements Addressable<String> {
     private final Flux<Signal<Double, Status<Double>>> stateFlux = stateSink.asFlux();
 
     /**
-     * Create a thermostat with a default 10C..40C setpoint range and specified setpoint and PID values.
+     * Create a thermostat with a default 10C..40C setpoint range, specified setpoint and PID values, and no sensitivity adjustment.
      *
      */
     public Thermostat(String name, Double setpoint, double p, double i, double d, double limit) {
-        this(Clock.systemUTC(), name, new Range<>(10d, 40d), setpoint, p, i, d, limit);
+        this(Clock.systemUTC(), name, new Range<>(10d, 40d), setpoint, p, i, d, limit, Duration.ZERO, 0);
     }
 
     /**
@@ -86,14 +98,29 @@ public class Thermostat implements Addressable<String> {
      * @param d PID controller derivative weight.
      * @param limit PID controller saturation limit.
      */
-    public Thermostat(Clock clock, String name, Range<Double> setpointRange, Double setpoint, double p, double i, double d, double limit) {
+    public Thermostat(Clock clock, String name, Range<Double> setpointRange, Double setpoint, double p, double i, double d, double limit, Duration halfLife, double multiplier) {
 
         this.clock = HCCObjects.requireNonNull(clock, "clock can't be null");
         this.name = name;
         this.setpointRange = setpointRange;
+        this.sensitivityMultiplier = checkSensitivity(halfLife, multiplier);
 
         controller = new SimplePidController<>("(controller) " + name, setpoint, p, i, d, limit);
+        sensitivityController = new HalfLifeController<>("(sensitivity) " + name, halfLife);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + name, 0, HYSTERESIS);
+    }
+
+    private double checkSensitivity(Duration halfLife, double multiplier) {
+
+        if (multiplier < 0) {
+            throw new IllegalArgumentException("multiplier cannot be negative");
+        }
+
+        if (multiplier == 0 && !halfLife.isZero()) {
+            throw new IllegalArgumentException("zero multiplier with non-zero half life will slow the system down, specify zero half life if you want to disable the sensitivity controller");
+        }
+
+        return multiplier;
     }
 
     /**
