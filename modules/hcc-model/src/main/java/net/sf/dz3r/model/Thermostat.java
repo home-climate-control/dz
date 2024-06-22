@@ -143,7 +143,6 @@ public class Thermostat implements Addressable<String> {
                 .doOnComplete(stateSink::tryEmitComplete); // or it will hang forever
 
         // Discard things the renderer doesn't understand.
-        // Total failure is denoted by NaN by stage 1, it will get through.
         // The PID controller output value becomes the extra payload to pass to the zone controller to calculate demand.
         Flux<Signal<Double, Status<Double>>> stage2 = stage1
                 .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
