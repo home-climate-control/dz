@@ -138,6 +138,17 @@ class ThermostatTest {
         }
     }
 
+    /**
+     * Make sure that the thermostat can be created with a {@code null} setpoint.
+     */
+    @Test
+    void nullSetpointOnInstantiation() {
+
+        var ts = new Thermostat("ts", null, 1.0, 0, 0, 0);
+
+        logger.info("null setpoint: {}", ts.getSetpoint());
+    }
+
     private void assertOK(Signal<ProcessController.Status<CallingStatus>, Void> s) {
 
         assertThat(s.getValue().setpoint).isEqualTo(20.0);
@@ -179,7 +190,7 @@ class ThermostatTest {
                 .create(this::connectSetpoint)
                 .map(v -> new Signal<Double, Void>(Instant.now(), v));
 
-        var ts = new Thermostat("ts", 20, 1, 0, 0, 1.1);
+        var ts = new Thermostat("ts", 20.0, 1, 0, 0, 1.1);
 
         var accumulator = new ArrayList<Signal<ProcessController.Status<CallingStatus>, Void>>();
         var out = ts

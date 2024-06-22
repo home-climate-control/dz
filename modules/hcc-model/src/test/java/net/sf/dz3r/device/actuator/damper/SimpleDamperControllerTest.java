@@ -47,8 +47,8 @@ class SimpleDamperControllerTest {
         assertThatIllegalStateException()
                 .isThrownBy(() -> {
 
-                    var zoneSettings = new ZoneSettings(20);
-                    var z1 = new Zone(new Thermostat("Z1", 20, 1, 0, 0, 1), zoneSettings);
+                    var zoneSettings = new ZoneSettings(20.0);
+                    var z1 = new Zone(new Thermostat("Z1", 20.0, 1, 0, 0, 1), zoneSettings);
 
                     var d1 = new NullDamper("d1");
 
@@ -66,9 +66,9 @@ class SimpleDamperControllerTest {
 
         assertThatCode(() -> {
 
-            var zoneSettings = new ZoneSettings(20);
-            var z1 = new Zone(new Thermostat("Z1", 20, 1, 0, 0, 1), zoneSettings);
-            var z2 = new Zone(new Thermostat("Z2", 20, 1, 0, 0, 1), zoneSettings);
+            var zoneSettings = new ZoneSettings(20.0);
+            var z1 = new Zone(new Thermostat("Z1", 20.0, 1, 0, 0, 1), zoneSettings);
+            var z2 = new Zone(new Thermostat("Z2", 20.0, 1, 0, 0, 1), zoneSettings);
 
             var d1 = new NullDamper("d1");
             var d2 = new NullDamper("d2");
@@ -126,9 +126,9 @@ class SimpleDamperControllerTest {
 
         assertThatCode(() -> {
 
-            var zoneSettings = new ZoneSettings(20);
-            var z1 = new Zone(new Thermostat("Z1", 20, 1, 0, 0, 1), zoneSettings);
-            var z2 = new Zone(new Thermostat("Z2", 20, 1, 0, 0, 1), zoneSettings);
+            var zoneSettings = new ZoneSettings(20.0);
+            var z1 = new Zone(new Thermostat("Z1", 20.0, 1, 0, 0, 1), zoneSettings);
+            var z2 = new Zone(new Thermostat("Z2", 20.0, 1, 0, 0, 1), zoneSettings);
 
             var d1 = new NullDamper("d1");
             var d2 = new NullDamper("d2");
@@ -180,9 +180,9 @@ class SimpleDamperControllerTest {
 
         assertThatCode(() -> {
 
-            var zoneSettings = new ZoneSettings(20);
-            var z1 = new Zone(new Thermostat("Z1", 20, 1, 0, 0, 1), zoneSettings);
-            var z2 = new Zone(new Thermostat("Z2", 20, 1, 0, 0, 1), zoneSettings);
+            var zoneSettings = new ZoneSettings(20.0);
+            var z1 = new Zone(new Thermostat("Z1", 20.0, 1, 0, 0, 1), zoneSettings);
+            var z2 = new Zone(new Thermostat("Z2", 20.0, 1, 0, 0, 1), zoneSettings);
 
             var d1 = new NullDamper("d1");
             var d2 = new NullDamper("d2");

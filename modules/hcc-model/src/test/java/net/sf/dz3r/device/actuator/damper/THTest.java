@@ -183,7 +183,7 @@ class THTest {
             assertThat(switchWestDamper.getState().block()).isTrue();
             assertThat(switchWestBoosterFan.getState().block()).isTrue();
 
-            var zoneSettings = new ZoneSettings(20);
+            var zoneSettings = new ZoneSettings(20.0);
 
             // For a good measure, let's advance the timestamp between signals
             timestamp += 50 + rg.nextInt(100);
