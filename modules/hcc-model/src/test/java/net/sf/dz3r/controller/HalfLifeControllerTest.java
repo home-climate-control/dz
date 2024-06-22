@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Random;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,6 +37,19 @@ class HalfLifeControllerTest {
                 .isThrownBy(() -> {
                     c.setSetpoint(20.0);
                 });
+    }
+
+    @Test
+    void zeroHalfLife() {
+        var c = new HalfLifeController<Void>("nop", Duration.ZERO);
+        var rg = new Random();
+        var source = Flux.range(0, 10)
+                .map(ignored -> new Signal<Double, Void>(Instant.now(), rg.nextDouble()));
+
+        c
+                .compute(source)
+                .doOnNext(signal -> assertThat(signal.getValue().signal).isZero())
+                .blockLast();
     }
 
     @ParameterizedTest

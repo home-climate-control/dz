@@ -50,6 +50,11 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
     @Override
     protected synchronized Signal<Status<Double>, P> wrapCompute(Double setpoint, Signal<Double, P> pv) {
 
+        // Are we configured to be a NOP?
+        if (halfLife.isZero()) {
+            return new Signal<>(pv.timestamp, new Status<>(setpoint, 0d, 0d), pv.payload);
+        }
+
         // This will only be non-null upon second invocation
         var lastOutputSignal = getLastOutputSignal();
 
@@ -134,7 +139,7 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
     private void setHalfLife(Duration halfLife) {
         HCCObjects.requireNonNull(halfLife, "halfLife can't be null");
 
-        if (halfLife.isNegative() || halfLife.isZero()) {
+        if (halfLife.isNegative()) {
             throw new IllegalArgumentException("halfLife must be positive");
         }
 
