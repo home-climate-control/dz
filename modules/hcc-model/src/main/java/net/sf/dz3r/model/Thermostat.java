@@ -75,8 +75,11 @@ public class Thermostat implements Addressable<String> {
      */
     private final HysteresisController<Status<Double>> signalRenderer;
 
-    private final Sinks.Many<Signal<Double, Status<Double>>> stateSink = Sinks.many().unicast().onBackpressureBuffer();
-    private final Flux<Signal<Double, Status<Double>>> stateFlux = stateSink.asFlux();
+    /**
+     * Sink to accept feedback loop signals from {@link #raise()}.
+     */
+    private final Sinks.Many<Signal<Double, Status<Double>>> raiseSink = Sinks.many().unicast().onBackpressureBuffer();
+    private final Flux<Signal<Double, Status<Double>>> raiseFlux = raiseSink.asFlux();
 
     /**
      * Create a thermostat with a default 10C..40C setpoint range, specified setpoint and PID values, and no sensitivity adjustment.
@@ -167,7 +170,7 @@ public class Thermostat implements Addressable<String> {
         var stage1 = controller
                 .compute(pv)
                 .doOnNext(e -> logger.trace("controller/{}: {}", name, e))
-                .doOnComplete(stateSink::tryEmitComplete); // or it will hang forever
+                .doOnComplete(raiseSink::tryEmitComplete); // or it will hang forever
 
         // Discard things the renderer doesn't understand.
         // The PID controller output value becomes the extra payload to pass to the zone controller to calculate demand.
@@ -175,7 +178,7 @@ public class Thermostat implements Addressable<String> {
                 .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
 
         // Inject signals from raise(), if any
-        var stage3 = Flux.merge(stage2, stateFlux);
+        var stage3 = Flux.merge(stage2, raiseFlux);
 
         // Deliver the signal
         // Might want to expose this as well
@@ -237,7 +240,7 @@ public class Thermostat implements Addressable<String> {
             logger.trace("{}: actual:   {}", getAddress(), actual);
             logger.trace("{}: adjusted: {}", getAddress(), adjusted);
 
-            stateSink.tryEmitNext(adjusted);
+            raiseSink.tryEmitNext(adjusted);
 
         } finally {
             ThreadContext.pop();
