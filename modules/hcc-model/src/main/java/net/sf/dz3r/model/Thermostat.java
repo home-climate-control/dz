@@ -82,6 +82,12 @@ public class Thermostat implements Addressable<String> {
     private final Flux<Signal<Double, Status<Double>>> raiseFlux = raiseSink.asFlux();
 
     /**
+     * Sink to accept setpoints to feed to {@link #sensitivityController}.
+     */
+    private final Sinks.Many<Signal<Double, Void>> setpointSink = Sinks.many().unicast().onBackpressureBuffer();
+    private final Flux<Signal<Double, Void>> setpointFlux = setpointSink.asFlux();
+
+    /**
      * Create a thermostat with a default 10C..40C setpoint range, specified setpoint and PID values, and no sensitivity adjustment.
      *
      */
@@ -162,7 +168,6 @@ public class Thermostat implements Addressable<String> {
      *
      * @see net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer#computeDeviceState(Flux)
      */
-//    @Override
     public Flux<Signal<Status<CallingStatus>, Void>> compute(Flux<Signal<Double, Void>> pv) {
 
         // Compute the control signal to feed to the renderer.
@@ -170,22 +175,60 @@ public class Thermostat implements Addressable<String> {
         var stage1 = controller
                 .compute(pv)
                 .doOnNext(e -> logger.trace("controller/{}: {}", name, e))
-                .doOnComplete(raiseSink::tryEmitComplete); // or it will hang forever
+
+                // or it will hang forever
+                .doOnComplete(raiseSink::tryEmitComplete)
+                .doOnComplete(setpointSink::tryEmitComplete);
 
         // Discard things the renderer doesn't understand.
         // The PID controller output value becomes the extra payload to pass to the zone controller to calculate demand.
-        Flux<Signal<Double, Status<Double>>> stage2 = stage1
+        var stage2 = stage1
                 .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
 
         // Inject signals from raise(), if any
         var stage3 = Flux.merge(stage2, raiseFlux);
 
+        // Broadcast setpoint to sensitivityController
+        var stage4 = stage3.doOnNext(this::watchSetpoint);
+
+        // Adjust the PID controller signal with spikes on setpoint changes
+        var setpointAdjustment = sensitivityController.compute(setpointFlux);
+        var stage5 = Flux.zip(stage4, setpointAdjustment, this::triggerHappy);
+
         // Deliver the signal
         // Might want to expose this as well
         return signalRenderer
-                .compute(stage3)
+                .compute(stage5)
                 .doOnNext(e -> logger.trace("renderer/{}: {}", name, e))
                 .map(this::mapOutput);
+    }
+
+    /**
+     * Adjust the {@link #controller PID controller} signal with the sensitivity adjustment from {@link #sensitivityController}.
+     *
+     * @param pid PID controller signal.
+     * @param setpoint Setpoint change adjustments
+     */
+    private Signal<Double, Status<Double>> triggerHappy(Signal<Double, Status<Double>> pid, Signal<Status<Double>, Void> setpoint) {
+        ThreadContext.push("triggerHappy");
+
+        try {
+
+            logger.trace("{}: pid: {}", name, pid);
+            logger.trace("{}: setpoint: {}", name, setpoint);
+
+            // VT: FIXME: Need a data structure to represent both PID and HalfLife controller status
+            // VT: FIXME: Careful with the sign here; and do we need to adjust it for the mode?
+
+            return new Signal<>(pid.timestamp, pid.getValue() + setpoint.getValue().signal, pid.payload, pid.status, pid.error);
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void watchSetpoint(Signal<Double, Status<Double>> source) {
+        setpointSink.tryEmitNext(new Signal<>(source.timestamp, source.payload.setpoint));
     }
 
     private Signal<Status<CallingStatus>, Void> mapOutput(Signal<Status<Double>, Status<Double>> source) {
