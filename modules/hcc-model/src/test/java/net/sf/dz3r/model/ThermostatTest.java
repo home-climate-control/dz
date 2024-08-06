@@ -9,7 +9,7 @@ import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 import reactor.tools.agent.ReactorDebugAgent;
 
@@ -186,8 +186,9 @@ class ThermostatTest {
     @Test
     void setpointChangeEmitsSignal() {
 
-        var source = Flux
-                .create(this::connectSetpoint)
+        Sinks.Many<Double> pvSink = Sinks.many().multicast().onBackpressureBuffer();
+        var source = pvSink
+                .asFlux()
                 .map(v -> new Signal<Double, Void>(Instant.now(), v));
 
         var ts = new Thermostat("ts", 20.0, 1, 0, 0, 1.1);
@@ -198,14 +199,14 @@ class ThermostatTest {
                 .log()
                 .subscribe(accumulator::add);
 
-        pvSink.next(15.0);
-        pvSink.next(25.0);
+        pvSink.tryEmitNext(15.0);
+        pvSink.tryEmitNext(25.0);
 
         ts.setSetpoint(30.0);
 
-        pvSink.next(35.0);
+        pvSink.tryEmitNext(35.0);
 
-        pvSink.complete();
+        pvSink.tryEmitComplete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
         assertThat(accumulator).hasSize(4);
@@ -221,12 +222,5 @@ class ThermostatTest {
         assertThat(accumulator.get(3).getValue().signal.calling).isTrue();
 
         out.dispose();
-    }
-
-    private FluxSink<Double> pvSink;
-
-
-    private void connectSetpoint(FluxSink<Double> pvSink) {
-        this.pvSink = pvSink;
     }
 }
