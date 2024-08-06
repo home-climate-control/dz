@@ -4,7 +4,7 @@ import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -25,8 +25,8 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
      */
     private Double setpoint;
 
-    private final Flux<Optional<Double>> setpointFlux;
-    private FluxSink<Optional<Double>> setpointSink;
+    private final Sinks.Many<Optional<Double>> setpointSink = Sinks.many().multicast().onBackpressureBuffer();
+    private final Flux<Optional<Double>> setpointFlux = setpointSink.asFlux();
 
     /**
      * The current process variable value.
@@ -47,19 +47,19 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
     protected AbstractProcessController(String jmxName, Double setpoint) {
         this.jmxName = jmxName;
 
-        setpointFlux = Flux.create(this::connectSetpoint);
-        setpointFlux.subscribe(s -> this.setpoint = s.orElse(null));
+        setpointFlux.subscribe(this::setSetpoint);
 
         setSetpoint(setpoint);
     }
 
-    private void connectSetpoint(FluxSink<Optional<Double>> setpointSink) {
-        this.setpointSink = setpointSink;
+    private void setSetpoint(Optional<Double> setpoint) { // NOSONAR This use of Optional as an argument has been considered and accepted
+        logger.trace("{}: setSetpoint={}", jmxName, setpoint);
+        this.setpoint = setpoint.orElse(null);
     }
 
     @Override
     public void setSetpoint(Double setpoint) {
-        setpointSink.next(Optional.ofNullable(setpoint));
+        setpointSink.tryEmitNext(Optional.ofNullable(setpoint));
     }
 
     @Override
@@ -103,7 +103,7 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
                         Flux.just(Optional.ofNullable(setpoint)),
                         setpointFlux
                 ),
-                pv.doOnComplete(() -> setpointSink.complete()), // or it will hang forever
+                pv.doOnComplete(setpointSink::tryEmitComplete), // or it will hang forever
                 this::compute);
     }
 
@@ -119,7 +119,7 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
      *
      * @return Computed signal.
      */
-    private Signal<Status<O>, P> compute(Optional<Double> setpoint, Signal<I, P> pv) {
+    private Signal<Status<O>, P> compute(Optional<Double> setpoint, Signal<I, P> pv) { // NOSONAR This use of Optional as an argument has been considered and accepted
 
         // VT: NOTE: https://github.com/home-climate-control/dz/issues/321 - no more "magic numbers"
 
