@@ -175,7 +175,9 @@ public class Thermostat implements Addressable<String> {
         var adjustment = sensitivityController.compute(setpointFlux);
 
         // Mix the source and the half-life controller output
-        var stage0 = Flux.zip(source, adjustment, this::inputMix);
+        var stage0 = Flux
+                .zip(source, adjustment, this::inputMix)
+                .doOnNext(s -> logger.trace("{} adjusted: {}", name, s));
 
         // Compute the control signal to feed to the renderer.
         // Might want to make this available to outside consumers for instrumentation.
@@ -215,7 +217,7 @@ public class Thermostat implements Addressable<String> {
             // VT: FIXME: Need a data structure to represent both PID and HalfLife controller status
             // VT: FIXME: Careful with the sign here; and do we need to adjust it for the mode?
 
-            return new Signal<>(source.timestamp, source.getValue() + halfLife.getValue().signal, source.payload, source.status, source.error);
+            return new Signal<>(source.timestamp, source.getValue() - halfLife.getValue().signal * sensitivityMultiplier, source.payload, source.status, source.error);
 
         } finally {
             ThreadContext.pop();
