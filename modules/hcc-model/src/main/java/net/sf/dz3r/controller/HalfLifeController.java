@@ -52,6 +52,7 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
 
         // Are we configured to be a NOP?
         if (halfLife.isZero()) {
+            // A little bit wasteful, but the same control flow is preserved regardless of the delay
             return new Signal<>(pv.timestamp, new Status<>(setpoint, 0d, 0d), pv.payload);
         }
 
