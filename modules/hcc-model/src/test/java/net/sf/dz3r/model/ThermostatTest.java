@@ -9,16 +9,21 @@ import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 import reactor.tools.agent.ReactorDebugAgent;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 
 /**
  * Test cases for {@link Thermostat}.
@@ -183,11 +188,13 @@ class ThermostatTest {
         assertThat(s.isOK()).isTrue();
         assertThat(s.isError()).isFalse();
     }
+
     @Test
     void setpointChangeEmitsSignal() {
 
-        var source = Flux
-                .create(this::connectSetpoint)
+        Sinks.Many<Double> pvSink = Sinks.many().multicast().onBackpressureBuffer();
+        var source = pvSink
+                .asFlux()
                 .map(v -> new Signal<Double, Void>(Instant.now(), v));
 
         var ts = new Thermostat("ts", 20.0, 1, 0, 0, 1.1);
@@ -198,14 +205,14 @@ class ThermostatTest {
                 .log()
                 .subscribe(accumulator::add);
 
-        pvSink.next(15.0);
-        pvSink.next(25.0);
+        pvSink.tryEmitNext(15.0);
+        pvSink.tryEmitNext(25.0);
 
         ts.setSetpoint(30.0);
 
-        pvSink.next(35.0);
+        pvSink.tryEmitNext(35.0);
 
-        pvSink.complete();
+        pvSink.tryEmitComplete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
         assertThat(accumulator).hasSize(4);
@@ -223,10 +230,68 @@ class ThermostatTest {
         out.dispose();
     }
 
-    private FluxSink<Double> pvSink;
+    /**
+     * Make sure setpoint change causes a trail of adjusted signals according to its half-life - in cooling mode.
+     */
+    @Test
+    void setpointChangeHalfLifeCooling() throws InterruptedException {
+        assertThatCode(() -> {
+            setpointChangeHalfLife(
+                    new Thermostat(Clock.systemUTC(), "ts", new Range<>(10d, 40d), 25.0, -1.0, 0, 0, 0, Duration.ofSeconds(10), 1),
+                    20d,
+                    30d);
+        })
+                .doesNotThrowAnyException();
+    }
 
+    /**
+     * Make sure setpoint change causes a trail of adjusted signals according to its half-life - in heating mode.
+     */
+    @Test
+    void setpointChangeHalfLifeHeating() throws InterruptedException {
+        assertThatCode(() -> {
+            setpointChangeHalfLife(
+                    new Thermostat(Clock.systemUTC(), "ts", new Range<>(10d, 40d), 25.0, 1.0, 0, 0, 0, Duration.ofSeconds(10), 1),
+                    30d,
+                    10d);
+        })
+                .doesNotThrowAnyException();
+    }
 
-    private void connectSetpoint(FluxSink<Double> pvSink) {
-        this.pvSink = pvSink;
+    private void setpointChangeHalfLife(Thermostat ts, Double changedSetpoint, Double temperature) throws InterruptedException {
+        var count = 20;
+        var deltaT = 1;
+        var offset = 0;
+        var start = Instant.now();
+        Sinks.Many<Signal<Double, Void>> sourceSink = Sinks.many().multicast().onBackpressureBuffer();
+        var source = sourceSink.asFlux();
+
+        var changeGate = new CountDownLatch(1);
+        var stopGate = new CountDownLatch(1);
+
+        ts
+                .compute(source)
+                .subscribeOn(Schedulers.boundedElastic())
+                .doOnNext(ignored -> changeGate.countDown())
+                .doOnComplete(stopGate::countDown)
+
+                // The data structure passing the sensitivity controller output here is not yet in place, so let's just watch the logs until it is
+                .subscribe(s -> logger.info("output: {}", s));
+
+        // Prime the controller
+        sourceSink.tryEmitNext(new Signal<Double, Void>(start, temperature));
+
+        changeGate.await();
+
+        // Introduce a change increasing the demand
+        ts.setSetpoint(changedSetpoint);
+
+        // Feed the rest
+        while (offset++ < count) {
+            sourceSink.tryEmitNext(new Signal<Double, Void>(start.plus(Duration.ofSeconds(offset * deltaT)), temperature));
+        }
+
+        sourceSink.tryEmitComplete();
+        stopGate.await();
     }
 }

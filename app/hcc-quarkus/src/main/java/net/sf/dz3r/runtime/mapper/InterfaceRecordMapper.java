@@ -22,6 +22,7 @@ import net.sf.dz3r.runtime.config.quarkus.hardware.UnitControllerConfig;
 import net.sf.dz3r.runtime.config.quarkus.hardware.VariableHvacConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.ConsoleConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.EconomizerConfig;
+import net.sf.dz3r.runtime.config.quarkus.model.HalfLifeConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.MeasurementUnits;
 import net.sf.dz3r.runtime.config.quarkus.model.PidControllerConfig;
 import net.sf.dz3r.runtime.config.quarkus.model.RangeConfig;
@@ -134,6 +135,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(source.name())", target = "name")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.controller(source.controller()))", target = "controller")
+    @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.sensitivity(source.sensitivity().orElse(null)))", target = "sensitivity")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.settings(source.settings()))", target = "settings")
     @Mapping(expression = "java(InterfaceRecordMapper.INSTANCE.economizer(source.economizer().orElse(null)))", target = "economizer")
     net.sf.dz3r.runtime.config.model.ZoneConfig zone(ZoneConfig source);
@@ -143,6 +145,10 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.d())", target = "d")
     @Mapping(expression = "java(source.limit())", target = "limit")
     net.sf.dz3r.runtime.config.model.PidControllerConfig controller(PidControllerConfig source);
+
+    @Mapping(expression = "java(source.halfLife().orElse(null))", target = "halfLife")
+    @Mapping(expression = "java(source.multiplier().orElse(null))", target = "multiplier")
+    net.sf.dz3r.runtime.config.model.HalfLifeConfig sensitivity(HalfLifeConfig source);
 
     @Mapping(expression = "java(source.enabled().orElse(true))", target = "enabled")
     @Mapping(expression = "java(source.setpoint())", target = "setpoint")
