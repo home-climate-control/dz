@@ -1,6 +1,10 @@
 Home Climate Control: Release Notes
 ==
 
+## v4.4.0 (2024-08-15)
+
+* Enhancement: [#322](https://github.com/home-climate-control/dz/issues/322) - eliminated control input lag.
+
 ## v4.3.0 (2024-06-04)
 
 * Enhancement: [#267](https://github.com/home-climate-control/dz/issues/267) - economizer can now exist without a setpoint.
