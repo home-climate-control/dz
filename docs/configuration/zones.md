@@ -68,8 +68,8 @@ Positive `p` and `i` values are used for cooling mode, negative for heating. `li
 ### sensitivity
 Defines how strongly the zone will react to setpoint changes. The algorithm is explained [here](https://www.emathhelp.net/en/calculators/differential-equations/half-life-calculator).
 
-* `half-life` defines for how long the setpoint change amplification will linger. Value of `PT0S` disables sensitivity altogether.
-* `multiplier` defines the amplitude of the kick the control pipeline receives when the setpoint is changed.
+* `half-life` defines for how long the setpoint change amplification will linger. Value of `PT0S` disables sensitivity altogether. Default is 10 seconds.
+* `multiplier` defines the amplitude of the kick the control pipeline receives when the setpoint is changed. Default is 1.0.
 
 This section is optional with system defined defaults (logged at startup at `DEBUG` level), but feel free to tinker with it if you think that the system is too sluggish or too trigger-happy reacting to setpoint changes.
 
