@@ -21,6 +21,9 @@ import java.util.Set;
 
 public class ZoneConfigurationParser extends ConfigurationContextAware {
 
+    private final static Duration DEFAULT_HALFLIFE = Duration.ofSeconds(10);
+    private final static double DEFAULT_MULTIPLIER = 1d;
+
     public ZoneConfigurationParser(ConfigurationContext context) {
         super(context);
     }
@@ -47,17 +50,48 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                 cf.name(),
                 cf.settings().setpoint(), cf.settings().setpointRange(),
                 cf.controller(),
-                Optional.ofNullable(cf.sensitivity()).orElseGet(() -> {
-                    var s = new HalfLifeConfig(Duration.ofSeconds(10), 1d);
-                    logger.debug("{}: using default sensitivity configuration of (half-life={}, multiplier={})", cf.name(), s.halfLife(), s.multiplier());
-                    return s;
-
-                }));
+                parseSensitivity(cf.name(), cf.sensitivity()));
         var eco = createEconomizer(cf.name(), cf.economizer());
         var ecoSettings = Optional.ofNullable(eco).map(v -> v.config.settings).orElse(null);
         var zone = new Zone(ts, map(cf.settings(), ecoSettings), eco);
 
         return new ImmutablePair<>(cf.id(), zone);
+    }
+
+    protected HalfLifeConfig parseSensitivity(String name, HalfLifeConfig source) {
+
+        if (source == null) {
+
+            var result = new HalfLifeConfig(Duration.ofSeconds(10), 1d);
+            logger.debug("{}: using default sensitivity configuration of (half-life={}, multiplier={})", name, result.halfLife(), result.multiplier());
+
+            return result;
+        }
+
+        var halfLife = Optional
+                .ofNullable(source.halfLife())
+                .orElseGet(() -> {
+                    logger.debug("{}: using default sensitivity half-life={}", name, DEFAULT_HALFLIFE);
+                    return DEFAULT_HALFLIFE;
+                });
+
+        var multiplier = Optional
+                .ofNullable(source.multiplier())
+                .orElseGet(() -> {
+                    logger.debug("{}: using default sensitivity multiplier={}", name, DEFAULT_MULTIPLIER);
+                    return DEFAULT_MULTIPLIER;
+                });
+
+        if (halfLife.isNegative()) {
+            throw new IllegalArgumentException("half-life must be non-negative, received " + halfLife);
+        }
+
+        if (multiplier < 0) {
+            throw new IllegalArgumentException("multiplier must be non-negative, received " + multiplier);
+        }
+
+        // Extra object creation, but the number of them is negligible
+        return new HalfLifeConfig(halfLife, multiplier);
     }
 
     private EconomizerContext createEconomizer(String zoneName, net.sf.dz3r.runtime.config.model.EconomizerConfig cf) {
