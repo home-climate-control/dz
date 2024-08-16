@@ -76,7 +76,7 @@ class ZoneControllerTest {
         var sequence = Flux
                 .fromIterable(source)
                 .map(e -> new Signal<Double, Void>(Instant.now().plus(offset.getAndIncrement(), ChronoUnit.SECONDS), e));
-        var ts = new Thermostat("ts", 20, 1, 0, 0, 1);
+        var ts = new Thermostat("ts", 20.0, 1, 0, 0, 1);
 
         var stage1 = ts.compute(sequence);
 
@@ -131,7 +131,7 @@ class ZoneControllerTest {
                 .fromIterable(source)
                 .map(e -> new Signal<Double, String>(Instant.now().plus(offset.getAndIncrement(), ChronoUnit.SECONDS), e));
 
-        var ts = new Thermostat("ts", 20, 1, 0, 0, 1);
+        var ts = new Thermostat("ts", 20.0, 1, 0, 0, 1);
         var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
         var zc = new ZoneController(Set.of(z));
 
@@ -162,10 +162,10 @@ class ZoneControllerTest {
     @Test
     void testColdStartNotCalling() throws Exception {
 
-        var ts1 = new Thermostat("ts20", 20, 1, 0, 0, 1);
+        var ts1 = new Thermostat("ts20", 20.0, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
 
-        var ts2 = new Thermostat("ts25", 25, 1, 0, 0, 1);
+        var ts2 = new Thermostat("ts25", 25.0, 1, 0, 0, 1);
         var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
 
         var zc = new ZoneController(Set.of(z1, z2));
@@ -198,10 +198,10 @@ class ZoneControllerTest {
     @Test
     void testColdStartCalling() throws Exception {
 
-        var ts1 = new Thermostat("ts20", 20, 1, 0, 0, 1);
+        var ts1 = new Thermostat("ts20", 20.0, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
 
-        var ts2 = new Thermostat("ts25", 25, 1, 0, 0, 1);
+        var ts2 = new Thermostat("ts25", 25.0, 1, 0, 0, 1);
         var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
 
         var zc = new ZoneController(Set.of(z1, z2));
@@ -374,7 +374,7 @@ class ZoneControllerTest {
     @Test
     void errorSignalSingleZone() throws Exception {
 
-        var ts = new Thermostat("ts", 20, 1, 0, 0, 1);
+        var ts = new Thermostat("ts", 20.0, 1, 0, 0, 1);
         var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
 
         var zc = new ZoneController(Set.of(z));
@@ -406,10 +406,10 @@ class ZoneControllerTest {
     @Test
     void errorSignalOneInMultiZone() throws Exception {
 
-        var ts1 = new Thermostat("ts20", 20, 1, 0, 0, 1);
+        var ts1 = new Thermostat("ts20", 20.0, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
 
-        var ts2 = new Thermostat("ts25", 25, 1, 0, 0, 1);
+        var ts2 = new Thermostat("ts25", 25.0, 1, 0, 0, 1);
         var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
 
         var zc = new ZoneController(Set.of(z1, z2));
@@ -452,10 +452,10 @@ class ZoneControllerTest {
     @Test
     void alienZone() throws Exception {
 
-        var ts1 = new Thermostat("ours", 20, 1, 0, 0, 1);
+        var ts1 = new Thermostat("ours", 20.0, 1, 0, 0, 1);
         var z1 = new Zone(ts1, new ZoneSettings(ts1.getSetpoint()));
 
-        var ts2 = new Thermostat("alien", 25, 1, 0, 0, 1);
+        var ts2 = new Thermostat("alien", 25.0, 1, 0, 0, 1);
         var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
 
         // Note, no z2

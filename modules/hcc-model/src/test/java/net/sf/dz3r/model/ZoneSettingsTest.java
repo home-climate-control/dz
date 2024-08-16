@@ -28,8 +28,8 @@ class ZoneSettingsTest {
 
         return Stream.of(
                 new Source(
-                        new ZoneSettings(25),
-                        new ZoneSettings(25),
+                        new ZoneSettings(25.0),
+                        new ZoneSettings(25.0),
                         true
                 ),
                 new Source(

@@ -170,6 +170,7 @@ public class WebUI implements AutoCloseable {
 
                     "name", config.instance,
                     "vendor", "homeclimatecontrol.com",
+                    "product", "hcc-core",
 
                     "unique-id", InstanceIdProvider.getId().toString(),
                     "config-digest", config.configDigest

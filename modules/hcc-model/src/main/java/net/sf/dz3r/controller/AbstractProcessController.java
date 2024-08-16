@@ -4,9 +4,10 @@ import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
+import java.util.Optional;
 
 /**
  * Base class for reactive process controllers.
@@ -22,10 +23,10 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
     /**
      * The process setpoint.
      */
-    private double setpoint;
+    private Double setpoint;
 
-    private final Flux<Double> setpointFlux;
-    private FluxSink<Double> setpointSink;
+    private final Sinks.Many<Optional<Double>> setpointSink = Sinks.many().multicast().onBackpressureBuffer();
+    private final Flux<Optional<Double>> setpointFlux = setpointSink.asFlux();
 
     /**
      * The current process variable value.
@@ -43,26 +44,26 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
      * @param jmxName This controller's JMX name.
      * @param setpoint Initial setpoint.
      */
-    protected AbstractProcessController(String jmxName, double setpoint) {
+    protected AbstractProcessController(String jmxName, Double setpoint) {
         this.jmxName = jmxName;
 
-        setpointFlux = Flux.create(this::connectSetpoint);
-        setpointFlux.subscribe(s -> this.setpoint = s);
+        setpointFlux.subscribe(this::setSetpoint);
 
         setSetpoint(setpoint);
     }
 
-    private void connectSetpoint(FluxSink<Double> setpointSink) {
-        this.setpointSink = setpointSink;
+    private void setSetpoint(Optional<Double> setpoint) { // NOSONAR This use of Optional as an argument has been considered and accepted
+        logger.trace("{}: setSetpoint={}", jmxName, setpoint);
+        this.setpoint = setpoint.orElse(null);
     }
 
     @Override
-    public void setSetpoint(double setpoint) {
-        setpointSink.next(setpoint);
+    public void setSetpoint(Double setpoint) {
+        setpointSink.tryEmitNext(Optional.ofNullable(setpoint));
     }
 
     @Override
-    public double getSetpoint() {
+    public Double getSetpoint() {
         return setpoint;
     }
 
@@ -72,17 +73,16 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
     }
 
     @Override
-    public final synchronized double getError() {
+    public final synchronized Double getError() {
 
-        if (pv == null) {
-            // No sample, no error
-            return 0;
+        if (setpoint == null || pv == null) {
+            return null;
         }
 
         return getError(pv, setpoint);
     }
 
-    protected abstract double getError(Signal<I, P> pv, double setpoint);
+    protected abstract double getError(Signal<I, P> pv, Double setpoint);
 
     /**
      * Get last output signal value.
@@ -100,23 +100,28 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
         // Need to re-inject it.
         return Flux.combineLatest(
                 Flux.concat(
-                        Flux.just(setpoint),
+                        Flux.just(Optional.ofNullable(setpoint)),
                         setpointFlux
                 ),
-                pv.doOnComplete(() -> setpointSink.complete()), // or it will hang forever
+                pv.doOnComplete(setpointSink::tryEmitComplete), // or it will hang forever
                 this::compute);
     }
 
-    private Signal<Status<O>, P> compute(Double setpoint, Signal<I, P> pv) {
+    /**
+     * Compute the controller signal.
+     *
+     * Using {@code Optional} for arguments is an antipattern, but an unavoidable one -
+     * the setpoint is supplied by a {@code Flux} which doesn't support null values, so some kind of wrapper
+     * would've been necessary anyway, so why not use whatever is intended for this specifically.
+     *
+     * @param setpoint Setpoint wrapped into {@code Optional}.
+     * @param pv Process variable.
+     *
+     * @return Computed signal.
+     */
+    private Signal<Status<O>, P> compute(Optional<Double> setpoint, Signal<I, P> pv) { // NOSONAR This use of Optional as an argument has been considered and accepted
 
-        if (pv.isError()) {
-
-            // VT: FIXME: Ideally, even the error signal must be passed to wrapCompute() in case it needs to
-            // recalculate the state. In practice, this will have to wait.
-
-            // For now, let's throw them a NaN, they better pay attention.
-            return new Signal<>(pv.timestamp, new Status(setpoint, null, Double.NaN), pv.payload, pv.status, pv.error);
-        }
+        // VT: NOTE: https://github.com/home-climate-control/dz/issues/321 - no more "magic numbers"
 
         if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
             logger.warn("Can't go back in time: last sample was @{}, this is @{}, {}ms difference: {}",
@@ -127,7 +132,7 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
         }
 
         this.pv = pv;
-        lastOutputSignal = wrapCompute(setpoint, pv);
+        lastOutputSignal = wrapCompute(setpoint.orElse(null), pv);
 
         return lastOutputSignal;
     }

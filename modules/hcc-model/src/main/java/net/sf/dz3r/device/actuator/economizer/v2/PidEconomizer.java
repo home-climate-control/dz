@@ -60,7 +60,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
 
         super(clock, name, settings, device, timeout);
 
-        controller = new SimplePidController<>("(controller) " + getAddress(), 0, settings.P, settings.I, 0, settings.saturationLimit);
+        controller = new SimplePidController<>("(controller) " + getAddress(), 0d, settings.P, settings.I, 0, settings.saturationLimit);
         signalRenderer = new HysteresisController<>("(signalRenderer) " + getAddress(), 0, HYSTERESIS);
 
         initFluxes(ambientFlux);

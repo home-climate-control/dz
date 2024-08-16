@@ -38,7 +38,7 @@ class ZoneRendererTest {
     void deviation() {
 
         // Abbreviated constructor - sets enabled = true, voting = true
-        var settingsActual = new ZoneSettings(25);
+        var settingsActual = new ZoneSettings(25.0);
 
         // Full constructor - explicit values
         var settingsPeriod = new ZoneSettings(

@@ -19,7 +19,7 @@ public class SimplePidController<P> extends AbstractPidController<P> {
      */
     private double lastError = 0;
 
-    public SimplePidController(String jmxName, double setpoint, double P, double I, double D, double saturationLimit) {
+    public SimplePidController(String jmxName, Double setpoint, double P, double I, double D, double saturationLimit) {
         super(jmxName, setpoint, P, I, D, saturationLimit);
     }
 

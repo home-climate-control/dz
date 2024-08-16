@@ -21,6 +21,9 @@ import java.util.Set;
 
 public class ZoneConfigurationParser extends ConfigurationContextAware {
 
+    private final static Duration DEFAULT_HALFLIFE = Duration.ofSeconds(10);
+    private final static double DEFAULT_MULTIPLIER = 1d;
+
     public ZoneConfigurationParser(ConfigurationContext context) {
         super(context);
     }
@@ -43,12 +46,52 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
 
     private Map.Entry<String, Zone> createZone(ZoneConfig cf) {
 
-        var ts = createThermostat(cf.name(), cf.settings().setpoint(), cf.settings().setpointRange(), cf.controller());
+        var ts = createThermostat(
+                cf.name(),
+                cf.settings().setpoint(), cf.settings().setpointRange(),
+                cf.controller(),
+                parseSensitivity(cf.name(), cf.sensitivity()));
         var eco = createEconomizer(cf.name(), cf.economizer());
         var ecoSettings = Optional.ofNullable(eco).map(v -> v.config.settings).orElse(null);
         var zone = new Zone(ts, map(cf.settings(), ecoSettings), eco);
 
         return new ImmutablePair<>(cf.id(), zone);
+    }
+
+    protected HalfLifeConfig parseSensitivity(String name, HalfLifeConfig source) {
+
+        if (source == null) {
+
+            var result = new HalfLifeConfig(Duration.ofSeconds(10), 1d);
+            logger.debug("{}: using default sensitivity configuration of (half-life={}, multiplier={})", name, result.halfLife(), result.multiplier());
+
+            return result;
+        }
+
+        var halfLife = Optional
+                .ofNullable(source.halfLife())
+                .orElseGet(() -> {
+                    logger.debug("{}: using default sensitivity half-life={}", name, DEFAULT_HALFLIFE);
+                    return DEFAULT_HALFLIFE;
+                });
+
+        var multiplier = Optional
+                .ofNullable(source.multiplier())
+                .orElseGet(() -> {
+                    logger.debug("{}: using default sensitivity multiplier={}", name, DEFAULT_MULTIPLIER);
+                    return DEFAULT_MULTIPLIER;
+                });
+
+        if (halfLife.isNegative()) {
+            throw new IllegalArgumentException("half-life must be non-negative, received " + halfLife);
+        }
+
+        if (multiplier < 0) {
+            throw new IllegalArgumentException("multiplier must be non-negative, received " + multiplier);
+        }
+
+        // Extra object creation, but the number of them is negligible
+        return new HalfLifeConfig(halfLife, multiplier);
     }
 
     private EconomizerContext createEconomizer(String zoneName, net.sf.dz3r.runtime.config.model.EconomizerConfig cf) {
@@ -61,7 +104,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
         var hvacDevice = HCCObjects.requireNonNull(getHvacDevice(cf.hvacDevice()), "can't resolve hvac-device=" + cf.hvacDevice());
         var timeout = Optional.ofNullable(cf.timeout()).orElseGet(() -> {
             var t = Duration.ofSeconds(90);
-            logger.info("{}: using default stale timeout of {} for the economizer", zoneName, t);
+            logger.debug("{}: using default stale timeout of {} for the economizer", zoneName, t);
             return t;
         });
 
@@ -97,10 +140,14 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                 timeout);
     }
 
-    private Thermostat createThermostat(String name, Double setpoint, RangeConfig rangeConfig, PidControllerConfig cf) {
+    private Thermostat createThermostat(String name, Double setpoint, RangeConfig rangeConfig, PidControllerConfig cf, HalfLifeConfig sensitivity) {
 
-        var range = map(Optional.ofNullable(rangeConfig).orElse(new RangeConfig(10.0, 40.0)));
-        return new Thermostat(Clock.systemUTC(), name, range, setpoint, cf.p(), cf.i(), cf.d(), cf.limit());
+        var range = map(Optional.ofNullable(rangeConfig).orElseGet(() -> {
+            var rc = new RangeConfig(10.0, 40.0);
+            logger.debug("{}: using default setpoint range of ({}..{})", name, rc.min(), rc.max());
+            return rc;
+        }));
+        return new Thermostat(Clock.systemUTC(), name, range, setpoint, cf.p(), cf.i(), cf.d(), cf.limit(), sensitivity.halfLife(), sensitivity.multiplier());
     }
 
     private ZoneSettings map(ZoneSettingsConfig source, EconomizerSettings economizerSettings) {
