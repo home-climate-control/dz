@@ -241,9 +241,16 @@ public class ConfigurationParser {
 
     private HvacDeviceMeta renderHvacDeviceMeta(GenericHvacDeviceConfig source) {
 
+        var type = switch (source.getClass().getSimpleName()) {
+            case "HeatpumpConfig", "HeatpumpHATConfig" -> HvacDeviceMeta.Type.HEAT_PUMP;
+            case "SwitchableHvacDeviceConfig" -> HvacDeviceMeta.Type.SWITCHABLE;
+            case "VariableHvacConfig" -> HvacDeviceMeta.Type.VARIABLE;
+            default -> throw new IllegalArgumentException("Unrecognized HVAC device type: " + source.getClass().getSimpleName());
+        };
+
         return new HvacDeviceMeta(
                 source.id(),
-                HvacDeviceMeta.Type.SWITCHABLE,
+                type,
                 source.filter() != null
         );
     }
