@@ -24,7 +24,7 @@ public class RoutingConfiguration {
                 // Accessors
 
                 GET("/").and(ACCEPT_JSON), webUI::getMeta).andRoute(
-                GET(META_PATH + Version.PROTOCOL_VERSION).and(ACCEPT_JSON), webUI::getMeta).andRoute(
+                GET(META_PATH).and(ACCEPT_JSON), webUI::getMeta).andRoute(
                 GET("/sensors").and(ACCEPT_JSON), webUI::getSensors).andRoute(
                 GET("/sensor/{sensor}").and(ACCEPT_JSON), webUI::getSensor).andRoute(
                 GET("/units").and(ACCEPT_JSON), webUI::getUnits).andRoute(
