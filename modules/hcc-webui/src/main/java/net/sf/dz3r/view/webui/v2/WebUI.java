@@ -210,7 +210,7 @@ public class WebUI implements AutoCloseable {
 
         return ok()
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Flux.just(config.endpointMeta), EndpointMeta.class);
+                .body(Mono.just(config.endpointMeta), EndpointMeta.class);
     }
 
     /**
