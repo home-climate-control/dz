@@ -1,6 +1,10 @@
 Home Climate Control: Release Notes
 ==
 
+## v4.5.0 (upcoming)
+
+* Stay tuned. Meanwhile, [v4.5.0 release notes draft](./release-notes/v4.5.0.md).
+
 ## v4.4.0 (2024-08-15)
 
 * Enhancement: [#322](https://github.com/home-climate-control/dz/issues/322) - eliminated control input lag.
