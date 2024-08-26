@@ -17,6 +17,7 @@ mapstruct = "1.5.5.Final"
 mockito = "5.11.0"
 netty = "1.1.14"
 reactor = "3.6.4"
+rsocket = "1.1.4"
 rxtx = "2.1.7"
 sonarqube = "5.0.0.4638"
 spring-boot-plugin = "3.2.4"
@@ -62,6 +63,8 @@ reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "react
 reactor-netty = { module = "io.projectreactor.netty:reactor-netty", version.ref = "netty" }
 reactor-test = { module = "io.projectreactor:reactor-test", version.ref = "reactor" }
 reactor-tools = { module = "io.projectreactor:reactor-tools", version.ref = "reactor" }
+rsocket-core = { module = "io.rsocket:rsocket-core", version.ref = "rsocket" }
+rsocket-transport-netty = { module = "io.rsocket:rsocket-transport-netty", version.ref = "rsocket" }
 rxtx = { module = "org.rxtx:rxtx", version.ref = "rxtx" }
 
 # Quarkus
