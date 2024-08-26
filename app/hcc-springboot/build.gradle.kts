@@ -29,6 +29,7 @@ dependencies {
 
     implementation(libs.springboot.starter.actuator)
     implementation(libs.springboot.starter.log4j2)
+    implementation(libs.springboot.starter.rsocket)
     implementation(libs.springboot.starter.webflux)
 
     testImplementation(libs.springboot.starter.test)

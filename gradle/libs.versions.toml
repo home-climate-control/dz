@@ -85,6 +85,7 @@ spring-standalone-webflux = { module = "org.springframework:spring-webflux", ver
 springboot-configuration-processor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
 springboot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2" }
+springboot-starter-rsocket = { module = "org.springframework.boot:spring-boot-starter-rsocket" }
 springboot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
 springboot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 
