@@ -29,6 +29,7 @@ import net.sf.dz3r.runtime.config.model.ZoneConfigurationParser;
 import net.sf.dz3r.runtime.config.mqtt.MqttConfigurationParser;
 import net.sf.dz3r.runtime.config.onewire.OnewireConfigurationParser;
 import net.sf.dz3r.runtime.config.schedule.ScheduleConfigurationParser;
+import net.sf.dz3r.view.webui.v2.WebUI;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -199,6 +200,7 @@ public class ConfigurationParser {
                         source.instance(),
                         InstanceIdProvider.getId(),
                         digest,
+                        Optional.ofNullable(source.webUi().duplexPort()).orElse(WebUI.DEFAULT_PORT_DUPLEX),
                         new SimpleClientMeta(
                                 zones,
                                 devices

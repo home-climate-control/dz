@@ -14,6 +14,7 @@ import java.util.UUID;
  * @param name Instance name, taken from {@code HccRawConfig#instance}.
  * @param id Persistent unique system ID.
  * @param configDigest Current parsed (not source) configuration message digest.
+ * @param duplexPort Port to conduct RSocket communications on.
  * @param simple Simple UI metadata.
  * @param full Full control metadata.
  *
@@ -24,6 +25,7 @@ public record InstanceMeta(
         String name,
         UUID id,
         String configDigest,
+        int duplexPort,
         SimpleClientMeta simple,
         InstrumentClusterMeta full
 ) {

@@ -165,7 +165,7 @@ public class WebUI implements AutoCloseable {
                     "path", META_PATH, // http://www.dns-sd.org/txtrecords.html#http
                     "protocol-version", Version.PROTOCOL_VERSION,
 
-                    "duplex", Integer.toString(config.duplexPort),
+                    "duplex-port", Integer.toString(config.duplexPort),
                     "type",DIRECT.toString().toLowerCase(),
 
                     "name", config.instance,
