@@ -93,6 +93,14 @@ public class WebUI implements AutoCloseable {
                     .publishOn(Schedulers.boundedElastic())
                     .subscribe(httpEndpoint::run);
 
+            var rsocketEndpoint = new RSocketEndpoint(
+                    config.interfaces,
+                    config.duplexPort);
+
+            Flux.just(Instant.now())
+                    .publishOn(Schedulers.boundedElastic())
+                    .subscribe(rsocketEndpoint::run);
+
             advertise();
 
             logger.info("done");
