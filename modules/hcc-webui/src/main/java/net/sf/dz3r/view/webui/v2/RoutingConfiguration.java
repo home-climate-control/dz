@@ -18,26 +18,26 @@ public class RoutingConfiguration {
     private static final RequestPredicate ACCEPT_JSON = accept(MediaType.APPLICATION_JSON);
 
     @Bean
-    public RouterFunction<ServerResponse> monoRouterFunction(WebUI webUI) {
+    public RouterFunction<ServerResponse> monoRouterFunction(HttpEndpoint endpoint) {
         return route(
 
                 // Accessors
 
-                GET("/").and(ACCEPT_JSON), webUI::getMeta).andRoute(
-                GET(META_PATH).and(ACCEPT_JSON), webUI::getMeta).andRoute(
-                GET("/sensors").and(ACCEPT_JSON), webUI::getSensors).andRoute(
-                GET("/sensor/{sensor}").and(ACCEPT_JSON), webUI::getSensor).andRoute(
-                GET("/units").and(ACCEPT_JSON), webUI::getUnits).andRoute(
-                GET("/unit/{unit}").and(ACCEPT_JSON), webUI::getUnit).andRoute(
-                GET("/zones").and(ACCEPT_JSON), webUI::getZones).andRoute(
-                GET("/zone/{zone}").and(ACCEPT_JSON), webUI::getZone).andRoute(
+                GET("/").and(ACCEPT_JSON), endpoint::getMeta).andRoute(
+                GET(META_PATH).and(ACCEPT_JSON), endpoint::getMeta).andRoute(
+                GET("/sensors").and(ACCEPT_JSON), endpoint::getSensors).andRoute(
+                GET("/sensor/{sensor}").and(ACCEPT_JSON), endpoint::getSensor).andRoute(
+                GET("/units").and(ACCEPT_JSON), endpoint::getUnits).andRoute(
+                GET("/unit/{unit}").and(ACCEPT_JSON), endpoint::getUnit).andRoute(
+                GET("/zones").and(ACCEPT_JSON), endpoint::getZones).andRoute(
+                GET("/zone/{zone}").and(ACCEPT_JSON), endpoint::getZone).andRoute(
 
-                GET("/uptime").and(ACCEPT_JSON), webUI::getUptime).andRoute(
-                GET("/version").and(ACCEPT_JSON), webUI::getVersion).andRoute(
+                GET("/uptime").and(ACCEPT_JSON), endpoint::getUptime).andRoute(
+                GET("/version").and(ACCEPT_JSON), endpoint::getVersion).andRoute(
 
                 // Mutators
 
-                POST("/zone{zone}").and(ACCEPT_JSON), webUI::setZone).andRoute(
-                POST("/unit/{unit}").and(ACCEPT_JSON), webUI::setUnit);
+                POST("/zone{zone}").and(ACCEPT_JSON), endpoint::setZone).andRoute(
+                POST("/unit/{unit}").and(ACCEPT_JSON), endpoint::setUnit);
     }
 }
