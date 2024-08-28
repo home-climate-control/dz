@@ -56,4 +56,8 @@ include("app:hcc-springboot")
 
 include("app:hcc-quarkus")
 
+// This is the command line tool, useful mostly for troubleshooting until further notice.
+
+include("app:hcc-cli")
+
 rootProject.name = "dz3-master"

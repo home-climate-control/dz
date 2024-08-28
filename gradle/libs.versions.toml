@@ -9,6 +9,7 @@ httpclient = "4.5.14"
 influxdb = "2.24"
 jackson = "2.17.0"
 jacoco = "0.8.11"
+jcommander = "2.0"
 jib = "3.4.3"
 jmdns = "3.5.9"
 junit5 = "5.10.2"
@@ -49,6 +50,7 @@ jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", ver
 jackson-dataformat-yaml = { module = "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml", version.ref = "jackson" }
 jackson-datatype-jdk8 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jdk8", version.ref = "jackson" }
 jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+jcommander = { module = "org.jcommander:jcommander", version.ref = "jcommander" }
 jib-layer-filter = { module = "com.google.cloud.tools:jib-layer-filter-extension-gradle", version = "0.3.0" }
 jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
 junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
@@ -86,6 +88,7 @@ spring-standalone-webflux = { module = "org.springframework:spring-webflux", ver
 # Versions are missing here because they are implied by spring-dependency-management plugin
 
 springboot-configuration-processor = { module = "org.springframework.boot:spring-boot-configuration-processor" }
+springboot-starter = { module = "org.springframework.boot:spring-boot-starter" }
 springboot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 springboot-starter-log4j2 = { module = "org.springframework.boot:spring-boot-starter-log4j2" }
 springboot-starter-rsocket = { module = "org.springframework.boot:spring-boot-starter-rsocket" }
