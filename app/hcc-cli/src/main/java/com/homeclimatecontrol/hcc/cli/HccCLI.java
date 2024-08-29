@@ -16,6 +16,7 @@ public class HccCLI implements CommandLineRunner {
     private static final Logger logger = LogManager.getLogger(HccCLI.class);
 
     private static final String COMMAND_GET_META = "get-meta";
+    private static final String COMMAND_MDNS_SCAN = "mdns-scan";
 
     public abstract class CommandBase {
 
@@ -25,6 +26,12 @@ public class HccCLI implements CommandLineRunner {
 
     public class CommandGetMeta extends CommandBase {
 
+    }
+
+    public class CommandMdnsScan {
+
+        @Parameter(names = { "--timeout" }, description = "Scan timeout in seconds")
+        int timeout = 1;
     }
 
     public static void main(String[] args) {
@@ -42,9 +49,12 @@ public class HccCLI implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
         var commandGetMeta = new CommandGetMeta();
+        var commandMdnsScan = new CommandMdnsScan();
+
         var jc = JCommander
                 .newBuilder()
                 .addCommand(COMMAND_GET_META, commandGetMeta)
+                .addCommand(COMMAND_MDNS_SCAN, commandMdnsScan)
                 .build();
 
         try {
@@ -58,6 +68,7 @@ public class HccCLI implements CommandLineRunner {
             switch (jc.getParsedCommand()) {
 
                 case COMMAND_GET_META -> getMeta(commandGetMeta.url);
+                case COMMAND_MDNS_SCAN -> mdnsScan();
 
             }
 
@@ -75,6 +86,15 @@ public class HccCLI implements CommandLineRunner {
         ThreadContext.push("getMeta");
         try {
             logger.info("url={}", url);
+            throw new UnsupportedOperationException("Stay tuned");
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void mdnsScan() {
+        ThreadContext.push("mdnsScan");
+        try {
             throw new UnsupportedOperationException("Stay tuned");
         } finally {
             ThreadContext.pop();
