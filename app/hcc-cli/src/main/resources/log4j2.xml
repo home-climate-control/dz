@@ -13,15 +13,15 @@
         </Console>
         <RollingFile
             name="TraceAppender"
-            fileName="${logDir}/dz-trace.log"
-            filePattern="${logDir}/dz-trace.log.%d{yyyy-MM-dd}.gz">
+            fileName="${logDir}/hcc-cli-trace.log"
+            filePattern="${logDir}/hcc-cli-trace.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}{TRACE=white}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${logDir}" maxDepth="2">
-                    <IfFileName glob="dz-trace.log.*.gz" />
+                    <IfFileName glob="hcc-cli-trace.log.*.gz" />
                     <!-- Trace level logs are HUGE -->
                     <IfLastModified age="P1D" />
                 </Delete>
@@ -32,15 +32,15 @@
         </RollingFile>
         <RollingFile
                 name="DebugAppender"
-                fileName="${logDir}/dz-debug.log"
-                filePattern="${logDir}/dz-debug.log.%d{yyyy-MM-dd}.gz">
+                fileName="${logDir}/hcc-cli-debug.log"
+                filePattern="${logDir}/hcc-cli-debug.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${logDir}" maxDepth="2">
-                    <IfFileName glob="dz-debug.log.*.gz" />
+                    <IfFileName glob="hcc-cli-debug.log.*.gz" />
                     <!-- Debug level logs are BIG -->
                     <IfLastModified age="P7D" />
                 </Delete>
@@ -51,15 +51,15 @@
         </RollingFile>
         <RollingFile
                 name="InfoAppender"
-                fileName="${logDir}/dz-info.log"
-                filePattern="${logDir}/dz-info.log.%d{yyyy-MM-dd}.gz">
+                fileName="${logDir}/hcc-cli-info.log"
+                filePattern="${logDir}/hcc-cli-info.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${logDir}" maxDepth="2">
-                    <IfFileName glob="dz-info.log.*.gz" />
+                    <IfFileName glob="hcc-cli-info.log.*.gz" />
                     <!-- Debug level logs are BIG -->
                     <IfLastModified age="P7D" />
                 </Delete>
@@ -71,15 +71,15 @@
         </RollingFile>
         <RollingFile
             name="WarnAppender"
-            fileName="${logDir}/dz-warn.log"
-            filePattern="${logDir}/dz-warn.log.%d{yyyy-MM-dd}.gz">
+            fileName="${logDir}/hcc-cli-warn.log"
+            filePattern="${logDir}/hcc-cli-warn.log.%d{yyyy-MM-dd}.gz">
             <PatternLayout pattern="%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %level %class{1} %t %NDC %message%n}"/>
             <Policies>
                 <TimeBasedTriggeringPolicy interval="1"/>
             </Policies>
             <DefaultRolloverStrategy>
                 <Delete basePath="${logDir}" maxDepth="2">
-                    <IfFileName glob="dz-warn.log.*.gz" />
+                    <IfFileName glob="hcc-cli-warn.log.*.gz" />
                     <IfLastModified age="P30D" />
                 </Delete>
             </DefaultRolloverStrategy>
@@ -95,9 +95,8 @@
         <Logger name="com.dalsemi" level="info" />
         <Logger name="org.springframework" level="info" />
 
-        <!-- Reactive classes -->
-
         <Logger name="net.sf.dz3r" level="trace" />
+        <Logger name="com.homeclimatecontrol" level="trace" />
 
         <Root level="INFO">
 

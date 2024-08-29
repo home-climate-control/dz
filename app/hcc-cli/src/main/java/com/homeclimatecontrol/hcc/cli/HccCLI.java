@@ -3,12 +3,17 @@ package com.homeclimatecontrol.hcc.cli;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.homeclimatecontrol.hcc.client.http.HccHttpClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+
+import java.io.IOException;
+import java.net.URL;
 
 @SpringBootApplication
 public class HccCLI implements CommandLineRunner {
@@ -17,6 +22,9 @@ public class HccCLI implements CommandLineRunner {
 
     private static final String COMMAND_GET_META = "get-meta";
     private static final String COMMAND_MDNS_SCAN = "mdns-scan";
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HccHttpClient httpClient = new HccHttpClient();
 
     public abstract class CommandBase {
 
@@ -82,11 +90,14 @@ public class HccCLI implements CommandLineRunner {
         }
     }
 
-    private void getMeta(String url) {
+    private void getMeta(String url) throws IOException {
         ThreadContext.push("getMeta");
         try {
             logger.info("url={}", url);
-            throw new UnsupportedOperationException("Stay tuned");
+            var meta = httpClient.getMeta(new URL(url));
+            var metaPrint = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(meta);
+            logger.info("META/parsed: {}", metaPrint);
+
         } finally {
             ThreadContext.pop();
         }
