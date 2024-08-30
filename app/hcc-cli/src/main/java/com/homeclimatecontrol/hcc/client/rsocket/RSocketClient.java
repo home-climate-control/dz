@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
 import io.rsocket.core.RSocketConnector;
+import io.rsocket.frame.decoder.PayloadDecoder;
 import io.rsocket.metadata.TaggingMetadataCodec;
 import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.netty.client.TcpClientTransport;
@@ -31,6 +32,7 @@ public class RSocketClient {
 
         var socket = RSocketConnector
                 .create()
+                .payloadDecoder(PayloadDecoder.ZERO_COPY)
                 .metadataMimeType(WellKnownMimeType.MESSAGE_RSOCKET_ROUTING.getString())
                 .connect(TcpClientTransport.create(bindAddress, port))
                 .block();
