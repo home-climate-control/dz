@@ -18,7 +18,7 @@ public class RoutingConfiguration {
     private static final RequestPredicate ACCEPT_JSON = accept(MediaType.APPLICATION_JSON);
 
     @Bean
-    public RouterFunction<ServerResponse> monoRouterFunction(HttpEndpoint endpoint) {
+    public RouterFunction<ServerResponse> monoRouterFunction(HttpServer endpoint) {
         return route(
 
                 // Accessors

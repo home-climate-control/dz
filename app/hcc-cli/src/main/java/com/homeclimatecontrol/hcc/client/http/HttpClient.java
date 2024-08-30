@@ -2,7 +2,6 @@ package com.homeclimatecontrol.hcc.client.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -18,14 +17,14 @@ import java.net.URL;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
-public class HccHttpClient {
+public class HttpClient {
 
     private final Logger logger = LogManager.getLogger();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private HttpClient httpClient;
+    private org.apache.http.client.HttpClient httpClient;
 
-    private synchronized HttpClient getHttpClient() {
+    private synchronized org.apache.http.client.HttpClient getHttpClient() {
 
         if (httpClient == null) {
 
@@ -37,7 +36,7 @@ public class HccHttpClient {
         return httpClient;
     }
 
-    private HttpClient createClient() {
+    private org.apache.http.client.HttpClient createClient() {
 
         // VT: NOTE: Copypasted with abbreviations from HttpClientFactory (search the whole project).
         // Important fact not to forget: https://github.com/home-climate-control/dz/issues/80

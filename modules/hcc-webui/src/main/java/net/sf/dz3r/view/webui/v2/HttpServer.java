@@ -8,8 +8,6 @@ import net.sf.dz3r.runtime.GitProperties;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.UnitObserver;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
@@ -19,7 +17,6 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.netty.http.server.HttpServer;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -34,22 +31,20 @@ import java.util.Map;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
-public class HttpEndpoint {
+public class HttpServer extends Endpoint {
 
-    private final Logger logger = LogManager.getLogger();
     private static final DurationFormatter uptimeFormatter = new DurationFormatter();
 
     private final String interfaces;
     private final int port;
     private final EndpointMeta endpointMeta;
-    private final Map<UnitDirector, UnitObserver> unit2observer;
 
-    public HttpEndpoint(String interfaces, int port, EndpointMeta endpointMeta, Map<UnitDirector, UnitObserver> unit2observer) {
+    public HttpServer(String interfaces, int port, EndpointMeta endpointMeta, Map<UnitDirector, UnitObserver> unit2observer) {
+        super(unit2observer);
 
         this.interfaces = interfaces;
         this.port = port;
         this.endpointMeta = endpointMeta;
-        this.unit2observer = unit2observer;
     }
 
     void run(Instant startedAt) {
@@ -59,7 +54,7 @@ public class HttpEndpoint {
             var httpHandler = RouterFunctions.toHttpHandler(new RoutingConfiguration().monoRouterFunction(this));
             var adapter = new ReactorHttpHandlerAdapter(httpHandler);
 
-            var server = HttpServer.create().host(interfaces).port(port);
+            var server = reactor.netty.http.server.HttpServer.create().host(interfaces).port(port);
             var disposableServer = server.handle(adapter).bind().block();
 
             logger.info("started in {}ms", Duration.between(startedAt, Instant.now()).toMillis());

@@ -83,7 +83,7 @@ public class WebUI implements AutoCloseable {
             // besides, if we fail here, it's a UI failure, and it will not disrupt the HVAC system operation.
             init();
 
-            var httpEndpoint = new HttpEndpoint(
+            var httpServer = new HttpServer(
                     config.interfaces,
                     config.httpPort,
                     config.endpointMeta,
@@ -91,15 +91,16 @@ public class WebUI implements AutoCloseable {
 
             Flux.just(Instant.now())
                     .publishOn(Schedulers.boundedElastic())
-                    .subscribe(httpEndpoint::run);
+                    .subscribe(httpServer::run);
 
-            var rsocketEndpoint = new RSocketEndpoint(
+            var rsocketServer = new RSocketServer(
                     config.interfaces,
-                    config.duplexPort);
+                    config.duplexPort,
+                    unit2observer);
 
             Flux.just(Instant.now())
                     .publishOn(Schedulers.boundedElastic())
-                    .subscribe(rsocketEndpoint::run);
+                    .subscribe(rsocketServer::run);
 
             advertise();
 
