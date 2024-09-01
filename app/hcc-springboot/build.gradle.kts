@@ -7,6 +7,7 @@ buildscript {
 }
 
 plugins {
+    application
     `jacoco-report-aggregation`
     // See https://github.com/home-climate-control/dz/issues/230
     // Should that bug be fixed, this goes to the parent
@@ -16,6 +17,11 @@ plugins {
     alias(libs.plugins.spring.dependency.management)
 
     alias(libs.plugins.jib)
+}
+
+application {
+    applicationName = "hcc"
+    mainClass.set("net.sf.dz3r.runtime.springboot.HccApplication")
 }
 
 dependencies {
