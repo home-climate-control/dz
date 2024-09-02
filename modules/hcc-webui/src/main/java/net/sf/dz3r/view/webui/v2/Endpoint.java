@@ -9,6 +9,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 
+/**
+ * Base class for HCC remote control endpoints.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2024
+ */
 public class Endpoint {
 
     protected final Logger logger = LogManager.getLogger();

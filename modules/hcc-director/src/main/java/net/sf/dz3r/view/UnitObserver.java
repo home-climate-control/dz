@@ -19,9 +19,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * Keeps track on the state of everything connected to a given {@link net.sf.dz3r.model.UnitDirector}.
+ * Keeps track on the state of everything connected to a given {@link UnitDirector}.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 public class UnitObserver {
 
@@ -33,6 +33,11 @@ public class UnitObserver {
     private final Map<String, Signal<ZoneStatus, String>> zone2status = new TreeMap<>();
     private Signal<HvacDeviceStatus, Void> unitStatus;
 
+    /**
+     * Feed terminators.
+     *
+     * VT: FIXME: Do we really need them? They have never been acted upon on shutdown. Consider removing.
+     */
     private final Set<Disposable> terminators = new LinkedHashSet<>();
 
     public UnitObserver(UnitDirector source) {
@@ -82,16 +87,8 @@ public class UnitObserver {
 
             logger.info("Observer feeds: {} initialized", terminators.size());
 
-            // VT: FIXME: How do I wait until everything is done?
-
         } finally {
 
-//            Flux.fromIterable(terminators)
-//                    .doOnNext(Disposable::dispose)
-//                    .subscribe()
-//                    .dispose();
-//
-//            logger.info("Observer feeds: disposed of");
             ThreadContext.pop();
         }
     }

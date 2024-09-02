@@ -31,6 +31,13 @@ import java.util.Map;
 
 import static org.springframework.web.reactive.function.server.ServerResponse.ok;
 
+/**
+ * HCC remote control endpoint over HTTP.
+ *
+ * This endpoint only serves small snapshots.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2024
+ */
 public class HttpServer extends Endpoint {
 
     private static final DurationFormatter uptimeFormatter = new DurationFormatter();

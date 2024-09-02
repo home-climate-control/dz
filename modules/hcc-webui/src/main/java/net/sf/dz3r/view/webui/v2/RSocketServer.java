@@ -19,6 +19,13 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Map;
 
+/**
+ * HCC remote control endpoint over RSocket.
+ *
+ * This endpoint only serves streams, and big snapshots.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2024
+ */
 public class RSocketServer extends Endpoint {
 
     public enum Command {
