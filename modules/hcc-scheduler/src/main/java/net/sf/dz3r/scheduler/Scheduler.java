@@ -1,10 +1,10 @@
 package net.sf.dz3r.scheduler;
 
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.model.ZoneSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -152,15 +152,15 @@ public class Scheduler {
 
                 var settings = new ZoneSettings(
                         parsedSettings.isEnabled(),
-                        parsedSettings.setpoint,
+                        parsedSettings.setpoint(),
                         parsedSettings.isVoting(),
                         parsedSettings.isOnHold(),
                         parsedSettings.getDumpPriority(),
                         Optional
-                                .ofNullable(parsedSettings.economizerSettings)
+                                .ofNullable(parsedSettings.economizerSettings())
                                 .map(s -> new EconomizerSettings(
-                                        s.changeoverDelta,
-                                        s.targetTemperature,
+                                        s.changeoverDelta(),
+                                        s.targetTemperature(),
                                         s.isKeepHvacOn(),
                                         s.getMaxPower()
                                 ))

@@ -1,7 +1,7 @@
 package net.sf.dz3r.scheduler;
 
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.model.SchedulePeriod;
-import net.sf.dz3r.model.ZoneSettings;
 import reactor.core.publisher.Flux;
 
 import java.util.Map;

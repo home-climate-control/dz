@@ -138,7 +138,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         }
     }
 
-    public void setSettings(EconomizerSettings settings) {
+    public void setSettings(com.homeclimatecontrol.hcc.model.EconomizerSettings settings) {
 
         ThreadContext.push("setSettings");
 
@@ -246,7 +246,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
 
         economizerStatus = new EconomizerStatus(
-                Optional.ofNullable(config.settings).map(EconomizerSettings::new).orElse(null),
+                Optional.ofNullable(config.settings).map(com.homeclimatecontrol.hcc.model.EconomizerSettings::new).orElse(null),
                 sample,
                 demand,
                 stateSignal.getValue(),
@@ -373,7 +373,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         double targetAdjustment;
 
-        if (targetDelta > config.settings.changeoverDelta) {
+        if (targetDelta > config.settings.changeoverDelta()) {
 
             // We're still above the target
             targetAdjustment = 0.0;
@@ -386,7 +386,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         } else {
 
             // As the indoor temperature is approaching the target, need to take corrective measures
-            var k = (1.0 / config.settings.changeoverDelta) * (config.settings.changeoverDelta - targetDelta);
+            var k = (1.0 / config.settings.changeoverDelta()) * (config.settings.changeoverDelta() - targetDelta);
 
             targetAdjustment = ambientDelta * k;
 
@@ -408,8 +408,8 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
     double getAmbientDelta(double indoor, double ambient) {
 
         return config.mode == HvacMode.COOLING
-                ? indoor - (ambient + config.settings.changeoverDelta)
-                : ambient - (indoor + config.settings.changeoverDelta);
+                ? indoor - (ambient + config.settings.changeoverDelta())
+                : ambient - (indoor + config.settings.changeoverDelta());
     }
 
     /**
@@ -419,8 +419,8 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
      */
     double getTargetDelta(double indoor) {
         return config.mode == HvacMode.COOLING
-                ? indoor - config.settings.targetTemperature
-                : config.settings.targetTemperature - indoor;
+                ? indoor - config.settings.targetTemperature()
+                : config.settings.targetTemperature() - indoor;
     }
 
     /**
@@ -460,7 +460,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             return augmentedSource;
         }
 
-        if (Boolean.TRUE.equals(config.settings.keepHvacOn)) {
+        if (config.settings.isKeepHvacOn()) {
 
             // We're feeding indoor air to HVAC air return, right?
             return augmentedSource;

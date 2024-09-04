@@ -4,7 +4,6 @@ import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.LogManager;
@@ -57,7 +56,7 @@ class PidEconomizerTest {
                         1.0,
                         0.0000008,
                         1.1,
-                        new EconomizerSettings(
+                        new com.homeclimatecontrol.hcc.model.EconomizerSettings(
                                 0,
                                 20,
                                 true, 1.0

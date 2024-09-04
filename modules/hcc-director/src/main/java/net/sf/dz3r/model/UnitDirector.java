@@ -125,7 +125,7 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
             UnitController unitController,
             HvacDevice hvacDevice,
             HvacMode hvacMode,
-            Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> scheduleFlux) {
+            Flux<Map.Entry<String, Map.Entry<SchedulePeriod, com.homeclimatecontrol.hcc.model.ZoneSettings>>> scheduleFlux) {
 
         var aggregateZoneFlux = Flux
                 .merge(extractSensorFluxes(sensorFlux2zone))
@@ -159,7 +159,7 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
         );
     }
 
-    private Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> connectScheduler(Collection<Zone> zones, ScheduleUpdater scheduleUpdater) {
+    private Flux<Map.Entry<String, Map.Entry<SchedulePeriod, com.homeclimatecontrol.hcc.model.ZoneSettings>>> connectScheduler(Collection<Zone> zones, ScheduleUpdater scheduleUpdater) {
 
         net.sf.dz3r.common.HCCObjects.requireNonNull(scheduleUpdater, "programming error, this should've been resolved up the call stack");
 
@@ -281,7 +281,7 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
         public final Flux<Signal<UnitControlSignal, Void>> zoneControllerFlux;
         public final Flux<Signal<HvacCommand, Void>> unitControllerFlux;
         public final Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux;
-        public final Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> scheduleFlux;
+        public final Flux<Map.Entry<String, Map.Entry<SchedulePeriod, com.homeclimatecontrol.hcc.model.ZoneSettings>>> scheduleFlux;
 
         public Feed(
                 String unit,
@@ -289,7 +289,7 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
                 Flux<Signal<ZoneStatus, String>> aggregateZoneFlux,
                 Flux<Signal<UnitControlSignal, Void>> zoneControllerFlux,
                 Flux<Signal<HvacCommand, Void>> unitControllerFlux,
-                Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux, Flux<Map.Entry<String, Map.Entry<SchedulePeriod, ZoneSettings>>> scheduleFlux) {
+                Flux<Signal<HvacDeviceStatus, Void>> hvacDeviceFlux, Flux<Map.Entry<String, Map.Entry<SchedulePeriod, com.homeclimatecontrol.hcc.model.ZoneSettings>>> scheduleFlux) {
 
             this.unit = unit;
             this.sensorFlux2zone = sensorFlux2zone;

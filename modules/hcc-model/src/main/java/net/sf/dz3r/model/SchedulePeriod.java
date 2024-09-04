@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * Defines a time period when a given {@link ZoneSettings} is to be activated.
+ * Defines a time period when a given {@link com.homeclimatecontrol.hcc.model.ZoneSettings} is to be activated.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
  */

@@ -125,7 +125,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
                 .filter(kv -> !kv.getValue().isError());
 
         var enabled = nonError
-                .filter(kv -> kv.getValue().getValue().settings().enabled);
+                .filter(kv -> kv.getValue().getValue().settings().isEnabled());
 
         var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().callingStatus().calling)
@@ -134,7 +134,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
         var unhappyVoting = unhappy
                 .entrySet()
                 .stream()
-                .filter(kv -> kv.getValue().getValue().settings().voting)
+                .filter(kv -> kv.getValue().getValue().settings().isVoting())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         var unhappyCount = unhappy.size();
@@ -167,8 +167,8 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
         return zoneMap
                 .values()
                 .stream()
-                .filter(z -> z.getSettings().enabled)
-                .filter(z -> z.getSettings().voting)
+                .filter(z -> z.getSettings().isEnabled())
+                .filter(z -> z.getSettings().isVoting())
                 .count();
     }
 

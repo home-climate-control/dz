@@ -35,6 +35,26 @@ public record ZoneSettings(
     }
 
     /**
+     * Create an instance from a template, and enabled flag.
+     *
+     * @param template Template to copy all settings except {@link #enabled} from.
+     * @param enabled {@link #enabled} flag to set.
+     */
+    public ZoneSettings(ZoneSettings template, boolean enabled) {
+        this(enabled, template.setpoint, template.voting, template.hold, template.dumpPriority, template.economizerSettings);
+    }
+
+    /**
+     * Create an instance from a template, and a setpoint.
+     *
+     * @param template Template to copy all settings except {@link #enabled} from.
+     * @param setpoint {@link #setpoint} to set.
+     */
+    public ZoneSettings(ZoneSettings template, Double setpoint) {
+        this(template.enabled, setpoint, template.voting, template.hold, template.dumpPriority, template.economizerSettings);
+    }
+
+    /**
      * Merge this instance with an update.
      *
      * @param from Adjustment instance. Non-null values take precedence over this object's values.

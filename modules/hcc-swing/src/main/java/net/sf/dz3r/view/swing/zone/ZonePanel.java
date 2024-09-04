@@ -1,9 +1,9 @@
 package net.sf.dz3r.view.swing.zone;
 
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.runtime.config.model.MeasurementUnits;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
 import net.sf.dz3r.signal.Signal;
@@ -293,12 +293,12 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         null,
                         null,
                         null,
-                        !zoneStatus.settings().hold,
+                        !zoneStatus.settings().hold(),
                         null,
                         null
                 )));
                 refresh();
-                return Flux.just("hold status is now " + zone.getSettings().hold);
+                return Flux.just("hold status is now " + zone.getSettings().hold());
             }
             case 'v' -> {
 
@@ -307,21 +307,21 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                 zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
                         null,
                         null,
-                        !zoneStatus.settings().voting,
+                        !zoneStatus.settings().voting(),
                         null,
                         null,
                         null
                 )));
                 refresh();
-                return Flux.just("voting status is now " + zone.getSettings().voting);
+                return Flux.just("voting status is now " + zone.getSettings().voting());
             }
             case 'o' -> {
 
                 // Toggle off status
 
-                zone.setSettingsSync(new ZoneSettings(zone.getSettings(), !zoneStatus.settings().enabled));
+                zone.setSettingsSync(new ZoneSettings(zone.getSettings(), !zoneStatus.settings().enabled()));
                 refresh();
-                return Flux.just("on status is now " + zone.getSettings().enabled);
+                return Flux.just("on status is now " + zone.getSettings().enabled());
             }
             case 's' -> {
 
@@ -352,7 +352,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         null
                 )));
                 refresh();
-                return Flux.just("dump priority is now " + zone.getSettings().dumpPriority);
+                return Flux.just("dump priority is now " + zone.getSettings().dumpPriority());
             }
             case KeyEvent.CHAR_UNDEFINED -> {
                 switch (e.getKeyCode()) {
@@ -420,7 +420,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         try {
 
             // Must operate in visible values to avoid rounding problems
-            var setpoint = getDisplayValue(zone.getSettings().setpoint);
+            var setpoint = getDisplayValue(zone.getSettings().setpoint());
 
             setpoint += delta;
             setpoint = getSIValue(Double.parseDouble(numberFormat.format(setpoint)));
@@ -475,9 +475,9 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return false;
         }
 
-        var setpoint = Optional.ofNullable(zoneStatus.settings().setpoint);
-        var voting = Optional.ofNullable(zoneStatus.settings().voting);
-        var hold = Optional.ofNullable(zoneStatus.settings().hold);
+        var setpoint = Optional.ofNullable(zoneStatus.settings().setpoint());
+        var voting = Optional.ofNullable(zoneStatus.settings().voting());
+        var hold = Optional.ofNullable(zoneStatus.settings().hold());
 
         setpoint.ifPresent(s -> setpointLabel.setText(String.format(Locale.getDefault(), "%.1f°", getDisplayValue(s))));
 
@@ -506,8 +506,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         }
 
         ecoLabel.setVisible(true);
-        ecoLabel.setText("ECO " + UNICODE_DELTA + " " + source.settings.changeoverDelta
-                        + " " + UNICODE_SUN + " " + source.settings.targetTemperature + " "
+        ecoLabel.setText("ECO " + UNICODE_DELTA + " " + source.settings.changeoverDelta()
+                        + " " + UNICODE_SUN + " " + source.settings.targetTemperature() + " "
                         + Optional.ofNullable(source.ambient).map(s -> " (" + s.getValue() + ")").orElse("")
         );
     }
@@ -553,7 +553,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                             sensorSignal.getValue(),
                             zoneStatus.callingStatus().demand * 2,
                             zoneStatus.callingStatus().calling),
-                    zoneStatus.settings().setpoint,
+                    zoneStatus.settings().setpoint(),
                     zoneStatus.economizerStatus());
 
             // VT: FIXME: This must be driven via Flux
@@ -666,7 +666,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return Zone.State.ERROR;
         }
 
-        if (Boolean.FALSE.equals(zoneStatus.settings().enabled)) {
+        if (Boolean.FALSE.equals(zoneStatus.settings().enabled())) {
             return Zone.State.OFF;
         }
 

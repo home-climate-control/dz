@@ -50,7 +50,7 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
         var status = source.getValue();
 
         var periodName = Optional.ofNullable(status.periodSettings()).map(ps -> ps.period().name).orElse(null);
-        var deviationSetpoint = Optional.ofNullable(status.periodSettings()).map(ps -> status.settings().setpoint - ps.settings().setpoint).orElse(0d);
+        var deviationSetpoint = Optional.ofNullable(status.periodSettings()).map(ps -> status.settings().setpoint() - ps.settings().setpoint()).orElse(0d);
 
         // Careful with literals on ZoneSettings - null values are interpreted as "true" for "enabled" and "voting"
         var deviationEnabled = Optional.ofNullable(status.periodSettings()).map(ps -> !Objects.equals(status.settings().isEnabled(), ps.settings().isEnabled())).orElse(false);
@@ -66,13 +66,13 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
                         source.timestamp.toEpochMilli(),
                         zoneName,
                         modeMap.get(unit2mode.get(unitId).getValue()),
-                        renderState(status.settings().enabled, status.callingStatus().calling),
+                        renderState(status.settings().enabled(), status.callingStatus().calling),
                         status.callingStatus().demand,
                         zone2signal.get(zoneName).getValue(),
-                        status.settings().setpoint,
-                        status.settings().enabled,
-                        status.settings().hold,
-                        status.settings().voting,
+                        status.settings().setpoint(),
+                        status.settings().enabled(),
+                        status.settings().hold(),
+                        status.settings().voting(),
                         periodName,
                         deviationSetpoint,
                         deviationEnabled,

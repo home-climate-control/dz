@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
 
+    api(project(":modules:hcc-data-source-api"))
     api(project(":modules:hcc-model"))
     implementation(libs.log4j.api)
     implementation(libs.reactor.core)

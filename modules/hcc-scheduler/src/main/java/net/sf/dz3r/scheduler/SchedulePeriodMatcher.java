@@ -1,7 +1,7 @@
 package net.sf.dz3r.scheduler;
 
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.model.SchedulePeriod;
-import net.sf.dz3r.model.ZoneSettings;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -32,7 +32,7 @@ public class SchedulePeriodMatcher {
      *
      * @return Current period, or {@code null} if none was found.
      */
-    public SchedulePeriod match(SortedMap<SchedulePeriod, ZoneSettings> zoneSchedule, LocalDateTime time) {
+    public SchedulePeriod match(SortedMap<SchedulePeriod, com.homeclimatecontrol.hcc.model.ZoneSettings> zoneSchedule, LocalDateTime time) {
 
         ThreadContext.push("match");
 
@@ -42,7 +42,7 @@ public class SchedulePeriodMatcher {
 
             logger.trace("matching {}", time);
 
-            SortedMap<SchedulePeriod, ZoneSettings> today = getToday(zoneSchedule, time.toLocalDate());
+            SortedMap<SchedulePeriod, com.homeclimatecontrol.hcc.model.ZoneSettings> today = getToday(zoneSchedule, time.toLocalDate());
 
             for (SchedulePeriod p : today.keySet()) {
 

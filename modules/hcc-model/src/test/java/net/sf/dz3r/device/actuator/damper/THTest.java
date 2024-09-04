@@ -1,9 +1,9 @@
 package net.sf.dz3r.device.actuator.damper;
 
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.device.actuator.NullSwitch;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.CallingStatus;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;

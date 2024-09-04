@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
@@ -74,7 +75,7 @@ class ZoneTest {
         StepVerifier
                 .create(out)
                 .assertNext(s -> {
-                    assertThat(s.getValue().settings().setpoint).isEqualTo(setpoint);
+                    assertThat(s.getValue().settings().setpoint()).isEqualTo(setpoint);
                     assertThat(s.getValue().callingStatus().calling).isTrue();
                     assertThat(s.payload).isEqualTo(name);
                 })
@@ -106,7 +107,7 @@ class ZoneTest {
         StepVerifier
                 .create(out)
                 .assertNext(s -> {
-                    assertThat(s.getValue().settings().setpoint).isEqualTo(setpoint);
+                    assertThat(s.getValue().settings().setpoint()).isEqualTo(setpoint);
                     assertThat(s.getValue().callingStatus().calling).isFalse();
                     assertThat(s.payload).isEqualTo(name);
                 })

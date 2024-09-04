@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;

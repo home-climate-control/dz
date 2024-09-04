@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.swing.zone;
 
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import net.sf.dz3r.common.DataSet;
 import net.sf.dz3r.signal.Signal;
 
@@ -53,7 +54,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
             logger.trace("eco: {}", signal.getValue().economizerStatus);
 
             ambient = Optional.ofNullable(signal.getValue().economizerStatus.ambient).map(Signal::getValue).orElse(null);
-            target = Optional.ofNullable(signal.getValue().economizerStatus.settings).map(s -> s.targetTemperature).orElse(null);
+            target = Optional.ofNullable(signal.getValue().economizerStatus.settings).map(EconomizerSettings::targetTemperature).orElse(null);
         }
 
         logger.trace("ambient={}, target={}", ambient, target);

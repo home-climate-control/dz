@@ -32,11 +32,11 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
 
         if (status != null) {
 
-            b.addField("enabled", status.settings().enabled);
-            b.addField("setpoint", status.settings().setpoint);
-            b.addField("voting", status.settings().voting);
-            b.addField("hold", status.settings().hold);
-            b.addField("dumpPriority", status.settings().dumpPriority);
+            b.addField("enabled", status.settings().enabled());
+            b.addField("setpoint", status.settings().setpoint());
+            b.addField("voting", status.settings().voting());
+            b.addField("hold", status.settings().hold());
+            b.addField("dumpPriority", status.settings().dumpPriority());
 
             b.addField("calling", status.callingStatus().calling);
             b.addField("demand", status.callingStatus().demand);
@@ -66,8 +66,8 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
         if (economizerStatus.settings != null) {
 
             b.addField("enabled", true);
-            b.addField("delta", economizerStatus.settings.changeoverDelta);
-            b.addField("target", economizerStatus.settings.targetTemperature);
+            b.addField("delta", economizerStatus.settings.changeoverDelta());
+            b.addField("target", economizerStatus.settings.targetTemperature());
 
         } else {
             b.addField("enabled", false);

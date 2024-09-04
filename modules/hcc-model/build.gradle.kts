@@ -4,6 +4,7 @@ dependencies {
     implementation(libs.log4j.core)
 
     implementation(project(":modules:hcc-common"))
+    implementation(project(":modules:hcc-data-source-api"))
 
     testImplementation(libs.assertj.core)
     testImplementation(libs.mockito)

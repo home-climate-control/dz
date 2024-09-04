@@ -9,12 +9,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.Connector;
@@ -267,9 +267,9 @@ public class HomeAssistantConnector implements Connector {
                                 source.meta.rootTopic,
                                 source.meta.currentTemperatureTopic),
                         s.getValue(),
-                        source.zone.getSettings().enabled,
+                        source.zone.getSettings().enabled(),
                         zone2mode.get(source.zone),
-                        source.zone.getSettings().setpoint));
+                        source.zone.getSettings().setpoint()));
     }
 
     private void broadcast(Signal<ZoneStatus, String> status2zone) {
@@ -291,7 +291,7 @@ public class HomeAssistantConnector implements Connector {
                 meta.rootTopic,
                 meta.temperatureStateTopic);
 
-        broadcast(topic, null, status.settings().enabled, zone2mode.get(zone), status.settings().setpoint);
+        broadcast(topic, null, status.settings().enabled(), zone2mode.get(zone), status.settings().setpoint());
     }
 
     private boolean contains(String zoneName, Collection<Zone> zones) {

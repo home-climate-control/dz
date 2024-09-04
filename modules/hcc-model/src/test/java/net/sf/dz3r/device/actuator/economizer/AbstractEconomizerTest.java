@@ -28,7 +28,7 @@ class AbstractEconomizerTest {
         var config = new EconomizerConfig(
                 source.mode,
                 1.0, 0.0001, 1.0,
-                new EconomizerSettings(
+                new com.homeclimatecontrol.hcc.model.EconomizerSettings(
                         source.changeoverDelta,
                         source.targetTemperature,
                         true,

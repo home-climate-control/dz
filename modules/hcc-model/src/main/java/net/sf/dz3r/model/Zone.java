@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
@@ -46,7 +47,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     /**
      * Zone settings.
      */
-    private ZoneSettings settings;
+    private com.homeclimatecontrol.hcc.model.ZoneSettings settings;
 
     /**
      * Settings that came from the scheduler.
@@ -69,7 +70,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      * @param ts Thermostat to use.
      * @param settings Zone settings. Thermostat setpoint overrides zone setpoint - this argument is here to configure initial flags.
      */
-    public Zone(Thermostat ts, ZoneSettings settings) {
+    public Zone(Thermostat ts, com.homeclimatecontrol.hcc.model.ZoneSettings settings) {
         this(ts, settings, null);
     }
 
@@ -80,36 +81,36 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      * @param settings Zone settings. Thermostat setpoint overrides zone setpoint - this argument is here to configure initial flags.
      * @param economizerContext Optional context to initialize the economizer with.
      */
-    public Zone(Thermostat ts, ZoneSettings settings, EconomizerContext economizerContext) {
+    public Zone(Thermostat ts, com.homeclimatecontrol.hcc.model.ZoneSettings settings, EconomizerContext economizerContext) {
         this.ts = ts;
-        setSettingsSync(new ZoneSettings(settings, settings.setpoint));
+        setSettingsSync(new ZoneSettings(settings, settings.setpoint()));
 
         economizer = Optional.ofNullable(economizerContext)
                 .map(ctx -> new PidEconomizer<>(
                         Clock.systemUTC(),
                         ts.getAddress(),
-                        ctx.config,
-                        ctx.ambientFlux,
-                        ctx.device,
-                        ctx.timeout))
+                        ctx.config(),
+                        ctx.ambientFlux(),
+                        ctx.device(),
+                        ctx.timeout()))
                 .orElse(null);
     }
 
     /**
      * Set zone settings immediately.
      *
-     * This method isn't deprecated, and isn't really diligent to be deprecated at the moment - however, using {@link #setSettings(ZoneSettings)} would be more diligent.
+     * This method isn't deprecated, and isn't really diligent to be deprecated at the moment - however, using {@link #setSettings(com.homeclimatecontrol.hcc.model.ZoneSettings)} would be more diligent.
      *
      * @param settings Settings to set zone to.
      *
-     * @return New settings (result of {@link ZoneSettings#merge(ZoneSettings)}).
+     * @return New settings (result of {@link com.homeclimatecontrol.hcc.model.ZoneSettings#merge(com.homeclimatecontrol.hcc.model.ZoneSettings)}).
      *
      * @throws IllegalArgumentException if things go wrong.
      */
-    public ZoneSettings setSettingsSync(ZoneSettings settings) {
+    public com.homeclimatecontrol.hcc.model.ZoneSettings setSettingsSync(com.homeclimatecontrol.hcc.model.ZoneSettings settings) {
         HCCObjects.requireNonNull(settings, "settings can't be null");
 
-        ts.setSetpoint(settings.setpoint);
+        ts.setSetpoint(settings.setpoint());
 
         var newSettings = Optional.ofNullable(this.settings)
                 .map(s -> s.merge(settings))
@@ -121,7 +122,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         logger.info("{}: setSettings({}): = {}", getAddress(), r, newSettings);
 
         if (economizer != null) {
-            economizer.setSettings(newSettings.economizerSettings);
+            economizer.setSettings(newSettings.economizerSettings());
         }
 
         this.settings = newSettings;
@@ -157,7 +158,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      * @return The Mono signal indicating the new status or, possibly, the reason why they can't be set.
      * This mono will never be an error mono, but the wrapped {@link Signal} may be.
      */
-    public Mono<Signal<ZoneSettings, String>> setSettings(ZoneSettings settings) {
+    public Mono<Signal<com.homeclimatecontrol.hcc.model.ZoneSettings, String>> setSettings(com.homeclimatecontrol.hcc.model.ZoneSettings settings) {
         return Mono.create(sink -> {
             try {
                 sink.success(new Signal<>(Instant.now(), setSettingsSync(settings), getAddress()));
@@ -184,7 +185,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         var r = Integer.toHexString(settings.hashCode());
 
-        if (Boolean.TRUE.equals(settings.hold)) {
+        if (settings.isOnHold()) {
             logger.debug("{}: setSettings({}): on hold, ignored: period = {}, settings = {}", getAddress(), r, periodSettings.period().name, periodSettings.settings());
             return;
         }
@@ -193,7 +194,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         logger.info("{}: setSettings({}): period = {}", getAddress(), r, periodSettings.period().name);
     }
 
-    public ZoneSettings getSettings() {
+    public com.homeclimatecontrol.hcc.model.ZoneSettings getSettings() {
         return settings;
     }
 
@@ -237,7 +238,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         // Now, dampen the signal if the zone is disabled
         var stage3 = stage2
                 .map(this::suppressIfNotEnabled)
-                .doOnNext(e -> logger.trace("compute {}/isOn: {} {}", getAddress(), settings.enabled ? "enabled" : "DISABLED", e));
+                .doOnNext(e -> logger.trace("compute {}/isOn: {} {}", getAddress(), settings.isEnabled() ? "enabled" : "DISABLED", e));
 
         // And finally, suppress if the economizer says so
         return stage3.map(this::suppressEconomizer);
@@ -259,7 +260,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
     private Signal<ZoneStatus, String> suppressIfNotEnabled(Signal<ZoneStatus, String> source) {
 
-        if (Boolean.TRUE.equals(settings.enabled)) {
+        if (Boolean.TRUE.equals(settings.isEnabled())) {
             return source;
         }
 

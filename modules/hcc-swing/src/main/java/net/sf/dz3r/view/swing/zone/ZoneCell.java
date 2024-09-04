@@ -86,7 +86,7 @@ public class ZoneCell extends EntityCell<ZoneStatus, Void> {
             return Zone.State.ERROR;
         }
 
-        if (Boolean.FALSE.equals(zoneStatus.settings().enabled)) {
+        if (!zoneStatus.settings().isEnabled()) {
             return Zone.State.OFF;
         }
 

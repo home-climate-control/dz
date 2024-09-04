@@ -21,7 +21,7 @@ public class EconomizerConfig {
 
     public final Double saturationLimit;
 
-    public final EconomizerSettings settings;
+    public final com.homeclimatecontrol.hcc.model.EconomizerSettings settings;
 
     /**
      * All argument constructor.
@@ -33,7 +33,7 @@ public class EconomizerConfig {
      */
     public EconomizerConfig(HvacMode mode,
                             Double P, Double I, Double saturationLimit,
-                            EconomizerSettings settings) {
+                            com.homeclimatecontrol.hcc.model.EconomizerSettings settings) {
 
         if (mode == null) {
             throw new IllegalArgumentException("mode can't be null");
@@ -78,7 +78,7 @@ public class EconomizerConfig {
         return settings != null;
     }
 
-    public EconomizerConfig merge(EconomizerSettings settings) {
+    public EconomizerConfig merge(com.homeclimatecontrol.hcc.model.EconomizerSettings settings) {
 
         return new EconomizerConfig(
                 mode,

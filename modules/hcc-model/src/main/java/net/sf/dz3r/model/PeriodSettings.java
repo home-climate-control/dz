@@ -7,6 +7,6 @@ package net.sf.dz3r.model;
  */
 public record PeriodSettings(
         SchedulePeriod period,
-        ZoneSettings settings
+        com.homeclimatecontrol.hcc.model.ZoneSettings settings
 ) {
 }

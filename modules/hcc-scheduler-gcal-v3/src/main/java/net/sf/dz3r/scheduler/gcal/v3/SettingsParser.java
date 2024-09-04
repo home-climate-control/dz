@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.services.calendar.model.Event;
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
-import net.sf.dz3r.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.scheduler.gcal.v3.SettingsParser.ZoneSettingsYaml.EconomizerSettingsYaml;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -310,9 +310,11 @@ public class SettingsParser {
     }
 
     /**
-     * An immutable behaviorless copy of {@link net.sf.dz3r.model.ZoneSettings}.
+     * An immutable behaviorless copy of {@link com.homeclimatecontrol.hcc.model.ZoneSettings}.
      *
      * It's easier to have it here than to deal with Jackson shenanigans.
+     *
+     * VT: FIXME: https://github.com/home-climate-control/dz/issues/326 may have made this class unnecessary; need to review.
      */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)

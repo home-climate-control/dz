@@ -1,6 +1,6 @@
 package net.sf.dz3r.signal.hvac;
 
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import net.sf.dz3r.signal.Signal;
 
 /**

@@ -1,13 +1,13 @@
 package net.sf.dz3r.runtime.config.model;
 
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
+import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
-import net.sf.dz3r.device.actuator.economizer.EconomizerSettings;
 import net.sf.dz3r.model.Range;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.model.ZoneSettings;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -52,7 +52,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                 cf.controller(),
                 parseSensitivity(cf.name(), cf.sensitivity()));
         var eco = createEconomizer(cf.name(), cf.economizer());
-        var ecoSettings = Optional.ofNullable(eco).map(v -> v.config.settings).orElse(null);
+        var ecoSettings = Optional.ofNullable(eco).map(v -> v.config().settings).orElse(null);
         var zone = new Zone(ts, map(cf.settings(), ecoSettings), eco);
 
         return new ImmutablePair<>(cf.id(), zone);
