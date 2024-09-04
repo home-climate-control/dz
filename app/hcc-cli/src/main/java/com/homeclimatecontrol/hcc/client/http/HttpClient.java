@@ -3,6 +3,7 @@ package com.homeclimatecontrol.hcc.client.http;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import net.sf.dz3r.instrumentation.Marker;
+import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -12,6 +13,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Map;
 
 /**
  * HCC remote client using HTTP protocol.
@@ -58,7 +60,18 @@ public class HttpClient {
 
     public EndpointMeta getMeta(URL targetUrl) throws IOException {
 
-        var m = new Marker("getMeta");
+        return objectMapper.readValue(get(targetUrl, "getMeta"), EndpointMeta.class);
+    }
+
+    public Map<String, ZoneStatus> getZones(URL targetUrl) throws IOException {
+
+        // VT: FIXME: This returns a map of maps :O Will deal with this in a short bit.
+        return objectMapper.readValue(get(targetUrl, "getZones"), Map.class);
+    }
+
+    private String get(URL targetUrl, String marker) throws IOException {
+
+        var m = new Marker(marker);
         var get = new HttpGet(targetUrl.toString());
 
         try {
@@ -76,8 +89,9 @@ public class HttpClient {
 
             var response = EntityUtils.toString(rsp.getEntity());
 
-            logger.trace("META/raw: {}", response);
-            return objectMapper.readValue(response, EndpointMeta.class);
+            logger.trace("{}/raw: {}", marker, response);
+
+            return response;
 
         } finally {
             get.releaseConnection();

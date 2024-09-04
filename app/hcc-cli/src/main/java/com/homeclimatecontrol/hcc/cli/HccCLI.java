@@ -25,6 +25,8 @@ public class HccCLI implements CommandLineRunner {
     private static final String COMMAND_MDNS_SCAN = "mdns-scan";
     private static final String COMMAND_GET_META = "get-meta";
     private static final String COMMAND_GET_ZONES = "get-zones";
+    private static final String COMMAND_GET_ZONES_HTTP = "get-zones-http";
+    private static final String COMMAND_GET_ZONES_RSOCKET = "get-zones-rsocket";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = new HttpClient();
@@ -40,13 +42,17 @@ public class HccCLI implements CommandLineRunner {
 
     }
 
+    public class CommandGetZonesHTTP extends CommandBase {
+
+    }
+
     public abstract class CommandRSocket extends CommandBase {
 
         @Parameter(names = { "--serialization" }, description = "Serialization method")
         String serialization = "JSON";
     }
 
-    public class CommandGetZones extends CommandRSocket {
+    public class CommandGetZonesRSocket extends CommandRSocket {
 
     }
 
@@ -74,13 +80,15 @@ public class HccCLI implements CommandLineRunner {
 
         var commandMdnsScan = new CommandMdnsScan();
         var commandGetMeta = new CommandGetMeta();
-        var commandGetZones = new CommandGetZones();
+        var commandGetZonesHTTP = new CommandGetZonesHTTP();
+        var commandGetZonesRSocket = new CommandGetZonesRSocket();
 
         var jc = JCommander
                 .newBuilder()
                 .addCommand(COMMAND_MDNS_SCAN, commandMdnsScan)
                 .addCommand(COMMAND_GET_META, commandGetMeta)
-                .addCommand(COMMAND_GET_ZONES, commandGetZones)
+                .addCommand(COMMAND_GET_ZONES, commandGetZonesHTTP)
+                .addCommand(COMMAND_GET_ZONES_RSOCKET, commandGetZonesRSocket)
                 .build();
 
         try {
@@ -95,8 +103,9 @@ public class HccCLI implements CommandLineRunner {
 
                 case COMMAND_MDNS_SCAN -> mdnsScan();
                 case COMMAND_GET_META -> getMeta(commandGetMeta.url);
-                case COMMAND_GET_ZONES -> getZones(commandGetZones.url, commandGetZones.serialization);
-
+                case COMMAND_GET_ZONES -> getZonesHTTP(commandGetZonesHTTP.url);
+                case COMMAND_GET_ZONES_HTTP -> getZonesHTTP(commandGetZonesHTTP.url);
+                case COMMAND_GET_ZONES_RSOCKET -> getZonesRSocket(commandGetZonesRSocket.url, commandGetZonesRSocket.serialization);
             }
 
         } catch (ParameterException ex) {
@@ -131,8 +140,24 @@ public class HccCLI implements CommandLineRunner {
         }
     }
 
-    private void getZones(String url, String serialization) throws IOException {
-        ThreadContext.push("getZones");
+    private void getZonesHTTP(String url) throws IOException {
+        ThreadContext.push("getZonesHTTP");
+        try {
+            logger.info("url={}", url);
+
+            var httpUrl = new URL(url);
+            // First need to get this to determine the host and port to connect RSocket to
+            var zoneMap = httpClient.getZones(httpUrl);
+
+            logger.info("ZONES:\n{}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zoneMap));
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void getZonesRSocket(String url, String serialization) throws IOException {
+        ThreadContext.push("getZonesRSocket");
         try {
             logger.info("url={}", url);
 
