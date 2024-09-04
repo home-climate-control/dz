@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.actuator.economizer;
+package com.homeclimatecontrol.hcc.model;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -6,34 +6,17 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.Optional;
 
 /**
- * Set of user changeable economizer settings.
+ * Runtime economizer settings in a form that can be exposed to external systems.
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
- *
- * @deprecated Use {@link com.homeclimatecontrol.hcc.model.EconomizerSettings} instead.
  */
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
-@Deprecated
-public class EconomizerSettings {
-
-    /**
-     * Temperature difference between indoor and outdoor temperature necessary to turn the device on.
-     */
-    public final double changeoverDelta;
-
-    /**
-     * When this temperature is reached, the device is shut off.
-     */
-    public final double targetTemperature;
-
-    /**
-     * {@code true} means that turning on the device will NOT turn the HVAC off.
-     * You probably want to keep this at {@code false}, unless the indoor temperature is measured at HVAC return
-     * and fresh air is injected into HVAC return.
-     */
-    public final Boolean keepHvacOn;
-
-    public final Double maxPower;
+public record EconomizerSettings(
+        double changeoverDelta,
+        double targetTemperature,
+        Boolean keepHvacOn,
+        Double maxPower
+) {
 
     public EconomizerSettings(double changeoverDelta, double targetTemperature, Boolean keepHvacOn, Double maxPower) {
 
@@ -42,7 +25,7 @@ public class EconomizerSettings {
         }
 
         if (maxPower != null && (maxPower.isInfinite() || maxPower.isNaN() || maxPower <= 0 || maxPower > 1)) {
-                throw new IllegalArgumentException("maxPower must be in range ]0,1]");
+            throw new IllegalArgumentException("maxPower must be in range ]0,1]");
         }
 
         this.changeoverDelta = changeoverDelta;
@@ -52,20 +35,7 @@ public class EconomizerSettings {
     }
 
     public EconomizerSettings(EconomizerSettings source) {
-
-        this.changeoverDelta = source.changeoverDelta;
-        this.targetTemperature = source.targetTemperature;
-        this.keepHvacOn = source.keepHvacOn;
-        this.maxPower = source.maxPower;
-    }
-
-    @Override
-    public String toString() {
-        return "{changeoverDelta=" + changeoverDelta
-                + ", targetTemperature=" + targetTemperature
-                + ", keepHvacOn=" + keepHvacOn
-                + ", maxPower=" + maxPower
-                + "}";
+        this(source.changeoverDelta(), source.targetTemperature(), source.keepHvacOn(), source.maxPower());
     }
 
     public final boolean isKeepHvacOn() {

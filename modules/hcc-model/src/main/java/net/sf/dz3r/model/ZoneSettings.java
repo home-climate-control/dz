@@ -13,11 +13,13 @@ import java.util.Optional;
 /**
  * Zone settings.
  *
- * This object defines the desired zone configuration.
+ * This object defines the desired zone runtime configuration.
  *
  * @see ZoneStatus
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ *
+ * @deprecated Use {@link com.homeclimatecontrol.hcc.model.ZoneSettings} instead.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
