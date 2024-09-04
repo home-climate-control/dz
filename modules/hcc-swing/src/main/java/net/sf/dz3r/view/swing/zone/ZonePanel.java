@@ -293,7 +293,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                         null,
                         null,
                         null,
-                        !zoneStatus.settings.hold,
+                        !zoneStatus.settings().hold,
                         null,
                         null
                 )));
@@ -307,7 +307,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                 zone.setSettingsSync(zone.getSettings().merge(new ZoneSettings(
                         null,
                         null,
-                        !zoneStatus.settings.voting,
+                        !zoneStatus.settings().voting,
                         null,
                         null,
                         null
@@ -319,7 +319,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
                 // Toggle off status
 
-                zone.setSettingsSync(new ZoneSettings(zone.getSettings(), !zoneStatus.settings.enabled));
+                zone.setSettingsSync(new ZoneSettings(zone.getSettings(), !zoneStatus.settings().enabled));
                 refresh();
                 return Flux.just("on status is now " + zone.getSettings().enabled);
             }
@@ -377,12 +377,12 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private void activateSchedule() {
 
-        if (zoneStatus.periodSettings == null) {
+        if (zoneStatus.periodSettings() == null) {
             logger.error("{}: activateSchedule(): no period active", zone.getAddress());
             return;
         }
 
-        var settings = zoneStatus.periodSettings.settings();
+        var settings = zoneStatus.periodSettings().settings();
 
         logger.info("{}: returning to settings: {}", zone.getAddress(), settings);
 
@@ -475,9 +475,9 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return false;
         }
 
-        var setpoint = Optional.ofNullable(zoneStatus.settings.setpoint);
-        var voting = Optional.ofNullable(zoneStatus.settings.voting);
-        var hold = Optional.ofNullable(zoneStatus.settings.hold);
+        var setpoint = Optional.ofNullable(zoneStatus.settings().setpoint);
+        var voting = Optional.ofNullable(zoneStatus.settings().voting);
+        var hold = Optional.ofNullable(zoneStatus.settings().hold);
 
         setpoint.ifPresent(s -> setpointLabel.setText(String.format(Locale.getDefault(), "%.1f°", getDisplayValue(s))));
 
@@ -492,7 +492,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         });
 
         renderPeriod();
-        renderEconomizer(zoneStatus.economizerStatus);
+        renderEconomizer(zoneStatus.economizerStatus());
 
         return true;
     }
@@ -551,10 +551,10 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             var dataPoint = new ZoneChartDataPoint(
                     new ThermostatTintedValue(
                             sensorSignal.getValue(),
-                            zoneStatus.callingStatus.demand * 2,
-                            zoneStatus.callingStatus.calling),
-                    zoneStatus.settings.setpoint,
-                    zoneStatus.economizerStatus);
+                            zoneStatus.callingStatus().demand * 2,
+                            zoneStatus.callingStatus().calling),
+                    zoneStatus.settings().setpoint,
+                    zoneStatus.economizerStatus());
 
             // VT: FIXME: This must be driven via Flux
             chart.consumeSignal(new Signal<>(getSignal().timestamp, dataPoint));
@@ -597,10 +597,10 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return;
         }
 
-        if (zoneStatus.periodSettings == null) {
+        if (zoneStatus.periodSettings() == null) {
             periodLabel.setText(NO_PERIOD);
         } else {
-            periodLabel.setText(zoneStatus.periodSettings.period().name + (isOnSchedule() ? "" : "*"));
+            periodLabel.setText(zoneStatus.periodSettings().period().name + (isOnSchedule() ? "" : "*"));
         }
     }
 
@@ -608,8 +608,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
      * @return {@code true} if the zone settings are identical to those of the current schedule period, {@code false} otherwise.
      */
     private boolean isOnSchedule() {
-        return zoneStatus.settings.same(
-                Optional.ofNullable(zoneStatus.periodSettings)
+        return zoneStatus.settings().same(
+                Optional.ofNullable(zoneStatus.periodSettings())
                         .map(PeriodSettings::settings)
                         .orElse(null));
     }
@@ -649,7 +649,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var g2d = (Graphics2D) g;
         var d = getSize();
 
-        var signal = zoneStatus.callingStatus.demand;
+        var signal = zoneStatus.callingStatus().demand;
         var mode = getMode();
         var state = resolveState();
         var boundary = new Rectangle(0, 0, d.width, d.height);
@@ -666,10 +666,10 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return Zone.State.ERROR;
         }
 
-        if (Boolean.FALSE.equals(zoneStatus.settings.enabled)) {
+        if (Boolean.FALSE.equals(zoneStatus.settings().enabled)) {
             return Zone.State.OFF;
         }
 
-        return zoneStatus.callingStatus.calling ? Zone.State.CALLING : Zone.State.HAPPY;
+        return zoneStatus.callingStatus().calling ? Zone.State.CALLING : Zone.State.HAPPY;
     }
 }

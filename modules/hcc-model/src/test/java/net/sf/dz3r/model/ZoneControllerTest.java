@@ -534,9 +534,9 @@ class ZoneControllerTest {
         gate.await();
 
         // Verify
-        assertThat(t1.output.get(0).callingStatus.calling).isFalse();
-        assertThat(t2.output.get(0).callingStatus.calling).isFalse();
-        assertThat(t3.output.get(0).callingStatus.calling).isFalse();
+        assertThat(t1.output.get(0).callingStatus().calling).isFalse();
+        assertThat(t2.output.get(0).callingStatus().calling).isFalse();
+        assertThat(t3.output.get(0).callingStatus().calling).isFalse();
 
         assertThat(zcOutput).hasSize(3);
         assertThat(zcOutput.get(2).getValue().demand).isZero();
@@ -552,14 +552,14 @@ class ZoneControllerTest {
 
         // This one was responsible for changing the status
         assertThat(t1.output).hasSize(2);
-        assertThat(t1.output.get(1).callingStatus.calling).isTrue();
+        assertThat(t1.output.get(1).callingStatus().calling).isTrue();
 
         // This one was raised
         assertThat(t2.output).hasSize(2);
         // But this one wasn't, no signals were emitted
         assertThat(t3.output).hasSize(1);
 
-        assertThat(t2.output.get(1).callingStatus.calling).isTrue();
+        assertThat(t2.output.get(1).callingStatus().calling).isTrue();
 
     }
 

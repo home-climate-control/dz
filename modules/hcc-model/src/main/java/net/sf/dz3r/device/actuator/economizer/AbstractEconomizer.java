@@ -427,7 +427,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
      * Figure out whether the HVAC needs to be suppressed and adjust the signal if so.
      *
      * @param source Signal computed by {@link Zone}.
-     * @return Signal with {@link ZoneStatus#callingStatus} possibly adjusted to shut off the HVAC if the economizer is active.
+     * @return Signal with {@link ZoneStatus#callingStatus()} possibly adjusted to shut off the HVAC if the economizer is active.
      */
     public Signal<ZoneStatus, String> computeHvacSuppression(Signal<ZoneStatus, String> source) {
 
@@ -446,10 +446,10 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var augmentedSource = new Signal<>(
                 source.timestamp,
                 new ZoneStatus(
-                        zoneSettings.settings,
-                        zoneSettings.callingStatus,
+                        zoneSettings.settings(),
+                        zoneSettings.callingStatus(),
                         economizerStatus,
-                        zoneSettings.periodSettings),
+                        zoneSettings.periodSettings()),
                 source.payload,
                 source.status,
                 source.error);
@@ -468,10 +468,10 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         // Need to suppress demand and keep the HVAC off while the economizer is on
         var adjusted = new ZoneStatus(
-                zoneSettings.settings,
+                zoneSettings.settings(),
                 new CallingStatus(null, 0, false),
                 economizerStatus,
-                zoneSettings.periodSettings);
+                zoneSettings.periodSettings());
 
         return new Signal<>(
                 source.timestamp,

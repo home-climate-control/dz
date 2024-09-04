@@ -31,7 +31,7 @@ public class SimpleDamperController extends AbstractDamperController {
         zone2signal.forEach((key, value) -> {
 
             var damper = getDamperFor(key);
-            var position = value.getValue().callingStatus.calling ? 1d : 0d;
+            var position = value.getValue().callingStatus().calling ? 1d : 0d;
 
             result.put(damper, position);
         });

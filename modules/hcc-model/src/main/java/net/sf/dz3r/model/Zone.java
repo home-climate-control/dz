@@ -266,7 +266,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         return new Signal<>(
                 source.timestamp,
                 new ZoneStatus(
-                        new ZoneSettings(source.getValue().settings, false),
+                        new ZoneSettings(source.getValue().settings(), false),
                         new CallingStatus(null, 0, false),
                         null,
                         periodSettings),

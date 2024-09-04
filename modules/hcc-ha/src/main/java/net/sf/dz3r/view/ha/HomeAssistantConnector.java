@@ -291,7 +291,7 @@ public class HomeAssistantConnector implements Connector {
                 meta.rootTopic,
                 meta.temperatureStateTopic);
 
-        broadcast(topic, null, status.settings.enabled, zone2mode.get(zone), status.settings.setpoint);
+        broadcast(topic, null, status.settings().enabled, zone2mode.get(zone), status.settings().setpoint);
     }
 
     private boolean contains(String zoneName, Collection<Zone> zones) {

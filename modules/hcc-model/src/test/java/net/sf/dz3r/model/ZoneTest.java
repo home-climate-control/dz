@@ -74,12 +74,12 @@ class ZoneTest {
         StepVerifier
                 .create(out)
                 .assertNext(s -> {
-                    assertThat(s.getValue().settings.setpoint).isEqualTo(setpoint);
-                    assertThat(s.getValue().callingStatus.calling).isTrue();
+                    assertThat(s.getValue().settings().setpoint).isEqualTo(setpoint);
+                    assertThat(s.getValue().callingStatus().calling).isTrue();
                     assertThat(s.payload).isEqualTo(name);
                 })
-                .assertNext(s -> assertThat(s.getValue().callingStatus.calling).isFalse())
-                .assertNext(s -> assertThat(s.getValue().callingStatus.calling).isFalse())
+                .assertNext(s -> assertThat(s.getValue().callingStatus().calling).isFalse())
+                .assertNext(s -> assertThat(s.getValue().callingStatus().calling).isFalse())
                 .verifyComplete();
     }
 
@@ -106,8 +106,8 @@ class ZoneTest {
         StepVerifier
                 .create(out)
                 .assertNext(s -> {
-                    assertThat(s.getValue().settings.setpoint).isEqualTo(setpoint);
-                    assertThat(s.getValue().callingStatus.calling).isFalse();
+                    assertThat(s.getValue().settings().setpoint).isEqualTo(setpoint);
+                    assertThat(s.getValue().callingStatus().calling).isFalse();
                     assertThat(s.payload).isEqualTo(name);
                 })
                 .verifyComplete();
@@ -144,15 +144,15 @@ class ZoneTest {
         assertThat(accumulator).hasSize(5);
 
         // PV change
-        assertThat(accumulator.get(0).getValue().callingStatus.calling).isFalse();
-        assertThat(accumulator.get(1).getValue().callingStatus.calling).isTrue();
+        assertThat(accumulator.get(0).getValue().callingStatus().calling).isFalse();
+        assertThat(accumulator.get(1).getValue().callingStatus().calling).isTrue();
 
         // Setpoint change; one replayed by AbstractProcessController, another replayed by Zone
-        assertThat(accumulator.get(2).getValue().callingStatus.calling).isFalse();
-        assertThat(accumulator.get(3).getValue().callingStatus.calling).isFalse();
+        assertThat(accumulator.get(2).getValue().callingStatus().calling).isFalse();
+        assertThat(accumulator.get(3).getValue().callingStatus().calling).isFalse();
 
         // PV change again
-        assertThat(accumulator.get(4).getValue().callingStatus.calling).isTrue();
+        assertThat(accumulator.get(4).getValue().callingStatus().calling).isTrue();
 
         out.dispose();
     }

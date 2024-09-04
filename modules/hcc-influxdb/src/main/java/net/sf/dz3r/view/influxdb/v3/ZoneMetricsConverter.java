@@ -32,14 +32,14 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
 
         if (status != null) {
 
-            b.addField("enabled", status.settings.enabled);
-            b.addField("setpoint", status.settings.setpoint);
-            b.addField("voting", status.settings.voting);
-            b.addField("hold", status.settings.hold);
-            b.addField("dumpPriority", status.settings.dumpPriority);
+            b.addField("enabled", status.settings().enabled);
+            b.addField("setpoint", status.settings().setpoint);
+            b.addField("voting", status.settings().voting);
+            b.addField("hold", status.settings().hold);
+            b.addField("dumpPriority", status.settings().dumpPriority);
 
-            b.addField("calling", status.callingStatus.calling);
-            b.addField("demand", status.callingStatus.demand);
+            b.addField("calling", status.callingStatus().calling);
+            b.addField("demand", status.callingStatus().demand);
         }
 
         if (signal.error != null) {
@@ -52,7 +52,7 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
 
         var status = signal.getValue();
 
-        if (status == null || status.economizerStatus == null) {
+        if (status == null || status.economizerStatus() == null) {
 
             // Not returning an error here, will have to live and see if this is a problem
             // (it's already emitted by the zone itself)
@@ -61,7 +61,7 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
 
         var b = createBuilder(signal, "economizer");
 
-        var economizerStatus = status.economizerStatus;
+        var economizerStatus = status.economizerStatus();
 
         if (economizerStatus.settings != null) {
 
