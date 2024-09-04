@@ -139,7 +139,9 @@ public class HccCLI implements CommandLineRunner {
             var httpUrl = new URL(url);
             // First need to get this to determine the host and port to connect RSocket to
             var meta = httpClient.getMeta(httpUrl);
-            rsocketClient.getZones(httpUrl.getHost(), meta.instance().duplexPort(), serialization);
+            var zoneMap = rsocketClient.getZones(httpUrl.getHost(), meta.instance().duplexPort(), serialization);
+
+            logger.info("ZONES:\n{}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zoneMap));
 
         } finally {
             ThreadContext.pop();

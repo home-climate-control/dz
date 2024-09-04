@@ -2,6 +2,7 @@ package com.homeclimatecontrol.hcc.client.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
+import net.sf.dz3r.instrumentation.Marker;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -57,6 +58,7 @@ public class HttpClient {
 
     public EndpointMeta getMeta(URL targetUrl) throws IOException {
 
+        var m = new Marker("getMeta");
         var get = new HttpGet(targetUrl.toString());
 
         try {
@@ -79,6 +81,7 @@ public class HttpClient {
 
         } finally {
             get.releaseConnection();
+            m.close();
         }
     }
 }

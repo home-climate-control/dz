@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.springboot.starter.log4j2)
     implementation(libs.springboot.starter.rsocket)
 
+    implementation(project(":modules:hcc-common"))
     implementation(project(":modules:hcc-data-source-api"))
     implementation(project(":modules:hcc-model"))
 }
