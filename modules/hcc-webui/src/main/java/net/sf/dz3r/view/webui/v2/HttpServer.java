@@ -200,9 +200,11 @@ public class HttpServer extends Endpoint {
         return ok()
                 .cacheControl(CacheControl.noCache())
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(Flux.fromIterable(unit2observer.values())
-                                .flatMap(UnitObserver::getZones),
-                        ZoneStatus.class);
+                .body(Flux
+                                .fromIterable(unit2observer.values())
+                                .flatMap(UnitObserver::getZones)
+                                .collectMap(Map.Entry::getKey, Map.Entry::getValue),
+                        Map.class);
     }
 
     /**
