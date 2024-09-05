@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.influxdb.v3;
 
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import org.influxdb.dto.Point;
 import reactor.core.publisher.Flux;
 
@@ -29,9 +29,9 @@ public class UnitControllerMetricsConverter extends MetricsConverter<HvacCommand
 
         if (hvacCommand != null) {
 
-            b.addField("demand", hvacCommand.demand);
-            b.addField("fanSpeed", hvacCommand.fanSpeed);
-            Optional.ofNullable(hvacCommand.mode).ifPresent(m -> b.tag("mode", m.toString()));
+            b.addField("demand", hvacCommand.demand());
+            b.addField("fanSpeed", hvacCommand.fanSpeed());
+            Optional.ofNullable(hvacCommand.mode()).ifPresent(m -> b.tag("mode", m.toString()));
         }
 
         if (signal.error != null) {

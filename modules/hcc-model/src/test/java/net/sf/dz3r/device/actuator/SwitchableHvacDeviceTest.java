@@ -1,8 +1,8 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-import static net.sf.dz3r.model.HvacMode.COOLING;
+import static com.homeclimatecontrol.hcc.model.HvacMode.COOLING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -42,18 +42,18 @@ class SwitchableHvacDeviceTest {
         StepVerifier
                 .create(result)
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().demand).isEqualTo(0.5);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.5);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().demand).isEqualTo(0.0);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.0);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 .verifyComplete();
     }
@@ -122,7 +122,7 @@ class SwitchableHvacDeviceTest {
         StepVerifier
                 .create(result)
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().fanSpeed).isEqualTo(1.0);
+                    assertThat(e.getValue().command().fanSpeed()).isEqualTo(1.0);
                 })
                 .verifyComplete();
     }
@@ -172,24 +172,24 @@ class SwitchableHvacDeviceTest {
                 .create(result)
                 // Device must turn on
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // Device must stay on
                 .assertNext(e -> {
                     // Requested demand is the previous value
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isEqualTo(0.5);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isEqualTo(0.5);
                 })
                 // Device must still stay on
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isZero();
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isZero();
                 })
                 // Device must shut off
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().demand).isEqualTo(0.0);
-                    assertThat(e.getValue().command().fanSpeed).isZero();
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.0);
+                    assertThat(e.getValue().command().fanSpeed()).isZero();
                 })
                 .verifyComplete();
     }
@@ -234,9 +234,9 @@ class SwitchableHvacDeviceTest {
                 .assertNext(e -> {
                     assertThat(e.isOK()).isTrue();
                     assertThat(e.isError()).isFalse();
-                    assertThat(e.getValue().command().mode).isEqualTo(COOLING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(COOLING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 .verifyComplete();
     }

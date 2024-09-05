@@ -1,7 +1,7 @@
 package net.sf.dz3r.runtime.config.quarkus.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 
 import java.time.Duration;
 import java.util.Optional;

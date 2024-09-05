@@ -1,8 +1,8 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.BeforeAll;
@@ -64,16 +64,16 @@ class HeatPumpTest {
                 // --
                 // Init sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isNull();
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isNull();
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // Shutdown sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isNull();
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isZero();
+                    assertThat(e.getValue().command().mode()).isNull();
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isZero();
                 })
                 .verifyComplete();
     }
@@ -106,9 +106,9 @@ class HeatPumpTest {
                 // --
                 // Init sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isNull();
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isNull();
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // This shall not pass...
@@ -121,23 +121,23 @@ class HeatPumpTest {
                 // --
                 // ...but this will
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.7);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.7);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // Demand change command - requested
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.7);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.7);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // Shutdown sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isZero();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isZero();
                 })
                 .verifyComplete();
     }
@@ -167,30 +167,30 @@ class HeatPumpTest {
                 // --
                 // Init sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isNull();
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isNull();
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // Set mode to HEATING
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // Turn on the condenser
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // Shutdown sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isZero();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isZero();
                 })
                 .verifyComplete();
     }
@@ -218,51 +218,51 @@ class HeatPumpTest {
                 // --
                 // Init sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isNull();
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isNull();
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // (heating, 0.8, null)
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // VT: FIXME: Why twice?
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.HEATING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.8);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.HEATING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.8);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // (cooling, 0.7, null)
                 .assertNext(e -> {
                     // Mode change to cooling command, shutting off the condenser - requested
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 .assertNext(e -> {
                     // ... and set the demand
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.7);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.7);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 .assertNext(e -> {
                     // VT: FIXME: Why twice?
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isEqualTo(0.7);
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(0.7);
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // Shutdown sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isZero();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isZero();
                 })
                 .verifyComplete();
     }
@@ -294,43 +294,43 @@ class HeatPumpTest {
                 // --
                 // Init sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isNull();
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isNull();
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // (null, 0d, null)
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isNull();
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isNull();
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 // (cooling, null, null) => (cooling, 0d, null) because reconcile()
                 // Switch the mode to COOLING without delays
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // VT: FIXME: Why twice?
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isNull();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isNull();
                 })
                 // --
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isEqualTo(1.0);
-                    assertThat(e.getValue().command().fanSpeed).isEqualTo(1.0);
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isEqualTo(1.0);
+                    assertThat(e.getValue().command().fanSpeed()).isEqualTo(1.0);
                 })
                 // --
                 // Shutdown sequence
                 .assertNext(e -> {
-                    assertThat(e.getValue().command().mode).isEqualTo(HvacMode.COOLING);
-                    assertThat(e.getValue().command().demand).isZero();
-                    assertThat(e.getValue().command().fanSpeed).isZero();
+                    assertThat(e.getValue().command().mode()).isEqualTo(HvacMode.COOLING);
+                    assertThat(e.getValue().command().demand()).isZero();
+                    assertThat(e.getValue().command().fanSpeed()).isZero();
                 })
                 .verifyComplete();
     }

@@ -1,11 +1,11 @@
 package net.sf.dz3r.view.http.gae.v3;
 
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
-import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.SchedulePeriod;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

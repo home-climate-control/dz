@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator.economizer;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 
 /**
  * Full set of economizer settings, both permanent and user changeable.

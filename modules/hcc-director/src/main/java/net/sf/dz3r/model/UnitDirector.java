@@ -1,11 +1,12 @@
 package net.sf.dz3r.model;
 
+import com.homeclimatecontrol.hcc.model.HvacMode;
+import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import net.sf.dz3r.scheduler.Scheduler;
-import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;

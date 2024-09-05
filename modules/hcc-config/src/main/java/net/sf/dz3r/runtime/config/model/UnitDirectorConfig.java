@@ -2,7 +2,7 @@ package net.sf.dz3r.runtime.config.model;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import net.sf.dz3r.runtime.config.Identifiable;
 
 import java.util.Map;

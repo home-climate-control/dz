@@ -1,9 +1,9 @@
 package net.sf.dz3r.view.swing.zone;
 
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.EconomizerStatus;
-import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.runtime.config.model.MeasurementUnits;

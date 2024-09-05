@@ -9,13 +9,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
-import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.Connector;
 import org.apache.logging.log4j.LogManager;
@@ -136,12 +136,12 @@ public class HomeAssistantConnector implements Connector {
 
             feed.hvacDeviceFlux
                     .doOnNext(s -> {
-                        if (s.getValue().command().mode == null) {
+                        if (s.getValue().command().mode() == null) {
                             logger.debug("null hvacMode (normal on startup): {}", s);
                         }
                     })
-                    .filter(s -> s.getValue().command().mode != null)
-                    .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command().mode, unitId, s.status, s.error))
+                    .filter(s -> s.getValue().command().mode() != null)
+                    .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command().mode(), unitId, s.status, s.error))
                     .subscribe(mode -> captureMode(mode, sensorFlux2zone.values()));
 
         } finally {

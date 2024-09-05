@@ -1,5 +1,6 @@
 package net.sf.dz3r.runtime.config.hardware;
 
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.counter.FileTimeUsageCounter;
 import net.sf.dz3r.counter.LoggerTimeUsageReporter;
@@ -9,7 +10,6 @@ import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.VariableHvacDevice;
 import net.sf.dz3r.device.actuator.pi.autohat.HeatPumpHAT;
-import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import reactor.core.publisher.Flux;

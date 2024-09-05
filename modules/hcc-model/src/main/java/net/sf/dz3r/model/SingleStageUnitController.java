@@ -1,7 +1,7 @@
 package net.sf.dz3r.model;
 
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import reactor.core.publisher.Flux;
 

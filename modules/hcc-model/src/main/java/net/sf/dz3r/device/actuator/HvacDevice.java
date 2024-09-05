@@ -1,10 +1,10 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.device.Addressable;
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
+import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.signal.SignalProcessor;
-import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 

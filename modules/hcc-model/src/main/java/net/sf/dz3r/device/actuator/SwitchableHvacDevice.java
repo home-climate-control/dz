@@ -1,9 +1,9 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.counter.ResourceUsageCounter;
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
+import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
@@ -103,7 +103,7 @@ public class SwitchableHvacDevice extends SingleModeHvacDevice<Void> {
      * @return Switch state.
      */
     private boolean getState(HvacCommand command) {
-        return Optional.ofNullable(command.demand).orElse(0d) + Optional.ofNullable(command.fanSpeed).orElse(0d) > 0;
+        return Optional.ofNullable(command.demand()).orElse(0d) + Optional.ofNullable(command.fanSpeed()).orElse(0d) > 0;
     }
 
     @Override

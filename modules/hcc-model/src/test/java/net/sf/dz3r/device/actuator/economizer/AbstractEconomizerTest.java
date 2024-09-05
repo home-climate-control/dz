@@ -1,12 +1,12 @@
 package net.sf.dz3r.device.actuator.economizer;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
+import com.homeclimatecontrol.hcc.model.HvacMode;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
-import net.sf.dz3r.model.HvacMode;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;

@@ -1,11 +1,11 @@
 package net.sf.dz3r.device.actuator;
 
+import com.homeclimatecontrol.hcc.model.HvacMode;
+import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.device.DeviceState;
-import net.sf.dz3r.model.HvacMode;
-import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
@@ -103,7 +103,7 @@ public class VariableHvacDevice extends SingleModeHvacDevice<OutputState> {
     @Override
     protected Flux<Signal<HvacDeviceStatus<OutputState>, Void>> apply(HvacCommand command) {
 
-        var output = band(Math.max(command.demand, command.fanSpeed), bandCount);
+        var output = band(Math.max(command.demand(), command.fanSpeed()), bandCount);
         var scaled = output * maxPower;
         var on = Double.compare(output, 0d) != 0;
 

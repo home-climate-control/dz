@@ -3,12 +3,12 @@ package net.sf.dz3r.view.http.gae.v3;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.instrumentation.Marker;
-import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneCommand;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;
 import net.sf.dz3r.view.http.v3.HttpConnector;
@@ -108,12 +108,12 @@ public class HttpConnectorGAE extends HttpConnector {
         // Zones and zone controller have no business knowing about HVAC mode; inject it
         feed.hvacDeviceFlux
                 .doOnNext(s -> {
-                    if (s.getValue().command().mode == null) {
+                    if (s.getValue().command().mode() == null) {
                         logger.debug("null hvacMode (normal on startup): {}", s);
                     }
                 })
-                .filter(s -> s.getValue().command().mode != null)
-                .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command().mode, unitId, s.status, s.error))
+                .filter(s -> s.getValue().command().mode() != null)
+                .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command().mode(), unitId, s.status, s.error))
                 .subscribe(zoneRenderer::consumeMode);
 
         // Zone ("thermostat" in its terminology) status feed is the only one supported

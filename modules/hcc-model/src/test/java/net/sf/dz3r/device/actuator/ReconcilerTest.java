@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.model.HvacMode;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,9 +33,9 @@ class ReconcilerTest {
         var next = new HvacCommand(null, 1d, null);
         var result = reconciler.reconcile("mode-to-null", prev, next);
 
-        assertThat(result.command().mode).isEqualTo(HvacMode.HEATING);
-        assertThat(result.command().demand).isEqualTo(1d);
-        assertThat(result.command().fanSpeed).isNull();
+        assertThat(result.command().mode()).isEqualTo(HvacMode.HEATING);
+        assertThat(result.command().demand()).isEqualTo(1d);
+        assertThat(result.command().fanSpeed()).isNull();
         assertThat(result.modeChangeRequired()).isFalse();
         assertThat(result.delayRequired()).isFalse();
     }
@@ -50,9 +50,9 @@ class ReconcilerTest {
         var next = new HvacCommand(HvacMode.HEATING, 1d, null);
         var result = reconciler.reconcile("null-to-heating", prev, next);
 
-        assertThat(result.command().mode).isEqualTo(HvacMode.HEATING);
-        assertThat(result.command().demand).isEqualTo(1d);
-        assertThat(result.command().fanSpeed).isNull();
+        assertThat(result.command().mode()).isEqualTo(HvacMode.HEATING);
+        assertThat(result.command().demand()).isEqualTo(1d);
+        assertThat(result.command().fanSpeed()).isNull();
         assertThat(result.modeChangeRequired()).isTrue();
         assertThat(result.delayRequired()).isFalse();
     }
@@ -67,9 +67,9 @@ class ReconcilerTest {
         var next = new HvacCommand(HvacMode.HEATING, 1d, null);
         var result = reconciler.reconcile("cooling-to-heating", prev, next);
 
-        assertThat(result.command().mode).isEqualTo(HvacMode.HEATING);
-        assertThat(result.command().demand).isEqualTo(1d);
-        assertThat(result.command().fanSpeed).isNull();
+        assertThat(result.command().mode()).isEqualTo(HvacMode.HEATING);
+        assertThat(result.command().demand()).isEqualTo(1d);
+        assertThat(result.command().fanSpeed()).isNull();
         assertThat(result.modeChangeRequired()).isTrue();
         assertThat(result.delayRequired()).isTrue();
     }
@@ -84,9 +84,9 @@ class ReconcilerTest {
         var next = new HvacCommand(null, null, 1d);
         var result = reconciler.reconcile("null-to-fan", prev, next);
 
-        assertThat(result.command().mode).isNull();
-        assertThat(result.command().demand).isNull();
-        assertThat(result.command().fanSpeed).isEqualTo(1d);
+        assertThat(result.command().mode()).isNull();
+        assertThat(result.command().demand()).isNull();
+        assertThat(result.command().fanSpeed()).isEqualTo(1d);
         assertThat(result.modeChangeRequired()).isFalse();
         assertThat(result.delayRequired()).isFalse();
     }
@@ -101,9 +101,9 @@ class ReconcilerTest {
         var next = new HvacCommand(null, null, 0d);
         var result = reconciler.reconcile("fan-to-zero", prev, next);
 
-        assertThat(result.command().mode).isNull();
-        assertThat(result.command().demand).isNull();
-        assertThat(result.command().fanSpeed).isEqualTo(0d);
+        assertThat(result.command().mode()).isNull();
+        assertThat(result.command().demand()).isNull();
+        assertThat(result.command().fanSpeed()).isEqualTo(0d);
         assertThat(result.modeChangeRequired()).isFalse();
         assertThat(result.delayRequired()).isFalse();
     }
@@ -118,9 +118,9 @@ class ReconcilerTest {
         var next = new HvacCommand(null, null, null);
         var result = reconciler.reconcile("anything-to-null", prev, next);
 
-        assertThat(result.command().mode).isEqualTo(HvacMode.HEATING);
-        assertThat(result.command().demand).isEqualTo(1d);
-        assertThat(result.command().fanSpeed).isEqualTo(1d);
+        assertThat(result.command().mode()).isEqualTo(HvacMode.HEATING);
+        assertThat(result.command().demand()).isEqualTo(1d);
+        assertThat(result.command().fanSpeed()).isEqualTo(1d);
         assertThat(result.modeChangeRequired()).isFalse();
         assertThat(result.delayRequired()).isFalse();
     }

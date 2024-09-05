@@ -1,4 +1,4 @@
-package net.sf.dz3r.model;
+package com.homeclimatecontrol.hcc.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -7,8 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * Unlike the previous incarnation, this just includes actionable modes, {@code OFF} is handled by devices.
  *
- * @see net.sf.dz3r.device.model.HvacMode
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 public enum HvacMode {
 

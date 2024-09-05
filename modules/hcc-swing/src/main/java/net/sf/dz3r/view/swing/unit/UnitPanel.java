@@ -153,7 +153,7 @@ public class UnitPanel extends EntityPanel<HvacDeviceStatus, Void> {
         if (signal.isError()) {
             currentDemandLabel.setText(UNDEFINED);
         } else {
-            currentDemandLabel.setText(format.format(signal.getValue().command().demand));
+            currentDemandLabel.setText(format.format(signal.getValue().command().demand()));
         }
     }
 

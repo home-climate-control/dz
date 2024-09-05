@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.http.gae.v3;
 
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;

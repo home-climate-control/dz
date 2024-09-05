@@ -1,10 +1,10 @@
 package net.sf.dz3r.device.actuator;
 
+import com.homeclimatecontrol.hcc.model.HvacMode;
+import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.counter.ResourceUsageCounter;
-import net.sf.dz3r.model.HvacMode;
-import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
@@ -34,7 +34,7 @@ public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
      * {@code null} value means the status is unknown.
      *
      * Note that for cooling-only devices the actual state is determined by whether
-     * {@link HvacCommand#demand} OR {@link HvacCommand#fanSpeed} are positive.
+     * {@link HvacCommand#demand()} OR {@link HvacCommand#fanSpeed()} are positive.
      */
     protected HvacCommand requested;
 
@@ -96,19 +96,19 @@ public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
      */
     protected HvacCommand reconcile(HvacCommand command) {
 
-        if (command.mode != null && command.mode != mode) {
-            throw new IllegalArgumentException(command.mode.description + " is not supported by this instance");
+        if (command.mode() != null && command.mode() != mode) {
+            throw new IllegalArgumentException(command.mode().description + " is not supported by this instance");
         }
 
-        if (mode != HvacMode.COOLING && command.fanSpeed != null && command.fanSpeed > 0) {
+        if (mode != HvacMode.COOLING && command.fanSpeed() != null && command.fanSpeed() > 0) {
             // FIXME: https://github.com/home-climate-control/dz/issues/222
             logger.warn("{}: fanSpeed>0 should not be issued to this device in heating mode, ignored. Kick the maintainer to fix #222 (command={})", getAddress(), command);
         }
 
         var result = new HvacCommand(
                 mode,
-                command.demand == null ? requested.demand : command.demand,
-                command.fanSpeed == null ? requested.fanSpeed : command.fanSpeed
+                command.demand() == null ? requested.demand() : command.demand(),
+                command.fanSpeed() == null ? requested.fanSpeed() : command.fanSpeed()
         );
 
         logger.debug("{}: requested: {}", getAddress(), result);
@@ -125,7 +125,7 @@ public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
     protected abstract Flux<Signal<HvacDeviceStatus<T>, Void>> apply(HvacCommand command);
 
     private final void updateUptime(Signal<HvacDeviceStatus<T>, Void> signal) {
-        updateUptime(clock.instant(), signal.getValue().command().demand > 0);
+        updateUptime(clock.instant(), signal.getValue().command().demand() > 0);
     }
 
     @Override
@@ -137,7 +137,7 @@ public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
 
         // A valid situation for the whole system which makes no sense for this particular application
 
-        if (command.demand == null && command.fanSpeed == null) {
+        if (command.demand() == null && command.fanSpeed() == null) {
             logger.debug("{}: mode only command, ignored: {}", getAddress(), command);
             return true;
         }

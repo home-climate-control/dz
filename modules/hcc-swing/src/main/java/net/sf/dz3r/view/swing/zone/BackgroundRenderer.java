@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.swing.zone;
 
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.view.swing.ColorScheme;
 

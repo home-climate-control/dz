@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.swing;
 
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 
 import java.awt.Color;
 import java.util.Map;

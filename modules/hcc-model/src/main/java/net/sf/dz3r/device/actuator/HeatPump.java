@@ -1,9 +1,9 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.counter.ResourceUsageCounter;
-import net.sf.dz3r.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
+import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
 import reactor.core.publisher.Flux;
@@ -185,7 +185,7 @@ public class HeatPump extends AbstractHvacDevice<Void> {
         // This is the only time we touch requested state, otherwise side effects will explode the command pipeline
         requestedState = change.command;
 
-        Flux<Signal<HvacDeviceStatus<Void>, Void>> modeFlux = change.modeChangeRequired ? setMode(command.mode, change.delayRequired) : Flux.empty();
+        Flux<Signal<HvacDeviceStatus<Void>, Void>> modeFlux = change.modeChangeRequired ? setMode(command.mode(), change.delayRequired) : Flux.empty();
         var stateFlux = setState(command);
 
         return Flux.concat(modeFlux, stateFlux);
@@ -198,7 +198,7 @@ public class HeatPump extends AbstractHvacDevice<Void> {
      * @return {@code true} if the mode is set and we can proceed, {@code false} otherwise
      */
     private boolean isModeSet(HvacCommand command) {
-        return requestedState.mode != null || command.mode != null || command.demand <= 0;
+        return requestedState.mode() != null || command.mode() != null || command.demand() <= 0;
     }
 
     /**
@@ -309,8 +309,8 @@ public class HeatPump extends AbstractHvacDevice<Void> {
     /**
      * Set the condenser and fan switches to proper positions.
      *
-     * Note that the fan switch is only set if {@link HvacCommand#fanSpeed} is not {@code null},
-     * but {@link HvacCommand#demand} is expected to have a valid value.
+     * Note that the fan switch is only set if {@link HvacCommand#fanSpeed()} is not {@code null},
+     * but {@link HvacCommand#demand()} is expected to have a valid value.
      *
      * @param command Command to execute.
      */
@@ -319,16 +319,16 @@ public class HeatPump extends AbstractHvacDevice<Void> {
         var requestedOperation = reconciler.reconcile(
                 getAddress(),
                 requestedState,
-                new HvacCommand(null, command.demand, command.fanSpeed))
+                new HvacCommand(null, command.demand(), command.fanSpeed()))
                 .command;
 
         Flux<Boolean> runningFlux;
-        if (requestedOperation.demand != null) {
-            var running = (requestedOperation.demand > 0) != reverseRunning;
+        if (requestedOperation.demand() != null) {
+            var running = (requestedOperation.demand() > 0) != reverseRunning;
             runningFlux = Flux
                     .just(new StateCommand(switchRunning, running))
                     .flatMap(this::setState)
-                    .doOnComplete(() -> updateUptime(clock.instant(), requestedOperation.demand > 0));
+                    .doOnComplete(() -> updateUptime(clock.instant(), requestedOperation.demand() > 0));
         } else {
             // This will cause no action, but will prompt zip() to do what it is expected to
             runningFlux = Flux.just(false);
@@ -336,12 +336,12 @@ public class HeatPump extends AbstractHvacDevice<Void> {
 
         Flux<Boolean> fanFlux;
 
-        if (requestedOperation.fanSpeed != null) {
-            var fan =(requestedOperation.fanSpeed > 0) != reverseFan;
+        if (requestedOperation.fanSpeed() != null) {
+            var fan =(requestedOperation.fanSpeed() > 0) != reverseFan;
             fanFlux = Flux
                     .just(new StateCommand(switchFan, fan))
                     .flatMap(this::setState)
-                    .doOnComplete(() -> updateUptime(clock.instant(), requestedOperation.fanSpeed > 0));
+                    .doOnComplete(() -> updateUptime(clock.instant(), requestedOperation.fanSpeed() > 0));
         } else {
             // This will cause no action, but will prompt zip() to do what it is expected to
             fanFlux = Flux.just(false);
@@ -411,19 +411,19 @@ public class HeatPump extends AbstractHvacDevice<Void> {
         public Result reconcile(String name, HvacCommand previous, HvacCommand next) {
 
             var result = new HvacCommand(
-                    next.mode == null? previous.mode : next.mode,
-                    next.demand == null ? previous.demand : next.demand,
-                    next.fanSpeed == null ? previous.fanSpeed : next.fanSpeed
+                    next.mode() == null? previous.mode() : next.mode(),
+                    next.demand() == null ? previous.demand() : next.demand(),
+                    next.fanSpeed() == null ? previous.fanSpeed() : next.fanSpeed()
             );
 
-            var modeChangeRequired = previous.mode != result.mode;
-            var delayRequired = previous.mode != null && previous.mode != result.mode;
+            var modeChangeRequired = previous.mode() != result.mode();
+            var delayRequired = previous.mode() != null && previous.mode() != result.mode();
 
             LogManager.getLogger(HeatPump.class).debug("{}: reconcile: {} + {} => {}", name, previous, next, result);
 
             // Once set, mode will never go null again if the calling conventions are honored
 
-            if (result.mode == null && result.demand != null && result.demand > 0) {
+            if (result.mode() == null && result.demand() != null && result.demand() > 0) {
                 throw new IllegalArgumentException("positive demand with no mode, programming error: " + result);
             }
 

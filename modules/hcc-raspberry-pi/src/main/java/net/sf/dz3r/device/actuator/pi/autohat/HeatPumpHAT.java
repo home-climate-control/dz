@@ -1,9 +1,9 @@
 package net.sf.dz3r.device.actuator.pi.autohat;
 
 import com.homeclimatecontrol.autohat.pi.PimoroniAutomationHAT;
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.device.actuator.HeatPump;
-import net.sf.dz3r.model.HvacMode;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;

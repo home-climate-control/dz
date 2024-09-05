@@ -1,12 +1,12 @@
 package net.sf.dz3r.view.swing;
 
+import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
-import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.swing.dashboard.DashboardCell;
@@ -158,8 +158,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 .filter(s -> zoneName.equals(s.payload))
                 .map(s -> new Signal<ZoneStatus, Void>(s.timestamp, s.getValue(), null, s.status, s.error));
         var modeFlux = hvacDeviceFlux
-                .filter(s -> s.getValue().command().mode != null)
-                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command().mode, null, s.status, s.error));
+                .filter(s -> s.getValue().command().mode() != null)
+                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command().mode(), null, s.status, s.error));
         var thisScheduleFlux = scheduleFlux
                 .filter(s -> zoneName.equals(s.getKey()))
                 .map(Map.Entry::getValue);
