@@ -12,7 +12,7 @@ import java.time.Duration;
  *
  * @param uptime Current uptime. {@code null} if the unit is off.
  *
- * @see net.sf.dz3r.signal.hvac.EconomizerStatus
+ * @see com.homeclimatecontrol.hcc.signal.hvac.EconomizerStatus
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
  */
 public record EconomizerStatus(

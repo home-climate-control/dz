@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.swing.zone;
 
-import net.sf.dz3r.signal.hvac.EconomizerStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.EconomizerStatus;
 
 /**
  * {@link AbstractZoneChart} data point wrapper.

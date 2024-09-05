@@ -1,7 +1,6 @@
-package net.sf.dz3r.signal.hvac;
+package com.homeclimatecontrol.hcc.signal.hvac;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
-import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
 import com.homeclimatecontrol.hcc.signal.Signal;
 
 /**
