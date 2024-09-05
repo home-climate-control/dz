@@ -2,7 +2,7 @@ package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +16,7 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.Set;
 
-import static net.sf.dz3r.signal.Signal.Status.FAILURE_TOTAL;
+import static com.homeclimatecontrol.hcc.signal.Signal.Status.FAILURE_TOTAL;
 
 /**
  * Single stage heatpump, energize to heat.

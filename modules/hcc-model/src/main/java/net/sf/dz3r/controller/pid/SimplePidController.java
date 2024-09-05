@@ -1,6 +1,6 @@
 package net.sf.dz3r.controller.pid;
 
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 
 /**
  * Simple stateless reactive PID controller implementation.

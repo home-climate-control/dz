@@ -1,11 +1,13 @@
 package net.sf.dz3r.signal.health;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
+
 import java.time.Duration;
 
 /**
  * Status of any polling connector.
  *
- * Note that this object bears no failure indication, this is what {@link net.sf.dz3r.signal.Signal#status} is for.
+ * Note that this object bears no failure indication, this is what {@link Signal#status} is for.
  *
  * @param period Detected average period.
  * @param periodStDev Detected period standard deviation.

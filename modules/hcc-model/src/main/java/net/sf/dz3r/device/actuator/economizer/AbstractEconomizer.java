@@ -9,7 +9,7 @@ import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.EconomizerStatus;
 import net.sf.dz3r.signal.hvac.HvacCommand;

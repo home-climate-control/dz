@@ -1,5 +1,6 @@
 package net.sf.dz3r.signal.health;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 
 import java.time.Duration;
@@ -7,7 +8,7 @@ import java.time.Duration;
 /**
  * Status of any {@link AbstractEconomizer}.
  *
- * Note that this object bears no failure indication, this is what {@link net.sf.dz3r.signal.Signal#status} is for.
+ * Note that this object bears no failure indication, this is what {@link Signal#status} is for.
  *
  * @param uptime Current uptime. {@code null} if the unit is off.
  *

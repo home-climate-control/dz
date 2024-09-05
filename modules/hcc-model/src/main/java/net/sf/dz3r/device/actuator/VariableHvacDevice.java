@@ -4,7 +4,7 @@ import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.counter.ResourceUsageCounter;
 import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;

@@ -2,6 +2,7 @@ package net.sf.dz3r.device.onewire;
 
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.utils.OWPath;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.common.IntegerChannelAddress;
 import net.sf.dz3r.device.driver.AbstractDeviceDriver;
 import net.sf.dz3r.device.driver.DriverNetworkMonitor;
@@ -12,7 +13,6 @@ import net.sf.dz3r.device.onewire.event.OneWireNetworkArrival;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkDeparture;
 import net.sf.dz3r.device.onewire.event.OneWireNetworkTemperatureSample;
 import net.sf.dz3r.device.onewire.event.OneWireSwitchState;
-import net.sf.dz3r.signal.Signal;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;

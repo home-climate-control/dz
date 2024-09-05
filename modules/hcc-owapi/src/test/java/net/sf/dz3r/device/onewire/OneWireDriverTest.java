@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.onewire;
 
 import com.dalsemi.onewire.adapter.DSPortAdapter;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.test.TestVariableProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

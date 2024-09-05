@@ -2,7 +2,7 @@ package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.counter.DurationIncrementAdapter;
 import net.sf.dz3r.counter.ResourceUsageCounter;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

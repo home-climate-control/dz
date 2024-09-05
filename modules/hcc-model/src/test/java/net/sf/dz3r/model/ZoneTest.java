@@ -1,7 +1,7 @@
 package net.sf.dz3r.model;
 
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

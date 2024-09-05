@@ -2,7 +2,7 @@ package net.sf.dz3r.signal.hvac;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 
 /**
  * Economiser status.

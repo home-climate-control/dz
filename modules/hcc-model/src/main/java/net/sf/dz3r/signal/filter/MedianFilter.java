@@ -1,6 +1,6 @@
 package net.sf.dz3r.signal.filter;
 
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 
 import java.util.ArrayList;
 import java.util.List;

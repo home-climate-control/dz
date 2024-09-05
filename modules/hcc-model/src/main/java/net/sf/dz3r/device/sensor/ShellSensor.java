@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.sensor;
 
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.logging.log4j.Level;

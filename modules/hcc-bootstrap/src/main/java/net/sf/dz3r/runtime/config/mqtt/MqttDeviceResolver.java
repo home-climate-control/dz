@@ -12,7 +12,7 @@ import net.sf.dz3r.runtime.config.protocol.mqtt.FanConfig;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttBrokerSpec;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttEndpointSpec;
 import net.sf.dz3r.runtime.config.protocol.mqtt.MqttGateway;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.commons.lang3.tuple.ImmutablePair;

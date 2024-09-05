@@ -2,10 +2,10 @@ package net.sf.dz3r.device.z2m.v1;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

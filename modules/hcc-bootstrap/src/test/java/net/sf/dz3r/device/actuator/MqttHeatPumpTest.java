@@ -4,7 +4,7 @@ import net.sf.dz3r.device.esphome.v2.ESPHomeCqrsSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

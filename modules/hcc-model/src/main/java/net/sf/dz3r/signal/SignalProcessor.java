@@ -1,5 +1,6 @@
 package net.sf.dz3r.signal;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
 import reactor.core.publisher.Flux;
 
 /**

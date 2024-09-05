@@ -3,7 +3,7 @@ package net.sf.dz3r.instrumentation;
 import net.sf.dz3r.device.actuator.CqrsSwitch;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.health.SystemStatus;
 import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.Connector;

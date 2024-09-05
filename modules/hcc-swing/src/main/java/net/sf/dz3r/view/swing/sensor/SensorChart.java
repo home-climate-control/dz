@@ -2,7 +2,7 @@ package net.sf.dz3r.view.swing.sensor;
 
 
 import net.sf.dz3r.common.DataSet;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.view.swing.AbstractChart;
 import net.sf.dz3r.view.swing.ColorScheme;
 

@@ -7,7 +7,7 @@ import net.sf.dz3r.runtime.GitProperties;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import net.sf.dz3r.runtime.config.ConfigurationMapper;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.view.ha.HomeAssistantConnector;
 import net.sf.dz3r.view.http.gae.v3.HttpConnectorGAE;
 import net.sf.dz3r.view.influxdb.v3.InfluxDbLogger;

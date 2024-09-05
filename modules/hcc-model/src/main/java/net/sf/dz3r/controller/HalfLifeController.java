@@ -1,7 +1,7 @@
 package net.sf.dz3r.controller;
 
 import net.sf.dz3r.common.HCCObjects;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 
 import java.time.Duration;
 import java.time.Instant;

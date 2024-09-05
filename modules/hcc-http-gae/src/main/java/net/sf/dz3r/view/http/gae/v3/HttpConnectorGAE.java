@@ -8,7 +8,7 @@ import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneCommand;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;
 import net.sf.dz3r.view.http.v3.HttpConnector;

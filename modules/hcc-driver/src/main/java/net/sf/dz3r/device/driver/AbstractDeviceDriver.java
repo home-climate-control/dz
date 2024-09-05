@@ -1,10 +1,10 @@
 package net.sf.dz3r.device.driver;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.actuator.Switch;
 import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
 import net.sf.dz3r.instrumentation.Marker;
-import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import net.sf.dz3r.signal.filter.TimeoutGuard;
 import org.apache.logging.log4j.LogManager;

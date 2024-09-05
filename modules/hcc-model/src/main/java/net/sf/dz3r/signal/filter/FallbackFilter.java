@@ -1,6 +1,6 @@
 package net.sf.dz3r.signal.filter;
 
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,12 +18,12 @@ import java.util.Map;
  *
  * Payload information is passed along to allow determination of which source is actually being used.
  *
- * If all sources are healthy, the output signal status will be {@link net.sf.dz3r.signal.Signal.Status#OK}.
+ * If all sources are healthy, the output signal status will be {@link Signal.Status#OK}.
  *
- * If some sources are not healthy, the output signal status will be {@link net.sf.dz3r.signal.Signal.Status#FAILURE_PARTIAL},
+ * If some sources are not healthy, the output signal status will be {@link Signal.Status#FAILURE_PARTIAL},
  * with the {@link Signal#error} being the error from the first faulty source in the fallback chain.
  *
- * If none of the sources are healthy, the output signal status will be {@link net.sf.dz3r.signal.Signal.Status#FAILURE_TOTAL},
+ * If none of the sources are healthy, the output signal status will be {@link Signal.Status#FAILURE_TOTAL},
  * with the {@link Signal#error} being the error from the first faulty source in the fallback chain.
  *
  * @param <T> Filtered object type.

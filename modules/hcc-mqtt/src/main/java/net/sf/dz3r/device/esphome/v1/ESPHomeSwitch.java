@@ -1,12 +1,12 @@
 package net.sf.dz3r.device.esphome.v1;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
-import net.sf.dz3r.signal.Signal;
 import reactor.core.scheduler.Scheduler;
 
 import java.io.IOException;

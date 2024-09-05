@@ -5,7 +5,7 @@ import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import net.sf.dz3r.common.DurationFormatter;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.runtime.GitProperties;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.UnitObserver;
 import org.apache.logging.log4j.ThreadContext;

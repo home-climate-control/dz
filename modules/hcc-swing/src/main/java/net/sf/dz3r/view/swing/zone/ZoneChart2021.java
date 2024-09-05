@@ -2,7 +2,7 @@ package net.sf.dz3r.view.swing.zone;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import net.sf.dz3r.common.DataSet;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 
 import java.awt.Color;
 import java.awt.Dimension;

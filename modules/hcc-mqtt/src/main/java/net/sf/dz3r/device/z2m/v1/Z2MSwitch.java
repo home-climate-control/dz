@@ -3,12 +3,12 @@ package net.sf.dz3r.device.z2m.v1;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.AbstractMqttSwitch;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
 import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
-import net.sf.dz3r.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Scheduler;
 

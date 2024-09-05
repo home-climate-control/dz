@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.HvacCommand;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.swing.dashboard;
 
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.health.SystemStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityCell;

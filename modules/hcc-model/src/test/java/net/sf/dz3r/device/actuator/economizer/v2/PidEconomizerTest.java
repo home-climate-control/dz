@@ -6,7 +6,7 @@ import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.model.HvacMode;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;

@@ -10,7 +10,7 @@ import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.runtime.config.onewire.EntityProvider;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
 import net.sf.dz3r.view.webui.v2.WebUI;

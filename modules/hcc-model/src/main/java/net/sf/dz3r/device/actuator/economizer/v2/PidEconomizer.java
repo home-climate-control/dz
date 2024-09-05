@@ -8,7 +8,7 @@ import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.model.Thermostat;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import reactor.core.publisher.Flux;
 
 import java.time.Clock;

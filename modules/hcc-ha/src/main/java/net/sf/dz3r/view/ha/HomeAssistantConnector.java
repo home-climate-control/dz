@@ -15,7 +15,7 @@ import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.Connector;
 import org.apache.logging.log4j.LogManager;

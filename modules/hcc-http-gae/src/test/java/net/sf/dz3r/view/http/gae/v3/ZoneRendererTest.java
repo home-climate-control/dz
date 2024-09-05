@@ -5,7 +5,7 @@ import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
 import net.sf.dz3r.model.HvacMode;
 import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.SchedulePeriod;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

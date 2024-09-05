@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator;
 
 import net.sf.dz3r.device.DeviceState;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import reactor.core.publisher.Flux;
 
 /**

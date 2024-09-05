@@ -5,7 +5,7 @@ import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.VariableOutputDevice;
 import net.sf.dz3r.model.UnitController;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;

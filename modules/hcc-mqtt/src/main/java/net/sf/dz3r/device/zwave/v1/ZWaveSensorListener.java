@@ -1,8 +1,8 @@
 package net.sf.dz3r.device.zwave.v1;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
-import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

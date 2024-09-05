@@ -1,7 +1,7 @@
 package net.sf.dz3r.controller;
 
 import net.sf.dz3r.controller.pid.SimplePidController;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Sinks;
 

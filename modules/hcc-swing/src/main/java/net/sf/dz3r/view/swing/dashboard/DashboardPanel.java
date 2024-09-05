@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.swing.dashboard;
 
 import net.sf.dz3r.instrumentation.InstrumentCluster;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.health.SensorStatus;
 import net.sf.dz3r.signal.health.SwitchStatus;
 import net.sf.dz3r.signal.health.SystemStatus;

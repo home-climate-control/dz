@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.xbee;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.xbee.XBeeReactive;
 import net.sf.dz3r.common.StringChannelAddress;
 import net.sf.dz3r.device.driver.AbstractDeviceDriver;
@@ -10,7 +11,6 @@ import net.sf.dz3r.device.xbee.command.XBeeSetSwitchCommand;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkArrival;
 import net.sf.dz3r.device.xbee.event.XBeeNetworkIOSample;
 import net.sf.dz3r.device.xbee.event.XBeeSwitchState;
-import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.filter.AnalogConverter;
 import net.sf.dz3r.signal.filter.AnalogConverterLM34;
 import net.sf.dz3r.signal.filter.AnalogConverterTMP36;

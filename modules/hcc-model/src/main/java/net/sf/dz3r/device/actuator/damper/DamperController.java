@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.actuator.damper;
 
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import reactor.core.publisher.Flux;

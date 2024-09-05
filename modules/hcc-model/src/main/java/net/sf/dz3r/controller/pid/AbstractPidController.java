@@ -1,7 +1,7 @@
 package net.sf.dz3r.controller.pid;
 
 import net.sf.dz3r.controller.AbstractProcessController;
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 
 /**
  * Abstract base for a PID controller implementation.

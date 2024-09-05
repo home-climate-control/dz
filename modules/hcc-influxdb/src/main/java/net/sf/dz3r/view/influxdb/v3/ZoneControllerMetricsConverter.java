@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.influxdb.v3;
 
-import net.sf.dz3r.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
 import org.influxdb.dto.Point;
 import reactor.core.publisher.Flux;
