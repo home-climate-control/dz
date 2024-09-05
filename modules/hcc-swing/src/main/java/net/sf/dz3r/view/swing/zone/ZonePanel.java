@@ -1,10 +1,10 @@
 package net.sf.dz3r.view.swing.zone;
 
 import com.homeclimatecontrol.hcc.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.PeriodSettings;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.EconomizerStatus;
-import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.runtime.config.model.MeasurementUnits;
 import net.sf.dz3r.runtime.config.model.TemperatureUnit;
@@ -600,7 +600,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         if (zoneStatus.periodSettings() == null) {
             periodLabel.setText(NO_PERIOD);
         } else {
-            periodLabel.setText(zoneStatus.periodSettings().period().name + (isOnSchedule() ? "" : "*"));
+            periodLabel.setText(zoneStatus.periodSettings().period().name() + (isOnSchedule() ? "" : "*"));
         }
     }
 

@@ -1,11 +1,11 @@
 package net.sf.dz3r.view.swing;
 
 import com.homeclimatecontrol.hcc.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.SchedulePeriod;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.instrumentation.InstrumentCluster;
-import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.hvac.ZoneStatus;

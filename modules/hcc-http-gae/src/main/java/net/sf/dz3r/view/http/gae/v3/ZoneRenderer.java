@@ -49,7 +49,7 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
 
         var status = source.getValue();
 
-        var periodName = Optional.ofNullable(status.periodSettings()).map(ps -> ps.period().name).orElse(null);
+        var periodName = Optional.ofNullable(status.periodSettings()).map(ps -> ps.period().name()).orElse(null);
         var deviationSetpoint = Optional.ofNullable(status.periodSettings()).map(ps -> status.settings().setpoint() - ps.settings().setpoint()).orElse(0d);
 
         // Careful with literals on ZoneSettings - null values are interpreted as "true" for "enabled" and "voting"

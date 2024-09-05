@@ -1,9 +1,9 @@
 package net.sf.dz3r.scheduler;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
+import com.homeclimatecontrol.hcc.model.PeriodSettings;
+import com.homeclimatecontrol.hcc.model.SchedulePeriod;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
-import net.sf.dz3r.model.PeriodSettings;
-import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,6 +1,8 @@
 package net.sf.dz3r.model;
 
+import com.homeclimatecontrol.hcc.model.PeriodSettings;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.ProcessController;
@@ -8,7 +10,6 @@ import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
@@ -186,12 +187,12 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         var r = Integer.toHexString(settings.hashCode());
 
         if (settings.isOnHold()) {
-            logger.debug("{}: setSettings({}): on hold, ignored: period = {}, settings = {}", getAddress(), r, periodSettings.period().name, periodSettings.settings());
+            logger.debug("{}: setSettings({}): on hold, ignored: period = {}, settings = {}", getAddress(), r, periodSettings.period().name(), periodSettings.settings());
             return;
         }
 
         setSettingsSync(periodSettings.settings());
-        logger.info("{}: setSettings({}): period = {}", getAddress(), r, periodSettings.period().name);
+        logger.info("{}: setSettings({}): period = {}", getAddress(), r, periodSettings.period().name());
     }
 
     public com.homeclimatecontrol.hcc.model.ZoneSettings getSettings() {

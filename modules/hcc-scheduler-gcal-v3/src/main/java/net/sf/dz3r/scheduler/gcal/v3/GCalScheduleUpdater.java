@@ -16,9 +16,9 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
+import com.homeclimatecontrol.hcc.model.SchedulePeriod;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.instrumentation.Marker;
-import net.sf.dz3r.model.SchedulePeriod;
 import net.sf.dz3r.scheduler.SchedulePeriodFactory;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import org.apache.logging.log4j.LogManager;
@@ -282,7 +282,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
             String settingsAsString;
 
             try {
-                settingsAsString = event.getSummary().substring(period.name.length() + 1);
+                settingsAsString = event.getSummary().substring(period.name().length() + 1);
             } catch (Exception ex) {
                 // Easier to paint over than to scratch off; this code will be gone with the old syntax
                 logger.warn("Goofed up parsing '{}' as settings, likely new/old syntax clash, treating the entry as new syntax", event.getSummary(), ex);

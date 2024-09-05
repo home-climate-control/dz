@@ -1,6 +1,6 @@
 package net.sf.dz3r.scheduler;
 
-import net.sf.dz3r.model.SchedulePeriod;
+import com.homeclimatecontrol.hcc.model.SchedulePeriod;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -64,11 +64,11 @@ class SchedulePeriodTest {
         SchedulePeriod p = schedulePeriodFactory.build("period", "02:15", "02:20", "       ");
 
         // Wrong time
-        assertThat(p.start).isEqualTo(TWO_FIFTEEN);
+        assertThat(p.start()).isEqualTo(TWO_FIFTEEN);
         // Wrong days
-        assertThat(p.days).isEqualTo((byte) 0x00);
+        assertThat(p.days()).isEqualTo((byte) 0x00);
         // Wrong string representation
-        assertThat(p.toString()).hasToString("period (id=" + p.id + " 02:15 to 02:20 on .......)");
+        assertThat(p.toString()).hasToString("period (id=" + p.id() + " 02:15 to 02:20 on .......)");
     }
 
     @Test
@@ -77,11 +77,11 @@ class SchedulePeriodTest {
         SchedulePeriod p = schedulePeriodFactory.build("period", "14:15", "14:20", "       ");
 
         // Wrong time
-        assertThat(p.start).isEqualTo(FOURTEEN_FIFTEEN);
+        assertThat(p.start()).isEqualTo(FOURTEEN_FIFTEEN);
         // Wrong days
-        assertThat(p.days).isEqualTo((byte) 0x00);
+        assertThat(p.days()).isEqualTo((byte) 0x00);
         // Wrong string representation
-        assertThat(p.toString()).hasToString("period (id=" + p.id + " 14:15 to 14:20 on .......)");
+        assertThat(p.toString()).hasToString("period (id=" + p.id() + " 14:15 to 14:20 on .......)");
     }
 
     @Test
@@ -95,10 +95,10 @@ class SchedulePeriodTest {
                     SchedulePeriod p = schedulePeriodFactory.build("period", "0:15", "0:20", "      ");
 
                     // Wrong time
-                    assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
+                    assertThat(p.start()).isEqualTo(LocalTime.parse("00:15"));
 
                     // Wrong days
-                    assertThat(p.days).isEqualTo((byte) 0x00);
+                    assertThat(p.days()).isEqualTo((byte) 0x00);
 
                 })
                 .withMessage("Days argument malformed, see source code for instructions");
@@ -115,10 +115,10 @@ class SchedulePeriodTest {
                     SchedulePeriod p = schedulePeriodFactory.build("period", "0:15", "0:20", "        ");
 
                     // Wrong time
-                    assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
+                    assertThat(p.start()).isEqualTo(LocalTime.parse("00:15"));
 
                     // Wrong days
-                    assertThat(p.days).isEqualTo((byte) 0x00);
+                    assertThat(p.days()).isEqualTo((byte) 0x00);
 
                 })
                 .withMessage("Days argument malformed, see source code for instructions");
@@ -130,10 +130,10 @@ class SchedulePeriodTest {
         SchedulePeriod p = schedulePeriodFactory.build("period", "0:15", "0:20", "M WT  S");
 
         // Wrong time
-        assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
+        assertThat(p.start()).isEqualTo(LocalTime.parse("00:15"));
 
         // Wrong days
-        assertThat(p.days).isEqualTo((byte) 0x4D);
+        assertThat(p.days()).isEqualTo((byte) 0x4D);
     }
 
     @Test
@@ -142,10 +142,10 @@ class SchedulePeriodTest {
         SchedulePeriod p = schedulePeriodFactory.build("period", "0:15","0:20",  "MT   SS");
 
         // Wrong time
-        assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
+        assertThat(p.start()).isEqualTo(LocalTime.parse("00:15"));
 
         // Wrong days
-        assertThat(p.days).isEqualTo((byte) 0x63);
+        assertThat(p.days()).isEqualTo((byte) 0x63);
     }
 
     @Test
@@ -154,10 +154,10 @@ class SchedulePeriodTest {
         SchedulePeriod p = schedulePeriodFactory.build("period", "0:15","0:20",  ".......");
 
         // Wrong time
-        assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
+        assertThat(p.start()).isEqualTo(LocalTime.parse("00:15"));
 
         // Wrong days
-        assertThat(p.days).isEqualTo((byte) 0x7F);
+        assertThat(p.days()).isEqualTo((byte) 0x7F);
     }
 
     @Test
@@ -166,10 +166,10 @@ class SchedulePeriodTest {
         SchedulePeriod p = schedulePeriodFactory.build("period", "2:15 AM","02:20 AM",  ".......");
 
         // Wrong time
-        assertThat(p.start).isEqualTo(TWO_FIFTEEN);
+        assertThat(p.start()).isEqualTo(TWO_FIFTEEN);
 
         // Wrong days
-        assertThat(p.days).isEqualTo((byte) 0x7F);
+        assertThat(p.days()).isEqualTo((byte) 0x7F);
     }
 
     @Test
@@ -178,10 +178,10 @@ class SchedulePeriodTest {
         SchedulePeriod p = schedulePeriodFactory.build("period", "2:15 PM", "02:20 PM", ".......");
 
         // Wrong time
-        assertThat(p.start).isEqualTo(FOURTEEN_FIFTEEN);
+        assertThat(p.start()).isEqualTo(FOURTEEN_FIFTEEN);
 
         // Wrong days
-        assertThat(p.days).isEqualTo((byte) 0x7F);
+        assertThat(p.days()).isEqualTo((byte) 0x7F);
     }
 
     @Test
@@ -190,10 +190,10 @@ class SchedulePeriodTest {
         SchedulePeriod p = schedulePeriodFactory.build("period", "1415", "1420", ".......");
 
         // Wrong time
-        assertThat(p.start).isEqualTo(FOURTEEN_FIFTEEN);
+        assertThat(p.start()).isEqualTo(FOURTEEN_FIFTEEN);
 
         // Wrong days
-        assertThat(p.days).isEqualTo((byte) 0x7F);
+        assertThat(p.days()).isEqualTo((byte) 0x7F);
     }
 
     @Test
@@ -207,10 +207,10 @@ class SchedulePeriodTest {
                     SchedulePeriod p = schedulePeriodFactory.build("period", "oops", "oops again", "       ");
 
                     // Wrong time
-                    assertThat(p.start).isEqualTo(LocalTime.parse("00:15"));
+                    assertThat(p.start()).isEqualTo(LocalTime.parse("00:15"));
 
                     // Wrong days
-                    assertThat(p.days).isEqualTo((byte) 0x00);
+                    assertThat(p.days()).isEqualTo((byte) 0x00);
 
                 })
                 .withMessage("Tried all available formats to parse 'oops' (see the log for details) and failed, giving up");
@@ -317,6 +317,6 @@ class SchedulePeriodTest {
 
         SchedulePeriod p = schedulePeriodFactory.build("period", "1415", "1420", ".......");
 
-        assertThat(p.toString()).hasToString("period (id=" + p.id + " 14:15 to 14:20 on MTWTFSS)");
+        assertThat(p.toString()).hasToString("period (id=" + p.id() + " 14:15 to 14:20 on MTWTFSS)");
     }
 }

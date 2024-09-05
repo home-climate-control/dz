@@ -1,66 +1,25 @@
-package net.sf.dz3r.model;
+package com.homeclimatecontrol.hcc.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 /**
- * Defines a time period when a given {@link com.homeclimatecontrol.hcc.model.ZoneSettings} is to be activated.
+ * Defines a time period when a given {@link ZoneSettings} is to be activated.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @param id Period ID. Doesn't participate in {@link #compareTo(SchedulePeriod)}, but does participate in {@link #equals(Object)} and {@link #hashCode()}.
+ * @param name Period name. Has no significance other than for display and {@link #toString()}.
+ * @param start Start time offset against midnight.
+ * @param end End time offset against midnight.
+ * @param days Days when this period is scheduled to be active, as a bitmask. 0x01 is Monday, 0x02 is Tuesday, and son on.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
-public class SchedulePeriod implements Comparable<SchedulePeriod> {
-
-    /**
-     * Period ID.
-     *
-     * Doesn't participate in {@link #compareTo(SchedulePeriod)}, but does participate in {@link #equals(Object)}
-     * and {@link #hashCode()}.
-     */
-    public final String id;
-
-    /**
-     * Period name.
-     *
-     * Has no significance other than for display and {@link #toString()}.
-     */
-    public final String name;
-
-    /**
-     * Start time offset against midnight.
-     */
-    public final LocalTime start;
-
-    /**
-     * End time offset against midnight.
-     */
-    public final LocalTime end;
-
-    /**
-     * Days when this period is scheduled to be active, as a bitmask.
-     *
-     * 0x01 is Monday, 0x02 is Tuesday, and son on.
-     */
-    public final byte days;
-
-    /**
-     * Create an instance.
-     *
-     * Sanity checks are deferred to {@link SchedulePeriodFactory}.
-     *
-     * @param id Period ID.
-     * @param name Period name.
-     * @param start Start time.
-     * @param end End time.
-     * @param days Days of week bitmask.
-     */
-    public SchedulePeriod(String id, String name, LocalTime start, LocalTime end, byte days) {
-
-        this.id = id;
-        this.name = name;
-        this.start = start;
-        this.end = end;
-        this.days = days;
-    }
+public record SchedulePeriod(
+        String id,
+        String name,
+        LocalTime start,
+        LocalTime end,
+        byte days) implements Comparable<SchedulePeriod> {
 
     public boolean isSameDay() {
         return end.isAfter(start);
@@ -74,7 +33,6 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
      * Check if the given time is within this period.
      *
      * @param t Time of day to check for inclusion.
-     *
      * @return {@code true} if this period includes the time.
      */
     public boolean includes(LocalTime t) {
@@ -88,7 +46,6 @@ public class SchedulePeriod implements Comparable<SchedulePeriod> {
      * Check if this period is active on the day of week of the given date.
      *
      * @param d Date to check for inclusion.
-     *
      * @return {@code true} if this period includes is active for the date's day of week..
      */
     public boolean includesDay(LocalDate d) {

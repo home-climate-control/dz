@@ -1,6 +1,7 @@
 package net.sf.dz3r.model;
 
 import com.homeclimatecontrol.hcc.model.HvacMode;
+import com.homeclimatecontrol.hcc.model.SchedulePeriod;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
