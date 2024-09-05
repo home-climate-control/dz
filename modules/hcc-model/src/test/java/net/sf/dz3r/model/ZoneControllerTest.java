@@ -85,38 +85,38 @@ class ZoneControllerTest {
                 .create(stage1)
                 .assertNext(s -> {
                     // 20.0 - initially, off
-                    assertThat(s.getValue().signal.calling).isFalse();
-                    assertThat(s.getValue().signal.demand).isEqualTo(1.0);
+                    assertThat(s.getValue().signal.calling()).isFalse();
+                    assertThat(s.getValue().signal.demand()).isEqualTo(1.0);
                 })
                 .assertNext(s -> {
                     // 20.5 - still off
-                    assertThat(s.getValue().signal.calling).isFalse();
-                    assertThat(s.getValue().signal.demand).isEqualTo(1.5);
+                    assertThat(s.getValue().signal.calling()).isFalse();
+                    assertThat(s.getValue().signal.demand()).isEqualTo(1.5);
                 })
                 .assertNext(s -> {
                     // 21.0 - turning on
-                    assertThat(s.getValue().signal.calling).isTrue();
-                    assertThat(s.getValue().signal.demand).isEqualTo(2.0);
+                    assertThat(s.getValue().signal.calling()).isTrue();
+                    assertThat(s.getValue().signal.demand()).isEqualTo(2.0);
                 })
                 .assertNext(s -> {
                     // 20.5 - still on
-                    assertThat(s.getValue().signal.calling).isTrue();
-                    assertThat(s.getValue().signal.demand).isEqualTo(1.5);
+                    assertThat(s.getValue().signal.calling()).isTrue();
+                    assertThat(s.getValue().signal.demand()).isEqualTo(1.5);
                 })
                 .assertNext(s -> {
                     // 20.0 - still on
-                    assertThat(s.getValue().signal.calling).isTrue();
-                    assertThat(s.getValue().signal.demand).isEqualTo(1.0);
+                    assertThat(s.getValue().signal.calling()).isTrue();
+                    assertThat(s.getValue().signal.demand()).isEqualTo(1.0);
                 })
                 .assertNext(s -> {
                     // 19.5 - still on
-                    assertThat(s.getValue().signal.calling).isTrue();
-                    assertThat(s.getValue().signal.demand).isEqualTo(0.5);
+                    assertThat(s.getValue().signal.calling()).isTrue();
+                    assertThat(s.getValue().signal.demand()).isEqualTo(0.5);
                 })
                 .assertNext(s -> {
                     // 19.0 - turning off now
-                    assertThat(s.getValue().signal.calling).isFalse();
-                    assertThat(s.getValue().signal.demand).isEqualTo(0.0);
+                    assertThat(s.getValue().signal.calling()).isFalse();
+                    assertThat(s.getValue().signal.demand()).isEqualTo(0.0);
                 })
                 .verifyComplete();
     }
@@ -535,9 +535,9 @@ class ZoneControllerTest {
         gate.await();
 
         // Verify
-        assertThat(t1.output.get(0).callingStatus().calling).isFalse();
-        assertThat(t2.output.get(0).callingStatus().calling).isFalse();
-        assertThat(t3.output.get(0).callingStatus().calling).isFalse();
+        assertThat(t1.output.get(0).callingStatus().calling()).isFalse();
+        assertThat(t2.output.get(0).callingStatus().calling()).isFalse();
+        assertThat(t3.output.get(0).callingStatus().calling()).isFalse();
 
         assertThat(zcOutput).hasSize(3);
         assertThat(zcOutput.get(2).getValue().demand).isZero();
@@ -553,14 +553,14 @@ class ZoneControllerTest {
 
         // This one was responsible for changing the status
         assertThat(t1.output).hasSize(2);
-        assertThat(t1.output.get(1).callingStatus().calling).isTrue();
+        assertThat(t1.output.get(1).callingStatus().calling()).isTrue();
 
         // This one was raised
         assertThat(t2.output).hasSize(2);
         // But this one wasn't, no signals were emitted
         assertThat(t3.output).hasSize(1);
 
-        assertThat(t2.output.get(1).callingStatus().calling).isTrue();
+        assertThat(t2.output.get(1).callingStatus().calling()).isTrue();
 
     }
 

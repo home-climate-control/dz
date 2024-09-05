@@ -38,8 +38,8 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
             b.addField("hold", status.settings().hold());
             b.addField("dumpPriority", status.settings().dumpPriority());
 
-            b.addField("calling", status.callingStatus().calling);
-            b.addField("demand", status.callingStatus().demand);
+            b.addField("calling", status.callingStatus().calling());
+            b.addField("demand", status.callingStatus().demand());
         }
 
         if (signal.error != null) {
@@ -63,23 +63,23 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
 
         var economizerStatus = status.economizerStatus();
 
-        if (economizerStatus.settings != null) {
+        if (economizerStatus.settings() != null) {
 
             b.addField("enabled", true);
-            b.addField("delta", economizerStatus.settings.changeoverDelta());
-            b.addField("target", economizerStatus.settings.targetTemperature());
+            b.addField("delta", economizerStatus.settings().changeoverDelta());
+            b.addField("target", economizerStatus.settings().targetTemperature());
 
         } else {
             b.addField("enabled", false);
         }
 
-        b.addField("calling", economizerStatus.callingStatus.calling);
-        b.addField("demand", economizerStatus.callingStatus.demand);
-        b.addField("sample", economizerStatus.callingStatus.sample);
+        b.addField("calling", economizerStatus.callingStatus().calling());
+        b.addField("demand", economizerStatus.callingStatus().demand());
+        b.addField("sample", economizerStatus.callingStatus().sample());
 
         // May not be ready yet at startup time
-        if (economizerStatus.ambient != null) {
-            b.addField("ambient", economizerStatus.ambient.getValue());
+        if (economizerStatus.ambient() != null) {
+            b.addField("ambient", economizerStatus.ambient().getValue());
         }
 
         return Mono.just(b.build());

@@ -53,8 +53,8 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
             logger.trace("eco: {}", signal.getValue().economizerStatus);
 
-            ambient = Optional.ofNullable(signal.getValue().economizerStatus.ambient).map(Signal::getValue).orElse(null);
-            target = Optional.ofNullable(signal.getValue().economizerStatus.settings).map(EconomizerSettings::targetTemperature).orElse(null);
+            ambient = Optional.ofNullable(signal.getValue().economizerStatus.ambient()).map(Signal::getValue).orElse(null);
+            target = Optional.ofNullable(signal.getValue().economizerStatus.settings()).map(EconomizerSettings::targetTemperature).orElse(null);
         }
 
         logger.trace("ambient={}, target={}", ambient, target);
@@ -103,7 +103,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
 
         // These two may be non-null at different times, must analyze them separately
         var thermostatTintedValue = thermostatAverager.append(signal);
-        var economizerTintedValue = (signal.getValue().economizerStatus == null || signal.getValue().economizerStatus.ambient == null)
+        var economizerTintedValue = (signal.getValue().economizerStatus == null || signal.getValue().economizerStatus.ambient() == null)
                 ? null
                 : economizerAverager.append(signal);
 

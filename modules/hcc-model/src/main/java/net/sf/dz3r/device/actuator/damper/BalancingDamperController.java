@@ -64,7 +64,7 @@ public class BalancingDamperController extends AbstractDamperController {
                 }
 
                 // Negative demand counts as 0, otherwise damper positions will go below 0 and go boom
-                var demand = Math.max(0.0, zoneSignal.getValue().callingStatus().demand);
+                var demand = Math.max(0.0, zoneSignal.getValue().callingStatus().demand());
                 var zoneSet = demand2zone.computeIfAbsent(demand, k -> new TreeSet<>());
 
                 zoneSet.add(zoneName);

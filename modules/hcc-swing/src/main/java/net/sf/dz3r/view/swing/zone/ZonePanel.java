@@ -499,16 +499,16 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
 
     private void renderEconomizer(EconomizerStatus source) {
 
-        if (source == null || source.settings == null) {
+        if (source == null || source.settings() == null) {
             logger.debug("economizer: invisible: {}", source);
             ecoLabel.setVisible(false);
             return;
         }
 
         ecoLabel.setVisible(true);
-        ecoLabel.setText("ECO " + UNICODE_DELTA + " " + source.settings.changeoverDelta()
-                        + " " + UNICODE_SUN + " " + source.settings.targetTemperature() + " "
-                        + Optional.ofNullable(source.ambient).map(s -> " (" + s.getValue() + ")").orElse("")
+        ecoLabel.setText("ECO " + UNICODE_DELTA + " " + source.settings().changeoverDelta()
+                        + " " + UNICODE_SUN + " " + source.settings().targetTemperature() + " "
+                        + Optional.ofNullable(source.ambient()).map(s -> " (" + s.getValue() + ")").orElse("")
         );
     }
 
@@ -551,8 +551,8 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             var dataPoint = new ZoneChartDataPoint(
                     new ThermostatTintedValue(
                             sensorSignal.getValue(),
-                            zoneStatus.callingStatus().demand * 2,
-                            zoneStatus.callingStatus().calling),
+                            zoneStatus.callingStatus().demand() * 2,
+                            zoneStatus.callingStatus().calling()),
                     zoneStatus.settings().setpoint(),
                     zoneStatus.economizerStatus());
 
@@ -649,7 +649,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         var g2d = (Graphics2D) g;
         var d = getSize();
 
-        var signal = zoneStatus.callingStatus().demand;
+        var signal = zoneStatus.callingStatus().demand();
         var mode = getMode();
         var state = resolveState();
         var boundary = new Rectangle(0, 0, d.width, d.height);
@@ -670,6 +670,6 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return Zone.State.OFF;
         }
 
-        return zoneStatus.callingStatus().calling ? Zone.State.CALLING : Zone.State.HAPPY;
+        return zoneStatus.callingStatus().calling() ? Zone.State.CALLING : Zone.State.HAPPY;
     }
 }

@@ -158,7 +158,7 @@ class ThermostatTest {
 
         assertThat(s.getValue().setpoint).isEqualTo(20.0);
         assertThat(s.getValue().error).isEqualTo(22.0);
-        assertThat(s.getValue().signal.calling).isTrue();
+        assertThat(s.getValue().signal.calling()).isTrue();
 
         // This signal is totally fine
         assertThat(s.isOK()).isTrue();
@@ -175,14 +175,14 @@ class ThermostatTest {
 
         // Special case: total failure, but the value still exists
         assertThat(s.getValue().error).isZero();
-        assertThat(s.getValue().signal.demand).isZero();
+        assertThat(s.getValue().signal.demand()).isZero();
     }
 
     private void assertPartial(Signal<ProcessController.Status<CallingStatus>, Void> s) {
 
         assertThat(s.getValue().setpoint).isEqualTo(20.0);
         assertThat(s.getValue().error).isEqualTo(22.0);
-        assertThat(s.getValue().signal.calling).isTrue();
+        assertThat(s.getValue().signal.calling()).isTrue();
 
         // Partial [control path] error got masked by the PID controller, it's invisible here - this is expected
         assertThat(s.isOK()).isTrue();
@@ -218,14 +218,14 @@ class ThermostatTest {
         assertThat(accumulator).hasSize(4);
 
         // PV change
-        assertThat(accumulator.get(0).getValue().signal.calling).isFalse();
-        assertThat(accumulator.get(1).getValue().signal.calling).isTrue();
+        assertThat(accumulator.get(0).getValue().signal.calling()).isFalse();
+        assertThat(accumulator.get(1).getValue().signal.calling()).isTrue();
 
         // Setpoint change
-        assertThat(accumulator.get(2).getValue().signal.calling).isFalse();
+        assertThat(accumulator.get(2).getValue().signal.calling()).isFalse();
 
         // PV change again
-        assertThat(accumulator.get(3).getValue().signal.calling).isTrue();
+        assertThat(accumulator.get(3).getValue().signal.calling()).isTrue();
 
         out.dispose();
     }
@@ -234,7 +234,7 @@ class ThermostatTest {
      * Make sure setpoint change causes a trail of adjusted signals according to its half-life - in cooling mode.
      */
     @Test
-    void setpointChangeHalfLifeCooling() throws InterruptedException {
+    void setpointChangeHalfLifeCooling() {
         assertThatCode(() -> {
             setpointChangeHalfLife(
                     new Thermostat(Clock.systemUTC(), "ts", new Range<>(10d, 40d), 25.0, -1.0, 0, 0, 0, Duration.ofSeconds(10), 1),
@@ -248,7 +248,7 @@ class ThermostatTest {
      * Make sure setpoint change causes a trail of adjusted signals according to its half-life - in heating mode.
      */
     @Test
-    void setpointChangeHalfLifeHeating() throws InterruptedException {
+    void setpointChangeHalfLifeHeating() {
         assertThatCode(() -> {
             setpointChangeHalfLife(
                     new Thermostat(Clock.systemUTC(), "ts", new Range<>(10d, 40d), 25.0, 1.0, 0, 0, 0, Duration.ofSeconds(10), 1),
