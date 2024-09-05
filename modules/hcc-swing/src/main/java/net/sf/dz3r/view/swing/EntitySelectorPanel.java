@@ -158,8 +158,8 @@ public class EntitySelectorPanel extends JPanel implements KeyListener {
                 .filter(s -> zoneName.equals(s.payload))
                 .map(s -> new Signal<ZoneStatus, Void>(s.timestamp, s.getValue(), null, s.status, s.error));
         var modeFlux = hvacDeviceFlux
-                .filter(s -> s.getValue().command.mode != null)
-                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command.mode, null, s.status, s.error));
+                .filter(s -> s.getValue().command().mode != null)
+                .map(s -> new Signal<HvacMode, Void>(s.timestamp, s.getValue().command().mode, null, s.status, s.error));
         var thisScheduleFlux = scheduleFlux
                 .filter(s -> zoneName.equals(s.getKey()))
                 .map(Map.Entry::getValue);

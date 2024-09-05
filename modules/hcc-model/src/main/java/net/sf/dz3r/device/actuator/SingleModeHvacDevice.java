@@ -125,7 +125,7 @@ public abstract class SingleModeHvacDevice<T> extends AbstractHvacDevice<T> {
     protected abstract Flux<Signal<HvacDeviceStatus<T>, Void>> apply(HvacCommand command);
 
     private final void updateUptime(Signal<HvacDeviceStatus<T>, Void> signal) {
-        updateUptime(clock.instant(), signal.getValue().command.demand > 0);
+        updateUptime(clock.instant(), signal.getValue().command().demand > 0);
     }
 
     @Override

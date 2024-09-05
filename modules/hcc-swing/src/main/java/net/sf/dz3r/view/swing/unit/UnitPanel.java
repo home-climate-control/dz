@@ -153,18 +153,18 @@ public class UnitPanel extends EntityPanel<HvacDeviceStatus, Void> {
         if (signal.isError()) {
             currentDemandLabel.setText(UNDEFINED);
         } else {
-            currentDemandLabel.setText(format.format(signal.getValue().command.demand));
+            currentDemandLabel.setText(format.format(signal.getValue().command().demand));
         }
     }
 
     private void displayRunningFor(Signal<HvacDeviceStatus, Void> signal) {
-        if (signal.isError() || signal.getValue().uptime == null) {
+        if (signal.isError() || signal.getValue().uptime() == null) {
             currentRunningForLabel.setText(UNDEFINED);
         } else {
-            currentRunningForLabel.setText(format(signal.getValue().uptime, false));
+            currentRunningForLabel.setText(format(signal.getValue().uptime(), false));
         }
 
-        currentRunningForLabel.setForeground(getColor(signal.getValue().uptime));
+        currentRunningForLabel.setForeground(getColor(signal.getValue().uptime()));
     }
 
     private void displayLeft(Signal<HvacDeviceStatus, Void> signal) {

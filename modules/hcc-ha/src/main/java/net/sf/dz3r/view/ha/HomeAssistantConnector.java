@@ -136,12 +136,12 @@ public class HomeAssistantConnector implements Connector {
 
             feed.hvacDeviceFlux
                     .doOnNext(s -> {
-                        if (s.getValue().command.mode == null) {
+                        if (s.getValue().command().mode == null) {
                             logger.debug("null hvacMode (normal on startup): {}", s);
                         }
                     })
-                    .filter(s -> s.getValue().command.mode != null)
-                    .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command.mode, unitId, s.status, s.error))
+                    .filter(s -> s.getValue().command().mode != null)
+                    .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command().mode, unitId, s.status, s.error))
                     .subscribe(mode -> captureMode(mode, sensorFlux2zone.values()));
 
         } finally {

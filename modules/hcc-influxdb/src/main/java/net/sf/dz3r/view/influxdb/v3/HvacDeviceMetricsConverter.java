@@ -30,10 +30,10 @@ public class HvacDeviceMetricsConverter extends MetricsConverter<HvacDeviceStatu
 
         if (status != null) {
 
-            b.addField("demand", status.command.demand);
-            b.addField("fanSpeed", status.command.fanSpeed);
-            b.addField("uptimeMillis", Optional.ofNullable(status.uptime).map(Duration::toMillis).orElse(0L));
-            Optional.ofNullable(status.command.mode).ifPresent(m -> b.tag("mode", m.toString()));
+            b.addField("demand", status.command().demand);
+            b.addField("fanSpeed", status.command().fanSpeed);
+            b.addField("uptimeMillis", Optional.ofNullable(status.uptime()).map(Duration::toMillis).orElse(0L));
+            Optional.ofNullable(status.command().mode).ifPresent(m -> b.tag("mode", m.toString()));
         }
 
         if (signal.error != null) {

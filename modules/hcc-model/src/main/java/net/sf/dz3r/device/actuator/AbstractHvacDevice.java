@@ -134,7 +134,7 @@ public abstract class AbstractHvacDevice<T> implements HvacDevice<T> {
         }
 
         // Null uptime will be in the signal when the HVAC is off
-        return Flux.just(Objects.requireNonNullElse(signal.getValue().uptime, Duration.ZERO));
+        return Flux.just(Objects.requireNonNullElse(signal.getValue().uptime(), Duration.ZERO));
     }
 
     protected boolean isClosed() {

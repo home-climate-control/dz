@@ -220,7 +220,7 @@ public class HeatPump extends AbstractHvacDevice<Void> {
 
         return Flux
                 .concat(condenserOff, forceMode)
-                .doOnNext(s -> logger.debug("{}: setMode: {}", getAddress(), s.getValue().command))
+                .doOnNext(s -> logger.debug("{}: setMode: {}", getAddress(), s.getValue().command()))
                 .doOnComplete(() -> logger.info("{}: mode changed to: {}", getAddress(), mode));
     }
 
