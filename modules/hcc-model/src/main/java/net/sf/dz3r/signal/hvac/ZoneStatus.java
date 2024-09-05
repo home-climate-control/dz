@@ -3,6 +3,7 @@ package net.sf.dz3r.signal.hvac;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
 import net.sf.dz3r.model.PeriodSettings;
 import net.sf.dz3r.model.Zone;
 

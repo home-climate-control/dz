@@ -1,8 +1,8 @@
 package net.sf.dz3r.model;
 
+import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.hvac.CallingStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;

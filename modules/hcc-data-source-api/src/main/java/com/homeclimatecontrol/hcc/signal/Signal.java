@@ -1,4 +1,4 @@
-package net.sf.dz3r.signal;
+package com.homeclimatecontrol.hcc.signal;
 
 import java.time.Instant;
 

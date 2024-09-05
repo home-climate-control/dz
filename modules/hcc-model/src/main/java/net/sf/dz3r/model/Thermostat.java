@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HalfLifeController;
 import net.sf.dz3r.controller.HysteresisController;
@@ -8,7 +9,6 @@ import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.signal.Signal;
-import net.sf.dz3r.signal.hvac.CallingStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;

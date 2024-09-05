@@ -1,6 +1,7 @@
 package net.sf.dz3r.model;
 
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
@@ -9,7 +10,6 @@ import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
 import net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer;
 import net.sf.dz3r.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
-import net.sf.dz3r.signal.hvac.CallingStatus;
 import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

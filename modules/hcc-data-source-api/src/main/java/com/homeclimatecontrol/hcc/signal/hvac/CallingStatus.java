@@ -1,4 +1,4 @@
-package net.sf.dz3r.signal.hvac;
+package com.homeclimatecontrol.hcc.signal.hvac;
 
 /**
  * Calling status.
