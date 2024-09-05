@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.webui.v2;
 
+import com.homeclimatecontrol.hcc.ClientBootstrap;
 import com.homeclimatecontrol.hcc.Version;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import com.homeclimatecontrol.hcc.signal.Signal;
@@ -286,5 +287,30 @@ public class HttpServer extends Endpoint {
         } catch (IOException ex) {
             throw new IllegalStateException("This shouldn't have happened", ex);
         }
+    }
+
+    /**
+     * Response handler for the bootstrap packet request.
+     *
+     * @param ignoredRq ignored.
+     *
+     * @return Bootstrap packet.
+     */
+    public Mono<ServerResponse> getBootstrap(ServerRequest ignoredRq) {
+        logger.info("GET /bootstrap");
+
+        var meta = Mono.just(endpointMeta);
+        var zones = Flux
+                .fromIterable(unit2observer.values())
+                .flatMap(UnitObserver::getZones)
+                .collectMap(Map.Entry::getKey, Map.Entry::getValue);
+        var combined = Mono
+                .zip(meta, zones)
+                .map(tuple -> new ClientBootstrap(tuple.getT1(), tuple.getT2()));
+
+        return ok()
+                .cacheControl(CacheControl.noCache())
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(combined, ClientBootstrap.class);
     }
 }

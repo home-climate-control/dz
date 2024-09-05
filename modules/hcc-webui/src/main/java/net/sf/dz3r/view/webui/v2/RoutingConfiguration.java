@@ -25,6 +25,7 @@ public class RoutingConfiguration {
 
                 GET("/").and(ACCEPT_JSON), endpoint::getMeta).andRoute(
                 GET(META_PATH).and(ACCEPT_JSON), endpoint::getMeta).andRoute(
+                GET("/bootstrap").and(ACCEPT_JSON), endpoint::getBootstrap).andRoute(
                 GET("/sensors").and(ACCEPT_JSON), endpoint::getSensors).andRoute(
                 GET("/sensor/{sensor}").and(ACCEPT_JSON), endpoint::getSensor).andRoute(
                 GET("/units").and(ACCEPT_JSON), endpoint::getUnits).andRoute(
