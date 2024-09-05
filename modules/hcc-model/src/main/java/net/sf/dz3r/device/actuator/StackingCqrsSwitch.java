@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.device.DeviceState;
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,6 +1,8 @@
 dependencies {
     implementation(libs.jackson.databind)
 
+    implementation(project(":modules:hcc-common"))
+
     testImplementation(libs.assertj.core)
     testImplementation(libs.jackson.dataformat.yaml)
     testImplementation(libs.junit5.api)

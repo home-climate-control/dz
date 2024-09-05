@@ -1,9 +1,9 @@
 package net.sf.dz3r.device.actuator.economizer.v2;
 
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;

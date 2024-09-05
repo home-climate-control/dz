@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator.damper;
 
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import net.sf.dz3r.device.Addressable;
-import net.sf.dz3r.device.DeviceState;
 import reactor.core.publisher.Mono;
 
 /**

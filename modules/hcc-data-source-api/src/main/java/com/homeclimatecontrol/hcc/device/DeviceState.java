@@ -1,4 +1,4 @@
-package net.sf.dz3r.device;
+package com.homeclimatecontrol.hcc.device;
 
 import net.sf.dz3r.common.HCCObjects;
 

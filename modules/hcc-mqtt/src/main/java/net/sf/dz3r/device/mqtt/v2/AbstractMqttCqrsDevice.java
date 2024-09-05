@@ -1,8 +1,8 @@
 package net.sf.dz3r.device.mqtt.v2;
 
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.common.HCCObjects;
-import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.device.actuator.AbstractCqrsDevice;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;

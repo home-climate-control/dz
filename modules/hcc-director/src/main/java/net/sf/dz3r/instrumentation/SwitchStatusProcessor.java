@@ -1,6 +1,6 @@
 package net.sf.dz3r.instrumentation;
 
-import net.sf.dz3r.device.DeviceState;
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.SignalProcessor;
 import net.sf.dz3r.signal.health.SwitchStatus;

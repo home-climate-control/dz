@@ -1,8 +1,8 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.device.Addressable;
-import net.sf.dz3r.device.DeviceState;
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.device.Addressable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

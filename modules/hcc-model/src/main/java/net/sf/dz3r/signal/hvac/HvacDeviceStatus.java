@@ -1,7 +1,7 @@
 package net.sf.dz3r.signal.hvac;
 
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
-import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.device.actuator.HvacDevice;
 
 import java.time.Duration;

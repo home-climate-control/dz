@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.actuator;
 
-import net.sf.dz3r.device.DeviceState;
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import com.homeclimatecontrol.hcc.signal.Signal;
 
 import java.security.SecureRandom;

@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.actuator;
 
+import com.homeclimatecontrol.hcc.device.DeviceState;
 import net.sf.dz3r.common.TestClock;
-import net.sf.dz3r.device.DeviceState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
