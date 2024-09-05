@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer.v2;
 
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import net.sf.dz3r.device.DeviceState;
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
@@ -56,7 +57,7 @@ class PidEconomizerTest {
                         1.0,
                         0.0000008,
                         1.1,
-                        new com.homeclimatecontrol.hcc.model.EconomizerSettings(
+                        new EconomizerSettings(
                                 0,
                                 20,
                                 true, 1.0

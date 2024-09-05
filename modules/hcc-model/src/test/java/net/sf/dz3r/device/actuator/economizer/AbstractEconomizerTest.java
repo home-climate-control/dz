@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
@@ -19,7 +20,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class AbstractEconomizerTest {
 
     /**
-     * Make sure that control signal is computed properly as the indoor temperature is approaching the {@link EconomizerSettings#targetTemperature}.
+     * Make sure that control signal is computed properly as the indoor temperature is approaching the {@link EconomizerSettings#targetTemperature()}.
      */
     @ParameterizedTest
     @MethodSource("targetAdjustmentProvider")
@@ -28,7 +29,7 @@ class AbstractEconomizerTest {
         var config = new EconomizerConfig(
                 source.mode,
                 1.0, 0.0001, 1.0,
-                new com.homeclimatecontrol.hcc.model.EconomizerSettings(
+                new EconomizerSettings(
                         source.changeoverDelta,
                         source.targetTemperature,
                         true,
@@ -54,7 +55,7 @@ class AbstractEconomizerTest {
 
     }
 
-    private class TestEconomizer extends AbstractEconomizer {
+    private static class TestEconomizer extends AbstractEconomizer {
 
         /**
          * Create an instance.

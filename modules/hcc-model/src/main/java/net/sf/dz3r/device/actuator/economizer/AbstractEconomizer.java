@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
@@ -138,7 +139,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         }
     }
 
-    public void setSettings(com.homeclimatecontrol.hcc.model.EconomizerSettings settings) {
+    public void setSettings(EconomizerSettings settings) {
 
         ThreadContext.push("setSettings");
 
@@ -246,7 +247,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
 
         economizerStatus = new EconomizerStatus(
-                Optional.ofNullable(config.settings).map(com.homeclimatecontrol.hcc.model.EconomizerSettings::new).orElse(null),
+                Optional.ofNullable(config.settings).map(EconomizerSettings::new).orElse(null),
                 sample,
                 demand,
                 stateSignal.getValue(),
@@ -401,7 +402,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
     }
 
     /**
-     * Get the {@link EconomizerSettings#changeoverDelta ambient} delta signal.
+     * Get the {@link EconomizerSettings#changeoverDelta()}  ambient} delta signal.
      *
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */
@@ -413,7 +414,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
     }
 
     /**
-     * Get the {@link EconomizerSettings#targetTemperature} delta signal.
+     * Get the {@link EconomizerSettings#targetTemperature()} delta signal.
      *
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */

@@ -8,6 +8,13 @@ import java.util.Optional;
 /**
  * Runtime economizer settings in a form that can be exposed to external systems.
  *
+ * @param changeoverDelta Temperature difference between indoor and outdoor temperature necessary to turn the device on.
+ * @param targetTemperature When this temperature is reached, the device is shut off.
+ * @param keepHvacOn {@code true} means that turning on the device will NOT turn the HVAC off.
+ *   You probably want to keep this at {@code false}, unless the indoor temperature is measured at HVAC return
+ *   and fresh air is injected into HVAC return.
+ * @param maxPower Max power to deliver to the HVAC unit when the economizer is on; 1 is full, 0 is off (not very useful).
+ *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
  */
 @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)

@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer;
 
+import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import net.sf.dz3r.model.HvacMode;
 
 /**
@@ -21,7 +22,7 @@ public class EconomizerConfig {
 
     public final Double saturationLimit;
 
-    public final com.homeclimatecontrol.hcc.model.EconomizerSettings settings;
+    public final EconomizerSettings settings;
 
     /**
      * All argument constructor.
@@ -33,7 +34,7 @@ public class EconomizerConfig {
      */
     public EconomizerConfig(HvacMode mode,
                             Double P, Double I, Double saturationLimit,
-                            com.homeclimatecontrol.hcc.model.EconomizerSettings settings) {
+                            EconomizerSettings settings) {
 
         if (mode == null) {
             throw new IllegalArgumentException("mode can't be null");
@@ -78,7 +79,7 @@ public class EconomizerConfig {
         return settings != null;
     }
 
-    public EconomizerConfig merge(com.homeclimatecontrol.hcc.model.EconomizerSettings settings) {
+    public EconomizerConfig merge(EconomizerSettings settings) {
 
         return new EconomizerConfig(
                 mode,
