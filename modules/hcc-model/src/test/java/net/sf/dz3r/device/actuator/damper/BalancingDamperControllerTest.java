@@ -1,12 +1,12 @@
 package net.sf.dz3r.device.actuator.damper;
 
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.model.Thermostat;
 import net.sf.dz3r.model.Zone;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Disabled;

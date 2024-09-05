@@ -2,6 +2,7 @@ package com.homeclimatecontrol.hcc.client.rsocket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
 import io.rsocket.core.RSocketConnector;
@@ -11,7 +12,6 @@ import io.rsocket.metadata.WellKnownMimeType;
 import io.rsocket.transport.netty.client.TcpClientTransport;
 import io.rsocket.util.ByteBufPayload;
 import net.sf.dz3r.instrumentation.Marker;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

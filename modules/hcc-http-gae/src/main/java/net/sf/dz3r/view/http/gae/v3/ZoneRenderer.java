@@ -2,7 +2,7 @@ package net.sf.dz3r.view.http.gae.v3;
 
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneState;
 import org.apache.logging.log4j.LogManager;

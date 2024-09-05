@@ -1,8 +1,8 @@
 package net.sf.dz3r.device.actuator.damper;
 
 import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
 import reactor.core.publisher.Flux;
 
 public interface DamperController extends AutoCloseable {

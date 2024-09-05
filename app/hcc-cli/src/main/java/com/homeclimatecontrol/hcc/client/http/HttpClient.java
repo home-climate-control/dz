@@ -2,8 +2,8 @@ package com.homeclimatecontrol.hcc.client.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.instrumentation.Marker;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClientBuilder;

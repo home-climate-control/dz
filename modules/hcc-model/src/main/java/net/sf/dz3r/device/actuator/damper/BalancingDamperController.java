@@ -1,8 +1,8 @@
 package net.sf.dz3r.device.actuator.damper;
 
-import net.sf.dz3r.model.Zone;
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
+import net.sf.dz3r.model.Zone;
 import org.apache.logging.log4j.ThreadContext;
 
 import java.util.Map;

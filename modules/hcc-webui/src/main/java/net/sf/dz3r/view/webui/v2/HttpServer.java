@@ -2,11 +2,11 @@ package net.sf.dz3r.view.webui.v2;
 
 import com.homeclimatecontrol.hcc.Version;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
+import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.common.DurationFormatter;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.runtime.GitProperties;
-import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.UnitObserver;
 import org.apache.logging.log4j.ThreadContext;
 import org.springframework.http.CacheControl;

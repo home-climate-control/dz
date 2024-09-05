@@ -2,8 +2,8 @@ package net.sf.dz3r.view.swing.zone;
 
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityCell;
 import reactor.core.publisher.Flux;

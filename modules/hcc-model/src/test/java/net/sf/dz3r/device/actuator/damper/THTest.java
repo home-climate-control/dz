@@ -1,13 +1,13 @@
 package net.sf.dz3r.device.actuator.damper;
 
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
+import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.device.actuator.NullSwitch;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.Zone;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;

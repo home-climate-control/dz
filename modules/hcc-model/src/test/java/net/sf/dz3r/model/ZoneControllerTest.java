@@ -1,10 +1,10 @@
 package net.sf.dz3r.model;
 
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
-import net.sf.dz3r.controller.pid.SimplePidController;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
+import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.signal.hvac.UnitControlSignal;
-import net.sf.dz3r.signal.hvac.ZoneStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;

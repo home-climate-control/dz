@@ -1,12 +1,9 @@
-package net.sf.dz3r.signal.hvac;
+package com.homeclimatecontrol.hcc.signal.hvac;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.homeclimatecontrol.hcc.model.PeriodSettings;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
-import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
-import com.homeclimatecontrol.hcc.signal.hvac.EconomizerStatus;
-import net.sf.dz3r.model.Zone;
 
 /**
  * Zone status.
