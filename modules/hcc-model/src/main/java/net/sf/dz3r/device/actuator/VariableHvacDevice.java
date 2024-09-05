@@ -4,9 +4,9 @@ import com.homeclimatecontrol.hcc.device.DeviceState;
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.counter.ResourceUsageCounter;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;

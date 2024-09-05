@@ -1,7 +1,7 @@
 package net.sf.dz3r.signal.health;
 
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 
 import java.util.Map;
 

@@ -3,9 +3,9 @@ package net.sf.dz3r.device.actuator;
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.signal.SignalProcessor;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
 import java.util.Set;

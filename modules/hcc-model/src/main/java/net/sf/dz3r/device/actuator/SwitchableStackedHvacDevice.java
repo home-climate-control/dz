@@ -3,7 +3,7 @@ package net.sf.dz3r.device.actuator;
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;

@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.influxdb.v3;
 
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 import org.influxdb.dto.Point;
 import reactor.core.publisher.Flux;
 

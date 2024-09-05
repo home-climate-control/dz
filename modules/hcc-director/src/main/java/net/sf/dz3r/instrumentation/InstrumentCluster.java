@@ -1,11 +1,11 @@
 package net.sf.dz3r.instrumentation;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.device.actuator.CqrsSwitch;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.signal.health.SystemStatus;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.Connector;
 import net.sf.dz3r.view.MetricsCollector;
 import org.apache.logging.log4j.LogManager;

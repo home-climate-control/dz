@@ -1,9 +1,9 @@
 package net.sf.dz3r.device.actuator;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.counter.DurationIncrementAdapter;
 import net.sf.dz3r.counter.ResourceUsageCounter;
-import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.Disposable;

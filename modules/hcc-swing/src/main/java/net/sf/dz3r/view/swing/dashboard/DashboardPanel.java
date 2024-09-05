@@ -1,11 +1,11 @@
 package net.sf.dz3r.view.swing.dashboard;
 
-import net.sf.dz3r.instrumentation.InstrumentCluster;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
+import net.sf.dz3r.instrumentation.InstrumentCluster;
 import net.sf.dz3r.signal.health.SensorStatus;
 import net.sf.dz3r.signal.health.SwitchStatus;
 import net.sf.dz3r.signal.health.SystemStatus;
-import net.sf.dz3r.signal.hvac.HvacDeviceStatus;
 import net.sf.dz3r.view.swing.ColorScheme;
 import net.sf.dz3r.view.swing.EntityPanel;
 import net.sf.dz3r.view.swing.ScreenDescriptor;
