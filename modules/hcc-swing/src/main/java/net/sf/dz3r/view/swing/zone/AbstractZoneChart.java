@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.swing.zone;
 
-import net.sf.dz3r.common.DataSet;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.common.DataSet;
 import net.sf.dz3r.view.swing.AbstractChart;
 import net.sf.dz3r.view.swing.ColorScheme;
 
@@ -179,10 +179,10 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
         public final O append(Signal<I, Void> signal) {
 
             if (oldestTimestamp == null) {
-                oldestTimestamp = signal.timestamp.toEpochMilli();
+                oldestTimestamp = signal.timestamp().toEpochMilli();
             }
 
-            var age = signal.timestamp.toEpochMilli() - oldestTimestamp;
+            var age = signal.timestamp().toEpochMilli() - oldestTimestamp;
 
             if (age < expirationInterval) {
 
@@ -198,7 +198,7 @@ public abstract class AbstractZoneChart extends AbstractChart<ZoneChartDataPoint
             var result = complete(signal.getValue(), count);
 
             count = 1;
-            oldestTimestamp = signal.timestamp.toEpochMilli();
+            oldestTimestamp = signal.timestamp().toEpochMilli();
 
             return result;
         }

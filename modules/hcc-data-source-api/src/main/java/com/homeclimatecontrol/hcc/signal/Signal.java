@@ -1,54 +1,37 @@
 package com.homeclimatecontrol.hcc.signal;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.Instant;
 
 /**
  * Base interface for all the signals in the system.
  *
+ * @param timestamp Event time.
+ * @param value Signal value. Must be present if the status is {@link Signal.Status#OK}.
+ * @param payload Optional payload.
+ *   {@link net.sf.dz3r.controller.ProcessController} implementations are expected to pass this signal
+ *   from input to output unchanged, however, this is not enforced.
+ * @param status Signal status.
+ * @param error Error. Must be present if the status is not {@link Signal.Status#OK}.
  * @param <T> Signal value type.
  * @param <P> Extra payload type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2024
  */
-public class Signal<T, P> {
+public record Signal<T, P>(
+        Instant timestamp,
+        T value,
+        P payload,
+        Status status,
+        Throwable error
+) {
 
     public enum Status {
         OK,
         FAILURE_PARTIAL,
         FAILURE_TOTAL
     }
-
-    /**
-     * Event time.
-     */
-    public final Instant timestamp;
-
-    /**
-     * Signal value.
-     *
-     * Must be present if the status is {@link Signal.Status#OK}.
-     */
-    private final T value;
-
-    /**
-     * Optional payload.
-     *
-     * {@link net.sf.dz3r.controller.ProcessController} implementations are expected to pass this signal
-     * from input to output unchanged, however, this is not enforced.
-     */
-    public final P payload;
-
-    /**
-     * Signal status.
-     */
-    public final Status status;
-
-    /**
-     * Error.
-     *
-     * Must be present if the status is not {@link Signal.Status#OK}.
-     */
-    public final Throwable error;
 
     /**
      * Construct a non-error signal with no payload.
@@ -71,7 +54,7 @@ public class Signal<T, P> {
         this(timestamp, value, payload, Status.OK, null);
     }
 
-    public Signal(Instant timestamp, T value, P payload, Status status, Throwable error) {
+    public Signal {
 
         if (timestamp == null) {
             throw new IllegalArgumentException("timestamp can't be null");
@@ -85,12 +68,6 @@ public class Signal<T, P> {
             throw new IllegalArgumentException("null error doesn't make sense for status " + status);
         }
 
-        this.timestamp = timestamp;
-        this.value = value;
-        this.payload = payload;
-
-        this.status = status;
-        this.error = error;
     }
 
     /**
@@ -109,6 +86,7 @@ public class Signal<T, P> {
      *
      * @return {@code true} if there are no failures, otherwise {@code false}.
      */
+    @JsonIgnore
     public boolean isOK() {
         return status == Status.OK;
     }
@@ -121,6 +99,7 @@ public class Signal<T, P> {
      *
      * @return {@code true} if the failure is {@link Status#FAILURE_TOTAL}.
      */
+    @JsonIgnore
     public boolean isError() {
         return status == Status.FAILURE_TOTAL;
     }

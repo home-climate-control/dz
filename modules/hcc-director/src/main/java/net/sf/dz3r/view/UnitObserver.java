@@ -70,8 +70,8 @@ public class UnitObserver {
 
             terminators.add(feed.aggregateZoneFlux
                     .doOnNext(s -> {
-                        logger.trace("Zone status: {}: {}", s.payload, s);
-                        zone2status.put(s.payload, s);
+                        logger.trace("Zone status: {}: {}", s.payload(), s);
+                        zone2status.put(s.payload(), s);
                     })
                     .publishOn(Schedulers.boundedElastic())
                     .subscribe());

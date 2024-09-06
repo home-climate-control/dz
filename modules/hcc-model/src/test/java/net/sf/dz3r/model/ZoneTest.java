@@ -77,7 +77,7 @@ class ZoneTest {
                 .assertNext(s -> {
                     assertThat(s.getValue().settings().setpoint()).isEqualTo(setpoint);
                     assertThat(s.getValue().callingStatus().calling()).isTrue();
-                    assertThat(s.payload).isEqualTo(name);
+                    assertThat(s.payload()).isEqualTo(name);
                 })
                 .assertNext(s -> assertThat(s.getValue().callingStatus().calling()).isFalse())
                 .assertNext(s -> assertThat(s.getValue().callingStatus().calling()).isFalse())
@@ -109,7 +109,7 @@ class ZoneTest {
                 .assertNext(s -> {
                     assertThat(s.getValue().settings().setpoint()).isEqualTo(setpoint);
                     assertThat(s.getValue().callingStatus().calling()).isFalse();
-                    assertThat(s.payload).isEqualTo(name);
+                    assertThat(s.payload()).isEqualTo(name);
                 })
                 .verifyComplete();
     }

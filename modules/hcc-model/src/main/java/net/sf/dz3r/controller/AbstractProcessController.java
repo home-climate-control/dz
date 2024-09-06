@@ -123,11 +123,11 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
 
         // VT: NOTE: https://github.com/home-climate-control/dz/issues/321 - no more "magic numbers"
 
-        if (lastOutputSignal != null && lastOutputSignal.timestamp.isAfter(pv.timestamp)) {
+        if (lastOutputSignal != null && lastOutputSignal.timestamp().isAfter(pv.timestamp())) {
             logger.warn("Can't go back in time: last sample was @{}, this is @{}, {}ms difference: {}",
-                    lastOutputSignal.timestamp,
-                    pv.timestamp,
-                    Duration.between(lastOutputSignal.timestamp, pv.timestamp).toMillis(),
+                    lastOutputSignal.timestamp(),
+                    pv.timestamp(),
+                    Duration.between(lastOutputSignal.timestamp(), pv.timestamp()).toMillis(),
                     pv);
         }
 

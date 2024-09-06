@@ -134,7 +134,7 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
 
         if (pv.isError()) {
             // Nothing good at least; let's pass up the error
-            return new Signal<>(pv.timestamp, new HysteresisStatus(setpoint, null, null, null), pv.payload, pv.status, pv.getError());
+            return new Signal<>(pv.timestamp(), new HysteresisStatus(setpoint, null, null, null), pv.payload(), pv.status(), pv.getError());
         }
 
         var sample = pv.getValue(); // NOSONAR false positive
@@ -162,7 +162,7 @@ public class HysteresisController<P> extends AbstractProcessController<Double, D
             logger.trace("{}: state change {} => {}", jmxName, oldState, state);
         }
 
-        return new Signal<>(pv.timestamp, new HysteresisStatus(setpoint, getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS, sample), pv.payload);
+        return new Signal<>(pv.timestamp(), new HysteresisStatus(setpoint, getError(), state ? DEFAULT_HYSTERESIS : -DEFAULT_HYSTERESIS, sample), pv.payload());
     }
 
     @Override

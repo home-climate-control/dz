@@ -167,13 +167,13 @@ class MedianFilterTest {
                     assertThat(s.getValue()).isEqualTo(2d);
                     assertThat(s.isOK()).isFalse();
                     assertThat(s.isError()).isFalse();
-                    assertThat(s.error).isInstanceOf(NullPointerException.class);
+                    assertThat(s.error()).isInstanceOf(NullPointerException.class);
                 })
                 .assertNext(s -> {
                     assertThat(s.getValue()).isEqualTo(2d);
                     assertThat(s.isOK()).isFalse();
                     assertThat(s.isError()).isFalse();
-                    assertThat(s.error).isInstanceOf(TimeoutException.class);
+                    assertThat(s.error()).isInstanceOf(TimeoutException.class);
                 })
                 .verifyComplete();
     }
@@ -194,13 +194,13 @@ class MedianFilterTest {
                     assertThat(s.getValue()).isNull();
                     assertThat(s.isOK()).isFalse();
                     assertThat(s.isError()).isTrue();
-                    assertThat(s.error).isInstanceOf(NullPointerException.class);
+                    assertThat(s.error()).isInstanceOf(NullPointerException.class);
                 })
                 .assertNext(s -> {
                     assertThat(s.getValue()).isNull();
                     assertThat(s.isOK()).isFalse();
                     assertThat(s.isError()).isTrue();
-                    assertThat(s.error).isInstanceOf(TimeoutException.class);
+                    assertThat(s.error()).isInstanceOf(TimeoutException.class);
                 })
                 .verifyComplete();
     }

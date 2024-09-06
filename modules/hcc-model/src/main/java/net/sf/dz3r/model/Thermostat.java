@@ -1,5 +1,6 @@
 package net.sf.dz3r.model;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
 import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HalfLifeController;
@@ -8,7 +9,6 @@ import net.sf.dz3r.controller.ProcessController.Status;
 import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.Addressable;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -171,7 +171,7 @@ public class Thermostat implements Addressable<String> {
     public Flux<Signal<Status<CallingStatus>, Void>> compute(Flux<Signal<Double, Void>> pv) {
 
         // Feed the source stream into the trigger-happy half-life controller
-        var source = pv.doOnNext(s -> setpointSink.tryEmitNext(new Signal<Double, Void>(s.timestamp, getSetpoint())));
+        var source = pv.doOnNext(s -> setpointSink.tryEmitNext(new Signal<Double, Void>(s.timestamp(), getSetpoint())));
         var adjustment = sensitivityController.compute(setpointFlux);
 
         // Mix the source and the half-life controller output
@@ -189,7 +189,7 @@ public class Thermostat implements Addressable<String> {
         // Discard things the renderer doesn't understand.
         // The PID controller output value becomes the extra payload to pass to the zone controller to calculate demand.
         var stage2 = stage1
-                .map(s -> new Signal<>(s.timestamp, s.getValue().signal, s.getValue(), s.status, s.error));
+                .map(s -> new Signal<>(s.timestamp(), s.getValue().signal, s.getValue(), s.status(), s.error()));
 
         // Inject signals from raise(), if any
         var stage3 = Flux.merge(stage2, raiseFlux);
@@ -217,7 +217,7 @@ public class Thermostat implements Addressable<String> {
             // VT: FIXME: Need a data structure to represent both PID and HalfLife controller status
             // VT: FIXME: Careful with the sign here; and do we need to adjust it for the mode?
 
-            return new Signal<>(source.timestamp, source.getValue() - halfLife.getValue().signal * sensitivityMultiplier, source.payload, source.status, source.error);
+            return new Signal<>(source.timestamp(), source.getValue() - halfLife.getValue().signal * sensitivityMultiplier, source.payload(), source.status(), source.error());
 
         } finally {
             ThreadContext.pop();
@@ -231,15 +231,15 @@ public class Thermostat implements Addressable<String> {
                 : null;
 
         // Watch for the error signal
-        var demand = source.isError() ? 0 : source.payload.signal - signalRenderer.getThresholdLow();
+        var demand = source.isError() ? 0 : source.payload().signal - signalRenderer.getThresholdLow();
         var calling = !source.isError() && Double.compare(source.getValue().signal, 1.0) == 0;
 
         return new Signal<>(
-                source.timestamp,
-                new Status<>(source.payload.setpoint, source.payload.error, new CallingStatus(sample, demand, calling)),
+                source.timestamp(),
+                new Status<>(source.payload().setpoint, source.payload().error, new CallingStatus(sample, demand, calling)),
                 null,
-                source.status,
-                source.error);
+                source.status(),
+                source.error());
     }
 
     /**
@@ -271,7 +271,7 @@ public class Thermostat implements Addressable<String> {
 
             // All we need is a little nudge
             // Timestamp has to be current - there's no say how long the PV was sitting there
-            var adjusted = new Signal<>(clock.instant(), HYSTERESIS, actual.payload);
+            var adjusted = new Signal<>(clock.instant(), HYSTERESIS, actual.payload());
 
             logger.trace("{}: actual:   {}", getAddress(), actual);
             logger.trace("{}: adjusted: {}", getAddress(), adjusted);

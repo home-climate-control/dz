@@ -44,7 +44,7 @@ public abstract class MedianSetFilter<T extends  Comparable<T>, P> extends Abstr
     @Override
     protected final Signal<T, P> compute(Signal<T, P> signal) {
 
-        channelMap.put(signal.payload, signal);
+        channelMap.put(signal.payload(), signal);
 
         var buffer = new ArrayList<Signal<T, P>>(channelMap.size());
         Flux.fromIterable(channelMap.values())
@@ -60,10 +60,10 @@ public abstract class MedianSetFilter<T extends  Comparable<T>, P> extends Abstr
             buffer.remove(0);
         }
 
-        return filter(buffer, signal.timestamp);
+        return filter(buffer, signal.timestamp());
     }
 
     private int sortByTimestamp(Signal<T, P> s1, Signal<T, P> s2) {
-        return s1.timestamp.compareTo(s2.timestamp);
+        return s1.timestamp().compareTo(s2.timestamp());
     }
 }

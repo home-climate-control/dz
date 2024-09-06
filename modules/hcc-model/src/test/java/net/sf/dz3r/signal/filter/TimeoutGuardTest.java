@@ -88,8 +88,8 @@ class TimeoutGuardTest {
                 .compute(source)
                 .doOnNext(s -> {
                     var level = s.isError() ? Level.WARN : Level.INFO;
-                    logger.log(level, "delay: abs {} rel {} = {}", Duration.between(start, s.timestamp).toMillis(), s.timestamp.toEpochMilli() - last.get(), s);
-                    last.set(s.timestamp.toEpochMilli());
+                    logger.log(level, "delay: abs {} rel {} = {}", Duration.between(start, s.timestamp()).toMillis(), s.timestamp().toEpochMilli() - last.get(), s);
+                    last.set(s.timestamp().toEpochMilli());
                 });
 
         return guarded;

@@ -13,7 +13,6 @@ application {
 dependencies {
 
     implementation(libs.httpclient)
-    implementation(libs.jackson.datatype.jsr310)
     implementation(libs.jcommander)
     implementation(libs.reactor.tools)
     implementation(libs.springboot.starter)

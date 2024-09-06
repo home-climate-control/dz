@@ -81,13 +81,13 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
      */
     private boolean isOurs(Signal<ZoneStatus, String> signal) {
 
-        if (zoneMap.containsKey(signal.payload)) {
+        if (zoneMap.containsKey(signal.payload())) {
             return true;
         }
 
         // Unless this is done, computeDemand() will be off
         // warn() is warranted here, this likely indicates a programming or configuration problem
-        logger.warn("Alien zone '{}', signal dropped: {}", signal.payload, signal);
+        logger.warn("Alien zone '{}', signal dropped: {}", signal.payload(), signal);
 
         return false;
     }
@@ -103,7 +103,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         logger.debug("capture: {}", signal);
 
-        zone2status.put(signal.payload, signal);
+        zone2status.put(signal.payload(), signal);
     }
 
     private int lastKnownCalling = 0;
@@ -153,7 +153,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         var demand = computeDemand(unhappy, unhappyVoting);
 
-        return new Signal<>(signal.timestamp, new UnitControlSignal(demand, null));
+        return new Signal<>(signal.timestamp(), new UnitControlSignal(demand, null));
     }
 
     /**

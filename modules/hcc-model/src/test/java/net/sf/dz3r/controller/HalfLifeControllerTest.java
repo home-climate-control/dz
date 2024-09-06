@@ -73,7 +73,7 @@ class HalfLifeControllerTest {
                 .compute(signal)
                 .doOnNext(s -> {
                     logger.debug("output: {}", s);
-                    assertThat((s.getValue()).signal).isCloseTo(s.payload.expectedOutput, Offset.offset(0.000001));
+                    assertThat((s.getValue()).signal).isCloseTo(s.payload().expectedOutput, Offset.offset(0.000001));
                 })
                 .blockLast();
     }

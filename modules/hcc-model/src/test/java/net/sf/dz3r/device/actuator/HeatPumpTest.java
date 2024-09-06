@@ -114,7 +114,7 @@ class HeatPumpTest {
                 // This shall not pass...
                 .assertNext(e -> {
                     assertThat(e.isError()).isTrue();
-                    assertThat(e.error)
+                    assertThat(e.error())
                             .isInstanceOf(IllegalStateException.class)
                             .hasMessageStartingWith("Demand command issued before mode is set (likely programming error)");
                 })

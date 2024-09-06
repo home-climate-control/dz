@@ -119,7 +119,7 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
     public Flux<Signal<T, P>> compute(Flux<Signal<T, P>> in) {
 
         var actual = in
-                .doOnNext(s -> touch(s.timestamp))
+                .doOnNext(s -> touch(s.timestamp()))
                 .doOnNext(ignored -> inTimeout = false)
                 .doOnError(t -> logger.error("{}: errored out", marker, t))
                 .doOnComplete(this::close);

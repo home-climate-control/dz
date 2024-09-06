@@ -21,7 +21,7 @@ public class UnitControllerMetricsConverter extends MetricsConverter<HvacCommand
     private Point convert(Signal<HvacCommand, Void> signal) {
 
         var b = Point.measurement("unitController")
-                .time(signal.timestamp.toEpochMilli(), TimeUnit.MILLISECONDS)
+                .time(signal.timestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("instance", instance)
                 .tag("unit", unit);
 
@@ -34,8 +34,8 @@ public class UnitControllerMetricsConverter extends MetricsConverter<HvacCommand
             Optional.ofNullable(hvacCommand.mode()).ifPresent(m -> b.tag("mode", m.toString()));
         }
 
-        if (signal.error != null) {
-            b.addField("error", signal.error.toString());
+        if (signal.error() != null) {
+            b.addField("error", signal.error().toString());
         }
 
         return b.build();

@@ -58,7 +58,7 @@ public class RateLimiter<T, P> implements SignalProcessor<T, T, P> {
                 return Flux.just(s);
             }
 
-            if (Duration.between(lastSignal.timestamp, s.timestamp).compareTo(delay) < 0) {
+            if (Duration.between(lastSignal.timestamp(), s.timestamp()).compareTo(delay) < 0) {
 
                 // Too early, keep quiet
                 return Flux.empty();

@@ -1,5 +1,7 @@
 package com.homeclimatecontrol.hcc.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -21,10 +23,12 @@ public record SchedulePeriod(
         LocalTime end,
         byte days) implements Comparable<SchedulePeriod> {
 
+    @JsonIgnore
     public boolean isSameDay() {
         return end.isAfter(start);
     }
 
+    @JsonIgnore
     public boolean isAcrossMidnight() {
         return start.isAfter(end);
     }

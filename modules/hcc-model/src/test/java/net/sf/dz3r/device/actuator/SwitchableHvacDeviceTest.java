@@ -76,7 +76,7 @@ class SwitchableHvacDeviceTest {
                 .create(result)
                 .assertNext(e -> {
                     assertThat(e.isError()).isTrue();
-                    assertThat(e.error)
+                    assertThat(e.error())
                             .isInstanceOf(IllegalArgumentException.class)
                             .hasMessage("Heating is not supported by this instance");
                 })
@@ -101,7 +101,7 @@ class SwitchableHvacDeviceTest {
                 .create(result)
                 .assertNext(e -> {
                     assertThat(e.isError()).isTrue();
-                    assertThat(e.error)
+                    assertThat(e.error())
                             .isInstanceOf(IllegalArgumentException.class)
                             .hasMessage("fanSpeed=1.0 is not supported by this instance (not in cooling mode)");
                 })

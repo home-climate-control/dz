@@ -224,7 +224,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
         // Since the zone doesn't need the payload, but the thermostat does, need to translate the input
         var stage0 = source
-                .map(s -> new Signal<>(s.timestamp, s.getValue(), (Void) null, s.status, s.error));
+                .map(s -> new Signal<>(s.timestamp(), s.getValue(), (Void) null, s.status(), s.error()));
 
         // Not to disrupt the thermostat control logic, input signal is fed to it
         // regardless of whether the zone is enabled
@@ -252,11 +252,11 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     private Signal<ZoneStatus, String> translate(Signal<ProcessController.Status<CallingStatus>, Void> source) {
 
         return new Signal<>(
-                source.timestamp,
+                source.timestamp(),
                 new ZoneStatus(settings, source.getValue().signal, null, periodSettings),
                 getAddress(),
-                source.status,
-                source.error);
+                source.status(),
+                source.error());
     }
 
     private Signal<ZoneStatus, String> suppressIfNotEnabled(Signal<ZoneStatus, String> source) {
@@ -266,15 +266,15 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         }
 
         return new Signal<>(
-                source.timestamp,
+                source.timestamp(),
                 new ZoneStatus(
                         new ZoneSettings(source.getValue().settings(), false),
                         new CallingStatus(null, 0, false),
                         null,
                         periodSettings),
-                source.payload,
-                source.status,
-                source.error);
+                source.payload(),
+                source.status(),
+                source.error());
     }
 
     private Signal<ZoneStatus, String> suppressEconomizer(Signal<ZoneStatus, String> source) {

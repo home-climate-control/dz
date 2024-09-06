@@ -30,7 +30,7 @@ public class SimplePidController<P> extends AbstractPidController<P> {
             return integral;
         }
 
-        long deltaT = pv.timestamp.toEpochMilli() - lastKnownSignal.timestamp.toEpochMilli();
+        long deltaT = pv.timestamp().toEpochMilli() - lastKnownSignal.timestamp().toEpochMilli();
         integral += error * deltaT;
 
         return integral;
@@ -43,7 +43,7 @@ public class SimplePidController<P> extends AbstractPidController<P> {
             return 0;
         }
 
-        long deltaT = pv.timestamp.toEpochMilli() - lastKnownSignal.timestamp.toEpochMilli();
+        long deltaT = pv.timestamp().toEpochMilli() - lastKnownSignal.timestamp().toEpochMilli();
 
         // deltaT is guaranteed not to be 0 - see call stack
         double derivative = (error - lastError) / deltaT;

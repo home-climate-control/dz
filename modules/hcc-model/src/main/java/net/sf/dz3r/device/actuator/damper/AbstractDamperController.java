@@ -116,7 +116,7 @@ public abstract class AbstractDamperController implements DamperController {
     private synchronized Map<String, Signal<ZoneStatus, String>>  getZone2status(Signal<ZoneStatus, String> signal) {
 
         if (signal != null) {
-            zone2status.put(signal.payload, signal);
+            zone2status.put(signal.payload(), signal);
         }
 
         return new TreeMap<>(zone2status);

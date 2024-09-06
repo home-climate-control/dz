@@ -65,7 +65,7 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
                 .compute(Flux.concat(
                         checkPresence(address),
                         getSensorsFlux()
-                                .filter(s -> address.equals(s.payload))));
+                                .filter(s -> address.equals(s.payload()))));
     }
 
     /**
@@ -103,7 +103,7 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
     /**
      * Get the flux of readings from all devices producing readings that can be interpreted as {@link Double}.
      *
-     * @return Flux of device readings, with the device address as the {@link Signal#payload}.
+     * @return Flux of device readings, with the device address as the {@link Signal#payload()}.
      * If the device is not present at subscription time, or when the device departs, the flux will emit a
      * {@link Signal.Status#FAILURE_TOTAL} signal once, same in case when there isa failure reading from the device.
      * When the device returns (or is detected for the first time), the readings just start being emitted.

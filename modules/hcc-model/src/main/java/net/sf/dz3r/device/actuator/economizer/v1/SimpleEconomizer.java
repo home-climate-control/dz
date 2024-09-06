@@ -1,10 +1,10 @@
 package net.sf.dz3r.device.actuator.economizer.v1;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 
@@ -59,7 +59,7 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
 
             logger.debug("state={}", state);
 
-            return new Signal<>(signal.timestamp, state);
+            return new Signal<>(signal.timestamp(), state);
 
         } finally {
             ThreadContext.pop();

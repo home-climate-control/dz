@@ -4,6 +4,8 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.homeclimatecontrol.hcc.client.http.HttpClient;
 import com.homeclimatecontrol.hcc.client.rsocket.RSocketClient;
 import org.apache.logging.log4j.LogManager;
@@ -29,9 +31,30 @@ public class HccCLI implements CommandLineRunner {
     private static final String COMMAND_GET_ZONES_RSOCKET = "get-zones-rsocket";
     private static final String COMMAND_GET_BOOTSTRAP = "get-bootstrap";
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final HttpClient httpClient = new HttpClient();
-    private final RSocketClient rsocketClient = new RSocketClient();
+    private ObjectMapper objectMapper;
+
+    private final HttpClient httpClient = new HttpClient(getObjectMapper());
+    private final RSocketClient rsocketClient = new RSocketClient(getObjectMapper());
+
+    public HccCLI() {
+
+    }
+
+    private synchronized ObjectMapper getObjectMapper() {
+
+        if (objectMapper == null) {
+
+            objectMapper = new ObjectMapper();
+
+            // Necessary to print Optionals in a sane way
+            objectMapper.registerModule(new Jdk8Module());
+
+            // Necessary to deal with Duration
+            objectMapper.registerModule(new JavaTimeModule());
+        }
+
+        return objectMapper;
+    }
 
     public abstract class CommandBase {
 

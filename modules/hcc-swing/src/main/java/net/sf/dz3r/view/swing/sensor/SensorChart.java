@@ -1,8 +1,8 @@
 package net.sf.dz3r.view.swing.sensor;
 
 
-import net.sf.dz3r.common.DataSet;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.common.DataSet;
 import net.sf.dz3r.view.swing.AbstractChart;
 import net.sf.dz3r.view.swing.ColorScheme;
 
@@ -29,7 +29,7 @@ public class SensorChart extends AbstractChart<Double, Void> {
     @Override
     protected boolean update(Signal<Double, Void> signal) {
 
-        adjustVerticalLimits(signal.timestamp.toEpochMilli(), signal.getValue());
+        adjustVerticalLimits(signal.timestamp().toEpochMilli(), signal.getValue());
 
         synchronized (AbstractChart.class) {
 
@@ -66,7 +66,7 @@ public class SensorChart extends AbstractChart<Double, Void> {
             return false;
         }
 
-        values.append(signal.timestamp.toEpochMilli(), value);
+        values.append(signal.timestamp().toEpochMilli(), value);
 
         return true;
     }

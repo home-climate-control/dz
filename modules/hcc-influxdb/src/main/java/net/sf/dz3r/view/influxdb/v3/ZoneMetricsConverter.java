@@ -42,8 +42,8 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
             b.addField("demand", status.callingStatus().demand());
         }
 
-        if (signal.error != null) {
-            b.addField("error", signal.error.toString());
+        if (signal.error() != null) {
+            b.addField("error", signal.error().toString());
         }
 
         return Mono.just(b.build());
@@ -88,9 +88,9 @@ public class ZoneMetricsConverter extends MetricsConverter<ZoneStatus, String> {
     private Point.Builder createBuilder(Signal<ZoneStatus, String> signal, String measurement) {
 
         return Point.measurement(measurement)
-                .time(signal.timestamp.toEpochMilli(), TimeUnit.MILLISECONDS)
+                .time(signal.timestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("instance", instance)
                 .tag("unit", unit)
-                .tag("name", signal.payload);
+                .tag("name", signal.payload());
     }
 }

@@ -20,7 +20,7 @@ public class ZoneControllerMetricsConverter extends MetricsConverter<UnitControl
     private Point convert(Signal<UnitControlSignal, Void> signal) {
 
         var b = Point.measurement("zoneController")
-                .time(signal.timestamp.toEpochMilli(), TimeUnit.MILLISECONDS)
+                .time(signal.timestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("instance", instance)
                 .tag("unit", unit);
 
@@ -32,8 +32,8 @@ public class ZoneControllerMetricsConverter extends MetricsConverter<UnitControl
             b.addField("fanSpeed", controlSignal.fanSpeed);
         }
 
-        if (signal.error != null) {
-            b.addField("error", signal.error.toString());
+        if (signal.error() != null) {
+            b.addField("error", signal.error().toString());
         }
 
         return b.build();

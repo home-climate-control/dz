@@ -22,7 +22,7 @@ public class HvacDeviceMetricsConverter extends MetricsConverter<HvacDeviceStatu
     private Point convert(Signal<HvacDeviceStatus, Void> signal) {
 
         var b = Point.measurement("hvacDevice")
-                .time(signal.timestamp.toEpochMilli(), TimeUnit.MILLISECONDS)
+                .time(signal.timestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("instance", instance)
                 .tag("unit", unit);
 
@@ -36,8 +36,8 @@ public class HvacDeviceMetricsConverter extends MetricsConverter<HvacDeviceStatu
             Optional.ofNullable(status.command().mode()).ifPresent(m -> b.tag("mode", m.toString()));
         }
 
-        if (signal.error != null) {
-            b.addField("error", signal.error.toString());
+        if (signal.error() != null) {
+            b.addField("error", signal.error().toString());
         }
 
         return b.build();

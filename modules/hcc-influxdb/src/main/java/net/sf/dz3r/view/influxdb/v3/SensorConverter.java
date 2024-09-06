@@ -28,7 +28,7 @@ public class SensorConverter {
     private Point convert(Signal<Double, Void> signal) {
 
         var b = Point.measurement("sensor")
-                .time(signal.timestamp.toEpochMilli(), TimeUnit.MILLISECONDS)
+                .time(signal.timestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("instance", instance)
                 .tag("name", name);
 
@@ -36,8 +36,8 @@ public class SensorConverter {
             b.addField("sample", signal.getValue());
         }
 
-        if (signal.error != null) {
-            b.addField("error", signal.error.toString());
+        if (signal.error() != null) {
+            b.addField("error", signal.error().toString());
         }
 
         return b.build();

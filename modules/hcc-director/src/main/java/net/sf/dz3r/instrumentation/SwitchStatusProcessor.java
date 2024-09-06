@@ -36,10 +36,10 @@ public class SwitchStatusProcessor implements SignalProcessor<DeviceState<Boolea
 
         if (source.isError()) {
             // Nothing else matters, for now
-            return new Signal<>(source.timestamp, null, null, source.status, source.error);
+            return new Signal<>(source.timestamp(), null, null, source.status(), source.error());
         }
 
         // VT: FIXME: Pass/fail is the only thing of interest right now, but DeviceState contains some juicy bits
-        return new Signal<>(source.timestamp, new SwitchStatus(Optional.empty()));
+        return new Signal<>(source.timestamp(), new SwitchStatus(Optional.empty()));
     }
 }

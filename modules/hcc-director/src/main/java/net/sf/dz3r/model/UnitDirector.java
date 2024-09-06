@@ -205,11 +205,11 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
 
         return new AbstractMap.SimpleEntry<>(
                 sensorFlux
-                        .map(s -> new Signal<>(s.timestamp, s.getValue(), zoneName, s.status, s.error)), zone);
+                        .map(s -> new Signal<>(s.timestamp(), s.getValue(), zoneName, s.status(), s.error())), zone);
     }
 
     private Signal<UnitControlSignal, Void> stripZoneName(Signal<UnitControlSignal, String> s) {
-        return new Signal<>(s.timestamp, s.getValue(), null, s.status, s.error);
+        return new Signal<>(s.timestamp(), s.getValue(), null, s.status(), s.error());
     }
 
     public final Flux<Signal<HvacDeviceStatus, Void>> getFlux() {

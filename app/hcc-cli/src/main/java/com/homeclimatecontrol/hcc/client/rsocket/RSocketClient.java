@@ -26,7 +26,11 @@ import java.util.Map;
 public class RSocketClient {
 
     private final Logger logger = LogManager.getLogger();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    public RSocketClient(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     public Map<String, ZoneStatus> getZones(String bindAddress, int port, String serialization) throws JsonProcessingException {
 

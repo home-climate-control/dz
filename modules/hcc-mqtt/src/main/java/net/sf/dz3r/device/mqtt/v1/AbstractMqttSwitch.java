@@ -81,7 +81,7 @@ public abstract class AbstractMqttSwitch extends AbstractSwitch<MqttMessageAddre
             return getStateFlux()
                     .next()
                     .map(this::getState)
-                    .doOnNext(state -> logger.debug("signal @{}: {}", state.timestamp.atZone(ZoneId.systemDefault()), lastKnownState))
+                    .doOnNext(state -> logger.debug("signal @{}: {}", state.timestamp().atZone(ZoneId.systemDefault()), lastKnownState))
                     .map(Signal::getValue);
 
         } finally {

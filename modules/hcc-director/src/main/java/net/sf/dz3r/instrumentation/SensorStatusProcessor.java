@@ -52,13 +52,13 @@ public class SensorStatusProcessor implements SignalProcessor<Double, SensorStat
         if (source.isError()) {
             // Nothing else matters
             lastKnown = null;
-            return new Signal<>(source.timestamp, null, null, source.status, source.error);
+            return new Signal<>(source.timestamp(), null, null, source.status(), source.error());
         }
 
         // VT: FIXME: Calculate signal stats
 
         return new Signal<>(
-                source.timestamp,
+                source.timestamp(),
                 new SensorStatus(
                         Optional.ofNullable(source.getValue())
                                 .map(this::computeResolution)

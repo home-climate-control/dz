@@ -1,7 +1,7 @@
 package net.sf.dz3r.controller.pid;
 
-import net.sf.dz3r.controller.AbstractProcessController;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.controller.AbstractProcessController;
 
 /**
  * Abstract base for a PID controller implementation.
@@ -140,13 +140,13 @@ public abstract class AbstractPidController<P> extends AbstractProcessController
                     lastP, lastI, lastD));
         }
 
-        return new Signal<>(pv.timestamp,
+        return new Signal<>(pv.timestamp(),
                 new PidStatus(
                         new Status<>(setpoint, error, signal),
                         lastP, lastI, lastD),
-                pv.payload,
-                pv.status,
-                pv.error);
+                pv.payload(),
+                pv.status(),
+                pv.error());
     }
 
     /**

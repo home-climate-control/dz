@@ -1,8 +1,8 @@
 package net.sf.dz3r.view.swing.zone;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
-import net.sf.dz3r.common.DataSet;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.common.DataSet;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -60,7 +60,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
         logger.trace("ambient={}, target={}", ambient, target);
 
         adjustVerticalLimits(
-                signal.timestamp.toEpochMilli(),
+                signal.timestamp().toEpochMilli(),
                 signal.getValue().tintedValue.value,
                 signal.getValue().setpoint,
                 ambient,
@@ -110,7 +110,7 @@ public class ZoneChart2021 extends AbstractZoneChart {
         logger.trace("thermostatTintedValue={}", thermostatTintedValue);
         logger.trace("economizerTintedValue={}", economizerTintedValue);
 
-        var timestamp = signal.timestamp.toEpochMilli();
+        var timestamp = signal.timestamp().toEpochMilli();
 
         // VT: NOTE: Write lock is acquired once per all sets, it's a short operation
         var lockNow = Instant.now().toEpochMilli();

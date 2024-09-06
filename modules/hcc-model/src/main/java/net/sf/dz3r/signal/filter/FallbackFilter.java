@@ -52,7 +52,7 @@ public class FallbackFilter<T, P> implements SignalProcessor<T, T, P> {
 
     private Signal<T, P> fallback(Signal<T, P> signal) {
 
-        P source = signal.payload;
+        P source = signal.payload();
         if (!fallbackMap.containsKey(source)) {
 
             // This is serious enough to complain, this stream is not supposed to contain alien signals
@@ -88,7 +88,7 @@ public class FallbackFilter<T, P> implements SignalProcessor<T, T, P> {
                 .map(Map.Entry::getValue)
                 .filter(Signal::isError)
                 .sort(this::reverseByTimestamp)
-                .map(s -> s.error)
+                .map(s -> s.error())
                 .collectList()
                 .block();
 
@@ -102,10 +102,10 @@ public class FallbackFilter<T, P> implements SignalProcessor<T, T, P> {
             throw new IllegalStateException("Should've been handled elsewhere: all " + errors.size() + " errors, map: " + fallbackMap);
         }
 
-        return new Signal<>(signal.timestamp, signal.getValue(), signal.payload, Signal.Status.FAILURE_PARTIAL, errors.get(0));
+        return new Signal<>(signal.timestamp(), signal.getValue(), signal.payload(), Signal.Status.FAILURE_PARTIAL, errors.get(0));
     }
 
     private int reverseByTimestamp(Signal<T,P> s1, Signal<T,P> s2) {
-        return s2.timestamp.compareTo(s1.timestamp);
+        return s2.timestamp().compareTo(s1.timestamp());
     }
 }

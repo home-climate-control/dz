@@ -1,7 +1,7 @@
 package net.sf.dz3r.controller.pid;
 
-import net.sf.dz3r.controller.ProcessController;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.controller.ProcessController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -113,7 +113,7 @@ class SimplePidControllerTest {
                 .compute(signal)
                 .doOnNext(s -> {
                     logger.debug("output: {}", s);
-                    assertThat(((PidController.PidStatus) s.getValue()).i).isEqualTo(s.payload.expectedOutput);
+                    assertThat(((PidController.PidStatus) s.getValue()).i).isEqualTo(s.payload().expectedOutput);
                 })
                 .blockLast();
     }
@@ -130,7 +130,7 @@ class SimplePidControllerTest {
                 .compute(signal)
                 .doOnNext(s -> {
                     logger.debug("output: {}", s);
-                    assertThat(((PidController.PidStatus) s.getValue()).d).isEqualTo(s.payload.expectedOutput);
+                    assertThat(((PidController.PidStatus) s.getValue()).d).isEqualTo(s.payload().expectedOutput);
                 })
                 .blockLast();
     }

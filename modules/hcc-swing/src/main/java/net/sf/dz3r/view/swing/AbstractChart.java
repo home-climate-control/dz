@@ -502,10 +502,10 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
         public final O append(Signal<I, Void> signal) {
 
             if (oldestTimestamp == null) {
-                oldestTimestamp = signal.timestamp.toEpochMilli();
+                oldestTimestamp = signal.timestamp().toEpochMilli();
             }
 
-            var age = signal.timestamp.toEpochMilli() - oldestTimestamp;
+            var age = signal.timestamp().toEpochMilli() - oldestTimestamp;
 
             if (age < expirationInterval) {
 
@@ -521,7 +521,7 @@ public abstract class AbstractChart<T, P> extends SwingSink<T, P> {
             var result = complete(signal.getValue(), count);
 
             count = 1;
-            oldestTimestamp = signal.timestamp.toEpochMilli();
+            oldestTimestamp = signal.timestamp().toEpochMilli();
 
             return result;
         }

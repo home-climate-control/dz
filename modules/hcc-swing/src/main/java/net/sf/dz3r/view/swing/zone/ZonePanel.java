@@ -432,7 +432,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                     .flatMap(ignore -> zone.setSettings(new ZoneSettings(zone.getSettings(), s)))
                     .doOnNext(signal -> {
                         if (!signal.isOK()) {
-                            logger.error("{}: changeSetpoint({}) failed", zone.getAddress(), delta, signal.error);
+                            logger.error("{}: changeSetpoint({}) failed", zone.getAddress(), delta, signal.error());
                         }
                     })
                     .filter(Signal::isOK)
@@ -557,7 +557,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
                     zoneStatus.economizerStatus());
 
             // VT: FIXME: This must be driven via Flux
-            chart.consumeSignal(new Signal<>(getSignal().timestamp, dataPoint));
+            chart.consumeSignal(new Signal<>(getSignal().timestamp(), dataPoint));
         } catch (Exception ex) {
             logger.error("unexpected exception processing {}", sensorSignal, ex);
         }

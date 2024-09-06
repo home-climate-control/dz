@@ -50,6 +50,6 @@ public abstract class MedianFilter<T extends  Comparable<T>> extends AbstractMed
             buffer.remove(0);
         }
 
-        return filter(buffer, signal.timestamp);
+        return filter(buffer, signal.timestamp());
     }
 }

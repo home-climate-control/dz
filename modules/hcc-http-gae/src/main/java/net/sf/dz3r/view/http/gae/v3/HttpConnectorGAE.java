@@ -113,16 +113,16 @@ public class HttpConnectorGAE extends HttpConnector {
                     }
                 })
                 .filter(s -> s.getValue().command().mode() != null)
-                .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command().mode(), unitId, s.status, s.error))
+                .map(s -> new Signal<HvacMode, String>(s.timestamp(), s.getValue().command().mode(), unitId, s.status(), s.error()))
                 .subscribe(zoneRenderer::consumeMode);
 
         // Zone ("thermostat" in its terminology) status feed is the only one supported
         zoneRenderer.compute(
                         unitId,
                         feed.aggregateZoneFlux
-                                .doOnNext(z -> logger.debug("Incoming zone: {}", z.payload))
-                                .filter(z -> zoneNames.contains(z.payload))
-                                .doOnNext(z -> logger.debug("Reportable zone: {}", z.payload))
+                                .doOnNext(z -> logger.debug("Incoming zone: {}", z.payload()))
+                                .filter(z -> zoneNames.contains(z.payload()))
+                                .doOnNext(z -> logger.debug("Reportable zone: {}", z.payload()))
                 )
                 .subscribe(bufferSink::tryEmitNext);
     }
@@ -141,7 +141,7 @@ public class HttpConnectorGAE extends HttpConnector {
         var zoneName = source.getValue().getAddress();
         return source
                 .getKey()
-                .map(s -> new Signal<>(s.timestamp, s.getValue(), zoneName, s.status, s.error));
+                .map(s -> new Signal<>(s.timestamp(), s.getValue(), zoneName, s.status(), s.error()));
     }
 
     private void exchange(List<ZoneSnapshot> buffer) {

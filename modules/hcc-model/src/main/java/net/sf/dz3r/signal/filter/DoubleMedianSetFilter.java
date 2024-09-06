@@ -27,12 +27,12 @@ public class DoubleMedianSetFilter<P> extends MedianSetFilter<Double, P> {
             filterSet.add(flux
                     // Convert the (Double, Void) signal to (Double, Integer)
                     // so that the filter can distinguish channels
-                    .map(s -> new Signal<>(s.timestamp, s.getValue(), hash, s.status, s.error)));
+                    .map(s -> new Signal<>(s.timestamp(), s.getValue(), hash, s.status(), s.error())));
         }
 
         return filter
                 .compute(Flux.merge(filterSet))
                 // Strip the hash, the consumer doesn't need it
-                .map(s -> new Signal<>(s.timestamp, s.getValue(), null, s.status, s.error));
+                .map(s -> new Signal<>(s.timestamp(), s.getValue(), null, s.status(), s.error()));
     }
 }

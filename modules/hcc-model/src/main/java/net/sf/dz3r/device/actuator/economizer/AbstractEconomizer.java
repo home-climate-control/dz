@@ -243,8 +243,8 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
      */
     private Boolean computeDeviceState(Signal<Boolean, ProcessController.Status<Double>> stateSignal) {
 
-        var sample = stateSignal.payload == null ? null : ((HysteresisController.HysteresisStatus) stateSignal.payload).sample;
-        var demand = stateSignal.payload == null ? 0 : stateSignal.payload.signal;
+        var sample = stateSignal.payload() == null ? null : ((HysteresisController.HysteresisStatus) stateSignal.payload()).sample;
+        var demand = stateSignal.payload() == null ? 0 : stateSignal.payload().signal;
 
         economizerStatus = new EconomizerStatus(
                 Optional.ofNullable(config.settings).map(EconomizerSettings::new).orElse(null),
@@ -338,7 +338,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             // and even 90 seconds can cause blips once in a while
             var stale = clock.instant().minus(timeout);
 
-            if (pair.indoor.timestamp.isBefore(stale) || pair.ambient.timestamp.isBefore(stale)) {
+            if (pair.indoor.timestamp().isBefore(stale) || pair.ambient.timestamp().isBefore(stale)) {
 
                 // How??? Stale signals should have been taken care of by the TimeoutGuard by now.
                 logger.error("{}: stale signals? resetting both {}", getAddress(), pair);
@@ -355,7 +355,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             var signal = computeCombined(indoorTemperature, ambientTemperature);
 
             // The latter one wins
-            var timestamp = indoor.timestamp.isAfter(ambient.timestamp) ? indoor.timestamp : ambient.timestamp;
+            var timestamp = indoor.timestamp().isAfter(ambient.timestamp()) ? indoor.timestamp() : ambient.timestamp();
 
             return new Signal<>(timestamp, signal);
 
@@ -445,15 +445,15 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         // Augment the source with the economizer status
         var augmentedSource = new Signal<>(
-                source.timestamp,
+                source.timestamp(),
                 new ZoneStatus(
                         zoneSettings.settings(),
                         zoneSettings.callingStatus(),
                         economizerStatus,
                         zoneSettings.periodSettings()),
-                source.payload,
-                source.status,
-                source.error);
+                source.payload(),
+                source.status(),
+                source.error());
 
         if (actuatorState == null || actuatorState.equals(Boolean.FALSE)) {
 
@@ -475,11 +475,11 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 zoneSettings.periodSettings());
 
         return new Signal<>(
-                source.timestamp,
+                source.timestamp(),
                 adjusted,
-                source.payload,
-                source.status,
-                source.error);
+                source.payload(),
+                source.status(),
+                source.error());
     }
 
     @Override

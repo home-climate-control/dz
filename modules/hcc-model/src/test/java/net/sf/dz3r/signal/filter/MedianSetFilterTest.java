@@ -78,7 +78,7 @@ class MedianSetFilterTest {
     }
 
     private int sortByTimestamp(Signal<?, ?> s1, Signal<?, ?> s2) {
-        return s1.timestamp.compareTo(s2.timestamp);
+        return s1.timestamp().compareTo(s2.timestamp());
     }
 
     @Test

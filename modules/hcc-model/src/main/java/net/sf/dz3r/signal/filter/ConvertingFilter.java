@@ -24,6 +24,6 @@ public class ConvertingFilter<P> implements SignalProcessor<Double, Double, P> {
 
     @Override
     public Flux<Signal<Double, P>> compute(Flux<Signal<Double, P>> in) {
-        return in.map(signal -> new Signal<>(signal.timestamp, converter.convert(signal.getValue()), signal.payload, signal.status, signal.error));
+        return in.map(signal -> new Signal<>(signal.timestamp(), converter.convert(signal.getValue()), signal.payload(), signal.status(), signal.error()));
     }
 }

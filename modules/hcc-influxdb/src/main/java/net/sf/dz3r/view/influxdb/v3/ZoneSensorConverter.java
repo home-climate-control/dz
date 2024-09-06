@@ -23,7 +23,7 @@ public class ZoneSensorConverter extends MetricsConverter<Double, Void>{
     private Point convert(Signal<Double, Void> signal) {
 
         var b = Point.measurement("zone")
-                .time(signal.timestamp.toEpochMilli(), TimeUnit.MILLISECONDS)
+                .time(signal.timestamp().toEpochMilli(), TimeUnit.MILLISECONDS)
                 .tag("instance", instance)
                 .tag("unit", unit)
                 .tag("name", zoneName);
@@ -32,8 +32,8 @@ public class ZoneSensorConverter extends MetricsConverter<Double, Void>{
             b.addField("temperature", signal.getValue());
         }
 
-        if (signal.error != null) {
-            b.addField("error", signal.error.toString());
+        if (signal.error() != null) {
+            b.addField("error", signal.error().toString());
         }
 
         return b.build();

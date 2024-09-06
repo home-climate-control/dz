@@ -91,7 +91,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     @Override
     protected boolean update(Signal<SystemStatus, Void> signal) {
 
-        switch (signal.status) {
+        switch (signal.status()) {
             case OK -> setTitleColor(Color.WHITE);
             case FAILURE_PARTIAL -> setTitleColor(Color.ORANGE);
             case FAILURE_TOTAL -> setTitleColor(Color.RED);
@@ -231,7 +231,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     private void renderSensor(JPanel p, String id, Signal<SensorStatus, Void> signal) {
 
         if (signal.isError()) {
-            renderError(p, id, signal.error);
+            renderError(p, id, signal.error());
             return;
         }
 
@@ -247,7 +247,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     private void renderSwitch(JPanel p, String id, Signal<SwitchStatus, String> signal) {
 
         if (signal.isError()) {
-            renderError(p, id, signal.error);
+            renderError(p, id, signal.error());
             return;
         }
 
@@ -258,7 +258,7 @@ public class DashboardPanel extends EntityPanel<SystemStatus, Void> {
     private void renderHvacDevice(JPanel p, String id, Signal<HvacDeviceStatus, Void> signal) {
 
         if (signal.isError()) {
-            renderError(p, id, signal.error);
+            renderError(p, id, signal.error());
             return;
         }
 

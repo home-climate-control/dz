@@ -38,8 +38,8 @@ class HysteresisControllerTest {
                 .create(flux)
                 .assertNext(s -> {
                     assertThat(s.getValue().signal).isEqualTo(-1.0);
-                    assertThat(s.payload).isInstanceOf(UUID.class);
-                    assertThat(s.payload).isEqualTo(payload);
+                    assertThat(s.payload()).isInstanceOf(UUID.class);
+                    assertThat(s.payload()).isEqualTo(payload);
                 })
                 .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(-1.0))
                 .assertNext(s -> assertThat(s.getValue().signal).isEqualTo(1.0))

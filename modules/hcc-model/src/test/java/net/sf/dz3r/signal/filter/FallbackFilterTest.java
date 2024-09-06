@@ -77,25 +77,25 @@ class FallbackFilterTest {
         StepVerifier.create(result)
                 .assertNext(s -> {
                     assertThat(s.getValue()).isEqualTo(1);
-                    assertThat(s.payload).isEqualTo(source1);
-                    assertThat(s.status).isEqualTo(Signal.Status.OK);
+                    assertThat(s.payload()).isEqualTo(source1);
+                    assertThat(s.status()).isEqualTo(Signal.Status.OK);
                 })
                 .assertNext(s -> {
                     assertThat(s.getValue()).isEqualTo(4);
-                    assertThat(s.payload).isEqualTo(source1);
-                    assertThat(s.status).isEqualTo(Signal.Status.FAILURE_PARTIAL);
-                    assertThat(s.error).isInstanceOf(TimeoutException.class);
+                    assertThat(s.payload()).isEqualTo(source1);
+                    assertThat(s.status()).isEqualTo(Signal.Status.FAILURE_PARTIAL);
+                    assertThat(s.error()).isInstanceOf(TimeoutException.class);
                 })
                 .assertNext(s -> {
                     assertThat(s.getValue()).isNull();
-                    assertThat(s.payload).isEqualTo(source3);
-                    assertThat(s.status).isEqualTo(Signal.Status.FAILURE_TOTAL);
-                    assertThat(s.error).isInstanceOf(IllegalStateException.class);
+                    assertThat(s.payload()).isEqualTo(source3);
+                    assertThat(s.status()).isEqualTo(Signal.Status.FAILURE_TOTAL);
+                    assertThat(s.error()).isInstanceOf(IllegalStateException.class);
                 })
                 .assertNext(s -> {
                     assertThat(s.getValue()).isEqualTo(6);
-                    assertThat(s.payload).isEqualTo(source2);
-                    assertThat(s.status).isEqualTo(Signal.Status.FAILURE_PARTIAL);
+                    assertThat(s.payload()).isEqualTo(source2);
+                    assertThat(s.status()).isEqualTo(Signal.Status.FAILURE_PARTIAL);
                 })
                 .verifyComplete();
     }

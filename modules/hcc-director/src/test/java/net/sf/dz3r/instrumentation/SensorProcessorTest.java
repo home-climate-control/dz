@@ -39,7 +39,7 @@ class SensorProcessorTest {
         var result = sp.compute(source).blockLast();
 
         assertThat(result).isNotNull();
-        assertThat(result.status).isEqualTo(Signal.Status.FAILURE_TOTAL);
+        assertThat(result.status()).isEqualTo(Signal.Status.FAILURE_TOTAL);
         assertThat(result.getValue()).isNull();
     }
 
@@ -56,7 +56,7 @@ class SensorProcessorTest {
         var result = sp.compute(source).blockLast();
 
         assertThat(result).isNotNull();
-        assertThat(result.status).isEqualTo(Signal.Status.OK);
+        assertThat(result.status()).isEqualTo(Signal.Status.OK);
         assertThat(result.getValue()).isNotNull();
         assertThat(result.getValue().resolution()).isNull();
     }

@@ -35,7 +35,7 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
 
     private Flux<ZoneSnapshot> convert(String unitId, Signal<ZoneStatus, String> source) {
 
-        var zoneName = source.payload;
+        var zoneName = source.payload();
 
         if (!unit2mode.containsKey(unitId)) {
             logger.debug("{}: don't know the mode yet, skipping this status: {}", unitId, source);
@@ -63,7 +63,7 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
 
             try {
                 return Flux.just(new ZoneSnapshot(
-                        source.timestamp.toEpochMilli(),
+                        source.timestamp().toEpochMilli(),
                         zoneName,
                         modeMap.get(unit2mode.get(unitId).getValue()),
                         renderState(status.settings().enabled(), status.callingStatus().calling()),
@@ -106,14 +106,14 @@ public class ZoneRenderer extends EntityRenderer<ZoneStatus, String> {
     public void consumeSensorSignal(Signal<Double, String> signal) {
 
         // Signals from different zones are coming, must keep them separate
-        zone2signal.put(signal.payload, signal);
-        logger.trace("consume/signal: {}={}", signal.payload, signal);
+        zone2signal.put(signal.payload(), signal);
+        logger.trace("consume/signal: {}={}", signal.payload(), signal);
     }
 
     public void consumeMode(Signal<HvacMode, String> signal) {
 
         // Signals from different units are coming, must keep them separate
-        unit2mode.put(signal.payload, signal);
-        logger.trace("consume/mode: {}={}", signal.payload, signal);
+        unit2mode.put(signal.payload(), signal);
+        logger.trace("consume/mode: {}={}", signal.payload(), signal);
     }
 }

@@ -1,7 +1,7 @@
 package net.sf.dz3r.controller;
 
-import net.sf.dz3r.common.HCCObjects;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.common.HCCObjects;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -53,7 +53,7 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
         // Are we configured to be a NOP?
         if (halfLife.isZero()) {
             // A little bit wasteful, but the same control flow is preserved regardless of the delay
-            return new Signal<>(pv.timestamp, new Status<>(setpoint, 0d, 0d), pv.payload);
+            return new Signal<>(pv.timestamp(), new Status<>(setpoint, 0d, 0d), pv.payload());
         }
 
         // This will only be non-null upon second invocation
@@ -64,15 +64,15 @@ public class HalfLifeController<P>  extends AbstractProcessController<Double, Do
             if (lastOutputSignal == null) {
 
                 // Not much we can do, this is the first signal ever. The superclass will remember it for us.
-                return new Signal<>(pv.timestamp, new Status<>(setpoint, 0d, 0d), pv.payload);
+                return new Signal<>(pv.timestamp(), new Status<>(setpoint, 0d, 0d), pv.payload());
             }
 
             double diff = getDiff(lastPV, pv);
 
             return new Signal<>(
-                    pv.timestamp,
-                    new Status<>(setpoint, diff, computeRemaining(pv.timestamp, lastOutputSignal.getValue().signal, diff)),
-                    pv.payload
+                    pv.timestamp(),
+                    new Status<>(setpoint, diff, computeRemaining(pv.timestamp(), lastOutputSignal.getValue().signal, diff)),
+                    pv.payload()
             );
 
         } finally {

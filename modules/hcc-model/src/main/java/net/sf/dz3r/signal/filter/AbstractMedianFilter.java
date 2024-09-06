@@ -58,13 +58,13 @@ public abstract class AbstractMedianFilter<T extends  Comparable<T>, P> implemen
                 .doOnNext(s -> {
 
                     if (!s.isOK()) {
-                        errors.add(s.error);
+                        errors.add(s.error());
                         notOkCount.incrementAndGet();
                     }
 
                     if (s.isError()) {
                         errorCount.incrementAndGet();
-                        errors.add(s.error);
+                        errors.add(s.error());
                     }
                 })
                 .filter(s -> s.getValue() != null)

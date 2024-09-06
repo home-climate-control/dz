@@ -24,9 +24,13 @@ import java.util.Map;
 public class HttpClient {
 
     private final Logger logger = LogManager.getLogger();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     private org.apache.http.client.HttpClient httpClient;
+
+    public HttpClient(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     private synchronized org.apache.http.client.HttpClient getHttpClient() {
 

@@ -39,8 +39,8 @@ class OneWireDriverTest {
                 .create(presenceSignal)
                 .assertNext(s -> {
                     assertThat(s.isError()).isTrue();
-                    assertThat(s.status).isEqualTo(Signal.Status.FAILURE_TOTAL);
-                    assertThat(s.error).isInstanceOf(IllegalArgumentException.class).hasMessage("does not exist: not present");
+                    assertThat(s.status()).isEqualTo(Signal.Status.FAILURE_TOTAL);
+                    assertThat(s.error()).isInstanceOf(IllegalArgumentException.class).hasMessage("does not exist: not present");
                 })
                 .verifyComplete();
     }

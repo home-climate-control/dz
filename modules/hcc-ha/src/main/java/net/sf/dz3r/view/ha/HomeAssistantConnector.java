@@ -131,7 +131,7 @@ public class HomeAssistantConnector implements Connector {
                     .subscribe(this::receive);
 
             feed.aggregateZoneFlux
-                    .filter(signal -> contains(signal.payload, exposedZones))
+                    .filter(signal -> contains(signal.payload(), exposedZones))
                     .subscribe(this::broadcast);
 
             feed.hvacDeviceFlux
@@ -141,7 +141,7 @@ public class HomeAssistantConnector implements Connector {
                         }
                     })
                     .filter(s -> s.getValue().command().mode() != null)
-                    .map(s -> new Signal<HvacMode, String>(s.timestamp, s.getValue().command().mode(), unitId, s.status, s.error))
+                    .map(s -> new Signal<HvacMode, String>(s.timestamp(), s.getValue().command().mode(), unitId, s.status(), s.error()))
                     .subscribe(mode -> captureMode(mode, sensorFlux2zone.values()));
 
         } finally {
@@ -274,7 +274,7 @@ public class HomeAssistantConnector implements Connector {
 
     private void broadcast(Signal<ZoneStatus, String> status2zone) {
 
-        var zoneName = status2zone.payload;
+        var zoneName = status2zone.payload();
 
         for (var kv : zone2meta.entrySet()) {
             var zone = kv.getKey();

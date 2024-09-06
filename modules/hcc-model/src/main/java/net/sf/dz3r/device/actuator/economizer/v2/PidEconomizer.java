@@ -1,5 +1,6 @@
 package net.sf.dz3r.device.actuator.economizer.v2;
 
+import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.controller.pid.AbstractPidController;
@@ -8,7 +9,6 @@ import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.model.Thermostat;
-import com.homeclimatecontrol.hcc.signal.Signal;
 import reactor.core.publisher.Flux;
 
 import java.time.Clock;
@@ -98,17 +98,17 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
 
         if (signal.isOK()) {
             // PID controller output value becomes the extra payload but is ignored at the moment (unlike Thermostat#compute()).
-            return new Signal<>(signal.timestamp, signal.getValue().signal, signal.getValue(), signal.status, signal.error);
+            return new Signal<>(signal.timestamp(), signal.getValue().signal, signal.getValue(), signal.status(), signal.error());
         }
 
         // Any kind of errors at this point must be interpreted as "turn it off"
-        return new Signal<>(signal.timestamp, -1d);
+        return new Signal<>(signal.timestamp(), -1d);
     }
 
     private Signal<Boolean, ProcessController.Status<Double>> mapOutput(Signal<ProcessController.Status<Double>, ProcessController.Status<Double>> source) {
 
         var calling = Double.compare(source.getValue().signal, 1.0) == 0;
 
-        return new Signal<>(source.timestamp, calling, source.getValue());
+        return new Signal<>(source.timestamp(), calling, source.getValue());
     }
 }

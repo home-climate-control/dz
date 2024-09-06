@@ -33,7 +33,7 @@ public class SingleStageUnitController extends AbstractUnitController {
                 .map(s -> {
                     var demand = s.getValue().demand;
                     var output = demand > 0 ? demand : 0;
-                    return new Signal<>(s.timestamp, new HvacCommand(null, output, output));
+                    return new Signal<>(s.timestamp(), new HvacCommand(null, output, output));
                 });
     }
 }
