@@ -27,6 +27,7 @@ public class HccCLI implements CommandLineRunner {
     private static final String COMMAND_GET_ZONES = "get-zones";
     private static final String COMMAND_GET_ZONES_HTTP = "get-zones-http";
     private static final String COMMAND_GET_ZONES_RSOCKET = "get-zones-rsocket";
+    private static final String COMMAND_GET_BOOTSTRAP = "get-bootstrap";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = new HttpClient();
@@ -39,6 +40,10 @@ public class HccCLI implements CommandLineRunner {
     }
 
     public class CommandGetMeta extends CommandBase {
+
+    }
+
+    public class CommandGetBootstrap extends CommandBase {
 
     }
 
@@ -82,6 +87,7 @@ public class HccCLI implements CommandLineRunner {
         var commandGetMeta = new CommandGetMeta();
         var commandGetZonesHTTP = new CommandGetZonesHTTP();
         var commandGetZonesRSocket = new CommandGetZonesRSocket();
+        var commandGetBootstrap = new CommandGetBootstrap();
 
         var jc = JCommander
                 .newBuilder()
@@ -89,6 +95,7 @@ public class HccCLI implements CommandLineRunner {
                 .addCommand(COMMAND_GET_META, commandGetMeta)
                 .addCommand(COMMAND_GET_ZONES, commandGetZonesHTTP)
                 .addCommand(COMMAND_GET_ZONES_RSOCKET, commandGetZonesRSocket)
+                .addCommand(COMMAND_GET_BOOTSTRAP, commandGetBootstrap)
                 .build();
 
         try {
@@ -106,6 +113,7 @@ public class HccCLI implements CommandLineRunner {
                 case COMMAND_GET_ZONES -> getZonesHTTP(commandGetZonesHTTP.url);
                 case COMMAND_GET_ZONES_HTTP -> getZonesHTTP(commandGetZonesHTTP.url);
                 case COMMAND_GET_ZONES_RSOCKET -> getZonesRSocket(commandGetZonesRSocket.url, commandGetZonesRSocket.serialization);
+                case COMMAND_GET_BOOTSTRAP -> getBootstrap(commandGetBootstrap.url);
             }
 
         } catch (ParameterException ex) {
@@ -167,6 +175,19 @@ public class HccCLI implements CommandLineRunner {
             var zoneMap = rsocketClient.getZones(httpUrl.getHost(), meta.instance().duplexPort(), serialization);
 
             logger.info("ZONES:\n{}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zoneMap));
+
+        } finally {
+            ThreadContext.pop();
+        }
+    }
+
+    private void getBootstrap(String url) throws IOException {
+        ThreadContext.push("getBootstrap");
+        try {
+            logger.info("url={}", url);
+            var bootstrap = httpClient.getBootstrap(new URL(url));
+            var bootstrapPrint = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(bootstrap);
+            logger.info("BOOTSTRAP/parsed: {}", bootstrapPrint);
 
         } finally {
             ThreadContext.pop();

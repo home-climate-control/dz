@@ -1,6 +1,7 @@
 package com.homeclimatecontrol.hcc.client.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.homeclimatecontrol.hcc.ClientBootstrap;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.instrumentation.Marker;
@@ -67,6 +68,11 @@ public class HttpClient {
 
         // VT: FIXME: This returns a map of maps :O Will deal with this in a short bit.
         return objectMapper.readValue(get(targetUrl, "getZones"), Map.class);
+    }
+
+    public ClientBootstrap getBootstrap(URL targetUrl) throws IOException {
+
+        return objectMapper.readValue(get(targetUrl, "getBootstrap"), ClientBootstrap.class);
     }
 
     private String get(URL targetUrl, String marker) throws IOException {
