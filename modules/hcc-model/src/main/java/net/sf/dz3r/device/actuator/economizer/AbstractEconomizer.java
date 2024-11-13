@@ -386,8 +386,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         } else {
 
-            // As the indoor temperature is approaching the target, need to take corrective measures
-            var k = (1.0 / config.settings.changeoverDelta()) * (config.settings.changeoverDelta() - targetDelta);
+            // As the indoor temperature is approaching the target, need to take corrective measures.
+            // This one is not ideal but is a good approximation.
+            var k = config.settings.changeoverDelta() - targetDelta;
 
             targetAdjustment = ambientDelta * k;
 
