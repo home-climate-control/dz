@@ -93,14 +93,6 @@ class AbstractEconomizerTest {
 
         var signal = e.computeCombined(source.indoorTemperature, source.ambientTemperature);
 
-        if (Double.compare(signal, Double.NaN) == 0 && Double.compare(source.expectedSignal, Double.NaN) == 0) {
-            // Corner case, isEqualTo won't be able to handle that Double.NaN == Double.NaN is false, pass.
-            // Reference: https://docs.oracle.com/javase/8/docs/api/java/lang/Double.html#equals-java.lang.Object-
-
-            logger.info("NaN received for {}, this is expected", source);
-            return;
-        }
-
         assertThat(signal).isEqualTo(source.expectedSignal);
     }
 
@@ -157,12 +149,11 @@ class AbstractEconomizerTest {
                 // https://github.com/home-climate-control/dz/issues/328
                 // Note changeoverDelta == 0.
                 // NEGATIVE_INFINITY is wrong, but this is what it is now. Will be adjusted after the fix is in.
-                new TargetAdjustmentTestData(HvacMode.COOLING, 0.0, 22.0, 21.0, 20.0, Double.NEGATIVE_INFINITY),
+                new TargetAdjustmentTestData(HvacMode.COOLING, 0.0, 22.0, 21.0, 20.0, 0.0),
 
                 // https://github.com/home-climate-control/dz/issues/329
                 // Note changeoverDelta == 0 && targetTemperature == indoorTemperature.
-                // Surprise, surprise - Infinity * 0 == NaN
-                new TargetAdjustmentTestData(HvacMode.COOLING, 0.0, 25.0, 25.0, 20.0, Double.NaN)
+                new TargetAdjustmentTestData(HvacMode.COOLING, 0.0, 25.0, 25.0, 20.0, 5.0)
         );
     }
 
@@ -181,13 +172,11 @@ class AbstractEconomizerTest {
 
                 // https://github.com/home-climate-control/dz/issues/328
                 // Note changeoverDelta == 0.
-                // NEGATIVE_INFINITY is wrong, but this is what it is now. Will be adjusted after the fix is in.
-                new TargetAdjustmentTestData(HvacMode.HEATING, 0.0, 25.0, 26.0, 30.0, Double.NEGATIVE_INFINITY),
+                new TargetAdjustmentTestData(HvacMode.HEATING, 0.0, 25.0, 26.0, 30.0, 0.0),
 
                 // https://github.com/home-climate-control/dz/issues/329
                 // Note changeoverDelta == 0 && targetTemperature == indoorTemperature.
-                // Surprise, surprise - Infinity * 0 == NaN
-                new TargetAdjustmentTestData(HvacMode.HEATING, 0.0, 25.0, 25.0, 30.0, Double.NaN)
+                new TargetAdjustmentTestData(HvacMode.HEATING, 0.0, 25.0, 25.0, 30.0, 5.0)
         );
     }
 }
