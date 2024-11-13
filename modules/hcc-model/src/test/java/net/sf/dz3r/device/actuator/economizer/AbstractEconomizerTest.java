@@ -112,7 +112,12 @@ class AbstractEconomizerTest {
                 new TargetAdjustmentTestData(HvacMode.COOLING, 1.0, 22.0, 21.0, 10.0, -10.0),
 
                 // https://github.com/home-climate-control/dz/issues/263
-                new TargetAdjustmentTestData(HvacMode.COOLING, 1.0, 22.0, 21.0, 30.0, -10.0)
+                new TargetAdjustmentTestData(HvacMode.COOLING, 1.0, 22.0, 21.0, 30.0, -10.0),
+
+                // https://github.com/home-climate-control/dz/issues/328
+                // Note changeoverDelta == 0.
+                // NEGATIVE_INFINITY is wrong, but this is what it is now. Will be adjusted after the fix is in.
+                new TargetAdjustmentTestData(HvacMode.COOLING, 0.0, 22.0, 21.0, 20.0, Double.NEGATIVE_INFINITY)
         );
 
     }
