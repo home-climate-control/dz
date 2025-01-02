@@ -1,5 +1,5 @@
 plugins {
-    `java-library`
+    id("buildlogic.java-library-conventions")
 }
 
 dependencies {

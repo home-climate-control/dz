@@ -1,3 +1,7 @@
+plugins {
+    id("buildlogic.java-common-conventions")
+}
+
 dependencies {
 
     implementation(libs.spring.standalone.context)

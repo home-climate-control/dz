@@ -1,3 +1,10 @@
+plugins {
+    // Apply the foojay-resolver plugin to allow automatic download of JDKs
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.9.0"
+}
+
+rootProject.name = "dz3-master"
+
 // External dependencies
 
 includeBuild("submodules/automation-hat-driver")
@@ -59,5 +66,3 @@ include("app:hcc-quarkus")
 // This is the command line tool, useful mostly for troubleshooting until further notice.
 
 include("app:hcc-cli")
-
-rootProject.name = "dz3-master"

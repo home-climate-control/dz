@@ -1,5 +1,5 @@
 plugins {
-    `java-library`
+    id("buildlogic.java-library-conventions")
 }
 
 dependencies {
@@ -52,8 +52,4 @@ dependencies {
     // Mapstruct
     implementation(libs.mapstruct)
     annotationProcessor(libs.mapstruct.processor)
-
-    testImplementation(libs.assertj.core)
-    testImplementation(libs.junit5.api)
-    testImplementation(libs.junit5.params)
 }
