@@ -1,5 +1,5 @@
 plugins {
-    `java-library`
+    id("buildlogic.java-library-conventions")
 }
 
 dependencies {
@@ -10,7 +10,4 @@ dependencies {
     implementation(libs.jackson.databind)
     implementation(libs.jackson.datatype.jdk8)
     implementation(libs.jackson.datatype.jsr310)
-
-    testImplementation(libs.assertj.core)
-    testImplementation(libs.junit5.api)
 }

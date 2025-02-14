@@ -1,3 +1,7 @@
+plugins {
+    id("buildlogic.java-common-conventions")
+}
+
 dependencies {
 
     implementation(libs.google.api.services.calendar)
@@ -8,9 +12,4 @@ dependencies {
 
     implementation(project(":modules:hcc-common"))
     implementation(project(":modules:hcc-scheduler"))
-
-    testImplementation(libs.assertj.core)
-    testImplementation(libs.junit5.api)
-    testImplementation(libs.junit5.params)
-    testImplementation(libs.reactor.tools)
 }

@@ -1,5 +1,5 @@
 plugins {
-    `java-library`
+    id("buildlogic.java-library-conventions")
 }
 
 dependencies {
@@ -10,8 +10,4 @@ dependencies {
     implementation(project(":modules:hcc-common"))
     implementation(project(":modules:hcc-data-source-api"))
     implementation(project(":modules:hcc-model"))
-
-    testImplementation(libs.assertj.core)
-    testImplementation(libs.junit5.api)
-    testImplementation(libs.reactor.tools)
 }
