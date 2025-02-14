@@ -30,7 +30,7 @@ spring-dependency-management = "1.1.7"
 
 # Quarkus
 
-quarkus-platform = "3.14.2"
+quarkus-platform = "3.15.3"
 
 # This relates to Spring packages used outside SpringBoot, those are managed by their own plugin
 # Gradle is smart enough to match this to SpringBoot, but it'll be a good idea to keep an eye on it.
