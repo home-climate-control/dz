@@ -1,4 +1,4 @@
-Home Climate Control: Hardware Support: Pimoroni
+Home Climate Control: Hardware Support: XBee
 ==
 
 Stay tuned.
