@@ -1,3 +1,7 @@
-Home Climate Control: Build
+Home Climate Control Legacy: Build
 ==
-Stay tuned.
+
+Psst! Did you read the [BIG FAT WARNING](../index.md#big-fat-warning)?
+
+## Work In Progress
+See [#334](https://github.com/home-climate-control/dz/issues/334).
