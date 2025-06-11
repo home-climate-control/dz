@@ -1,10 +1,6 @@
 Home Climate Control Legacy: HOWTO: XBee Sensors
 ==
-
 Psst! Did you read the [BIG FAT WARNING](../index.md#big-fat-warning)?
-
-## Work In Progress
-See [#334](https://github.com/home-climate-control/dz/issues/334).
 
 ---
 Configuring XBee sensors is similar to other factory based configurations ([1-Wire](./1-wire-sensors-howto.md) and [MQTT](mqtt-sensors-howto.md)), though it's a bit more tricky. Here's a working example, the XBee has a [TMP36](https://www.analog.com/en/products/tmp36.html) analog sensor (another option is [LM34](http://www.ti.com/product/LM34)):

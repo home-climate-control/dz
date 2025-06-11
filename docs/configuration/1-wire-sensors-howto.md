@@ -1,10 +1,6 @@
 Home Climate Control Legacy: HOWTO: 1-Wire Sensors
 ==
-
 Psst! Did you read the [BIG FAT WARNING](../index.md#big-fat-warning)?
-
-## Work In Progress
-See [#334](https://github.com/home-climate-control/dz/issues/334).
 
 ---
 Configuring 1-Wire sensors is similar to other factory based configurations ([MQTT](mqtt-sensors-howto.md) and [XBee](./xbee-sensors-howto.md)).
