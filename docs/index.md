@@ -21,5 +21,6 @@ TL;DR: [go here](https://github.com/home-climate-control/dz?tab=readme-ov-file#h
 
 
 # Getting Deeper
-* [Build](./build/index.md)
+* [Build](build.md)
+* [Run](run.md)
 * [Configuration](./configuration/index.md)

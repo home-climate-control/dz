@@ -13,7 +13,7 @@ it is a filesystem location.
 
 ### NEXT STEPS
 
-Go to https://github.com/home-climate-control/dz/wiki for further
+Go to [documentation home](https://github.com/home-climate-control/dz/tree/master/docs/index.md) for further
 instructions.
 
 ### BEFORE YOU GO

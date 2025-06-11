@@ -17,5 +17,5 @@ If you feel gaps in above documents, you're probably right. Go take a look at th
 ## Bits and Pieces
 
 - [HOWTO: 1-Wire Sensors](https://github.com/home-climate-control/dz/wiki/HOWTO:-1-Wire-Sensors)
-- [HOWTO: MQTT Sensors](https://github.com/home-climate-control/dz/wiki/HOWTO:-MQTT-Sensors)
+- [HOWTO: MQTT Sensors](mqtt-sensors-howto.md)
 - [HOWTO: XBee Sensors](https://github.com/home-climate-control/dz/wiki/HOWTO:-XBee-Sensors)

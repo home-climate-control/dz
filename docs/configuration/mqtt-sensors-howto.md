@@ -1,12 +1,12 @@
 Home Climate Control Legacy: HOWTO: MQTT Sensors
 ==
 
-Psst! Did you read the [BIG FAT WARNING](../../index.md#big-fat-warning)?
+Psst! Did you read the [BIG FAT WARNING](../index.md#big-fat-warning)?
 
 ## Work In Progress
 See [#334](https://github.com/home-climate-control/dz/issues/334).
-See also: [MQTT: Useful Tools, Bits and Pieces](./mqtt-bits-and-pieces.md)
 
+---
 ## Configuration
 
 Configuring MQTT sensors is similar to other factory based configurations 
@@ -45,3 +45,8 @@ Below is the JSON that DZ expects. mandatory fields are `entity_type=sensor`, `n
     "signature": "T289E0279A201039B"
 }
 ```
+
+See also: [MQTT: Useful Tools, Bits and Pieces](./mqtt-bits-and-pieces.md)
+
+---
+PS: Compare to [how MQTT Connectors are configured today](https://github.com/home-climate-control/dz/blob/master/docs/configuration/mqtt.md).
