@@ -370,7 +370,7 @@ class ZoneControllerTest {
     }
 
     /**
-     * Make sure the zone controller handles incoming error signals as expected.
+     * Make sure the zone controller with a single zone shuts of when the zone sends an error signal.
      */
     @Test
     void errorSignalSingleZone() throws Exception {
@@ -384,7 +384,7 @@ class ZoneControllerTest {
                 .just(
                         new Signal<Double, String>(Instant.now(), 30.0),
                         new Signal<Double, String>(Instant.now().plus(1, ChronoUnit.SECONDS), null, null, Signal.Status.FAILURE_TOTAL, new IllegalStateException("test")),
-                        new Signal<Double, String>(Instant.now(), 30.0)
+                        new Signal<Double, String>(Instant.now().plus(2, ChronoUnit.SECONDS), 30.0)
                         );
 
         var fluxSignal = z.compute(sequence);
