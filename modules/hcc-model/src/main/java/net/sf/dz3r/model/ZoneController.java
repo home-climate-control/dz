@@ -115,9 +115,8 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         // VT: NOTE: private method, it is safe to assume that alien signals have been filtered out by isOurs()
 
-        var nonError = zone2status
-                .entrySet()
-                .stream()
+        var nonError = Flux
+                .fromIterable(zone2status.entrySet())
                 .filter(kv -> !kv.getValue().isError());
 
         var enabled = nonError
@@ -125,13 +124,14 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().callingStatus().calling())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                .block();
 
-        var unhappyVoting = unhappy
-                .entrySet()
-                .stream()
+        var unhappyVoting = Flux
+                .fromIterable(unhappy.entrySet())
                 .filter(kv -> kv.getValue().getValue().settings().isVoting())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+                .block();
 
         var unhappyCount = unhappy.size();
         var unhappyVotingCount = unhappyVoting.size();
