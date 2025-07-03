@@ -37,16 +37,12 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
     public ZoneController(Collection<Zone> zones) {
 
-        this.zoneMap = zones
-                .stream()
-                .collect(Collectors.toMap(
-                        Zone::getAddress,
-                        z -> z,
-                        (s, s2) -> s,
-                        TreeMap::new));
-
         logger.info("Zones configured:");
-        zoneMap.keySet().forEach(z -> logger.info("  {}", z));
+        this.zoneMap = Flux
+                .fromIterable(zones)
+                .doOnNext(z -> logger.info("  {}", z.getAddress()))
+                .collectMap(Zone::getAddress, z -> z)
+                .block();
 
         if (zones.size() > zoneMap.size()) {
 
