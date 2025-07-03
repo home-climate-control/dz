@@ -59,8 +59,8 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
 
     protected final Logger logger = LogManager.getLogger();
 
-    private static final String LITERAL_APP_NAME = "Home Climate Control-DZ-3.5";
-    private static final String STORED_CREDENTIALS = ".dz/calendar";
+    private static final String LITERAL_APP_NAME = "Home Climate Control-HCC-3.5";
+    private static final String STORED_CREDENTIALS = ".hcc/calendar";
     private static final String CLIENT_SECRETS = "/client_secrets.json";
 
     public static final Duration DEFAULT_POLL_INTERVAL = Duration.of(1, ChronoUnit.MINUTES);

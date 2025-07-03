@@ -146,7 +146,7 @@ public class MqttListenerImpl extends AbstractMqttListener {
             // https://github.com/hivemq/hivemq-mqtt-client/issues/496
 
             var clientPrototype= Mqtt5Client.builder()
-                    .identifier("dz-" + UUID.randomUUID())
+                    .identifier("hcc-" + UUID.randomUUID())
                     .serverHost(address.host)
                     .serverPort(address.port);
 

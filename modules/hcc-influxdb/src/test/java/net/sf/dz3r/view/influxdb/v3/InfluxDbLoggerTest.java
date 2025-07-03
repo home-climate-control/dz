@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.fail;
  * InfluxDB logger test.
  *
  * Verify this by running the following snippet on the target InfluxDB instance:
- * {@code use dz-test}
- * {@code select * from sensor where instance = 'dz3.test.v3'}
+ * {@code use hcc-test}
+ * {@code select * from sensor where instance = 'hcc.test.v3'}
  */
 @Disabled("Enable if you have InfluxDB running on localhost (or elsewhere, see the source)")
 class InfluxDbLoggerTest {
@@ -38,8 +38,8 @@ class InfluxDbLoggerTest {
 
         if (dbLogger == null) {
             dbLogger = new InfluxDbLogger(
-                    "dz-test",
-                    "dz3.test.v3",
+                    "hcc-test",
+                    "hcc.test.v3",
                     "http://127.0.0.1:8086",
                     null, null,
                     Map.of());
