@@ -12,6 +12,7 @@ import reactor.core.publisher.Flux;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -115,33 +116,41 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         // VT: NOTE: private method, it is safe to assume that alien signals have been filtered out by isOurs()
 
+        var countNonError = new AtomicInteger();
+        var countEnabled = new AtomicInteger();
+        var countUnhappy = new AtomicInteger();
+        var countUnhappyVoting = new AtomicInteger();
+
+        // VT: FIXME: Lower these four log statements to TRACE later. Keep in mind that not all of them will show up all the time.
+
         var nonError = Flux
                 .fromIterable(zone2status.entrySet())
-                .filter(kv -> !kv.getValue().isError());
+                .filter(kv -> !kv.getValue().isError())
+                .doOnNext(ignored -> logger.debug("process/non-error: {}", countNonError.incrementAndGet()));
 
         var enabled = nonError
-                .filter(kv -> kv.getValue().getValue().settings().isEnabled());
+                .filter(kv -> kv.getValue().getValue().settings().isEnabled())
+                .doOnNext(ignored -> logger.debug("process/enabled: {}", countEnabled.incrementAndGet()));
 
         var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().callingStatus().calling())
+                .doOnNext(ignored -> logger.debug("process/unhappy: {}", countUnhappy.incrementAndGet()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
                 .block();
 
         var unhappyVoting = Flux
                 .fromIterable(unhappy.entrySet())
                 .filter(kv -> kv.getValue().getValue().settings().isVoting())
+                .doOnNext(ignored -> logger.debug("process/unhappy-voting: {}", countUnhappyVoting.incrementAndGet()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
                 .block();
-
-        var unhappyCount = unhappy.size();
-        var unhappyVotingCount = unhappyVoting.size();
 
         // "Bump" is letting the thermostat know that the unit is starting and they may want to reconsider their
         // calling status
         var needBump = lastKnownCalling == 0 && !unhappyVoting.isEmpty();
-        lastKnownCalling = unhappyVoting.size();
+        lastKnownCalling = countUnhappyVoting.get();
 
-        logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", unhappyCount, unhappyVotingCount, needBump, signal);
+        logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", countUnhappy, countUnhappyVoting, needBump, signal);
 
         if (needBump) {
             raise();
