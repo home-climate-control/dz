@@ -141,7 +141,6 @@ class ZoneControllerTest {
 
         z.close();
 
-        // DZ-reactive sequence
         StepVerifier
                 .create(stage2)
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(0.0)) // 20.0
