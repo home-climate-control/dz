@@ -10,12 +10,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
+import static com.homeclimatecontrol.hcc.signal.Signal.Status.FAILURE_TOTAL;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,7 +56,7 @@ class ZoneTest {
         var setpoint = 20.0;
         var signalOK = new Signal<Double, String>(Instant.now(), 30.0);
         var signalPartialFailure = new Signal<Double, String>(Instant.now(), 10.0, null, Signal.Status.FAILURE_PARTIAL, new TimeoutException("stale sensor"));
-        var signalTotalFailure = new Signal<Double, String>(Instant.now(), null, null, Signal.Status.FAILURE_TOTAL, new TimeoutException("sensor is gone"));
+        var signalTotalFailure = new Signal<Double, String>(Instant.now(), null, null, FAILURE_TOTAL, new TimeoutException("sensor is gone"));
 
         var sequence = Flux.just(
                 signalOK,
@@ -155,6 +157,63 @@ class ZoneTest {
 
         // PV change again
         assertThat(accumulator.get(4).getValue().callingStatus().calling()).isTrue();
+
+        out.dispose();
+    }
+
+    /**
+     * Make sure the error signal is replayed when setpoint is changed.
+     *
+     * See <a href="https://github.com/home-climate-control/dz/issues/333">#333</a>.
+     */
+    @Test
+    void errorSignalReplayed() {
+
+        var pvWrapper = new SinkWrapper<Signal<Double, String>>();
+        var source = Flux
+                .create(pvWrapper::connect);
+
+        var setpoint = 30.0;
+        var name = UUID.randomUUID().toString();
+        var ts = new Thermostat(name, setpoint, 1, 0, 0, 1);
+        var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
+
+        var accumulator = new ArrayList<Signal<ZoneStatus, String>>();
+        var out = z
+                .compute(source)
+                .log()
+                .subscribe(accumulator::add);
+
+        var start = Instant.now();
+
+        // A valid signal not causing the zone to call
+        pvWrapper.sink.next(new Signal<>(start, 25.0));
+
+        // Error signal 30 seconds later
+        pvWrapper.sink.next(new Signal<>(start.plus(Duration.ofSeconds(30)), null, null, FAILURE_TOTAL, new IllegalStateException("timeout")));
+
+        // Setpoint set so that the last known signal would have caused it to start calling
+        // With #333, this DOES cause it to start calling - but the cause is not here
+        z.setSettingsSync(new ZoneSettings(z.getSettings(), 20.0));
+
+        pvWrapper.sink.complete();
+
+        // Three signals corresponding to process variable change, and one to setpoint change
+        assertThat(accumulator).hasSize(4);
+
+        // PV change
+        assertThat(accumulator.get(0).getValue().callingStatus().calling()).isFalse();
+        assertThat(accumulator.get(0).status()).isEqualTo(Signal.Status.OK);
+
+        // Error signal received
+        assertThat(accumulator.get(1).getValue().callingStatus().calling()).isFalse();
+        assertThat(accumulator.get(1).status()).isEqualTo(Signal.Status.FAILURE_TOTAL);
+
+        // Setpoint change; one replayed by AbstractProcessController, another replayed by Zone
+        assertThat(accumulator.get(2).getValue().callingStatus().calling()).isFalse();
+        assertThat(accumulator.get(2).status()).isEqualTo(Signal.Status.FAILURE_TOTAL);
+        assertThat(accumulator.get(3).getValue().callingStatus().calling()).isFalse();
+        assertThat(accumulator.get(2).status()).isEqualTo(Signal.Status.FAILURE_TOTAL);
 
         out.dispose();
     }
