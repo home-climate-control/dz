@@ -29,7 +29,7 @@ import java.util.Optional;
  * A {@link Thermostat} is just a device that watches the temperature.
  * A zone is an entity that controls the thermostat.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, AutoCloseable {
 
@@ -48,7 +48,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     /**
      * Zone settings.
      */
-    private com.homeclimatecontrol.hcc.model.ZoneSettings settings;
+    private ZoneSettings settings;
 
     /**
      * Settings that came from the scheduler.
@@ -71,7 +71,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      * @param ts Thermostat to use.
      * @param settings Zone settings. Thermostat setpoint overrides zone setpoint - this argument is here to configure initial flags.
      */
-    public Zone(Thermostat ts, com.homeclimatecontrol.hcc.model.ZoneSettings settings) {
+    public Zone(Thermostat ts, ZoneSettings settings) {
         this(ts, settings, null);
     }
 
@@ -82,7 +82,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      * @param settings Zone settings. Thermostat setpoint overrides zone setpoint - this argument is here to configure initial flags.
      * @param economizerContext Optional context to initialize the economizer with.
      */
-    public Zone(Thermostat ts, com.homeclimatecontrol.hcc.model.ZoneSettings settings, EconomizerContext economizerContext) {
+    public Zone(Thermostat ts, ZoneSettings settings, EconomizerContext economizerContext) {
         this.ts = ts;
         setSettingsSync(new ZoneSettings(settings, settings.setpoint()));
 
@@ -100,15 +100,15 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     /**
      * Set zone settings immediately.
      *
-     * This method isn't deprecated, and isn't really diligent to be deprecated at the moment - however, using {@link #setSettings(com.homeclimatecontrol.hcc.model.ZoneSettings)} would be more diligent.
+     * This method isn't deprecated, and isn't really diligent to be deprecated at the moment - however, using {@link #setSettings(ZoneSettings)} would be more diligent.
      *
      * @param settings Settings to set zone to.
      *
-     * @return New settings (result of {@link com.homeclimatecontrol.hcc.model.ZoneSettings#merge(com.homeclimatecontrol.hcc.model.ZoneSettings)}).
+     * @return New settings (result of {@link ZoneSettings#merge(ZoneSettings)}).
      *
      * @throws IllegalArgumentException if things go wrong.
      */
-    public com.homeclimatecontrol.hcc.model.ZoneSettings setSettingsSync(com.homeclimatecontrol.hcc.model.ZoneSettings settings) {
+    public ZoneSettings setSettingsSync(ZoneSettings settings) {
         HCCObjects.requireNonNull(settings, "settings can't be null");
 
         ts.setSetpoint(settings.setpoint());
@@ -136,7 +136,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
     /**
      * Force the {@link #lastKnownSignal} through {@link #compute(Flux)}.
      *
-     * Note that there's one replay in {@link net.sf.dz3r.controller.AbstractProcessController#setSetpoint(double)}
+     * Note that there's one replay in {@link net.sf.dz3r.controller.AbstractProcessController#setSetpoint(Double)}
      * (which will cause the signal to be replayed twice), however, settings outside the process controller may have changed
      * which makes this necessary.
      */
@@ -159,7 +159,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      * @return The Mono signal indicating the new status or, possibly, the reason why they can't be set.
      * This mono will never be an error mono, but the wrapped {@link Signal} may be.
      */
-    public Mono<Signal<com.homeclimatecontrol.hcc.model.ZoneSettings, String>> setSettings(com.homeclimatecontrol.hcc.model.ZoneSettings settings) {
+    public Mono<Signal<ZoneSettings, String>> setSettings(ZoneSettings settings) {
         return Mono.create(sink -> {
             try {
                 sink.success(new Signal<>(Instant.now(), setSettingsSync(settings), getAddress()));
@@ -195,7 +195,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
         logger.info("{}: setSettings({}): period = {}", getAddress(), r, periodSettings.period().name());
     }
 
-    public com.homeclimatecontrol.hcc.model.ZoneSettings getSettings() {
+    public ZoneSettings getSettings() {
         return settings;
     }
 
@@ -261,7 +261,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
 
     private Signal<ZoneStatus, String> suppressIfNotEnabled(Signal<ZoneStatus, String> source) {
 
-        if (Boolean.TRUE.equals(settings.isEnabled())) {
+        if (settings.isEnabled()) {
             return source;
         }
 
