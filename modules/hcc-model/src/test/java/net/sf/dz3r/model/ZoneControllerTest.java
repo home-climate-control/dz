@@ -401,7 +401,7 @@ class ZoneControllerTest {
     }
 
     /**
-     * Make sure the zone controller handles incoming error signals as expected.
+     * Make sure the zone controller adjusts demand, treating error zones as non-existent.
      */
     @Test
     void errorSignalOneInMultiZone() throws Exception {
@@ -429,8 +429,12 @@ class ZoneControllerTest {
         var flux1 = z1.compute(sequence1);
         var flux2 = z2.compute(sequence2);
 
-        // Note concat(), order is important for StepVerifier
-        var fluxZ = zc.compute(Flux.concat(flux1, flux2));
+        var fluxZ = zc
+                .compute(Flux
+                        .concat(flux1, flux2)
+                        // Line signals up in time
+                        .sort((a, b) -> a.timestamp().compareTo(b.timestamp()))
+                );
 
         z1.close();
         z2.close();
@@ -438,10 +442,15 @@ class ZoneControllerTest {
         // Error signal from just one zone means we just adjust the demand accordingly
         StepVerifier
                 .create(fluxZ)
+                // @0 - initial demand from z1
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
-                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                // @+2 - z2 adds its demand
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
+                // @+4 - z2 goes offline, its demand is ignored
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                // @+6 z1 confirms demand, no summary change
+                .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(11.0))
+                // @+8 z2 goes online, its demand contributes again
                 .assertNext(s -> assertThat(s.getValue().demand).isEqualTo(17.0))
                 .verifyComplete();
     }
