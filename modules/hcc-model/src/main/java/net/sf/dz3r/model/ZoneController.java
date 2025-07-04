@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +36,11 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
      * Mapping from zone name to the latest zone signal.
      */
     private final Map<String, Signal<ZoneStatus, String>> zone2status = new TreeMap<>();
+
+    /**
+     * Unique sequence number for {@link #process(Signal)} call.
+     */
+    private final AtomicLong processCallCount = new AtomicLong();
 
     public ZoneController(Collection<Zone> zones) {
 
@@ -116,6 +122,9 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         // VT: NOTE: private method, it is safe to assume that alien signals have been filtered out by isOurs()
 
+        // Log messages from different calls often get interleaved
+        final var callId = Long.toHexString(processCallCount.getAndIncrement());
+
         var countNonError = new AtomicInteger();
         var countEnabled = new AtomicInteger();
         var countUnhappy = new AtomicInteger();
@@ -125,23 +134,24 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         var nonError = Flux
                 .fromIterable(zone2status.entrySet())
+                .doOnNext(s -> logger.debug("callId={} process/signal: {}", callId, s))
                 .filter(kv -> !kv.getValue().isError())
-                .doOnNext(ignored -> logger.debug("process/non-error: {}", countNonError.incrementAndGet()));
+                .doOnNext(ignored -> logger.debug("callId={} process/non-error: {}", callId, countNonError.incrementAndGet()));
 
         var enabled = nonError
                 .filter(kv -> kv.getValue().getValue().settings().isEnabled())
-                .doOnNext(ignored -> logger.debug("process/enabled: {}", countEnabled.incrementAndGet()));
+                .doOnNext(ignored -> logger.debug("callId={} process/enabled: {}", callId, countEnabled.incrementAndGet()));
 
         var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().callingStatus().calling())
-                .doOnNext(ignored -> logger.debug("process/unhappy: {}", countUnhappy.incrementAndGet()))
+                .doOnNext(ignored -> logger.debug("callId={} process/unhappy: {}", callId, countUnhappy.incrementAndGet()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
                 .block();
 
         var unhappyVoting = Flux
                 .fromIterable(unhappy.entrySet())
                 .filter(kv -> kv.getValue().getValue().settings().isVoting())
-                .doOnNext(ignored -> logger.debug("process/unhappy-voting: {}", countUnhappyVoting.incrementAndGet()))
+                .doOnNext(ignored -> logger.debug("callId={} process/unhappy-voting: {}", callId, countUnhappyVoting.incrementAndGet()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
                 .block();
 
@@ -150,7 +160,7 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
         var needBump = lastKnownCalling == 0 && !unhappyVoting.isEmpty();
         lastKnownCalling = countUnhappyVoting.get();
 
-        logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", countUnhappy, countUnhappyVoting, needBump, signal);
+        logger.debug("callId={} unhappy={}, unhappyVoting={}, needBump={}, signal={}", callId, countUnhappy, countUnhappyVoting, needBump, signal);
 
         if (needBump) {
             raise();
