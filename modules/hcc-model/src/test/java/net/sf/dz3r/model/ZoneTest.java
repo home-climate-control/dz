@@ -117,8 +117,9 @@ class ZoneTest {
     @Test
     void setpointChangeEmitsSignal() {
 
+        var pvWrapper = new SinkWrapper<Double>();
         var source = Flux
-                .create(this::connectSetpoint)
+                .create(pvWrapper::connect)
                 .map(v -> new Signal<Double, String>(Instant.now(), v));
 
         var setpoint = 20.0;
@@ -132,14 +133,14 @@ class ZoneTest {
                 .log()
                 .subscribe(accumulator::add);
 
-        pvSink.next(15.0);
-        pvSink.next(25.0);
+        pvWrapper.sink.next(15.0);
+        pvWrapper.sink.next(25.0);
 
         z.setSettingsSync(new ZoneSettings(z.getSettings(), 30.0));
 
-        pvSink.next(35.0);
+        pvWrapper.sink.next(35.0);
 
-        pvSink.complete();
+        pvWrapper.sink.complete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
         assertThat(accumulator).hasSize(5);
@@ -158,10 +159,10 @@ class ZoneTest {
         out.dispose();
     }
 
-    private FluxSink<Double> pvSink;
-
-
-    private void connectSetpoint(FluxSink<Double> pvSink) {
-        this.pvSink = pvSink;
+    private static class SinkWrapper<T> {
+        FluxSink<T> sink;
+        void connect(FluxSink<T> sink) {
+            this.sink = sink;
+        }
     }
 }
