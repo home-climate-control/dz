@@ -13,6 +13,7 @@ import reactor.test.StepVerifier;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -22,9 +23,13 @@ class HysteresisControllerTest {
 
     private final Logger logger = LogManager.getLogger();
 
+    /**
+     * Test the controller behavior with default hysteresis thresholds.
+     */
     @ParameterizedTest
     @MethodSource("happyStreamProvider1")
-    void testHappyDefault(Flux<TestPair> sequence) {
+    @MethodSource("errorStreamProvider")
+    void testDefault(Flux<TestPair> sequence) {
         var pc = new HysteresisController<UUID>("controller", 20);
         testSequence(sequence, pc);
     }
@@ -32,7 +37,7 @@ class HysteresisControllerTest {
     private void testSequence(Flux<TestPair> sequence, HysteresisController<UUID> target) {
 
         var sources = new ArrayList<Signal<Double, UUID>>();
-        var expected = new ArrayList<Double>();
+        var expected = new ArrayList<Optional<Double>>();
 
         sequence.subscribe(p -> {
             sources.add(p.signal);
@@ -48,13 +53,16 @@ class HysteresisControllerTest {
                 .doOnNext(x -> sv.assertNext(s -> {
                     logger.debug("expected: {}", x);
                     logger.debug("actual: {}", s);
-                    assertThat(s.getValue().signal).isEqualTo(x);
+                    assertThat(s.getValue().signal).isEqualTo(x.orElse(null));
                 }))
                 .subscribe();
 
         sv.verifyComplete();
     }
 
+    /**
+     * Make sure the payload propagates through the controller.
+     */
     @Test
     void testPayload() {
 
@@ -79,19 +87,40 @@ class HysteresisControllerTest {
         long offset = 0;
 
         return Stream.of(Flux.just(
-                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0, UUID.randomUUID()), -1.0),
-                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID()), -1.0),
-                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 21.0, UUID.randomUUID()), 1.0),
-                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID()), 1.0),
-                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0, UUID.randomUUID()), 1.0),
-                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 19.5, UUID.randomUUID()), 1.0),
-                new TestPair(new Signal<>(timestamp.plus(offset, ChronoUnit.SECONDS), 19.0, UUID.randomUUID()), -1.0)
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0, UUID.randomUUID()), Optional.of(-1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID()), Optional.of(-1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 21.0, UUID.randomUUID()), Optional.of(1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID()), Optional.of(1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0, UUID.randomUUID()), Optional.of(1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 19.5, UUID.randomUUID()), Optional.of(1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset, ChronoUnit.SECONDS), 19.0, UUID.randomUUID()), Optional.of(-1.0))
         ));
     }
 
+    private static Stream<Flux<TestPair>> errorStreamProvider() {
+
+        var timestamp = TimeTool.atMidnightUTC();
+        long offset = 0;
+
+        return Stream.of(Flux.just(
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0, UUID.randomUUID()), Optional.of(-1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID()), Optional.of(-1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 21.0, UUID.randomUUID()), Optional.of(1.0)),
+
+                // VT: NOTE: This tests behavior as of rev. acf8b3f044b9d35e483171a60ce1f75694c2d379, which may not be what we actually want.
+                // See https://github.com/home-climate-control/dz/issues/339
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), null, UUID.randomUUID(), Signal.Status.FAILURE_TOTAL, new IllegalStateException("total")), Optional.empty()),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID(), Signal.Status.FAILURE_PARTIAL, new IllegalStateException("total")), Optional.of(1.0)),
+
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID()), Optional.of(1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.0, UUID.randomUUID()), Optional.of(1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 19.5, UUID.randomUUID()), Optional.of(1.0)),
+                new TestPair(new Signal<>(timestamp.plus(offset, ChronoUnit.SECONDS), 19.0, UUID.randomUUID()), Optional.of(-1.0))
+        ));
+    }
     private record TestPair(
             Signal<Double, UUID> signal,
-            Double expected
+            Optional<Double> expected
     ) {
 
     }
