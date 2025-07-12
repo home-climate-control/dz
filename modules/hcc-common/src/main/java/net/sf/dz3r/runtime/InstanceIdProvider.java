@@ -16,12 +16,12 @@ import java.util.UUID;
 /**
  * Provides a persistent unique instance identifier.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public class InstanceIdProvider {
 
     private static final Logger logger = LogManager.getLogger(InstanceIdProvider.class);
-    private static final File source = new File(System.getProperty("user.home"), ".hcc/system.id");
+    private static final File source = new File(AppHome.getHome(), "system.id");
     private static UUID id;
 
     private InstanceIdProvider() {

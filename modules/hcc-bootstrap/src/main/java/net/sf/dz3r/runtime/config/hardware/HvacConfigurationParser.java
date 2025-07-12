@@ -10,6 +10,7 @@ import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.VariableHvacDevice;
 import net.sf.dz3r.device.actuator.pi.autohat.HeatPumpHAT;
+import net.sf.dz3r.runtime.AppHome;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationContextAware;
 import reactor.core.publisher.Flux;
@@ -88,10 +89,8 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
 
     private File getCountersDirectory() {
 
-        // VT: NOTE: This may need to get more complicated... but all in due time. It's $HOME/.hcc/counters for now.
-
-        var home = new File(System.getProperty("user.home"));
-        return new File(home, ".hcc/counters");
+        // VT: NOTE: This may need to get more complicated... but all in due time.
+        return new File(AppHome.getHome(), "counters");
     }
 
     private HvacDevice<?> parseHeatpump(HeatpumpConfig cf) {
