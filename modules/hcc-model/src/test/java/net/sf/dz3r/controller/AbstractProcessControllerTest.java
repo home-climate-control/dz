@@ -3,11 +3,18 @@ package net.sf.dz3r.controller;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
+import reactor.test.StepVerifier;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
+import static com.homeclimatecontrol.hcc.TimeTool.atMidnightUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AbstractProcessControllerTest {
@@ -191,5 +198,51 @@ class AbstractProcessControllerTest {
         assertThat(accumulator.get(4).getValue().signal).isEqualTo(5.0);
 
         out.dispose();
+    }
+
+    /**
+     * See <a href="https://github.com/home-climate-control/dz/issues/340">#340</a>
+     */
+    @ParameterizedTest
+    @MethodSource("timeTravelStream")
+    void timeTravelHysteresis(Flux<Signal<Double, Void>> source) {
+        var pc = new HysteresisController<Void>("hysteresis", 20);
+        var result = pc.compute(source).log();
+
+        StepVerifier
+                .create(result)
+
+                // VT: NOTE: This captures the behavior as of rev. acf8b3f044b9d35e483171a60ce1f75694c2d379, which is *NOT* what we want.
+                // See https://github.com/home-climate-control/dz/issues/340
+                .assertNext(signal -> assertThat(signal.getValue().signal).isEqualTo(1.0))
+                .assertNext(signal -> assertThat(signal.getValue().signal).isEqualTo(-1.0))
+                .verifyComplete();
+    }
+
+    /**
+     * See <a href="https://github.com/home-climate-control/dz/issues/340">#340</a>
+     */
+    @ParameterizedTest
+    @MethodSource("timeTravelStream")
+    void timeTravelPid(Flux<Signal<Double, Void>> source) {
+        var pc = new SimplePidController<Void>("pid", 20d, 1, 0, 0, 1.1);
+        var result = pc.compute(source).log();
+
+        StepVerifier
+                .create(result)
+
+                // VT: NOTE: This captures the behavior as of rev. acf8b3f044b9d35e483171a60ce1f75694c2d379, which is *NOT* what we want.
+                // See https://github.com/home-climate-control/dz/issues/340
+                .assertNext(signal -> assertThat(signal.getValue().signal).isEqualTo(1.0))
+                .assertNext(signal -> assertThat(signal.getValue().signal).isEqualTo(-1.0))
+                .verifyComplete();
+    }
+
+    public static Stream<Flux<Signal<Double, Void>>> timeTravelStream() {
+        var start = atMidnightUTC();
+        return Stream.of(Flux.just(
+                new Signal<>(start, 21.0),
+                new Signal<>(start.minus(1, ChronoUnit.SECONDS), 19.0)
+        ));
     }
 }
