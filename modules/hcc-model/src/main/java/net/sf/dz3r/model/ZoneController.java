@@ -132,28 +132,28 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         // VT: FIXME: Lower these four log statements to TRACE later. Keep in mind that not all of them will show up all the time.
 
-        var nonError = Flux
-                .fromIterable(zone2status.entrySet())
-                .doOnNext(s -> logger.debug("callId={} process/signal: {}", callId, s))
+        var nonError = zone2status
+                .entrySet()
+                .stream()
+                .peek(s -> logger.debug("callId={} process/signal: {}", callId, s))
                 .filter(kv -> !kv.getValue().isError())
-                .doOnNext(ignored -> logger.debug("callId={} process/non-error: {}", callId, countNonError.incrementAndGet()));
+                .peek(ignored -> logger.debug("callId={} process/non-error: {}", callId, countNonError.incrementAndGet()));
 
         var enabled = nonError
                 .filter(kv -> kv.getValue().getValue().settings().isEnabled())
-                .doOnNext(ignored -> logger.debug("callId={} process/enabled: {}", callId, countEnabled.incrementAndGet()));
+                .peek(ignored -> logger.debug("callId={} process/enabled: {}", callId, countEnabled.incrementAndGet()));
 
         var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().callingStatus().calling())
-                .doOnNext(ignored -> logger.debug("callId={} process/unhappy: {}", callId, countUnhappy.incrementAndGet()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                .block();
+                .peek(ignored -> logger.debug("callId={} process/unhappy: {}", callId, countUnhappy.incrementAndGet()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        var unhappyVoting = Flux
-                .fromIterable(unhappy.entrySet())
+        var unhappyVoting = unhappy
+                .entrySet()
+                .stream()
                 .filter(kv -> kv.getValue().getValue().settings().isVoting())
-                .doOnNext(ignored -> logger.debug("callId={} process/unhappy-voting: {}", callId, countUnhappyVoting.incrementAndGet()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-                .block();
+                .peek(ignored -> logger.debug("callId={} process/unhappy-voting: {}", callId, countUnhappyVoting.incrementAndGet()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         // "Bump" is letting the thermostat know that the unit is starting and they may want to reconsider their
         // calling status
