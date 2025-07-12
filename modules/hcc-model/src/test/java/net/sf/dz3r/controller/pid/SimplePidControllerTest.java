@@ -17,6 +17,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static com.homeclimatecontrol.hcc.TimeTool.atMidnightUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -37,13 +38,13 @@ class SimplePidControllerTest {
         try {
 
             // Feel free to push this north of 5,000,000
-            int COUNT = 5_000;
+            var COUNT = 5_000;
 
             var sourceSequence = new ArrayList<Double>();
             var signalSequence = new ArrayList<Signal<ProcessController.Status<Double>, Void>>();
 
-            var timestamp = new AtomicLong(Instant.now().toEpochMilli());
-            Flux<Signal<Double, Void>> sourceFlux = Flux.generate(
+            var timestamp = new AtomicLong(atMidnightUTC().toEpochMilli());
+            var sourceFlux = Flux.generate(
                             rg::nextDouble,
                     (state, sink) -> {
                         state = rg.nextDouble();
@@ -65,7 +66,7 @@ class SimplePidControllerTest {
             assertThat(sourceSequence).hasSize(COUNT);
             assertThat(signalSequence).hasSize(COUNT);
 
-            int offset = 0;
+            var offset = 0;
             for (var v : sourceSequence) {
                 assertThat(v).isEqualTo(signalSequence.get(offset++).getValue().signal);
             }
@@ -104,15 +105,14 @@ class SimplePidControllerTest {
     @ParameterizedTest
     @MethodSource("getIntegralStream")
     void testIntegral(Flux<PidSourceTuple> source) {
-        var c = new SimplePidController<PidSourceTuple>("integral", 20.0, 1, 0.00001, 0, 2);
-        var now = Instant.now();
+        var controller = new SimplePidController<PidSourceTuple>("integral", 20.0, 1, 0.00001, 0, 2);
         var signal = source
-                .map(t -> tuple2signal(now, t));
+                .map(t -> tuple2signal(atMidnightUTC(), t));
 
-        var output = c
+        controller
                 .compute(signal)
                 .doOnNext(s -> {
-                    logger.debug("output: {}", s);
+                    logger.debug("output/i: {}", s);
                     assertThat(((PidController.PidStatus) s.getValue()).i).isEqualTo(s.payload().expectedOutput);
                 })
                 .blockLast();
@@ -121,15 +121,14 @@ class SimplePidControllerTest {
     @ParameterizedTest
     @MethodSource("getDerivativeStream")
     void testDerivative(Flux<PidSourceTuple> source) {
-        var c = new SimplePidController<PidSourceTuple>("derivative", 20.0, 1, 0, 2_000, 0);
-        var now = Instant.now();
+        var controller = new SimplePidController<PidSourceTuple>("derivative", 20.0, 1, 0, 2_000, 0);
         var signal = source
-                .map(t -> tuple2signal(now, t));
+                .map(t -> tuple2signal(atMidnightUTC(), t));
 
-        var output = c
+        controller
                 .compute(signal)
                 .doOnNext(s -> {
-                    logger.debug("output: {}", s);
+                    logger.debug("output/d: {}", s);
                     assertThat(((PidController.PidStatus) s.getValue()).d).isEqualTo(s.payload().expectedOutput);
                 })
                 .blockLast();
