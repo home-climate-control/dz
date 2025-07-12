@@ -128,7 +128,12 @@ public abstract class AbstractProcessController<I, O, P> implements ProcessContr
                     lastOutputSignal.timestamp(),
                     pv.timestamp(),
                     Duration.between(lastOutputSignal.timestamp(), pv.timestamp()).toMillis(),
-                    pv);
+                    pv,
+
+                    // https://github.com/home-climate-control/dz/issues/340
+                    // This bug existed for too long to rock the boat right now and is intertwined with others;
+                    // need to collect logs before deciding on course of action
+                    new IllegalArgumentException("call stack"));
         }
 
         this.pv = pv;
