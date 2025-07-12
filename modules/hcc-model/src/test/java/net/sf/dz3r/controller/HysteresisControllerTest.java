@@ -107,7 +107,7 @@ class HysteresisControllerTest {
                 new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID()), Optional.of(-1.0)),
                 new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 21.0, UUID.randomUUID()), Optional.of(1.0)),
 
-                // VT: NOTE: This tests behavior as of rev. acf8b3f044b9d35e483171a60ce1f75694c2d379, which may not be what we actually want.
+                // VT: NOTE: This captures the behavior as of rev. acf8b3f044b9d35e483171a60ce1f75694c2d379, which may not be what we actually want in the end.
                 // See https://github.com/home-climate-control/dz/issues/339
                 new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), null, UUID.randomUUID(), Signal.Status.FAILURE_TOTAL, new IllegalStateException("total")), Optional.empty()),
                 new TestPair(new Signal<>(timestamp.plus(offset++, ChronoUnit.SECONDS), 20.5, UUID.randomUUID(), Signal.Status.FAILURE_PARTIAL, new IllegalStateException("total")), Optional.of(1.0)),
