@@ -7,7 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
 import reactor.test.StepVerifier;
 
 import java.time.Duration;
@@ -119,9 +119,9 @@ class ZoneTest {
     @Test
     void setpointChangeEmitsSignal() {
 
-        var pvWrapper = new SinkWrapper<Double>();
-        var source = Flux
-                .create(pvWrapper::connect)
+        Sinks.Many<Double> sink = Sinks.many().multicast().onBackpressureBuffer();
+        var source = sink
+                .asFlux()
                 .map(v -> new Signal<Double, String>(Instant.now(), v));
 
         var setpoint = 20.0;
@@ -135,14 +135,14 @@ class ZoneTest {
                 .log()
                 .subscribe(accumulator::add);
 
-        pvWrapper.sink.next(15.0);
-        pvWrapper.sink.next(25.0);
+        sink.tryEmitNext(15.0);
+        sink.tryEmitNext(25.0);
 
         z.setSettingsSync(new ZoneSettings(z.getSettings(), 30.0));
 
-        pvWrapper.sink.next(35.0);
+        sink.tryEmitNext(35.0);
 
-        pvWrapper.sink.complete();
+        sink.tryEmitComplete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
         assertThat(accumulator).hasSize(5);
@@ -169,9 +169,8 @@ class ZoneTest {
     @Test
     void errorSignalReplayed() {
 
-        var pvWrapper = new SinkWrapper<Signal<Double, String>>();
-        var source = Flux
-                .create(pvWrapper::connect);
+        Sinks.Many<Signal<Double, String>> sink = Sinks.many().multicast().onBackpressureBuffer();
+        var source = sink.asFlux();
 
         var setpoint = 30.0;
         var name = UUID.randomUUID().toString();
@@ -187,16 +186,16 @@ class ZoneTest {
         var start = Instant.now();
 
         // A valid signal not causing the zone to call
-        pvWrapper.sink.next(new Signal<>(start, 25.0));
+        sink.tryEmitNext(new Signal<>(start, 25.0));
 
         // Error signal 30 seconds later
-        pvWrapper.sink.next(new Signal<>(start.plus(Duration.ofSeconds(30)), null, null, FAILURE_TOTAL, new IllegalStateException("timeout")));
+        sink.tryEmitNext(new Signal<>(start.plus(Duration.ofSeconds(30)), null, null, FAILURE_TOTAL, new IllegalStateException("timeout")));
 
         // Setpoint set so that the last known signal would have caused it to start calling
         // With #333, this DOES cause it to start calling - but the cause is not here
         z.setSettingsSync(new ZoneSettings(z.getSettings(), 20.0));
 
-        pvWrapper.sink.complete();
+        sink.tryEmitComplete();
 
         // Three signals corresponding to process variable change, and one to setpoint change
         assertThat(accumulator).hasSize(4);
@@ -216,12 +215,5 @@ class ZoneTest {
         assertThat(accumulator.get(2).status()).isEqualTo(Signal.Status.FAILURE_TOTAL);
 
         out.dispose();
-    }
-
-    private static class SinkWrapper<T> {
-        FluxSink<T> sink;
-        void connect(FluxSink<T> sink) {
-            this.sink = sink;
-        }
     }
 }
