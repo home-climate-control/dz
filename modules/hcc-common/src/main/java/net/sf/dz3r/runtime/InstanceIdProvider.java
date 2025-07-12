@@ -21,7 +21,7 @@ import java.util.UUID;
 public class InstanceIdProvider {
 
     private static final Logger logger = LogManager.getLogger(InstanceIdProvider.class);
-    private static final File source = new File(System.getProperty("user.home"), ".dz/system.id");
+    private static final File source = new File(System.getProperty("user.home"), ".hcc/system.id");
     private static UUID id;
 
     private InstanceIdProvider() {

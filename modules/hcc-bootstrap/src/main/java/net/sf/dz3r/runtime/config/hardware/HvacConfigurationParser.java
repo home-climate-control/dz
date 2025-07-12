@@ -88,10 +88,10 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
 
     private File getCountersDirectory() {
 
-        // VT: NOTE: This may need to get more complicated... but all in due time. It's $HOME/.dz/counters for now.
+        // VT: NOTE: This may need to get more complicated... but all in due time. It's $HOME/.hcc/counters for now.
 
         var home = new File(System.getProperty("user.home"));
-        return new File(home, ".dz/counters");
+        return new File(home, ".hcc/counters");
     }
 
     private HvacDevice<?> parseHeatpump(HeatpumpConfig cf) {

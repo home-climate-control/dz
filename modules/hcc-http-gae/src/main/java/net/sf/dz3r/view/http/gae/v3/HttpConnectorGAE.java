@@ -269,7 +269,7 @@ public class HttpConnectorGAE extends HttpConnector {
 
     private File getSecretsDir() {
 
-        var result = new File(System.getProperty("user.home"), ".dz/oauth/HttpConnector");
+        var result = new File(System.getProperty("user.home"), ".hcc/oauth/HttpConnector");
 
         if (!result.exists() || !result.isDirectory() || !result.canRead()) {
             throw new IllegalArgumentException(result + ": doesn't exist, not a directory, or can't read");
