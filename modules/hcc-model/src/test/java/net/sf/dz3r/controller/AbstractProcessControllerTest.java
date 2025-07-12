@@ -1,7 +1,7 @@
 package net.sf.dz3r.controller;
 
-import net.sf.dz3r.controller.pid.SimplePidController;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.controller.pid.SimplePidController;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Sinks;
 
@@ -62,7 +62,6 @@ class AbstractProcessControllerTest {
         var source = sink
                 .asFlux()
                 .map(v -> new Signal<Double, Void>(Instant.now(), v));
-
 
         var pc = new SimplePidController<Void>("pc", 20d, 1, 0, 0, 1.1);
 
