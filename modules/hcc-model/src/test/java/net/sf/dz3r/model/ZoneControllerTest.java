@@ -644,35 +644,34 @@ class ZoneControllerTest {
         sinkGood.tryEmitComplete();
         sinkBad.tryEmitComplete();
 
+        assertThat(accumulator).hasSize(11);
+
         // @0 both zones happy
         assertThat(accumulator.get(0).getValue().demand).isEqualTo(0.0);
         assertThat(accumulator.get(1).getValue().demand).isEqualTo(0.0);
 
-        // @+2 good zone unhappy
+        // @+2 good zone unhappy, expect 2 demands of 3
         assertThat(accumulator.get(2).getValue().demand).isEqualTo(3.0);
         assertThat(accumulator.get(3).getValue().demand).isEqualTo(3.0);
 
-        // @+3 good zone happy
+        // @+3 good zone happy, expect 0
         assertThat(accumulator.get(4).getValue().demand).isEqualTo(0.0);
 
-        // @+4 bad zone sensor gone
+        // @+4 bad zone sensor gone, expect 0
         assertThat(accumulator.get(5).getValue().demand).isEqualTo(0.0);
 
-        // @+10 good zone unhappy, expect 2 demands of 3, but get 3 then 4
+        // @+10 good zone unhappy, expect 3
         assertThat(accumulator.get(6).getValue().demand).isEqualTo(3.0);
-        assertThat(accumulator.get(7).getValue().demand).isEqualTo(4.0);
 
-        // @+20 good zone is happy, expect 0 but get 1
-        assertThat(accumulator.get(8).getValue().demand).isEqualTo(1.0);
+        // @+20 good zone is happy, expect 0
+        assertThat(accumulator.get(7).getValue().demand).isEqualTo(0.0);
 
-        // setSettingsSync(), the zone should cause calling but is in error, demand goes to 0, 0
+        // setSettingsSync(), the zone should cause calling but is in error, demand goes to (0, 0)
+        assertThat(accumulator.get(8).getValue().demand).isEqualTo(0.0);
         assertThat(accumulator.get(9).getValue().demand).isEqualTo(0.0);
-        assertThat(accumulator.get(10).getValue().demand).isEqualTo(0.0);
 
         // @+6hrs the bad zone sensor returns, everyone's happy, expect 0
-        assertThat(accumulator.get(11).getValue().demand).isEqualTo(0.0);
-
-        assertThat(accumulator).hasSize(12);
+        assertThat(accumulator.get(10).getValue().demand).isEqualTo(0.0);
 
         zoneGood.close();
         zoneBad.close();
@@ -726,19 +725,19 @@ class ZoneControllerTest {
         // @+1min, the sensor is gone in the bad zone, expect 0
         sinkBad.tryEmitNext(new Signal<Double, String>(start.plus(1, ChronoUnit.MINUTES), null, null, Signal.Status.FAILURE_TOTAL, new IllegalStateException("test")));
 
-        // The new setpoint is deeply below the last known good sensor reading
+        // The new setpoint is deeply below the last known good sensor reading, but the zone is in error, expect (0, 0)
         zoneBad.setSettingsSync(new ZoneSettings(setpointBad - 5));
 
-        // @+2min, the good zone is unhappy, expect 2 demands of 3, but get 3 then 4
+        // @+2min, the good zone is unhappy, expect 3
         sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(2, ChronoUnit.MINUTES), setpointGood + 2));
 
-        // @+3min, the good zone is happy, expect 0 but get 1 - the HVAC did not stop
+        // @+3min, the good zone is happy, expect 0
         sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(3, ChronoUnit.MINUTES), setpointGood - 2));
 
         // @+10min the good zone is unhappy, the demand is wrong
         sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(10, ChronoUnit.MINUTES), setpointGood + 2));
 
-        // @+20min the good zone is happy, expect 0 but get 1 - the HVAC did not stop
+        // @+20min the good zone is happy, expect 0
         sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(20, ChronoUnit.MINUTES), setpointGood - 2));
 
         // @+6hrs the sensor is back, the bad zone is very, very happy, but the occupants are not
@@ -746,6 +745,8 @@ class ZoneControllerTest {
 
         sinkGood.tryEmitComplete();
         sinkBad.tryEmitComplete();
+
+        assertThat(accumulator).hasSize(10);
 
         // @0 both zones happy
         assertThat(accumulator.get(0).getValue().demand).isEqualTo(0.0);
@@ -758,23 +759,20 @@ class ZoneControllerTest {
         assertThat(accumulator.get(3).getValue().demand).isEqualTo(0.0);
         assertThat(accumulator.get(4).getValue().demand).isEqualTo(0.0);
 
-        // @+2min, the good zone is unhappy, expect 2 demands of 3, but get 3 then 4
+        // @+2min, the good zone is unhappy, expect 3
         assertThat(accumulator.get(5).getValue().demand).isEqualTo(3.0);
-        assertThat(accumulator.get(6).getValue().demand).isEqualTo(4.0);
 
-        // @+3min, the good zone is happy, expect 0 but get 1 - the HVAC did not stop
-        assertThat(accumulator.get(7).getValue().demand).isEqualTo(1.0);
+        // @+3min, the good zone is happy, expect 0
+        assertThat(accumulator.get(6).getValue().demand).isEqualTo(0.0);
 
-        // @+10min the good zone is unhappy, demand is wrong
-        assertThat(accumulator.get(8).getValue().demand).isEqualTo(4.0);
+        // @+10min the good zone is unhappy
+        assertThat(accumulator.get(7).getValue().demand).isEqualTo(3.0);
 
-        // @+20min the good zone is happy, expect 0 but get 1 - the HVAC did not stop
-        assertThat(accumulator.get(9).getValue().demand).isEqualTo(1.0);
+        // @+20min the good zone is happy, expect 0
+        assertThat(accumulator.get(8).getValue().demand).isEqualTo(0.0);
 
         // @+6hrs the sensor is back, the bad zone is very, very happy, but the occupants are not
-        assertThat(accumulator.get(10).getValue().demand).isEqualTo(0.0);
-
-        assertThat(accumulator).hasSize(11);
+        assertThat(accumulator.get(9).getValue().demand).isEqualTo(0.0);
 
         zoneGood.close();
         zoneBad.close();
