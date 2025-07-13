@@ -680,6 +680,108 @@ class ZoneControllerTest {
         out.dispose();
     }
 
+    /**
+     * Reproducer for one of possible scenarios causing <a href="https://github.com/home-climate-control/dz/issues/333">#333</a>.
+     */
+    @Test
+    void sensorDeparture2() throws Exception {
+
+        final var setpointGood = 28.0;
+        final var setpointBad = 29.0;
+
+        var tsGood = new Thermostat(Clock.systemUTC(), "good-zone", new Range<>(10d, 40d), setpointGood, 1, 0, 0, 1, Duration.ZERO, 0);
+        var zoneGood = new Zone(tsGood, new ZoneSettings(tsGood.getSetpoint()));
+
+        var tsBad = new Thermostat(Clock.systemUTC(), "bad-zone", new Range<>(10d, 40d), setpointBad, 1, 0, 0, 1, Duration.ZERO, 0);
+        var zoneBad = new Zone(tsBad, new ZoneSettings(tsBad.getSetpoint()));
+
+        var zc = new ZoneController(Set.of(zoneGood, zoneBad));
+
+        var start = atMidnightUTC();
+
+        Sinks.Many<Signal<Double, String>> sinkGood = reactor.core.publisher.Sinks.many().multicast().onBackpressureBuffer();
+        Sinks.Many<Signal<Double, String>> sinkBad = reactor.core.publisher.Sinks.many().multicast().onBackpressureBuffer();
+
+        var zoneFluxGood = zoneGood
+                .compute(sinkGood.asFlux())
+                .doOnNext(s -> logger.warn("signal/good:     {}", s));
+        var zoneFluxBad = zoneBad
+                .compute(sinkBad.asFlux())
+                .doOnNext(s -> logger.warn("signal/bad:      {}", s));
+
+        var aggregatedFlux = Flux
+                .merge(zoneFluxGood, zoneFluxBad)
+                .doOnNext(s -> logger.warn("signal/merged:   {}", s));
+
+        var accumulator = new ArrayList<Signal<UnitControlSignal, String>>();
+        var out = zc
+                .compute(aggregatedFlux)
+                .doOnNext(s -> logger.warn("signal/computed: {}", s))
+                .subscribe(accumulator::add);
+
+        // @0 both zones are happy, expect 0
+        sinkGood.tryEmitNext(new Signal<Double, String>(start, setpointGood - 1));
+        sinkBad.tryEmitNext(new Signal<Double, String>(start, setpointBad - 1));
+
+        // @+1min, the sensor is gone in the bad zone, expect 0
+        sinkBad.tryEmitNext(new Signal<Double, String>(start.plus(1, ChronoUnit.MINUTES), null, null, Signal.Status.FAILURE_TOTAL, new IllegalStateException("test")));
+
+        // The new setpoint is deeply below the last known good sensor reading
+        zoneBad.setSettingsSync(new ZoneSettings(setpointBad - 5));
+
+        // @+2min, the good zone is unhappy, expect 2 demands of 3, but get 3 then 4
+        sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(2, ChronoUnit.MINUTES), setpointGood + 2));
+
+        // @+3min, the good zone is happy, expect 0 but get 1 - the HVAC did not stop
+        sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(3, ChronoUnit.MINUTES), setpointGood - 2));
+
+        // @+10min the good zone is unhappy, the demand is wrong
+        sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(10, ChronoUnit.MINUTES), setpointGood + 2));
+
+        // @+20min the good zone is happy, expect 0 but get 1 - the HVAC did not stop
+        sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(20, ChronoUnit.MINUTES), setpointGood - 2));
+
+        // @+6hrs the sensor is back, the bad zone is very, very happy, but the occupants are not
+        sinkBad.tryEmitNext(new Signal<Double, String>(start.plus(6, ChronoUnit.HOURS), setpointBad - 9));
+
+        sinkGood.tryEmitComplete();
+        sinkBad.tryEmitComplete();
+
+        // @0 both zones happy
+        assertThat(accumulator.get(0).getValue().demand).isEqualTo(0.0);
+        assertThat(accumulator.get(1).getValue().demand).isEqualTo(0.0);
+
+        // @+1 bad zone sensor gone, expect 0
+        assertThat(accumulator.get(2).getValue().demand).isEqualTo(0.0);
+
+        // Change of setpoint; the zone is error, zero demand
+        assertThat(accumulator.get(3).getValue().demand).isEqualTo(0.0);
+        assertThat(accumulator.get(4).getValue().demand).isEqualTo(0.0);
+
+        // @+2min, the good zone is unhappy, expect 2 demands of 3, but get 3 then 4
+        assertThat(accumulator.get(5).getValue().demand).isEqualTo(3.0);
+        assertThat(accumulator.get(6).getValue().demand).isEqualTo(4.0);
+
+        // @+3min, the good zone is happy, expect 0 but get 1 - the HVAC did not stop
+        assertThat(accumulator.get(7).getValue().demand).isEqualTo(1.0);
+
+        // @+10min the good zone is unhappy, demand is wrong
+        assertThat(accumulator.get(8).getValue().demand).isEqualTo(4.0);
+
+        // @+20min the good zone is happy, expect 0 but get 1 - the HVAC did not stop
+        assertThat(accumulator.get(9).getValue().demand).isEqualTo(1.0);
+
+        // @+6hrs the sensor is back, the bad zone is very, very happy, but the occupants are not
+        assertThat(accumulator.get(10).getValue().demand).isEqualTo(0.0);
+
+        assertThat(accumulator).hasSize(11);
+
+        zoneGood.close();
+        zoneBad.close();
+
+        out.dispose();
+    }
+
     private Signal<Double, String> createSignal(double temperature, String address) {
         return new Signal<>(Instant.now(), temperature, address);
     }
