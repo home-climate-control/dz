@@ -13,6 +13,8 @@ import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
+import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -26,7 +28,7 @@ import static com.homeclimatecontrol.hcc.TimeTool.atMidnightUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 class ZoneControllerTest {
 
@@ -573,6 +575,109 @@ class ZoneControllerTest {
 
         assertThat(t2.output.get(1).callingStatus().calling()).isTrue();
 
+    }
+
+    /**
+     * Reproducer for one of possible scenarios causing <a href="https://github.com/home-climate-control/dz/issues/333">#333</a>.
+     */
+    @Test
+    void sensorDeparture1() throws Exception {
+
+        final var setpointGood = 28.0;
+        final var setpointBad = 29.0;
+
+        var tsGood = new Thermostat(Clock.systemUTC(), "good-zone", new Range<>(10d, 40d), setpointGood, 1, 0, 0, 1, Duration.ZERO, 0);
+        var zoneGood = new Zone(tsGood, new ZoneSettings(tsGood.getSetpoint()));
+
+        var tsBad = new Thermostat(Clock.systemUTC(), "bad-zone", new Range<>(10d, 40d), setpointBad, 1, 0, 0, 1, Duration.ZERO, 0);
+        var zoneBad = new Zone(tsBad, new ZoneSettings(tsBad.getSetpoint()));
+
+        var zc = new ZoneController(Set.of(zoneGood, zoneBad));
+
+        var start = atMidnightUTC();
+
+        Sinks.Many<Signal<Double, String>> sinkGood = reactor.core.publisher.Sinks.many().multicast().onBackpressureBuffer();
+        Sinks.Many<Signal<Double, String>> sinkBad = reactor.core.publisher.Sinks.many().multicast().onBackpressureBuffer();
+
+        var zoneFluxGood = zoneGood
+                .compute(sinkGood.asFlux())
+                .doOnNext(s -> logger.warn("signal/good:     {}", s));
+        var zoneFluxBad = zoneBad
+                .compute(sinkBad.asFlux())
+                .doOnNext(s -> logger.warn("signal/bad:      {}", s));
+
+        var aggregatedFlux = Flux
+                .merge(zoneFluxGood, zoneFluxBad)
+                .doOnNext(s -> logger.warn("signal/merged:   {}", s));
+
+        var accumulator = new ArrayList<Signal<UnitControlSignal, String>>();
+        var out = zc
+                .compute(aggregatedFlux)
+                .doOnNext(s -> logger.warn("signal/computed: {}", s))
+                .subscribe(accumulator::add);
+
+        // @0 both zones are happy, expect 0
+        sinkGood.tryEmitNext(new Signal<Double, String>(start, setpointGood - 1));
+        sinkBad.tryEmitNext(new Signal<Double, String>(start, setpointBad - 1));
+
+        // @+2min, the good zone is unhappy, expect 2 demands of 3
+        sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(2, ChronoUnit.MINUTES), setpointGood + 2));
+
+        // @+3min, the good zone is happy, expect 0
+        sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(3, ChronoUnit.MINUTES), setpointGood - 2));
+
+        // @+4min, the sensor is gone in the bad zone, expect 0
+        sinkBad.tryEmitNext(new Signal<Double, String>(start.plus(4, ChronoUnit.MINUTES), null, null, Signal.Status.FAILURE_TOTAL, new IllegalStateException("test")));
+
+        // @+10min the good zone is unhappy, expect 2 demands of 3 but get 3 then 4
+        sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(10, ChronoUnit.MINUTES), setpointGood + 2));
+
+        // @+20min the good zone is happy, expect 0 but get 1
+        sinkGood.tryEmitNext(new Signal<Double, String>(start.plus(20, ChronoUnit.MINUTES), setpointGood - 2));
+
+        // This causes the signal to replay and issue two signals
+        zoneBad.setSettingsSync(new ZoneSettings(setpointBad - 3));
+
+        // @+6hrs the sensor is back, the bad zone is very, very happy, but the occupants are not
+        sinkBad.tryEmitNext(new Signal<Double, String>(start.plus(6, ChronoUnit.HOURS), setpointBad - 9));
+
+        sinkGood.tryEmitComplete();
+        sinkBad.tryEmitComplete();
+
+        // @0 both zones happy
+        assertThat(accumulator.get(0).getValue().demand).isEqualTo(0.0);
+        assertThat(accumulator.get(1).getValue().demand).isEqualTo(0.0);
+
+        // @+2 good zone unhappy
+        assertThat(accumulator.get(2).getValue().demand).isEqualTo(3.0);
+        assertThat(accumulator.get(3).getValue().demand).isEqualTo(3.0);
+
+        // @+3 good zone happy
+        assertThat(accumulator.get(4).getValue().demand).isEqualTo(0.0);
+
+        // @+4 bad zone sensor gone
+        assertThat(accumulator.get(5).getValue().demand).isEqualTo(0.0);
+
+        // @+10 good zone unhappy, expect 2 demands of 3, but get 3 then 4
+        assertThat(accumulator.get(6).getValue().demand).isEqualTo(3.0);
+        assertThat(accumulator.get(7).getValue().demand).isEqualTo(4.0);
+
+        // @+20 good zone is happy, expect 0 but get 1
+        assertThat(accumulator.get(8).getValue().demand).isEqualTo(1.0);
+
+        // setSettingsSync(), the zone should cause calling but is in error, demand goes to 0, 0
+        assertThat(accumulator.get(9).getValue().demand).isEqualTo(0.0);
+        assertThat(accumulator.get(10).getValue().demand).isEqualTo(0.0);
+
+        // @+6hrs the bad zone sensor returns, everyone's happy, expect 0
+        assertThat(accumulator.get(11).getValue().demand).isEqualTo(0.0);
+
+        assertThat(accumulator).hasSize(12);
+
+        zoneGood.close();
+        zoneBad.close();
+
+        out.dispose();
     }
 
     private Signal<Double, String> createSignal(double temperature, String address) {
