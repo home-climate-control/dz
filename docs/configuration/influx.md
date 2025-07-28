@@ -26,7 +26,7 @@ Best explained by example:
     - influx:
         id: influxdb-connector-house
         instance: house
-        db: dz-reactive
+        db: hcc-reactive
         uri: http://dx:8086
         username: <InfluxDB username>
         password: <InfluxDB password>

@@ -17,6 +17,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
+import static com.homeclimatecontrol.hcc.TimeTool.atMidnightUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -37,13 +38,13 @@ class SimplePidControllerTest {
         try {
 
             // Feel free to push this north of 5,000,000
-            int COUNT = 5_000;
+            var COUNT = 5_000;
 
             var sourceSequence = new ArrayList<Double>();
             var signalSequence = new ArrayList<Signal<ProcessController.Status<Double>, Void>>();
 
-            var timestamp = new AtomicLong(Instant.now().toEpochMilli());
-            Flux<Signal<Double, Void>> sourceFlux = Flux.generate(
+            var timestamp = new AtomicLong(atMidnightUTC().toEpochMilli());
+            var sourceFlux = Flux.generate(
                             rg::nextDouble,
                     (state, sink) -> {
                         state = rg.nextDouble();
@@ -65,7 +66,7 @@ class SimplePidControllerTest {
             assertThat(sourceSequence).hasSize(COUNT);
             assertThat(signalSequence).hasSize(COUNT);
 
-            int offset = 0;
+            var offset = 0;
             for (var v : sourceSequence) {
                 assertThat(v).isEqualTo(signalSequence.get(offset++).getValue().signal);
             }
@@ -85,7 +86,7 @@ class SimplePidControllerTest {
     }
 
     /**
-     * Test input and expected output.
+     * Test input and expected output for happy paths.
      *
      * @param offset Time offset from the start of the stream.
      * @param setpoint Current setpoint.
@@ -101,18 +102,41 @@ class SimplePidControllerTest {
 
     }
 
+    /**
+     * Test input and expected output for cases with error signals.
+     *
+     * @param offset Time offset from the start of the stream.
+     * @param setpoint Current setpoint.
+     * @param pv Current process variable.
+     * @param expectedOutput Expected output. Will be interpreted differently depending on what test is run.
+     */
+    record PidErrorTuple(
+            Duration offset,
+            Double setpoint,
+            Double pv,
+            Signal.Status status,
+            double expectedOutput
+    ) {
+        PidErrorTuple(
+                Duration offset,
+                Double setpoint,
+                Double pv,
+                double expectedOutput) {
+            this(offset, setpoint, pv, Signal.Status.OK, expectedOutput);
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("getIntegralStream")
     void testIntegral(Flux<PidSourceTuple> source) {
-        var c = new SimplePidController<PidSourceTuple>("integral", 20.0, 1, 0.00001, 0, 2);
-        var now = Instant.now();
+        var controller = new SimplePidController<PidSourceTuple>("integral", 20.0, 1, 0.00001, 0, 2);
         var signal = source
-                .map(t -> tuple2signal(now, t));
+                .map(t -> tuple2signal(atMidnightUTC(), t));
 
-        var output = c
+        controller
                 .compute(signal)
                 .doOnNext(s -> {
-                    logger.debug("output: {}", s);
+                    logger.debug("output/i: {}", s);
                     assertThat(((PidController.PidStatus) s.getValue()).i).isEqualTo(s.payload().expectedOutput);
                 })
                 .blockLast();
@@ -121,22 +145,52 @@ class SimplePidControllerTest {
     @ParameterizedTest
     @MethodSource("getDerivativeStream")
     void testDerivative(Flux<PidSourceTuple> source) {
-        var c = new SimplePidController<PidSourceTuple>("derivative", 20.0, 1, 0, 2_000, 0);
-        var now = Instant.now();
+        var controller = new SimplePidController<PidSourceTuple>("derivative", 20.0, 1, 0, 2_000, 0);
         var signal = source
-                .map(t -> tuple2signal(now, t));
+                .map(t -> tuple2signal(atMidnightUTC(), t));
 
-        var output = c
+        controller
                 .compute(signal)
                 .doOnNext(s -> {
-                    logger.debug("output: {}", s);
+                    logger.debug("output/d: {}", s);
                     assertThat(((PidController.PidStatus) s.getValue()).d).isEqualTo(s.payload().expectedOutput);
+                })
+                .blockLast();
+    }
+
+    /**
+     * Verify the behavior for the controller with no integral or derivative component.
+     *
+     * See <a href="https://github.com/home-climate-control/dz/issues/339>#339</a>.
+     */
+    @ParameterizedTest
+    @MethodSource("getErrorStreamP")
+    void testErrorP(Flux<PidErrorTuple> source) {
+        // VT: NOTE: no I, no D
+        var controller = new SimplePidController<PidErrorTuple>("error", 20.0, 1, 0, 0, 0);
+        var signal = source
+                .map(t -> tuple2signal(atMidnightUTC(), t));
+
+        controller
+                .compute(signal)
+                .doOnNext(s -> {
+                    logger.debug("output/e: {}", s);
+                    assertThat(((PidController.PidStatus) s.getValue()).p).isEqualTo(s.payload().expectedOutput);
                 })
                 .blockLast();
     }
 
     private Signal<Double, PidSourceTuple> tuple2signal(Instant start, PidSourceTuple source) {
         return new Signal<>(start.plus(source.offset), source.pv, source);
+    }
+
+    private Signal<Double, PidErrorTuple> tuple2signal(Instant start, PidErrorTuple source) {
+        return new Signal<>(
+                start.plus(source.offset),
+                source.pv,
+                source,
+                source.status,
+                source.status == Signal.Status.OK ? null : new IllegalStateException("error: " + source.status));
     }
 
     public static Stream<Flux<PidSourceTuple>> getIntegralStream() {
@@ -219,6 +273,23 @@ class SimplePidControllerTest {
                         new PidSourceTuple(Duration.ofSeconds(36), 22.0, 20, 0),
                         new PidSourceTuple(Duration.ofSeconds(40), 22.0, 20, 0),
                         new PidSourceTuple(Duration.ofSeconds(45), 22.0, 20, 0)
+                )
+        );
+    }
+
+    public static Stream<Flux<PidErrorTuple>> getErrorStreamP() {
+
+        return Stream.of(
+                Flux.just(
+                        new PidErrorTuple(Duration.ZERO, 20.0, 20.0, 0),
+                        new PidErrorTuple(Duration.ofMinutes(1), 20.0, 20.5, 0.5),
+
+                        // VT: NOTE: This captures the behavior as of rev. acf8b3f044b9d35e483171a60ce1f75694c2d379, which may not be what we actually want in the end.
+                        // See https://github.com/home-climate-control/dz/issues/339
+                        new PidErrorTuple(Duration.ofMinutes(2), 20.0, 21.0, Signal.Status.FAILURE_PARTIAL, 1.0),
+                        new PidErrorTuple(Duration.ofMinutes(2), 20.0, null, Signal.Status.FAILURE_TOTAL, 0.0),
+
+                        new PidErrorTuple(Duration.ofMinutes(3), 20.0, 20.5, 0.5)
                 )
         );
     }

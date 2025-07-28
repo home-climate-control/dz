@@ -9,6 +9,7 @@ import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.model.Zone;
+import net.sf.dz3r.runtime.AppHome;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneCommand;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;
 import net.sf.dz3r.view.http.v3.HttpConnector;
@@ -269,7 +270,7 @@ public class HttpConnectorGAE extends HttpConnector {
 
     private File getSecretsDir() {
 
-        var result = new File(System.getProperty("user.home"), ".dz/oauth/HttpConnector");
+        var result = new File(AppHome.getHome(), "oauth/HttpConnector");
 
         if (!result.exists() || !result.isDirectory() || !result.canRead()) {
             throw new IllegalArgumentException(result + ": doesn't exist, not a directory, or can't read");

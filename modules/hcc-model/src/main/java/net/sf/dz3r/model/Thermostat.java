@@ -259,6 +259,11 @@ public class Thermostat implements Addressable<String> {
                 return;
             }
 
+            if (actual.isError()) {
+                logger.warn("error signal, no raise: {}", actual);
+                return;
+            }
+
             if (actual.getValue() >= HYSTERESIS) {
                 // no need, it's already calling
                 return;

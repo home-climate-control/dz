@@ -12,6 +12,8 @@ import reactor.core.publisher.Flux;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -35,18 +37,19 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
      */
     private final Map<String, Signal<ZoneStatus, String>> zone2status = new TreeMap<>();
 
+    /**
+     * Unique sequence number for {@link #process(Signal)} call.
+     */
+    private final AtomicLong processCallCount = new AtomicLong();
+
     public ZoneController(Collection<Zone> zones) {
 
-        this.zoneMap = zones
-                .stream()
-                .collect(Collectors.toMap(
-                        Zone::getAddress,
-                        z -> z,
-                        (s, s2) -> s,
-                        TreeMap::new));
-
         logger.info("Zones configured:");
-        zoneMap.keySet().forEach(z -> logger.info("  {}", z));
+        this.zoneMap = Flux
+                .fromIterable(zones)
+                .doOnNext(z -> logger.info("  {}", z.getAddress()))
+                .collectMap(Zone::getAddress, z -> z)
+                .block();
 
         if (zones.size() > zoneMap.size()) {
 
@@ -119,33 +122,45 @@ public class ZoneController implements SignalProcessor<ZoneStatus, UnitControlSi
 
         // VT: NOTE: private method, it is safe to assume that alien signals have been filtered out by isOurs()
 
+        // Log messages from different calls often get interleaved
+        final var callId = Long.toHexString(processCallCount.getAndIncrement());
+
+        var countNonError = new AtomicInteger();
+        var countEnabled = new AtomicInteger();
+        var countUnhappy = new AtomicInteger();
+        var countUnhappyVoting = new AtomicInteger();
+
+        // VT: FIXME: Lower these four log statements to TRACE later. Keep in mind that not all of them will show up all the time.
+
         var nonError = zone2status
                 .entrySet()
                 .stream()
-                .filter(kv -> !kv.getValue().isError());
+                .peek(s -> logger.debug("callId={} process/signal: {}", callId, s))
+                .filter(kv -> !kv.getValue().isError())
+                .peek(ignored -> logger.debug("callId={} process/non-error: {}", callId, countNonError.incrementAndGet()));
 
         var enabled = nonError
-                .filter(kv -> kv.getValue().getValue().settings().isEnabled());
+                .filter(kv -> kv.getValue().getValue().settings().isEnabled())
+                .peek(ignored -> logger.debug("callId={} process/enabled: {}", callId, countEnabled.incrementAndGet()));
 
         var unhappy = enabled
                 .filter(kv -> kv.getValue().getValue().callingStatus().calling())
+                .peek(ignored -> logger.debug("callId={} process/unhappy: {}", callId, countUnhappy.incrementAndGet()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         var unhappyVoting = unhappy
                 .entrySet()
                 .stream()
                 .filter(kv -> kv.getValue().getValue().settings().isVoting())
+                .peek(ignored -> logger.debug("callId={} process/unhappy-voting: {}", callId, countUnhappyVoting.incrementAndGet()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        var unhappyCount = unhappy.size();
-        var unhappyVotingCount = unhappyVoting.size();
 
         // "Bump" is letting the thermostat know that the unit is starting and they may want to reconsider their
         // calling status
         var needBump = lastKnownCalling == 0 && !unhappyVoting.isEmpty();
-        lastKnownCalling = unhappyVoting.size();
+        lastKnownCalling = countUnhappyVoting.get();
 
-        logger.debug("unhappy={}, unhappyVoting={}, needBump={}, signal={}", unhappyCount, unhappyVotingCount, needBump, signal);
+        logger.debug("callId={} unhappy={}, unhappyVoting={}, needBump={}, signal={}", callId, countUnhappy, countUnhappyVoting, needBump, signal);
 
         if (needBump) {
             raise();

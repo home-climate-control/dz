@@ -18,7 +18,7 @@ import static net.sf.dz3r.device.mqtt.v2.AbstractMqttListener.DEFAULT_CACHE_AGE;
  * Implementation to control <a href="https://esphome.io/components/switch/">ESPHome Switch Component</a> via
  * <a href="https://esphome.io/components/mqtt">ESPHome MQTT Client Component</a>.
  *
- * See <a href="https://github.com/home-climate-control/dz/wiki/HOWTO:-DZ-to-ESPHome-integration">HOWTO: DZ to ESPHome integration</a>
+ * See <a href="https://github.com/home-climate-control/dz/blob/master/docs/configuration/esphome.md">ESPHome integration</a>
  * for configuration details.
  *
  * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch

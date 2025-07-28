@@ -19,6 +19,7 @@ import com.google.api.services.calendar.model.EventDateTime;
 import com.homeclimatecontrol.hcc.model.SchedulePeriod;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import net.sf.dz3r.instrumentation.Marker;
+import net.sf.dz3r.runtime.AppHome;
 import net.sf.dz3r.scheduler.SchedulePeriodFactory;
 import net.sf.dz3r.scheduler.ScheduleUpdater;
 import org.apache.logging.log4j.LogManager;
@@ -59,8 +60,8 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
 
     protected final Logger logger = LogManager.getLogger();
 
-    private static final String LITERAL_APP_NAME = "Home Climate Control-DZ-3.5";
-    private static final String STORED_CREDENTIALS = ".dz/calendar";
+    private static final String LITERAL_APP_NAME = "Home Climate Control-HCC-3.5";
+    private static final String STORED_CREDENTIALS = "calendar";
     private static final String CLIENT_SECRETS = "/client_secrets.json";
 
     public static final Duration DEFAULT_POLL_INTERVAL = Duration.of(1, ChronoUnit.MINUTES);
@@ -148,7 +149,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-            FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(new File(System.getProperty("user.home"), STORED_CREDENTIALS));
+            FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(new File(AppHome.getHome(), STORED_CREDENTIALS));
 
             Credential credential = authorize(httpTransport, jsonFactory, dataStoreFactory);
 

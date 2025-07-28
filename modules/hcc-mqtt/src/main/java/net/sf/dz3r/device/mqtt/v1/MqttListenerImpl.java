@@ -91,7 +91,7 @@ public class MqttListenerImpl implements MqttListener {
             // https://github.com/hivemq/hivemq-mqtt-client/issues/496
 
             var clientPrototype= Mqtt3Client.builder()
-                    .identifier("dz-" + UUID.randomUUID())
+                    .identifier("hcc-" + UUID.randomUUID())
                     .serverHost(address.host)
                     .serverPort(address.port);
 

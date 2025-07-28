@@ -6,12 +6,12 @@ import com.homeclimatecontrol.hcc.signal.Signal;
  * A hysteresis controller.
  *
  * The controller output becomes positive when the process variable becomes
- * higher than the setpoint plus hysteresis, and it becomes negative when the
- * process variable becomes lower than the setpoint minus hysteresis.
+ * greater than the {@link #thresholdHigh high threshold}, and it becomes negative when the
+ * process variable becomes less than the {@link #thresholdLow low threshold}.
  *
  * @param <P> Payload type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public class HysteresisController<P> extends AbstractProcessController<Double, Double, P> {
 
