@@ -2,8 +2,8 @@
 
 assertj = "3.27.3"
 commons-lang3 = "3.17.0"
-errorprone-lib = "2.36.0"
-errorprone-plugin = "4.1.0"
+errorprone-lib = "2.42.0"
+errorprone-plugin = "4.3.0"
 gradle-dependency-analysis = "2.8.2"
 gradle-doctor = "0.10.0"
 gradle-git-properties = "2.5.3"
@@ -16,7 +16,7 @@ jacoco = "0.8.13"
 jcommander = "2.0"
 jib = "3.4.4"
 jmdns = "3.6.0"
-junit5 = "5.11.4"
+junit5 = "6.0.0"
 log4j = "2.24.3"
 mapstruct = "1.6.3"
 mockito = "5.18.0"
@@ -61,6 +61,7 @@ jmdns = { module = "org.jmdns:jmdns", version.ref = "jmdns" }
 junit5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
 junit5-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
 junit5-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit5" }
+junit5-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit5" }
 log4j-api = { module = "org.apache.logging.log4j:log4j-api", version.ref = "log4j" }
 log4j-core = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j" }
 mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
