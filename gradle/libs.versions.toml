@@ -24,7 +24,7 @@ netty = "1.2.2"
 reactor = "3.7.7"
 rsocket = "1.1.5"
 rxtx = "2.1.7"
-sonarqube = "5.0.0.4638"
+sonarqube = "6.3.1.5724"
 spring-boot-plugin = "3.4.2"
 spring-dependency-management = "1.1.7"
 
