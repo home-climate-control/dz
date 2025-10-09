@@ -52,7 +52,7 @@ dependencies {
     implementation(enforcedPlatform(libs.quarkus.bom))
     implementation(libs.quarkus.arc)
     implementation(libs.quarkus.config.yaml)
-    implementation(libs.quarkus.resteasy.reactive)
+    implementation(libs.quarkus.rest)
     testImplementation(libs.quarkus.junit5)
 }
 
