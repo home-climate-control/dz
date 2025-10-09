@@ -20,6 +20,7 @@ dependencies {
     testImplementation(libs.reactor.tools)
 
     testRuntimeOnly(libs.junit5.engine)
+    testRuntimeOnly(libs.junit5.platform.launcher)
 }
 
 java {
