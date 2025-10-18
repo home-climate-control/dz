@@ -54,7 +54,7 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBe
 
                 var pin = kv.getKey();
                 var signal = Double.valueOf(kv.getValue());
-                String address = ((XBeeNetworkIOSample) event).address + ":A" + pin;
+                String address = xbeeSample.address + ":A" + pin;
 
                 // This will take care of the device *and* channel address.
                 // There's no need to send an arrival notification.
