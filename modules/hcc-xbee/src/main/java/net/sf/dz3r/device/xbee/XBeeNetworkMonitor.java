@@ -96,22 +96,16 @@ public class XBeeNetworkMonitor extends DriverNetworkMonitor<XBeeReactive> imple
     protected void handleEvent(DriverNetworkEvent event) {
 
         switch (event.getClass().getSimpleName()) { // NOSONAR Just wait a bit
-            case "XBeeNetworkArrival":
-                handleArrival((XBeeNetworkArrival) event);
-                break;
-            default:
-                logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
+            case "XBeeNetworkArrival" -> handleArrival((XBeeNetworkArrival) event);
+            default -> logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
     }
 
     private void handleXBeeEvent(XBeeResponseFrame event, FluxSink<DriverNetworkEvent> observer) {
         logger.debug("XBee event: {} {}", event.getClass().getName(), event);
         switch (event.getClass().getSimpleName()) { // NOSONAR Just wait a bit
-            case "ZNetRxIoSampleResponse":
-                handleIOSample((IOSampleIndicator) event, observer);
-                break;
-            default:
-                logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
+            case "ZNetRxIoSampleResponse" -> handleIOSample((IOSampleIndicator) event, observer);
+            default -> logger.debug("Not handling {} ({}) event yet", event.getClass().getSimpleName(), event);
         }
     }
 
