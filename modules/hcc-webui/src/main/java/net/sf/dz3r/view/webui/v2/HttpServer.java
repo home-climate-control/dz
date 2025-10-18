@@ -37,7 +37,7 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  *
  * This endpoint only serves small snapshots.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2024
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2025
  */
 public class HttpServer extends Endpoint {
 

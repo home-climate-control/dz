@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * This endpoint only serves streams, and big snapshots.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2024
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2025
  */
 public class RSocketServer extends Endpoint {
 

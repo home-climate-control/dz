@@ -30,7 +30,7 @@ import static net.sf.dz3r.view.webui.v2.RoutingConfiguration.META_PATH;
 /**
  * Web UI for Home Climate Control - reactive version.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public class WebUI implements AutoCloseable {
 

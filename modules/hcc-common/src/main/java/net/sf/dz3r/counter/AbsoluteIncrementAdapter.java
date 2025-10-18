@@ -13,7 +13,7 @@ import reactor.core.publisher.Flux;
  *
  * @param <T> Measured data type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public abstract class AbsoluteIncrementAdapter<T extends Comparable<T>> {
 

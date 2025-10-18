@@ -29,7 +29,7 @@ import java.util.StringTokenizer;
  * this will also cause it to bloat quite a bit and become too heavy. It is possible to offload
  * parsing on an online component, but whether this is necessary is yet to be seen.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public class SettingsParser {
 
