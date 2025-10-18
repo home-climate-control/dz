@@ -23,7 +23,7 @@ public class AppHome {
     public synchronized static File getHome() {
 
         if (home == null) {
-            home = new File(new File(System.getProperty("user.home")), ".hcc");
+            home = new File(new File(System.getProperty("user.home")), HOME);
             logger.debug("home={}", home);
         }
 
