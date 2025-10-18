@@ -1,3 +1,4 @@
+import com.google.cloud.tools.jib.gradle.JibTask
 import com.google.cloud.tools.jib.gradle.extension.layerfilter.Configuration
 
 buildscript {
@@ -104,4 +105,10 @@ jib {
 
 tasks.check {
     dependsOn(tasks.named<JacocoReport>("testCodeCoverageReport"))
+}
+
+// Workaround source: https://github.com/GoogleContainerTools/jib/issues/3132#issuecomment-1933748189
+// This issue has been dragging on since 2021-03-12, Gradle v.6.8.1 <facepalm>
+tasks.withType<JibTask>().configureEach {
+    notCompatibleWithConfigurationCache("because https://github.com/GoogleContainerTools/jib/issues/3132")
 }
