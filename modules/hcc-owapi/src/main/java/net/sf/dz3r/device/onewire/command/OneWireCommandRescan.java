@@ -4,7 +4,6 @@ import com.dalsemi.onewire.OneWireException;
 import com.dalsemi.onewire.adapter.DSPortAdapter;
 import com.dalsemi.onewire.container.OneWireContainer;
 import com.dalsemi.onewire.container.OneWireContainer1F;
-import com.dalsemi.onewire.container.SwitchContainer;
 import com.dalsemi.onewire.utils.OWPath;
 import net.sf.dz3r.device.driver.command.DriverCommand;
 import net.sf.dz3r.device.driver.event.DriverNetworkEvent;
@@ -145,11 +144,9 @@ public class OneWireCommandRescan extends OneWireCommand {
 
     private void checkLanCoupler(OneWireContainer owc, OWPath path, List<OWPath> branches) {
 
-        if (!(owc instanceof OneWireContainer1F)) {
+        if (!(owc instanceof OneWireContainer1F coupler)) {
             return;
         }
-
-        var coupler = (SwitchContainer) owc;
 
         branches.add(path.extend(coupler, 0));
         branches.add(path.extend(coupler, 1));

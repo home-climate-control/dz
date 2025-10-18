@@ -88,7 +88,7 @@ public class OneWireDriver extends AbstractDeviceDriver<String, Double, String, 
         devicesPresent.remove(departureEvent.address);
         address2path.remove(departureEvent.address);
 
-        logger.error("Departure not handled completely: {}", ((OneWireNetworkDeparture) event).address );
+        logger.error("Departure not handled completely: {}", departureEvent.address );
     }
 
     @Override

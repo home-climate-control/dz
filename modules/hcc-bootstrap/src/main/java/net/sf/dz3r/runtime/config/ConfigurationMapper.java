@@ -12,7 +12,7 @@ import org.mapstruct.factory.Mappers;
  * This might mutate into proper usage if/when components get separated into configuration + implementation pairs,
  * otherwise too many irrelevant dependencies will bleed into this module.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 @Mapper
 public interface ConfigurationMapper {
@@ -51,11 +51,11 @@ public interface ConfigurationMapper {
             @Override
             public boolean equals(Object other) {
 
-                if (!(other instanceof MqttEndpointSpec)) {
+                if (!(other instanceof MqttEndpointSpec spec)) {
                     return false;
                 }
 
-                return signature().equals(((MqttEndpointSpec) other).signature());
+                return signature().equals(spec.signature());
             }
 
             @Override

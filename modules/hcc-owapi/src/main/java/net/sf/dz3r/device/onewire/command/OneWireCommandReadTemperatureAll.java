@@ -106,13 +106,12 @@ public class OneWireCommandReadTemperatureAll extends OneWireCommand {
 
             var owc = adapter.getDeviceContainer(address);
 
-            if (!(owc instanceof TemperatureContainer)) {
+            if (!(owc instanceof TemperatureContainer temperatureContainer)) {
                 logger.debug("not a temperature container: {}", address);
                 return;
             }
 
-            var tc = (TemperatureContainer) owc;
-            var sample = tc.getTemperature(tc.readDevice());
+            var sample = temperatureContainer.getTemperature(temperatureContainer.readDevice());
 
             logger.debug("{}: {}°C", address, sample);
 
