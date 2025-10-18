@@ -1,6 +1,7 @@
 package net.sf.dz3r.common;
 
 import java.time.Duration;
+import java.util.Locale;
 
 public class DurationFormatter {
     public String format(long duration) {
@@ -17,6 +18,6 @@ public class DurationFormatter {
 
     private String format24H(long duration) {
         // Longest time period Duration#toString() is aware of is hours, we need days
-        return Duration.ofMillis(duration).toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase();
+        return Duration.ofMillis(duration).toString().substring(2).replaceAll("(\\d[HMS])(?!$)", "$1 ").toLowerCase(Locale.getDefault());
     }
 }

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -153,7 +154,7 @@ public class WebUI implements AutoCloseable {
                     "protocol-version", Version.PROTOCOL_VERSION,
 
                     "duplex-port", Integer.toString(config.duplexPort),
-                    "type",DIRECT.toString().toLowerCase(),
+                    "type",DIRECT.toString().toLowerCase(Locale.getDefault()),
 
                     "name", config.instance,
                     "vendor", "homeclimatecontrol.com",

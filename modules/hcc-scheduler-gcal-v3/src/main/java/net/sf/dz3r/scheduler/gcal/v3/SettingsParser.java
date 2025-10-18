@@ -17,6 +17,7 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringTokenizer;
@@ -176,7 +177,7 @@ public class SettingsParser {
 
         ThreadContext.push("parse");
 
-        arguments = arguments.toLowerCase().trim();
+        arguments = arguments.toLowerCase(Locale.getDefault()).trim();
 
         Double setpoint = null;
         Boolean enabled = null;

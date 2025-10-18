@@ -9,6 +9,7 @@ import org.apache.logging.log4j.ThreadContext;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Map;
 
 public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
@@ -72,11 +73,11 @@ public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
             return false;
         }
 
-        if (availabilityMessage.toLowerCase().contains("alive")) {
+        if (availabilityMessage.toLowerCase(Locale.getDefault()).contains("alive")) {
             return true;
         }
 
-        if (availabilityMessage.toLowerCase().contains("dead")) {
+        if (availabilityMessage.toLowerCase(Locale.getDefault()).contains("dead")) {
             return false;
         }
 
