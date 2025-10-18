@@ -113,7 +113,7 @@ public class MqttListenerImpl extends AbstractMqttListener {
     private void callback(Sinks.Many<MqttSignal> sink, Mqtt5Publish message) {
 
         var topic = message.getTopic().toString();
-        var payload = new String(message.getPayloadAsBytes());
+        var payload = new String(message.getPayloadAsBytes(), StandardCharsets.UTF_8);
 
         logger.trace("{}: receive: {} {}", getAddress(), message, payload);
         sink.tryEmitNext(new MqttSignal(topic, payload));
