@@ -21,12 +21,12 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -41,6 +41,8 @@ import static org.springframework.web.reactive.function.server.ServerResponse.ok
  */
 public class HttpServer extends Endpoint {
 
+    private static final ZoneId zoneId = ZoneId.systemDefault();
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss,SSS VV");
     private static final DurationFormatter uptimeFormatter = new DurationFormatter();
 
     private final String interfaces;
@@ -255,7 +257,7 @@ public class HttpServer extends Endpoint {
         var mx = ManagementFactory.getRuntimeMXBean();
         var startMillis = mx.getStartTime();
         var uptimeMillis = mx.getUptime();
-        var start = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS").format(new Date(startMillis)) + " " + ZoneId.systemDefault();
+        var start = formatter.format(ZonedDateTime.ofInstant(Instant.ofEpochMilli(startMillis), zoneId));
         var uptime = uptimeFormatter.format(uptimeMillis);
 
         // Let's make the JSON order predictable
