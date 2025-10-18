@@ -33,6 +33,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 import static java.awt.event.KeyEvent.KEY_PRESSED;
+import static java.lang.Boolean.FALSE;
 
 /**
  * Zone panel.
@@ -482,13 +483,13 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
         setpoint.ifPresent(s -> setpointLabel.setText(String.format(Locale.getDefault(), "%.1f°", getDisplayValue(s))));
 
         voting.ifPresent(v -> {
-            votingLabel.setText(Boolean.TRUE.equals(v) ? VOTING : NOT_VOTING);
-            votingLabel.setForeground(Boolean.TRUE.equals(v) ? ColorScheme.getScheme(getMode()).noticeDefault : ColorScheme.getScheme(getMode()).noticeActive);
+            votingLabel.setText(v ? VOTING : NOT_VOTING);
+            votingLabel.setForeground(v ? ColorScheme.getScheme(getMode()).noticeDefault : ColorScheme.getScheme(getMode()).noticeActive);
         });
 
         hold.ifPresent(h -> {
-            holdLabel.setText(Boolean.TRUE.equals(h) ? ON_HOLD : HOLD);
-            holdLabel.setForeground(Boolean.TRUE.equals(h) ? ColorScheme.getScheme(getMode()).noticeActive : ColorScheme.getScheme(getMode()).noticeDefault);
+            holdLabel.setText(h ? ON_HOLD : HOLD);
+            holdLabel.setForeground(h ? ColorScheme.getScheme(getMode()).noticeActive : ColorScheme.getScheme(getMode()).noticeDefault);
         });
 
         renderPeriod();
@@ -666,7 +667,7 @@ public class ZonePanel extends EntityPanel<ZoneStatus, Void> {
             return Zone.State.ERROR;
         }
 
-        if (Boolean.FALSE.equals(zoneStatus.settings().enabled())) {
+        if (FALSE.equals(zoneStatus.settings().enabled())) {
             return Zone.State.OFF;
         }
 

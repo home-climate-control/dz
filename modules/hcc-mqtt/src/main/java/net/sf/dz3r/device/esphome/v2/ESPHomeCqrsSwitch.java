@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.lang.Boolean.TRUE;
+
 /**
  * Implementation to control <a href="https://esphome.io/components/switch/">ESPHome Switch Component</a> via
  * <a href="https://esphome.io/components/mqtt">ESPHome MQTT Client Component</a>.
@@ -89,7 +91,7 @@ public class ESPHomeCqrsSwitch extends AbstractMqttCqrsSwitch {
     }
     @Override
     protected String renderPayload(Boolean state) {
-        return Boolean.TRUE.equals(state) ? "ON" : "OFF";
+        return TRUE.equals(state) ? "ON" : "OFF";
     }
 
     @Override

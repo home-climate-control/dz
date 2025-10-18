@@ -10,6 +10,9 @@ import reactor.core.publisher.Flux;
 
 import java.time.Duration;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 /**
  * Simple economizer implementation with no jitter control (rather a prototype).
  *
@@ -55,7 +58,7 @@ public class SimpleEconomizer<A extends Comparable<A>> extends AbstractEconomize
 
             // VT: NOTE: This will create LOTS of jitter, don't use with units that can't deal with it
 
-            Boolean state = signal.getValue() > 0 ? Boolean.TRUE : Boolean.FALSE;
+            Boolean state = signal.getValue() > 0 ? TRUE : FALSE;
 
             logger.debug("state={}", state);
 

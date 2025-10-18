@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import static java.lang.Boolean.TRUE;
+
 /**
  * A switch that turns off when the first participating virtual switch is turned on, and turns off when the last
  * participating virtual switch is turned off.
@@ -139,7 +141,7 @@ public class StackingCqrsSwitch implements CqrsSwitch<String> {
         public DeviceState<Boolean> setState(Boolean state) {
             this.state = state;
 
-            if (Boolean.TRUE.equals(state)) {
+            if (TRUE.equals(state)) {
                 demand.add(this);
             } else {
                 demand.remove(this);

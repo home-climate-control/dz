@@ -11,6 +11,8 @@ import java.time.Clock;
 import java.time.Duration;
 import java.util.Map;
 
+import static java.lang.Boolean.TRUE;
+
 /**
  * Implementation for a Zigbee switch over <a href="https://zigbee2mqtt.io">Zigbee2MQTT</a>.
  *
@@ -100,6 +102,6 @@ public class Z2MCqrsSwitch extends AbstractMqttCqrsSwitch {
 
     @Override
     protected String renderPayload(Boolean state) {
-        return "{\"state\": \"" + (Boolean.TRUE.equals(state) ? "ON" : "OFF") + "\"}";
+        return "{\"state\": \"" + (TRUE.equals(state) ? "ON" : "OFF") + "\"}";
     }
 }

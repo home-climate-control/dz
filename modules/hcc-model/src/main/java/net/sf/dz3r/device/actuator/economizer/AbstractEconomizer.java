@@ -27,6 +27,9 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+
 /**
  * Common implementation for all economizer classes.
  *
@@ -204,7 +207,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
     private void setDeviceState(Boolean state) {
 
-        var ctl = Boolean.TRUE.equals(state) ? 1.0 : 0.0;
+        var ctl = TRUE.equals(state) ? 1.0 : 0.0;
         var signal = new Signal<HvacCommand, Void>(
                 clock.instant(),
                 new HvacCommand(config.mode, ctl, ctl)
@@ -456,7 +459,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 source.status(),
                 source.error());
 
-        if (actuatorState == null || actuatorState.equals(Boolean.FALSE)) {
+        if (actuatorState == null || actuatorState.equals(FALSE)) {
 
             // Economizer inactive, no change required
             return augmentedSource;

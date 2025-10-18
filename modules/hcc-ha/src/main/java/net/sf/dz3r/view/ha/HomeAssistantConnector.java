@@ -41,6 +41,8 @@ import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import static java.lang.Boolean.TRUE;
+
 
 /**
  * <a href="https://homeassistant.io">Home Assistant</a> integration.
@@ -311,7 +313,7 @@ public class HomeAssistantConnector implements Connector {
 
         String finalMode;
 
-        if (Boolean.TRUE.equals(enabled)) {
+        if (TRUE.equals(enabled)) {
             finalMode = Optional.ofNullable(mode).map(m -> m == HvacMode.COOLING ? "cool" : "heat").orElse("off");
         } else {
             finalMode = "off";

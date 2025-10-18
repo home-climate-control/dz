@@ -12,6 +12,8 @@ import reactor.core.scheduler.Scheduler;
 import java.io.IOException;
 import java.time.Instant;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static net.sf.dz3r.device.mqtt.v2.AbstractMqttListener.DEFAULT_CACHE_AGE;
 
 /**
@@ -151,11 +153,11 @@ public class ESPHomeSwitch extends AbstractMqttSwitch {
         var timestamp = Instant.now();
 
         return switch (message) {
-            case "ON" -> new Signal<>(timestamp, Boolean.TRUE);
-            case "OFF" -> new Signal<>(timestamp, Boolean.FALSE);
+            case "ON" -> new Signal<>(timestamp, TRUE);
+            case "OFF" -> new Signal<>(timestamp, FALSE);
             default -> {
                 logger.warn("malformed payload '{}', returning FALSE", message);
-                yield new Signal<>(timestamp, Boolean.FALSE);
+                yield new Signal<>(timestamp, FALSE);
             }
         };
     }
