@@ -20,10 +20,12 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Read time from file, count, store back.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public class FileTimeUsageCounter implements ResourceUsageCounter<Duration>, AutoCloseable {
 
@@ -162,7 +164,7 @@ public class FileTimeUsageCounter implements ResourceUsageCounter<Duration>, Aut
                 logger.error("failed to rename {} to {}", canonical, backup);
             }
 
-            try (PrintWriter pw = new PrintWriter(new FileWriter(storage))) {
+            try (PrintWriter pw = new PrintWriter(new FileWriter(storage.getCanonicalFile(), UTF_8))) {
 
                 pw.println("# Resource Usage Counter: " + marker);
 

@@ -10,8 +10,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.UUID;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Provides a persistent unique instance identifier.
@@ -54,7 +55,7 @@ public class InstanceIdProvider {
      * @throws IOException if things went sour; let's fast fail here.
      */
     private static UUID readId() throws IOException {
-        try (var br = new BufferedReader(new FileReader(source, StandardCharsets.UTF_8))) {
+        try (var br = new BufferedReader(new FileReader(source, UTF_8))) {
             return UUID.fromString(br.readLine());
         } catch (FileNotFoundException ex) {
 
@@ -77,7 +78,7 @@ public class InstanceIdProvider {
 
         var newId = UUID.randomUUID();
 
-        try (PrintWriter pw = new PrintWriter(new FileWriter(source))) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(source.getCanonicalFile(), UTF_8))) {
             pw.println(newId);
         }
 
