@@ -44,7 +44,7 @@ class ZoneConfigurationParserTest {
     @Test
     void sensitivityMultiplierMissing() {
 
-        var halfLife = Duration.ofSeconds(Math.abs(rg.nextInt()));
+        var halfLife = Duration.ofSeconds(rg.nextInt(Integer.MAX_VALUE));
         var source = new HalfLifeConfig(halfLife, null);
         var result = p.parseSensitivity("name", source);
 
