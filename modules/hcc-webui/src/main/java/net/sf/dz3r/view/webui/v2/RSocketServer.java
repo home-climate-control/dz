@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -85,7 +86,7 @@ public class RSocketServer extends Endpoint {
 
                 logger.debug("command/text: {}", commandText);
 
-                var command = Command.valueOf(commandText.toUpperCase());
+                var command = Command.valueOf(commandText.toUpperCase(Locale.getDefault()));
 
                 logger.info("command/parsed: {}", command);
 

@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.time.Clock;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
@@ -125,7 +126,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         return new SwitchableHvacDevice(
                 Clock.systemUTC(),
                 cf.id(),
-                HvacMode.valueOf(HCCObjects.requireNonNull(cf.mode(), "switchable.mode can't be null").toUpperCase()),
+                HvacMode.valueOf(HCCObjects.requireNonNull(cf.mode(), "switchable.mode can't be null").toUpperCase(Locale.getDefault())),
                 getSwitch(HCCObjects.requireNonNull(cf.switchAddress(), "switchable.switch-address can't be null")),
                 false,
                 createFileCounter(cf.id(), cf.filter()));
@@ -136,7 +137,7 @@ public class HvacConfigurationParser extends ConfigurationContextAware {
         return new VariableHvacDevice(
                 Clock.systemUTC(),
                 cf.id(),
-                HvacMode.valueOf(HCCObjects.requireNonNull(cf.mode(), "variable.mode can't be null").toUpperCase()),
+                HvacMode.valueOf(HCCObjects.requireNonNull(cf.mode(), "variable.mode can't be null").toUpperCase(Locale.getDefault())),
                 getFans(HCCObjects.requireNonNull(cf.actuator(), "variable.actuator can't be null")),
                 Optional.ofNullable(cf.maxPower()).orElse(1d),
                 Optional.ofNullable(cf.bandCount()).orElse(10),

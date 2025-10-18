@@ -19,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -125,7 +126,7 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBe
      * @throws IllegalArgumentException if the {@code conversion} argument is neither of two supported.
      */
     public final Flux<Signal<Double, String>> getFlux(String address, String conversion) {
-        AnalogConverter converter = switch (conversion.toUpperCase()) {
+        AnalogConverter converter = switch (conversion.toUpperCase(Locale.getDefault())) {
             case "LM34" -> new AnalogConverterLM34();
             case "TMP36" -> new AnalogConverterTMP36();
             default -> throw new IllegalArgumentException("Supported values are: LM34, TMP36");
