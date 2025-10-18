@@ -24,7 +24,7 @@ import java.util.TreeMap;
 /**
  * Collection of all raw signal processors emitting a coherent "at a glance" system status.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2025
  */
 public class InstrumentCluster {
 
@@ -67,8 +67,11 @@ public class InstrumentCluster {
     }
 
     /**
-     * @return System status flux. A new item is emitted every time a particular entity's status is updated,
-     * the item can and must be treated as an incremental update, though it may at times represent full system status.
+     * Get the system status flux.
+     *
+     * A new item is emitted every time a particular entity's status is updated, the item can and must be treated as an incremental update, though it may at times represent full system status.
+     *
+     * @return System status flux.
      */
     public Flux<Signal<SystemStatus, Void>> getFlux() {
 
