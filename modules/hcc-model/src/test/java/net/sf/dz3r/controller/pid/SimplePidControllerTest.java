@@ -17,7 +17,7 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
-import static com.homeclimatecontrol.hcc.TimeTool.atMidnightUTC;
+import static com.homeclimatecontrol.hcc.TimeTool.atDayStartUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -43,7 +43,7 @@ class SimplePidControllerTest {
             var sourceSequence = new ArrayList<Double>();
             var signalSequence = new ArrayList<Signal<ProcessController.Status<Double>, Void>>();
 
-            var timestamp = new AtomicLong(atMidnightUTC().toEpochMilli());
+            var timestamp = new AtomicLong(atDayStartUTC().toEpochMilli());
             var sourceFlux = Flux.generate(
                             rg::nextDouble,
                     (state, sink) -> {
@@ -131,7 +131,7 @@ class SimplePidControllerTest {
     void testIntegral(Flux<PidSourceTuple> source) {
         var controller = new SimplePidController<PidSourceTuple>("integral", 20.0, 1, 0.00001, 0, 2);
         var signal = source
-                .map(t -> tuple2signal(atMidnightUTC(), t));
+                .map(t -> tuple2signal(atDayStartUTC(), t));
 
         controller
                 .compute(signal)
@@ -147,7 +147,7 @@ class SimplePidControllerTest {
     void testDerivative(Flux<PidSourceTuple> source) {
         var controller = new SimplePidController<PidSourceTuple>("derivative", 20.0, 1, 0, 2_000, 0);
         var signal = source
-                .map(t -> tuple2signal(atMidnightUTC(), t));
+                .map(t -> tuple2signal(atDayStartUTC(), t));
 
         controller
                 .compute(signal)
@@ -169,7 +169,7 @@ class SimplePidControllerTest {
         // VT: NOTE: no I, no D
         var controller = new SimplePidController<PidErrorTuple>("error", 20.0, 1, 0, 0, 0);
         var signal = source
-                .map(t -> tuple2signal(atMidnightUTC(), t));
+                .map(t -> tuple2signal(atDayStartUTC(), t));
 
         controller
                 .compute(signal)

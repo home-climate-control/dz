@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
-import static com.homeclimatecontrol.hcc.TimeTool.atMidnightUTC;
+import static com.homeclimatecontrol.hcc.TimeTool.atDayStartUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class AbstractProcessControllerTest {
@@ -239,7 +239,7 @@ class AbstractProcessControllerTest {
     }
 
     public static Stream<Flux<Signal<Double, Void>>> timeTravelStream() {
-        var start = atMidnightUTC();
+        var start = atDayStartUTC();
         return Stream.of(Flux.just(
                 new Signal<>(start, 21.0),
                 new Signal<>(start.minus(1, ChronoUnit.SECONDS), 19.0)

@@ -1,6 +1,5 @@
 package net.sf.dz3r.controller;
 
-import com.homeclimatecontrol.hcc.TimeTool;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static com.homeclimatecontrol.hcc.TimeTool.atDayStartUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HysteresisControllerTest {
@@ -83,7 +83,7 @@ class HysteresisControllerTest {
 
     private static Stream<Flux<TestPair>> happyStreamProvider1() {
 
-        var timestamp = TimeTool.atMidnightUTC();
+        var timestamp = atDayStartUTC();
         long offset = 0;
 
         return Stream.of(Flux.just(
@@ -99,7 +99,7 @@ class HysteresisControllerTest {
 
     private static Stream<Flux<TestPair>> errorStreamProvider() {
 
-        var timestamp = TimeTool.atMidnightUTC();
+        var timestamp = atDayStartUTC();
         long offset = 0;
 
         return Stream.of(Flux.just(

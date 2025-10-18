@@ -11,11 +11,11 @@ import java.util.TimeZone;
 public class TimeTool {
 
     /**
-     * Get the midnight.
+     * Get the day start instant.
      *
-     * @return Instant at midnight of the current day.
+     * @return Instant at midnight at the beginning of the current day.
      */
-    public static Instant atMidnightUTC() {
+    public static Instant atDayStartUTC() {
         var now = Instant.now();
         var dt = now.atZone(TimeZone.getTimeZone("UTC").toZoneId());
 

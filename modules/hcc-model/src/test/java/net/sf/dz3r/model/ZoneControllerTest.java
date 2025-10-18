@@ -24,7 +24,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.homeclimatecontrol.hcc.TimeTool.atMidnightUTC;
+import static com.homeclimatecontrol.hcc.TimeTool.atDayStartUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -53,7 +53,7 @@ class ZoneControllerTest {
         var offset = new AtomicInteger();
         var sequence = Flux
                 .fromIterable(source)
-                .map(e -> new Signal<Double, Void>(atMidnightUTC().plus(offset.getAndIncrement(), ChronoUnit.SECONDS), e));
+                .map(e -> new Signal<Double, Void>(atDayStartUTC().plus(offset.getAndIncrement(), ChronoUnit.SECONDS), e));
         var controller = new SimplePidController<Void>("simple20",  20.0, 1.0, 0, 0, 0);
 
         var stage1 = controller.compute(sequence);
@@ -79,7 +79,7 @@ class ZoneControllerTest {
         var offset = new AtomicInteger();
         var sequence = Flux
                 .fromIterable(source)
-                .map(e -> new Signal<Double, Void>(atMidnightUTC().plus(offset.getAndIncrement(), ChronoUnit.SECONDS), e));
+                .map(e -> new Signal<Double, Void>(atDayStartUTC().plus(offset.getAndIncrement(), ChronoUnit.SECONDS), e));
         var ts = new Thermostat("ts", 20.0, 1, 0, 0, 1);
 
         var stage1 = ts.compute(sequence);
@@ -133,7 +133,7 @@ class ZoneControllerTest {
         var offset = new AtomicInteger();
         var sequence = Flux
                 .fromIterable(source)
-                .map(e -> new Signal<Double, String>(atMidnightUTC().plus(offset.getAndIncrement(), ChronoUnit.SECONDS), e));
+                .map(e -> new Signal<Double, String>(atDayStartUTC().plus(offset.getAndIncrement(), ChronoUnit.SECONDS), e));
 
         var ts = new Thermostat("ts", 20.0, 1, 0, 0, 1);
         var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
@@ -174,7 +174,7 @@ class ZoneControllerTest {
         var zc = new ZoneController(Set.of(z1, z2));
 
         var sequence = Flux
-                .just(new Signal<Double, String>(atMidnightUTC(), 20.0));
+                .just(new Signal<Double, String>(atDayStartUTC(), 20.0));
 
         var flux1 = z1.compute(sequence);
         var flux2 = z2.compute(sequence);
@@ -210,7 +210,7 @@ class ZoneControllerTest {
         var zc = new ZoneController(Set.of(z1, z2));
 
         var sequence = Flux
-                .just(new Signal<Double, String>(atMidnightUTC(), 30.0));
+                .just(new Signal<Double, String>(atDayStartUTC(), 30.0));
 
         var flux1 = z1.compute(sequence);
         var flux2 = z2.compute(sequence);
@@ -250,7 +250,7 @@ class ZoneControllerTest {
 
         // This should bump z2 to calling, but z1 should stay off
         var sequence = Flux
-                .just(new Signal<Double, String>(atMidnightUTC(), 23.0));
+                .just(new Signal<Double, String>(atDayStartUTC(), 23.0));
 
         var flux1 = z1.compute(sequence);
         var flux2 = z2.compute(sequence);
@@ -293,7 +293,7 @@ class ZoneControllerTest {
         var zc = new ZoneController(Set.of(z1, z2));
 
         var sequence = Flux
-                .just(new Signal<Double, String>(atMidnightUTC(), 23.0));
+                .just(new Signal<Double, String>(atDayStartUTC(), 23.0));
 
         var flux1 = z1.compute(sequence);
         var flux2 = z2.compute(sequence);
@@ -329,7 +329,7 @@ class ZoneControllerTest {
         var zc = new ZoneController(Set.of(z1));
 
         var sequence = Flux
-                .just(new Signal<Double, String>(atMidnightUTC(), 23.0));
+                .just(new Signal<Double, String>(atDayStartUTC(), 23.0));
 
         var flux1 = z1.compute(sequence);
         var fluxZ = zc.compute(flux1);
@@ -358,7 +358,7 @@ class ZoneControllerTest {
         var zc = new ZoneController(Set.of(z1));
 
         var sequence = Flux
-                .just(new Signal<Double, String>(atMidnightUTC(), 23.0));
+                .just(new Signal<Double, String>(atDayStartUTC(), 23.0));
 
         var flux1 = z1.compute(sequence);
         var fluxZ = zc.compute(flux1);
@@ -381,7 +381,7 @@ class ZoneControllerTest {
         var z = new Zone(ts, new ZoneSettings(ts.getSetpoint()));
 
         var zc = new ZoneController(Set.of(z));
-        var start = atMidnightUTC();
+        var start = atDayStartUTC();
 
         var sequence = Flux
                 .just(
@@ -417,7 +417,7 @@ class ZoneControllerTest {
         var z2 = new Zone(ts2, new ZoneSettings(ts2.getSetpoint()));
 
         var zc = new ZoneController(Set.of(z1, z2));
-        var start = atMidnightUTC();
+        var start = atDayStartUTC();
 
         var sequence1 = Flux
                 .just(
@@ -476,7 +476,7 @@ class ZoneControllerTest {
         var zc = new ZoneController(Set.of(z1));
 
         var sequence = Flux
-                .just(new Signal<Double, String>(atMidnightUTC(), 30.0));
+                .just(new Signal<Double, String>(atDayStartUTC(), 30.0));
 
         var flux1 = z1.compute(sequence);
         var flux2 = z2.compute(sequence);
@@ -594,7 +594,7 @@ class ZoneControllerTest {
 
         var zc = new ZoneController(Set.of(zoneGood, zoneBad));
 
-        var start = atMidnightUTC();
+        var start = atDayStartUTC();
 
         Sinks.Many<Signal<Double, String>> sinkGood = reactor.core.publisher.Sinks.many().multicast().onBackpressureBuffer();
         Sinks.Many<Signal<Double, String>> sinkBad = reactor.core.publisher.Sinks.many().multicast().onBackpressureBuffer();
@@ -696,7 +696,7 @@ class ZoneControllerTest {
 
         var zc = new ZoneController(Set.of(zoneGood, zoneBad));
 
-        var start = atMidnightUTC();
+        var start = atDayStartUTC();
 
         Sinks.Many<Signal<Double, String>> sinkGood = reactor.core.publisher.Sinks.many().multicast().onBackpressureBuffer();
         Sinks.Many<Signal<Double, String>> sinkBad = reactor.core.publisher.Sinks.many().multicast().onBackpressureBuffer();
