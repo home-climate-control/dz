@@ -66,12 +66,11 @@ public abstract class AbsoluteIncrementAdapter<T extends Comparable<T>> {
         return Flux.just(diff(temp, snapshot));
     }
 
-    /**
-     * Determine if the given snapshot is a terminator of a monotonous sequence.
-     */
     protected abstract boolean isZero(T snapshot);
 
     /**
+     * Determine if the given snapshot is a terminator of a monotonous sequence.
+     *
      * @return {@code true} if {@code lastKnown} < {@code snapshot}.
      */
     protected abstract boolean isMonotonous(T lastKnown, T snapshot);

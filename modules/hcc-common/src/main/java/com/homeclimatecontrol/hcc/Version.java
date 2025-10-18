@@ -1,8 +1,9 @@
 package com.homeclimatecontrol.hcc;
 
 /**
+ * Class to denote well known versions.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public final class Version {
     /**

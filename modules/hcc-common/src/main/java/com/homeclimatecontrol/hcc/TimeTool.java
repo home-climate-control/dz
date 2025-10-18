@@ -3,9 +3,16 @@ package com.homeclimatecontrol.hcc;
 import java.time.Instant;
 import java.util.TimeZone;
 
+/**
+ * Time manipulation utilities.
+ *
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
+ */
 public class TimeTool {
 
     /**
+     * Get the midnight.
+     *
      * @return Instant at midnight of the current day.
      */
     public static Instant atMidnightUTC() {
