@@ -16,7 +16,10 @@ import reactor.core.publisher.FluxSink;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -24,7 +27,7 @@ import java.util.UUID;
 /**
  * Command to rescan the 1-Wire network.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
  */
 public class OneWireCommandRescan extends OneWireCommand {
 
@@ -55,9 +58,9 @@ public class OneWireCommandRescan extends OneWireCommand {
 
     private void rescan(DSPortAdapter adapter, FluxSink<DriverNetworkEvent> eventSink,
                         OWPath path,
-                        TreeMap<String, OneWireContainer> address2device,
-                        TreeMap<String, OWPath> address2path,
-                        TreeSet<String> known,
+                        SortedMap<String, OneWireContainer> address2device,
+                        SortedMap<String, OWPath> address2path,
+                        SortedSet<String> known,
                         int depth) throws OneWireException {
 
         var logMarker = "rescan^" + depth + "(" + path + ")";
@@ -124,14 +127,14 @@ public class OneWireCommandRescan extends OneWireCommand {
 
     }
 
-    private void checkArrival(TreeSet<String> known, String address, OneWireContainer owc, OWPath path, FluxSink<DriverNetworkEvent> eventSink) {
+    private void checkArrival(SortedSet<String> known, String address, OneWireContainer owc, OWPath path, FluxSink<DriverNetworkEvent> eventSink) {
         if (!known.contains(address)) {
             logger.warn("Arrived: {}", owc);
             eventSink.next(new OneWireNetworkArrival(Instant.now(), address, path));
         }
     }
 
-    private void checkDepartures(TreeSet<String> known, FluxSink<DriverNetworkEvent> eventSink) {
+    private void checkDepartures(SortedSet<String> known, FluxSink<DriverNetworkEvent> eventSink) {
         if (!known.isEmpty()) {
             for (var address : known) {
                 logger.warn("Departed: {}", address);
@@ -140,7 +143,7 @@ public class OneWireCommandRescan extends OneWireCommand {
         }
     }
 
-    private void checkLanCoupler(OneWireContainer owc, OWPath path, ArrayList<OWPath> branches) {
+    private void checkLanCoupler(OneWireContainer owc, OWPath path, List<OWPath> branches) {
 
         if (!(owc instanceof OneWireContainer1F)) {
             return;
