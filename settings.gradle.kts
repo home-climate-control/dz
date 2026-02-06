@@ -5,6 +5,8 @@ plugins {
 
 rootProject.name = "dz3-master"
 
+includeBuild("build-logic")
+
 // External dependencies
 
 includeBuild("submodules/automation-hat-driver")
