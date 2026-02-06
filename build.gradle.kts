@@ -24,10 +24,6 @@ sonarqube {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 doctor {
     javaHome {
         // Build breaks in IntelliJ IDEA on macOS even if JAVA_HOME is set correctly
@@ -70,10 +66,6 @@ subprojects {
             xml.required.set(true)
             html.required.set(true)
         }
-    }
-
-    repositories {
-        mavenCentral()
     }
 
     dependencies {
