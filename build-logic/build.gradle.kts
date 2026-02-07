@@ -10,5 +10,6 @@ repositories {
 }
 
 dependencies {
+    // VT: NOTE: Search the codebase for import org.gradle.accessors.dm.LibrariesForLibs to see the rationale for this
     implementation(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
 }
