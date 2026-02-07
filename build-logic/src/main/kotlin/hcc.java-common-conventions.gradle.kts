@@ -15,6 +15,14 @@ java {
     }
 }
 
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("--should-stop=ifError=FLOW")
+}
+
+tasks.named<JavaCompile>("compileTestJava") {
+    options.compilerArgs.add("--should-stop=ifError=FLOW")
+}
+
 dependencies {
 
     testImplementation(libs.assertj.core)

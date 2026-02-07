@@ -35,7 +35,6 @@ doctor {
 subprojects {
 
     apply(plugin = "java")
-    apply(plugin = "maven-publish")
     apply(plugin = "jacoco")
     apply(plugin = rootProject.libs.plugins.errorprone.get().pluginId)
 
@@ -44,16 +43,6 @@ subprojects {
 
     jacoco {
         toolVersion = rootProject.libs.versions.jacoco.get()
-    }
-
-    tasks.compileJava {
-        options.release = 17
-        options.compilerArgs.add("--should-stop=ifError=FLOW")
-    }
-
-    tasks.compileTestJava {
-        options.release = 17
-        options.compilerArgs.add("--should-stop=ifError=FLOW")
     }
 
     tasks.test {
