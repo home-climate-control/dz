@@ -34,31 +34,9 @@ doctor {
 
 subprojects {
 
-    apply(plugin = "java")
-    apply(plugin = "jacoco")
     apply(plugin = rootProject.libs.plugins.errorprone.get().pluginId)
-
-    jacoco {
-        toolVersion = rootProject.libs.versions.jacoco.get()
-    }
-
-    tasks.test {
-        finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-    }
-
-    tasks.jacocoTestReport {
-        dependsOn(tasks.test) // tests are required to run before generating the report
-        reports {
-            xml.required.set(true)
-            html.required.set(true)
-        }
-    }
 
     dependencies {
         errorprone(rootProject.libs.errorprone)
-    }
-
-    tasks.test {
-        useJUnitPlatform()
     }
 }
