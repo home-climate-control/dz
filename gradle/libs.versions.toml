@@ -83,7 +83,6 @@ quarkus-arc = { module = "io.quarkus:quarkus-arc" }
 quarkus-config-yaml = { module = "io.quarkus:quarkus-config-yaml" }
 quarkus-rest = { module = "io.quarkus:quarkus-rest" }
 quarkus-junit5 = { module = "io.quarkus:quarkus-junit5" }
-rest-assured = { module = "io.rest-assured:rest-assured" }
 
 # Spring
 
