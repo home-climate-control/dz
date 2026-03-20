@@ -73,26 +73,27 @@ public abstract class ApplicationBase<C> {
         // Once in a blue moon, this code fails to read git.properties. Likely a race condition, not an excuse to start up.
         // Besides, it's not on a critical path so we can do it in the background.
 
-        new Thread(() -> {
+        new Thread(this::reportGitPropertiesSync).start();
+    }
 
-            ThreadContext.push("git.properties");
+    private void reportGitPropertiesSync() {
 
-            try {
-                var p = GitProperties.get();
+        ThreadContext.push("git.properties");
 
-                logger.debug("git.branch={}", p.get("git.branch"));
-                logger.debug("git.commit.id={}", p.get("git.commit.id"));
-                logger.debug("git.commit.id.abbrev={}", p.get("git.commit.id.abbrev"));
-                logger.debug("git.commit.id.describe={}", p.get("git.commit.id.describe"));
-                logger.debug("git.build.version={}", p.get("git.build.version"));
+        try {
+            var p = GitProperties.get();
 
-            } catch (IOException ex) {
-                logger.error("Failed to read Git properties", ex);
-            } finally {
-                ThreadContext.pop();
-            }
+            logger.debug("git.branch={}", p.get("git.branch"));
+            logger.debug("git.commit.id={}", p.get("git.commit.id"));
+            logger.debug("git.commit.id.abbrev={}", p.get("git.commit.id.abbrev"));
+            logger.debug("git.commit.id.describe={}", p.get("git.commit.id.describe"));
+            logger.debug("git.build.version={}", p.get("git.build.version"));
 
-        }).start();
+        } catch (IOException ex) {
+            logger.error("Failed to read Git properties", ex);
+        } finally {
+            ThreadContext.pop();
+        }
     }
 
     /**
@@ -121,6 +122,10 @@ public abstract class ApplicationBase<C> {
             sleepUntilKilled(context);
 
         } finally {
+
+            // Turns out, it's useful to know which revision ran when looking at the logs months later, so let's report that.
+            // This set of log records will be the last one before the "Shut down" entry at ERROR level.
+            reportGitPropertiesSync();
             logger.fatal("Shut down");
             m.close();
         }
