@@ -18,6 +18,7 @@ import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -73,10 +74,10 @@ public abstract class ApplicationBase<C> {
         // Once in a blue moon, this code fails to read git.properties. Likely a race condition, not an excuse to start up.
         // Besides, it's not on a critical path so we can do it in the background.
 
-        new Thread(this::reportGitPropertiesSync).start();
+        new Thread(() -> reportGitPropertiesSync("started")).start();
     }
 
-    private void reportGitPropertiesSync() {
+    private void reportGitPropertiesSync(String qualifier) {
 
         ThreadContext.push("git.properties");
 
@@ -89,10 +90,46 @@ public abstract class ApplicationBase<C> {
             logger.debug("git.commit.id.describe={}", p.get("git.commit.id.describe"));
             logger.debug("git.build.version={}", p.get("git.build.version"));
 
+            touchRevisionMarker((String) p.get("git.commit.id"), qualifier);
+
         } catch (IOException ex) {
             logger.error("Failed to read Git properties", ex);
         } finally {
             ThreadContext.pop();
+        }
+    }
+
+    private void touchRevisionMarker(String revision, String qualifier) {
+
+        try {
+
+            var versionsDir = new File(AppHome.getHome(), "versions");
+
+            if (!versionsDir.exists() && !versionsDir.mkdirs()) {
+                logger.error("Failed to create: {}, no revision marker will be created", versionsDir);
+                return;
+            }
+
+            if (!versionsDir.canWrite()) {
+                logger.error("Not writable: {}, no revision marker will be created", versionsDir);
+                return;
+            }
+
+            var marker = new File(versionsDir, revision + "." + qualifier);
+
+            // Need the marker file to reflect the last invocation timestamp, so deleting it if it exists
+            marker.delete();
+
+            if (!marker.createNewFile()) {
+                // No exception thrown, the user will have to figure it out
+                logger.error("Failed to create revision marker {}, you need to investigate the cause (check permissions?)", marker.getAbsolutePath());
+                return;
+            }
+
+            logger.debug("Created revision marker {}", marker.getAbsolutePath());
+
+        } catch (IOException ex) {
+            logger.error("Failed to read Git properties", ex);
         }
     }
 
@@ -125,7 +162,7 @@ public abstract class ApplicationBase<C> {
 
             // Turns out, it's useful to know which revision ran when looking at the logs months later, so let's report that.
             // This set of log records will be the last one before the "Shut down" entry at ERROR level.
-            reportGitPropertiesSync();
+            reportGitPropertiesSync("stopped");
             logger.fatal("Shut down");
             m.close();
         }
