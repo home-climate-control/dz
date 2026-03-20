@@ -1,5 +1,6 @@
 plugins {
-    id("buildlogic.java-common-conventions")
+    id("hcc.java-common-conventions")
+    id("hcc.reactor-conventions")
 }
 
 dependencies {

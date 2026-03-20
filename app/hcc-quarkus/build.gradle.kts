@@ -5,11 +5,15 @@ plugins {
 
     java
     alias(libs.plugins.quarkus.plugin)
+    id("hcc.java-common-conventions")
+    id("hcc.quarkus-conventions")
 }
 
 dependencies {
 
     implementation(libs.jackson.databind)
+    implementation(libs.mapstruct)
+    annotationProcessor(libs.mapstruct.processor)
 
     implementation(project(":modules:hcc-bootstrap"))
     implementation(project(":modules:hcc-director"))
@@ -41,24 +45,4 @@ dependencies {
 
     // Enable Raspberry Pi specific hardware integration
     runtimeOnly(project(":modules:hcc-raspberry-pi"))
-
-    testImplementation(libs.rest.assured)
-    testImplementation(libs.assertj.core)
-}
-
-// Quarkus additions
-dependencies {
-
-    implementation(enforcedPlatform(libs.quarkus.bom))
-    implementation(libs.quarkus.arc)
-    implementation(libs.quarkus.config.yaml)
-    implementation(libs.quarkus.rest)
-    testImplementation(libs.quarkus.junit5)
-}
-
-// Mapstruct
-dependencies {
-
-    implementation(libs.mapstruct)
-    annotationProcessor(libs.mapstruct.processor)
 }

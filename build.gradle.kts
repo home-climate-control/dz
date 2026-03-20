@@ -1,7 +1,5 @@
 plugins {
-    java
-    `maven-publish`
-    jacoco
+
     alias(libs.plugins.errorprone)
     alias(libs.plugins.sonarqube)
     alias(libs.plugins.git.properties) apply false
@@ -9,6 +7,8 @@ plugins {
     alias(libs.plugins.spring.boot) apply false
     alias(libs.plugins.spring.dependency.management) apply false
 
+    // These two go together; "java" can't be removed without Quarkus failing
+    java
     alias(libs.plugins.quarkus.plugin) apply false
 
     alias(libs.plugins.gradle.versions)
@@ -24,10 +24,6 @@ sonarqube {
     }
 }
 
-repositories {
-    mavenCentral()
-}
-
 doctor {
     javaHome {
         // Build breaks in IntelliJ IDEA on macOS even if JAVA_HOME is set correctly
@@ -38,49 +34,9 @@ doctor {
 
 subprojects {
 
-    apply(plugin = "java")
-    apply(plugin = "maven-publish")
-    apply(plugin = "jacoco")
     apply(plugin = rootProject.libs.plugins.errorprone.get().pluginId)
-
-    group = "net.sf.dz3"
-    version = "4.5.0-SNAPSHOT"
-
-    jacoco {
-        toolVersion = rootProject.libs.versions.jacoco.get()
-    }
-
-    tasks.compileJava {
-        options.release = 17
-        options.compilerArgs.add("--should-stop=ifError=FLOW")
-    }
-
-    tasks.compileTestJava {
-        options.release = 17
-        options.compilerArgs.add("--should-stop=ifError=FLOW")
-    }
-
-    tasks.test {
-        finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
-    }
-
-    tasks.jacocoTestReport {
-        dependsOn(tasks.test) // tests are required to run before generating the report
-        reports {
-            xml.required.set(true)
-            html.required.set(true)
-        }
-    }
-
-    repositories {
-        mavenCentral()
-    }
 
     dependencies {
         errorprone(rootProject.libs.errorprone)
-    }
-
-    tasks.test {
-        useJUnitPlatform()
     }
 }
