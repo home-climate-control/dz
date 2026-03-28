@@ -11,6 +11,12 @@ It would be a good idea to take a look at [Zigbee2MQTT Supported Devices](https:
 
 * Working [Zigbee2MQTT](https://www.zigbee2mqtt.io/) installation.
 
+## DO NOT USE
+
+* [Aqara Temperature and Humidity Sensor, a.k.a. Xiaomi WSDCGQ11LM](https://www.zigbee2mqtt.io/devices/WSDCGQ11LM.html) - while there's nothing wrong with this device per se,
+it is not configurable and is absolutely unfit to produce acceptable control quality. To give you a rough idea, 24 hours of measurements produced samples with time gaps of
+average value of around 890 seconds (almost 15 minutes), median value of 760 seconds, and standard deviation of about 760 seconds.
+
 ## Recommended
 
 * [Sonoff SNZB-02](https://www.zigbee2mqtt.io/devices/SNZB-02_EFEKTA.html) - excellent battery life even when configured for short poll interval.
