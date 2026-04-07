@@ -60,9 +60,8 @@ class PidEconomizerTest {
                         new EconomizerSettings(
                                 0,
                                 20,
-                                true, 1.0
+                                1.0, 1.0
                         )
-
                 ),
                 ambientFlux,
                 hvac,

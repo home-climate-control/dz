@@ -38,7 +38,7 @@ class SettingsParserYamlTest {
                         22d,
                         null,
                         null,
-                        new EconomizerSettingsYaml(2d, 20d, true, 1.0)
+                        new EconomizerSettingsYaml(2d, 20d, 1.0, 1.0, null)
                 ),
                 new SettingsParser.ZoneSettingsYaml(
                         null,
