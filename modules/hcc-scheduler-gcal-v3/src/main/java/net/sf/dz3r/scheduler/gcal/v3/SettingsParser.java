@@ -339,6 +339,7 @@ public class SettingsParser {
                 Double targetTemperature,
                 Double hvacHandoffFactor,
                 Double maxPower,
+                @Deprecated
                 Boolean keepHvacOn
         ) {
 
