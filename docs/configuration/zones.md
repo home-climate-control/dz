@@ -42,7 +42,7 @@ Best explained by example:
         settings:
             changeover-delta: 1
             target-temperature: 22
-            keep-hvac-on: true
+            hvac-handoff-factor: 0.8
 ```
 
 ### id
@@ -94,7 +94,8 @@ Cooling mode assumed:
 * `settings`: This section is optional. If missing, it is assumed that the [schedule](./schedule.md) will take care of configuring economizer settings dynamically.
   * `changeover-delta`: ambient temperature has to be this much lower than indoors for the economizer to start working (subject to PID configuration). Surprisingly, a value of 0 works well due to [PID control magic](https://en.wikipedia.org/wiki/Proportional%E2%80%93integral%E2%80%93derivative_controller).
   * `target-temperature`: shut the economizer off when indoor temperature drops to this value.
-  * `keep-hvac-on`: set to `true` if you want the main HVAC to be still working when the economizer is active (maximum comfort), and to `false` if you want to stop it (maximum cost savings).
+  * `hvac-handoff-factor`: set to `1.0` if you want the main HVAC to be still working when the economizer is active (maximum comfort), and to `0.0` if you want to stop it (maximum cost savings).
+  Values in between will cause the HVAC unit to switch later than it otherwise would.
 
 #### controller
 Economizer PID controller. `p` and `i` values are always positive, regardless of the mode.

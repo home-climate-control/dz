@@ -32,7 +32,8 @@ dump-priority: integer number # optional, defaults to 0
 economizer: # optional section, defaults to "not present"
   changeover-delta: decimal number # mandatory
   target-temperature: decimal number # mandatory
-  keep-hvac-on: true | false # optional, defaults to true
+  keep-hvac-on: deprecated, superseded by hvac-handoff-factor
+  hvac-handoff-factor: decimal number between 0 and 1 # optional, defaults to 1
   max-power: decimal number between 0 and 1 # optional, defaults to 1
 ```
 
@@ -40,7 +41,7 @@ economizer: # optional section, defaults to "not present"
 
 The value of `true` mean that the zone is ON during this period. This is the default behavior.
 
-The value of `false`` mean that the zone is OFF during this period. You have to explicitly specify this.
+The value of `false`` means that the zone is OFF during this period. You have to explicitly specify this.
 
 Setpoint value is ignored for a disabled zone, to make it easier to do one-off edits. However, it is still required.
 
@@ -71,9 +72,13 @@ When this temperature is reached, the economizer is shut off.
 
 ### economizer.keep-hvac-on
 
-The value of `true` means that the main HVAC unit for this zone will be kept on even if the economizer is on. This maximizes comfort.
+Deprecated in favor of [hvac-handoff-factor](#economizerhvac-handoff-factor).
 
-The value of `false` means that when the conditions are suitable for the economizer to turn on, the main HVAC unit will be kept off. This maximizes energy savings.
+### economizer.hvac-handoff-factor
+
+Supersedes [keep-hvac-on](#economizerkeep-hvac-on), and overrides it if both are present. The acceptable range is 0 to 1; 0 means that the economizer will always keep the HVAC unit off when it is on,
+1 means that the economizer will not interfere with the HVAC unit's operation, and values in between will proportionally suppress HVAC unit operation (the lower it is, the later
+the HVAC unit will be turned on).
 
 ### economizer.max-power
 
