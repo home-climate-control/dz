@@ -176,7 +176,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
 
         if (keepHvacOn != null) {
             logger.warn("{}: 'keep-hvac-on' is deprecated, replace with 'hvac-handoff-factor' (true→1.0, false→0.0)", zoneName);
-            return Boolean.TRUE.equals(keepHvacOn) ? 1.0 : 0.0;
+            return keepHvacOn ? 1.0 : 0.0;
         }
 
         return null;
