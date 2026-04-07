@@ -33,7 +33,7 @@ import static java.lang.Boolean.TRUE;
 /**
  * Common implementation for all economizer classes.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public abstract class AbstractEconomizer implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
 
@@ -467,38 +467,15 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         var hvacHandoffFactor = config.settings.getHvacHandoffFactor();
 
-        if (hvacHandoffFactor >= 1.0) {
-
-            // No suppression; HVAC passes through unchanged
-            logger.debug("{}: hvacHandoffFactor={}, not suppressing HVAC", getAddress(), hvacHandoffFactor);
-            return augmentedSource;
-        }
-
-        if (hvacHandoffFactor <= 0.0) {
-
-            // Full suppression; HVAC is off
-            logger.debug("{}: hvacHandoffFactor={}, fully suppressing HVAC", getAddress(), hvacHandoffFactor);
-            var adjusted = new ZoneStatus(
-                    zoneSettings.settings(),
-                    new CallingStatus(null, 0, false),
-                    economizerStatus,
-                    zoneSettings.periodSettings());
-
-            return new Signal<>(
-                    source.timestamp(),
-                    adjusted,
-                    source.payload(),
-                    source.status(),
-                    source.error());
-        }
-
-        // Proportional: scale HVAC demand by the factor, economizer carries the remainder
+        // Scale HVAC demand by the factor, economizer carries the remainder
         var original = zoneSettings.callingStatus();
-        logger.debug("{}: hvacHandoffFactor={}, scaling HVAC demand {} → {}",
-                getAddress(), hvacHandoffFactor, original.demand(), original.demand() * hvacHandoffFactor);
+        var adjustedDemand = original.demand() * hvacHandoffFactor;
+
+        logger.debug("{}: hvacHandoffFactor={}, scaling HVAC demand {} => {}",
+                getAddress(), hvacHandoffFactor, original.demand(), adjustedDemand);
         var adjusted = new ZoneStatus(
                 zoneSettings.settings(),
-                new CallingStatus(original.sample(), original.demand() * hvacHandoffFactor, original.calling()),
+                new CallingStatus(original.sample(), adjustedDemand, original.calling() && adjustedDemand > 0),
                 economizerStatus,
                 zoneSettings.periodSettings());
 
