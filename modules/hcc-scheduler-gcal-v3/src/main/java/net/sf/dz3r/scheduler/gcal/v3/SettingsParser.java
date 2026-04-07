@@ -160,10 +160,16 @@ public class SettingsParser {
             return null;
         }
 
+        var handoffFactor = source.hvacHandoffFactor;
+        if (handoffFactor == null && source.keepHvacOn != null) {
+            logger.warn("'keep-hvac-on' is deprecated in economizer settings, replace with 'hvac-handoff-factor' (true→1.0, false→0.0)");
+            handoffFactor = source.keepHvacOn ? 1.0 : 0.0;
+        }
+
         return new EconomizerSettings(
                 source.changeoverDelta,
                 source.targetTemperature,
-                source.hvacHandoffFactor,
+                handoffFactor,
                 source.maxPower
         );
     }
@@ -332,7 +338,8 @@ public class SettingsParser {
                 Double changeoverDelta,
                 Double targetTemperature,
                 Double hvacHandoffFactor,
-                Double maxPower
+                Double maxPower,
+                Boolean keepHvacOn
         ) {
 
         }

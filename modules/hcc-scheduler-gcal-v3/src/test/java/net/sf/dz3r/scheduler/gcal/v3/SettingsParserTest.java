@@ -169,7 +169,7 @@ class SettingsParserTest {
                             economizer:
                               changeover-delta: 2
                               target-temperature: 27
-                              hvac-handoff-factor: 1.5""",
+                              hvac-handoff-factor: 0.0""",
                         "Evening: everyone is at home",
                         null
                 ),
@@ -204,7 +204,7 @@ class SettingsParserTest {
                             economizer:
                               changeover-delta: 2
                               target-temperature: 27
-                              hvac-handoff-factor: 1.5""",
+                              hvac-handoff-factor: 0.0""",
                         "Sleep",
                         null
                 ),
@@ -215,7 +215,7 @@ class SettingsParserTest {
                             economizer:
                               changeover-delta: 2
                               target-temperature: 27
-                              hvac-handoff-factor: 1.5""",
+                              hvac-handoff-factor: 0.0""",
                         null,
                         "Can't parse period name out of event title '# Sleep at 28.6C' (empty text before '#')"
                 )

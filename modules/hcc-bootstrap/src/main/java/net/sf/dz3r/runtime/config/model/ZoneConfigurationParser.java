@@ -131,7 +131,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                                 .map(settings -> new EconomizerSettings(
                                         settings.changeoverDelta(),
                                         settings.targetTemperature(),
-                                        settings.hvacHandoffFactor(),
+                                        resolveHvacHandoffFactor(zoneName, settings.hvacHandoffFactor(), settings.keepHvacOn()),
                                         1.0))
                                 .orElse(null)
                 ),
@@ -159,6 +159,27 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                 Optional.ofNullable(source.hold()).orElse(false),
                 source.dumpPriority(),
                 economizerSettings);
+    }
+
+    /**
+     * Resolve the effective {@code hvacHandoffFactor}, handling the deprecated {@code keepHvacOn} fallback.
+     *
+     * <p>If {@code hvacHandoffFactor} is present it is used as-is. If only the deprecated {@code keepHvacOn}
+     * is present a WARN is logged and the value is mapped: {@code true} → {@code 1.0} (HVAC not suppressed),
+     * {@code false} → {@code 0.0} (HVAC fully suppressed).
+     */
+    private Double resolveHvacHandoffFactor(String zoneName, Double hvacHandoffFactor, Boolean keepHvacOn) {
+
+        if (hvacHandoffFactor != null) {
+            return hvacHandoffFactor;
+        }
+
+        if (keepHvacOn != null) {
+            logger.warn("{}: 'keep-hvac-on' is deprecated, replace with 'hvac-handoff-factor' (true→1.0, false→0.0)", zoneName);
+            return Boolean.TRUE.equals(keepHvacOn) ? 1.0 : 0.0;
+        }
+
+        return null;
     }
 
     private Range<Double> map(RangeConfig cf) {

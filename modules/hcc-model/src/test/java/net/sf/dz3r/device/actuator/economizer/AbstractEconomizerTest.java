@@ -100,14 +100,17 @@ class AbstractEconomizerTest {
     }
 
     /**
-     * Verify that when the economizer is active and HVAC demand is below the handoff factor, HVAC is suppressed.
+     * Verify HVAC suppression behaviour across the full range of {@link EconomizerSettings#hvacHandoffFactor()}.
      *
-     * Scenario: ambient conditions favour economizer, zone demands HVAC, but demand is below threshold.
-     * Expected: economizer on, HVAC off.
+     * <ul>
+     *   <li>factor = 0.0 → HVAC fully suppressed (economizer handles demand alone)</li>
+     *   <li>factor = 1.0 (or null default) → HVAC not suppressed (passes through unchanged)</li>
+     *   <li>0 &lt; factor &lt; 1 → HVAC demand scaled proportionally</li>
+     * </ul>
      */
     @ParameterizedTest
-    @MethodSource("hvacSuppressionBelowFactorProvider")
-    void hvacSuppressedBelowHandoffFactor(HvacSuppressionTestData source) {
+    @MethodSource("hvacHandoffFactorProvider")
+    void hvacHandoffFactorTest(HvacSuppressionTestData source) {
 
         var config = new EconomizerConfig(
                 HvacMode.COOLING,
@@ -132,34 +135,36 @@ class AbstractEconomizerTest {
 
         var zoneStatus = new ZoneStatus(
                 new com.homeclimatecontrol.hcc.model.ZoneSettings(25.0),
-                new CallingStatus(null, source.hvacDemand, true),
+                new CallingStatus(null, source.inputDemand, true),
                 null,
                 null);
 
         var input = new Signal<>(Instant.now(), zoneStatus, (String) null);
         var result = e.computeHvacSuppression(input);
 
-        assertThat(result.getValue().callingStatus().calling()).isEqualTo(source.expectHvacCalling);
+        assertThat(result.getValue().callingStatus().demand()).isEqualTo(source.expectedDemand);
+        assertThat(result.getValue().callingStatus().calling()).isEqualTo(source.expectedCalling);
     }
 
-    private static Stream<HvacSuppressionTestData> hvacSuppressionBelowFactorProvider() {
+    private static Stream<HvacSuppressionTestData> hvacHandoffFactorProvider() {
 
         return Stream.of(
-                // demand below factor: HVAC suppressed
-                new HvacSuppressionTestData(1.5, 0.8, false),
-                // demand equals factor: HVAC not suppressed
-                new HvacSuppressionTestData(1.5, 1.5, true),
-                // demand above factor: HVAC not suppressed
-                new HvacSuppressionTestData(1.5, 2.0, true),
-                // null factor (default MAX_VALUE): HVAC always suppressed
-                new HvacSuppressionTestData(null, 100.0, false)
+                // factor=0: HVAC fully suppressed regardless of demand
+                new HvacSuppressionTestData(0.0, 5.0, 0.0, false),
+                // factor=1: HVAC fully passed through, demand unchanged
+                new HvacSuppressionTestData(1.0, 5.0, 5.0, true),
+                // factor=null (defaults to 1.0): same as factor=1
+                new HvacSuppressionTestData(null, 5.0, 5.0, true),
+                // factor=0.5: HVAC demand scaled to half
+                new HvacSuppressionTestData(0.5, 4.0, 2.0, true)
         );
     }
 
     private record HvacSuppressionTestData(
             Double hvacHandoffFactor,
-            double hvacDemand,
-            boolean expectHvacCalling) {
+            double inputDemand,
+            double expectedDemand,
+            boolean expectedCalling) {
     }
 
     private static class TestEconomizer extends AbstractEconomizer {

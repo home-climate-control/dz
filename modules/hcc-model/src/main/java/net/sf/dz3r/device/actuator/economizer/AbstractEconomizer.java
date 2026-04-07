@@ -466,20 +466,39 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         }
 
         var hvacHandoffFactor = config.settings.getHvacHandoffFactor();
-        var demand = Math.abs(zoneSettings.callingStatus().demand());
 
-        if (demand >= hvacHandoffFactor) {
+        if (hvacHandoffFactor >= 1.0) {
 
-            // HVAC demand exceeds the handoff threshold; let HVAC run alongside the economizer
-            logger.debug("{}: HVAC demand {} >= handoff factor {}, not suppressing HVAC", getAddress(), demand, hvacHandoffFactor);
+            // No suppression; HVAC passes through unchanged
+            logger.debug("{}: hvacHandoffFactor={}, not suppressing HVAC", getAddress(), hvacHandoffFactor);
             return augmentedSource;
         }
 
-        // Economizer can handle this level of demand; suppress HVAC
-        logger.debug("{}: HVAC demand {} < handoff factor {}, suppressing HVAC", getAddress(), demand, hvacHandoffFactor);
+        if (hvacHandoffFactor <= 0.0) {
+
+            // Full suppression; HVAC is off
+            logger.debug("{}: hvacHandoffFactor={}, fully suppressing HVAC", getAddress(), hvacHandoffFactor);
+            var adjusted = new ZoneStatus(
+                    zoneSettings.settings(),
+                    new CallingStatus(null, 0, false),
+                    economizerStatus,
+                    zoneSettings.periodSettings());
+
+            return new Signal<>(
+                    source.timestamp(),
+                    adjusted,
+                    source.payload(),
+                    source.status(),
+                    source.error());
+        }
+
+        // Proportional: scale HVAC demand by the factor, economizer carries the remainder
+        var original = zoneSettings.callingStatus();
+        logger.debug("{}: hvacHandoffFactor={}, scaling HVAC demand {} → {}",
+                getAddress(), hvacHandoffFactor, original.demand(), original.demand() * hvacHandoffFactor);
         var adjusted = new ZoneStatus(
                 zoneSettings.settings(),
-                new CallingStatus(null, 0, false),
+                new CallingStatus(original.sample(), original.demand() * hvacHandoffFactor, original.calling()),
                 economizerStatus,
                 zoneSettings.periodSettings());
 

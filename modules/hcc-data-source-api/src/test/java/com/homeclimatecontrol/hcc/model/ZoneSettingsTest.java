@@ -128,7 +128,7 @@ class ZoneSettingsTest {
                                 new EconomizerSettings(
                                         2d,
                                         22d,
-                                        true,
+                                        1.0,
                                         1d
                                 )
                         ),
