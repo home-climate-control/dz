@@ -18,7 +18,7 @@ public record EconomizerConfig(
     public record Settings(
             double changeoverDelta,
             double targetTemperature,
-            Boolean keepHvacOn
+            Double hvacHandoffFactor
     ) {
 
     }

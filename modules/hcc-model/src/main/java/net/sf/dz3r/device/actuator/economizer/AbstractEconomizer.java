@@ -465,13 +465,18 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             return augmentedSource;
         }
 
-        if (config.settings.isKeepHvacOn()) {
+        var hvacHandoffFactor = config.settings.getHvacHandoffFactor();
+        var demand = Math.abs(zoneSettings.callingStatus().demand());
 
-            // We're feeding indoor air to HVAC air return, right?
+        if (demand >= hvacHandoffFactor) {
+
+            // HVAC demand exceeds the handoff threshold; let HVAC run alongside the economizer
+            logger.debug("{}: HVAC demand {} >= handoff factor {}, not suppressing HVAC", getAddress(), demand, hvacHandoffFactor);
             return augmentedSource;
         }
 
-        // Need to suppress demand and keep the HVAC off while the economizer is on
+        // Economizer can handle this level of demand; suppress HVAC
+        logger.debug("{}: HVAC demand {} < handoff factor {}, suppressing HVAC", getAddress(), demand, hvacHandoffFactor);
         var adjusted = new ZoneStatus(
                 zoneSettings.settings(),
                 new CallingStatus(null, 0, false),
@@ -484,6 +489,13 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 source.payload(),
                 source.status(),
                 source.error());
+    }
+
+    /**
+     * Set the actuator state directly. For testing only.
+     */
+    void setActuatorState(Boolean state) {
+        this.actuatorState = state;
     }
 
     @Override

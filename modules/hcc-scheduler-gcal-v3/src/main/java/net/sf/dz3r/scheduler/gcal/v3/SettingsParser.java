@@ -163,7 +163,7 @@ public class SettingsParser {
         return new EconomizerSettings(
                 source.changeoverDelta,
                 source.targetTemperature,
-                source.keepHvacOn,
+                source.hvacHandoffFactor,
                 source.maxPower
         );
     }
@@ -331,7 +331,7 @@ public class SettingsParser {
         public record EconomizerSettingsYaml(
                 Double changeoverDelta,
                 Double targetTemperature,
-                Boolean keepHvacOn,
+                Double hvacHandoffFactor,
                 Double maxPower
         ) {
 

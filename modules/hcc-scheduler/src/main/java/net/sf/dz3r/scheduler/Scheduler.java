@@ -161,7 +161,7 @@ public class Scheduler {
                                 .map(s -> new EconomizerSettings(
                                         s.changeoverDelta(),
                                         s.targetTemperature(),
-                                        s.isKeepHvacOn(),
+                                        s.hvacHandoffFactor(),
                                         s.getMaxPower()
                                 ))
                                 .orElse(null)

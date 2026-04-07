@@ -10,9 +10,9 @@ import java.util.Optional;
  *
  * @param changeoverDelta Temperature difference between indoor and outdoor temperature necessary to turn the device on.
  * @param targetTemperature When this temperature is reached, the device is shut off.
- * @param keepHvacOn {@code true} means that turning on the device will NOT turn the HVAC off.
- *   You probably want to keep this at {@code false}, unless the indoor temperature is measured at HVAC return
- *   and fresh air is injected into HVAC return.
+ * @param hvacHandoffFactor HVAC demand threshold at which the HVAC is turned on regardless of whether the economizer is on.
+ *   When {@code null}, the economizer suppresses the HVAC entirely while active.
+ *   A value of {@code 0} means HVAC is always on alongside the economizer.
  * @param maxPower Max power to deliver to the HVAC unit when the economizer is on; 1 is full, 0 is off (not very useful).
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
@@ -21,11 +21,11 @@ import java.util.Optional;
 public record EconomizerSettings(
         double changeoverDelta,
         double targetTemperature,
-        Boolean keepHvacOn,
+        Double hvacHandoffFactor,
         Double maxPower
 ) {
 
-    public EconomizerSettings(double changeoverDelta, double targetTemperature, Boolean keepHvacOn, Double maxPower) {
+    public EconomizerSettings(double changeoverDelta, double targetTemperature, Double hvacHandoffFactor, Double maxPower) {
 
         if (changeoverDelta < 0) {
             throw new IllegalArgumentException("changeoverDelta must be non-negative");
@@ -35,18 +35,27 @@ public record EconomizerSettings(
             throw new IllegalArgumentException("maxPower must be in range ]0,1]");
         }
 
+        if (hvacHandoffFactor != null && (hvacHandoffFactor.isInfinite() || hvacHandoffFactor.isNaN() || hvacHandoffFactor < 0)) {
+            throw new IllegalArgumentException("hvacHandoffFactor must be non-negative");
+        }
+
         this.changeoverDelta = changeoverDelta;
         this.targetTemperature = targetTemperature;
-        this.keepHvacOn = keepHvacOn;
+        this.hvacHandoffFactor = hvacHandoffFactor;
         this.maxPower = maxPower;
     }
 
     public EconomizerSettings(EconomizerSettings source) {
-        this(source.changeoverDelta(), source.targetTemperature(), source.keepHvacOn(), source.maxPower());
+        this(source.changeoverDelta(), source.targetTemperature(), source.hvacHandoffFactor(), source.maxPower());
     }
 
-    public final boolean isKeepHvacOn() {
-        return Optional.ofNullable(keepHvacOn).orElse(true);
+    /**
+     * Get the effective HVAC handoff factor.
+     *
+     * @return The configured threshold, or {@link Double#MAX_VALUE} when unconfigured (HVAC fully suppressed).
+     */
+    public final double getHvacHandoffFactor() {
+        return Optional.ofNullable(hvacHandoffFactor).orElse(Double.MAX_VALUE);
     }
 
     public final double getMaxPower() {
@@ -68,7 +77,7 @@ public record EconomizerSettings(
 
         return Double.compare(changeoverDelta, other.changeoverDelta) == 0
                 && Double.compare(targetTemperature, other.targetTemperature) == 0
-                && isKeepHvacOn() == other.isKeepHvacOn()
+                && Double.compare(getHvacHandoffFactor(), other.getHvacHandoffFactor()) == 0
                 && Double.compare(getMaxPower(), other.getMaxPower()) == 0;
     }
 }

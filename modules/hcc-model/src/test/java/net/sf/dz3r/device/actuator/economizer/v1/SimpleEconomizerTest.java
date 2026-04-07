@@ -44,7 +44,7 @@ class SimpleEconomizerTest {
                 new EconomizerSettings(
                         2.0,
                         10.0,
-                        false,
+                        null,
                         1.0
                 ));
 

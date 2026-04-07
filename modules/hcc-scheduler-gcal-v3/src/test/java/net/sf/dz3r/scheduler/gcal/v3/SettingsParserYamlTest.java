@@ -119,7 +119,7 @@ class SettingsParserYamlTest {
                         economizer:
                           changeover-delta: 2
                           target-temperature: 27
-                          keep-hvac-on: false"""
+                          hvac-handoff-factor: 1.5"""
         );
     }
 
@@ -130,7 +130,7 @@ class SettingsParserYamlTest {
                         economizer:
                         \u00A0 changeover-delta: 3
                         \u00A0 target-temperature: 25
-                        \u00A0 keep-hvac-on: false"""
+                        \u00A0 hvac-handoff-factor: 1.5"""
 
         );
     }

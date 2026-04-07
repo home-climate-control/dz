@@ -131,7 +131,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                                 .map(settings -> new EconomizerSettings(
                                         settings.changeoverDelta(),
                                         settings.targetTemperature(),
-                                        settings.keepHvacOn(),
+                                        settings.hvacHandoffFactor(),
                                         1.0))
                                 .orElse(null)
                 ),
