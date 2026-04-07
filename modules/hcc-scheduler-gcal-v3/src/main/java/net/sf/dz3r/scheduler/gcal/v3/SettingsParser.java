@@ -162,8 +162,8 @@ public class SettingsParser {
 
         var handoffFactor = source.hvacHandoffFactor;
         if (handoffFactor == null && source.keepHvacOn != null) {
-            logger.warn("'keep-hvac-on' is deprecated in economizer settings, replace with 'hvac-handoff-factor' (true→1.0, false→0.0)");
             handoffFactor = source.keepHvacOn ? 1.0 : 0.0;
+            logger.warn("keep-hvac-on={} is deprecated, replace with hvac-handoff-factor={}", source.keepHvacOn, handoffFactor);
         }
 
         return new EconomizerSettings(
