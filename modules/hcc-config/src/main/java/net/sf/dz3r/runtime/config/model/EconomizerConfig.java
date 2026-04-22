@@ -18,6 +18,8 @@ public record EconomizerConfig(
     public record Settings(
             double changeoverDelta,
             double targetTemperature,
+            Double hvacHandoffFactor,
+            @Deprecated
             Boolean keepHvacOn
     ) {
 

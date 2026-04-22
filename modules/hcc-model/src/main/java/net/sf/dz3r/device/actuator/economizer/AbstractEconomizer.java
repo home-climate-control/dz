@@ -33,7 +33,7 @@ import static java.lang.Boolean.TRUE;
 /**
  * Common implementation for all economizer classes.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public abstract class AbstractEconomizer implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
 
@@ -465,16 +465,17 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             return augmentedSource;
         }
 
-        if (config.settings.isKeepHvacOn()) {
+        var hvacHandoffFactor = config.settings.getHvacHandoffFactor();
 
-            // We're feeding indoor air to HVAC air return, right?
-            return augmentedSource;
-        }
+        // Scale HVAC demand by the factor, economizer carries the remainder
+        var original = zoneSettings.callingStatus();
+        var adjustedDemand = original.demand() * hvacHandoffFactor;
 
-        // Need to suppress demand and keep the HVAC off while the economizer is on
+        logger.debug("{}: hvacHandoffFactor={}, scaling HVAC demand {} => {}",
+                getAddress(), hvacHandoffFactor, original.demand(), adjustedDemand);
         var adjusted = new ZoneStatus(
                 zoneSettings.settings(),
-                new CallingStatus(null, 0, false),
+                new CallingStatus(original.sample(), adjustedDemand, original.calling() && adjustedDemand > 0),
                 economizerStatus,
                 zoneSettings.periodSettings());
 
@@ -484,6 +485,13 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 source.payload(),
                 source.status(),
                 source.error());
+    }
+
+    /**
+     * Set the actuator state directly. For testing only.
+     */
+    void setActuatorState(Boolean state) {
+        this.actuatorState = state;
     }
 
     @Override

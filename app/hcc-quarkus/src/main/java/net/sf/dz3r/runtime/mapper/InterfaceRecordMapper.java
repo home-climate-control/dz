@@ -168,6 +168,7 @@ public interface InterfaceRecordMapper {
 
     @Mapping(expression = "java(source.changeoverDelta())", target = "changeoverDelta")
     @Mapping(expression = "java(source.targetTemperature())", target = "targetTemperature")
+    @Mapping(expression = "java(source.hvacHandoffFactor())", target = "hvacHandoffFactor")
     @Mapping(expression = "java(source.keepHvacOn())", target = "keepHvacOn")
     net.sf.dz3r.runtime.config.model.EconomizerConfig.Settings settings(EconomizerConfig.Settings source);
 

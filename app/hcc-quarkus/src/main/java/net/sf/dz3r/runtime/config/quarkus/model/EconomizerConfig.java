@@ -25,7 +25,11 @@ public interface EconomizerConfig {
         double changeoverDelta();
         @JsonProperty("target-temperature")
         double targetTemperature();
+        @JsonProperty("hvac-handoff-factor")
+        Double hvacHandoffFactor();
+        /** @deprecated Use {@code hvac-handoff-factor} instead. */
         @JsonProperty("keep-hvac-on")
+        @Deprecated
         Boolean keepHvacOn();
     }
 }

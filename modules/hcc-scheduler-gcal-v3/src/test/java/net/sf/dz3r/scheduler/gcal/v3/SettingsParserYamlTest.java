@@ -38,7 +38,7 @@ class SettingsParserYamlTest {
                         22d,
                         null,
                         null,
-                        new EconomizerSettingsYaml(2d, 20d, true, 1.0)
+                        new EconomizerSettingsYaml(2d, 20d, 1.0, 1.0, null)
                 ),
                 new SettingsParser.ZoneSettingsYaml(
                         null,
@@ -119,7 +119,7 @@ class SettingsParserYamlTest {
                         economizer:
                           changeover-delta: 2
                           target-temperature: 27
-                          keep-hvac-on: false"""
+                          hvac-handoff-factor: 0.0"""
         );
     }
 
@@ -130,7 +130,7 @@ class SettingsParserYamlTest {
                         economizer:
                         \u00A0 changeover-delta: 3
                         \u00A0 target-temperature: 25
-                        \u00A0 keep-hvac-on: false"""
+                        \u00A0 hvac-handoff-factor: 0.0"""
 
         );
     }

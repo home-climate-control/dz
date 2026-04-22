@@ -3,6 +3,8 @@ package net.sf.dz3r.device.actuator.economizer;
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.CallingStatus;
+import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
@@ -15,6 +17,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.Clock;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -36,7 +39,7 @@ class AbstractEconomizerTest {
                 new EconomizerSettings(
                         source.changeoverDelta,
                         source.targetTemperature,
-                        true,
+                        null,
                         1.0
                 )
         );
@@ -69,7 +72,7 @@ class AbstractEconomizerTest {
                 new EconomizerSettings(
                         source.changeoverDelta,
                         source.targetTemperature,
-                        true,
+                        null,
                         1.0
                 )
         );
@@ -94,6 +97,74 @@ class AbstractEconomizerTest {
         var signal = e.computeCombined(source.indoorTemperature, source.ambientTemperature);
 
         assertThat(signal).isEqualTo(source.expectedSignal);
+    }
+
+    /**
+     * Verify HVAC suppression behaviour across the full range of {@link EconomizerSettings#hvacHandoffFactor()}.
+     *
+     * <ul>
+     *   <li>factor = 0.0 → HVAC fully suppressed (economizer handles demand alone)</li>
+     *   <li>factor = 1.0 (or null default) → HVAC not suppressed (passes through unchanged)</li>
+     *   <li>0 &lt; factor &lt; 1 → HVAC demand scaled proportionally</li>
+     * </ul>
+     */
+    @ParameterizedTest
+    @MethodSource("hvacHandoffFactorProvider")
+    void hvacHandoffFactorTest(HvacSuppressionTestData source) {
+
+        var config = new EconomizerConfig(
+                HvacMode.COOLING,
+                1.0, 0.0001, 1.0,
+                new EconomizerSettings(2.0, 20.0, source.hvacHandoffFactor, 1.0)
+        );
+
+        var e = new TestEconomizer(
+                "eco-suppress",
+                config,
+                new SwitchableHvacDevice(
+                        Clock.systemUTC(),
+                        "cooler",
+                        HvacMode.COOLING,
+                        new NullCqrsSwitch("s"),
+                        false,
+                        null)
+        );
+
+        // Simulate economizer being active
+        e.setActuatorState(true);
+
+        var zoneStatus = new ZoneStatus(
+                new com.homeclimatecontrol.hcc.model.ZoneSettings(25.0),
+                new CallingStatus(null, source.inputDemand, true),
+                null,
+                null);
+
+        var input = new Signal<>(Instant.now(), zoneStatus, (String) null);
+        var result = e.computeHvacSuppression(input);
+
+        assertThat(result.getValue().callingStatus().demand()).isEqualTo(source.expectedDemand);
+        assertThat(result.getValue().callingStatus().calling()).isEqualTo(source.expectedCalling);
+    }
+
+    private static Stream<HvacSuppressionTestData> hvacHandoffFactorProvider() {
+
+        return Stream.of(
+                // factor=0: HVAC fully suppressed regardless of demand
+                new HvacSuppressionTestData(0.0, 5.0, 0.0, false),
+                // factor=1: HVAC fully passed through, demand unchanged
+                new HvacSuppressionTestData(1.0, 5.0, 5.0, true),
+                // factor=null (defaults to 1.0): same as factor=1
+                new HvacSuppressionTestData(null, 5.0, 5.0, true),
+                // factor=0.5: HVAC demand scaled to half
+                new HvacSuppressionTestData(0.5, 4.0, 2.0, true)
+        );
+    }
+
+    private record HvacSuppressionTestData(
+            Double hvacHandoffFactor,
+            double inputDemand,
+            double expectedDemand,
+            boolean expectedCalling) {
     }
 
     private static class TestEconomizer extends AbstractEconomizer {
