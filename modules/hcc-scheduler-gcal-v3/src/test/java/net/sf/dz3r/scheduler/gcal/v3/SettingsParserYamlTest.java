@@ -71,7 +71,7 @@ class SettingsParserYamlTest {
 
         assertThatCode(() -> {
 
-            assertThat(parser.parseAsYaml(source)).isNotNull();
+            assertThat(parser.parseAsYaml("name", source)).isNotNull();
 
         }).doesNotThrowAnyException();
     }
@@ -84,7 +84,7 @@ class SettingsParserYamlTest {
     void parseGoogleFail(String source) {
 
         assertThatExceptionOfType(UnrecognizedPropertyException.class)
-                .isThrownBy(() -> parser.parseAsYaml(source))
+                .isThrownBy(() -> parser.parseAsYaml("name", source))
                 .withMessageStartingWith("Unrecognized field \"\u00A0 changeover-delta\"");
     }
 
@@ -97,7 +97,7 @@ class SettingsParserYamlTest {
 
         assertThatCode(() -> {
 
-            assertThat(parser.parseAsYaml(source.replace('\u00A0',' '))).isNotNull();
+            assertThat(parser.parseAsYaml("name", source.replace('\u00A0',' '))).isNotNull();
 
         }).doesNotThrowAnyException();
     }

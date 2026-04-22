@@ -260,17 +260,18 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
     private Map.Entry<String, SortedMap<SchedulePeriod, ZoneSettings>> convertEvents(Map.Entry<CalendarListEntry, List<Event>> source) {
 
         var calendar = source.getKey();
+        var zoneName = calendar.getSummary();
         var schedule = new TreeMap<SchedulePeriod, ZoneSettings>();
 
         Flux.fromIterable(source.getValue())
-                .flatMap(this::convertEvent)
+                .flatMap(e -> convertEvent(zoneName, e))
                 .subscribe(kv -> schedule.put(kv.getKey(), kv.getValue()));
 
         return new AbstractMap.SimpleEntry<>(calendar.getSummary(), schedule);
     }
 
-    private Flux<Map.Entry<SchedulePeriod, ZoneSettings>> convertEvent(Event event) {
-        ThreadContext.push("convertEvent");
+    private Flux<Map.Entry<SchedulePeriod, ZoneSettings>> convertEvent(String zoneName, Event event) {
+        ThreadContext.push("convertEvent(" + zoneName + ")");
         try {
 
             var period = parsePeriod(event);
@@ -290,7 +291,7 @@ public class GCalScheduleUpdater implements ScheduleUpdater {
                 settingsAsString = null;
             }
 
-            var settings = settingsParser.parseSettings(event, settingsAsString);
+            var settings = settingsParser.parseSettings(period.name(), event, settingsAsString);
 
             return Flux.just(new AbstractMap.SimpleEntry<>(period, settings));
 

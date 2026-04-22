@@ -89,29 +89,32 @@ public class SettingsParser {
      * Parse the complete zone settings (with economizer settings) from the whole event and if it doesn't work,
      * try to parse it {@link #parseSettings(String) the old style}.
      *
+     * @param periodName Name of the period being parsed (used for logging only).
      * @param source Event to parse.
      * @param settingsAsString Legacy argument - the summary substring; will go away.
      */
-    public ZoneSettings parseSettings(Event source, String settingsAsString) {
+    public ZoneSettings parseSettings(String periodName, Event source, String settingsAsString) {
 
         return Optional
-                .ofNullable(parseSettings(source))
+                .ofNullable(parseSettings(periodName, source))
                 .orElseGet(() -> parseSettings(settingsAsString));
     }
 
     /**
      * Parse just the event.
+     *
+     * @param periodName Name of the period being parsed (used for logging only).
      * @param source Event to parse.
      *
      * @return Parsed settings, or {@code null} if settings couldn't have been parsed this way.
      */
-    private ZoneSettings parseSettings(Event source) {
+    private ZoneSettings parseSettings(String periodName, Event source) {
 
         var summary = source.getSummary();
         var description = source.getDescription();
 
         if (description == null || description.isEmpty()) {
-            logger.debug("Missing description for event '{}', reverting to old syntax", summary);
+            logger.debug("{}: Missing description for event '{}', reverting to old syntax", periodName, summary);
             return null;
         }
 
@@ -119,7 +122,7 @@ public class SettingsParser {
         try {
 
             // VT: Two fucking hours of my life on catching this &nbsp; nobody ever asked for.
-            return parseAsYaml(description.replace('\u00A0',' '));
+            return parseAsYaml(periodName, description.replace('\u00A0',' '));
 
         } catch (JsonProcessingException ex) {
             logger.error("Can't parse '{}' body as YAML, reverting to old syntax:\n{}", summary, source, ex);
@@ -129,7 +132,7 @@ public class SettingsParser {
         }
     }
 
-    ZoneSettings parseAsYaml(String source) throws JsonProcessingException {
+    ZoneSettings parseAsYaml(String periodName, String source) throws JsonProcessingException {
 
             var result = getMapper()
                     .readerFor(ZoneSettingsYaml.class)
@@ -137,12 +140,12 @@ public class SettingsParser {
                     .readValue(source);
             var yaml = getMapper().writerWithDefaultPrettyPrinter().writeValueAsString(result);
 
-            logger.debug("YAML event settings parsed:\n{}", yaml);
+            logger.debug("{}: YAML event settings parsed:\n{}", periodName, yaml);
 
-            return convert((ZoneSettingsYaml) result);
+            return convert(periodName, (ZoneSettingsYaml) result);
     }
 
-    private ZoneSettings convert(ZoneSettingsYaml source) {
+    private ZoneSettings convert(String periodName, ZoneSettingsYaml source) {
 
         return new ZoneSettings(
                 source.enabled,
@@ -150,20 +153,25 @@ public class SettingsParser {
                 source.voting,
                 null,
                 source.dumpPriority,
-                convert(source.economizer)
+                convert(periodName, source.economizer)
         );
     }
 
-    private EconomizerSettings convert(EconomizerSettingsYaml source) {
+    private EconomizerSettings convert(String periodName, EconomizerSettingsYaml source) {
 
         if (source == null) {
             return null;
         }
 
         var handoffFactor = source.hvacHandoffFactor;
+
+        if (handoffFactor != null && source.keepHvacOn != null) {
+            logger.warn("{}: deprecated keep-hvac-on={} will be ignored because hvac-handoff-factor={} is present", periodName, source.keepHvacOn, handoffFactor);
+        }
+
         if (handoffFactor == null && source.keepHvacOn != null) {
             handoffFactor = source.keepHvacOn ? 1.0 : 0.0;
-            logger.warn("keep-hvac-on={} is deprecated, replace with hvac-handoff-factor={}", source.keepHvacOn, handoffFactor);
+            logger.warn("{}: keep-hvac-on={} is deprecated, replace with hvac-handoff-factor={}", periodName, source.keepHvacOn, handoffFactor);
         }
 
         return new EconomizerSettings(
