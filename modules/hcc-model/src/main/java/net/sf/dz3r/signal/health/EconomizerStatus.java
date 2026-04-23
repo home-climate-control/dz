@@ -1,7 +1,7 @@
 package net.sf.dz3r.signal.health;
 
 import com.homeclimatecontrol.hcc.signal.Signal;
-import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
+import net.sf.dz3r.device.actuator.economizer.v1.AbstractEconomizer;
 
 import java.time.Duration;
 

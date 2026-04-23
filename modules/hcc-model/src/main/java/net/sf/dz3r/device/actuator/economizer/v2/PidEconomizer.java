@@ -6,8 +6,8 @@ import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
+import net.sf.dz3r.device.actuator.economizer.v1.AbstractEconomizer;
 import net.sf.dz3r.model.Thermostat;
 import reactor.core.publisher.Flux;
 

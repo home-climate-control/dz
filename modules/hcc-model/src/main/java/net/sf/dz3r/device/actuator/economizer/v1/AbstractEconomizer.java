@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.actuator.economizer;
+package net.sf.dz3r.device.actuator.economizer.v1;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import com.homeclimatecontrol.hcc.model.HvacMode;
@@ -12,6 +12,7 @@ import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.actuator.HvacDevice;
+import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.model.Zone;
 import net.sf.dz3r.signal.SignalProcessor;
 import org.apache.logging.log4j.LogManager;
