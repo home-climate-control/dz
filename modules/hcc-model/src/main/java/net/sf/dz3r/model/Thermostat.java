@@ -149,7 +149,7 @@ public class Thermostat implements Addressable<String> {
     public void setSetpoint(Double setpoint) {
 
         if (setpoint != null && !setpointRange.contains(setpoint)) {
-            throw new IllegalArgumentException(setpoint + " is outside of " + setpointRange.min + ".." + setpointRange.max);
+            throw new IllegalArgumentException(setpoint + " is outside of " + setpointRange.min() + ".." + setpointRange.max());
         }
 
         controller.setSetpoint(setpoint);
