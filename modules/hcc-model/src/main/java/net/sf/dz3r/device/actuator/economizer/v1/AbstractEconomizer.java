@@ -10,11 +10,10 @@ import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.HysteresisController;
 import net.sf.dz3r.controller.ProcessController;
-import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.actuator.Economizer;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import net.sf.dz3r.model.Zone;
-import net.sf.dz3r.signal.SignalProcessor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -36,7 +35,7 @@ import static java.lang.Boolean.TRUE;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
-public abstract class AbstractEconomizer implements SignalProcessor<Double, Double, String>, Addressable<String>, AutoCloseable {
+public abstract class AbstractEconomizer implements Economizer {
 
     protected final Logger logger = LogManager.getLogger();
 

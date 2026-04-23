@@ -8,8 +8,8 @@ import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.common.HCCObjects;
 import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.Addressable;
+import net.sf.dz3r.device.actuator.Economizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerContext;
-import net.sf.dz3r.device.actuator.economizer.v1.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.v2.PidEconomizer;
 import net.sf.dz3r.signal.SignalProcessor;
 import org.apache.logging.log4j.LogManager;
@@ -29,7 +29,7 @@ import java.util.Optional;
  * A {@link Thermostat} is just a device that watches the temperature.
  * A zone is an entity that controls the thermostat.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addressable<String>, AutoCloseable {
 
@@ -58,7 +58,7 @@ public class Zone implements SignalProcessor<Double, ZoneStatus, String>, Addres
      */
     private PeriodSettings periodSettings;
 
-    private final AbstractEconomizer economizer;
+    private final Economizer economizer;
 
     private final Sinks.Many<Signal<Double, String>> feedbackSink = Sinks.many().unicast().onBackpressureBuffer();
     private final Flux<Signal<Double, String>> feedbackFlux = feedbackSink.asFlux();
