@@ -87,7 +87,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             HvacDevice device,
             Duration timeout) {
 
-        checkModes(config.mode, device);
+        checkModes(config.mode(), device);
 
         this.clock = clock == null ? Clock.systemUTC() : clock;
         this.name = name;
@@ -106,7 +106,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
                 .subscribe(s -> logger.debug("{}: HVAC device state/done: {}", getAddress(), s));
 
         this.economizerStatus = new EconomizerStatus(
-                config.settings,
+                config.settings(),
                 null, 0, false, null);
 
         // Don't forget to connect fluxes; this can only be done in subclasses after all the
@@ -210,7 +210,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var ctl = TRUE.equals(state) ? 1.0 : 0.0;
         var signal = new Signal<HvacCommand, Void>(
                 clock.instant(),
-                new HvacCommand(config.mode, ctl, ctl)
+                new HvacCommand(config.mode(), ctl, ctl)
         );
 
         logger.debug("{}: setDeviceState={}", getAddress(), signal);
@@ -250,7 +250,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
         var demand = stateSignal.payload() == null ? 0 : stateSignal.payload().signal;
 
         economizerStatus = new EconomizerStatus(
-                Optional.ofNullable(config.settings).map(EconomizerSettings::new).orElse(null),
+                Optional.ofNullable(config.settings()).map(EconomizerSettings::new).orElse(null),
                 sample,
                 demand,
                 stateSignal.getValue(),
@@ -377,7 +377,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
         double targetAdjustment;
 
-        if (targetDelta > config.settings.changeoverDelta()) {
+        if (targetDelta > config.settings().changeoverDelta()) {
 
             // We're still above the target
             targetAdjustment = 0.0;
@@ -391,7 +391,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
 
             // As the indoor temperature is approaching the target, need to take corrective measures.
             // This one is not ideal but is a good approximation.
-            var k = config.settings.changeoverDelta() - targetDelta;
+            var k = config.settings().changeoverDelta() - targetDelta;
 
             targetAdjustment = ambientDelta * k;
 
@@ -412,9 +412,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
      */
     double getAmbientDelta(double indoor, double ambient) {
 
-        return config.mode == HvacMode.COOLING
-                ? indoor - (ambient + config.settings.changeoverDelta())
-                : ambient - (indoor + config.settings.changeoverDelta());
+        return config.mode() == HvacMode.COOLING
+                ? indoor - (ambient + config.settings().changeoverDelta())
+                : ambient - (indoor + config.settings().changeoverDelta());
     }
 
     /**
@@ -423,9 +423,9 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
      * @return Positive value indicates demand, negative indicates lack thereof, regardless of mode.
      */
     double getTargetDelta(double indoor) {
-        return config.mode == HvacMode.COOLING
-                ? indoor - config.settings.targetTemperature()
-                : config.settings.targetTemperature() - indoor;
+        return config.mode() == HvacMode.COOLING
+                ? indoor - config.settings().targetTemperature()
+                : config.settings().targetTemperature() - indoor;
     }
 
     /**
@@ -465,7 +465,7 @@ public abstract class AbstractEconomizer implements SignalProcessor<Double, Doub
             return augmentedSource;
         }
 
-        var hvacHandoffFactor = config.settings.getHvacHandoffFactor();
+        var hvacHandoffFactor = config.settings().getHvacHandoffFactor();
 
         // Scale HVAC demand by the factor, economizer carries the remainder
         var original = zoneSettings.callingStatus();
