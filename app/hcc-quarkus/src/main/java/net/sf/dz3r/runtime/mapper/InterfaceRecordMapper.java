@@ -45,7 +45,7 @@ import java.util.Set;
 /**
  * SpringBoot loves records. Quarkus <a href="https://github.com/quarkusio/quarkus/issues/32746">is not ready yet</a>. Need to map.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 @Mapper
 public interface InterfaceRecordMapper {
@@ -262,6 +262,7 @@ public interface InterfaceRecordMapper {
     @Mapping(expression = "java(source.id())", target = "id")
     @Mapping(expression = "java(source.connectors())", target = "connectors")
     @Mapping(expression = "java(source.sensorFeedMapping())", target = "sensorFeedMapping")
+    @Mapping(expression = "java(source.sensorMapping())", target = "sensorMapping")
     @Mapping(expression = "java(source.unit())", target = "unit")
     @Mapping(expression = "java(source.hvac())", target = "hvac")
     @Mapping(expression = "java(source.mode())", target = "mode")
