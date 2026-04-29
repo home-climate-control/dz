@@ -205,8 +205,8 @@ public class HomeAssistantConnector implements Connector {
                     originalName,
                     // VT: NOTE: see adjustModeSet()
                     new String[] {"off"},
-                    zone.getSetpointRange().min,
-                    zone.getSetpointRange().max,
+                    zone.getSetpointRange().min(),
+                    zone.getSetpointRange().max(),
                     uniqueId,
                     new DeviceDiscoveryPacket(
                         uniqueId,

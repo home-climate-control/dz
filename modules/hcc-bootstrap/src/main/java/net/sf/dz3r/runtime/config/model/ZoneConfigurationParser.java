@@ -52,7 +52,7 @@ public class ZoneConfigurationParser extends ConfigurationContextAware {
                 cf.controller(),
                 parseSensitivity(cf.name(), cf.sensitivity()));
         var eco = createEconomizer(cf.name(), cf.economizer());
-        var ecoSettings = Optional.ofNullable(eco).map(v -> v.config().settings).orElse(null);
+        var ecoSettings = Optional.ofNullable(eco).map(v -> v.config().settings()).orElse(null);
         var zone = new Zone(ts, map(cf.settings(), ecoSettings), eco);
 
         return new ImmutablePair<>(cf.id(), zone);

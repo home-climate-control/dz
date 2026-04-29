@@ -6,8 +6,8 @@ import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.controller.pid.AbstractPidController;
 import net.sf.dz3r.controller.pid.SimplePidController;
 import net.sf.dz3r.device.actuator.HvacDevice;
-import net.sf.dz3r.device.actuator.economizer.AbstractEconomizer;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
+import net.sf.dz3r.device.actuator.economizer.v1.AbstractEconomizer;
 import net.sf.dz3r.model.Thermostat;
 import reactor.core.publisher.Flux;
 
@@ -60,7 +60,7 @@ public class PidEconomizer<A extends Comparable<A>> extends AbstractEconomizer {
 
         super(clock, name, settings, device, timeout);
 
-        controller = new SimplePidController<>("(controller) " + getAddress(), 0d, settings.P, settings.I, 0, settings.saturationLimit);
+        controller = new SimplePidController<>("(controller) " + getAddress(), 0d, settings.P(), settings.I(), 0, settings.saturationLimit());
         signalRenderer = new HysteresisController<>("(signalRenderer) " + getAddress(), 0, HYSTERESIS);
 
         initFluxes(ambientFlux);

@@ -3,21 +3,15 @@ package net.sf.dz3r.model;
 /**
  * A range.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
-public class Range<T extends Comparable<T>> {
+public record Range<T extends Comparable<T>>(T min, T max) {
 
-    public final T min;
-    public final T max;
-
-    public Range(T min, T max) {
+    public Range {
 
         if (min.compareTo(max) >= 0) {
             throw new IllegalArgumentException("Invalid range " + min + ".." + max);
         }
-
-        this.min = min;
-        this.max = max;
     }
 
     public boolean contains(T value) {

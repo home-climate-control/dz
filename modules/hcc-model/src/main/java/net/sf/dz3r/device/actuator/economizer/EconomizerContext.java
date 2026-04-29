@@ -1,7 +1,8 @@
 package net.sf.dz3r.device.actuator.economizer;
 
-import net.sf.dz3r.device.actuator.HvacDevice;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import net.sf.dz3r.device.actuator.HvacDevice;
+import net.sf.dz3r.device.actuator.economizer.v1.AbstractEconomizer;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;

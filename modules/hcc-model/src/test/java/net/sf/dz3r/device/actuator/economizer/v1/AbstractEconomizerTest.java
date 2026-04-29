@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.actuator.economizer;
+package net.sf.dz3r.device.actuator.economizer.v1;
 
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import com.homeclimatecontrol.hcc.model.HvacMode;
@@ -9,6 +9,7 @@ import net.sf.dz3r.controller.ProcessController;
 import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
+import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.params.ParameterizedTest;

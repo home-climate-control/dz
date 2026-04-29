@@ -1,13 +1,11 @@
 package com.homeclimatecontrol.hcc.device;
 
-import net.sf.dz3r.common.HCCObjects;
-
 /**
  * Device state abstraction.
  *
  * @param <T> Payload type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2026
  */
 public class DeviceState<T> {
 
@@ -40,7 +38,12 @@ public class DeviceState<T> {
             T actual,
             Integer queueDepth
     ) {
-        this.id = HCCObjects.requireNonNull(id, "id can't be null");
+
+        if (id == null) {
+            throw new IllegalArgumentException("id can't be null");
+        }
+
+        this.id = id;
         this.available = available;
         this.requested = requested;
         this.actual = actual;
