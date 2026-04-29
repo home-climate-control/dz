@@ -34,7 +34,9 @@ doctor {
 }
 
 rewrite {
-    activeRecipe("org.openrewrite.gradle.GradleBestPractices")
+    // VT: NOTE: Do not run this recipe without reviewing results;
+    // it silently misplaces comments in build files with SortDependencies
+    // activeRecipe("org.openrewrite.gradle.GradleBestPractices")
 }
 
 subprojects {
