@@ -14,6 +14,7 @@ plugins {
     alias(libs.plugins.gradle.versions)
     alias(libs.plugins.gradle.dependency.analysis)
     alias(libs.plugins.gradle.doctor)
+    alias(libs.plugins.openrewrite.rewrite)
 }
 
 sonarqube {
@@ -30,6 +31,10 @@ doctor {
         // (it picks up JetBrains JDK instead)
         failOnError.set(false)
     }
+}
+
+rewrite {
+
 }
 
 subprojects {

@@ -21,6 +21,7 @@ log4j = "2.25.3"
 mapstruct = "1.6.3"
 mockito = "5.18.0"
 netty = "1.2.2"
+openrewrite = "7.32.0"
 reactor = "3.7.7"
 rsocket = "1.1.5"
 rxtx = "2.1.7"
@@ -117,6 +118,7 @@ gradle-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", ve
 gradle-doctor = { id = "com.osacky.doctor", version.ref = "gradle-doctor" }
 gradle-versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions"}
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
+openrewrite-rewrite = { id = "org.openrewrite.rewrite", version.ref = "openrewrite" }
 quarkus-plugin = { id = "io.quarkus", version.ref = "quarkus-platform" }
 sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot-plugin" }
