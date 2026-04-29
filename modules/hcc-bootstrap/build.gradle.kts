@@ -4,6 +4,9 @@ plugins {
 
 dependencies {
 
+    // VT: NOTE: DO NOT use "org.openrewrite.gradle.SortDependencies" OpenRewrite recipe on this file - it will misplace comments
+    // It is a part of "org.openrewrite.gradle.GradleBestPractices" recipe
+
     implementation(project(":modules:hcc-common"))
     api(project(":modules:hcc-config"))
 

@@ -34,7 +34,7 @@ doctor {
 }
 
 rewrite {
-
+    activeRecipe("org.openrewrite.gradle.GradleBestPractices")
 }
 
 subprojects {

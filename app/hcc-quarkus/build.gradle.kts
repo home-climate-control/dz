@@ -11,9 +11,9 @@ plugins {
 
 dependencies {
 
+    annotationProcessor(libs.mapstruct.processor)
     implementation(libs.jackson.databind)
     implementation(libs.mapstruct)
-    annotationProcessor(libs.mapstruct.processor)
 
     implementation(project(":modules:hcc-bootstrap"))
     implementation(project(":modules:hcc-director"))
