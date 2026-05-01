@@ -1,16 +1,17 @@
 package net.sf.dz3r.scheduler.gcal.v3;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.exc.UnrecognizedPropertyException;
-import tools.jackson.dataformat.yaml.YAMLFactory;
 import net.sf.dz3r.scheduler.gcal.v3.SettingsParser.ZoneSettingsYaml.EconomizerSettingsYaml;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 
 import java.util.stream.Stream;
 
@@ -81,6 +82,7 @@ class SettingsParserYamlTest {
      */
     @ParameterizedTest
     @MethodSource("googleCalendarSettings")
+    @Disabled("Jackson 3.x dodged this problem, it manifests elsewhere")
     void parseGoogleFail(String source) {
 
         assertThatExceptionOfType(UnrecognizedPropertyException.class)
@@ -98,6 +100,35 @@ class SettingsParserYamlTest {
         assertThatCode(() -> {
 
             assertThat(parser.parseAsYaml("name", source.replace('\u00A0',' '))).isNotNull();
+
+        }).doesNotThrowAnyException();
+    }
+
+    /**
+     * See what exactly Jackson 3.x did here.
+     */
+    @ParameterizedTest
+    @MethodSource("googleCalendarSettings")
+    void parseGoogleJackson3(String source) {
+
+        assertThatCode(() -> {
+
+            logger.info("source: {}", source);
+
+            var raw = parser.parseAsYaml("name", source);
+            var adjusted = parser.parseAsYaml("name", source.replace('\u00A0',' '));
+
+            logger.info("raw:      {}", raw);
+            logger.info("adjusted: {}", adjusted);
+
+            // No, the problem wasn't fixed; it was sidestepped, the wrong way.
+
+            // This is good.
+            assertThat(raw.setpoint()).isEqualTo(adjusted.setpoint());
+
+            // This, not so much. Jackson 3.x no longer chokes on NBSP like 2.x used to, but it doesn't parse it correctly, either,
+            // so we still need to replace it manually before parsing.
+            assertThat(raw).isNotEqualTo(adjusted);
 
         }).doesNotThrowAnyException();
     }
