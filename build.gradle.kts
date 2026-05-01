@@ -56,6 +56,4 @@ subprojects {
 
 dependencies {
     rewrite(libs.rewrite.spring)
-
-    runtimeOnly("javax.xml.bind:jaxb-api:2.3.1")
 }

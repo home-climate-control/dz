@@ -27,7 +27,7 @@ rewrite-spring = "6.30.3"
 rsocket = "1.1.5"
 rxtx = "2.1.7"
 sonarqube = "6.3.1.5724"
-spring-boot-plugin = "3.4.2"
+spring-boot-plugin = "4.0.6"
 spring-dependency-management = "1.1.7"
 
 # Quarkus
@@ -37,7 +37,7 @@ quarkus-platform = "3.27.0"
 # This relates to Spring packages used outside SpringBoot, those are managed by their own plugin
 # Gradle is smart enough to match this to SpringBoot, but it'll be a good idea to keep an eye on it.
 
-spring-standalone = "6.2.2"
+spring-standalone = "7.0.7"
 
 # Google
 
