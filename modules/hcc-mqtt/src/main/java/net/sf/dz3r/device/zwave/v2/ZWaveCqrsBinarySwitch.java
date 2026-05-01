@@ -1,6 +1,6 @@
 package net.sf.dz3r.device.zwave.v2;
 
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
@@ -40,7 +40,7 @@ public class ZWaveCqrsBinarySwitch extends AbstractMqttCqrsSwitch {
 
             actual = Boolean.valueOf(payload.get("value").toString());
 
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
 
             actual = null;
 

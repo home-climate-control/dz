@@ -1,16 +1,16 @@
 package net.sf.dz3r.view.http.gae.v3;
 
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 import net.sf.dz3r.instrumentation.Marker;
-import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.client5.http.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.utils.URIBuilder;
+import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Stateless <a href="https://oauth.net/2/device-flow/"> OAuth 2.0 Device Flow</a> identity provider.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class OAuth2DeviceIdentityProvider {
 
@@ -34,7 +34,7 @@ public class OAuth2DeviceIdentityProvider {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = new JsonMapper();
 
     private final HttpClient httpClient = HttpClientFactory.createClient();
 
@@ -247,7 +247,7 @@ public class OAuth2DeviceIdentityProvider {
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-6-handle-responses-to-polling-requests
 
             {
-                responseMap = objectMapper.readValue(responseJson, new TypeReference<>() {});
+                responseMap = jsonMapper.readValue(responseJson, new TypeReference<>() {});
 
                 String accessToken = responseMap.get("access_token");
                 String refreshToken = responseMap.get("refresh_token");
@@ -307,7 +307,7 @@ public class OAuth2DeviceIdentityProvider {
         }
 
         var responseJson = EntityUtils.toString(rsp.getEntity());
-        Map<String,String> responseMap = objectMapper.readValue(responseJson, new TypeReference<>() {});
+        Map<String,String> responseMap = jsonMapper.readValue(responseJson, new TypeReference<>() {});
 
         logger.debug("response: {}", responseMap);
 

@@ -1,6 +1,6 @@
 package net.sf.dz3r.scheduler.gcal.v3;
 
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.exc.UnrecognizedPropertyException;
 import tools.jackson.dataformat.yaml.YAMLFactory;
@@ -30,7 +30,7 @@ class SettingsParserYamlTest {
      * See how YAML is rendered from {@link SettingsParser.ZoneSettingsYaml}.
      */
     @Test
-    void render() throws JsonProcessingException {
+    void render() throws JacksonException {
 
         var source = Flux.just(
                 new SettingsParser.ZoneSettingsYaml(

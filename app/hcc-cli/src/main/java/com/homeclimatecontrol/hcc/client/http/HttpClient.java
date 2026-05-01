@@ -1,16 +1,16 @@
 package com.homeclimatecontrol.hcc.client.http;
 
-import tools.jackson.databind.ObjectMapper;
 import com.homeclimatecontrol.hcc.ClientBootstrap;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.instrumentation.Marker;
-import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -19,17 +19,17 @@ import java.util.Map;
 /**
  * HCC remote client using HTTP protocol.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class HttpClient {
 
     private final Logger logger = LogManager.getLogger();
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     private org.apache.http.client.HttpClient httpClient;
 
-    public HttpClient(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public HttpClient(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
     }
 
     private synchronized org.apache.http.client.HttpClient getHttpClient() {
@@ -65,18 +65,18 @@ public class HttpClient {
 
     public EndpointMeta getMeta(URL targetUrl) throws IOException {
 
-        return objectMapper.readValue(get(targetUrl, "getMeta"), EndpointMeta.class);
+        return jsonMapper.readValue(get(targetUrl, "getMeta"), EndpointMeta.class);
     }
 
     public Map<String, ZoneStatus> getZones(URL targetUrl) throws IOException {
 
         // VT: FIXME: This returns a map of maps :O Will deal with this in a short bit.
-        return objectMapper.readValue(get(targetUrl, "getZones"), Map.class);
+        return jsonMapper.readValue(get(targetUrl, "getZones"), Map.class);
     }
 
     public ClientBootstrap getBootstrap(URL targetUrl) throws IOException {
 
-        return objectMapper.readValue(get(targetUrl, "getBootstrap"), ClientBootstrap.class);
+        return jsonMapper.readValue(get(targetUrl, "getBootstrap"), ClientBootstrap.class);
     }
 
     private String get(URL targetUrl, String marker) throws IOException {

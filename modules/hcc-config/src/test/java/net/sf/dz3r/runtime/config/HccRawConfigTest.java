@@ -1,15 +1,12 @@
 package net.sf.dz3r.runtime.config;
 
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.SerializationFeature;
-import tools.jackson.dataformat.yaml.YAMLFactory;
-import tools.jackson.databind.ext.jdk8.Jdk8Module;
-import tools.jackson.databind.ext.javatime.JavaTimeModule;
 import net.sf.dz3r.runtime.config.schedule.CalendarConfigEntry;
 import net.sf.dz3r.runtime.config.schedule.ScheduleConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -24,24 +21,16 @@ class HccRawConfigTest {
     /**
      * @return Object mapper configured the same way as it is in {@code ApplicationBase}.
      */
-    private ObjectMapper getMapper() {
+    private YAMLMapper getMapper() {
 
-        var objectMapper = new ObjectMapper(new YAMLFactory());
-
-        // Necessary to print Optionals in a sane way
-        objectMapper.registerModule(new Jdk8Module());
-
-        // Necessary to deal with Duration
-        objectMapper.registerModule(new JavaTimeModule());
-
-        // For Quarkus to deal with interfaces nicer
-        objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
-
-        // For standalone to allow to ignore the root element
-        // VT: NOTE: Not necessary here
-        // objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
-
-        return objectMapper;
+        return YAMLMapper
+                .builder()
+                // For Quarkus to deal with interfaces nicer
+                .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+                // For standalone to allow to ignore the root element
+                // VT: NOTE: Not necessary here
+                // .enable(DeserializationFeature.UNWRAP_ROOT_VALUE)
+                .build();
     }
 
     /**
@@ -73,16 +62,16 @@ class HccRawConfigTest {
                 null,
                 null);
 
-        var objectMapper = getMapper();
+        var yamlMapper = getMapper();
 
-        var result = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+        var result = yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
 
         // Hmm... Quarkus and Spring will take the ScheduleConfig YAML even if the zone/calendar pairs are shifted
         // one tab to the right
         logger.debug("YAML:\n{}", result);
 
         assertThatCode(() -> {
-            objectMapper.readValue(new StringReader(result), HccRawConfig.class);
+            yamlMapper.readValue(new StringReader(result), HccRawConfig.class);
         })
                 .doesNotThrowAnyException();
     }

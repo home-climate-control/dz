@@ -1,7 +1,5 @@
 package net.sf.dz3r.device.z2m.v1;
 
-import tools.jackson.core.JsonProcessingException;
-import tools.jackson.databind.ObjectMapper;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
@@ -10,6 +8,8 @@ import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Flux;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Map;
 
@@ -33,12 +33,12 @@ import java.util.Map;
  *
  * Read more: <a href="https://www.zigbee2mqtt.io/guide/usage/mqtt_topics_and_messages.html">MQTT Topics and Messages</a>
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2022
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<String, Double, Void> {
 
     private final Logger logger = LogManager.getLogger();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = new JsonMapper();
 
     private static final String DEFAULT_MEASUREMENT = "temperature";
 
@@ -94,7 +94,7 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
         try {
 
-            var payload = objectMapper.readValue(signal.getValue(), Map.class);
+            var payload = jsonMapper.readValue(signal.getValue(), Map.class);
 
             logger.debug("payload: {}", payload);
 
@@ -104,7 +104,7 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
             return new Signal<>(signal.timestamp(), value);
 
-        } catch (JsonProcessingException | NumberFormatException ex) {
+        } catch (JacksonException | NumberFormatException ex) {
 
             // Throwing an exception here breaks everything
             // https://github.com/home-climate-control/dz/issues/303

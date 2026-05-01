@@ -8,6 +8,7 @@ dependencies {
     implementation(libs.google.api.services.calendar)
     implementation(libs.google.oauth.client.jetty)
     implementation(libs.google.http.client.jackson2)
+    implementation(libs.jackson.core)
     implementation(libs.jackson.databind)
     implementation(libs.jackson.dataformat.yaml)
 

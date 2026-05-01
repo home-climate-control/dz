@@ -1,7 +1,5 @@
 package net.sf.dz3r.device.z2m.v1;
 
-import tools.jackson.core.JsonProcessingException;
-import tools.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
@@ -11,6 +9,8 @@ import net.sf.dz3r.device.mqtt.v1.MqttMessageAddress;
 import net.sf.dz3r.device.mqtt.v2async.MqttAdapterImpl;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Scheduler;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -25,14 +25,14 @@ import static net.sf.dz3r.device.mqtt.v2.AbstractMqttListener.DEFAULT_CACHE_AGE;
  * @see net.sf.dz3r.device.esphome.v1.ESPHomeSwitch
  * @see net.sf.dz3r.device.zwave.v1.ZWaveBinarySwitch
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  *
  * @deprecated Use {@link net.sf.dz3r.device.z2m.v2.Z2MCqrsSwitch} instead.
  */
 @Deprecated(since = "5.0.0")
 public class Z2MSwitch extends AbstractMqttSwitch {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = new JsonMapper();
 
     private final String deviceRootTopic;
 
@@ -145,7 +145,7 @@ public class Z2MSwitch extends AbstractMqttSwitch {
         ThreadContext.push("parseState");
         try {
 
-            var payload = objectMapper.readValue(message, Map.class);
+            var payload = jsonMapper.readValue(message, Map.class);
 
             logger.debug("payload: {}", payload);
 
@@ -159,7 +159,7 @@ public class Z2MSwitch extends AbstractMqttSwitch {
             };
 
             return new Signal<>(timestamp, state);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new IllegalStateException("Can't parse JSON: " + message, e);
         } finally {
             ThreadContext.pop();

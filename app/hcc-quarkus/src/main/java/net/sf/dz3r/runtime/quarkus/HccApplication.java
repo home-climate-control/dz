@@ -17,7 +17,7 @@ import tools.jackson.core.JacksonException;
 /**
  * Quarkus entry point into HCC Core.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 @ApplicationScoped
 public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {
@@ -57,7 +57,7 @@ public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {
 
         logger.debug("configuration/interface: {}", () -> {
             try {
-                return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+                return yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
             } catch (JacksonException ex) {
                 throw new IllegalStateException("Failed to convert materialized interface configuration to YAML", ex);
             }

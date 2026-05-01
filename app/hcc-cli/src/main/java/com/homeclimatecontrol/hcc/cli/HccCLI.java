@@ -3,9 +3,6 @@ package com.homeclimatecontrol.hcc.cli;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import tools.jackson.databind.ObjectMapper;
-import tools.jackson.databind.ext.jdk8.Jdk8Module;
-import tools.jackson.databind.ext.javatime.JavaTimeModule;
 import com.homeclimatecontrol.hcc.client.http.HttpClient;
 import com.homeclimatecontrol.hcc.client.rsocket.RSocketClient;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +12,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import reactor.tools.agent.ReactorDebugAgent;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.IOException;
 import java.net.URL;
@@ -31,29 +29,25 @@ public class HccCLI implements CommandLineRunner {
     private static final String COMMAND_GET_ZONES_RSOCKET = "get-zones-rsocket";
     private static final String COMMAND_GET_BOOTSTRAP = "get-bootstrap";
 
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
 
-    private final HttpClient httpClient = new HttpClient(getObjectMapper());
-    private final RSocketClient rsocketClient = new RSocketClient(getObjectMapper());
+    private final HttpClient httpClient = new HttpClient(getMapper());
+    private final RSocketClient rsocketClient = new RSocketClient(getMapper());
 
     public HccCLI() {
 
     }
 
-    private synchronized ObjectMapper getObjectMapper() {
+    private synchronized JsonMapper getMapper() {
 
-        if (objectMapper == null) {
+        if (jsonMapper == null) {
 
-            objectMapper = new ObjectMapper();
-
-            // Necessary to print Optionals in a sane way
-            objectMapper.registerModule(new Jdk8Module());
-
-            // Necessary to deal with Duration
-            objectMapper.registerModule(new JavaTimeModule());
+            jsonMapper = JsonMapper
+                    .builder()
+                    .build();
         }
 
-        return objectMapper;
+        return jsonMapper;
     }
 
     public abstract class CommandBase {
@@ -163,7 +157,7 @@ public class HccCLI implements CommandLineRunner {
         try {
             logger.info("url={}", url);
             var meta = httpClient.getMeta(new URL(url));
-            var metaPrint = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(meta);
+            var metaPrint = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(meta);
             logger.info("META/parsed: {}", metaPrint);
 
         } finally {
@@ -180,7 +174,7 @@ public class HccCLI implements CommandLineRunner {
             // First need to get this to determine the host and port to connect RSocket to
             var zoneMap = httpClient.getZones(httpUrl);
 
-            logger.info("ZONES:\n{}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zoneMap));
+            logger.info("ZONES:\n{}", jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zoneMap));
 
         } finally {
             ThreadContext.pop();
@@ -197,7 +191,7 @@ public class HccCLI implements CommandLineRunner {
             var meta = httpClient.getMeta(httpUrl);
             var zoneMap = rsocketClient.getZones(httpUrl.getHost(), meta.instance().duplexPort(), serialization);
 
-            logger.info("ZONES:\n{}", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zoneMap));
+            logger.info("ZONES:\n{}", jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(zoneMap));
 
         } finally {
             ThreadContext.pop();
@@ -209,7 +203,7 @@ public class HccCLI implements CommandLineRunner {
         try {
             logger.info("url={}", url);
             var bootstrap = httpClient.getBootstrap(new URL(url));
-            var bootstrapPrint = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(bootstrap);
+            var bootstrapPrint = jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(bootstrap);
             logger.info("BOOTSTRAP/parsed: {}", bootstrapPrint);
 
         } finally {

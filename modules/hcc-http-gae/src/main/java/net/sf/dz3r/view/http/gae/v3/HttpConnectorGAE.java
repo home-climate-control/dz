@@ -1,6 +1,6 @@
 package net.sf.dz3r.view.http.gae.v3;
 
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import com.homeclimatecontrol.hcc.model.HvacMode;
@@ -197,7 +197,7 @@ public class HttpConnectorGAE extends HttpConnector {
         }
     }
 
-    private void processResponse(String response) throws JsonProcessingException {
+    private void processResponse(String response) throws JacksonException {
         ThreadContext.push("processResponse");
         try {
 

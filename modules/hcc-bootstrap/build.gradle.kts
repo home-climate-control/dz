@@ -15,8 +15,6 @@ dependencies {
 
     api(libs.jackson.databind)
     implementation(libs.jackson.dataformat.yaml)
-    implementation(libs.jackson.datatype.jdk8)
-    implementation(libs.jackson.datatype.jsr310)
     implementation(libs.reactor.tools)
 
     // VT: NOTE: "implementation()" dependencies will migrate to
