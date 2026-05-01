@@ -13,6 +13,7 @@ dependencies {
 
     annotationProcessor(libs.mapstruct.processor)
     implementation(libs.jackson.databind)
+    implementation(libs.jackson.dataformat.yaml)
     implementation(libs.mapstruct)
 
     implementation(project(":modules:hcc-bootstrap"))

@@ -9,5 +9,6 @@ dependencies {
     api(libs.commons.lang3)
     api(libs.reactor.core)
 
+    implementation(libs.httpclient5)
     implementation(libs.log4j.core)
 }

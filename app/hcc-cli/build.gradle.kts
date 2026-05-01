@@ -12,7 +12,7 @@ application {
 
 dependencies {
 
-    implementation(libs.httpclient)
+    implementation(libs.httpclient5)
     implementation(libs.jackson.core)
     implementation(libs.jackson.databind)
     implementation(libs.jcommander)

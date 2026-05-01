@@ -9,7 +9,7 @@ gradle-doctor = "0.12.1"
 gradle-git-properties = "2.5.7"
 gradle-versions = "0.54.0"
 hivemq-mqtt = "1.3.12"
-httpclient = "4.5.14"
+httpclient5 = "5.6.1"
 influxdb = "2.24"
 jackson = "3.1.2"
 jacoco = "0.8.14"
@@ -51,7 +51,7 @@ assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
 errorprone = { module = "com.google.errorprone:error_prone_core", version.ref = "errorprone-lib" }
 hivemq-mqtt-client = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqtt" }
-httpclient = { module = "org.apache.httpcomponents:httpclient", version.ref = "httpclient" }
+httpclient5 = { module = "org.apache.httpcomponents.client5:httpclient5", version.ref = "httpclient5" }
 influxdb = { module = "org.influxdb:influxdb-java", version.ref = "influxdb" }
 jackson-core = { module = "tools.jackson.core:jackson-core", version.ref = "jackson" }
 jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }

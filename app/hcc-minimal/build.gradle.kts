@@ -13,6 +13,7 @@ application {
 dependencies {
 
     implementation(libs.jackson.databind)
+    implementation(libs.jackson.dataformat.yaml)
 
     implementation(project(":modules:hcc-bootstrap"))
     implementation(project(":modules:hcc-common"))

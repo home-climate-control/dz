@@ -1,8 +1,6 @@
 package net.sf.dz3r.view.http.gae.v3;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
+import com.homeclimatecontrol.HttpClientFactory;
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
 import com.homeclimatecontrol.hcc.signal.Signal;
@@ -13,11 +11,11 @@ import net.sf.dz3r.runtime.AppHome;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneCommand;
 import net.sf.dz3r.view.http.gae.v3.wire.ZoneSnapshot;
 import net.sf.dz3r.view.http.v3.HttpConnector;
-import org.apache.hc.client5.http.HttpClient;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.utils.URIBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
-import org.apache.hc.core5.util.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
@@ -25,6 +23,9 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class HttpConnectorGAE extends HttpConnector {
     private final Logger logger = LogManager.getLogger();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    protected HttpClient httpClient;
+    protected CloseableHttpClient httpClient;
 
     private final Set<String> zoneNames;
     private final Map<String, Zone> name2zone = new TreeMap<>();
@@ -72,7 +73,7 @@ public class HttpConnectorGAE extends HttpConnector {
                 .subscribe();
     }
 
-    private synchronized HttpClient getHttpClient() {
+    private synchronized CloseableHttpClient getHttpClient() {
 
         if (httpClient == null) {
 
@@ -165,10 +166,9 @@ public class HttpConnectorGAE extends HttpConnector {
             post.setHeader("HCC-Identity", getIdentity());
             post.setEntity(new StringEntity(encoded));
 
-            try {
+            try (var rsp = getHttpClient().execute(post)) {
 
-                var rsp = getHttpClient().execute(post);
-                var rc = rsp.getStatusLine().getStatusCode();
+                var rc = rsp.getCode();
 
                 if (rc != 200) {
 
@@ -180,8 +180,6 @@ public class HttpConnectorGAE extends HttpConnector {
 
                 processResponse(EntityUtils.toString(rsp.getEntity()));
 
-            } finally {
-                post.releaseConnection();
             }
 
         } catch (Throwable t) { // NOSONAR Consequences have been considered

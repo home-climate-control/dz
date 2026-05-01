@@ -1,13 +1,14 @@
 package com.homeclimatecontrol.hcc.client.http;
 
+import com.homeclimatecontrol.HttpClientFactory;
 import com.homeclimatecontrol.hcc.ClientBootstrap;
 import com.homeclimatecontrol.hcc.meta.EndpointMeta;
 import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.core5.util.EntityUtils;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import tools.jackson.databind.json.JsonMapper;
@@ -26,42 +27,24 @@ public class HccHttpClient {
     private final Logger logger = LogManager.getLogger();
     private final JsonMapper jsonMapper;
 
-    private org.apache.http.client.HttpClient httpClient;
+    private CloseableHttpClient httpClient;
 
     public HccHttpClient(JsonMapper jsonMapper) {
         this.jsonMapper = jsonMapper;
     }
 
-    private synchronized org.apache.http.client.HttpClient getHttpClient() {
+    private synchronized CloseableHttpClient getHttpClient() {
 
         if (httpClient == null) {
 
             // VT: NOTE: This is about 100ms on a decent workstation. Unexpected.
             // ... but only if it is called from the constructor, otherwise it takes 2ms :O
-            httpClient = createClient();
+            httpClient = HttpClientFactory.createClient();
         }
 
         return httpClient;
     }
 
-    private org.apache.http.client.HttpClient createClient() {
-
-        // VT: NOTE: Copypasted with abbreviations from HttpClientFactory (search the whole project).
-        // Important fact not to forget: https://github.com/home-climate-control/dz/issues/80
-
-        return HttpClientBuilder
-                .create()
-                .setMaxConnPerRoute(100)
-                .setDefaultRequestConfig(
-                        RequestConfig
-                                .custom()
-                                .setConnectionRequestTimeout(10 * 1000)
-                                .setConnectTimeout(10 * 1000)
-                                .setSocketTimeout(10 * 1000)
-                                .build()
-                )
-                .build();
-    }
 
     public EndpointMeta getMeta(URL targetUrl) throws IOException {
 
@@ -84,27 +67,30 @@ public class HccHttpClient {
         var m = new Marker(marker);
         var get = new HttpGet(targetUrl.toString());
 
-        try {
+        try (var rsp = getHttpClient().execute(get)) {
 
-            var rsp = getHttpClient().execute(get);
-            var rc = rsp.getStatusLine().getStatusCode();
+            var rc = rsp.getCode();
+            var entity = rsp.getEntity();
 
-            if (rc != 200) {
+            try {
+                if (rc != 200) {
 
-                logger.error("HTTP rc={}, text follows:", rc);
-                logger.error(EntityUtils.toString(rsp.getEntity())); // NOSONAR Not worth the effort
+                    logger.error("HTTP rc={}, text follows:", rc);
+                    logger.error(EntityUtils.toString(rsp.getEntity())); // NOSONAR Not worth the effort
 
-                throw new IOException("Request to " + targetUrl + " failed with HTTP code " + rc);
+                    throw new IOException("Request to " + targetUrl + " failed with HTTP code " + rc);
+                }
+
+                var response = EntityUtils.toString(rsp.getEntity());
+
+                logger.trace("{}/raw: {}", marker, response);
+
+                return response;
+
+            } catch (ParseException ex) {
+                throw new IOException("Failed to parse response entity: " + entity, ex);
             }
-
-            var response = EntityUtils.toString(rsp.getEntity());
-
-            logger.trace("{}/raw: {}", marker, response);
-
-            return response;
-
         } finally {
-            get.releaseConnection();
             m.close();
         }
     }
