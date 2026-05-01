@@ -37,6 +37,12 @@ rewrite {
     // VT: NOTE: Do not run this recipe without reviewing results;
     // it silently misplaces comments in build files with SortDependencies
     // activeRecipe("org.openrewrite.gradle.GradleBestPractices")
+
+    // An attempt to run this directly causes version catalog not to be updated
+    // thus failing the rewrite (https://github.com/openrewrite/rewrite/issues/4852)
+    // but let's leave a record of what we were trying to do, and fix the version catalog by hand
+    activeRecipe("org.openrewrite.java.spring.boot4.UpgradeSpringBoot_4_0")
+    isExportDatatables = true
 }
 
 subprojects {
@@ -46,4 +52,10 @@ subprojects {
     dependencies {
         errorprone(rootProject.libs.errorprone)
     }
+}
+
+dependencies {
+    rewrite(libs.rewrite.spring)
+
+    runtimeOnly("javax.xml.bind:jaxb-api:2.3.1")
 }

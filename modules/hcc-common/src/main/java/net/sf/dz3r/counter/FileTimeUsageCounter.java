@@ -173,7 +173,7 @@ public class FileTimeUsageCounter implements ResourceUsageCounter<Duration>, Aut
                         : (double) state.current().toMillis() / (double) state.threshold().toMillis();
 
                 pw.println("#");
-                pw.println(String.format("# Relative usage %2.0f%%", usage * 100) + (usage > 1 ? " (OVERDUE)" : ""));
+                pw.println("# Relative usage %2.0f%%".formatted(usage * 100) + (usage > 1 ? " (OVERDUE)" : ""));
                 pw.println("#");
 
                 pw.println("# " + CF_THRESHOLD + "=" + getHumanReadableTime(state.threshold()));

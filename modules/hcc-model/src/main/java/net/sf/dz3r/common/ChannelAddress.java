@@ -61,9 +61,9 @@ public abstract class ChannelAddress<T> implements Comparable<ChannelAddress<T>>
     @Override
     public boolean equals(Object other) {
 
-        return other instanceof ChannelAddress
-                && hardwareAddress.equals(((ChannelAddress<?>) other).hardwareAddress)
-                && channel.equals(((ChannelAddress<?>) other).channel);
+        return other instanceof ChannelAddress<?> ca
+                && hardwareAddress.equals(ca.hardwareAddress)
+                && channel.equals(ca.channel);
     }
 
     @Override

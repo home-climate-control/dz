@@ -1,9 +1,9 @@
 package net.sf.dz3r.scheduler.gcal.v3;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.core.JsonProcessingException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
+import tools.jackson.dataformat.yaml.YAMLFactory;
 import net.sf.dz3r.scheduler.gcal.v3.SettingsParser.ZoneSettingsYaml.EconomizerSettingsYaml;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

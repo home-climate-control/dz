@@ -1,8 +1,8 @@
 package net.sf.dz3r.view.http.gae.v3;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.hc.client5.http.HttpClient;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 
 /**
  * Creates {@link HttpClient} with custom configuration preventing getting stuck on a request.

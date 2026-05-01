@@ -1,6 +1,5 @@
 package net.sf.dz3r.runtime.quarkus;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -13,6 +12,7 @@ import net.sf.dz3r.runtime.config.HccRawConfig;
 import net.sf.dz3r.runtime.config.quarkus.HccRawInterfaceConfig;
 import net.sf.dz3r.runtime.mapper.InterfaceRecordMapper;
 import org.apache.logging.log4j.ThreadContext;
+import tools.jackson.core.JacksonException;
 
 /**
  * Quarkus entry point into HCC Core.
@@ -58,7 +58,7 @@ public class HccApplication extends ApplicationBase<HccRawInterfaceConfig> {
         logger.debug("configuration/interface: {}", () -> {
             try {
                 return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
-            } catch (JsonProcessingException ex) {
+            } catch (JacksonException ex) {
                 throw new IllegalStateException("Failed to convert materialized interface configuration to YAML", ex);
             }
         });

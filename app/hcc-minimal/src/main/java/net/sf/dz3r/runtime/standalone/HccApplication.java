@@ -1,6 +1,6 @@
 package net.sf.dz3r.runtime.standalone;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.exc.InvalidFormatException;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.ApplicationBase;
 import net.sf.dz3r.runtime.config.HccRawConfig;

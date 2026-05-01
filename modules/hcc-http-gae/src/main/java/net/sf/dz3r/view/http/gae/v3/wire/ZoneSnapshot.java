@@ -1,5 +1,6 @@
 package net.sf.dz3r.view.http.gae.v3.wire;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -16,6 +17,7 @@ import java.io.Serializable;
  */
 public class ZoneSnapshot implements Comparable<ZoneSnapshot>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1968013529080011937L;
 
     public long timestamp;

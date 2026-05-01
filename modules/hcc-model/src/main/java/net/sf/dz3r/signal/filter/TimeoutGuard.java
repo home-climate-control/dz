@@ -110,7 +110,7 @@ public class TimeoutGuard<T, P> implements SignalProcessor<T, T, P> {
                         null,
                         null,
                         Signal.Status.FAILURE_TOTAL,
-                        new TimeoutException(String.format("%s: timeout of %s is exceeded", marker, timeout))));
+                        new TimeoutException("%s: timeout of %s is exceeded".formatted(marker, timeout))));
 
         inTimeout = true;
     }

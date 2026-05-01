@@ -1,7 +1,7 @@
 package net.sf.dz3r.view.webui.v2;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ext.javatime.JavaTimeModule;
 import net.sf.dz3r.model.UnitDirector;
 import net.sf.dz3r.view.UnitObserver;
 import org.apache.logging.log4j.LogManager;

@@ -1,7 +1,7 @@
 package net.sf.dz3r.device.z2m.v1;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JsonProcessingException;
+import tools.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.mqtt.MqttAdapter;

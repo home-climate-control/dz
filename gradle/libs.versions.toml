@@ -23,6 +23,7 @@ mockito = "5.18.0"
 netty = "1.2.2"
 openrewrite = "7.32.0"
 reactor = "3.7.7"
+rewrite-spring = "6.30.3"
 rsocket = "1.1.5"
 rxtx = "2.1.7"
 sonarqube = "6.3.1.5724"
@@ -72,6 +73,7 @@ reactor-core = { module = "io.projectreactor:reactor-core", version.ref = "react
 reactor-netty = { module = "io.projectreactor.netty:reactor-netty", version.ref = "netty" }
 reactor-test = { module = "io.projectreactor:reactor-test", version.ref = "reactor" }
 reactor-tools = { module = "io.projectreactor:reactor-tools", version.ref = "reactor" }
+rewrite-spring = { module = "org.openrewrite.recipe:rewrite-spring", version.ref = "rewrite-spring" }
 rsocket-core = { module = "io.rsocket:rsocket-core", version.ref = "rsocket" }
 rsocket-transport-netty = { module = "io.rsocket:rsocket-transport-netty", version.ref = "rsocket" }
 rxtx = { module = "org.rxtx:rxtx", version.ref = "rxtx" }

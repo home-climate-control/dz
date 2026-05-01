@@ -1,10 +1,10 @@
 package net.sf.dz3r.runtime.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.dataformat.yaml.YAMLFactory;
+import tools.jackson.databind.ext.jdk8.Jdk8Module;
+import tools.jackson.databind.ext.javatime.JavaTimeModule;
 import net.sf.dz3r.runtime.config.schedule.CalendarConfigEntry;
 import net.sf.dz3r.runtime.config.schedule.ScheduleConfig;
 import org.apache.logging.log4j.LogManager;
