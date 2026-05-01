@@ -3,7 +3,7 @@ package com.homeclimatecontrol.hcc.cli;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
-import com.homeclimatecontrol.hcc.client.http.HttpClient;
+import com.homeclimatecontrol.hcc.client.http.HccHttpClient;
 import com.homeclimatecontrol.hcc.client.rsocket.RSocketClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,7 +31,7 @@ public class HccCLI implements CommandLineRunner {
 
     private JsonMapper jsonMapper;
 
-    private final HttpClient httpClient = new HttpClient(getMapper());
+    private final HccHttpClient httpClient = new HccHttpClient(getMapper());
     private final RSocketClient rsocketClient = new RSocketClient(getMapper());
 
     public HccCLI() {

@@ -21,14 +21,14 @@ import java.util.Map;
  *
  * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
-public class HttpClient {
+public class HccHttpClient {
 
     private final Logger logger = LogManager.getLogger();
     private final JsonMapper jsonMapper;
 
     private org.apache.http.client.HttpClient httpClient;
 
-    public HttpClient(JsonMapper jsonMapper) {
+    public HccHttpClient(JsonMapper jsonMapper) {
         this.jsonMapper = jsonMapper;
     }
 
