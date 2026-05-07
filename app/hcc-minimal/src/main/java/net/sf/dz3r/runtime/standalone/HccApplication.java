@@ -1,6 +1,5 @@
 package net.sf.dz3r.runtime.standalone;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.ApplicationBase;
 import net.sf.dz3r.runtime.config.HccRawConfig;
@@ -14,7 +13,7 @@ import java.net.URL;
 /**
  * Standalone entry point into HCC Core.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class HccApplication extends ApplicationBase<HccRawConfig> {
 
@@ -70,7 +69,7 @@ public class HccApplication extends ApplicationBase<HccRawConfig> {
                     source = "file:" + source;
                 }
 
-                return objectMapper.readValue(getStream(source), HccRawConfig.class);
+                return yamlMapper.readValue(getStream(source), HccRawConfig.class);
 
             } catch (IOException ex) {
 
@@ -79,9 +78,12 @@ public class HccApplication extends ApplicationBase<HccRawConfig> {
                 // VT: NOTE: Both Quarkus and Spring use a trick to bypass this; would be nice to figure out what it is.
                 // For now, using the format documented at the link will yield a working configuration.
 
-                if (ex instanceof InvalidFormatException && message != null && message.startsWith("Cannot deserialize value of type `java.time.Duration` from String")) {
-                    throw new IllegalArgumentException("Try to use duration format specified in https://en.wikipedia.org/wiki/ISO_8601#Durations", ex);
-                }
+                // VT: FIXME: Let's compile the rest and then return to this
+                // Ref: https://github.com/home-climate-control/dz/issues/350
+
+//                if (ex instanceof InvalidFormatException && message != null && message.startsWith("Cannot deserialize value of type `java.time.Duration` from String")) {
+//                    throw new IllegalArgumentException("Try to use duration format specified in https://en.wikipedia.org/wiki/ISO_8601#Durations", ex);
+//                }
 
                 throw new IllegalArgumentException("Unexpected exception while parsing " + source,  ex);
             }

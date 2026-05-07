@@ -1,8 +1,8 @@
 package net.sf.dz3r.runtime.config;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3r.runtime.config.connector.ConnectorConfig;
 import net.sf.dz3r.runtime.config.filter.FilterConfig;
 import net.sf.dz3r.runtime.config.hardware.HvacDeviceConfig;

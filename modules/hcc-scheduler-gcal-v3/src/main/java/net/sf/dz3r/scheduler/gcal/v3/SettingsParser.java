@@ -1,11 +1,6 @@
 package net.sf.dz3r.scheduler.gcal.v3;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.api.services.calendar.model.Event;
 import com.homeclimatecontrol.hcc.model.EconomizerSettings;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
@@ -14,6 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -29,22 +28,24 @@ import java.util.StringTokenizer;
  * this will also cause it to bloat quite a bit and become too heavy. It is possible to offload
  * parsing on an online component, but whether this is necessary is yet to be seen.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class SettingsParser {
 
     private final Logger logger = LogManager.getLogger();
     private final NumberFormat numberFormat = NumberFormat.getInstance();
 
-    private ObjectMapper objectMapper;
+    private YAMLMapper yamlMapper;
 
-    private synchronized ObjectMapper getMapper() {
+    private synchronized YAMLMapper getMapper() {
 
-        if (objectMapper == null) {
-            objectMapper = new ObjectMapper(new YAMLFactory());
+        if (yamlMapper == null) {
+            yamlMapper = YAMLMapper
+                    .builder()
+                    .build();
         }
 
-        return objectMapper;
+        return yamlMapper;
     }
 
     /**
@@ -124,7 +125,7 @@ public class SettingsParser {
             // VT: Two fucking hours of my life on catching this &nbsp; nobody ever asked for.
             return parseAsYaml(periodName, description.replace('\u00A0',' '));
 
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             logger.error("Can't parse '{}' body as YAML, reverting to old syntax:\n{}", summary, source, ex);
             return null;
         } finally {
@@ -132,7 +133,7 @@ public class SettingsParser {
         }
     }
 
-    ZoneSettings parseAsYaml(String periodName, String source) throws JsonProcessingException {
+    ZoneSettings parseAsYaml(String periodName, String source) throws JacksonException {
 
             var result = getMapper()
                     .readerFor(ZoneSettingsYaml.class)
@@ -238,7 +239,7 @@ public class SettingsParser {
 
             return result;
 
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalArgumentException("Successfully parsed '" + arguments + "' but couldn't pretty print them", ex);
         } finally {
             ThreadContext.pop();

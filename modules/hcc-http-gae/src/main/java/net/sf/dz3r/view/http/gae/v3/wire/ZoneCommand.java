@@ -1,9 +1,11 @@
 package net.sf.dz3r.view.http.gae.v3.wire;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 public class ZoneCommand implements Comparable<ZoneCommand>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = -6584570502034039877L;
 
     public String name;

@@ -4,9 +4,9 @@ plugins {
 
 dependencies {
 
-    implementation(libs.jackson.databind)
-    implementation(libs.httpclient)
-
-    implementation(project(":modules:hcc-common"))
     api(project(":modules:hcc-http"))
+    implementation(libs.jackson.databind)
+
+    implementation(libs.httpclient5)
+    implementation(project(":modules:hcc-common"))
 }

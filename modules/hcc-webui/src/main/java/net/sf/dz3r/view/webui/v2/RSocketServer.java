@@ -1,6 +1,5 @@
 package net.sf.dz3r.view.webui.v2;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
 import io.rsocket.SocketAcceptor;
@@ -13,6 +12,7 @@ import net.sf.dz3r.view.UnitObserver;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import tools.jackson.core.JacksonException;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * This endpoint only serves streams, and big snapshots.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2025
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko 2001-2026
  */
 public class RSocketServer extends Endpoint {
 
@@ -109,8 +109,8 @@ public class RSocketServer extends Endpoint {
                     .collectMap(Map.Entry::getKey, Map.Entry::getValue)
                     .map(o -> {
                         try {
-                            return ByteBufPayload.create(objectMapper.writeValueAsString(o));
-                        } catch (JsonProcessingException ex) {
+                            return ByteBufPayload.create(jsonMapper.writeValueAsString(o));
+                        } catch (JacksonException ex) {
                             logger.error("Can't serialize object, exception will pop up at the client side: {}", o, ex);
                             return ex;
                         }

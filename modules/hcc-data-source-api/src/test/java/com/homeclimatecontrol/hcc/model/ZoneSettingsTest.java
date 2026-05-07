@@ -1,13 +1,14 @@
 package com.homeclimatecontrol.hcc.model;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.util.stream.Stream;
 
@@ -20,15 +21,15 @@ class ZoneSettingsTest {
 
     @Test
     void testJSON() {
-        assertThatCode(() -> testOutput(new ObjectMapper(), "JSON")).doesNotThrowAnyException();
+        assertThatCode(() -> testOutput(new JsonMapper(), "JSON")).doesNotThrowAnyException();
     }
 
     @Test
     void testYaml() {
-        assertThatCode(() -> testOutput(new ObjectMapper(new YAMLFactory()), "YAML")).doesNotThrowAnyException();
+        assertThatCode(() -> testOutput(new YAMLMapper(), "YAML")).doesNotThrowAnyException();
     }
 
-    private void testOutput(ObjectMapper objectMapper, String marker) throws JsonProcessingException {
+    private void testOutput(ObjectMapper objectMapper, String marker) throws JacksonException {
 
         var source = new ZoneSettings(
                 true,

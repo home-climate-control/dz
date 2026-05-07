@@ -1,16 +1,18 @@
 package net.sf.dz3r.view.http.gae.v3;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.homeclimatecontrol.HttpClientFactory;
 import net.sf.dz3r.instrumentation.Marker;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -25,7 +27,7 @@ import java.util.Map;
 /**
  * Stateless <a href="https://oauth.net/2/device-flow/"> OAuth 2.0 Device Flow</a> identity provider.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class OAuth2DeviceIdentityProvider {
 
@@ -34,9 +36,9 @@ public class OAuth2DeviceIdentityProvider {
 
     private final Logger logger = LogManager.getLogger(getClass());
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = new JsonMapper();
 
-    private final HttpClient httpClient = HttpClientFactory.createClient();
+    private final CloseableHttpClient httpClient = HttpClientFactory.createClient();
 
     /**
      * Obtain a client identity with given credentials.
@@ -142,7 +144,7 @@ public class OAuth2DeviceIdentityProvider {
      * @return {@code access_token}.
      */
     private String acquire(
-            HttpClient httpClient,
+            CloseableHttpClient httpClient,
             String clientId,
             String clientSecret,
             File refreshTokenFile,
@@ -211,34 +213,40 @@ public class OAuth2DeviceIdentityProvider {
                     post.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
                     rsp = httpClient.execute(post);
-                    var rc = rsp.getStatusLine().getStatusCode();
-                    var responseBody = EntityUtils.toString(rsp.getEntity());
+                    var rc = rsp.getCode();
+                    var entity = rsp.getEntity();
 
-                    logger.debug("RC={}", rc);
+                    try {
+                        var responseBody = EntityUtils.toString(entity);
 
-                    if (rc != 200) {
+                        logger.debug("RC={}", rc);
 
-                        if (rc == 428) {
+                        if (rc != 200) {
 
-                            logger.info("waiting for user response, will retry in {} seconds", interval);
+                            if (rc == 428) {
 
-                        } else {
+                                logger.info("waiting for user response, will retry in {} seconds", interval);
 
-                            // VT: NOTE: These are not really expected, but let's hope that the user
-                            // figures out what to with them
+                            } else {
 
-                            logger.error("Unexpected: HTTP rc={}, text follows:", rc);
-                            logger.error(responseBody);
+                                // VT: NOTE: These are not really expected, but let's hope that the user
+                                // figures out what to with them
 
-                            logger.warn("will retry in {} seconds", interval);
+                                logger.error("Unexpected: HTTP rc={}, text follows:", rc);
+                                logger.error(responseBody);
+
+                                logger.warn("will retry in {} seconds", interval);
+                            }
                         }
-                    }
 
-                    logger.debug("response: {}", responseBody);
+                        logger.debug("response: {}", responseBody);
 
-                    if (rc == 200) {
-                        responseJson = responseBody;
-                        break;
+                        if (rc == 200) {
+                            responseJson = responseBody;
+                            break;
+                        }
+                    } catch (ParseException ex) {
+                        throw new IOException("failed to parse response entity: " + entity, ex);
                     }
                 }
             }
@@ -247,7 +255,7 @@ public class OAuth2DeviceIdentityProvider {
             // https://developers.google.com/identity/protocols/OAuth2ForDevices#step-6-handle-responses-to-polling-requests
 
             {
-                responseMap = objectMapper.readValue(responseJson, new TypeReference<>() {});
+                responseMap = jsonMapper.readValue(responseJson, new TypeReference<>() {});
 
                 String accessToken = responseMap.get("access_token");
                 String refreshToken = responseMap.get("refresh_token");
@@ -292,32 +300,40 @@ public class OAuth2DeviceIdentityProvider {
      * @throws IOException if there's an I/O problem.
      * @throws IllegalStateException if the response is not 200.
      */
-    private Map<String, String> getResponseMap(HttpResponse rsp) throws IOException {
+    private Map<String, String> getResponseMap(CloseableHttpResponse rsp) throws IOException {
 
-        var rc = rsp.getStatusLine().getStatusCode();
+        var rc = rsp.getCode();
+        var entity = rsp.getEntity();
 
         logger.debug("RC={}", + rc);
 
-        if (rc != 200) {
+        try {
 
-            logger.error("HTTP rc={}, text follows:", rc);
-            logger.error(EntityUtils.toString(rsp.getEntity())); // NOSONAR Too much hassle for such a simple thing
+            if (rc != 200) {
 
-            throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
+                logger.error("HTTP rc={}, text follows:", rc);
+                logger.error(EntityUtils.toString(rsp.getEntity())); // NOSONAR Too much hassle for such a simple thing
+
+                throw new IllegalStateException("request failed with HTTP code " + rc + ", see log for details");
+            }
+
+            var responseJson = EntityUtils.toString(rsp.getEntity());
+            Map<String, String> responseMap = jsonMapper.readValue(responseJson, new TypeReference<>() {
+            });
+
+            logger.debug("response: {}", responseMap);
+
+            return responseMap;
+
+        } catch (ParseException ex) {
+            throw new IOException("failed to parse response entity: " + entity, ex);
         }
-
-        var responseJson = EntityUtils.toString(rsp.getEntity());
-        Map<String,String> responseMap = objectMapper.readValue(responseJson, new TypeReference<>() {});
-
-        logger.debug("response: {}", responseMap);
-
-        return responseMap;
     }
 
     /**
      * @return {@code access_token}.
      */
-    private String refresh(HttpClient httpClient, String clientId, String clientSecret, String refreshToken) throws IOException {
+    private String refresh(CloseableHttpClient httpClient, String clientId, String clientSecret, String refreshToken) throws IOException {
 
         ThreadContext.push("refresh");
 
@@ -355,7 +371,7 @@ public class OAuth2DeviceIdentityProvider {
      *
      * @return Client identity.
      */
-    private String getIdentityByToken(HttpClient httpClient, String accessToken) throws IOException {
+    private String getIdentityByToken(CloseableHttpClient httpClient, String accessToken) throws IOException {
 
         ThreadContext.push("getIdentityByToken");
 

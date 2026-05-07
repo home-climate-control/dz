@@ -39,10 +39,10 @@ dependencies {
     implementation(libs.springboot.starter.rsocket)
     implementation(libs.springboot.starter.webflux)
 
-    testImplementation(libs.springboot.starter.test)
-
     runtimeOnly(libs.micrometer.registry.influx)
+
     runtimeOnly(libs.micrometer.registry.jmx)
+    testImplementation(libs.springboot.starter.test)
 }
 
 configurations {

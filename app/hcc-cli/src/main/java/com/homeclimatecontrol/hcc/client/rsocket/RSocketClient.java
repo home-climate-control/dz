@@ -1,7 +1,5 @@
 package com.homeclimatecontrol.hcc.client.rsocket;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
@@ -14,6 +12,8 @@ import io.rsocket.util.ByteBufPayload;
 import net.sf.dz3r.instrumentation.Marker;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.Collections;
 import java.util.Map;
@@ -21,18 +21,18 @@ import java.util.Map;
 /**
  * HCC remote client using RSocket protocol.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class RSocketClient {
 
     private final Logger logger = LogManager.getLogger();
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
-    public RSocketClient(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+    public RSocketClient(JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
     }
 
-    public Map<String, ZoneStatus> getZones(String bindAddress, int port, String serialization) throws JsonProcessingException {
+    public Map<String, ZoneStatus> getZones(String bindAddress, int port, String serialization) throws JacksonException {
 
         var m = new Marker("getZones");
 
@@ -58,7 +58,7 @@ public class RSocketClient {
             try {
 
                 var response = payload.getDataUtf8();
-                return objectMapper.readValue(response, Map.class);
+                return jsonMapper.readValue(response, Map.class);
 
             } finally {
                 payload.release();

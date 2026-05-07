@@ -1,5 +1,7 @@
 package net.sf.dz3r.view.http.gae.v3.wire;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.io.Serializable;
 
 public enum HvacMode implements Comparable<HvacMode>, Serializable {
@@ -19,5 +21,16 @@ public enum HvacMode implements Comparable<HvacMode>, Serializable {
     @Override
     public String toString() {
         return description;
+    }
+
+    /**
+     * Force the Jackson 2.x serialization behavior.
+     *
+     * Unless this is done, HCC Remote fails to parse mode correctly.
+     * This will become unnecessary when HCC Remote behavior is fixed.
+     */
+    @JsonValue
+    public String jsonValue() {
+        return name();
     }
 }

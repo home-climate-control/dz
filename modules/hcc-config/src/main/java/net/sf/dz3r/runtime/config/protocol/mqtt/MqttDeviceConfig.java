@@ -1,7 +1,7 @@
 package net.sf.dz3r.runtime.config.protocol.mqtt;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.annotation.JsonNaming;
 import net.sf.dz3r.runtime.config.hardware.SensorConfig;
 import net.sf.dz3r.runtime.config.hardware.SwitchConfig;
 

@@ -1,11 +1,5 @@
 package net.sf.dz3r.runtime;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import net.sf.dz3r.instrumentation.Marker;
 import net.sf.dz3r.runtime.config.ConfigurationContext;
 import net.sf.dz3r.runtime.config.ConfigurationParser;
@@ -17,6 +11,9 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.scheduler.Schedulers;
 import reactor.tools.agent.ReactorDebugAgent;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,27 +29,21 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  *
  * @param <C> Framework configuration type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public abstract class ApplicationBase<C> {
     protected final Logger logger = LogManager.getLogger();
-    protected final ObjectMapper objectMapper;
+    protected final YAMLMapper yamlMapper;
 
     protected ApplicationBase() {
 
-        objectMapper = new ObjectMapper(new YAMLFactory());
-
-        // Necessary to print Optionals in a sane way
-        objectMapper.registerModule(new Jdk8Module());
-
-        // Necessary to deal with Duration
-        objectMapper.registerModule(new JavaTimeModule());
-
-        // For Quarkus to deal with interfaces nicer
-        objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
-
-        // For standalone to allow to ignore the root element
-        objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
+        yamlMapper = YAMLMapper
+                .builder()
+                // For Quarkus to deal with interfaces nicer
+                .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+                // For standalone to allow to ignore the root element
+                .enable(DeserializationFeature.UNWRAP_ROOT_VALUE)
+                .build();
     }
 
     protected final void init() throws IOException {
@@ -147,7 +138,7 @@ public abstract class ApplicationBase<C> {
         try {
 
             var config = mapConfiguration(rawConfig);
-            var configYaml = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
+            var configYaml = yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
             var digest = getDigest(configYaml);
 
             logger.debug("configuration: digest={}, YAML:\n{}", digest, configYaml);

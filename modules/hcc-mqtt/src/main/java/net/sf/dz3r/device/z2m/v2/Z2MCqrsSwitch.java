@@ -1,11 +1,11 @@
 package net.sf.dz3r.device.z2m.v2;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttSignal;
 import net.sf.dz3r.device.mqtt.v2.AbstractMqttCqrsSwitch;
 import org.apache.logging.log4j.ThreadContext;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -19,11 +19,11 @@ import static java.lang.Boolean.TRUE;
  * @see net.sf.dz3r.device.esphome.v2.ESPHomeCqrsSwitch
  * @see net.sf.dz3r.device.zwave.v2.ZWaveCqrsBinarySwitch
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class Z2MCqrsSwitch extends AbstractMqttCqrsSwitch {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final JsonMapper jsonMapper = new JsonMapper();
 
     public Z2MCqrsSwitch(
             String id,
@@ -44,7 +44,7 @@ public class Z2MCqrsSwitch extends AbstractMqttCqrsSwitch {
                 return;
             }
 
-            var payload = objectMapper.readValue(message.message(), Map.class);
+            var payload = jsonMapper.readValue(message.message(), Map.class);
 
             logger.debug("payload: {}", payload);
 
@@ -57,7 +57,7 @@ public class Z2MCqrsSwitch extends AbstractMqttCqrsSwitch {
 
             stateSink.tryEmitNext(getStateSignal());
 
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
 
             // Throwing an exception here breaks everything
             // https://github.com/home-climate-control/dz/issues/303

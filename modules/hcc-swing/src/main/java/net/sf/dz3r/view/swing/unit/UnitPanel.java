@@ -229,6 +229,6 @@ public class UnitPanel extends EntityPanel<HvacDeviceStatus, Void> {
             return "";
         }
 
-        return String.format("%s%2d min", hours > 0 ? " " : "", minutes);
+        return "%s%2d min".formatted(hours > 0 ? " " : "", minutes);
     }
 }

@@ -5,8 +5,8 @@ plugins {
 
 dependencies {
 
-    implementation("com.homeclimatecontrol:xbee-api")
     implementation(project(":modules:hcc-common"))
     implementation(project(":modules:hcc-data-source-api"))
     implementation(project(":modules:hcc-driver"))
+    implementation("com.homeclimatecontrol:xbee-api")
 }

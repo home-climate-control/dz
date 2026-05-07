@@ -4,6 +4,9 @@ plugins {
 
 dependencies {
 
+    // VT: NOTE: DO NOT use "org.openrewrite.gradle.SortDependencies" OpenRewrite recipe on this file - it will misplace comments
+    // It is a part of "org.openrewrite.gradle.GradleBestPractices" recipe
+
     implementation(project(":modules:hcc-common"))
     api(project(":modules:hcc-config"))
 
@@ -12,8 +15,6 @@ dependencies {
 
     api(libs.jackson.databind)
     implementation(libs.jackson.dataformat.yaml)
-    implementation(libs.jackson.datatype.jdk8)
-    implementation(libs.jackson.datatype.jsr310)
     implementation(libs.reactor.tools)
 
     // VT: NOTE: "implementation()" dependencies will migrate to

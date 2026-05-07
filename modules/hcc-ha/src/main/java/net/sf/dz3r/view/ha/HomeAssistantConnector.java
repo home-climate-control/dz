@@ -2,12 +2,6 @@ package net.sf.dz3r.view.ha;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.model.ZoneSettings;
@@ -23,6 +17,10 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -59,7 +57,7 @@ import static java.lang.Boolean.TRUE;
  * <li> https://esphome.io/components/climate/index.html ESPHome Climate component</li>
  * </ul>
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class HomeAssistantConnector implements Connector {
 
@@ -85,7 +83,7 @@ public class HomeAssistantConnector implements Connector {
 
     private final Map<String, Double> temperatureCache = new HashMap<>();
 
-    private ObjectMapper objectMapper;
+    private JsonMapper jsonMapper;
     private final TopicResolver topicResolver = new TopicResolver();
 
     public HomeAssistantConnector(String version, String id, MqttAdapter mqttAdapter, String discoveryPrefix, Set<Zone> zonesConfigured) {
@@ -231,13 +229,13 @@ public class HomeAssistantConnector implements Connector {
         try {
 
             // The payload gets logged at TRACE level, search for the config topic in the log to find it
-            var payload = getObjectMapper()
+            var payload = getMapper()
                     .writerWithDefaultPrettyPrinter()
                     .writeValueAsString(discoveryPacket);
 
             mqttAdapter.publish(discoveryPacket.configTopic, payload, MqttQos.AT_LEAST_ONCE, true);
 
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             throw new IllegalStateException("Failed to convert materialized discoveryPacket to JSON", ex);
         }
     }
@@ -342,10 +340,10 @@ public class HomeAssistantConnector implements Connector {
         logger.trace("broadcast: {}", message);
 
         try {
-            var payload =  getObjectMapper()
+            var payload =  getMapper()
                     .writeValueAsString(message);
             mqttAdapter.publish(topic, payload, MqttQos.AT_MOST_ONCE, false);
-        } catch (JsonProcessingException ex) {
+        } catch (JacksonException ex) {
             logger.error("Failed to render JSON from {}", message, ex);
         }
     }
@@ -554,29 +552,22 @@ public class HomeAssistantConnector implements Connector {
         return result;
     }
 
-    private synchronized ObjectMapper getObjectMapper() {
+    private synchronized JsonMapper getMapper() {
 
-        if (objectMapper == null) {
+        if (jsonMapper == null) {
 
-            objectMapper = new ObjectMapper();
-
-            // Necessary to print Optionals in a sane way
-            objectMapper.registerModule(new Jdk8Module());
-
-            // Necessary to deal with Duration
-            objectMapper.registerModule(new JavaTimeModule());
-
-            // For Quarkus to deal with interfaces nicer
-            objectMapper.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
-
-            // For standalone to allow to ignore the root element
-            objectMapper.enable(DeserializationFeature.UNWRAP_ROOT_VALUE);
-
-            // To avoid HA displaying a blank tile - this will cause WARNING level message and flood the logs, but that's better
-            objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            jsonMapper = JsonMapper
+                    .builder()
+                    // For Quarkus to deal with interfaces nicer
+                    .configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true)
+                    // For standalone to allow to ignore the root element
+                    .enable(DeserializationFeature.UNWRAP_ROOT_VALUE)
+                    // To avoid HA displaying a blank tile - this will cause WARNING level message and flood the logs, but that's better
+                    .changeDefaultPropertyInclusion(i -> i.withValueInclusion(JsonInclude.Include.NON_NULL))
+                    .build();
         }
 
-        return objectMapper;
+        return jsonMapper;
     }
 
     private record Config(
