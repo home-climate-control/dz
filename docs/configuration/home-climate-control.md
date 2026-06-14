@@ -19,7 +19,7 @@ home-climate-control:
   instance: workshop-pi3b-vnc-pimoroni-hat
 ```
 
-> ***Hint:*** With SpringBoot, Docker and Quarkus runners, you can use a profile file that consists just of this element, and use it along with other profiles.
+> ***Hint:*** With SpringBoot and Docker runners, you can use a profile file that consists just of this element, and use it along with other profiles.
 
 ### measurement-units
 

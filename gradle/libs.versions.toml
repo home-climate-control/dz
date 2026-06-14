@@ -31,10 +31,6 @@ sonarqube = "6.3.1.5724"
 spring-boot-plugin = "4.0.6"
 spring-dependency-management = "1.1.7"
 
-# Quarkus
-
-quarkus-platform = "3.27.0"
-
 # This relates to Spring packages used outside SpringBoot, those are managed by their own plugin
 # Gradle is smart enough to match this to SpringBoot, but it'll be a good idea to keep an eye on it.
 
@@ -78,15 +74,6 @@ rsocket-core = { module = "io.rsocket:rsocket-core", version.ref = "rsocket" }
 rsocket-transport-netty = { module = "io.rsocket:rsocket-transport-netty", version.ref = "rsocket" }
 rxtx = { module = "org.rxtx:rxtx", version.ref = "rxtx" }
 
-# Quarkus
-
-quarkus-bom = { module = "io.quarkus.platform:quarkus-bom", version.ref = "quarkus-platform" }
-
-quarkus-arc = { module = "io.quarkus:quarkus-arc" }
-quarkus-config-yaml = { module = "io.quarkus:quarkus-config-yaml" }
-quarkus-rest = { module = "io.quarkus:quarkus-rest" }
-quarkus-junit5 = { module = "io.quarkus:quarkus-junit5" }
-
 # Spring
 
 spring-standalone-context = { module = "org.springframework:spring-context", version.ref = "spring-standalone" }
@@ -121,7 +108,6 @@ gradle-doctor = { id = "com.osacky.doctor", version.ref = "gradle-doctor" }
 gradle-versions = { id = "com.github.ben-manes.versions", version.ref = "gradle-versions"}
 jib = { id = "com.google.cloud.tools.jib", version.ref = "jib" }
 openrewrite-rewrite = { id = "org.openrewrite.rewrite", version.ref = "openrewrite" }
-quarkus-plugin = { id = "io.quarkus", version.ref = "quarkus-platform" }
 sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot-plugin" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }

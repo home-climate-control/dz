@@ -27,11 +27,6 @@ When completed successfully, it will create a set of executable scripts and exec
 * When to use: if you are comfortable writing and working with Spring configurations, and wouldn't mind having the system instrumented.
 
 
-### Quarkus
-* To execute this variant, you need to run `QUARKUS_PROFILE=<list of active profiles> ./gradlew quarkusDev` from the project root.
-* Configuration can probably be 100% interchangeable with the SpringBoot version.
-* When to use: if you are comfortable with Quarkus more than you are with Spring.
-
 ### Docker
 #### Local Image
 * To execute this variant, you need to first build it with `./gradlew jibDockerBuild`
