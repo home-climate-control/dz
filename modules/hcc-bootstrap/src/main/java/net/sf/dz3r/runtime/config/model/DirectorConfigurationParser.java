@@ -37,6 +37,7 @@ public class DirectorConfigurationParser extends ConfigurationContextAware {
                 getCollectors(),
                 getConnectors(),
                 getSensorFeed2ZoneMapping(cf.sensorFeedMapping()),
+                getSensorMapping(cf.sensorMapping()),
                 getUnitController(cf.unit()),
                 getHvacDevice(cf.hvac()),
                 cf.mode());

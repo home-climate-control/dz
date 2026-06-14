@@ -3,6 +3,7 @@ package net.sf.dz3r.model;
 import com.homeclimatecontrol.hcc.model.HvacMode;
 import com.homeclimatecontrol.hcc.model.SchedulePeriod;
 import com.homeclimatecontrol.hcc.signal.Signal;
+import com.homeclimatecontrol.hcc.signal.hvac.Enthalpy;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacCommand;
 import com.homeclimatecontrol.hcc.signal.hvac.HvacDeviceStatus;
 import com.homeclimatecontrol.hcc.signal.hvac.ZoneStatus;
@@ -51,7 +52,8 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
      * @param metricsCollectorSet Set of sinks to send all the metrics to.
      * @param connectorSet Set of connectors to use.
      * @param name Instance name.
-     * @param sensorFlux2zone Mapping of sensor flux to zone it will feed.
+     * @param temperatureFlux2zone Mapping of temperature flux to zone it will feed.
+     * @param enthalpyFlux2zone Mapping of enthalpy flux to zone it will feed.
      * @param unitController Unit controller for this set of zones.
      * @param hvacDevice HVAC device that serves this set of zones.
      * @param hvacMode HVAC device mode for this zone. {@link Thermostat} PID signals must have correct polarity for this mode.
@@ -61,7 +63,8 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
             ScheduleUpdater scheduleUpdater,
             Set<MetricsCollector> metricsCollectorSet,
             Set<Connector> connectorSet,
-            Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
+            Map<Flux<Signal<Double, Void>>, Zone> temperatureFlux2zone,
+            Map<Flux<Signal<Enthalpy, Void>>, Zone> enthalpyFlux2zone,
             UnitController unitController,
             HvacDevice hvacDevice,
             HvacMode hvacMode
@@ -70,7 +73,7 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
         this.name = name;
 
         var scheduleFlux = Optional.ofNullable(scheduleUpdater)
-                .map(u -> connectScheduler(sensorFlux2zone.values(), u))
+                .map(u -> connectScheduler(temperatureFlux2zone.values(), u))
                 .orElseGet(() -> {
                     logger.warn("{}: no scheduler provided, running defaults", getAddress());
                     return Flux.empty();
@@ -86,9 +89,9 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
                 .doOnNext(s -> logger.debug("{}: zone={}, event={}", name, s.getKey(), s.getValue()))
                 .subscribe();
 
-        feed = connectFeeds(sensorFlux2zone, unitController, hvacDevice, hvacMode, scheduleFlux);
+        feed = connectFeeds(temperatureFlux2zone, unitController, hvacDevice, hvacMode, scheduleFlux);
 
-        var zones = sensorFlux2zone.values();
+        var zones = temperatureFlux2zone.values();
 
         Optional.ofNullable(metricsCollectorSet)
                 .ifPresent(collectors -> Flux.fromIterable(collectors)
@@ -123,17 +126,17 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
     }
 
     private Feed connectFeeds(
-            Map<Flux<Signal<Double, Void>>, Zone> sensorFlux2zone,
+            Map<Flux<Signal<Double, Void>>, Zone> temperatureFlux2zone,
             UnitController unitController,
             HvacDevice hvacDevice,
             HvacMode hvacMode,
             Flux<Map.Entry<String, Map.Entry<SchedulePeriod, com.homeclimatecontrol.hcc.model.ZoneSettings>>> scheduleFlux) {
 
         var aggregateZoneFlux = Flux
-                .merge(extractSensorFluxes(sensorFlux2zone))
+                .merge(extractSensorFluxes(temperatureFlux2zone))
                 .publish().autoConnect()
                 .checkpoint("aggregate-sensor");
-        var zoneControllerFlux = new ZoneController(sensorFlux2zone.values())
+        var zoneControllerFlux = new ZoneController(temperatureFlux2zone.values())
                 .compute(aggregateZoneFlux)
                 .publish().autoConnect()
                 .checkpoint("zone-controller")
@@ -152,7 +155,7 @@ public class UnitDirector implements Addressable<String>, AutoCloseable {
 
         return new Feed(
                 getAddress(),
-                sensorFlux2zone,
+                temperatureFlux2zone,
                 aggregateZoneFlux,
                 zoneControllerFlux,
                 unitControllerFlux,
