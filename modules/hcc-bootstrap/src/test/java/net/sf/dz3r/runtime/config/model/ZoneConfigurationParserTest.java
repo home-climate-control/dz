@@ -73,7 +73,7 @@ class ZoneConfigurationParserTest {
 
     private static class Parser extends ZoneConfigurationParser {
 
-        public Parser(ConfigurationContext context) {
+        Parser(ConfigurationContext context) {
             super(context);
         }
     }
