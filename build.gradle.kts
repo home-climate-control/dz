@@ -7,10 +7,6 @@ plugins {
     alias(libs.plugins.spring.boot) apply false
     alias(libs.plugins.spring.dependency.management) apply false
 
-    // These two go together; "java" can't be removed without Quarkus failing
-    java
-    alias(libs.plugins.quarkus.plugin) apply false
-
     alias(libs.plugins.gradle.versions)
     alias(libs.plugins.gradle.dependency.analysis)
     alias(libs.plugins.gradle.doctor)

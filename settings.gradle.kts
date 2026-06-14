@@ -71,15 +71,6 @@ include("app:hcc-minimal")
 
 include("app:hcc-springboot")
 
-// This is the Quarkus application, with all Quarkus bells and
-// whistles (including emitting metrics) included. See application.yaml for
-// details.
-
-// Run with (for starters; native app instructions coming):
-//   QUARKUS_PROFILE=<your-profile> ./gradlew quarkusDev
-
-include("app:hcc-quarkus")
-
 // This is the command line tool, useful mostly for troubleshooting until further notice.
 
 include("app:hcc-cli")

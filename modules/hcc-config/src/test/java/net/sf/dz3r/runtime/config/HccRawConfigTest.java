@@ -34,7 +34,7 @@ class HccRawConfigTest {
     }
 
     /**
-     * Confirm the correct syntax for {@link ScheduleConfig} - Spring and Quarkus parsers are more permissive than standalone.
+     * Confirm the correct syntax for {@link ScheduleConfig} - Spring parser is more permissive than standalone.
      */
     @Test
     void scheduleYamlSerialization() throws IOException {
@@ -66,8 +66,7 @@ class HccRawConfigTest {
 
         var result = yamlMapper.writerWithDefaultPrettyPrinter().writeValueAsString(config);
 
-        // Hmm... Quarkus and Spring will take the ScheduleConfig YAML even if the zone/calendar pairs are shifted
-        // one tab to the right
+        // Hmm... Spring will take the ScheduleConfig YAML even if the zone/calendar pairs are shifted one tab to the right
         logger.debug("YAML:\n{}", result);
 
         assertThatCode(() -> {

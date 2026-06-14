@@ -7,7 +7,7 @@ InfluxDB 2.x is not yet supported, [vote or submit a PR](https://github.com/home
 
 > **NOTE:** This integration will be inactive except for `sensor-field-mapping` unless included into [directors.connectors](./directors.md).   
 
-> **NOTE:** This integration is different from default InfluxDB integration embedded into Spring and Quarkus, those must be configured in [infrastructure configuration](./index.md#infrastructure-specific).
+> **NOTE:** This integration is different from default InfluxDB integration embedded into Spring, those must be configured in [infrastructure configuration](./index.md#infrastructure-specific).
 
 ### Telemetry Emitted
 
