@@ -89,8 +89,8 @@ public abstract class ConfigurationContextAware {
 
     protected final Map<Flux<Signal<Enthalpy, Void>>, Zone> getSensorMapping(Map<String, SensorMappingConfig> source) {
 
-        return Flux
-                .fromIterable(source.entrySet())
+        return Mono.justOrEmpty(source)
+                .flatMapMany(s -> Flux.fromIterable(s.entrySet()))
                 .map(kv -> {
 
                     var zone = getZone(kv.getKey());
