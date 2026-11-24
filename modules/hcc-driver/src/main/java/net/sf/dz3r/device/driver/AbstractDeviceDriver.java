@@ -32,7 +32,7 @@ import java.util.concurrent.CountDownLatch;
  * @param <P> Extra payload type.
  * @param <D> Adapter type
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2000-2026
  */
 public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> implements SignalSource<A, T, P>, AutoCloseable {
 
@@ -286,7 +286,7 @@ public abstract class AbstractDeviceDriver<A extends Comparable<A>, T, P, D> imp
 
             try {
 
-                if (heartbeat.getSeconds() > 0 && requested != null && requested == state) {
+                if (heartbeat.toSeconds() > 0 && requested != null && requested == state) {
 
                     var skip = Optional
                             .ofNullable(requestedAt)

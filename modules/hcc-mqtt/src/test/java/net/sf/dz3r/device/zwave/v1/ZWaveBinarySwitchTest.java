@@ -79,7 +79,7 @@ class ZWaveBinarySwitchTest {
     }
     private static class SwitchWrapper extends ZWaveBinarySwitch {
 
-        protected SwitchWrapper(String host, String deviceRootTopic) {
+        SwitchWrapper(String host, String deviceRootTopic) {
             super(host, deviceRootTopic);
         }
 

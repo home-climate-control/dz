@@ -27,7 +27,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
-import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 /**
@@ -142,6 +141,7 @@ public abstract class AbstractEconomizer implements Economizer {
         }
     }
 
+    @Override
     public void setSettings(EconomizerSettings settings) {
 
         ThreadContext.push("setSettings");
@@ -434,6 +434,7 @@ public abstract class AbstractEconomizer implements Economizer {
      * @param source Signal computed by {@link Zone}.
      * @return Signal with {@link ZoneStatus#callingStatus()} possibly adjusted to shut off the HVAC if the economizer is active.
      */
+    @Override
     public Signal<ZoneStatus, String> computeHvacSuppression(Signal<ZoneStatus, String> source) {
 
         if (source.isError()) {
@@ -459,7 +460,7 @@ public abstract class AbstractEconomizer implements Economizer {
                 source.status(),
                 source.error());
 
-        if (actuatorState == null || actuatorState.equals(FALSE)) {
+        if (actuatorState == null || actuatorState.equals(false)) {
 
             // Economizer inactive, no change required
             return augmentedSource;

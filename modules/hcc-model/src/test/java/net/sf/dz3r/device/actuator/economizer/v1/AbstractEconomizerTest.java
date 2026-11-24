@@ -10,8 +10,6 @@ import net.sf.dz3r.device.actuator.HvacDevice;
 import net.sf.dz3r.device.actuator.NullCqrsSwitch;
 import net.sf.dz3r.device.actuator.SwitchableHvacDevice;
 import net.sf.dz3r.device.actuator.economizer.EconomizerConfig;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import reactor.core.publisher.Flux;
@@ -24,8 +22,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class AbstractEconomizerTest {
-
-    private final Logger logger = LogManager.getLogger();
 
     /**
      * Make sure that control signal is computed properly in cooling mode as the indoor temperature is approaching the {@link EconomizerSettings#targetTemperature()}.
@@ -177,7 +173,7 @@ class AbstractEconomizerTest {
          *
          * @param device HVAC device acting as the economizer.
          */
-        protected TestEconomizer(String name, EconomizerConfig settings, HvacDevice device) {
+        TestEconomizer(String name, EconomizerConfig settings, HvacDevice device) {
             super(Clock.systemUTC(), name, settings, device, Duration.ofSeconds(90));
         }
 

@@ -28,7 +28,7 @@ import static com.homeclimatecontrol.hcc.TimeTool.atDayStartUTC;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2025
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 class ZoneControllerTest {
 
@@ -506,7 +506,6 @@ class ZoneControllerTest {
         var t2 = createRaiseTuple(25.0, "ts25");
         var t3 = createRaiseTuple(30.0, "ts30");
 
-        var tuples = Set.of(t1, t2, t3);
         var zones = Set.of(
                 t1.zone,
                 t2.zone,

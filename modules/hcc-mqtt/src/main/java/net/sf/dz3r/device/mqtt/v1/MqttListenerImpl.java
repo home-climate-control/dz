@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * If you need to publish messages, use {@link MqttAdapterImpl} instead.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2021
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class MqttListenerImpl implements MqttListener {
 
@@ -146,6 +146,7 @@ public class MqttListenerImpl implements MqttListener {
      *
      * @see #createFlux(String, boolean)
      */
+    @Override
     public Flux<MqttSignal> getFlux(String topic, boolean includeSubtopics) {
 
         // Move into a different thread
@@ -293,6 +294,6 @@ public class MqttListenerImpl implements MqttListener {
     }
 
     private interface Receiver {
-        public void receive(MqttTopic topic, String payload);
+        void receive(MqttTopic topic, String payload);
     }
 }

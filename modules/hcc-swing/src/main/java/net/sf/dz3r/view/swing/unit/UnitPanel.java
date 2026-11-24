@@ -210,7 +210,7 @@ public class UnitPanel extends EntityPanel<HvacDeviceStatus, Void> {
             return UNDEFINED;
         }
 
-        var seconds = d.getSeconds();
+        var seconds = d.toSeconds();
         var hours = seconds / 3600;
         var minutes = (seconds % 3600) / 60;
 

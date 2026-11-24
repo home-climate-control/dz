@@ -25,27 +25,21 @@ class HalfLifeControllerTest {
     @Test
     void goodSetpoint() {
         var c = new HalfLifeController<HalfLifeTuple>("goodSetpoint", Duration.ofSeconds(30));
-        assertThatCode(() -> {
-            c.setSetpoint(0.0);
-        }).doesNotThrowAnyException();
+        assertThatCode(() -> c.setSetpoint(0.0)).doesNotThrowAnyException();
     }
 
     @Test
     void badSetpoint() {
         var c = new HalfLifeController<HalfLifeTuple>("badSetpoint", Duration.ofSeconds(30));
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> {
-                    c.setSetpoint(20.0);
-                });
+                .isThrownBy(() -> c.setSetpoint(20.0));
     }
 
 
     @Test
     void negativeHalfLife() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> {
-                    new HalfLifeController<Void>("negative", Duration.ofSeconds(-30));
-                });
+                .isThrownBy(() -> new HalfLifeController<Void>("negative", Duration.ofSeconds(-30)));
     }
 
     @Test
@@ -69,11 +63,11 @@ class HalfLifeControllerTest {
         var signal = source
                 .map(t -> tuple2signal(now, t));
 
-        var output = c
+        c
                 .compute(signal)
                 .doOnNext(s -> {
                     logger.debug("output: {}", s);
-                    assertThat((s.getValue()).signal).isCloseTo(s.payload().expectedOutput, Offset.offset(0.000001));
+                    assertThat(s.getValue().signal).isCloseTo(s.payload().expectedOutput, Offset.offset(0.000001));
                 })
                 .blockLast();
     }

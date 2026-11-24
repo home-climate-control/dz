@@ -17,7 +17,7 @@ import java.util.List;
  * Wrapper to convert independent abstractions of {@link AutomationHAT}
  * into ones acceptable for DZ, and make them available at a proper point in DZ entities' lifecycle.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class AutomationHatWrapper {
 
@@ -70,7 +70,7 @@ public class AutomationHatWrapper {
         private Boolean requested;
         private Boolean actual;
 
-        public RelayWrapper(Relay target, String name) {
+        RelayWrapper(Relay target, String name) {
             this.name = name;
             this.target = target;
         }

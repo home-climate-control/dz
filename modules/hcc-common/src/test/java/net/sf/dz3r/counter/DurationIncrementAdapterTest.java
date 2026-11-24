@@ -29,16 +29,16 @@ class DurationIncrementAdapterTest {
 
         var increments = adapter
                 .split(source)
-                .doOnNext(s -> logger.info("split: {}", s.getSeconds()));
+                .doOnNext(s -> logger.info("split: {}", s.toSeconds()));
 
         var result = inc.consume(increments)
-                .doOnNext(s -> logger.warn("absolute/out: {}", s.current().getSeconds()));
+                .doOnNext(s -> logger.warn("absolute/out: {}", s.current().toSeconds()));
 
         StepVerifier
                 .create(result)
-                .assertNext(s -> assertThat(s.current().getSeconds()).isEqualTo(100))
-                .assertNext(s -> assertThat(s.current().getSeconds()).isEqualTo(200))
-                .assertNext(s -> assertThat(s.current().getSeconds()).isEqualTo(300))
+                .assertNext(s -> assertThat(s.current().toSeconds()).isEqualTo(100))
+                .assertNext(s -> assertThat(s.current().toSeconds()).isEqualTo(200))
+                .assertNext(s -> assertThat(s.current().toSeconds()).isEqualTo(300))
                 .verifyComplete();
     }
 
@@ -54,11 +54,11 @@ class DurationIncrementAdapterTest {
 
         var result = adapter
                 .split(source)
-                .doOnNext(s -> logger.info("split: {}", s.getSeconds()));
+                .doOnNext(s -> logger.info("split: {}", s.toSeconds()));
 
         StepVerifier
                 .create(result)
-                .assertNext(s -> assertThat(s.getSeconds()).isEqualTo(100))
+                .assertNext(s -> assertThat(s.toSeconds()).isEqualTo(100))
 
                 // VT: NOTE: Ignoring this until it is clear where the race condition is
                 // .expectErrorMatches(t -> t instanceof IllegalArgumentException && t.getMessage().equals("lastKnown=PT1M40S, snapshot=PT50S, not monotonous"))

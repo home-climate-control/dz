@@ -81,7 +81,7 @@ class ESPHomeSwitchTest {
 
     private static class SwitchWrapper extends ESPHomeSwitch {
 
-        protected SwitchWrapper(String host, String deviceRootTopic) {
+        SwitchWrapper(String host, String deviceRootTopic) {
             super(host, deviceRootTopic);
         }
 

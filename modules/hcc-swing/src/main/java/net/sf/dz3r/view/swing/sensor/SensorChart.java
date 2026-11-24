@@ -183,7 +183,7 @@ public class SensorChart extends AbstractChart<Double, Void> {
 
         private double valueAccumulator = 0;
 
-        protected DoubleAverager(long expirationInterval) {
+        DoubleAverager(long expirationInterval) {
             super(expirationInterval);
         }
 

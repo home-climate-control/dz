@@ -136,7 +136,7 @@ public class XBeeDriver extends AbstractDeviceDriver<String, Double, String, XBe
     }
 
     private class XBeeSwitchProxy extends SwitchProxy {
-        public XBeeSwitchProxy(String address, long heartbeatSeconds) {
+        XBeeSwitchProxy(String address, long heartbeatSeconds) {
             super(address, heartbeatSeconds);
         }
 

@@ -188,6 +188,7 @@ public class SettingsParser {
      *
      * @deprecated This syntax will go away soon, use the new syntax instead.
      */
+    @Deprecated
     ZoneSettings parseSettings(String arguments) {
 
         ThreadContext.push("parse");

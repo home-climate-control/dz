@@ -29,6 +29,7 @@ public class MqttAdapterImpl extends MqttListenerImpl implements MqttAdapter {
         super(address, username, password, autoReconnect);
     }
 
+    @Override
     public void publish(String topic, String payload, MqttQos qos, boolean retain) {
 
         ThreadContext.push("publish");

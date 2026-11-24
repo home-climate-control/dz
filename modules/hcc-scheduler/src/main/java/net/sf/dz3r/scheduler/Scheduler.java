@@ -26,7 +26,7 @@ import java.util.TreeMap;
  * Listens to the schedule event feed coming from {@link ScheduleUpdater}, and
  * passes the commands down to {@link net.sf.dz3r.model.Zone}s.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class Scheduler {
 
@@ -52,7 +52,7 @@ public class Scheduler {
         this.name2zone = name2zone;
 
         logger.info("Using {} time zone", clock.getZone());
-        logger.info("Synchronizing schedule every {} seconds", scheduleGranularity.getSeconds());
+        logger.info("Synchronizing schedule every {} seconds", scheduleGranularity.toSeconds());
 
         logger.info("{} zone[s] considered for scheduling:", name2zone.size());
         Flux.fromIterable(name2zone.entrySet())

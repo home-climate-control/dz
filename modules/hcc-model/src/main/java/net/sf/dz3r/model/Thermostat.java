@@ -33,7 +33,7 @@ import java.time.Duration;
  *
  * @see net.sf.dz3r.device.model.Thermostat
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2024
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  */
 public class Thermostat implements Addressable<String> {
 
@@ -42,11 +42,6 @@ public class Thermostat implements Addressable<String> {
 
     private final String name;
     public final Range<Double> setpointRange;
-
-    /**
-     * The current process variable value.
-     */
-    private Signal<Double, Void> pv;
 
     /**
      * Hysteresis boundaries for the {@link #signalRenderer}.

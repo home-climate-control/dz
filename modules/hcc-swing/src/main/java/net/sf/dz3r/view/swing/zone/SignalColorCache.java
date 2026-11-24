@@ -136,16 +136,19 @@ public class SignalColorCache {
         return (float) (start + signal * (end - start));
     }
 
+    /**
+     * VT: NOTE: IntelliJ suggests making this a record; bad idea unless the array is replaced by a collection (arrays are mutable).
+     * This may backfire as far as performance is concerned, and this code is on the hot path. Need to benchmark.
+     */
     private static class RGB2HSB {
 
-        public final int rgb;
-        public final float[] hsb;
+        final int rgb;
+        final float[] hsb;
 
-        public RGB2HSB(int rgb, float[] hsb) {
+        RGB2HSB(int rgb, float[] hsb) {
 
             this.rgb = rgb;
             this.hsb = hsb;
         }
     }
-
 }

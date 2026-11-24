@@ -84,7 +84,7 @@ class Z2MSwitchTest {
     }
     private static class SwitchWrapper extends Z2MSwitch {
 
-        protected SwitchWrapper(String host, String deviceRootTopic) {
+        SwitchWrapper(String host, String deviceRootTopic) {
             super(host, deviceRootTopic);
         }
 

@@ -124,13 +124,13 @@ class SimpleEconomizerTest {
         private FluxSink<T> sink;
         private final CountDownLatch gate = new CountDownLatch(1);
 
-        public void connect(FluxSink<T> sink) {
+        void connect(FluxSink<T> sink) {
             this.sink = sink;
             gate.countDown();
             logger.info("sink is ready");
         }
 
-        public FluxSink<T> getSink() {
+        FluxSink<T> getSink() {
             logger.info("acquiring sink...");
             try {
                 gate.await();

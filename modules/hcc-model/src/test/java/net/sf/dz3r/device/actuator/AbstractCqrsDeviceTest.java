@@ -63,9 +63,9 @@ class AbstractCqrsDeviceTest {
         );
     }
 
-    private class PaceTest extends AbstractCqrsDevice<String, String> {
+    private static class PaceTest extends AbstractCqrsDevice<String, String> {
 
-        protected PaceTest(String id, Clock clock, Duration heartbeat, Duration pace) {
+        PaceTest(String id, Clock clock, Duration heartbeat, Duration pace) {
             super(id, clock, heartbeat, pace);
         }
 

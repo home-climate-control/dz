@@ -5,6 +5,7 @@ import net.sf.dz3r.signal.SignalProcessor;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * Watch the incoming flux, and drop incoming signals if they are effectively identical for the consumer,
@@ -13,7 +14,7 @@ import java.time.Duration;
  * @param <T> Signal type.
  * @param <P> Signal payload type.
  *
- * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2023
+ * @author Copyright &copy; <a href="mailto:vt@homeclimatecontrol.com">Vadim Tkachenko</a> 2001-2026
  * @see TimeoutGuard
  */
 public class RateLimiter<T, P> implements SignalProcessor<T, T, P> {
@@ -77,7 +78,7 @@ public class RateLimiter<T, P> implements SignalProcessor<T, T, P> {
 
         @Override
         public boolean equals(Signal<T, P> o1, Signal<T, P> o2) {
-            return o1 == o2;
+            return Objects.equals(o1, o2);
         }
     }
 }
