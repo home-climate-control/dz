@@ -1,6 +1,8 @@
 package com.homeclimatecontrol.hcc;
 
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.TimeZone;
 
 /**
@@ -25,5 +27,22 @@ public class TimeTool {
                 .withSecond(0)
                 .withNano(0)
                 .toInstant();
+    }
+
+    /**
+     * Parse an ISO_8601 or ISO_8601_local formatted time string.
+     *
+     * @param source String to parse.
+     *
+     * @return either the parsed time, or {@code null} if the string is null or blank.
+     * @throws DateTimeParseException if the string can't be parsed.
+     */
+    public static Instant parseISO_8601(String source) {
+
+        if (source == null || source.isBlank()) {
+            return null;
+        }
+
+        return OffsetDateTime.parse(source).toInstant();
     }
 }
