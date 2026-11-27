@@ -34,13 +34,19 @@ public class Z2MTool {
 
         } catch (DateTimeParseException ex) {
 
+            // Can't lose diagnostics, but can't afford to have them at WARN level - spammy
+
+            if (!ex.getMessage().contains("could not be parsed at index 0")) {
+                logger.debug("Failed to parse '{}' as ISO_8601", source, ex);
+            }
+
             try {
 
                 // Could be either epoch, or garbage, but not null and not blank
                 return Instant.ofEpochMilli(parseLong(source.trim()));
 
             } catch (Throwable t) {
-                logger.warn("Failed to parse '{}' as ISO_8601 or epoch, returning null", source);
+                logger.debug("Failed to parse '{}' as ISO_8601 or epoch, returning null", source);
                 return null;
             }
         }

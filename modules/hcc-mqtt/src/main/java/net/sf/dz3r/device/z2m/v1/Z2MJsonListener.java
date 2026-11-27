@@ -14,6 +14,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Generic listener that treats Z2M messages as JSON packets and allows to extract arbitrary measurements from them.
@@ -112,7 +113,10 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
             logger.debug("convert: {}={}", measurement, value);
 
-            var lastSeen = z2mtool.parseLastSeen(logger, String.valueOf(payload.get("last_seen")));
+            var lastSeen = Optional.ofNullable(payload.get("last_seen"))
+                    .map(Object::toString)
+                    .map(v -> z2mtool.parseLastSeen(logger, v))
+                    .orElse(null);
             logger.debug("convert: last_seen={}", lastSeen);
 
             if (lastSeen != null) {

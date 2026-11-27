@@ -15,6 +15,11 @@ class Z2MToolTest {
     private final Z2MTool z2mtool = new Z2MTool();
 
     @Test
+    void parseLastSeenNull() {
+        assertThat(z2mtool.parseLastSeen(logger, null)).isNull();
+    }
+
+    @Test
     void parseLastSeenEpoch() {
         var now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         var millis = now.toEpochMilli();
