@@ -1,4 +1,4 @@
-package net.sf.dz3r.device.z2m.v1;
+package net.sf.dz3r.device.z2m.common;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,19 +9,20 @@ import java.time.temporal.ChronoUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class Z2MJsonListenerTest {
+class Z2MToolTest {
 
     private final Logger logger = LogManager.getLogger();
+    private final Z2MTool z2mtool = new Z2MTool();
 
     @Test
     void parseLastSeenEpoch() {
         var now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         var millis = now.toEpochMilli();
-        assertThat(Z2MJsonListener.parseLastSeen(logger, Long.toString(millis))).isEqualTo(now);
+        assertThat(z2mtool.parseLastSeen(logger, Long.toString(millis))).isEqualTo(now);
     }
 
     @Test
     void parseLastSeenGarbage() {
-        assertThat(Z2MJsonListener.parseLastSeen(logger, "what?")).isNull();
+        assertThat(z2mtool.parseLastSeen(logger, "what?")).isNull();
     }
 }

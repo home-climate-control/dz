@@ -1,10 +1,10 @@
 package net.sf.dz3r.device.z2m.v1;
 
-import com.homeclimatecontrol.hcc.TimeTool;
 import com.homeclimatecontrol.hcc.signal.Signal;
 import net.sf.dz3r.device.Addressable;
 import net.sf.dz3r.device.mqtt.MqttAdapter;
 import net.sf.dz3r.device.mqtt.v1.MqttEndpoint;
+import net.sf.dz3r.device.z2m.common.Z2MTool;
 import net.sf.dz3r.signal.SignalSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,11 +13,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.time.format.DateTimeParseException;
 import java.util.Map;
-
-import static java.lang.Long.parseLong;
 
 /**
  * Generic listener that treats Z2M messages as JSON packets and allows to extract arbitrary measurements from them.
@@ -51,6 +47,7 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
     public final String measurement;
 
     private final Z2MListener z2m;
+    private final Z2MTool z2mtool = new Z2MTool();
 
     public Z2MJsonListener(String host, String mqttRootTopicSub, String measurement) {
 
@@ -108,7 +105,7 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
             logger.debug("convert: {}={}", measurement, value);
 
-            var lastSeen = parseLastSeen(logger, String.valueOf(payload.get("last_seen")));
+            var lastSeen = z2mtool.parseLastSeen(logger, String.valueOf(payload.get("last_seen")));
             logger.debug("convert: last_seen={}", lastSeen);
 
             if (lastSeen != null) {
@@ -124,42 +121,6 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
             logger.error("Can't parse JSON:\n{}\n---", signal.getValue(), ex);
             return new Signal<>(signal.timestamp(), null, signal.payload(), Signal.Status.FAILURE_TOTAL, ex);
-        }
-    }
-
-    /**
-     * Parse the {@code last_seen} value per https://www.zigbee2mqtt.io/guide/configuration/all-settings.html#last-seen
-     *
-     * @param source Raw value obtained from the payload, could be {@code null}.
-     *
-     * @return Parsed value, or {@code null} if it is missing or unparseable.
-     */
-    static Instant parseLastSeen(Logger logger, String source) {
-
-        // The value can be:
-
-        // - missing if disabled (default Z2M behavior)
-        // - ISO_8601
-        // - ISO_8601_local
-        // - epoch
-
-        // All these must provide the same behavior - just like it was beore #354.
-
-        try {
-
-            return TimeTool.parseISO_8601(source);
-
-        } catch (DateTimeParseException ex) {
-
-            try {
-
-                // Could be either epoch, or garbage, but not null and not blank
-                return Instant.ofEpochMilli(parseLong(source.trim()));
-
-            } catch (Throwable t) {
-                logger.warn("Failed to parse '{}' as ISO_8601 or epoch, returning null", source);
-                return null;
-            }
         }
     }
 }
