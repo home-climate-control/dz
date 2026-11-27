@@ -44,6 +44,13 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
 
     private static final String DEFAULT_MEASUREMENT = "temperature";
 
+    /**
+     * Maximum allowed lag between the physical sensor and arrival timestamps.
+     *
+     * Theoretically, it would be nice to have it configurable, practically, not so much, so 60 seconds it is.
+     */
+    public static final Duration MAX_LAG = Duration.ofSeconds(60);
+
     public final String measurement;
 
     private final Z2MListener z2m;
@@ -109,7 +116,22 @@ public class Z2MJsonListener implements Addressable<MqttEndpoint>, SignalSource<
             logger.debug("convert: last_seen={}", lastSeen);
 
             if (lastSeen != null) {
-                logger.debug("last_seen lag: {}", Duration.between(signal.timestamp(), lastSeen));
+
+                var lag = Duration.between(lastSeen, signal.timestamp());
+                logger.debug("last_seen lag: {}", lag);
+
+                if (lag.isNegative()) {
+                    logger.warn("negative lag??? {}", lag);
+                }
+
+                if (lag.compareTo(MAX_LAG) > 0) {
+                    return new Signal<>(
+                            signal.timestamp(),
+                            null,
+                            signal.payload(),
+                            signal.status(),
+                            new IllegalStateException("Stale MQTT sensor value, lag (" + lag + ") is more than allowed (" + MAX_LAG + ")"));
+                }
             }
 
             return new Signal<>(lastSeen == null ? signal.timestamp() : lastSeen, value);
